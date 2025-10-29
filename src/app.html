@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="%paraglide.lang%">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="icon" href="./favicon.svg" />
+
+		%sveltekit.head%
+		 <script>
+    (function () {
+        const savedTheme = localStorage.getItem('theme');
+        let theme;
+
+        if (savedTheme) {
+          // If a theme is saved in localStorage, use it
+          theme = savedTheme;
+        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          // If no theme is saved, check the user's system preference
+          theme = 'dark'; // Or 'hacker', if that's what you want for dark preference
+        } else {
+          // Default to 'light' if no preference is found
+          theme = 'light';
+        }
+
+        // Create a style element to disable transitions temporarily
+        const style = document.createElement('style');
+        style.textContent = `
+        *, *::before, *::after {
+          transition-duration: 0s !important;
+          animation-duration: 0s !important;
+        }
+      `;
+        document.head.appendChild(style);
+
+        const setTheme = () => {
+          document.body.setAttribute('data-theme', theme);
+
+          // Re-enable transitions after theme is applied
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              document.head.removeChild(style);
+            });
+          });
+        };
+
+        if (document.body) {
+          setTheme();
+        } else {
+          document.addEventListener('DOMContentLoaded', setTheme);
+        }
+      })();
+  </script>
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>
