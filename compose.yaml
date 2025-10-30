@@ -1,0 +1,15 @@
+services:
+    postgres:
+        image: postgres:13
+        environment:
+            # This will still be the default database
+            - POSTGRES_DB=ksi 
+            - POSTGRES_USER=user
+            - POSTGRES_PASSWORD=user
+        network_mode: host
+        volumes:
+            - postgres-data:/var/lib/postgresql/data
+        ports:
+            - "5432:5432"
+volumes:
+    postgres-data:

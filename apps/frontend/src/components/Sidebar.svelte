@@ -4,6 +4,8 @@
 	import { motion } from 'motion-start';
 
 	let show = $derived($sidebarStore);
+
+	let showAdmin = $state(false);
 </script>
 
 <motion.div

@@ -38,6 +38,7 @@
 	"dependencies": {
 		"@lucide/svelte": "^0.548.0",
 		"daisyui": "^5.3.10",
+		"drizzle-orm": "^0.44.7",
 		"motion": "^12.23.24",
 		"motion-start": "^0.1.18"
 	}
