@@ -20,7 +20,7 @@
 		</button>
 		<a
 			href="/"
-			class="text-lg md:text-2xl font-mono opacity-80 flex gap-4 border-x border-base-300 px-4 transition-colors hover:bg-base-200/50 h-full items-center"
+			class="text-lg md:text-2xl font-mono opacity-80 flex gap-4 border-x border-base-300 w-[140px] px-4 transition-colors hover:bg-base-200/50 h-full items-center"
 		>
 			<img src="./logo.svg" alt="" class="dark:invert size-10" />
 			KSI
