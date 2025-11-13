@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { showAdmin, sidebarStore } from '$lib/sidebar';
-	import { File, LogIn, LogOut, PanelLeft, PanelLeftClose, Star, Wrench } from '@lucide/svelte';
+	import { File, LogIn, LogOut, PanelLeftClose, Star, Wrench } from '@lucide/svelte';
 	import { motion } from 'motion-start';
-	import { writable } from 'svelte/store';
 	import { authClient } from '../lib/auth-client';
+	import { api } from '$lib/backend';
+	import { toast } from 'svelte-sonner';
 
 	let show = $derived($sidebarStore);
 
@@ -14,6 +15,18 @@
 	});
 
 	const session = authClient.useSession();
+
+	$effect(() => {
+		if (!$session.isPending && $session.data && $session.data?.user !== undefined) {
+			api.dashboard.user.get().then(async (r) => {
+				if (r.error) {
+					await authClient.signOut();
+					toast.error('Brak dostępu.');
+					return;
+				}
+			});
+		}
+	});
 </script>
 
 <motion.div

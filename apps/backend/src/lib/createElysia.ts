@@ -1,7 +1,7 @@
 import Elysia, { type ElysiaConfig, status } from "elysia"
-import { db, user } from "@/db"
-import { InferSelectModel } from "drizzle-orm"
-import { auth } from "@/lib/auth"
+import { db, user } from "@ksi-core/backend/db"
+import { type InferSelectModel } from "drizzle-orm"
+import { auth } from "@ksi-core/backend/lib/auth"
 
 // Define the context types based on protection level
 type ProtectedContext = {
@@ -16,50 +16,84 @@ type UnprotectedContext = {
     unauthorizedError: string | null
 }
 
-function recordToHeaders(record: Record<string, string | undefined>): Headers {
-    const headers = new Headers();
+/**
+ * Accept either a plain record or a Headers object and return a Headers instance.
+ * This removes the type mismatch depending on what Elysia provides.
+ */
+function toHeaders(headers: Headers | Record<string, string | undefined>): Headers {
+    if (headers instanceof Headers) return headers
 
-    for (const key in record) {
-        const value = record[key];
-        if (typeof value === 'string') {
-            headers.append(key, value);
-        }
+    const h = new Headers()
+    for (const k in headers) {
+        const v = headers[k]
+        if (typeof v === "string") h.append(k, v)
     }
-
-    return headers;
+    return h
 }
 
-const contextHandler = async <T extends boolean>(params: {
-    headers: Headers
-    protectedRoute: T
-}): Promise<T extends true ? ProtectedContext : UnprotectedContext> => {
+/**
+ * Overloads for contextHandler so TS understands the boolean -> return type mapping.
+ */
+async function contextHandler(params: {
+    headers: Headers | Record<string, string | undefined>
+    protectedRoute: true
+}): Promise<ProtectedContext>
+async function contextHandler(params: {
+    headers: Headers | Record<string, string | undefined>
+    protectedRoute: false
+}): Promise<UnprotectedContext>
+async function contextHandler(params: {
+    headers: Headers | Record<string, string | undefined>
+    protectedRoute: boolean
+}): Promise<ProtectedContext | UnprotectedContext> {
     const { headers, protectedRoute } = params
-
+    const hdrs = toHeaders(headers)
 
     const session = await auth.api.getSession({
-        headers: headers
+        headers: hdrs
     })
+
+    // If there is no session -> behave differently depending on protectedRoute
     if (!session?.session) {
-        if (protectedRoute) throw status(401)
+        if (protectedRoute) {
+            // protected route: explicitly throw 401 (runtime behavior)
+            throw status(401)
+        }
+
+        // unprotected route: return UnprotectedContext
         return {
             user: null,
             unauthorizedError: "Invalid auth token",
-            db: db,
-        } as any
+            db
+        }
+    }
+
+    // At this point we have a session (session.session exists). However TypeScript
+    // may still treat session.user as possibly null/undefined depending on the auth lib's types.
+    // For protected routes we assert it is non-nullable (runtime check earlier ensures it).
+    if (protectedRoute) {
+        // Force the narrower type for ProtectedContext.
+        return {
+            user: session.user as NonNullable<InferSelectModel<typeof user>>,
+            unauthorizedError: null,
+            db
+        }
     }
 
     return {
-        user: session.user,
+        // @ts-ignore
+        user: session.user ?? null,
         unauthorizedError: null,
-        db: db,
-    } as any
+        db
+    }
 }
 
 // Simplified createContext without complex overloads
 export const createContext = <T extends boolean>(protectedRoute: T) => {
     return (app: Elysia) =>
         app.derive(async function buildContext({ headers }) {
-            return await contextHandler({ headers: recordToHeaders(headers), protectedRoute })
+            // @ts-ignore
+            return await contextHandler({ headers, protectedRoute })
         })
 }
 

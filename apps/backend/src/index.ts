@@ -1,7 +1,9 @@
-import { auth } from "@/lib/auth";
+import { auth } from "@ksi-core/backend/lib/auth";
+import { discordBot } from "@ksi-core/backend/lib/discord";
+import routes from "./routes";
 import cors from "@elysiajs/cors";
-import { Context, Elysia } from "elysia";
-import { appUrls } from "shared";
+import { type Context, Elysia } from "elysia";
+import { getFrontendUrl } from "shared";
 
 const betterAuthView = (context: Context) => {
     const BETTER_AUTH_ACCEPT_METHODS = ["POST", "GET"]
@@ -13,8 +15,20 @@ const betterAuthView = (context: Context) => {
     }
 }
 
-const app = new Elysia().use(cors({
-    origin: appUrls.frontendBaseUrl?.replace(/^https?:\/\//, "")
-})).all("/api/auth/*", betterAuthView).listen(3000);
+discordBot.ping()
 
-export default typeof app;
+const app = new Elysia()
+    .use(cors(
+        {
+            origin: "localhost:5173",
+            methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            credentials: true,
+            allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+        }
+    ))
+    .all("/api/auth/*", betterAuthView)
+    .use(routes)
+
+app.listen(3000);
+
+export type App = typeof app;

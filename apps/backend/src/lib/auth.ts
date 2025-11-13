@@ -1,13 +1,13 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "@/db";
-import { appUrls } from "shared";
+import { db } from "@ksi-core/backend/db";
+import { getFrontendUrl } from "packages/shared";
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
         provider: "pg",
     }),
-    trustedOrigins: [appUrls.frontendBaseUrl],
+    trustedOrigins: [getFrontendUrl()],
 
     socialProviders: {
         discord: {
