@@ -1,19 +1,14 @@
-<script>
+<script lang="ts">
 	import { File, Star } from '@lucide/svelte';
 	import Gallery from '../../components/Gallery.svelte';
+	import Wrapper from '../../components/Wrapper.svelte';
 </script>
 
-<section class="border border-base-200 flex flex-col px-4 mt-[60px] md:px-10 lg:px-20 py-4">
-	<code class="opacity-60 flex gap-2 items-center text-primary font-bold"
-		><Star class="size-4" /> ZOSIA.md</code
-	>
-	<div class="w-screen h-px bg-base-200 relative left-1/2 -translate-x-1/2 my-4"></div>
-	<!-- <div
-		class="bg-white rounded-full size-20 lg:size-40 items-center justify-center text-center flex"
-	>
-		<p class="w-full text-[4.2cqw] text-base-100 font-bold">koło</p>
-	</div> -->
-	<!-- <div class="rounded-full size-20 lg:size-40 sticky top-80 left-0 z-10 backdrop-invert"></div> -->
+{#snippet starIcon()}
+	<Star class="size-4" />
+{/snippet}
+
+<Wrapper name="ZOSIA.md" textClassName="text-primary font-bold" icon={starIcon}>
 	<div class="markdown-file">
 		<h1>ZOSIA</h1>
 		<p>
@@ -51,4 +46,4 @@
 		<h2>ZOSIA 2020</h2>
 		<h2>ZOSIA 2019</h2>
 	</div>
-</section>
+</Wrapper>

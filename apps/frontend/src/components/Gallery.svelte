@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { motion } from 'motion-start';
+	import { easeIn } from 'motion';
+	import { AnimatePresence, motion } from 'motion-start';
+	import { bounceIn } from 'svelte/easing';
+	import { draw, fade, fly } from 'svelte/transition';
 
 	let { images }: { images: string[] } = $props();
 	let splittedImages = $derived([
@@ -10,44 +13,53 @@
 
 	let currImage = $state<number | null>(null);
 
-	window.addEventListener('keydown', (e) => {
-		if (currImage === null) return;
-		if (e.key === 'Escape') {
-			currImage = null;
-		}
-		currImage = currImage as number;
-		if (e.key === 'ArrowRight') {
-			if (currImage < images.length - 1) currImage++;
-		} else if (e.key === 'ArrowLeft') {
-			if (currImage > 0) currImage--;
-		}
-	});
+	if (typeof window !== 'undefined') {
+		window.addEventListener('keydown', (e) => {
+			if (currImage === null) return;
+			if (e.key === 'Escape') {
+				currImage = null;
+			}
+			currImage = currImage as number;
+			if (e.key === 'ArrowRight') {
+				if (currImage < images.length - 1) currImage++;
+			} else if (e.key === 'ArrowLeft') {
+				if (currImage > 0) currImage--;
+			}
+		});
+	}
 </script>
 
-<motion.div
-	animate={currImage === null
-		? {
-				display: 'none',
-				opacity: 0,
-				scale: 0
-			}
-		: {
-				opacity: 1,
-				scale: 1,
-				display: 'block'
+{#if currImage !== null}
+	<div
+		transition:fly={{ duration: 300 }}
+		class="fixed top-0 left-0 flex flex-col items-center justify-center w-screen h-screen bg-base-100/90 z-90"
+	>
+		<img
+			src={images[currImage]}
+			class="max-w-[50vw] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+			alt=""
+		/>
+	</div>
+{/if}
+
+<!-- <AnimatePresence>
+	{#if currImage !== null}
+		<motion.div
+			layoutId="image"
+			exit={{
+				opacity: 0
+				// scale: 0
 			}}
-	initial={{
-		display: 'none',
-		scale: 0
-	}}
-	class="fixed top-0 left-0 flex flex-col items-center justify-center w-screen h-screen bg-base-100/90 z-90"
->
-	<img
-		src={images[currImage as number]}
-		class="max-w-[50vw] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-		alt=""
-	/>
-</motion.div>
+			class="fixed top-0 left-0 flex flex-col items-center justify-center w-screen h-screen bg-base-100/90 z-90"
+		>
+			<img
+				src={images[currImage as number]}
+				class="max-w-[50vw] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+				alt=""
+			/>
+		</motion.div>
+	{/if}
+</AnimatePresence> -->
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
 	{#each splittedImages as splitCol, splitI}
@@ -67,7 +79,7 @@
 					}}
 					class="w-full overflow-hidden transition-all hover:scale-[0.98] hover:opacity-85 hover:rounded-lg cursor-pointer"
 				>
-					<img src={image} alt="" />
+					<img src={image} class="w-full" alt="" />
 				</button>
 			{/each}
 		</div>
