@@ -1,6 +1,13 @@
-const appUrls = {
-  backendUrl: Bun.env.BACKEND_BASE_URL!,
-  frontendBaseUrl: Bun.env.FRONTEND_BASE_URL!
-}
+export const getBackendUrl = () => {
+  if (process.env.NODE_ENV === "production") {
+    return `https://api.ksi.uni.wroc.pl`;
+  }
+  return `http://localhost:3000`;
+};
 
-export { appUrls };
+export const getFrontendUrl = () => {
+  if (process.env.NODE_ENV === "production") {
+    return "https://ksi.uni.wroc.pl";
+  }
+  return "http://localhost:5173";
+};
