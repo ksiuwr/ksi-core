@@ -1,4 +1,4 @@
-import * as schema from '@/db/schema';
+import * as schema from '@ksi-core/backend/db/schema';
 import { drizzle } from 'drizzle-orm/bun-sql';
 import Elysia from 'elysia';
 
