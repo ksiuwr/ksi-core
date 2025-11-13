@@ -28,7 +28,7 @@
 		bounceDamping: 20,
 		damping: 0.2
 	}}
-	class="min-h-screen"
+	class="min-h-screen mt-[60px] overflow-x-hidden"
 >
 	{@render children?.()}
 	<Footer />

@@ -1,7 +1,10 @@
+import * as schema from '@/db/schema';
 import { drizzle } from 'drizzle-orm/bun-sql';
 import Elysia from 'elysia';
 
-const createDatabase = () => drizzle(Bun.env.DATABASE_URL!);
+const createDatabase = () => drizzle(Bun.env.DATABASE_URL!, {
+    schema
+});
 
 const globalForDB = globalThis as unknown as {
     db: ReturnType<typeof createDatabase> | undefined
@@ -18,3 +21,5 @@ export const AuthorizationProvider = new Elysia({
         db: createDatabase(),
     }))
 
+
+export * from "./schema"

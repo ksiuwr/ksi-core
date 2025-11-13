@@ -65,7 +65,7 @@
   --color-success-content: oklch(98% 0.014 180.72);
   --color-warning: oklch(79% 0.184 86.047);
   --color-warning-content: oklch(98% 0.026 102.212);
-  --color-error: oklch(63% 0.237 25.331);
+  --color-error: oklch(0.71 0.18 20.16);
   --color-error-content: oklch(97% 0.013 17.38);
   --radius-selector: 0.5rem;
   --radius-field: 0.5rem;
