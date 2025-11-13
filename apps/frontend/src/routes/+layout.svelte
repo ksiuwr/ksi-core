@@ -5,6 +5,7 @@
 	import Sidebar from '../components/Sidebar.svelte';
 	import { sidebarStore } from '$lib/sidebar';
 	import Footer from '../components/Footer.svelte';
+	import { Toaster } from 'svelte-sonner';
 
 	const { children } = $props();
 	let sidebarShown = $derived($sidebarStore);
@@ -14,15 +15,16 @@
 	<title>KSI UWr</title>
 </svelte:head>
 
+<Toaster />
 <Navbar />
 <Sidebar />
 <motion.div
 	animate={sidebarShown
 		? {
-				paddingLeft: '140px'
+				marginLeft: '200px'
 			}
 		: {
-				paddingLeft: 0
+				marginLeft: 0
 			}}
 	transition={{
 		bounceDamping: 20,
