@@ -28,7 +28,6 @@ const app = new Elysia()
     ))
     .all("/api/auth/*", betterAuthView)
     .use(routes)
-
-app.listen(3000);
+    .listen(3000);
 
 export type App = typeof app;
