@@ -32,7 +32,7 @@
 </script>
 
 <motion.div
-	class="fixed top-0 left-0 select-none h-screen flex flex-col z-60"
+	class="fixed top-0 left-0 select-none h-screen flex flex-col pointer-events-none z-60"
 	animate={show
 		? {
 				x: 0
@@ -48,7 +48,7 @@
 		damping: 0.2
 	}}
 >
-	<div class="flex size-[60px] border-b border-base-300">
+	<div class="flex size-[60px] border-b border-base-300 pointer-events-auto">
 		<button
 			onclick={() => {
 				$sidebarStore = false;
@@ -60,7 +60,9 @@
 	</div>
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<div class="bg-base-100 border-r border-base-200 flex flex-col w-[200px] h-full z-60">
+	<div
+		class="bg-base-100 border-r border-base-200 flex flex-col w-[200px] pointer-events-auto h-full z-60"
+	>
 		<div
 			onclick={() => {
 				clicks++;
