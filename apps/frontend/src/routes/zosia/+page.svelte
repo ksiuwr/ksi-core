@@ -8,7 +8,7 @@
 	<Star class="size-4" />
 {/snippet}
 
-<Wrapper name="ZOSIA.md" textClassName="text-primary font-bold" icon={starIcon}>
+<Wrapper name="zosia/README.md" textClassName="text-primary font-bold" icon={starIcon}>
 	<div class="markdown-file">
 		<h1>ZOSIA</h1>
 		<p>

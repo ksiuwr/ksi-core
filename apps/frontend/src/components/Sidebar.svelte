@@ -1,6 +1,15 @@
 <script lang="ts">
 	import { showAdmin, sidebarStore } from '$lib/sidebar';
-	import { File, LogIn, LogOut, Megaphone, PanelLeftClose, Star, Wrench } from '@lucide/svelte';
+	import {
+		File,
+		FileIcon,
+		LogIn,
+		LogOut,
+		Megaphone,
+		PanelLeftClose,
+		Star,
+		Wrench
+	} from '@lucide/svelte';
 	import { motion } from 'motion-start';
 	import { authClient } from '../lib/auth-client';
 	import { api } from '$lib/backend';
@@ -78,12 +87,11 @@
 			{#snippet star()}
 				<Star class="size-4" />
 			{/snippet}
-			<SidebarAccordion
-				href="/zosia"
-				classValue="text-primary font-bold"
-				icon={star}
-				title="ZOSIA.md"
-			>
+			<SidebarAccordion icon={star} title="zosia">
+				<a href="/zosia">
+					<FileIcon class="size-4" />
+					README.md
+				</a>
 				<a href="/zosia/2025"> 2025.md</a>
 			</SidebarAccordion>
 			{#if $showAdmin}
@@ -117,7 +125,11 @@
 				{#snippet wrench()}
 					<Wrench class="size-4" />
 				{/snippet}
-				<SidebarAccordion href="/dashboard" icon={wrench} title="DASHBOARD.md">
+				<SidebarAccordion icon={wrench} title="dashboard">
+					<a href="/dashboard">
+						<Wrench class="size-4" />
+						HOME.md
+					</a>
 					<a href="/dashboard/alerts" class="text-primary font-bold"
 						><Megaphone class="size-4" /> ALERTS.md</a
 					>

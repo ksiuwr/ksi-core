@@ -7,7 +7,7 @@
 	<Wrench class="size-4" />
 {/snippet}
 
-<Wrapper name="DASHBOARD.md" icon={dashboardIcon}>
+<Wrapper name="dashboard/HOME.md" icon={dashboardIcon}>
 	<div class="markdown-file">
 		<h1>Panel</h1>
 	</div>
