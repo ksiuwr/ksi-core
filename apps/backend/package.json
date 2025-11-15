@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun run --watch src/index.ts"
+    "dev": "bun run --watch src/index.ts",
+    "db:generate": "bunx dotenv -e ../../.env -- bunx --bun drizzle-kit generate",
+    "db:migrate": "bunx dotenv -e ../../.env -- bunx --bun drizzle-kit migrate"
   },
   "exports": {
     ".": "./src/index.ts"
