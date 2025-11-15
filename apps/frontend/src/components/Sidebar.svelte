@@ -8,11 +8,15 @@
 	import SidebarAccordion from './SidebarAccordion.svelte';
 
 	let show = $derived($sidebarStore);
+	let clicksResetDebounceTimeout: NodeJS.Timeout | null = null;
 
 	let clicks = $state(0);
 	$effect(() => {
-		if (clicks >= 4 && $session.data?.user === null) $showAdmin = true;
-		setTimeout(() => (clicks = 0), 5000);
+		if (clicks >= 4 && ($session.data === null || $session.data.user === null)) $showAdmin = true;
+		if (clicksResetDebounceTimeout !== null) {
+			clearTimeout(clicksResetDebounceTimeout);
+		}
+		clicksResetDebounceTimeout = setTimeout(() => (clicks = 0), 5000);
 	});
 
 	const session = authClient.useSession();
