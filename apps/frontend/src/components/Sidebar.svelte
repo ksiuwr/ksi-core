@@ -10,7 +10,7 @@
 
 	let clicks = $state(0);
 	$effect(() => {
-		if (clicks >= 4) $showAdmin = true;
+		if (clicks >= 4 && $session.data?.user === null) $showAdmin = true;
 		setTimeout(() => (clicks = 0), 5000);
 	});
 
