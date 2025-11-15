@@ -21,7 +21,9 @@
 			api.dashboard.user.get().then(async (r) => {
 				if (r.error) {
 					await authClient.signOut();
-					toast.error('Brak dostępu.');
+					toast.error('Brak dostępu.', {
+						id: 'access_denied'
+					});
 					return;
 				}
 			});
