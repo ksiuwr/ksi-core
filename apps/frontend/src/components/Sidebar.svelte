@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { showAdmin, sidebarStore } from '$lib/sidebar';
-	import { File, LogIn, LogOut, PanelLeftClose, Star, Wrench } from '@lucide/svelte';
+	import { File, LogIn, LogOut, Megaphone, PanelLeftClose, Star, Wrench } from '@lucide/svelte';
 	import { motion } from 'motion-start';
 	import { authClient } from '../lib/auth-client';
 	import { api } from '$lib/backend';
 	import { toast } from 'svelte-sonner';
+	import SidebarAccordion from './SidebarAccordion.svelte';
 
 	let show = $derived($sidebarStore);
 
@@ -70,7 +71,17 @@
 			class="flex flex-col flex-1 w-full py-2 [&_a]:flex [&_a]:items-center [&_a]:gap-2 [&_a]:font-mono [&_a]:w-full [&_a]:py-px [&_a]:px-4 [&_a]:hover:bg-base-200 opacity-70"
 		>
 			<a href="/"><File class="size-4" /> README.md</a>
-			<a href="/zosia" class="text-primary font-bold"><Star class="size-4" /> ZOSIA.md</a>
+			{#snippet star()}
+				<Star class="size-4" />
+			{/snippet}
+			<SidebarAccordion
+				href="/zosia"
+				classValue="text-primary font-bold"
+				icon={star}
+				title="ZOSIA.md"
+			>
+				<a href="/zosia/2025"> 2025.md</a>
+			</SidebarAccordion>
 			{#if $showAdmin}
 				<button
 					onclick={() => {
@@ -99,7 +110,14 @@
 						</button>
 					</div>
 				</div>
-				<a href="/dashboard"><Wrench class="size-4" /> DASHBOARD.md</a>
+				{#snippet wrench()}
+					<Wrench class="size-4" />
+				{/snippet}
+				<SidebarAccordion href="/dashboard" icon={wrench} title="DASHBOARD.md">
+					<a href="/dashboard/alerts" class="text-primary font-bold"
+						><Megaphone class="size-4" /> ALERTS.md</a
+					>
+				</SidebarAccordion>
 			{/if}
 		</div>
 	</div>
