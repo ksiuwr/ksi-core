@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { easeIn } from 'motion';
-	import { AnimatePresence, motion } from 'motion-start';
-	import { bounceIn } from 'svelte/easing';
-	import { draw, fade, fly } from 'svelte/transition';
+	import { ChevronLeft, ChevronRight } from '@lucide/svelte';
+	import { fly } from 'svelte/transition';
 
 	let { images }: { images: string[] } = $props();
 	let splittedImages = $derived([
@@ -32,13 +30,32 @@
 {#if currImage !== null}
 	<div
 		transition:fly={{ duration: 300 }}
+		onclickcapture={(e) => {
+			if (e.target && 'tagName' in e.target && e.target.tagName === 'DIV') currImage = null;
+		}}
 		class="fixed top-0 left-0 flex flex-col items-center justify-center w-screen h-screen bg-base-100/90 z-90"
 	>
 		<img
 			src={images[currImage]}
-			class="max-w-[50vw] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+			class="md:max-w-[50vw] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
 			alt=""
 		/>
+		<button
+			onclick={() => {
+				if (currImage! > 0) currImage!--;
+			}}
+			class="absolute top-1/2 -translate-y-1/2 left-4 btn btn-square"
+		>
+			<ChevronLeft class="size-4" />
+		</button>
+		<button
+			onclick={() => {
+				if (currImage! < images.length - 1) currImage!++;
+			}}
+			class="absolute top-1/2 -translate-y-1/2 right-4 btn btn-square"
+		>
+			<ChevronRight class="size-4" />
+		</button>
 	</div>
 {/if}
 
