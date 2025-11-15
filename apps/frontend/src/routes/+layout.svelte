@@ -7,9 +7,28 @@
 	import Footer from '../components/Footer.svelte';
 	import { toast, Toaster } from 'svelte-sonner';
 	import { themeStore } from '$lib/themeStore';
+	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
 
 	const { children } = $props();
 	let sidebarShown = $derived($sidebarStore);
+
+	let innerWidth = $state(browser ? window.innerWidth : 1024);
+	let prefersReducedMotion = $state(false);
+
+	onMount(() => {
+		const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+		prefersReducedMotion = mediaQuery.matches;
+
+		mediaQuery.addEventListener('change', (e) => {
+			prefersReducedMotion = e.matches;
+		});
+	});
+
+	const breakpoint = 768;
+	let isSmallScreen = $derived(innerWidth < breakpoint);
+
+	let motionDisabled = $derived(isSmallScreen || prefersReducedMotion);
 </script>
 
 <svelte:head>
@@ -20,7 +39,7 @@
 <Navbar />
 <Sidebar />
 <motion.div
-	animate={sidebarShown
+	animate={!motionDisabled && sidebarShown
 		? {
 				marginLeft: '200px'
 			}
