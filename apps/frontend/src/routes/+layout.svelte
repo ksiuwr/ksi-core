@@ -5,7 +5,8 @@
 	import Sidebar from '../components/Sidebar.svelte';
 	import { sidebarStore } from '$lib/sidebar';
 	import Footer from '../components/Footer.svelte';
-	import { Toaster } from 'svelte-sonner';
+	import { toast, Toaster } from 'svelte-sonner';
+	import { themeStore } from '$lib/themeStore';
 
 	const { children } = $props();
 	let sidebarShown = $derived($sidebarStore);
@@ -15,7 +16,7 @@
 	<title>KSI UWr</title>
 </svelte:head>
 
-<Toaster />
+<Toaster theme={$themeStore} richColors />
 <Navbar />
 <Sidebar />
 <motion.div
