@@ -19,13 +19,26 @@ class DiscordBot {
     #cache: Map<string, CacheEntry> = new Map();
 
     constructor() {
-        this.client = new Client({ intents: [GatewayIntentBits.Guilds] });
+        this.client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
 
         this.client.on(Events.ClientReady, readyClient => {
             console.log(`[Discord] Logged in as ${readyClient.user.tag}!`);
         });
 
         this.client.login(Bun.env.DISCORD_BOT_TOKEN);
+
+        this.#registerListeners()
+    }
+
+    #registerListeners() {
+        this.client.on("guildMemberUpdate", async (m) => {
+            if (m.guild.id === Bun.env.DISCORD_GUILD_ID) {
+                const cached = this.#cache.get(m.user.id);
+                if (cached) {
+                    this.#cache.delete(m.user.id);
+                }
+            }
+        })
     }
 
     #addCache(userId: string, status: DiscordRankStatus): DiscordRankStatus {
