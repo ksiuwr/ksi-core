@@ -29,7 +29,7 @@
 	</div>
 	{#if expanded}
 		<div
-			class="flex flex-col [&_a]:pl-6! [&_a]:w-auto! [&_a]:before:left-5 pl-4 [&_a]:before:absolute [&_a]:before:w-4 [&_a]:before:h-[26px] [&_a]:before:border-b [&_a]:before:border-l [&_a]:before:mb-4 [&_a]:before:border-base-content/30"
+			class="flex flex-col [&_a]:pl-10! [&_a]:w-auto! [&_a]:before:left-5 [&_a]:before:absolute [&_a]:before:w-4 [&_a]:before:h-[26px] [&_a]:before:border-b [&_a]:before:border-l [&_a]:before:mb-4 [&_a]:before:border-base-content/30"
 		>
 			{@render children()}
 		</div>
