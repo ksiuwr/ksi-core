@@ -1,7 +1,8 @@
+import { createId } from "@paralleldrive/cuid2";
 import { pgTable, text, timestamp, boolean, integer, pgEnum } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     name: text("name").notNull(),
     email: text("email").notNull().unique(),
     emailVerified: boolean("email_verified").default(false).notNull(),
@@ -16,7 +17,7 @@ export const user = pgTable("user", {
 });
 
 export const session = pgTable("session", {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     expiresAt: timestamp("expires_at").notNull(),
     token: text("token").notNull().unique(),
     createdAt: timestamp("created_at")
@@ -33,7 +34,7 @@ export const session = pgTable("session", {
 });
 
 export const account = pgTable("account", {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     accountId: text("account_id").notNull(),
     providerId: text("provider_id").notNull(),
     userId: text("user_id")
@@ -55,7 +56,7 @@ export const account = pgTable("account", {
 });
 
 export const verification = pgTable("verification", {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     identifier: text("identifier").notNull(),
     value: text("value").notNull(),
     expiresAt: timestamp("expires_at").notNull(),
@@ -71,7 +72,7 @@ export const verification = pgTable("verification", {
 export const alertStyleEnum = pgEnum("alert_color", ["neutral", "info", "warning", "danger"])
 
 export const alert = pgTable("alert", {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     priority: integer("priority"),
     title: text("title").notNull(),
     description: text("description").notNull(),
