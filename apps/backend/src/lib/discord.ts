@@ -1,6 +1,7 @@
 import { Client, Events, GatewayIntentBits } from 'discord.js';
+import ms from "ms"
 
-const CACHE_TIME_IN_SECONDS = 60 * 5;
+const CACHE_TIME = ms('5m');
 
 export enum DiscordRankStatus {
     NOT_FOUND,
@@ -42,7 +43,7 @@ class DiscordBot {
     }
 
     #addCache(userId: string, status: DiscordRankStatus): DiscordRankStatus {
-        const expiresAt = Date.now() + CACHE_TIME_IN_SECONDS * 1000;
+        const expiresAt = Date.now() + CACHE_TIME;
         this.#cache.set(userId, { status, expiresAt });
         return status;
     }
