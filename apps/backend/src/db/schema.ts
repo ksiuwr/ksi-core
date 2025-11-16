@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, pgEnum } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
     id: text("id").primaryKey(),
@@ -67,3 +67,18 @@ export const verification = pgTable("verification", {
         .$onUpdate(() => new Date())
         .notNull(),
 });
+
+export const alertStyleEnum = pgEnum("alert_color", ["neutral", "info", "warning", "danger"])
+
+export const alert = pgTable("alert", {
+    id: text("id").primaryKey(),
+    priority: integer("priority"),
+    title: text("title").notNull(),
+    description: text("description").notNull(),
+    link: text("link"),
+    color: alertStyleEnum().notNull(),
+    startDate: timestamp("start_date").notNull(),
+    endDate: timestamp("end_date").notNull(),
+    createdBy: text("user_id").notNull().references(() => user.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at").$defaultFn(() => new Date()).notNull()
+})
