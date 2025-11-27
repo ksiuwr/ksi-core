@@ -1,38 +1,59 @@
-# sv
+# ksi-core
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Strona Koła Studentów Informatyki
 
-## Creating a project
+## Wymagania
 
-If you're seeing this, you've probably already done this step. Congrats!
+### [Runtime Bun](https://bun.sh)
 
-```sh
-# create a new project in the current directory
-npx sv create
+Jest on niezbędny, gdyż projekt korzysta z funkcji Bun, takich jak Bun.env czy importowanie innych packagy przez `workspace:*`
 
-# create a new project in my-app
-npx sv create my-app
+Linux: 
+```
+curl -fsSL https://bun.sh/install | bash
 ```
 
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+Windows:
+```
+powershell -c "irm bun.sh/install.ps1 | iex"
 ```
 
-## Building
+### [Docker Compose](https://github.com/docker/compose)
 
-To create a production version of your app:
+## Development
 
-```sh
-npm run build
+
+
+0. Sklonuj repo
+
+```
+git clone https://github.com/ksiuwr/ksi-core.git
+cd ./ksi-core
 ```
 
-You can preview the production build with `npm run preview`.
+1. Zainstaluj zależności
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+```
+bun i
+```
+
+2. Odpal bazę danych
+
+```
+docker compose up -d --build
+```
+
+3. Przeprowadź migracje bazy (tylko za pierwszym razem lub po zmianach w modelach bazy danych)
+
+```
+bun db:generate # Generuje pliki SQL do migracji
+bun db:migrate  # Przeprowadza migracje na bazie danych
+```
+
+4. Uruchom serwery (backend i frontend)
+
+```
+bun dev
+```
+
+5. Frontend jest dostępny pod http://localhost:5173/, a backend pod http://localhost:3000/.
