@@ -1,7 +1,5 @@
 <script>
 	import { m } from '$lib/paraglide/messages';
-	import { File } from '@lucide/svelte';
-	import Accordion from '../components/Accordion.svelte';
 	import Wrapper from '../components/Wrapper.svelte';
 </script>
 

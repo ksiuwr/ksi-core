@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { File, Star } from '@lucide/svelte';
+	import { Star } from '@lucide/svelte';
 	import Gallery from '../../components/Gallery.svelte';
 	import Wrapper from '../../components/Wrapper.svelte';
 </script>

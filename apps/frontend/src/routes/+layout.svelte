@@ -5,11 +5,10 @@
 	import Sidebar from '../components/Sidebar.svelte';
 	import { sidebarStore } from '$lib/sidebar';
 	import Footer from '../components/Footer.svelte';
-	import { toast, Toaster } from 'svelte-sonner';
+	import { Toaster } from 'svelte-sonner';
 	import { themeStore } from '$lib/themeStore';
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
-	import type { PageProps } from './$types';
 	import Alert from '../components/Alert.svelte';
 
 	const { children, data } = $props();
