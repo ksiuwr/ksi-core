@@ -81,7 +81,7 @@
 			const r = await api.dashboard.admin.alerts({ id: editingId }).put({
 				...newAlert,
 				priority: newAlert.priority || undefined,
-				link: newAlert.link || undefined
+				link: newAlert.link
 			});
 			if (r.error) {
 				toast.error(resolveError(r.error));
@@ -116,9 +116,7 @@
 	}
 
 	function formatDateForInput(date: Date) {
-		// Adjust for local timezone offset to display correct local time in input
-		const offset = date.getTimezoneOffset() * 60000;
-		const localISOTime = new Date(date.getTime() - offset).toISOString().slice(0, 16);
+		const localISOTime = new Date(date.getTime()).toISOString().slice(0, 16);
 		return localISOTime;
 	}
 </script>
@@ -255,9 +253,7 @@
 
 	<div class="flex flex-col gap-3">
 		{#each alerts as alert}
-			<div
-				class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-shadow"
-			>
+			<div class="card bg-base-100 border border-base-200">
 				<div class="card-body p-5">
 					<div class="flex justify-between items-start gap-4">
 						<div class="flex-1">
