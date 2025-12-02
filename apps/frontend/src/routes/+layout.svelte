@@ -9,8 +9,10 @@
 	import { themeStore } from '$lib/themeStore';
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
+	import type { PageProps } from './$types';
+	import Alert from '../components/Alert.svelte';
 
-	const { children } = $props();
+	const { children, data } = $props();
 	let sidebarShown = $derived($sidebarStore);
 
 	let innerWidth = $state(browser ? window.innerWidth : 1024);
@@ -37,6 +39,7 @@
 
 <Toaster theme={$themeStore} richColors />
 <Navbar />
+
 <Sidebar />
 <motion.div
 	animate={!motionDisabled && sidebarShown
@@ -52,6 +55,8 @@
 	}}
 	class="min-h-screen mt-[60px] overflow-x-hidden"
 >
+	<Alert alert={data.alert} />
+
 	{@render children?.()}
 	<Footer />
 </motion.div>
