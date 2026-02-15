@@ -1,0 +1,87 @@
+<script>
+	import { page } from '$app/state';
+	import { editions } from '$lib/data/conferences.js';
+	import { Calendar, MapPin, UsersRound } from '@lucide/svelte';
+	import Gallery from '../../../components/Gallery.svelte';
+
+	let year = $derived(page.params.year ?? '');
+	let data = $derived(editions[year]);
+
+	let galleryImages = $derived(
+		data?.photos > 0
+			? Array.from({ length: data.photos }, (_, i) => `/zosia/${year}/${i + 1}.jpg`)
+			: []
+	);
+</script>
+
+{#if data}
+	<div class="h-[80vh] w-full flex flex-col items-center justify-center relative overflow-hidden">
+		<span class="text-xl uppercase tracking-widest opacity-50 font-semibold">Edycja</span>
+		<img
+			alt=""
+			class="absolute bottom-0 opacity-20 left-1/2 -translate-x-1/2 min-w-full"
+			style="mask-image: linear-gradient(to top, transparent 0%, black 30%, transparent 60%); 
+                   -webkit-mask-image: linear-gradient(to top, transparent 0%, black 20%, transparent 60%);"
+			src={data.bgImage}
+		/>
+
+		<h1 class="text-[14rem] font-bold scale-y-[0.80] z-10">{year}</h1>
+
+		<div
+			class="flex md:flex-row flex-col border-t border-t-base-300 z-10 bg-base-100/70 rounded-lg"
+		>
+			<div class="flex flex-col items-center text-center p-8">
+				<pre class="opacity-50 mb-4 uppercase flex items-center"><MapPin
+						class="size-4"
+					/> Lokalizacja</pre>
+				{@html data.location.replace(',', '<br />')}
+			</div>
+			<div class="h-full p-px bg-base-300"></div>
+			<div class="flex flex-col items-center text-center p-8">
+				<pre class="opacity-50 mb-4 uppercase flex items-center"><UsersRound
+						class="size-4"
+					/> Ilość Uczestników</pre>
+				{data.participants}
+			</div>
+			<div class="h-full p-px bg-base-300"></div>
+			<div class="flex flex-col items-center text-center p-8">
+				<pre class="opacity-50 mb-4 uppercase flex items-center"><Calendar
+						class="size-4"
+					/> Data Obozu</pre>
+				{data.date}
+			</div>
+		</div>
+	</div>
+
+	{#if galleryImages.length > 0}
+		<Gallery images={galleryImages} />
+	{:else}
+		{@render emptyState()}
+	{/if}
+{:else}
+	<div class="h-screen flex items-center justify-center">
+		<h1 class="text-2xl opacity-50 uppercase tracking-tighter">
+			Edycja {year} nie została u nas znaleziona ;(
+		</h1>
+	</div>
+{/if}
+
+{#snippet emptyState()}
+	<div class="flex flex-col gap-4 items-center w-full py-20 text-center px-6">
+		<h2 class="text-2xl font-bold max-w-2xl">
+			Archeolodzy zastanawiają się, czy ZOSIA {year} się w ogóle odbyła. Brak żadnych dowodów...
+		</h2>
+		<p class="opacity-70">
+			Nie mamy zdjęć z tej edycji ZOSI. Jeśli jakieś posiadasz, możesz nam je wysłać abyśmy je tutaj
+			zamieścili.
+		</p>
+		<a href="mailto:ksi@cs.uni.wroc.pl" class="text-primary hover:underline"
+			>ksi [at] cs.uni.wroc.pl</a
+		>
+		<img
+			src="https://media.tenor.com/CEfTyE7rrA0AAAAi/tumbleweed-transparent.gif"
+			alt="Tumbleweed rolling"
+			class="w-64 opacity-80"
+		/>
+	</div>
+{/snippet}

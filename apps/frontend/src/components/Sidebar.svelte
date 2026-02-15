@@ -14,6 +14,7 @@
 	import { authClient } from '../lib/auth-client';
 	import { api } from '$lib/backend';
 	import { toast } from 'svelte-sonner';
+	import { editions } from '$lib/data/conferences.js';
 	import SidebarAccordion from './SidebarAccordion.svelte';
 
 	let show = $derived($sidebarStore);
@@ -92,7 +93,9 @@
 					<FileIcon class="size-4" />
 					README.md
 				</a>
-				<a href="/zosia/2025"> 2025.md</a>
+				{#each Object.keys(editions).sort((a, b) => parseInt(b) - parseInt(a)) as edition}
+					<a href={`/zosia/${edition}`}> {edition}.md</a>
+				{/each}
 			</SidebarAccordion>
 			{#if $showAdmin}
 				<button

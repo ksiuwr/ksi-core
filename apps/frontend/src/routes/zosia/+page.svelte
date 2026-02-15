@@ -2,14 +2,23 @@
 	import { Star } from '@lucide/svelte';
 	import Gallery from '../../components/Gallery.svelte';
 	import Wrapper from '../../components/Wrapper.svelte';
+	import { editions } from '$lib/data/conferences.js';
 </script>
 
 {#snippet starIcon()}
 	<Star class="size-4" />
 {/snippet}
 
+{#snippet zosiaEdition(edition: string)}
+	<a href={`/zosia/${edition}`}>
+		<div class="flex flex-col py-6 items-center border border-base-300">
+			<b class="text-[6rem]">{edition}</b>
+		</div>
+	</a>
+{/snippet}
+
 <Wrapper name="zosia/README.md" textClassName="text-primary font-bold" icon={starIcon}>
-	<div class="markdown-file">
+	<div class="markdown-file flex flex-col gap-4">
 		<h1>ZOSIA</h1>
 		<p>
 			Zimowy Obóz Studentów Informatyki A, to impreza organizowana przez Koło Studentów Informatyki
@@ -23,27 +32,11 @@
 			okołoinformatycznych, nie brakuje perełek z innych dziedzin.
 		</p>
 		<hr />
-		<h1>Galeria</h1>
-		<p>Obejrzyj poprzednie edycje ZOSI uwiecznione na zdjęciach!</p>
-		<h2>ZOSIA 2024</h2>
-		<Gallery
-			images={[
-				'https://cataas.com/cat?q=1',
-				'https://cataas.com/cat?q=2',
-				'https://cataas.com/cat?q=3',
-				'https://cataas.com/cat?q=4',
-				'https://cataas.com/cat?q=5',
-				'https://cataas.com/cat?q=6',
-				'https://cataas.com/cat?q=7',
-				'https://cataas.com/cat?q=8',
-				'https://cataas.com/cat?q=9',
-				'https://cataas.com/cat?q=10'
-			]}
-		/>
-		<h2>ZOSIA 2023</h2>
-		<h2>ZOSIA 2022</h2>
-		<h2>ZOSIA 2021</h2>
-		<h2>ZOSIA 2020</h2>
-		<h2>ZOSIA 2019</h2>
+		<h1>Archiwum Zosiek</h1>
+		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+			{#each Object.keys(editions).sort((a, b) => parseInt(b) - parseInt(a)) as edition}
+				{@render zosiaEdition(edition)}
+			{/each}
+		</div>
 	</div>
 </Wrapper>
