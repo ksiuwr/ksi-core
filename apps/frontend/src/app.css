@@ -81,7 +81,6 @@
   font-family: "Space Grotesk", sans-serif;
 }
 
-
 @utility font-lora {
   font-family: "Lora", serif;
 }
@@ -102,6 +101,15 @@
   @apply outline-0 focus:outline-0 focus:border-primary focus-visible:outline-0 focus-visible:border-primary focus-within:outline-0 focus-within:border-primary transition-colors;
 }
 
+@layer base {
+  h2 {
+    @apply text-[clamp(1.5rem,2cqw,4rem)];
+  }
+  p {
+    @apply text-[20px]
+  }
+}
+
 @utility markdown-file {
   h1 {
     @apply w-max text-[clamp(3rem,3cqw,6rem)] font-bold border-b border-b-base-200 mb-8;
@@ -113,7 +121,7 @@
     @apply text-[clamp(3rem,3cqw,6rem)] font-medium mr-2;
   }
   p {
-    @apply text-[18px] leading-relaxed tracking-wide;
+    @apply text-[24px] leading-relaxed tracking-wide;
   }
   h2 {
     @apply text-[clamp(1.5rem,2cqw,4rem)] my-4;
