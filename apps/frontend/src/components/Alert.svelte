@@ -57,7 +57,7 @@
 
 <div class={className}>
 	{#if alert !== null}
-		{#if alert.link !== ''}
+		{#if alert.link && alert.link !== ''}
 			<a
 				href={alert.link}
 				target="_blank"
