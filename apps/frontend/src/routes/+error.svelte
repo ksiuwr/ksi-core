@@ -3,14 +3,14 @@
 </script>
 
 <Wrapper
-	containerClassName="markdown-file min-h-screen"
+	containerClassName="markdown-file min-h-screen gap-4"
 	textClassName="text-error font-bold"
 	name="ERROR.md"
 >
-	<h1 class="md:mt-20 mt-10">Ojoj, a co tu się zadziało?</h1>
-	<p>
-		Albo coś się zepsuło, albo ktoś szukał szczęścia na naszej stronie. Zapewniamy, że jedyne
-		szczęście kryje się w <b>pokoju 24</b> na <b>Instytucie Informatyki</b>!
+	<h1 class="mt-10">Ojoj, a co tu się zadziało?</h1>
+	<p class="text-2xl!">
+		Albo coś się zepsuło, albo szukałeś szczęścia na naszej stronie. Zapewniamy, że jedyne szczęście
+		kryje się w <b>pokoju 24</b> na <b>Instytucie Informatyki</b>!
 	</p>
 
 	<h2>
