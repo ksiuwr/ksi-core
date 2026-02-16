@@ -1,15 +1,12 @@
 <script lang="ts">
-	import { ChevronDown, ChevronRight, Folder } from '@lucide/svelte';
+	import { ChevronRight, Folder } from '@lucide/svelte';
 	import type { Snippet } from 'svelte';
-	import type { ClassValue } from 'svelte/elements';
 
 	let {
 		title,
-		icon,
 		children
 	}: {
 		title: string;
-		icon: Snippet;
 		children: Snippet;
 	} = $props();
 
