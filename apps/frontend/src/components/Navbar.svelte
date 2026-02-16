@@ -6,35 +6,38 @@
 	import { sidebarStore } from '$lib/sidebar';
 </script>
 
-<div
-	class="fixed left-0 top-0 flex flex-row border-b border-b-base-200 bg-base-100 w-full h-[60px] items-center justify-between z-40"
+<header
+	class="sticky top-0 z-40 flex h-[60px] w-full flex-row items-center justify-between border-b border-b-base-200 bg-base-100/95 backdrop-blur supports-[backdrop-filter]:bg-base-100/60"
 >
-	<div class="flex h-full">
+	<div class="flex h-full items-center">
 		<button
 			onclick={() => {
-				$sidebarStore = true;
+				$sidebarStore = !$sidebarStore;
 			}}
-			class="btn btn-square btn-outline size-[60px] border-0 rounded-none"
+			class="btn btn-square btn-ghost h-[60px] w-[60px] rounded-none border-r border-base-200 lg:hidden"
+			aria-label="Toggle sidebar"
 		>
-			<PanelLeft class="size-4" />
+			<PanelLeft class="size-5" />
 		</button>
+
 		<a
 			href="/"
-			class="text-lg md:text-2xl font-mono opacity-80 flex gap-4 border-x border-base-300 w-[140px] px-4 transition-colors hover:bg-base-200/50 h-full items-center"
+			class="flex h-full w-[140px] items-center gap-4 px-6 font-mono text-lg opacity-80 transition-colors hover:bg-base-200/50 md:text-2xl lg:border-r lg:border-base-200 lg:w-[250px]"
 		>
-			<img src="/logo.svg" alt="" class="dark:invert size-10" />
+			<img src="/logo.svg" alt="" class="size-8 dark:invert md:size-10" />
 			KSI
 		</a>
 	</div>
+
 	<div class="flex h-full">
 		<button
 			onclick={() => {
 				setLocale(getLocale() === 'pl' ? 'en' : 'pl');
 			}}
-			class="btn btn-square btn-outline size-[60px] border-y-0 border-r-0 rounded-none"
+			class="btn btn-square btn-outline h-[60px] w-[60px] rounded-none border-y-0 border-r-0"
 		>
 			{m.EMOJI()}
 		</button>
 		<ThemeButton />
 	</div>
-</div>
+</header>

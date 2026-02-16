@@ -15,13 +15,11 @@
 </script>
 
 {#if data}
-	<div class="h-[80vh] w-full flex flex-col items-center justify-center relative overflow-hidden">
+	<div class="w-full py-20 mb-2 flex flex-col items-center justify-center relative overflow-hidden">
 		<span class="text-xl uppercase tracking-widest opacity-50 font-semibold">Edycja</span>
 		<img
 			alt=""
 			class="absolute bottom-0 opacity-20 left-1/2 -translate-x-1/2 min-w-full"
-			style="mask-image: linear-gradient(to top, transparent 0%, black 30%, transparent 60%); 
-                   -webkit-mask-image: linear-gradient(to top, transparent 0%, black 20%, transparent 60%);"
 			src={data.bgImage}
 		/>
 
@@ -75,9 +73,7 @@
 			Nie mamy zdjęć z tej edycji ZOSI. Jeśli jakieś posiadasz, możesz nam je wysłać abyśmy je tutaj
 			zamieścili.
 		</p>
-		<a href="mailto:ksi@cs.uni.wroc.pl" class="text-primary hover:underline"
-			>ksi [at] cs.uni.wroc.pl</a
-		>
+		<p class="font-mono font-medium text-primary transition-colors">ksi [at] cs.uni.wroc.pl</p>
 		<img
 			src="https://media.tenor.com/CEfTyE7rrA0AAAAi/tumbleweed-transparent.gif"
 			alt="Tumbleweed rolling"

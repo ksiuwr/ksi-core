@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { api } from '$lib/backend';
-	import { SquareArrowOutUpRight } from '@lucide/svelte';
-	import { cva, type VariantProps } from 'class-variance-authority';
+	import { SquareArrowOutUpRight, Terminal } from '@lucide/svelte'; // Opcjonalnie: ikona terminala
+	import { cva } from 'class-variance-authority';
 
 	import { cn } from '$lib/utils';
 
@@ -14,37 +14,23 @@
 	} = $props();
 
 	const alertVariants = cva(
-		'relative flex w-full flex-col md:items-center justify-center overflow-hidden gap-4 md:gap-2 py-2 px-4 md:px-2 transition-colors duration-300 before:absolute before:left-1/2 before:size-80 before:-translate-x-1/2 before:rounded-full before:blur-2xl before:pointer-events-none',
+		// Zmiany: font-mono, border, usunięcie zaokrągleń (lub małe), wyrównanie do lewej
+		'relative flex w-full flex-col gap-2 border-y md:border p-4 font-mono text-sm transition-all duration-200 md:rounded-sm',
 		{
 			variants: {
 				color: {
-					neutral: 'bg-base-200/5 text-base-content before:bg-base-300/30',
-					warning: 'bg-warning/5 text-warning-content before:bg-warning/10',
-					danger: 'bg-error/5 text-error-content before:bg-error/10',
-					info: 'bg-info/5 text-info-content before:bg-info/10'
+					// Styl: Ciemne tło, wyraźna ramka, techniczny kolor tekstu
+					neutral:
+						'border-base-content/20 bg-base-300/10 text-base-content/80 hover:bg-base-300/20',
+					warning: 'border-warning/50 bg-warning/5 text-warning hover:bg-warning/10',
+					danger: 'border-error bg-error/5 text-error hover:bg-error/10', // To czego chciałeś: czerwona ramka, surowe tło
+					info: 'border-info/50 bg-info/5 text-info hover:bg-info/10'
 				},
 				isLink: {
-					true: 'cursor-pointer',
+					true: 'cursor-pointer group',
 					false: ''
 				}
 			},
-			compoundVariants: [
-				{
-					color: 'info',
-					isLink: true,
-					class: 'hover:bg-info/10'
-				},
-				{
-					color: 'warning',
-					isLink: true,
-					class: 'hover:bg-warning/10'
-				},
-				{
-					color: 'danger',
-					isLink: true,
-					class: 'hover:bg-error/10'
-				}
-			],
 			defaultVariants: {
 				color: 'neutral',
 				isLink: false
@@ -63,16 +49,41 @@
 				target="_blank"
 				class={cn(alertVariants({ color: alertColor, isLink: true }))}
 			>
-				<div class="flex items-center gap-px">
-					<b class="font-lora text-lg">{alert.title}</b>
-					<SquareArrowOutUpRight class="ml-4 size-4" />
+				<div class="flex items-start justify-between gap-4">
+					<div class="flex flex-col gap-1">
+						<div class="flex items-center gap-2 font-bold uppercase tracking-wider">
+							{#if alertColor === 'danger'}
+								<span>[ERROR]</span>
+							{:else if alertColor === 'warning'}
+								<span>[WARN]</span>
+							{:else}
+								<span>&gt;</span>
+							{/if}
+							<span>{alert.title}</span>
+						</div>
+						<p class="opacity-90 leading-relaxed">{alert.description}</p>
+					</div>
+
+					<SquareArrowOutUpRight
+						class="size-4 opacity-50 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:opacity-100"
+					/>
 				</div>
-				<p class="opacity-80 text-sm md:text-base sm:tracking-tighter">{alert.description}</p>
 			</a>
 		{:else}
 			<div class={cn(alertVariants({ color: alertColor, isLink: false }))}>
-				<b class="font-lora text-lg">{alert.title}</b>
-				<p class="opacity-80 text-sm md:text-base sm:tracking-tighter">{alert.description}</p>
+				<div class="flex flex-col gap-1">
+					<div class="flex items-center gap-2 font-bold uppercase tracking-wider">
+						{#if alertColor === 'danger'}
+							<span>[ERROR]</span>
+						{:else if alertColor === 'warning'}
+							<span>[WARN]</span>
+						{:else}
+							<span>&gt;</span>
+						{/if}
+						<span>{alert.title}</span>
+					</div>
+					<p class="opacity-90 leading-relaxed">{alert.description}</p>
+				</div>
 			</div>
 		{/if}
 	{/if}

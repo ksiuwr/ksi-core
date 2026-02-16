@@ -1,21 +1,31 @@
-<script>
+<script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import Wrapper from '../components/Wrapper.svelte';
 </script>
 
-<Wrapper name="README.md">
-	<div class="markdown-file">
-		<div class="py-40">
-			<h1>Koło Studentów Informatyki</h1>
-			<h2>{m.minor_keen_cougar_sew()}</h2>
-			<p>W skrócie: KSI, lub ξ</p>
-		</div>
-		<hr />
-		<h1>Kim jesteśmy?</h1>
-		<p>
+<div class="mx-auto max-w-3xl px-6 py-20 text-base-content">
+	<header class="flex flex-col gap-6">
+		<h1 class="text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
+			Koło Studentów Informatyki
+			<span class="block text-2xl md:text-3xl font-medium text-base-content/60 mt-2">
+				Uniwersytetu Wrocławskiego
+			</span>
+		</h1>
+	</header>
+
+	<div class="h-px w-full bg-base-content/10 my-12"></div>
+
+	<main class="space-y-6">
+		<h2 class="text-2xl font-semibold tracking-tight">Kim jesteśmy?</h2>
+
+		<p class="text-lg leading-relaxed text-base-content/80">
 			Jesteśmy kołem naukowym działającym przy Instytucie Informatyki. Łączy nas zamiłowanie do
-			informatyki, zarówno od strony teoretycznej, jak i praktycznej. Działamy społecznie,
-			technicznie, naukowo.
+			technologii – od niskopoziomowej teorii po praktyczne wdrożenia.
 		</p>
-	</div>
-</Wrapper>
+
+		<p class="text-lg leading-relaxed text-base-content/80">
+			Działamy <span class="text-primary font-medium">społecznie</span>,
+			<span class="text-secondary font-medium">technicznie</span> i
+			<span class="text-accent font-medium">naukowo</span>.
+		</p>
+	</main>
+</div>

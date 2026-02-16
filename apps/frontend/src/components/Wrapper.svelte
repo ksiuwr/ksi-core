@@ -1,34 +1,40 @@
 <script lang="ts">
-	import { File } from '@lucide/svelte';
+	import { File, Terminal } from '@lucide/svelte'; // Opcjonalnie Terminal dla urozmaicenia
 	import type { Snippet } from 'svelte';
-	import type { ClassValue } from 'svelte/elements';
+	import { cn } from '$lib/utils'; // Zakładam, że masz cn() z shadcn/utils, jeśli nie - użyj zwykłego stringa
 
 	let {
 		name,
-		icon,
-		textClassName,
-		containerClassName,
+		icon, // Opcjonalny snippet ikony
+		class: className, // Zmieniłem containerClassName na standardowe 'class' dla wygody
 		children
 	}: {
 		name: string;
 		icon?: Snippet;
-		textClassName?: ClassValue;
-		containerClassName?: ClassValue;
+		class?: string;
 		children: Snippet;
 	} = $props();
 </script>
 
 <section
-	class={['border border-base-200 flex flex-col px-4 md:px-10 lg:px-20 py-4', containerClassName]}
+	class={cn(
+		'flex flex-col overflow-hidden rounded-md border border-base-300 bg-base-100',
+		className
+	)}
 >
-	<code class={['opacity-60 flex gap-2 items-center', textClassName]}>
+	<div
+		class="flex items-center gap-2 border-b border-base-300 bg-base-200/30 px-4 py-2 text-sm text-base-content/60 md:px-6"
+	>
 		{#if icon}
 			{@render icon()}
 		{:else}
-			<File class="size-4" />
+			<File class="size-4 opacity-70" />
 		{/if}
-		{name}
-	</code>
-	<div class="w-screen h-px bg-base-200 relative left-1/2 -translate-x-1/2 my-4"></div>
-	{@render children()}
+
+		<span class="font-mono tracking-tight">{name}</span>
+	</div>
+
+	<div class="p-6 md:p-10 lg:p-12">
+		{@render children()}
+	</div>
 </section>

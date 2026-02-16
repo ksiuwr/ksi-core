@@ -1,35 +1,13 @@
 <script lang="ts">
-	import { motion } from 'motion-start';
 	import '../app.css';
 	import Navbar from '../components/Navbar.svelte';
 	import Sidebar from '../components/Sidebar.svelte';
-	import { sidebarStore } from '$lib/sidebar';
 	import Footer from '../components/Footer.svelte';
 	import { Toaster } from 'svelte-sonner';
 	import { themeStore } from '$lib/themeStore';
-	import { browser } from '$app/environment';
-	import { onMount } from 'svelte';
 	import Alert from '../components/Alert.svelte';
 
 	const { children, data } = $props();
-	let sidebarShown = $derived($sidebarStore);
-
-	let innerWidth = $state(browser ? window.innerWidth : 1024);
-	let prefersReducedMotion = $state(false);
-
-	onMount(() => {
-		const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-		prefersReducedMotion = mediaQuery.matches;
-
-		mediaQuery.addEventListener('change', (e) => {
-			prefersReducedMotion = e.matches;
-		});
-	});
-
-	const breakpoint = 768;
-	let isSmallScreen = $derived(innerWidth < breakpoint);
-
-	let motionDisabled = $derived(isSmallScreen || prefersReducedMotion);
 </script>
 
 <svelte:head>
@@ -37,25 +15,27 @@
 </svelte:head>
 
 <Toaster theme={$themeStore} richColors />
-<Navbar />
 
-<Sidebar />
-<motion.div
-	animate={!motionDisabled && sidebarShown
-		? {
-				marginLeft: '200px'
-			}
-		: {
-				marginLeft: 0
-			}}
-	transition={{
-		bounceDamping: 20,
-		damping: 0.2
-	}}
-	class="min-h-screen mt-[60px] overflow-x-hidden"
->
-	<Alert alert={data.alert} />
+<div class="mx-auto flex min-h-screen flex-col gap-4 xl:my-8 xl:max-w-[1440px]">
+	{#if data.alert}
+		<div class="w-full">
+			<Alert alert={data.alert} class="w-full xl:border xl:border-base-200 shadow-sm" />
+		</div>
+	{/if}
 
-	{@render children?.()}
-	<Footer />
-</motion.div>
+	<div class="flex flex-1 flex-col bg-base-100 xl:border xl:border-base-200">
+		<Navbar />
+
+		<div class="relative flex flex-1 items-start">
+			<Sidebar />
+
+			<main class="flex-1 min-w-0 w-full px-4 sm:px-6 lg:px-12 py-8 md:py-12">
+				{@render children?.()}
+			</main>
+		</div>
+
+		<div class="relative z-10 bg-base-100">
+			<Footer />
+		</div>
+	</div>
+</div>
