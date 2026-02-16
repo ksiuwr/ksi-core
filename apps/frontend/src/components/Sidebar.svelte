@@ -7,6 +7,7 @@
 		LogOut,
 		Megaphone,
 		PanelLeftClose,
+		SquareKanban,
 		Star,
 		Wrench
 	} from '@lucide/svelte';
@@ -85,10 +86,7 @@
 			class="flex flex-col flex-1 w-full py-2 [&_a]:flex [&_a]:items-center [&_a]:gap-2 [&_a]:font-mono [&_a]:w-full [&_a]:py-px [&_a]:px-4 [&_a]:hover:bg-base-200 opacity-70"
 		>
 			<a href="/"><File class="size-4" /> README.md</a>
-			{#snippet star()}
-				<Star class="size-4" />
-			{/snippet}
-			<SidebarAccordion icon={star} title="zosia">
+			<SidebarAccordion title="zosia">
 				<a href="/zosia">
 					<FileIcon class="size-4" />
 					README.md
@@ -96,6 +94,9 @@
 				{#each Object.keys(editions).sort((a, b) => parseInt(b) - parseInt(a)) as edition}
 					<a href={`/zosia/${edition}`}> {edition}.md</a>
 				{/each}
+			</SidebarAccordion>
+			<SidebarAccordion title="projects">
+				<a href={`/projects/physarum`}> physarum.md</a>
 			</SidebarAccordion>
 			{#if $showAdmin}
 				<button

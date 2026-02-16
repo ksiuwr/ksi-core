@@ -102,6 +102,9 @@
 }
 
 @layer base {
+  h1 {
+    @apply w-max text-[clamp(3rem,3cqw,6rem)] font-bold border-b border-b-base-200 mb-8;
+  }
   h2 {
     @apply text-[clamp(1.5rem,2cqw,4rem)];
   }
