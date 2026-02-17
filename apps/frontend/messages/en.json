@@ -1,10 +1,4 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"EMOJI": "🇺🇸",
-	"lower_drab_snake_stir": "society",
-	"patchy_gray_squirrel_exhale": "Computer Science",
-	"minor_keen_cougar_sew": "of the University of Wrocław",
-	"mellow_merry_termite_tickle": "whats up!",
-	"yummy_zany_dachshund_sail": "Students, just like You! <br /><br />In student life we are passionate in making STEM related events, like ZOSIA and LEOSIA, social initiatives, and technical projects!",
-	"polite_happy_mallard_fond": "Who are we?"
+	"EMOJI": "🇺🇸"
 }

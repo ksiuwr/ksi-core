@@ -3,6 +3,7 @@
 	import { editions } from '$lib/data/conferences.js';
 	import { Calendar, MapPin, UsersRound } from '@lucide/svelte';
 	import Gallery from '../../../components/Gallery.svelte';
+	import { m } from '$lib/paraglide/messages';
 
 	let year = $derived(page.params.year ?? '');
 	let data = $derived(editions[year]);
@@ -31,21 +32,21 @@
 			<div class="flex flex-col items-center text-center p-8">
 				<pre class="opacity-50 mb-4 uppercase flex items-center"><MapPin
 						class="size-4"
-					/> Lokalizacja</pre>
+					/> {m.wacky_real_cat_coax()}</pre>
 				{@html data.location.replace(',', '<br />')}
 			</div>
 			<div class="h-full p-px bg-base-300"></div>
 			<div class="flex flex-col items-center text-center p-8">
 				<pre class="opacity-50 mb-4 uppercase flex items-center"><UsersRound
 						class="size-4"
-					/> Ilość Uczestników</pre>
+					/> {m.true_agent_wombat_sew()}</pre>
 				{data.participants}
 			</div>
 			<div class="h-full p-px bg-base-300"></div>
 			<div class="flex flex-col items-center text-center p-8">
 				<pre class="opacity-50 mb-4 uppercase flex items-center"><Calendar
 						class="size-4"
-					/> Data Obozu</pre>
+					/> {m.raw_weird_dachshund_rise()}</pre>
 				{data.date}
 			</div>
 		</div>
@@ -59,7 +60,7 @@
 {:else}
 	<div class="h-screen flex items-center justify-center">
 		<h1 class="text-2xl opacity-50 uppercase tracking-tighter">
-			Edycja {year} nie została u nas znaleziona ;(
+			{m.shy_loved_fish_gasp({ year })}
 		</h1>
 	</div>
 {/if}
@@ -67,11 +68,10 @@
 {#snippet emptyState()}
 	<div class="flex flex-col gap-4 items-center w-full py-20 text-center px-6">
 		<h2 class="text-2xl font-bold max-w-2xl">
-			Archeolodzy zastanawiają się, czy ZOSIA {year} się w ogóle odbyła. Brak żadnych dowodów...
+			{m.lucky_tired_seal_dine({ year })}
 		</h2>
 		<p class="opacity-70">
-			Nie mamy zdjęć z tej edycji ZOSI. Jeśli jakieś posiadasz, możesz nam je wysłać abyśmy je tutaj
-			zamieścili.
+			{m.lower_sour_tiger_gaze()}
 		</p>
 		<p class="font-mono font-medium text-primary transition-colors">ksi [at] cs.uni.wroc.pl</p>
 		<img

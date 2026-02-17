@@ -2,6 +2,7 @@
 	import Wrapper from '../../../components/Wrapper.svelte';
 	import Goal from '../../../components/Goal.svelte';
 	import { ArrowRight } from '@lucide/svelte';
+	import { m } from '$lib/paraglide/messages';
 </script>
 
 <Wrapper name="projects/physarum.md">
@@ -9,9 +10,9 @@
 		class="markdown-file flex flex-col gap-8 py-8 pl-12 md:pl-16 pr-4 max-w-4xl mx-auto text-base-content"
 	>
 		<header class="flex flex-col gap-2 pb-8">
-			<h1>Czy Śluzowiec potrafi trenować Sieci Neuronowe?</h1>
+			<h1>{m.zippy_steep_shell_dash()}</h1>
 
-			<p class="!text-lg !text-base-content/60 font-mono !my-0">// Biologia obliczeniowa & AI</p>
+			<p class="!text-lg !text-base-content/60 font-mono !my-0">{m.mellow_careful_elk_hug()}</p>
 		</header>
 
 		<div class="space-y-12">
@@ -25,37 +26,31 @@
 						/>
 					</div>
 					<figcaption class="font-mono text-xs text-base-content/40 text-center">
-						Wizualizacja U-Matrix, Hit Map i Wektorów wag
+						{m.helpful_gaudy_cheetah_breathe()}
 					</figcaption>
 				</figure>
 
 				<p class="text-justify">
-					Ten projekt bada fascynujące skrzyżowanie biologii i informatyki, sprawdzając, czy
-					naturalne procesy <em class="italic text-base-content font-serif"
-						>Physarum polycephalum</em
-					>
-					mogą zostać wykorzystane do wykonywania zadań obliczeniowych, takich jak trenowanie sieci neuronowych.
+					{@html m.giant_grand_mayfly_pout()}
 				</p>
 			</section>
 
 			<section class="space-y-6 w-full">
-				<h2>Cele</h2>
+				<h2>{m.clean_plane_finch_spin()}</h2>
 
 				<div class="flex flex-col gap-4 w-full">
 					<Goal type="scientific">
-						Badania behawioralne i eksperymentalne nad <em class="italic font-serif"
-							>Physarum polycephalum</em
-						>.
+						{@html m.spicy_dry_peacock_cure()}
 					</Goal>
 
-					<Goal type="technical">Analiza algorytmiczna i modelowanie sieci transportowych.</Goal>
+					<Goal type="technical">{m.suave_many_squid_adore()}</Goal>
 
-					<Goal type="social">Rozpowszechnianie wyników w środowisku akademickim i poza nim.</Goal>
+					<Goal type="social">{m.wide_kind_jan_aim()}</Goal>
 				</div>
 			</section>
 
 			<section class="space-y-4">
-				<h2>Członkowie Zespołu</h2>
+				<h2>{m.last_lucky_reindeer_belong()}</h2>
 
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-sm w-full">
 					{#each ['Igor Jakus', 'Hubert Berlicki', 'Wojciech Aszkiełowicz', 'Dr Marek Adamczyk'] as member, i}

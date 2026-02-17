@@ -1,19 +1,17 @@
 <script>
+	import { m } from '$lib/paraglide/messages';
 	import Wrapper from '../components/Wrapper.svelte';
 </script>
 
-<Wrapper
-	containerClassName="markdown-file min-h-screen gap-4"
-	textClassName="text-error font-bold"
-	name="ERROR.md"
->
-	<h1 class="mt-10">Ojoj, a co tu się zadziało?</h1>
-	<p class="text-2xl!">
-		Albo coś się zepsuło, albo szukałeś szczęścia na naszej stronie. Zapewniamy, że jedyne szczęście
-		kryje się w <b>pokoju 24</b> na <b>Instytucie Informatyki</b>!
-	</p>
+<Wrapper name="ERROR">
+	<div class="flex flex-col gap-8 items-center justify-center">
+		<h1 class="text-4xl mt-10">{m.plain_weak_moth_belong()}</h1>
+		<p class="text-xl">
+			{@html m.cuddly_born_skunk_wave()}
+		</p>
 
-	<h2>
-		Zapraszamy w wolnym czasie, a teraz <a href="/">kliknij tutaj</a>, aby wrócić do domu.
-	</h2>
+		<h2 class="text-2xl">
+			{@html m.direct_next_newt_relish()}
+		</h2>
+	</div>
 </Wrapper>
