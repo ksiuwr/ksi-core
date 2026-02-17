@@ -23,7 +23,7 @@
 			<div class="flex flex-col items-center gap-2 z-10">
 				<span
 					class="font-mono text-xs text-base-content/40 group-hover:text-primary/60 transition-colors uppercase tracking-widest"
-					>Edition</span
+					>Edycja</span
 				>
 				<b
 					class="text-5xl font-bold tracking-tighter text-base-content group-hover:text-primary transition-colors"
@@ -33,7 +33,7 @@
 				<div
 					class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity mt-2"
 				>
-					<span class="font-mono text-[10px] text-primary">view_archive.sh</span>
+					<span class="font-mono text-[10px] text-primary">zobacz_archiwum.sh</span>
 					<ArrowUpRight class="size-3 text-primary" />
 				</div>
 			</div>
@@ -41,11 +41,11 @@
 	</a>
 {/snippet}
 
-<Wrapper name="zosia/README.md" textClassName="text-primary font-bold" icon={starIcon}>
+<Wrapper name="zosia/README.md" icon={starIcon}>
 	<div class="markdown-file flex flex-col gap-8">
 		<header class="flex flex-col gap-2 border-b border-base-content/10 pb-8">
 			<h1>ZOSIA</h1>
-			<p class="!text-lg !text-base-content/60 font-mono !my-0">
+			<p class="text-lg! text-base-content/60! font-mono my-0!">
 				// Zimowy Obóz Studentów Informatyki
 			</p>
 		</header>
