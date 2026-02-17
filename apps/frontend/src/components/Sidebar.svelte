@@ -53,20 +53,20 @@
 			}}
 			class="px-6 pb-2 text-xs font-bold uppercase tracking-wider text-base-content/40 cursor-default select-none hover:text-base-content/60 transition-colors"
 		>
-			Dokumentacja
+			Drzewo nawigacji
 		</div>
 
-		<SidebarLink href="/" icon={File}>README.md</SidebarLink>
+		<SidebarLink href="/" icon={File}>Home</SidebarLink>
 
 		<SidebarAccordion title="zosia">
-			<SidebarLink href="/zosia" icon={FileIcon}>README.md</SidebarLink>
+			<SidebarLink href="/zosia" icon={FileIcon}>README</SidebarLink>
 			{#each Object.keys(editions).sort((a, b) => parseInt(b) - parseInt(a)) as edition}
-				<SidebarLink href={`/zosia/${edition}`}>{edition}.md</SidebarLink>
+				<SidebarLink href={`/zosia/${edition}`}>{edition}</SidebarLink>
 			{/each}
 		</SidebarAccordion>
 
 		<SidebarAccordion title="projects">
-			<SidebarLink href="/projects/physarum" icon={FileIcon} exact={false}>physarum.md</SidebarLink>
+			<SidebarLink href="/projects/physarum" icon={FileIcon} exact={false}>physarum</SidebarLink>
 		</SidebarAccordion>
 
 		<div class="flex flex-col w-full">
@@ -112,8 +112,8 @@
 					</div>
 
 					<SidebarAccordion title="dashboard">
-						<SidebarLink href="/dashboard" icon={Wrench}>HOME.md</SidebarLink>
-						<SidebarLink href="/dashboard/alerts" icon={Megaphone}>ALERTS.md</SidebarLink>
+						<SidebarLink href="/dashboard" icon={Wrench}>HOME</SidebarLink>
+						<SidebarLink href="/dashboard/alerts" icon={Megaphone}>ALERTS</SidebarLink>
 					</SidebarAccordion>
 				</div>
 			{/if}
