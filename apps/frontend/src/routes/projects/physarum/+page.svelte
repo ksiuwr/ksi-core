@@ -25,7 +25,7 @@
 						/>
 					</div>
 					<figcaption class="font-mono text-xs text-base-content/40 text-center">
-						![Wizualizacja U-Matrix, Hit Map i Wektorów wag](/graphic1.webp)
+						Wizualizacja U-Matrix, Hit Map i Wektorów wag
 					</figcaption>
 				</figure>
 
@@ -69,6 +69,7 @@
 				</div>
 			</section>
 
+			<!--
 			<section class="space-y-4 w-full">
 				<h2>Posty na Blogu</h2>
 
@@ -92,6 +93,7 @@
 					</a>
 				</div>
 			</section>
+      --->
 		</div>
 	</div>
 </Wrapper>
