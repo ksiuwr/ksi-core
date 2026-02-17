@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { File, Terminal } from '@lucide/svelte'; // Opcjonalnie Terminal dla urozmaicenia
+	import { File, Terminal } from '@lucide/svelte';
 	import type { Snippet } from 'svelte';
-	import { cn } from '$lib/utils'; // Zakładam, że masz cn() z shadcn/utils, jeśli nie - użyj zwykłego stringa
+	import { cn } from '$lib/utils';
 
 	let {
 		name,
-		icon, // Opcjonalny snippet ikony
-		class: className, // Zmieniłem containerClassName na standardowe 'class' dla wygody
+		icon,
+		class: className,
 		children
 	}: {
 		name: string;

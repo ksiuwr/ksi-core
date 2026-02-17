@@ -58,26 +58,6 @@
 		</button>
 	</div>
 {/if}
-
-<!-- <AnimatePresence>
-	{#if currImage !== null}
-		<motion.div
-			layoutId="image"
-			exit={{
-				opacity: 0
-				// scale: 0
-			}}
-			class="fixed top-0 left-0 flex flex-col items-center justify-center w-screen h-screen bg-base-100/90 z-90"
-		>
-			<img
-				src={images[currImage as number]}
-				class="max-w-[50vw] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-				alt=""
-			/>
-		</motion.div>
-	{/if}
-</AnimatePresence> -->
-
 <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
 	{#each splittedImages as splitCol, splitI}
 		<div class="flex flex-col gap-2">

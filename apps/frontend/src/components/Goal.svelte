@@ -10,7 +10,6 @@
 		children: Snippet;
 	} = $props();
 
-	// Mapowanie konfiguracji na podstawie typu
 	const config = {
 		scientific: {
 			colorClass: 'border-accent bg-accent/5 text-accent',
