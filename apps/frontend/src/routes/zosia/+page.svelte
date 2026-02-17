@@ -68,7 +68,7 @@
 
 		<section class="space-y-6">
 			<div class="flex items-center gap-4">
-				<h2 class="!my-0">Archiwum Zosiek</h2>
+				<h2 class="my-0!">Archiwum poprzednich edycji</h2>
 				<div class="h-px flex-1 bg-base-content/10"></div>
 				<FolderOpen class="size-5 text-base-content/20" />
 			</div>
