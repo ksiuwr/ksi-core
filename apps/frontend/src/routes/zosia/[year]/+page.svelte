@@ -17,7 +17,9 @@
 
 {#if data}
 	<div class="w-full py-20 mb-2 flex flex-col items-center justify-center relative overflow-hidden">
-		<span class="text-xl uppercase tracking-widest opacity-50 font-semibold">Edycja</span>
+		<span class="text-xl uppercase tracking-widest opacity-50 font-semibold"
+			>{m.clear_formal_marlin_hurl()}</span
+		>
 		<img
 			alt=""
 			class="absolute bottom-0 opacity-20 left-1/2 -translate-x-1/2 min-w-full"
