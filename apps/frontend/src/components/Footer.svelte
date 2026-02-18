@@ -9,7 +9,7 @@
 				{m.seemly_flaky_myna_buy()}
 			</strong>
 			<address class="not-italic text-base-content/60">
-				{m.major_swift_angelfish_borrow()}
+				{@html m.major_swift_angelfish_borrow()}
 			</address>
 		</div>
 
