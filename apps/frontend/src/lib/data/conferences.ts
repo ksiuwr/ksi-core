@@ -3,8 +3,8 @@ export const editions: { [year: string]: { location: string, participants: numbe
     location: "Hotel Bornit, Mickiewicza 21, 58-580 Szklarska Poręba",
     participants: 263,
     date: "22.02.2024 - 25.02.2024",
-    bgImage: "/tlo.jpg",
-    photos: 0
+    bgImage: "/zosia/2024/10.jpg",
+    photos: 21
   },
   "2025": {
     location: "Hotel Bornit, Mickiewicza 21, 58-580 Szklarska Poręba",
