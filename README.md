@@ -57,3 +57,42 @@ bun dev
 ```
 
 5. Frontend jest dostępny pod http://localhost:5173/, a backend pod http://localhost:3000/.
+
+## Produkcja
+
+Projekt można wdrożyć za pomocą Docker Compose z Traefik jako reverse proxy i automatycznym SSL (Let's Encrypt).
+
+### Wymagania
+
+- Docker z włączonym pluginem compose
+- Dostęp do serwera z portami 80 i 443
+- Domena wskazująca na serwer
+
+### Kroki wdrożenia
+
+1. Skonfiguruj zmienne środowiskowe
+
+```
+cp .env.example .env
+# Edytuj .env i uzupełnij wszystkie wartości (hasła, tokeny, klucze)
+```
+
+2. Zbuduj i uruchom kontenery
+
+```
+cd deploy
+docker compose up -d --build
+```
+
+3. Wykonaj migracje bazy danych
+
+```
+docker compose exec backend bun run db:migrate
+```
+
+4. Strona powinna być dostępna pod https://ksi.ii.uni.wroc.pl, a API pod https://ksi.ii.uni.wroc.pl/api
+
+### Uwagi
+
+- Po wdrożeniu zaktualizuj URL'e przekierowania OAuth w Discord Developer Portal na `https://ksi.ii.uni.wroc.pl/api/auth/oauth/discord/callback`
+- Jeśli używasz istniejącej bazy danych, usuń usługę `postgres` z `deploy/docker-compose.yml` i dostosuj `DATABASE_URL`

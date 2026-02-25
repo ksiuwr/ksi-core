@@ -20,7 +20,7 @@ discordBot.ping()
 const app = new Elysia()
     .use(cors(
         {
-            origin: "localhost:5173",
+            origin: process.env.FRONTEND_BASE_URL,
             methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             credentials: true,
             allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
