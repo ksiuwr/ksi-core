@@ -7,7 +7,7 @@
 
 <Wrapper name="projects/physarum.md">
 	<div
-		class="markdown-file flex flex-col gap-8 py-8 pl-12 md:pl-16 pr-4 max-w-4xl mx-auto text-base-content"
+		class="markdown-file flex flex-col gap-8 py-8 pl-px md:pl-16 max-w-4xl mx-auto text-base-content"
 	>
 		<header class="flex flex-col gap-2 pb-8">
 			<h1>{m.zippy_steep_shell_dash()}</h1>
