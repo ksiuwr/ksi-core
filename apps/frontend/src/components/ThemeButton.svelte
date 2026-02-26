@@ -9,7 +9,7 @@
 		const newTheme = $themeStore === 'dark' ? 'light' : 'dark';
 		themeStore.set(newTheme);
 	}}
-	class="btn btn-square btn-outline size-[60px] border-y-0 rounded-none"
+	class="btn btn-square btn-outline size-[60px] border-0 border-base-200 border-l rounded-none"
 >
 	{#if $themeStore === 'dark'}
 		<motion.div animate={{ rotateZ: 0 }} exit={{ rotateZ: 90 }} initial={{ rotateZ: -90 }}>

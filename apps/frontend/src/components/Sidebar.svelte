@@ -10,7 +10,7 @@
 	import { page } from '$app/stores';
 	import SidebarLink from './SidebarLink.svelte';
 	import { m } from '$lib/paraglide/messages';
-	import { getFrontendUrl } from 'shared';
+	import { getUrls } from 'shared';
 
 	let clicksResetDebounceTimeout: NodeJS.Timeout | null = null;
 
@@ -80,7 +80,7 @@
 					onclick={() => {
 						authClient.signIn.social({
 							provider: 'discord',
-							callbackURL: getFrontendUrl() + '/dashboard'
+							callbackURL: getUrls().FRONTEND + '/dashboard'
 						});
 					}}
 					class="text-error font-bold flex items-center gap-3 font-mono text-sm w-full py-1.5 px-6 hover:bg-base-200 cursor-pointer text-left"

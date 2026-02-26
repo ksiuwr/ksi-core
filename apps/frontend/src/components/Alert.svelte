@@ -14,16 +14,14 @@
 	} = $props();
 
 	const alertVariants = cva(
-		// Zmiany: font-mono, border, usunięcie zaokrągleń (lub małe), wyrównanie do lewej
 		'relative flex w-full flex-col gap-2 border-y md:border p-4 font-mono text-sm transition-all duration-200 md:rounded-sm',
 		{
 			variants: {
 				color: {
-					// Styl: Ciemne tło, wyraźna ramka, techniczny kolor tekstu
 					neutral:
 						'border-base-content/20 bg-base-300/10 text-base-content/80 hover:bg-base-300/20',
 					warning: 'border-warning/50 bg-warning/5 text-warning hover:bg-warning/10',
-					danger: 'border-error bg-error/5 text-error hover:bg-error/10', // To czego chciałeś: czerwona ramka, surowe tło
+					danger: 'border-error bg-error/5 text-error hover:bg-error/10',
 					info: 'border-info/50 bg-info/5 text-info hover:bg-info/10'
 				},
 				isLink: {

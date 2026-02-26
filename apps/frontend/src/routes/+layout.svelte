@@ -16,10 +16,10 @@
 
 <Toaster theme={$themeStore} richColors />
 
-<div class="mx-auto flex min-h-screen flex-col gap-4 xl:py-8 xl:max-w-[1440px]">
+<div class="mx-auto flex min-h-screen flex-col md:gap-4 xl:py-8 xl:max-w-[1440px]">
 	{#if data.alert}
 		<div class="w-full">
-			<Alert alert={data.alert} class="w-full xl:border xl:border-base-200 shadow-sm" />
+			<Alert alert={data.alert} />
 		</div>
 	{/if}
 

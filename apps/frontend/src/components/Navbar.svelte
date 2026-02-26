@@ -14,7 +14,7 @@
 			onclick={() => {
 				$sidebarStore = !$sidebarStore;
 			}}
-			class="btn btn-square btn-ghost h-[60px] w-[60px] rounded-none border-r border-base-200 lg:hidden"
+			class="btn btn-square btn-outline h-[60px] w-[60px] border-0 border-x rounded-none border-base-200 lg:hidden"
 			aria-label="Toggle sidebar"
 		>
 			<PanelLeft class="size-5" />
@@ -35,7 +35,7 @@
 				const current = getLocale();
 				setLocale(current === 'pl' ? 'en' : 'pl');
 			}}
-			class="btn btn-square btn-outline h-[60px] w-[60px] rounded-none border-y-0 border-r-0"
+			class="btn btn-square btn-outline h-[60px] w-[60px] rounded-none border-base-200 border-0 border-l"
 		>
 			{m.EMOJI()}
 		</button>
