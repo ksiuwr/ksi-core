@@ -10,7 +10,7 @@
 
 	let galleryImages = $derived(
 		data?.photos > 0
-			? Array.from({ length: data.photos }, (_, i) => `/zosia/${year}/${i + 1}.jpg`)
+			? Array.from({ length: data.photos }, (_, i) => `/zosia/${year}/${i + 1}.webp`)
 			: []
 	);
 </script>
