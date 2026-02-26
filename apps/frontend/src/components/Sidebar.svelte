@@ -135,12 +135,12 @@
 	initial={{ x: '-100%' }}
 	transition={{ bounceDamping: 20, damping: 0.2 }}
 >
-	<div class="flex h-[60px] items-center border-b border-base-200 bg-base-100">
+	<div class="flex h-[60px] items-center border-b border-r border-base-200 bg-base-100">
 		<button
 			onclick={() => {
 				$sidebarStore = false;
 			}}
-			class="btn btn-square btn-ghost h-[60px] w-[60px] rounded-none border-r border-base-200"
+			class="btn btn-square btn-outline h-[60px] w-[60px] rounded-none border-0 border-r border-base-200"
 		>
 			<PanelLeftClose class="size-5" />
 		</button>

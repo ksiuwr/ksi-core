@@ -13,7 +13,7 @@
 	let expanded = $state(false);
 </script>
 
-<div class="flex flex-col">
+<div class="flex flex-col select-none">
 	<div class="flex py-1 px-1 items-center gap-px hover:bg-base-200">
 		<button
 			onclick={() => (expanded = !expanded)}
