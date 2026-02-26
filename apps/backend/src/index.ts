@@ -26,7 +26,7 @@ const app = new Elysia()
       allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
     }
   ))
-  .all("/api/auth/*", betterAuthView)
+  .all("/auth/*", betterAuthView)
   .use(routes)
   .listen(3000);
 
