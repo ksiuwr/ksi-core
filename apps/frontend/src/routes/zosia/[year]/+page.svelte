@@ -16,36 +16,38 @@
 </script>
 
 {#if data}
-	<div class="w-full py-20 mb-2 flex flex-col items-center justify-center relative overflow-hidden">
-		<span class="text-xl uppercase tracking-widest opacity-50 font-semibold"
-			>{m.clear_formal_marlin_hurl()}</span
-		>
-		<img
-			alt=""
-			class="absolute bottom-0 opacity-20 left-1/2 -translate-x-1/2 min-w-full"
-			src={data.bgImage}
-		/>
-
-		<h1 class="lg:text-[14rem] text-[8rem] font-bold scale-y-[0.80] z-10">{year}</h1>
-
+	<div class="relative w-full py-20 flex flex-col items-center justify-center overflow-hidden">
 		<div
-			class="flex md:flex-row flex-col border-t border-t-base-300 z-10 bg-base-100/70 rounded-lg"
-		>
+			class="absolute inset-0 bg-no-repeat bg-cover bg-center opacity-30"
+			style={`background-image: url(${data.bgImage})`}
+		></div>
+
+		<span class="text-xl uppercase tracking-widest opacity-50 font-semibold">
+			{m.clear_formal_marlin_hurl()}
+		</span>
+		<h1 class="lg:text-[14rem] text-[8rem] font-bold scale-y-[0.80] z-10">
+			{year}
+		</h1>
+	</div>
+	<div class="w-full py-20 mb-2 flex flex-col items-center justify-center relative overflow-hidden">
+		<div class="flex md:flex-row flex-col border border-base-200">
 			<div class="flex flex-col items-center text-center p-8">
 				<pre class="opacity-50 mb-4 uppercase flex items-center"><MapPin
 						class="size-4"
 					/> {m.wacky_real_cat_coax()}</pre>
 				{@html data.location.replace(',', '<br />')}
 			</div>
-			<div class="h-full p-px bg-base-300"></div>
-			<div class="flex flex-col items-center text-center p-8">
+			<div
+				class="flex flex-col md:border-l border-t md:border-t-0 border-base-200 items-center text-center p-8"
+			>
 				<pre class="opacity-50 mb-4 uppercase flex items-center"><UsersRound
 						class="size-4"
 					/> {m.true_agent_wombat_sew()}</pre>
 				{data.participants}
 			</div>
-			<div class="h-full p-px bg-base-300"></div>
-			<div class="flex flex-col items-center text-center p-8">
+			<div
+				class="flex flex-col md:border-l border-t md:border-t-0 border-base-200 items-center text-center p-8"
+			>
 				<pre class="opacity-50 mb-4 uppercase flex items-center"><Calendar
 						class="size-4"
 					/> {m.raw_weird_dachshund_rise()}</pre>
