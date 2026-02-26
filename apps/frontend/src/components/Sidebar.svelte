@@ -11,7 +11,6 @@
 	import SidebarLink from './SidebarLink.svelte';
 	import { m } from '$lib/paraglide/messages';
 
-	let show = $derived($sidebarStore);
 	let clicksResetDebounceTimeout: NodeJS.Timeout | null = null;
 
 	let clicks = $state(0);
@@ -131,7 +130,7 @@
 
 <motion.div
 	class="fixed top-0 left-0 h-screen flex flex-col z-50 lg:hidden shadow-2xl"
-	animate={show ? { x: 0 } : { x: '-100%' }}
+	animate={$sidebarStore ? { x: 0 } : { x: '-100%' }}
 	initial={{ x: '-100%' }}
 	transition={{ bounceDamping: 20, damping: 0.2 }}
 >
@@ -152,10 +151,10 @@
 	</div>
 </motion.div>
 
-{#if show}
+{#if $sidebarStore}
 	<div
+    role="presentation"
 		class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
 		onclick={() => ($sidebarStore = false)}
-		transition:motion
 	></div>
 {/if}

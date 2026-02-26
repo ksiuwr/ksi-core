@@ -26,7 +26,7 @@
 			src={data.bgImage}
 		/>
 
-		<h1 class="text-[14rem] font-bold scale-y-[0.80] z-10">{year}</h1>
+		<h1 class="lg:text-[14rem] text-[8rem] font-bold scale-y-[0.80] z-10">{year}</h1>
 
 		<div
 			class="flex md:flex-row flex-col border-t border-t-base-300 z-10 bg-base-100/70 rounded-lg"
