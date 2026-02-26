@@ -1,0 +1,78 @@
+services:
+  traefik:
+    image: traefik:v3
+    container_name: traefik-prod
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - ksi-network
+    ports:
+      - "80:80"
+    environment:
+      - TZ=Europe/Warsaw
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    labels:
+      - "traefik.enable=true"
+      # Secure Traefik Dashboard (Optional - replace with your credentials)
+      - "traefik.http.routers.dashboard.service=api@internal"
+
+  postgres:
+    image: postgres:13-alpine
+    container_name: ksi-postgres-prod
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=ksi
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=passdb
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    #network_mode: host
+    networks:
+      - ksi-network
+
+  backend:
+    image: "ghcr.io/ksiuwr/ksi-backend:latest"
+    container_name: ksi-backend-prod
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    networks:
+      - ksi-network
+    depends_on:
+      - postgres
+    labels:
+      - "traefik.enable=true"
+      # Routing Logic
+      - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.priority=10"
+      # Middleware: Strip /api and add compression
+      - "traefik.http.routers.backend.middlewares=gzip-compress"
+      - "traefik.http.services.backend.loadbalancer.server.port=3000"
+
+  frontend:
+    image: "ghcr.io/ksiuwr/ksi-frontend:latest"
+    container_name: ksi-frontend-prod
+    restart: unless-stopped
+    networks:
+      - ksi-network
+    labels:
+      - "traefik.enable=true"
+      # Routing Logic
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.frontend.priority=1"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3001"
+      - "traefik.http.middlewares.gzip-compress.compress=true"
+      - "traefik.http.routers.frontend.middlewares=gzip-compress"
+
+networks:
+  ksi-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
