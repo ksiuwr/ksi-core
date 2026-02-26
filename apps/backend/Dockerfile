@@ -1,26 +1,16 @@
-FROM oven/bun:1-alpine AS base
+FROM oven/bun:1-alpine AS runner
 WORKDIR /app
-
-FROM base AS deps
-COPY package.json ./
-COPY bun.lockb* ./
-RUN bun install --frozen-lockfile
-
-FROM base AS builder
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-
-FROM base AS runner
 ENV NODE_ENV=production
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nodejs
+# 1. Copy workspace configuration (Crucial for Bun to respect aliases/workspaces)
+COPY package.json bun.lock tsconfig.base.json ./
 
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/src ./src
+COPY apps/backend ./apps/backend
+# If you have shared packages, copy those too
+COPY packages ./packages 
 
-USER nodejs
-
+RUN bun install
 EXPOSE 3000
-CMD ["bun", "run", "src/index.ts"]
+
+# Use the --cwd flag to ensure Bun is looking at the right context
+CMD ["bun", "run", "apps/backend/src/index.ts"]

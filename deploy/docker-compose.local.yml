@@ -1,0 +1,90 @@
+services:
+    traefik:
+        image: traefik:v3
+        container_name: traefik-local
+        restart: unless-stopped
+        security_opt:
+            - no-new-privileges:true
+        networks:
+            - ksi-network
+        ports:
+            - "80:80"
+            - "443:443"
+        environment:
+            - TZ=Europe/Warsaw
+            - TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL=admin@ksi.ii.uni.wroc.pl
+            - TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_STORAGE=/letsencrypt/acme.json
+            - TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_HTTPCHALLENGE=true
+            - TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_HTTPCHALLENGE_ENTRYPOINT=http
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+            - ./letsencrypt:/letsencrypt
+        command:
+            - "--api.insecure=true"
+            - "--providers.docker=true"
+            - "--providers.docker.exposedbydefault=false"
+            - "--entrypoints.http.address=:80"
+            - "--entrypoints.https.address=:443"
+        labels:
+            - traefik.enable=true
+            - traefik.http.routers.traefik.rule=PathPrefix(`/traefik`)
+            - traefik.http.routers.traefik.service=api@internal
+            - traefik.http.routers.traefik.entrypoints=http
+            - traefik.http.routers.traefik.tls=false
+
+    postgres:
+        image: postgres:13-alpine
+        container_name: ksi-postgres-local
+        restart: unless-stopped
+        environment:
+            - POSTGRES_DB=ksi
+            - POSTGRES_USER=user
+            - POSTGRES_PASSWORD=passdb
+        volumes:
+            - postgres-data:/var/lib/postgresql/data
+        networks:
+            - ksi-network
+        labels:
+            - traefik.enable=false
+
+    backend:
+        build:
+            context: ..
+            dockerfile: apps/backend/Dockerfile
+        container_name: ksi-backend-local
+        restart: unless-stopped
+        env_file:
+            - ../.env
+        networks:
+          - ksi-network
+        depends_on:
+            - postgres
+        labels:
+            - traefik.enable=true
+            - traefik.http.routers.ksi-backend.rule=PathPrefix(`/api`)
+            - traefik.http.routers.ksi-backend.entrypoints=http
+            - traefik.http.routers.ksi-backend.tls=false
+            - traefik.http.services.ksi-backend.loadbalancer.server.port=3000
+            - traefik.http.middlewares.ksi-api-strip.stripprefix.prefixes=/api
+            - traefik.http.routers.ksi-backend.middlewares=ksi-api-strip
+    frontend:
+        build:
+            context: ..
+            dockerfile: apps/frontend/Dockerfile
+        container_name: ksi-frontend-local
+        restart: unless-stopped
+        networks:
+          - ksi-network
+        labels:
+            - traefik.enable=true
+            - traefik.http.routers.ksi-frontend.rule=PathPrefix(`/`)
+            - traefik.http.routers.ksi-frontend.entrypoints=http
+            - traefik.http.routers.ksi-frontend.tls=false
+            - traefik.http.services.ksi-frontend.loadbalancer.server.port=3001
+
+networks:
+    ksi-network:
+        driver: bridge
+
+volumes:
+    postgres-data:

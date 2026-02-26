@@ -32,7 +32,8 @@
 	<div class="flex h-full">
 		<button
 			onclick={() => {
-				setLocale(getLocale() === 'pl' ? 'en' : 'pl');
+				const current = getLocale();
+				setLocale(current === 'pl' ? 'en' : 'pl');
 			}}
 			class="btn btn-square btn-outline h-[60px] w-[60px] rounded-none border-y-0 border-r-0"
 		>
