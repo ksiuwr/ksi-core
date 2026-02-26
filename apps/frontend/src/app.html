@@ -16,13 +16,12 @@
           theme = savedTheme;
         } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
           // If no theme is saved, check the user's system preference
-          theme = 'dark'; // Or 'hacker', if that's what you want for dark preference
+          theme = 'dark';
         } else {
           // Default to 'light' if no preference is found
           theme = 'light';
         }
 
-        // Create a style element to disable transitions temporarily
         const style = document.createElement('style');
         style.textContent = `
         *, *::before, *::after {
@@ -35,7 +34,6 @@
         const setTheme = () => {
           document.body.setAttribute('data-theme', theme);
 
-          // Re-enable transitions after theme is applied
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
               document.head.removeChild(style);
