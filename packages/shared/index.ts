@@ -1,14 +1,13 @@
 export const getBackendUrl = () => {
   if (process.env.NODE_ENV === "production") {
-    return process.env.BACKEND_BASE_URL;
-    // return `https://ksi.uni.wroc.pl/api`;
+    return "https://ksi.ii.uni.wroc.pl/api";
   }
-  return `http://localhost/api`;
+  return `http://localhost:3000`;
 };
 
 export const getFrontendUrl = () => {
   if (process.env.NODE_ENV === "production") {
-    return process.env.FRONTEND_BASE_URL;
+    return "https://ksi.ii.uni.wroc.pl";
   }
-  return "http://localhost";
+  return "http://localhost:5173";
 };
