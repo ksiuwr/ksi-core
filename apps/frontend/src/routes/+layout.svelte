@@ -16,14 +16,14 @@
 
 <Toaster theme={$themeStore} richColors />
 
-<div class="mx-auto flex min-h-screen flex-col md:gap-4 xl:py-8 xl:max-w-[1440px]">
+<div class="mx-auto flex min-h-screen flex-col gap-px lg:gap-4 lg:py-8 lg:max-w-[1440px]">
 	{#if data.alert}
 		<div class="w-full">
 			<Alert alert={data.alert} />
 		</div>
 	{/if}
 
-	<div class="flex flex-1 flex-col bg-base-100 xl:border xl:border-base-200">
+	<div class="flex flex-1 flex-col bg-base-100 lg:border lg:border-base-200">
 		<Navbar />
 
 		<div class="relative flex flex-1 items-start">
