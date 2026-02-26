@@ -30,7 +30,7 @@
 					</figcaption>
 				</figure>
 
-				<p class="text-justify">
+				<p class="text-balance">
 					{@html m.giant_grand_mayfly_pout()}
 				</p>
 			</section>
