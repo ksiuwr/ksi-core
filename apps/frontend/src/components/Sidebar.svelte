@@ -144,7 +144,7 @@
 		>
 			<PanelLeftClose class="size-5" />
 		</button>
-		<span class="ml-4 font-mono text-lg font-bold">Nawigacja</span>
+		<span class="ml-4 font-mono text-lg font-bold">{m.inclusive_tough_opossum_bake()}</span>
 	</div>
 
 	<div class="bg-base-100 flex flex-col w-[280px] h-full overflow-hidden border-r border-base-200">
