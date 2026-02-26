@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { showAdmin, sidebarStore } from '$lib/sidebar';
 	import { File, FileIcon, LogIn, LogOut, Megaphone, PanelLeftClose, Wrench } from '@lucide/svelte';
-	import { motion } from 'motion-start';
 	import { authClient } from '../lib/auth-client';
 	import { api } from '$lib/backend';
 	import { toast } from 'svelte-sonner';
@@ -129,11 +128,10 @@
 	{@render sidebarContent()}
 </aside>
 
-<motion.div
-	class="fixed top-0 left-0 h-screen flex flex-col z-50 lg:hidden shadow-2xl"
-	animate={$sidebarStore ? { x: 0 } : { x: '-100%' }}
-	initial={{ x: '-100%' }}
-	transition={{ bounceDamping: 20, damping: 0.2 }}
+<div
+	class="fixed top-0 left-0 h-screen flex flex-col z-50 lg:hidden shadow-2xl transition-transform duration-300 ease-out {$sidebarStore
+		? 'translate-x-0'
+		: 'translate-x-[-100%]'}"
 >
 	<div class="flex h-[60px] items-center border-b border-r border-base-200 bg-base-100">
 		<button
@@ -150,12 +148,10 @@
 	<div class="bg-base-100 flex flex-col w-[280px] h-full overflow-hidden border-r border-base-200">
 		{@render sidebarContent()}
 	</div>
-</motion.div>
+</div>
 
-{#if $sidebarStore}
-	<div
-		role="presentation"
-		class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
-		onclick={() => ($sidebarStore = false)}
-	></div>
-{/if}
+<div
+	role="presentation"
+	class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden transition-opacity duration-300 ease-out {$sidebarStore ? 'opacity-100' : 'opacity-0 pointer-events-none'}"
+	onclick={() => ($sidebarStore = false)}
+></div>
