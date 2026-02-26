@@ -1,15 +1,15 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@ksi-core/backend/db";
-import { getBackendUrl, getFrontendUrl } from "packages/shared";
+import { getUrls } from "packages/shared";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
   }),
-  trustedOrigins: [getFrontendUrl()],
+  trustedOrigins: [getUrls().FRONTEND],
 
-  baseURL: getFrontendUrl(),
+  baseURL: getUrls().AUTH,
   socialProviders: {
     discord: {
       clientId: Bun.env.OAUTH2_DISCORD_ID!,

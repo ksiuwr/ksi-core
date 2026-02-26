@@ -1,9 +1,9 @@
 import { treaty } from '@elysiajs/eden'
-import { getBackendUrl } from 'shared';
+import { getUrls } from 'shared';
 import type { App } from "shared/eden"
 
 
-export const api = treaty<App>(getBackendUrl(), {
+export const api = treaty<App>(getUrls().BACKEND, {
   fetch: {
     credentials: "include",
   },
