@@ -2,7 +2,7 @@
 
 W projekcie korzystamy z konwencji nazywania commitów [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
-Oznacza to mniej więcej tyle, że tam dodajemy prefiks `type` w opisie każdego commita, w zależności od jego znaczenia.
+Oznacza to mniej więcej tyle, że tam dodajemy prefiks `type` w opisie każdego commitu, w zależności od jego znaczenia.
 
 Dostępne typy:
 
@@ -63,12 +63,12 @@ chore(deps): bump axios from 0.21.0 to 0.21.1
 refactor(db): optimize user search query index
 ```
 
-## Struktura wiadomości commita
+## Struktura wiadomości commitu
 
-Pamiętaj, że `type` i `scope` to tylko nagłówek. Pełna wiadomość commita powinna wyglądać następująco:
+Pamiętaj, że `type` i `scope` to tylko nagłówek. Pełna wiadomość commitu powinna wyglądać następująco:
 
 ```
-\<type\>[optional scope]: \<description\>
+<type>[optional scope]: <description>
 
 [optional body]
 
@@ -101,5 +101,5 @@ Przykłady:
 
 Przed utworzeniem Pull Requesta (PR):
 
-1. Upewnij się, że Twój kod przechodzi testy.
+1. Uruchom `bun prettier -w .`, aby sformatować kod,
 2. Upewnij się, że nazwa PR odpowiada konwencji Conventional Commits (często tytuł PR staje się opisem commita przy _Squash & Merge_).
