@@ -1,7 +1,5 @@
 {
-	"extends": [
-		"./.svelte-kit/tsconfig.json",
-],
+	"extends": ["./.svelte-kit/tsconfig.json"],
 	"compilerOptions": {
 		"allowJs": true,
 		"checkJs": true,
@@ -14,12 +12,8 @@
 		"moduleResolution": "bundler",
 		"paths": {
 			"@ksi-core/backend/*": ["../backend/src/*"],
-			"$lib": [
-				"./src/lib"
-			],
-			"$lib/*": [
-				"./src/lib/*"
-			],
+			"$lib": ["./src/lib"],
+			"$lib/*": ["./src/lib/*"]
 		}
 	}
 	// Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias

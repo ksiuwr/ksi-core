@@ -5,152 +5,152 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @plugin "daisyui/theme" {
-  name: "light";
-  default: true;
-  prefersdark: false;
-  color-scheme: "light";
-  --font-mono: "Space Mono";
-  --color-base-100: oklch(98% 0 0);
-  --color-base-200: oklch(96% 0.001 286.375);
-  --color-base-300: oklch(92% 0.004 286.32);
-  --color-base-content: oklch(14% 0.004 49.25);
-  --color-primary: oklch(0.53 0.17 256.43);
-  --color-primary-content: oklch(0 0 0);
-  --color-secondary: oklch(83% 0.128 66.29);
-  --color-secondary-content: oklch(26% 0.079 36.259);
-  --color-accent: oklch(79% 0.209 151.711);
-  --color-accent-content: oklch(26% 0.065 152.934);
-  --color-neutral: oklch(0.2376 0.0036 345.53);
-  --color-neutral-content: oklch(98% 0 0);
-  --color-info: oklch(70% 0.165 254.624);
-  --color-info-content: oklch(28% 0.091 267.935);
-  --color-success: oklch(76% 0.177 163.223);
-  --color-success-content: oklch(26% 0.051 172.552);
-  --color-warning: oklch(82% 0.189 84.429);
-  --color-warning-content: oklch(27% 0.077 45.635);
-  --color-error: oklch(70% 0.191 22.216);
-  --color-error-content: oklch(25% 0.092 26.042);
-  --radius-selector: 0.5rem;
-  --radius-field: 0.5rem;
-  --radius-box: 0rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 2px;
-  --depth: 1;
-  --noise: 0;
+	name: 'light';
+	default: true;
+	prefersdark: false;
+	color-scheme: 'light';
+	--font-mono: 'Space Mono';
+	--color-base-100: oklch(98% 0 0);
+	--color-base-200: oklch(96% 0.001 286.375);
+	--color-base-300: oklch(92% 0.004 286.32);
+	--color-base-content: oklch(14% 0.004 49.25);
+	--color-primary: oklch(0.53 0.17 256.43);
+	--color-primary-content: oklch(0 0 0);
+	--color-secondary: oklch(83% 0.128 66.29);
+	--color-secondary-content: oklch(26% 0.079 36.259);
+	--color-accent: oklch(79% 0.209 151.711);
+	--color-accent-content: oklch(26% 0.065 152.934);
+	--color-neutral: oklch(0.2376 0.0036 345.53);
+	--color-neutral-content: oklch(98% 0 0);
+	--color-info: oklch(70% 0.165 254.624);
+	--color-info-content: oklch(28% 0.091 267.935);
+	--color-success: oklch(76% 0.177 163.223);
+	--color-success-content: oklch(26% 0.051 172.552);
+	--color-warning: oklch(82% 0.189 84.429);
+	--color-warning-content: oklch(27% 0.077 45.635);
+	--color-error: oklch(70% 0.191 22.216);
+	--color-error-content: oklch(25% 0.092 26.042);
+	--radius-selector: 0.5rem;
+	--radius-field: 0.5rem;
+	--radius-box: 0rem;
+	--size-selector: 0.25rem;
+	--size-field: 0.25rem;
+	--border: 2px;
+	--depth: 1;
+	--noise: 0;
 }
 
 @plugin "daisyui/theme" {
-  name: "dark";
-  default: false;
-  prefersdark: true;
-  color-scheme: "dark";
-  --font-mono: "Space Mono";
+	name: 'dark';
+	default: false;
+	prefersdark: true;
+	color-scheme: 'dark';
+	--font-mono: 'Space Mono';
 
-  --color-base-100: oklch(14% 0.005 285.823);
-  --color-base-200: oklch(21% 0.006 285.885);
-  --color-base-300: oklch(27% 0.006 286.033);
-  --color-base-content: oklch(96% 0.001 286.375);
+	--color-base-100: oklch(14% 0.005 285.823);
+	--color-base-200: oklch(21% 0.006 285.885);
+	--color-base-300: oklch(27% 0.006 286.033);
+	--color-base-content: oklch(96% 0.001 286.375);
 
-  --color-primary: oklch(98% 0.12 232.17);
-  --color-primary-content: oklch(10% 0.02 232.17);
+	--color-primary: oklch(98% 0.12 232.17);
+	--color-primary-content: oklch(10% 0.02 232.17);
 
-  --color-secondary: oklch(80% 0.12 277.117);
-  --color-secondary-content: oklch(10% 0.02 277.117);
+	--color-secondary: oklch(80% 0.12 277.117);
+	--color-secondary-content: oklch(10% 0.02 277.117);
 
-  --color-accent: oklch(82% 0.12 354.308);
-  --color-accent-content: oklch(10% 0.02 354.308);
+	--color-accent: oklch(82% 0.12 354.308);
+	--color-accent-content: oklch(10% 0.02 354.308);
 
-  --color-neutral: oklch(37% 0.013 285.805);
-  --color-neutral-content: oklch(98% 0 0);
-  
-  --color-info: oklch(75% 0.15 250);
-  --color-info-content: oklch(10% 0.02 250);
-  
-  --color-success: oklch(78% 0.15 170);
-  --color-success-content: oklch(10% 0.02 170);
-  
-  --color-warning: oklch(85% 0.16 90);
-  --color-warning-content: oklch(10% 0.02 90);
-  
-  --color-error: oklch(75% 0.16 25);
-  --color-error-content: oklch(10% 0.02 25);
+	--color-neutral: oklch(37% 0.013 285.805);
+	--color-neutral-content: oklch(98% 0 0);
 
-  --radius-selector: 0.5rem;
-  --radius-field: 0.5rem;
-  --radius-box: 0rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 2px;
-  --depth: 1;
-  --noise: 0;
+	--color-info: oklch(75% 0.15 250);
+	--color-info-content: oklch(10% 0.02 250);
+
+	--color-success: oklch(78% 0.15 170);
+	--color-success-content: oklch(10% 0.02 170);
+
+	--color-warning: oklch(85% 0.16 90);
+	--color-warning-content: oklch(10% 0.02 90);
+
+	--color-error: oklch(75% 0.16 25);
+	--color-error-content: oklch(10% 0.02 25);
+
+	--radius-selector: 0.5rem;
+	--radius-field: 0.5rem;
+	--radius-box: 0rem;
+	--size-selector: 0.25rem;
+	--size-field: 0.25rem;
+	--border: 2px;
+	--depth: 1;
+	--noise: 0;
 }
 :root {
-  font-family: "Space Grotesk", sans-serif;
+	font-family: 'Space Grotesk', sans-serif;
 }
 
 @utility font-lora {
-  font-family: "Lora", serif;
+	font-family: 'Lora', serif;
 }
 
 @utility btn-outline {
-  @apply border border-base-300;
+	@apply border border-base-300;
 }
 
 @utility input {
-  @apply outline-0 focus:outline-0 focus:border-primary focus-visible:outline-0 focus-visible:border-primary focus-within:outline-0 focus-within:border-primary transition-colors;
+	@apply outline-0 focus:outline-0 focus:border-primary focus-visible:outline-0 focus-visible:border-primary focus-within:outline-0 focus-within:border-primary transition-colors;
 }
 
 @utility textarea {
-  @apply outline-0 focus:outline-0 focus:border-primary focus-visible:outline-0 focus-visible:border-primary focus-within:outline-0 focus-within:border-primary transition-colors;
+	@apply outline-0 focus:outline-0 focus:border-primary focus-visible:outline-0 focus-visible:border-primary focus-within:outline-0 focus-within:border-primary transition-colors;
 }
 
 @utility select {
-  @apply outline-0 focus:outline-0 focus:border-primary focus-visible:outline-0 focus-visible:border-primary focus-within:outline-0 focus-within:border-primary transition-colors;
+	@apply outline-0 focus:outline-0 focus:border-primary focus-visible:outline-0 focus-visible:border-primary focus-within:outline-0 focus-within:border-primary transition-colors;
 }
 
-
 @utility markdown-file {
-  h1 {
-    @apply relative text-[clamp(2rem,5vw,3rem)] leading-tight font-bold border-b border-b-base-content/10 mb-8 pb-4;
-  }
-  
-  h1::before {
-    content: "#";
-    @apply absolute -left-[1.2ch] opacity-0 transition-opacity duration-300 text-[clamp(2rem,5vw,3rem)] font-medium text-base-content/20 pointer-events-none;
-  }
-  h1:hover::before {
-    @apply opacity-100;
-  }
+	h1 {
+		@apply relative text-[clamp(2rem,5vw,3rem)] leading-tight font-bold border-b border-b-base-content/10 mb-8 pb-4;
+	}
 
-  h2 {
-    @apply relative mt-12 mb-6 text-[clamp(1.5rem,3vw,2.25rem)] font-bold leading-snug;
-  }
-  
-  h2::before {
-    content: "##";
-    @apply absolute -left-[1.8ch] opacity-0 transition-opacity duration-300 text-[clamp(1.5rem,3vw,2.25rem)] text-base-content/20 pointer-events-none;
-  }
-  h2:hover::before {
-    @apply opacity-100;
-  }
+	h1::before {
+		content: '#';
+		@apply absolute -left-[1.2ch] opacity-0 transition-opacity duration-300 text-[clamp(2rem,5vw,3rem)] font-medium text-base-content/20 pointer-events-none;
+	}
+	h1:hover::before {
+		@apply opacity-100;
+	}
 
-  p {
-    @apply text-lg md:text-xl leading-relaxed tracking-wide text-base-content/90 mb-6;
-  }
+	h2 {
+		@apply relative mt-12 mb-6 text-[clamp(1.5rem,3vw,2.25rem)] font-bold leading-snug;
+	}
 
-  hr {
-    @apply border-base-content/10 my-12;
-  }
+	h2::before {
+		content: '##';
+		@apply absolute -left-[1.8ch] opacity-0 transition-opacity duration-300 text-[clamp(1.5rem,3vw,2.25rem)] text-base-content/20 pointer-events-none;
+	}
+	h2:hover::before {
+		@apply opacity-100;
+	}
 
-  p a, li a {
-    @apply text-primary font-medium hover:underline underline-offset-4 decoration-2 decoration-primary/30 transition-all;
-  }
-  
-  ul {
-    @apply list-disc list-inside space-y-2 mb-6;
-  }
-  li {
-    @apply text-lg md:text-xl text-base-content/90;
-  }
+	p {
+		@apply text-lg md:text-xl leading-relaxed tracking-wide text-base-content/90 mb-6;
+	}
+
+	hr {
+		@apply border-base-content/10 my-12;
+	}
+
+	p a,
+	li a {
+		@apply text-primary font-medium hover:underline underline-offset-4 decoration-2 decoration-primary/30 transition-all;
+	}
+
+	ul {
+		@apply list-disc list-inside space-y-2 mb-6;
+	}
+	li {
+		@apply text-lg md:text-xl text-base-content/90;
+	}
 }

@@ -8,12 +8,14 @@ Strona Koła Studentów Informatyki
 
 Jest on niezbędny, gdyż projekt korzysta z funkcji Bun, takich jak Bun.env czy importowanie innych packagy przez `workspace:*`
 
-Linux: 
+Linux:
+
 ```
 curl -fsSL https://bun.sh/install | bash
 ```
 
 Windows:
+
 ```
 powershell -c "irm bun.sh/install.ps1 | iex"
 ```
@@ -21,8 +23,6 @@ powershell -c "irm bun.sh/install.ps1 | iex"
 ### [Docker Compose](https://github.com/docker/compose)
 
 ## Development
-
-
 
 0. Sklonuj repo
 

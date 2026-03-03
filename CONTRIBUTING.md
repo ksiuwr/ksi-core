@@ -31,7 +31,6 @@ prefiks `feat(backend):` oznacza, że w commicie jest dodana funkcjonalność do
 
 W przypadku gdy w commicie są zmiany w całym scopie aplikacji, ten jest pomijany: `feat:`.
 
-
 ## Przykłady użycia
 
 1. Naprawiłeś błąd w którym element wylewał się poza obrys rodzica
@@ -76,13 +75,14 @@ Pamiętaj, że `type` i `scope` to tylko nagłówek. Pełna wiadomość commita 
 [optional footer(s)]
 ```
 
-* **Description:** Krótki opis zmiany (do 50-70 znaków), w trybie rozkazującym (np. "add" zamiast "added").
-* **Body (opcjonalne):** Jeśli zmiana wymaga szerszego wyjaśnienia, dodaj pustą linię po opisie i napisz szczegóły ("co" i "dlaczego", a nie "jak").
-* **Footer (opcjonalne):** Miejsce na informacje o "Breaking Changes" lub linki do ticketów (np. `Closes #123`).
+- **Description:** Krótki opis zmiany (do 50-70 znaków), w trybie rozkazującym (np. "add" zamiast "added").
+- **Body (opcjonalne):** Jeśli zmiana wymaga szerszego wyjaśnienia, dodaj pustą linię po opisie i napisz szczegóły ("co" i "dlaczego", a nie "jak").
+- **Footer (opcjonalne):** Miejsce na informacje o "Breaking Changes" lub linki do ticketów (np. `Closes #123`).
 
 ### Breaking Changes
 
 Jeśli Twój commit wprowadza zmianę, która psuje kompatybilność wsteczną (Breaking Change), musisz to wyraźnie zaznaczyć:
+
 1. Dodając wykrzyknik `!` po typie/zakresie, np.: `feat(backend)!: drop support for Node 12`.
 2. LUB dodając w stopce informację `BREAKING CHANGE: <opis>`.
 
@@ -93,11 +93,13 @@ Używaj formatu:
 `username/krotki-opis-zmiany`
 
 Przykłady:
-* `crqch/user-login`
-* `janek/header-alignment`
+
+- `crqch/user-login`
+- `janek/header-alignment`
 
 ## Pull Requesty
 
 Przed utworzeniem Pull Requesta (PR):
+
 1. Upewnij się, że Twój kod przechodzi testy.
-2. Upewnij się, że nazwa PR odpowiada konwencji Conventional Commits (często tytuł PR staje się opisem commita przy *Squash & Merge*).
+2. Upewnij się, że nazwa PR odpowiada konwencji Conventional Commits (często tytuł PR staje się opisem commita przy _Squash & Merge_).
