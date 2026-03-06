@@ -59,7 +59,7 @@
 							{/if}
 							<span>{alert.title}</span>
 						</div>
-						<p class="opacity-90 leading-relaxed">{alert.description}</p>
+						<p class="opacity-90 leading-relaxed break-all">{alert.description}</p>
 					</div>
 
 					<SquareArrowOutUpRight
