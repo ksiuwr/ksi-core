@@ -2,11 +2,11 @@ import { treaty } from '@elysiajs/eden';
 import { getUrls } from 'shared';
 import type { App } from 'shared/eden';
 
-export const api = treaty<App>(getUrls().BACKEND, {
+export const api = treaty<App>(getUrls().BACKEND.replace('/api', ''), {
 	fetch: {
 		credentials: 'include'
 	}
-});
+}).api;
 
 export const resolveError = (
 	error: unknown &

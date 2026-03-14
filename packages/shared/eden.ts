@@ -1,3 +1,3 @@
-export type { App } from 'backend';
+export type { App } from '@ksi-core/backend';
 
 // export * from 'backend';
