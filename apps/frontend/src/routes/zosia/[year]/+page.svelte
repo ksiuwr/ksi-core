@@ -5,16 +5,29 @@
 	import Gallery from '../../../components/Gallery.svelte';
 	import { m } from '$lib/paraglide/messages';
 	import DynamicGallery from '../../../components/DynamicGallery.svelte';
+	import { api } from '$lib/backend';
 
 	let year = $derived(page.params.year ?? '');
 	let data = $derived(editions[year]);
+
+	let bgImage = $state('');
+
+	$effect(() => {
+		api
+			.gallery({ id: `zosia-${year}` })
+			.bg({ name: data.bgImage })
+			.get()
+			.then((r) => {
+				if (r.data) bgImage = r.data;
+			});
+	});
 </script>
 
 {#if data}
 	<div class="relative w-full py-20 flex flex-col items-center justify-center overflow-hidden">
 		<div
 			class="absolute inset-0 bg-no-repeat bg-cover bg-center opacity-30"
-			style={`background-image: url(${data.bgImage})`}
+			style={`background-image: url(${bgImage})`}
 		></div>
 
 		<span class="text-xl uppercase tracking-widest opacity-50 font-semibold">
