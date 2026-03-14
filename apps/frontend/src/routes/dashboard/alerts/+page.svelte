@@ -135,7 +135,7 @@
 {/snippet}
 
 <Wrapper name="dashboard/ALERTS" {icon}>
-	<h2>{m.short_house_penguin_amuse()}</h2>
+	<h2 class="text-2xl">{m.short_house_penguin_amuse()}</h2>
 	{m.smart_smug_parrot_surge()}
 </Wrapper>
 <div class="flex flex-col my-8 gap-4">
