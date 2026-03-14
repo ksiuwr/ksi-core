@@ -25,8 +25,6 @@ ENV PORT=3001
 COPY --from=builder /app/apps/frontend/build ./build
 COPY --from=builder /app/apps/frontend/package.json ./package.json
 
-COPY --from=builder /app/node_modules ./node_modules
-
 COPY --from=builder /app/packages ./packages
 
 EXPOSE 3001

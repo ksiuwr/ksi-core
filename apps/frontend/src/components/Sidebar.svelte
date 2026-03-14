@@ -1,6 +1,15 @@
 <script lang="ts">
 	import { showAdmin, sidebarStore } from '$lib/sidebar';
-	import { File, FileIcon, LogIn, LogOut, Megaphone, PanelLeftClose, Wrench } from '@lucide/svelte';
+	import {
+		File,
+		FileIcon,
+		LogIn,
+		LogOut,
+		Megaphone,
+		PanelLeftClose,
+		TableProperties,
+		Wrench
+	} from '@lucide/svelte';
 	import { authClient } from '../lib/auth-client';
 	import { api } from '$lib/backend';
 	import { toast } from 'svelte-sonner';
@@ -48,6 +57,7 @@
 {#snippet sidebarContent()}
 	<div class="flex flex-col flex-1 w-full py-4 overflow-y-auto">
 		<div
+			role="presentation"
 			onclick={() => {
 				clicks++;
 			}}
@@ -115,6 +125,7 @@
 					<SidebarAccordion title="dashboard">
 						<SidebarLink href="/dashboard" icon={Wrench}>HOME</SidebarLink>
 						<SidebarLink href="/dashboard/alerts" icon={Megaphone}>ALERTS</SidebarLink>
+						<SidebarLink href="/dashboard/s3cache" icon={TableProperties}>S3 CACHE</SidebarLink>
 					</SidebarAccordion>
 				</div>
 			{/if}
@@ -152,6 +163,8 @@
 
 <div
 	role="presentation"
-	class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden transition-opacity duration-300 ease-out {$sidebarStore ? 'opacity-100' : 'opacity-0 pointer-events-none'}"
+	class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden transition-opacity duration-300 ease-out {$sidebarStore
+		? 'opacity-100'
+		: 'opacity-0 pointer-events-none'}"
 	onclick={() => ($sidebarStore = false)}
 ></div>

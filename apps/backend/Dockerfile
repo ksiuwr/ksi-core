@@ -1,16 +1,25 @@
-FROM oven/bun:1-alpine AS runner
+FROM oven/bun:1-alpine AS builder
+WORKDIR /app
+
+COPY package.json bun.lock tsconfig.base.json ./
+
+COPY apps/frontend/package.json ./apps/frontend/package.json
+
+COPY apps/backend ./apps/backend
+COPY packages ./packages 
+
+RUN bun install --frozen-lockfile
+
+RUN bun build ./apps/backend/src/index.ts --compile --outfile=server
+
+FROM alpine:latest
 WORKDIR /app
 ENV NODE_ENV=production
 
-# 1. Copy workspace configuration (Crucial for Bun to respect aliases/workspaces)
-COPY package.json bun.lock tsconfig.base.json ./
+RUN apk add --no-cache libstdc++ libgcc
 
-COPY apps/backend ./apps/backend
-# If you have shared packages, copy those too
-COPY packages ./packages 
+COPY --from=builder /app/server ./server
 
-RUN bun install
 EXPOSE 3000
 
-# Use the --cwd flag to ensure Bun is looking at the right context
-CMD ["bun", "run", "apps/backend/src/index.ts"]
+CMD ["./server"]
