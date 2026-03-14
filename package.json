@@ -9,7 +9,7 @@
 		"@types/bun": "^1.2.22",
 		"bun-types": "^1.2.22",
 		"concurrently": "^8.2.1",
-		"dotenv": "^17.2.3"
+		"dotenv": "^17.2.3",
 		"prettier-plugin-svelte": "^3.5.1"
 	},
 	"version": "0.0.1",
@@ -24,5 +24,8 @@
 	"workspaces": [
 		"packages/*",
 		"apps/*"
-	]
+	],
+	"dependencies": {
+		"@aws-sdk/client-s3": "^3.1009.0"
+	}
 }

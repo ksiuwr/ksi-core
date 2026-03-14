@@ -4,15 +4,10 @@
 	import { Calendar, MapPin, UsersRound } from '@lucide/svelte';
 	import Gallery from '../../../components/Gallery.svelte';
 	import { m } from '$lib/paraglide/messages';
+	import DynamicGallery from '../../../components/DynamicGallery.svelte';
 
 	let year = $derived(page.params.year ?? '');
 	let data = $derived(editions[year]);
-
-	let galleryImages = $derived(
-		data?.photos > 0
-			? Array.from({ length: data.photos }, (_, i) => `/zosia/${year}/${i + 1}.webp`)
-			: []
-	);
 </script>
 
 {#if data}
@@ -55,12 +50,7 @@
 			</div>
 		</div>
 	</div>
-
-	{#if galleryImages.length > 0}
-		<Gallery images={galleryImages} />
-	{:else}
-		{@render emptyState()}
-	{/if}
+	<DynamicGallery empty={emptyState} id={`zosia-${year}`} />
 {:else}
 	<div class="h-screen flex items-center justify-center">
 		<h1 class="text-2xl opacity-50 uppercase tracking-tighter">
