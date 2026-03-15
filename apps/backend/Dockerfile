@@ -10,6 +10,7 @@ COPY packages ./packages
 
 RUN bun install --frozen-lockfile
 
+ENV NODE_ENV=production
 RUN bun build ./apps/backend/src/index.ts --compile --outfile=server
 
 FROM alpine:latest
