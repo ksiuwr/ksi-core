@@ -4,7 +4,7 @@ import Elysia, { status } from 'elysia';
 // TODO: This is temporary, uploading files to R2 storage should be in the dashboard, just like managing this list of known prefixes.
 const isAllowedPrefix = (prefix: string) => {
 	if (prefix.startsWith('zosia-')) return true;
-	if (prefix.startsWith('project-hoi-')) return true;
+	if (prefix.startsWith('project-')) return true;
 
 	return false;
 };

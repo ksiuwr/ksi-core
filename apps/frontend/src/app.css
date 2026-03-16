@@ -109,11 +109,21 @@
 	@apply outline-0 focus:outline-0 focus:border-primary focus-visible:outline-0 focus-visible:border-primary focus-within:outline-0 focus-within:border-primary transition-colors;
 }
 
-@utility markdown-file {
+@layer base {
 	h1 {
-		@apply relative text-[clamp(2rem,5vw,3rem)] leading-tight font-bold border-b border-b-base-content/10 mb-8 pb-4;
+		@apply text-[clamp(3rem,5vw,3rem)] mb-4 leading-tight font-bold border-b border-b-base-content/10;
 	}
 
+	h2 {
+		@apply text-[1.75rem] mb-2 font-bold leading-snug;
+	}
+
+	hr {
+		@apply border-base-content/10 my-12;
+	}
+}
+
+@utility markdown-file {
 	h1::before {
 		content: '#';
 		@apply absolute -left-[1.2ch] opacity-0 transition-opacity duration-300 text-[clamp(2rem,5vw,3rem)] font-medium text-base-content/20 pointer-events-none;
@@ -122,24 +132,13 @@
 		@apply opacity-100;
 	}
 
-	h2 {
-		@apply relative mt-12 mb-6 text-[clamp(1.5rem,3vw,2.25rem)] font-bold leading-snug;
-	}
-
 	h2::before {
 		content: '##';
 		@apply absolute -left-[1.8ch] opacity-0 transition-opacity duration-300 text-[clamp(1.5rem,3vw,2.25rem)] text-base-content/20 pointer-events-none;
 	}
+
 	h2:hover::before {
 		@apply opacity-100;
-	}
-
-	p {
-		@apply text-lg md:text-xl leading-relaxed tracking-wide text-base-content/90 mb-6;
-	}
-
-	hr {
-		@apply border-base-content/10 my-12;
 	}
 
 	p a,
