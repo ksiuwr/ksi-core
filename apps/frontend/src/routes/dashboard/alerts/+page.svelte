@@ -239,7 +239,7 @@
 						<span class="label-text font-medium">{m.quiet_cozy_pug_zap()}</span>
 					</div>
 					<textarea
-						class="textarea textarea-bordered h-32 text-base leading-relaxed"
+						class="textarea textarea-bordered w-full h-32 text-base leading-relaxed"
 						placeholder={m.cool_caring_pony_drop()}
 						bind:value={newAlert.description}
 					></textarea>
