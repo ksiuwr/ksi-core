@@ -274,12 +274,14 @@
 									alert.endDate
 								).toLocaleString()}
 							</p>
-							<p class="text-base-content/80 whitespace-pre-wrap break-all">{alert.description}</p>
+							<p class="text-base-content/80 whitespace-pre-wrap wrap-anywhere">
+								{alert.description}
+							</p>
 							{#if alert.link}
 								<a
 									href={alert.link}
 									target="_blank"
-									class="link link-primary text-sm mt-2 inline-block">{alert.link.slice(0, 50)}</a
+									class="link link-primary text-sm mt-2 wrap-anywhere inline-block">{alert.link}</a
 								>
 							{/if}
 						</div>
