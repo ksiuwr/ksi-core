@@ -13,16 +13,16 @@
 			{m.brave_fancy_owl_spin()}
 		</p>
 		<div class="flex flex-col lg:flex-row gap-4">
-			<div class="p-4 border border-primary/20 bg-primary/10">
-				<h2 class="font-bold text-primary">{m.glad_antsy_mouse_swim()}</h2>
-				<p>
-					{m.eager_loud_owl_crawl()}
-				</p>
-			</div>
 			<div class="p-4 border border-secondary/20 bg-secondary/10">
 				<h2 class="font-bold text-secondary">{m.happy_dizzy_goat_fly()}</h2>
 				<p>
 					{@html m.dizzy_clever_dog_climb()}
+				</p>
+			</div>
+			<div class="p-4 border border-primary/20 bg-primary/10">
+				<h2 class="font-bold text-primary">{m.glad_antsy_mouse_swim()}</h2>
+				<p>
+					{m.eager_loud_owl_crawl()}
 				</p>
 			</div>
 		</div>
