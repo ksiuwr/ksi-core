@@ -76,7 +76,10 @@
 		</SidebarAccordion>
 
 		<SidebarAccordion title="projects">
-			<SidebarLink href="/projects/physarum" icon={FileIcon} exact={false}>physarum</SidebarLink>
+			<SidebarLink href="/projects/hoc" icon={FileIcon} exact={false}>hour-of-code</SidebarLink>
+			<SidebarAccordion title="machine-learning">
+				<SidebarLink href="/projects/physarum" icon={FileIcon} exact={false}>physarum</SidebarLink>
+			</SidebarAccordion>
 		</SidebarAccordion>
 
 		<div class="flex flex-col w-full">
