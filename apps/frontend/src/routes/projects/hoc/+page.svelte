@@ -1,7 +1,6 @@
 <script>
 	import Wrapper from '../../../components/Wrapper.svelte';
 	import Goal from '../../../components/Goal.svelte';
-	import { ArrowRight } from '@lucide/svelte';
 	import { m } from '$lib/paraglide/messages';
 	import DynamicGallery from '../../../components/DynamicGallery.svelte';
 </script>
@@ -11,70 +10,50 @@
 		<h1>Hour of Code</h1>
 
 		<p>
-			Zajęcia “Hour of Code” organizowane przez Koło Studentów Informatyki Uniwersytetu
-			Wrocławskiego zapoznają uczniów z językiem programowania Python. Są przeznaczone dla uczniów
-			klas 4-8 szkół podstawowych. Zajęcia mają dwie części:
+			{m.brave_fancy_owl_spin()}
 		</p>
 		<div class="flex flex-col lg:flex-row gap-4">
 			<div class="p-4 border border-primary/20 bg-primary/10">
-				<h2 class="font-bold text-primary">Ćwiczenia</h2>
+				<h2 class="font-bold text-primary">{m.glad_antsy_mouse_swim()}</h2>
 				<p>
-					Przy pomocy wolontariuszy, studentów informatyki, uczniowie samodzielnie będą rozwiązywać
-					zadania programistyczne w salach komputerowych.
+					{m.eager_loud_owl_crawl()}
 				</p>
 			</div>
 			<div class="p-4 border border-secondary/20 bg-secondary/10">
-				<h2 class="font-bold text-secondary">Wykład</h2>
+				<h2 class="font-bold text-secondary">{m.happy_dizzy_goat_fly()}</h2>
 				<p>
-					W interaktywny, przystępny, ale jakże akademicki sposób zostaną przedstawione podstawy
-					programowania w języku <span class="text-secondary">Python</span>.
+					{@html m.dizzy_clever_dog_climb()}
 				</p>
 			</div>
 		</div>
 
 		<section class="space-y-6 w-full">
-			<h2>Plan wydarzenia</h2>
+			<h2>{m.loud_loud_frog_roll()}</h2>
 			<p>
-				Rozpoczniemy wykładem, na którym uczniowie zapoznają się z teorią: nauczą się uruchamiać
-				środowisko i pisać proste programy w języku Python, wykorzystujące standardowe wejście i
-				wyjście, podstawowe typy danych oraz instrukcje warunkowe. Następnie poznają bardziej
-				zaawansowane konstrukcje jak pętle czy funkcje. Będą mieli także okazję zobaczyć ciekawe
-				projekty, zachęcające do dalszej nauki.
+				{m.calm_glad_tadpole_dive()}
 			</p>
 			<p>
-				Po przerwie i słodkim poczęstunku uczniowie będą mogli wykorzystać nowo poznane zagadnienia
-				w praktyce w trakcie pracowni, rozwiązując samodzielnie zadania. Na pracowni obecni będą
-				wolontariusze, gotowi służyć pomocą uczestnikom. Przewidywany łączny czas trwania warsztatów
-				to około 3 godziny.
+				{m.calm_brave_horse_walk()}
 			</p>
 		</section>
 		<section class="space-y-6 w-full">
-			<h2>Korzyści z udziału</h2>
+			<h2>{m.cool_wild_tadpole_hide()}</h2>
 			<p>
-				Hour of Code to szansa dla uczniów na pierwsze zetknięcie się i zafascynowanie informatyką.
-				Zajęcia staramy się prowadzić tak, by uczestnicy nie tylko zapoznali się z językiem
-				programowania, ale także mogli rozwinąć umiejętności logicznego myślenia i rozwiązywania
-				problemów.
+				{m.calm_loud_owl_fly()}
 			</p>
 		</section>
 
 		<section class="space-y-6 w-full">
-			<h2>Szczegóły organizacyjne</h2>
+			<h2>{m.jolly_happy_iguana_jump()}</h2>
 			<p>
-				W roku 2026 zajęcia odbędą się: 10 kwietnia, 24 kwietnia, 4 maja oraz 11 maja. Zajęcia
-				odbywają się w salach wykładowych i komputerowych Instytutu Informatyki Uniwersytetu
-				Wrocławskiego, przy ul. Fryderyka Joliota-Curie 15 we Wrocławiu. Zapraszamy szkoły do
-				zgłaszania chęci uczestnictwa w tych zajęciach mailowo na <span class="text-primary"
-					>hourofcode.ksi [at] gmail.com</span
-				>
+				{@html m.clever_away_lion_roll()}
 			</p>
 		</section>
 
 		<section class="space-y-6 w-full">
-			<h2>Poprzednie edycje</h2>
+			<h2>{m.shy_dizzy_tiger_fold()}</h2>
 			<p>
-				Hour of Code organizowany przez Koło Studentów Informatyki Uniwersytetu Wrocławskiego jest
-				już tradycją. Przedstawiamy wybrane zdjęcia z poprzednich edycji Hour of Code
+				{m.cool_loud_apple_crawl()}
 			</p>
 
 			<DynamicGallery id="project-hoc" />
@@ -84,10 +63,7 @@
 			<h2>{m.clean_plane_finch_spin()}</h2>
 
 			<div class="flex flex-col gap-4 w-full">
-				<Goal type="social"
-					>Nauka uczniów szkół podstawowych programowania, przedstawienie informatyki jako dziedziny
-					pracy i nauki.</Goal
-				>
+				<Goal type="social">{m.cool_cool_mouse_climb()}</Goal>
 			</div>
 		</section>
 
