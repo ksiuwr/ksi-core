@@ -5,7 +5,7 @@ yarn.lock
 bun.lock
 bun.lockb
 
-**/ .svelte-kit
+**/.svelte-kit
 **/build
 
 **/node_modules
