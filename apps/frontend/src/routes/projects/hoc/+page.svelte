@@ -62,7 +62,7 @@
 				{m.cool_loud_apple_crawl()}
 			</p>
 
-			<DynamicGallery id="project-hoc" />
+			<DynamicGallery id="project-hoc-past" />
 		</section>
 
 		<section class="space-y-6 w-full">
