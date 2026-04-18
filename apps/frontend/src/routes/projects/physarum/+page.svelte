@@ -11,7 +11,7 @@
 		<header class="flex flex-col gap-2 pb-8">
 			<h1>{m.zippy_steep_shell_dash()}</h1>
 
-			<p class="!text-lg !text-base-content/60 font-mono !my-0">{m.mellow_careful_elk_hug()}</p>
+			<p class="text-lg! text-base-content/60! font-mono my-0!">{m.mellow_careful_elk_hug()}</p>
 		</header>
 
 		<div class="space-y-12">
@@ -52,7 +52,7 @@
 				<h2>{m.last_lucky_reindeer_belong()}</h2>
 
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-sm w-full">
-					{#each ['Igor Jakus', 'Hubert Berlicki', 'Wojciech Aszkiełowicz', 'Dr Marek Adamczyk'] as member, i}
+					{#each ['Igor Jakus', 'Hubert Berlicki', 'Wojciech Aszkiełowicz', 'Dr Marek Adamczyk'] as member, i (i)}
 						<div
 							class="flex items-center gap-3 px-4 py-3 rounded bg-base-200/30 border border-base-content/5 hover:border-base-content/20 transition-colors cursor-default"
 						>
