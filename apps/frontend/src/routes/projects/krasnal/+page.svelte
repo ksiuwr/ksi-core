@@ -11,7 +11,11 @@
 	>
 		<header class="flex flex-col gap-2 pb-8">
 			<h1>{m.jolly_jolly_apple_spin()}</h1>
-			<a class="btn btn-outline w-min" href="https://github.com/KSI-ML-research/krasnal">
+			<a
+				class="btn btn-outline w-min"
+				href="https://github.com/KSI-ML-research/krasnal"
+				target="_blank"
+			>
 				<Github class="size-4" />
 				GitHub</a
 			>
