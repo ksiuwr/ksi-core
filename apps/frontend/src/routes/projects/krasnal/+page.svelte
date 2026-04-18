@@ -29,7 +29,7 @@
 			</section>
 
 			<section class="space-y-6 w-full">
-				<h2>Architektura systemu</h2>
+				<h2>{m.wild_loud_cat_fold()}</h2>
 				<div class="flex items-center gap-4 overflow-x-scroll h-[250px] md:h-[320pt] w-full">
 					<img
 						src="/projects/krasnal/1.webp"
