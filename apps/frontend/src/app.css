@@ -124,23 +124,6 @@
 }
 
 @utility markdown-file {
-	h1::before {
-		content: '#';
-		@apply absolute -left-[1.2ch] opacity-0 transition-opacity duration-300 text-[clamp(2rem,5vw,3rem)] font-medium text-base-content/20 pointer-events-none;
-	}
-	h1:hover::before {
-		@apply opacity-100;
-	}
-
-	h2::before {
-		content: '##';
-		@apply absolute -left-[1.8ch] opacity-0 transition-opacity duration-300 text-[clamp(1.5rem,3vw,2.25rem)] text-base-content/20 pointer-events-none;
-	}
-
-	h2:hover::before {
-		@apply opacity-100;
-	}
-
 	p a,
 	li a {
 		@apply text-primary font-medium hover:underline underline-offset-4 decoration-2 decoration-primary/30 transition-all;

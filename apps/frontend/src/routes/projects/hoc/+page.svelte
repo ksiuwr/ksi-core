@@ -77,7 +77,7 @@
 			<h2>{m.last_lucky_reindeer_belong()}</h2>
 
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-sm w-full">
-				{#each ['Agata Raczyk', 'Bartosz Kebel', 'Bartosz Kruszewski', 'Emilia Wiśniewska', 'Hania Laszkiewicz', 'Helena Rafałowicz', 'Kiri Goroshenko', 'Lidia Podoluk', 'Maksymilian Kochan', 'Michał Szwejda', 'Piotr Wdowiak', 'Wojciech Romanowski'] as member, i}
+				{#each ['Agata Raczyk', 'Bartosz Kebel', 'Bartosz Kruszewski', 'Emilia Wiśniewska', 'Hania Laszkiewicz', 'Helena Rafałowicz', 'Kiri Goroshenko', 'Lidia Podoluk', 'Maksymilian Kochan', 'Michał Szwejda', 'Piotr Wdowiak', 'Wojciech Romanowski'] as member, i (i)}
 					<div
 						class="flex items-center gap-3 px-4 py-3 rounded bg-base-200/30 border border-base-content/5 hover:border-base-content/20 transition-colors cursor-default"
 					>

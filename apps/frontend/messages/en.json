@@ -83,5 +83,10 @@
 	"glad_antsy_mouse_swim": "Exercises",
 	"happy_dizzy_goat_fly": "Lecture",
 	"shy_jolly_iguana_walk": "Current edition",
-	"shy_calm_horse_swim": "See images from Hour of Code 2026!"
+	"shy_calm_horse_swim": "See images from Hour of Code 2026!",
+	"wild_jolly_lion_climb": "Investigating the model's behavior depending on the training method.",
+	"happy_happy_apple_fly": "Training a model that generates legal and strong chess moves resembling human play.",
+	"shy_glad_horse_skip": "Krasnal's goal is to generate strong, yet human-like chess moves. Balancing between the intuition known from the Maia Chess project and the playing strength of Stockfish.",
+	"jolly_calm_lion_jump": "Krasnal is a chess engine developed in Wrocław, based on the Transformer architecture. It utilizes deep neural networks to learn to play chess intuitively, departing from traditional, heavy calculations and game tree searching.",
+	"jolly_jolly_apple_spin": "Krasnal Chess Engine ♟️"
 }

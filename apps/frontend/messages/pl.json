@@ -83,5 +83,10 @@
 	"glad_antsy_mouse_swim": "Ćwiczenia",
 	"happy_dizzy_goat_fly": "Wykład",
 	"shy_jolly_iguana_walk": "Obecna edycja",
-	"shy_calm_horse_swim": "Zobacz zdjęcia z obecnej edycji Hour of Code 2026!"
+	"shy_calm_horse_swim": "Zobacz zdjęcia z obecnej edycji Hour of Code 2026!",
+	"wild_jolly_lion_climb": "Badanie zachowań modelu w zależności od sposobu przeprowadzenia treningu.",
+	"happy_happy_apple_fly": "Wytrenowanie modelu, który generuje legalne i silne ruchy szachowe przypominające grę człowieka.",
+	"shy_glad_horse_skip": "Celem Krasnala jest generowanie silnych, a zarazem ludzkich ruchów szachowych. Balansować pomiędzy intuicją znaną z projektu Maya Chess a siłą gry Stockfisha.",
+	"jolly_calm_lion_jump": "Krasnal to rozwijany we Wrocławiu silnik szachowy oparty na architekturze Transformer. Wykorzystuje on głębokie sieci neuronowe, aby uczyć się gry w szachy w sposób intuicyjny, odchodząc od tradycyjnych, ciężkich obliczeń i przeszukiwania drzew wariantów.",
+	"jolly_jolly_apple_spin": "Silnik szachowy Krasnal ♟️"
 }
