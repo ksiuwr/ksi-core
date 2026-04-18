@@ -1,7 +1,6 @@
 <script>
 	import Wrapper from '../../../components/Wrapper.svelte';
 	import Goal from '../../../components/Goal.svelte';
-	import { ArrowRight } from '@lucide/svelte';
 	import { m } from '$lib/paraglide/messages';
 </script>
 
