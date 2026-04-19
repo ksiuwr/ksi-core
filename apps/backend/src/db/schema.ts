@@ -1,89 +1,75 @@
 import { createId } from '@paralleldrive/cuid2';
 import { pgTable, text, timestamp, boolean, integer, pgEnum } from 'drizzle-orm/pg-core';
 
-export const user = pgTable('user', {
-	id: text('id').primaryKey().$defaultFn(createId),
-	name: text('name').notNull(),
-	email: text('email').notNull().unique(),
-	emailVerified: boolean('email_verified').default(false).notNull(),
-	image: text('image'),
-	createdAt: timestamp('created_at')
+const dates = {
+	createdAt: timestamp()
 		.$defaultFn(() => new Date())
 		.notNull(),
-	updatedAt: timestamp('updated_at')
+	updatedAt: timestamp()
 		.$defaultFn(() => new Date())
 		.$onUpdate(() => new Date())
 		.notNull()
+};
+
+export const user = pgTable('user', {
+	id: text().primaryKey().$defaultFn(createId),
+	name: text().notNull(),
+	email: text().notNull().unique(),
+	emailVerified: boolean().default(false).notNull(),
+	image: text(),
+	...dates
 });
 
 export const session = pgTable('session', {
-	id: text('id').primaryKey().$defaultFn(createId),
-	expiresAt: timestamp('expires_at').notNull(),
-	token: text('token').notNull().unique(),
-	createdAt: timestamp('created_at')
-		.$defaultFn(() => new Date())
-		.notNull(),
-	updatedAt: timestamp('updated_at')
-		.$onUpdate(() => new Date())
-		.notNull(),
-	ipAddress: text('ip_address'),
-	userAgent: text('user_agent'),
-	userId: text('user_id')
+	id: text().primaryKey().$defaultFn(createId),
+	expiresAt: timestamp().notNull(),
+	token: text().notNull().unique(),
+	ipAddress: text(),
+	userAgent: text(),
+	userId: text()
 		.notNull()
-		.references(() => user.id, { onDelete: 'cascade' })
+		.references(() => user.id, { onDelete: 'cascade' }),
+	...dates
 });
 
 export const account = pgTable('account', {
-	id: text('id').primaryKey().$defaultFn(createId),
-	accountId: text('account_id').notNull(),
-	providerId: text('provider_id').notNull(),
-	userId: text('user_id')
+	id: text().primaryKey().$defaultFn(createId),
+	accountId: text().notNull(),
+	providerId: text().notNull(),
+	userId: text()
 		.notNull()
 		.references(() => user.id, { onDelete: 'cascade' }),
-	accessToken: text('access_token'),
-	refreshToken: text('refresh_token'),
-	idToken: text('id_token'),
-	accessTokenExpiresAt: timestamp('access_token_expires_at'),
-	refreshTokenExpiresAt: timestamp('refresh_token_expires_at'),
-	scope: text('scope'),
-	password: text('password'),
-	createdAt: timestamp('created_at')
-		.$defaultFn(() => new Date())
-		.notNull(),
-	updatedAt: timestamp('updated_at')
-		.$onUpdate(() => new Date())
-		.notNull()
+	accessToken: text(),
+	refreshToken: text(),
+	idToken: text(),
+	accessTokenExpiresAt: timestamp(),
+	refreshTokenExpiresAt: timestamp(),
+	scope: text(),
+	password: text(),
+	...dates
 });
 
 export const verification = pgTable('verification', {
-	id: text('id').primaryKey().$defaultFn(createId),
-	identifier: text('identifier').notNull(),
-	value: text('value').notNull(),
-	expiresAt: timestamp('expires_at').notNull(),
-	createdAt: timestamp('created_at')
-		.$defaultFn(() => new Date())
-		.notNull(),
-	updatedAt: timestamp('updated_at')
-		.$defaultFn(() => new Date())
-		.$onUpdate(() => new Date())
-		.notNull()
+	id: text().primaryKey().$defaultFn(createId),
+	identifier: text().notNull(),
+	value: text().notNull(),
+	expiresAt: timestamp().notNull(),
+	...dates
 });
 
 export const alertStyleEnum = pgEnum('alert_color', ['neutral', 'info', 'warning', 'danger']);
 
 export const alert = pgTable('alert', {
-	id: text('id').primaryKey().$defaultFn(createId),
-	priority: integer('priority'),
-	title: text('title').notNull(),
-	description: text('description').notNull(),
-	link: text('link'),
+	id: text().primaryKey().$defaultFn(createId),
+	priority: integer(),
+	title: text().notNull(),
+	description: text().notNull(),
+	link: text(),
 	color: alertStyleEnum().notNull(),
-	startDate: timestamp('start_date').notNull(),
-	endDate: timestamp('end_date').notNull(),
+	startDate: timestamp().notNull(),
+	endDate: timestamp().notNull(),
 	createdBy: text('user_id')
 		.notNull()
 		.references(() => user.id, { onDelete: 'set null' }),
-	createdAt: timestamp('created_at')
-		.$defaultFn(() => new Date())
-		.notNull()
+	...dates
 });
