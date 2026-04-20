@@ -2,7 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 </script>
 
-<div class="mx-auto max-w-3xl px-6 space-y-12 py-20 text-base-content">
+<div class=" max-w-4xl px-6 space-y-24 py-10 text-base-content">
 	<header class="flex flex-col gap-6">
 		<h1 class="text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
 			{m.away_antsy_tadpole_fold()}
@@ -12,8 +12,8 @@
 		</h1>
 	</header>
 
-	<main class="space-y-6">
-		<h2 class="text-2xl font-semibold tracking-tight">{m.weird_odd_husky_bump()}</h2>
+	<section class="space-y-6">
+		<h2 class="text-4xl font-semibold tracking-tight">{m.weird_odd_husky_bump()}</h2>
 
 		<p class="text-lg leading-relaxed text-base-content/80">
 			{m.aloof_plane_octopus_aspire()}
@@ -22,5 +22,34 @@
 		<p class="text-lg leading-relaxed text-base-content/80">
 			{@html m.inner_grand_sloth_aid()}
 		</p>
-	</main>
+	</section>
+
+	<section class="space-y-6">
+		<h2 class="text-4xl font-semibold tracking-tight">Zobacz nad czym działamy!</h2>
+
+		<p class="text-lg leading-relaxed text-base-content/80">Poznaj bliżej wybrane projekty koła</p>
+
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
+			<a
+				href="/projects/hoc"
+				class="border border-base-content/20 py-4 px-8 transition-colors hover:border-primary hover:bg-primary/20"
+			>
+				<h2 class="font-bold">👨‍💻 Hour of Code</h2>
+
+				<p class="text-lg leading-relaxed text-base-content/80">
+					Zajęcia skierowane do uczniów szkół podstawowych dotyczące podstaw programowania
+				</p>
+			</a>
+			<a
+				href="/projects/krasnal"
+				class="border border-base-content/20 py-4 px-8 transition-colors hover:border-primary hover:bg-primary/20"
+			>
+				<h2 class="font-bold">♟️ Krasnal</h2>
+
+				<p class="text-lg leading-relaxed text-base-content/80">
+					Silnik szachowy oparty na architekturze Transformer
+				</p>
+			</a>
+		</div>
+	</section>
 </div>
