@@ -25,29 +25,29 @@
 	</section>
 
 	<section class="space-y-6">
-		<h2 class="text-4xl font-semibold tracking-tight">Zobacz nad czym działamy!</h2>
+		<h2 class="text-4xl font-semibold tracking-tight">{m.jolly_dizzy_dog_swim()}</h2>
 
-		<p class="text-lg leading-relaxed text-base-content/80">Poznaj bliżej wybrane projekty koła</p>
+		<p class="text-lg leading-relaxed text-base-content/80">{m.fancy_wild_owl_climb()}</p>
 
 		<div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
 			<a
 				href="/projects/hoc"
 				class="border border-base-content/20 py-4 px-8 transition-colors hover:border-primary hover:bg-primary/20"
 			>
-				<h2 class="font-bold">👨‍💻 Hour of Code</h2>
+				<h2 class="font-bold">{m.antsy_clever_eagle_fly()}</h2>
 
 				<p class="text-lg leading-relaxed text-base-content/80">
-					Zajęcia skierowane do uczniów szkół podstawowych dotyczące podstaw programowania
+					{m.calm_cool_owl_crawl()}
 				</p>
 			</a>
 			<a
 				href="/projects/krasnal"
 				class="border border-base-content/20 py-4 px-8 transition-colors hover:border-primary hover:bg-primary/20"
 			>
-				<h2 class="font-bold">♟️ Krasnal</h2>
+				<h2 class="font-bold">{m.cool_shy_tiger_fold()}</h2>
 
 				<p class="text-lg leading-relaxed text-base-content/80">
-					Silnik szachowy oparty na architekturze Transformer
+					{m.wild_clever_lion_dive()}
 				</p>
 			</a>
 		</div>
