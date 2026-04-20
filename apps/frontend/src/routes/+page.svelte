@@ -2,7 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 </script>
 
-<div class="mx-auto max-w-3xl px-6 py-20 text-base-content">
+<div class="mx-auto max-w-3xl px-6 space-y-12 py-20 text-base-content">
 	<header class="flex flex-col gap-6">
 		<h1 class="text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
 			{m.away_antsy_tadpole_fold()}
@@ -11,8 +11,6 @@
 			</span>
 		</h1>
 	</header>
-
-	<div class="h-px w-full bg-base-content/10 my-12"></div>
 
 	<main class="space-y-6">
 		<h2 class="text-2xl font-semibold tracking-tight">{m.weird_odd_husky_bump()}</h2>
