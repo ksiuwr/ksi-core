@@ -4,7 +4,8 @@ import Elysia from 'elysia';
 
 const createDatabase = () =>
 	drizzle(Bun.env.DATABASE_URL!, {
-		schema
+		schema,
+		casing: 'snake_case'
 	});
 
 const globalForDB = globalThis as unknown as {

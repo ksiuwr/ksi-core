@@ -1,0 +1,1 @@
+ALTER TABLE "alert" ADD COLUMN "updated_at" timestamp NOT NULL;
