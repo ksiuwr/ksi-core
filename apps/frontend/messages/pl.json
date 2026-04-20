@@ -89,5 +89,6 @@
 	"shy_glad_horse_skip": "Celem Krasnala jest generowanie silnych, a zarazem ludzkich ruchów szachowych. Balansować pomiędzy intuicją znaną z projektu Maya Chess a siłą gry Stockfisha.",
 	"jolly_calm_lion_jump": "Krasnal to rozwijany we Wrocławiu silnik szachowy oparty na architekturze Transformer. Wykorzystuje on głębokie sieci neuronowe, aby uczyć się gry w szachy w sposób intuicyjny, odchodząc od tradycyjnych, ciężkich obliczeń i przeszukiwania drzew wariantów.",
 	"jolly_jolly_apple_spin": "Silnik szachowy Krasnal ♟️",
-	"wild_loud_cat_fold": "Architektura systemu"
+	"wild_loud_cat_fold": "Architektura systemu",
+	"loud_calm_horse_hide": "Kod źródłowy"
 }
