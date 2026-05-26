@@ -10,8 +10,8 @@
     "prepare": "svelte-kit sync || echo ''",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "lint": "eslint . && prettier --check .",
-    "format": "prettier --write ."
+    "lint": "eslint . && oxfmt --check .",
+    "format": "oxfmt --write ."
   },
   "dependencies": {
     "@elysiajs/eden": "^1.4.9",
