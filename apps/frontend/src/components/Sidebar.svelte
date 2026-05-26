@@ -77,6 +77,7 @@
 
     <SidebarAccordion title="projects">
       <SidebarLink href="/projects/hoc" icon={FileIcon} exact={false}>hour-of-code</SidebarLink>
+      <SidebarLink href="/projects/ket" icon={FileIcon} exact={false}>ket</SidebarLink>
       <SidebarAccordion title="machine-learning">
         <SidebarLink href="/projects/physarum" icon={FileIcon} exact={false}>physarum</SidebarLink>
         <SidebarLink href="/projects/krasnal" icon={FileIcon} exact={false}>krasnal</SidebarLink>

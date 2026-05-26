@@ -96,5 +96,9 @@
   "antsy_clever_eagle_fly": "👨‍💻 Hour of Code",
   "calm_cool_owl_crawl": "Classes teaching the basics of programming to primary school students",
   "cool_shy_tiger_fold": "♟️ Krasnal",
-  "wild_clever_lion_dive": "Chess engine based on the Transformer architecture"
+  "wild_clever_lion_dive": "Chess engine based on the Transformer architecture",
+  "eager_clever_iguana_run": "Join us",
+  "glad_loud_dog_walk": "The KET project focuses on pure quantum algorithmics, moving computation modeling to a level of abstraction familiar from classical software engineering. It allows you to learn and run code on a real quantum processor without requiring advanced knowledge of physics, optics, or cryogenics. The development path leads from the basics of qubit operation and cryptography in the Qiskit environment, through complexity theory, to variational optimization methods. In the final phase, participants face the challenges of modern hardware, learning advanced error-correcting codes, magic state distillation, and Quantum Machine Learning.",
+  "shy_brave_bear_walk": "Researching innovative quantum algorithms, computational complexity theory, and quantum machine learning to push the boundaries of modern cybersecurity and optimization paradigms.",
+  "wild_calm_owl_walk": "Modeling computations and independently implementing proprietary quantum algorithms in the Qiskit environment, with the ultimate execution of the code on a real quantum processor."
 }
