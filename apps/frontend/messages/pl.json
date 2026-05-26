@@ -96,5 +96,9 @@
   "antsy_clever_eagle_fly": "👨‍💻 Hour of Code",
   "calm_cool_owl_crawl": "Zajęcia skierowane do uczniów szkół podstawowych dotyczące podstaw programowania",
   "cool_shy_tiger_fold": "♟️ Krasnal",
-  "wild_clever_lion_dive": "Silnik szachowy oparty na architekturze Transformer"
+  "wild_clever_lion_dive": "Silnik szachowy oparty na architekturze Transformer",
+  "eager_clever_iguana_run": "Dołącz do nas",
+  "glad_loud_dog_walk": "Projekt KET skupia się na czystej algorytmice kwantowej, przenosząc modelowanie obliczeń na poziom abstrakcji znany z klasycznej inżynierii oprogramowania. Pozwala na naukę i uruchamianie kodu na rzeczywistym procesorze kwantowym bez konieczności znajomości zaawansowanej fizyki, optyki czy kriogeniki. Ścieżka rozwoju prowadzi od podstaw działania kubitów i kryptografii w środowisku Qiskit, przez teorię złożoności, aż po wariacyjne metody optymalizacyjne. W finałowej fazie uczestnicy mierzą się z wyzwaniami współczesnego sprzętu, poznając zaawansowane kody korekcji błędów, destylację stanów magicznych oraz Kwantowe Uczenie Maszynowe.",
+  "shy_brave_bear_walk": "Badanie innowacyjnych algorytmów kwantowych, teorii złożoności obliczeniowej oraz kwantowego uczenia maszynowego w celu przesuwania granic współczesnych paradygmatów cyberbezpieczeństwa i optymalizacji.",
+  "wild_calm_owl_walk": "Modelowanie obliczeń i samodzielna implementacja autorskich algorytmów kwantowych w środowisku Qiskit, z ostatecznym uruchomieniem kodu na rzeczywistym procesorze kwantowym."
 }
