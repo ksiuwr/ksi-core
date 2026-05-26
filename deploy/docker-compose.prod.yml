@@ -8,19 +8,19 @@ services:
     networks:
       - ksi-network
     ports:
-      - "80:80"
+      - '80:80'
     environment:
       - TZ=Europe/Warsaw
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     command:
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
+      - '--providers.docker=true'
+      - '--providers.docker.exposedbydefault=false'
+      - '--entrypoints.web.address=:80'
     labels:
-      - "traefik.enable=true"
+      - 'traefik.enable=true'
       # Secure Traefik Dashboard (Optional - replace with your credentials)
-      - "traefik.http.routers.dashboard.service=api@internal"
+      - 'traefik.http.routers.dashboard.service=api@internal'
 
   postgres:
     image: postgres:13-alpine
@@ -37,7 +37,7 @@ services:
       - ksi-network
 
   backend:
-    image: "ghcr.io/ksiuwr/ksi-backend:latest"
+    image: 'ghcr.io/ksiuwr/ksi-backend:latest'
     container_name: ksi-backend-prod
     restart: unless-stopped
     env_file:
@@ -47,28 +47,28 @@ services:
     depends_on:
       - postgres
     labels:
-      - "traefik.enable=true"
+      - 'traefik.enable=true'
       # Routing Logic
-      - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
-      - "traefik.http.routers.backend.priority=10"
+      - 'traefik.http.routers.backend.rule=PathPrefix(`/api`)'
+      - 'traefik.http.routers.backend.priority=10'
       # Middleware: Strip /api and add compression
-      - "traefik.http.routers.backend.middlewares=gzip-compress"
-      - "traefik.http.services.backend.loadbalancer.server.port=3000"
+      - 'traefik.http.routers.backend.middlewares=gzip-compress'
+      - 'traefik.http.services.backend.loadbalancer.server.port=3000'
 
   frontend:
-    image: "ghcr.io/ksiuwr/ksi-frontend:latest"
+    image: 'ghcr.io/ksiuwr/ksi-frontend:latest'
     container_name: ksi-frontend-prod
     restart: unless-stopped
     networks:
       - ksi-network
     labels:
-      - "traefik.enable=true"
+      - 'traefik.enable=true'
       # Routing Logic
-      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
-      - "traefik.http.routers.frontend.priority=1"
-      - "traefik.http.services.frontend.loadbalancer.server.port=3001"
-      - "traefik.http.middlewares.gzip-compress.compress=true"
-      - "traefik.http.routers.frontend.middlewares=gzip-compress"
+      - 'traefik.http.routers.frontend.rule=PathPrefix(`/`)'
+      - 'traefik.http.routers.frontend.priority=1'
+      - 'traefik.http.services.frontend.loadbalancer.server.port=3001'
+      - 'traefik.http.middlewares.gzip-compress.compress=true'
+      - 'traefik.http.routers.frontend.middlewares=gzip-compress'
 
 networks:
   ksi-network:
