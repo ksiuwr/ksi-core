@@ -3,16 +3,16 @@ import { S3Provider } from '@ksi-core/backend/lib/s3cache';
 import { status } from 'elysia';
 
 export default createElysia({ prefix: '/gallery' })
-	.use(S3Provider)
-	.get('/:id', async ({ params: { id }, s3 }) => {
-		const data = await s3.get_key(id);
-		if (typeof data === 'number') throw status(data);
+  .use(S3Provider)
+  .get('/:id', async ({ params: { id }, s3 }) => {
+    const data = await s3.get_key(id);
+    if (typeof data === 'number') throw status(data);
 
-		return { images: data };
-	})
-	.get('/:id/bg/:name', async ({ params: { id, name }, s3 }) => {
-		const data = await s3.get_key(id);
-		if (typeof data === 'number') throw status(data);
+    return { images: data };
+  })
+  .get('/:id/bg/:name', async ({ params: { id, name }, s3 }) => {
+    const data = await s3.get_key(id);
+    if (typeof data === 'number') throw status(data);
 
-		return data.find((k) => k.includes(name)) ?? data[0];
-	});
+    return data.find((k) => k.includes(name)) ?? data[0];
+  });

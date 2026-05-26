@@ -3,8 +3,8 @@ import alertsController from '@ksi-core/backend/routes/dashboard/admin/alerts/al
 import s3cacheController from './s3cache/s3cache.controller';
 
 export default createElysia({
-	prefix: '/admin',
-	protectedRoute: true
+  prefix: '/admin',
+  protectedRoute: true
 })
-	.use(alertsController)
-	.use(s3cacheController);
+  .use(alertsController)
+  .use(s3cacheController);
