@@ -28,35 +28,35 @@
     </div>
   </div>
   <div
-    class="flex items-center mt-8 *:flex *:items-center *:justify-center *:py-10 *:basis-[25%] *:border *:border-base-200 *:text-base-300 *:transition-colors *:duration-300 *:ease-out"
+    class="flex items-center mt-8 flex-col md:flex-row *:w-full *:flex *:items-center *:justify-center *:py-10 md:*:basis-[25%] *:border *:border-base-200 *:text-base-300 *:transition-colors *:duration-300 *:ease-out"
   >
     <a
       href="https://github.com/ksiuwr"
       target="_blank"
       class="hover:bg-base-content/20 hover:text-base-content"
     >
-      <Github class="size-12" />
+      <Github class="size-10 md:size-12" />
     </a>
     <a
       href="https://instagram.com/ksi_uwr"
       target="_blank"
       class="hover:bg-fuchsia-600/20 hover:text-fuchsia-500"
     >
-      <Instagram class="size-12" />
+      <Instagram class="size-10 md:size-12" />
     </a>
     <a
       href="https://www.facebook.com/ksi.uwr"
       target="_blank"
       class="hover:bg-blue-600/20 hover:text-blue-500"
     >
-      <Facebook class="size-12" />
+      <Facebook class="size-10 md:size-12" />
     </a>
     <a
       href="https://www.linkedin.com/company/ksiuwr/"
       target="_blank"
       class="hover:bg-blue-500/40 hover:text-white"
     >
-      <Linkedin class="size-12" />
+      <Linkedin class="size-10 md:size-12" />
     </a>
   </div>
 </footer>
