@@ -1,9 +1,9 @@
 <script>
   import { m } from '$lib/paraglide/messages';
-  import { Github } from '@lucide/svelte';
+  import { Facebook, Github, Instagram, Linkedin } from '@lucide/svelte';
 </script>
 
-<footer class="mt-auto w-full border-t border-base-content/10 bg-base-100 py-10 text-sm">
+<footer class="mt-auto w-full border-t border-base-200 bg-base-100 pt-10 text-sm">
   <div class="mx-auto flex max-w-3xl flex-col gap-8 px-6 md:flex-row md:justify-between md:gap-4">
     <div class="flex flex-col gap-1">
       <strong class="font-medium text-base-content">
@@ -26,5 +26,37 @@
         {m.loud_calm_horse_hide()}
       </a>
     </div>
+  </div>
+  <div
+    class="flex items-center mt-8 *:flex *:items-center *:justify-center *:py-10 *:basis-[25%] *:border *:border-base-200 *:text-base-300 *:transition-colors *:duration-300 *:ease-out"
+  >
+    <a
+      href="https://github.com/ksiuwr"
+      target="_blank"
+      class="hover:bg-base-content/20 hover:text-base-content"
+    >
+      <Github class="size-12" />
+    </a>
+    <a
+      href="https://instagram.com/ksi_uwr"
+      target="_blank"
+      class="hover:bg-fuchsia-600/20 hover:text-fuchsia-500"
+    >
+      <Instagram class="size-12" />
+    </a>
+    <a
+      href="https://www.facebook.com/ksi.uwr"
+      target="_blank"
+      class="hover:bg-blue-600/20 hover:text-blue-500"
+    >
+      <Facebook class="size-12" />
+    </a>
+    <a
+      href="https://www.linkedin.com/company/ksiuwr/"
+      target="_blank"
+      class="hover:bg-blue-500/40 hover:text-white"
+    >
+      <Linkedin class="size-12" />
+    </a>
   </div>
 </footer>
