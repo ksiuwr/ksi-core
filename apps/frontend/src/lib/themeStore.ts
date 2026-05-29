@@ -1,12 +1,14 @@
 import { writable } from 'svelte/store';
 
 function createThemeStore() {
-  let initialTheme: 'light' | 'dark';
+  let initialTheme: 'light' | 'dark' = 'light';
   if (typeof window !== 'undefined') {
-    initialTheme = document.body.getAttribute('data-theme') as 'light' | 'dark';
-  } else {
-    // Fallback for SSR
-    initialTheme = 'light';
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light' || savedTheme === 'dark') {
+      initialTheme = savedTheme;
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      initialTheme = 'dark';
+    }
   }
 
   const { subscribe, set, update } = writable<'light' | 'dark'>(initialTheme);
