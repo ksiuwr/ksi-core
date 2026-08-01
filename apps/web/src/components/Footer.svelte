@@ -1,5 +1,4 @@
 <script>
-  import { m } from '$lib/paraglide/messages';
   import { Facebook, Github, Instagram, Linkedin } from '@lucide/svelte';
 </script>
 
@@ -7,10 +6,10 @@
   <div class="mx-auto flex max-w-3xl flex-col gap-8 px-6 md:flex-row md:justify-between md:gap-4">
     <div class="flex flex-col gap-1">
       <strong class="font-medium text-base-content">
-        {m.seemly_flaky_myna_buy()}
+        Institute of Computer Science, University of Wrocław
       </strong>
       <address class="not-italic text-base-content/60">
-        {@html m.major_swift_angelfish_borrow()}
+        15 Fryderyka Joliot-Curie St.<br /> 50-383 Wrocław, Room 24
       </address>
     </div>
 
@@ -23,7 +22,7 @@
         target="_blank"
       >
         <Github class="inline w-3 h-3 mr-px" />
-        {m.loud_calm_horse_hide()}
+        Source code
       </a>
     </div>
   </div>

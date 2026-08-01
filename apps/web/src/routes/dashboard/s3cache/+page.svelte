@@ -34,7 +34,7 @@
     {#if cachedMap}
       {#each Object.keys(cachedMap) as key}
         <p>{key} [{cachedMap[key].data.length}]</p>
-        <button class="btn btn-outline inline-flex" onclick={() => refetch(key)}>refetch</button>
+        <button class="btn btn-outline inline-flex" onclick={() => refetch(key)}>Refetch</button>
         <p class="opacity-70">
           {new Date(cachedMap[key].time).toLocaleDateString()}
           {new Date(cachedMap[key].time).toLocaleTimeString()}

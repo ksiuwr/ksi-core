@@ -6,6 +6,13 @@
   import { Toaster } from 'svelte-sonner';
   import { themeStore } from '$lib/themeStore';
   import Alert from '../components/Alert.svelte';
+  import { loadLocale } from 'wuchale/load-utils';
+  import '../locales/main.loader.svelte.js';
+  import { locale } from '$lib/locale.svelte';
+
+  $effect(() => {
+    loadLocale(locale.current);
+  });
 
   const { children, data } = $props();
 </script>

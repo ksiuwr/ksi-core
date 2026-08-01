@@ -3,7 +3,6 @@
   import { editions } from '$lib/data/conferences.js';
   import { Calendar, MapPin, UsersRound } from '@lucide/svelte';
   import Gallery from '../../../components/Gallery.svelte';
-  import { m } from '$lib/paraglide/messages';
   import DynamicGallery from '../../../components/DynamicGallery.svelte';
   import { api } from '$lib/backend';
 
@@ -30,9 +29,7 @@
       style={`background-image: url(${bgImage})`}
     ></div>
 
-    <span class="text-xl uppercase tracking-widest opacity-50 font-semibold">
-      {m.clear_formal_marlin_hurl()}
-    </span>
+    <span class="text-xl uppercase tracking-widest opacity-50 font-semibold"> Edition </span>
     <h1 class="lg:text-[14rem] text-[8rem] font-bold scale-y-[0.80] z-10">
       {year}
     </h1>
@@ -42,7 +39,7 @@
       <div class="flex flex-col items-center text-center p-8">
         <pre class="opacity-50 mb-4 uppercase flex items-center"><MapPin
             class="size-4"
-          /> {m.wacky_real_cat_coax()}</pre>
+          /> Location</pre>
         {@html data.location.replace(',', '<br />')}
       </div>
       <div
@@ -50,7 +47,7 @@
       >
         <pre class="opacity-50 mb-4 uppercase flex items-center"><UsersRound
             class="size-4"
-          /> {m.true_agent_wombat_sew()}</pre>
+          /> Number of Participants</pre>
         {data.participants}
       </div>
       <div
@@ -58,7 +55,7 @@
       >
         <pre class="opacity-50 mb-4 uppercase flex items-center"><Calendar
             class="size-4"
-          /> {m.raw_weird_dachshund_rise()}</pre>
+          /> Camp Date</pre>
         {data.date}
       </div>
     </div>
@@ -67,7 +64,7 @@
 {:else}
   <div class="h-screen flex items-center justify-center">
     <h1 class="text-2xl opacity-50 uppercase tracking-tighter">
-      {m.shy_loved_fish_gasp({ year })}
+      Edition {year} was not found ;(
     </h1>
   </div>
 {/if}
@@ -75,10 +72,11 @@
 {#snippet emptyState()}
   <div class="flex flex-col gap-4 items-center w-full py-20 text-center px-6">
     <h2 class="text-2xl font-bold max-w-2xl">
-      {m.lucky_tired_seal_dine({ year })}
+      Archaeologists are wondering if ZOSIA {year} even took place. No evidence found...
     </h2>
     <p class="opacity-70">
-      {m.lower_sour_tiger_gaze()}
+      We don't have photos from this edition of ZOSIA. If you have any, you can send them to us so
+      we can post them here.
     </p>
     <p class="font-mono font-medium text-primary transition-colors">ksi [at] cs.uni.wroc.pl</p>
     <img
