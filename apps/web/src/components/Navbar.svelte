@@ -1,9 +1,8 @@
 <script lang="ts">
-  import { getLocale, setLocale } from '$lib/paraglide/runtime';
-  import { m } from '$lib/paraglide/messages';
   import ThemeButton from './ThemeButton.svelte';
   import { PanelLeft } from '@lucide/svelte';
   import { sidebarStore } from '$lib/sidebar';
+  import { locale, toggleLocale } from '$lib/locale.svelte';
 </script>
 
 <header
@@ -31,13 +30,11 @@
 
   <div class="flex h-full">
     <button
-      onclick={() => {
-        const current = getLocale();
-        setLocale(current === 'pl' ? 'en' : 'pl');
-      }}
+      onclick={toggleLocale}
       class="btn btn-square btn-outline h-[60px] w-[60px] rounded-none border-base-200 border-0 border-l"
+      aria-label="Toggle language"
     >
-      {m.EMOJI()}
+      {locale.current === 'en' ? '🇺🇸' : '🇵🇱'}
     </button>
     <ThemeButton />
   </div>

@@ -1,7 +1,6 @@
 <script>
   import Wrapper from '../../../components/Wrapper.svelte';
   import Goal from '../../../components/Goal.svelte';
-  import { m } from '$lib/paraglide/messages';
 </script>
 
 <Wrapper name="projects/physarum.md">
@@ -9,9 +8,9 @@
     class="markdown-file flex flex-col gap-8 py-8 pl-px md:pl-16 max-w-4xl mx-auto text-base-content"
   >
     <header class="flex flex-col gap-2 pb-8">
-      <h1>{m.zippy_steep_shell_dash()}</h1>
+      <h1>Can a Slime Mold train Neural Networks?</h1>
 
-      <p class="text-lg! text-base-content/60! font-mono my-0!">{m.mellow_careful_elk_hug()}</p>
+      <p class="text-lg! text-base-content/60! font-mono my-0!">// Computational Biology & AI</p>
     </header>
 
     <div class="space-y-12">
@@ -25,33 +24,39 @@
             />
           </div>
           <figcaption class="font-mono text-xs text-base-content/40 text-center">
-            {m.helpful_gaudy_cheetah_breathe()}
+            Visualization of U-Matrix, Hit Map, and Weight Vectors
           </figcaption>
         </figure>
 
         <p class="text-balance">
-          {@html m.giant_grand_mayfly_pout()}
+          This project explores the fascinating intersection of biology and computer science,
+          testing whether the natural processes of <em class="italic text-base-content font-serif"
+            >Physarum polycephalum</em
+          > can be used to perform computational tasks, such as training neural networks.
         </p>
       </section>
 
       <section class="space-y-6 w-full">
-        <h2>{m.clean_plane_finch_spin()}</h2>
+        <h2>Goals</h2>
 
         <div class="flex flex-col gap-4 w-full">
           <Goal type="scientific">
-            {@html m.spicy_dry_peacock_cure()}
+            Behavioral and experimental research on <em class="italic font-serif"
+              >Physarum polycephalum</em
+            >.
           </Goal>
 
-          <Goal type="technical">{m.suave_many_squid_adore()}</Goal>
+          <Goal type="technical">Algorithmic analysis and modeling of transport networks.</Goal>
 
-          <Goal type="social">{m.wide_kind_jan_aim()}</Goal>
+          <Goal type="social">Disseminating results within and beyond the academic community.</Goal>
         </div>
       </section>
 
       <section class="space-y-4">
-        <h2>{m.last_lucky_reindeer_belong()}</h2>
+        <h2>Team Members</h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-sm w-full">
+          <!-- @wc-ignore -->
           {#each ['Igor Jakus', 'Hubert Berlicki', 'Wojciech Aszkiełowicz', 'Dr Marek Adamczyk'] as member, i (i)}
             <div
               class="flex items-center gap-3 px-4 py-3 rounded bg-base-200/30 border border-base-content/5 hover:border-base-content/20 transition-colors cursor-default"

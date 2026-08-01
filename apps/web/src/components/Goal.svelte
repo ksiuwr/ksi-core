@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import { FlaskConical, CodeXml, Share2 } from '@lucide/svelte';
-  import { m } from '$lib/paraglide/messages';
 
   let {
     type,
@@ -14,17 +13,20 @@
   const config = {
     scientific: {
       colorClass: 'border-accent bg-accent/5 text-accent',
-      label: m.true_still_hyena_feel(),
+      // @wc-include
+      label: '// Scientifically',
       icon: FlaskConical
     },
     technical: {
       colorClass: 'border-secondary bg-secondary/5 text-secondary',
-      label: m.sound_inclusive_vole_create(),
+      // @wc-include
+      label: '// Technically',
       icon: CodeXml
     },
     social: {
       colorClass: 'border-primary bg-primary/5 text-primary',
-      label: m.antsy_icy_beaver_emerge(),
+      // @wc-include
+      label: '// Socially',
       icon: Share2
     }
   };
