@@ -37,25 +37,25 @@
   <div class="w-full py-20 mb-2 flex flex-col items-center justify-center relative overflow-hidden">
     <div class="flex md:flex-row flex-col border border-base-200">
       <div class="flex flex-col items-center text-center p-8">
-        <pre class="opacity-50 mb-4 uppercase flex items-center"><MapPin
-            class="size-4"
-          /> Location</pre>
+        <span class="font-mono opacity-50 mb-4 uppercase flex items-center">
+          <MapPin class="size-4" /> Location
+        </span>
         {@html data.location.replace(',', '<br />')}
       </div>
       <div
         class="flex flex-col md:border-l border-t md:border-t-0 border-base-200 items-center text-center p-8"
       >
-        <pre class="opacity-50 mb-4 uppercase flex items-center"><UsersRound
-            class="size-4"
-          /> Number of Participants</pre>
+        <span class="font-mono opacity-50 mb-4 uppercase flex items-center"
+          ><UsersRound class="size-4" /> Number of Participants</span
+        >
         {data.participants}
       </div>
       <div
         class="flex flex-col md:border-l border-t md:border-t-0 border-base-200 items-center text-center p-8"
       >
-        <pre class="opacity-50 mb-4 uppercase flex items-center"><Calendar
-            class="size-4"
-          /> Camp Date</pre>
+        <span class=" font-mono opacity-50 mb-4 uppercase flex items-center"
+          ><Calendar class="size-4" /> Camp Date</span
+        >
         {data.date}
       </div>
     </div>

@@ -504,3 +504,15 @@ msgstr "// Socially"
 #: src/routes/dashboard/s3cache/+page.svelte
 msgid "Refetch"
 msgstr "Refetch"
+
+#: src/routes/zosia/[year]/+page.svelte
+msgid "<0/> Location"
+msgstr "<0/> Location"
+
+#: src/routes/zosia/[year]/+page.svelte
+msgid "<0/> Number of Participants"
+msgstr "<0/> Number of Participants"
+
+#: src/routes/zosia/[year]/+page.svelte
+msgid "<0/> Camp Date"
+msgstr "<0/> Camp Date"
