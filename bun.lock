@@ -18,7 +18,7 @@
         "typescript": "^5.9.3",
       },
     },
-    "apps/backend": {
+    "apps/server": {
       "name": "@ksi-core/backend",
       "version": "0.0.1",
       "dependencies": {
@@ -43,7 +43,7 @@
         "drizzle-kit": "^0.31.10",
       },
     },
-    "apps/frontend": {
+    "apps/web": {
       "name": "@ksi-core/frontend",
       "version": "0.0.1",
       "dependencies": {
@@ -323,9 +323,9 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
 
-    "@ksi-core/backend": ["@ksi-core/backend@workspace:apps/backend"],
+    "@ksi-core/backend": ["@ksi-core/backend@workspace:apps/server"],
 
-    "@ksi-core/frontend": ["@ksi-core/frontend@workspace:apps/frontend"],
+    "@ksi-core/frontend": ["@ksi-core/frontend@workspace:apps/web"],
 
     "@lix-js/sdk": ["@lix-js/sdk@0.4.9", "", { "dependencies": { "@lix-js/server-protocol-schema": "0.1.1", "dedent": "1.5.1", "human-id": "^4.1.1", "js-sha256": "^0.11.0", "kysely": "^0.28.12", "sqlite-wasm-kysely": "0.3.0", "uuid": "^10.0.0" } }, "sha512-30mDkXpx704359oRrJI42bjfCspCiaMItngVBbPkiTGypS7xX4jYbHWQkXI8XuJ7VDB69D0MsVU6xfrBAIrM4A=="],
 

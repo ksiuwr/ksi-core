@@ -26,8 +26,10 @@
     "noPropertyAccessFromIndexSignature": false,
     "baseUrl": ".", // Base is the monorepo root
     "paths": {
-      "@ksi-core/backend/*": ["apps/backend/src/*"],
-      "@ksi-core/frontend/*": ["apps/frontend/src/*"]
+      "@ksi-core/backend/*": ["apps/server/src/*"],
+      "@ksi-core/frontend/*": ["apps/web/src/*"],
+      "@ksi-core/server/*": ["apps/server/src/*"],
+      "@ksi-core/web/*": ["apps/web/src/*"]
     }
   }
 }

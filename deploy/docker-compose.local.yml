@@ -50,11 +50,11 @@ services:
   backend:
     build:
       context: ..
-      dockerfile: apps/backend/Dockerfile
+      dockerfile: apps/server/Dockerfile
     container_name: ksi-backend-local
     restart: unless-stopped
     env_file:
-      - ../.env
+      - ../apps/server/.env
     networks:
       - ksi-network
     depends_on:
@@ -70,7 +70,7 @@ services:
   frontend:
     build:
       context: ..
-      dockerfile: apps/frontend/Dockerfile
+      dockerfile: apps/web/Dockerfile
     container_name: ksi-frontend-local
     restart: unless-stopped
     networks:
