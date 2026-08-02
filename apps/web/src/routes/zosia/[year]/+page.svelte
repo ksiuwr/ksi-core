@@ -2,7 +2,6 @@
   import { page } from '$app/state';
   import { editions } from '$lib/data/conferences.js';
   import { Calendar, MapPin, UsersRound } from '@lucide/svelte';
-  import Gallery from '../../../components/Gallery.svelte';
   import DynamicGallery from '../../../components/DynamicGallery.svelte';
   import { api } from '$lib/backend';
 
@@ -12,6 +11,7 @@
   let bgImage = $state('');
 
   $effect(() => {
+    if (!data.bgImage) return;
     api
       .gallery({ id: `zosia-${year}` })
       .bg({ name: data.bgImage })

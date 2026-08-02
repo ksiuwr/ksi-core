@@ -3,7 +3,7 @@ export const editions: {
     location: string;
     participants: number;
     date: string;
-    bgImage: string;
+    bgImage?: string;
   };
 } = {
   '2024': {
@@ -17,5 +17,11 @@ export const editions: {
     participants: 217,
     date: '28.02.2025 - 03.03.2025',
     bgImage: '11.webp'
-  }
+  },
+  '2026': {
+    location: 'Hotel Bornit, Mickiewicza 21, 58-580 Szklarska Poręba',
+    participants: 274,
+    date: '05.03.2026 - 08.03.2026',
+    bgImage: undefined,
+  },
 };
