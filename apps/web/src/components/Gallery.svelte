@@ -52,7 +52,7 @@
   >
     <img
       src={images[currImage]}
-      class="md:max-w-[70vw] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+      class="md:max-w-[70vw] max-h-[90vh] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
       alt=""
     />
     <button
