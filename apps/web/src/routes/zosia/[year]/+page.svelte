@@ -37,7 +37,7 @@
   <div class="w-full py-20 mb-2 flex flex-col items-center justify-center relative overflow-hidden">
     <div class="flex md:flex-row flex-col border border-base-200">
       <div class="flex flex-col items-center text-center p-8">
-        <span class="font-mono opacity-50 mb-4 uppercase flex items-center">
+        <span class="font-mono opacity-50 mb-4 uppercase flex gap-2 items-center">
           <MapPin class="size-4" /> Location
         </span>
         {#each data.location.split(',') as loc (loc)}
@@ -47,7 +47,7 @@
       <div
         class="flex flex-col md:border-l border-t md:border-t-0 border-base-200 items-center text-center p-8"
       >
-        <span class="font-mono opacity-50 mb-4 uppercase flex items-center"
+        <span class="font-mono opacity-50 mb-4 uppercase flex gap-2 items-center"
           ><UsersRound class="size-4" /> Number of Participants</span
         >
         {data.participants}
@@ -55,7 +55,7 @@
       <div
         class="flex flex-col md:border-l border-t md:border-t-0 border-base-200 items-center text-center p-8"
       >
-        <span class=" font-mono opacity-50 mb-4 uppercase flex items-center"
+        <span class=" font-mono opacity-50 mb-4 uppercase flex gap-2 items-center"
           ><Calendar class="size-4" /> Camp Date</span
         >
         {data.date}
