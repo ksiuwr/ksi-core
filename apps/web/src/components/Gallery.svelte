@@ -74,9 +74,9 @@
   </div>
 {/if}
 <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-  {#each splittedImages as splitCol, splitI}
+  {#each splittedImages as splitCol, splitI (splitI)}
     <div class="flex flex-col gap-2">
-      {#each splitCol as image, i}
+      {#each splitCol as image, i (i)}
         <button
           type="button"
           title=""
