@@ -40,7 +40,9 @@
         <span class="font-mono opacity-50 mb-4 uppercase flex items-center">
           <MapPin class="size-4" /> Location
         </span>
-        {@html data.location.replace(',', '<br />')}
+        {#each data.location.split(',') as loc (loc)}
+          <span>{loc}</span>
+        {/each}
       </div>
       <div
         class="flex flex-col md:border-l border-t md:border-t-0 border-base-200 items-center text-center p-8"
