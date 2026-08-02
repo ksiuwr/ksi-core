@@ -516,3 +516,11 @@ msgstr "<0/> Number of Participants"
 #: src/routes/zosia/[year]/+page.svelte
 msgid "<0/> Camp Date"
 msgstr "<0/> Camp Date"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Alerts"
+msgstr "Alerts"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Manage the alert displayed at the top of the page."
+msgstr "Manage the alert displayed at the top of the page."

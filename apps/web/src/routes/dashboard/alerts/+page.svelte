@@ -135,7 +135,7 @@
 
 <Wrapper name="dashboard/ALERTS" {icon}>
   <h2 class="text-2xl">Alerts</h2>
-  Manage the alert displayed at the top of the page.
+  <p>Manage the alert displayed at the top of the page.</p>
 </Wrapper>
 <div class="flex flex-col my-8 gap-4">
   {#if !creating}
