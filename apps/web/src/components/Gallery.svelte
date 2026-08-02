@@ -2,6 +2,13 @@
   import { ChevronLeft, ChevronRight } from '@lucide/svelte';
   import { fly } from 'svelte/transition';
 
+  // @wc-ignore
+  const keys = {
+    Escape: 'Escape',
+    ArrowRight: 'ArrowRight',
+    ArrowLeft: 'ArrowLeft'
+  };
+
   let { images }: { images: string[] } = $props();
   let splittedImages = $derived([
     images.slice(0, Math.floor(images.length / 3)),
@@ -11,16 +18,24 @@
 
   let currImage = $state<number | null>(null);
 
+  let debounce = $state<Timer | undefined>(undefined);
+
   if (typeof window !== 'undefined') {
     window.addEventListener('keydown', (e) => {
       if (currImage === null) return;
-      if (e.key === 'Escape') {
+      if (e.key === keys.Escape) {
         currImage = null;
       }
+      if (debounce != undefined) {
+        return;
+      }
+      debounce = setTimeout(() => {
+        debounce = undefined;
+      }, 150);
       currImage = currImage as number;
-      if (e.key === 'ArrowRight') {
+      if (e.key === keys.ArrowRight) {
         if (currImage < images.length - 1) currImage++;
-      } else if (e.key === 'ArrowLeft') {
+      } else if (e.key === keys.ArrowLeft) {
         if (currImage > 0) currImage--;
       }
     });

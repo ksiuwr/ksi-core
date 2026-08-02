@@ -27,18 +27,6 @@ msgstr "ksi [at] cs.uni.wroc.pl"
 msgid "© KSI {0}"
 msgstr "© KSI {0}"
 
-#: src/components/Gallery.svelte
-msgid "Escape"
-msgstr "Escape"
-
-#: src/components/Gallery.svelte
-msgid "ArrowRight"
-msgstr "Strzałka w prawo"
-
-#: src/components/Gallery.svelte
-msgid "ArrowLeft"
-msgstr "Strzałka w lewo"
-
 #: src/components/Navbar.svelte
 msgid "Toggle sidebar"
 msgstr "Przełącz panel boczny"
