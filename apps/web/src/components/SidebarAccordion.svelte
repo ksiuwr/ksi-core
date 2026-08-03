@@ -26,7 +26,7 @@
   </div>
   {#if expanded}
     <div
-      class="flex flex-col [&_a]:pl-12! [&_a]:w-auto! [&_a]:before:left-5 [&_a]:before:absolute [&_a]:before:w-4 [&_a]:before:h-[26px] [&_a]:before:border-b [&_a]:before:border-l [&_a]:before:mb-4 [&_a]:before:border-base-300"
+      class="flex flex-col [&_a]:pl-12! [&_a]:w-auto! [&_a]:before:left-5 [&_a]:before:absolute [&_a]:before:w-4 [&_a]:before:h-6.5 [&_a]:before:border-b [&_a]:before:border-l [&_a]:before:mb-4 [&_a]:before:border-base-300"
     >
       {@render children()}
     </div>

@@ -1,5 +1,5 @@
 import { createId } from '@paralleldrive/cuid2';
-import { pgTable, text, timestamp, boolean, integer, pgEnum, snakeCase } from 'drizzle-orm/pg-core';
+import { text, timestamp, boolean, integer, pgEnum, snakeCase } from 'drizzle-orm/pg-core';
 
 export const users = snakeCase.table('users', {
   id: text().primaryKey().$defaultFn(createId),

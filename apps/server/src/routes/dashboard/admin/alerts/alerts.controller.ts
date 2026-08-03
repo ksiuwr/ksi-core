@@ -1,6 +1,6 @@
-import { alerts } from '@ksi-core/backend/db';
-import { createElysia } from '@ksi-core/backend/lib/createElysia';
-import { AlertBodyType } from '@ksi-core/backend/routes/dashboard/admin/alerts/alerts.type';
+import { alerts } from '@ksi-core/server/db';
+import { createElysia } from '@ksi-core/server/lib/createElysia';
+import { AlertBodyType } from '@ksi-core/server/routes/dashboard/admin/alerts/alerts.type';
 import { eq } from 'drizzle-orm';
 import { status, t } from 'elysia';
 

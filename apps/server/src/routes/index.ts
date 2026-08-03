@@ -1,8 +1,7 @@
-import { createElysia } from '@ksi-core/backend/lib/createElysia';
-import dashboardRouter from '@ksi-core/backend/routes/dashboard';
-import galleryRouter from '@ksi-core/backend/routes/gallery';
+import { createElysia } from '@ksi-core/server/lib/createElysia';
+import dashboardRouter from '@ksi-core/server/routes/dashboard';
+import galleryRouter from '@ksi-core/server/routes/gallery';
 import { status } from 'elysia';
-import { alerts } from '../db';
 
 export default createElysia()
   .get('/alerts/current', async ({ db }) => {

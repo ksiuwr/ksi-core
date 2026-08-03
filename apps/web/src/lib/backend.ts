@@ -8,16 +8,22 @@ export const api = treaty<App>(getUrls().BACKEND.replace('/api', ''), {
   }
 }).api;
 
+export const makeApi = (fetcher: typeof fetch) =>
+  treaty<App>(getUrls().BACKEND.replace('/api', ''), {
+    fetch: {
+      credentials: 'include'
+    },
+    fetcher: fetcher
+  }).api;
+
 export const resolveError = (
-  error: unknown &
-    (
-      | { value: string }
-      | {
-          value: {
-            message?: string;
-          };
-        }
-    ),
+  error:
+    | { value: string }
+    | {
+        value: {
+          message?: string;
+        };
+      },
   alternativeError?: string
 ): string => {
   return typeof error.value === 'string'

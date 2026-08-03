@@ -1,4 +1,4 @@
-import { alertStyleEnum } from '@ksi-core/backend/db';
+import { alertStyleEnum } from '@ksi-core/server/db';
 import { t } from 'elysia';
 
 export const AlertBodyType = {

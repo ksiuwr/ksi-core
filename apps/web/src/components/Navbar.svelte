@@ -6,14 +6,14 @@
 </script>
 
 <header
-  class="sticky top-0 z-40 flex h-[60px] w-full flex-row items-center justify-between border-b border-b-base-200 bg-base-100/95 backdrop-blur supports-[backdrop-filter]:bg-base-100/60"
+  class="sticky top-0 z-40 flex h-15 w-full flex-row items-center justify-between border-b border-b-base-200 bg-base-100/95 backdrop-blur supports-backdrop-filter:bg-base-100/60"
 >
   <div class="flex h-full items-center">
     <button
       onclick={() => {
         $sidebarStore = !$sidebarStore;
       }}
-      class="btn btn-square btn-outline h-[60px] w-[60px] border-0 border-x rounded-none border-base-200 lg:hidden"
+      class="btn btn-square btn-outline h-15 w-15 border-0 border-x rounded-none border-base-200 lg:hidden"
       aria-label="Toggle sidebar"
     >
       <PanelLeft class="size-5" />
@@ -21,7 +21,7 @@
 
     <a
       href="/"
-      class="flex h-full w-[140px] items-center gap-4 px-6 font-mono text-lg opacity-80 transition-colors hover:bg-base-200/50 md:text-2xl lg:border-r lg:border-base-200 lg:w-[250px]"
+      class="flex h-full w-35 items-center gap-4 px-6 font-mono text-lg opacity-80 transition-colors hover:bg-base-200/50 md:text-2xl lg:border-r lg:border-base-200 lg:w-62.5"
     >
       <img src="/logo.svg" alt="" class="size-8 dark:invert md:size-10" />
       KSI
@@ -31,7 +31,7 @@
   <div class="flex h-full">
     <button
       onclick={toggleLocale}
-      class="btn btn-square btn-outline h-[60px] w-[60px] rounded-none border-base-200 border-0 border-l"
+      class="btn btn-square btn-outline h-15 w-15 rounded-none border-base-200 border-0 border-l"
       aria-label="Toggle language"
     >
       {locale.current === 'en' ? '🇺🇸' : '🇵🇱'}

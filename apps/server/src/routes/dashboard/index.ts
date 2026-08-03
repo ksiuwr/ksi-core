@@ -1,6 +1,6 @@
-import { createElysia } from '@ksi-core/backend/lib/createElysia';
-import { rankRequired } from '@ksi-core/backend/middlewares/rankRequired';
-import admin from '@ksi-core/backend/routes/dashboard/admin';
+import { createElysia } from '@ksi-core/server/lib/createElysia';
+import { rankRequired } from '@ksi-core/server/middlewares/rankRequired';
+import admin from '@ksi-core/server/routes/dashboard/admin';
 
 export default createElysia({
   prefix: '/dashboard',

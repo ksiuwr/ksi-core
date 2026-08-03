@@ -1,5 +1,5 @@
 import { ListObjectsV2Command, S3 } from '@aws-sdk/client-s3';
-import Elysia, { status } from 'elysia';
+import Elysia from 'elysia';
 
 // TODO: This is temporary, uploading files to R2 storage should be in the dashboard, just like managing this list of known prefixes.
 const isAllowedPrefix = (prefix: string) => {
@@ -27,13 +27,9 @@ class S3Cache {
 
     if (this.#map.has(key)) return this.#map.get(key)?.data ?? [];
 
-    try {
-      await this.#fetch(key);
+    await this.#fetch(key);
 
-      return this.#map.get(key)?.data ?? [];
-    } catch (e) {
-      throw e;
-    }
+    return this.#map.get(key)?.data ?? [];
   }
 
   async refetch(key: string) {

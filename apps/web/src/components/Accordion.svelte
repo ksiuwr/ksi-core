@@ -11,7 +11,7 @@
     children: Snippet;
   } = $props();
 
-  let id = title.slice(0, 4).toLowerCase();
+  let id = $derived(title.slice(0, 4).toLowerCase());
 
   let show = $derived($accordionStore === id);
 </script>

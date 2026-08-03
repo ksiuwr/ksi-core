@@ -1,7 +1,7 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { db } from '@ksi-core/backend/db';
-import { getUrls } from 'packages/shared';
+import { db } from '@ksi-core/server/db';
+import { getUrls } from '@ksi-core/shared';
 import * as schema from '../db/schema';
 
 export const auth = betterAuth({

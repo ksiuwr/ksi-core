@@ -11,7 +11,7 @@
     "strict": true,
     "moduleResolution": "bundler",
     "paths": {
-      "@ksi-core/backend/*": ["../server/src/*"],
+      "@ksi-core/server/*": ["../server/src/*"],
       "@ksi-core/server/*": ["../server/src/*"],
       "$lib": ["./src/lib"],
       "$lib/*": ["./src/lib/*"]

@@ -36,7 +36,10 @@
 
 <div class={`flex gap-4 p-4 border-l-2 rounded-r-md w-full ${current.colorClass}`}>
   <div class="shrink-0 mt-1">
-    <svelte:component this={current.icon} class="size-5" />
+    {#if current}
+      {@const Icon = current.icon}
+      <Icon class="size-5" />
+    {/if}
   </div>
   <div class="flex flex-col w-full">
     <span class="font-mono text-xs font-bold uppercase tracking-wider mb-1 opacity-90">

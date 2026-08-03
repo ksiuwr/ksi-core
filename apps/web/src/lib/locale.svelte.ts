@@ -22,7 +22,7 @@ export function setLocale(newLocale: 'en' | 'pl') {
     localStorage.setItem('locale', newLocale);
     document.cookie = `locale=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
   }
-  loadLocale(newLocale);
+  void loadLocale(newLocale);
 }
 
 export function toggleLocale() {

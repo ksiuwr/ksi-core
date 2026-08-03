@@ -1,5 +1,5 @@
-import { createElysia } from '@ksi-core/backend/lib/createElysia';
-import { S3Provider } from '@ksi-core/backend/lib/s3cache';
+import { createElysia } from '@ksi-core/server/lib/createElysia';
+import { S3Provider } from '@ksi-core/server/lib/s3cache';
 import { status } from 'elysia';
 
 export default createElysia({

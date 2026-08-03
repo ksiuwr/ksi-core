@@ -11,7 +11,6 @@
     "strict": true,
     "noEmitOnError": false,
     "noErrorTruncation": true,
-    "downlevelIteration": true,
     "skipLibCheck": false,
     "jsx": "react-jsx",
     "allowSyntheticDefaultImports": true,

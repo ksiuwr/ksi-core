@@ -1,5 +1,5 @@
-import { auth } from '@ksi-core/backend/lib/auth';
-import { discordBot } from '@ksi-core/backend/lib/discord';
+import { auth } from '@ksi-core/server/lib/auth';
+import { discordBot } from '@ksi-core/server/lib/discord';
 import routes from './routes';
 import { cors } from '@elysia/cors';
 import { Elysia, type Context } from 'elysia';

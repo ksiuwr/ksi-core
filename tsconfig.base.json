@@ -24,12 +24,11 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
-    "baseUrl": ".", // Base is the monorepo root
+    "rootDir": ".",
     "paths": {
-      "@ksi-core/backend/*": ["apps/server/src/*"],
-      "@ksi-core/frontend/*": ["apps/web/src/*"],
-      "@ksi-core/server/*": ["apps/server/src/*"],
-      "@ksi-core/web/*": ["apps/web/src/*"]
+      "@ksi-core/server/*": ["./apps/server/src/*"],
+      "@ksi-core/web/*": ["./apps/web/src/*"],
+      "@ksi-core/shared": ["./packages/shared/index"]
     }
   }
 }

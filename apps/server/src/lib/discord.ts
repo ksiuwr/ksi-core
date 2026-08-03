@@ -28,7 +28,7 @@ class DiscordBot {
       console.log(`[Discord] Logged in as ${readyClient.user.tag}!`);
     });
 
-    this.client.login(Bun.env.DISCORD_BOT_TOKEN);
+    void this.client.login(Bun.env.DISCORD_BOT_TOKEN);
 
     this.#registerListeners();
   }

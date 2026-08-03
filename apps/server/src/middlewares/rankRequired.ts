@@ -1,6 +1,6 @@
-import { db } from '@ksi-core/backend/db';
-import { createProtectedElysia } from '@ksi-core/backend/lib/createElysia';
-import { discordBot, DiscordRankStatus } from '@ksi-core/backend/lib/discord';
+import { db } from '@ksi-core/server/db';
+import { createProtectedElysia } from '@ksi-core/server/lib/createElysia';
+import { discordBot, DiscordRankStatus } from '@ksi-core/server/lib/discord';
 import Elysia, { status } from 'elysia';
 
 export const discordRank = (app: ReturnType<typeof createProtectedElysia>) =>

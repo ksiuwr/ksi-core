@@ -1,7 +1,7 @@
 import Elysia, { type ElysiaConfig, status } from 'elysia';
-import { db, users } from '@ksi-core/backend/db';
+import { db, users } from '@ksi-core/server/db';
 import { type InferSelectModel } from 'drizzle-orm';
-import { auth } from '@ksi-core/backend/lib/auth';
+import { auth } from '@ksi-core/server/lib/auth';
 
 // Define the context types based on protection level
 type ProtectedContext = {
