@@ -10,6 +10,7 @@
     TableProperties,
     Wrench
   } from '@lucide/svelte';
+  import type { User, Session } from '@ksi-core/server/lib/auth.types';
   import { authClient } from '../lib/auth-client';
   import { api } from '$lib/backend';
   import { toast } from 'svelte-sonner';
@@ -19,21 +20,26 @@
   import SidebarLink from './SidebarLink.svelte';
   import { getUrls } from 'shared';
 
+  interface Props {
+    user: User | null;
+    session: Session | null;
+  }
+
+  const { user, session }: Props = $props();
+
   let clicksResetDebounceTimeout: NodeJS.Timeout | null = null;
 
   let clicks = $state(0);
   $effect(() => {
-    if (clicks >= 4 && ($session.data === null || $session.data.user === null)) $showAdmin = true;
+    if (clicks >= 4 && user === null) $showAdmin = true;
     if (clicksResetDebounceTimeout !== null) {
       clearTimeout(clicksResetDebounceTimeout);
     }
     clicksResetDebounceTimeout = setTimeout(() => (clicks = 0), 5000);
   });
 
-  const session = authClient.useSession();
-
   $effect(() => {
-    if (!$session.isPending && $session.data && $session.data?.user !== undefined) {
+    if (user !== null) {
       api.dashboard.user.get().then(async (r) => {
         if (r.error) {
           await authClient.signOut();
@@ -103,14 +109,14 @@
         </button>
       {/if}
 
-      {#if $session.data?.session !== undefined}
+      {#if session !== null}
         <div class="pt-4">
           <div class="w-full px-4 py-2 my-2 border-t border-base-200 bg-base-200/30">
             <div class="flex items-center w-full justify-between px-2">
               <div class="flex flex-col">
                 <span class="text-xs opacity-50">Logged in as</span>
-                <span class="text-sm font-bold text-primary truncate max-w-[120px]">
-                  {$session.data?.user.name}
+                <span class="text-sm font-bold text-primary truncate max-w-30">
+                  {user?.name}
                 </span>
               </div>
               <button
@@ -138,7 +144,7 @@
 {/snippet}
 
 <aside
-  class="hidden lg:flex w-[250px] shrink-0 flex-col border-r border-base-200 bg-base-100 sticky top-[60px] h-[calc(100vh-60px)]"
+  class="hidden lg:flex w-62.5 shrink-0 flex-col border-r border-base-200 bg-base-100 sticky top-15 h-[calc(100vh-60px)]"
 >
   {@render sidebarContent()}
 </aside>
@@ -146,21 +152,21 @@
 <div
   class="fixed top-0 left-0 h-screen flex flex-col z-50 lg:hidden shadow-2xl transition-transform duration-300 ease-out {$sidebarStore
     ? 'translate-x-0'
-    : 'translate-x-[-100%]'}"
+    : '-translate-x-full'}"
 >
-  <div class="flex h-[60px] items-center border-b border-r border-base-200 bg-base-100">
+  <div class="flex h-15 items-center border-b border-r border-base-200 bg-base-100">
     <button
       onclick={() => {
         $sidebarStore = false;
       }}
-      class="btn btn-square btn-outline h-[60px] w-[60px] rounded-none border-0 border-r border-base-200"
+      class="btn btn-square btn-outline h-15 w-15 rounded-none border-0 border-r border-base-200"
     >
       <PanelLeftClose class="size-5" />
     </button>
     <span class="ml-4 font-mono text-lg font-bold">Navigation</span>
   </div>
 
-  <div class="bg-base-100 flex flex-col w-[280px] h-full overflow-hidden border-r border-base-200">
+  <div class="bg-base-100 flex flex-col w-70 h-full overflow-hidden border-r border-base-200">
     {@render sidebarContent()}
   </div>
 </div>

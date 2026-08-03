@@ -1,10 +1,18 @@
-import { api } from '$lib/backend';
+import type { LayoutServerLoad } from './$types';
+import { makeApi } from '$lib/backend';
 
-export const load = async () => {
+export const load: LayoutServerLoad = async ({ fetch, locals }) => {
+  let alert = null;
   try {
-    const alert = await api.alerts.current.get();
-    return { alert: alert.data };
+    const res = await makeApi(fetch).alerts.current.get();
+    alert = res.data;
   } catch {
-    return { alert: null };
+    // no active alert
   }
+
+  return {
+    alert,
+    user: locals.user,
+    session: locals.session
+  };
 };
