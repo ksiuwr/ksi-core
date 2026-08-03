@@ -1,11 +1,24 @@
 import * as schema from '@ksi-core/backend/db/schema';
+import { defineRelations } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/bun-sql';
 import Elysia from 'elysia';
 
-const createDatabase = () =>
-  drizzle(Bun.env.DATABASE_URL!, {
-    schema
-  });
+const relations = defineRelations(schema, (r) => ({
+  accounts: {
+    users: r.one.users({
+      from: r.accounts.userId,
+      to: r.users.id
+    })
+  },
+  users: {
+    createdAlerts: r.many.alerts({
+      from: r.users.id,
+      to: r.alerts.createdBy
+    })
+  }
+}));
+
+const createDatabase = () => drizzle(Bun.env.DATABASE_URL!, { relations });
 
 const globalForDB = globalThis as unknown as {
   db: ReturnType<typeof createDatabase> | undefined;

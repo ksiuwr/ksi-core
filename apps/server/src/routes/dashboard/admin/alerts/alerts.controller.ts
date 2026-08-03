@@ -1,8 +1,7 @@
-import { alert } from '@ksi-core/backend/db';
+import { alerts } from '@ksi-core/backend/db';
 import { createElysia } from '@ksi-core/backend/lib/createElysia';
 import { AlertBodyType } from '@ksi-core/backend/routes/dashboard/admin/alerts/alerts.type';
-import { _cuid2 } from 'better-auth';
-import { count, desc, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { status, t } from 'elysia';
 
 export default createElysia({
@@ -12,12 +11,15 @@ export default createElysia({
   .get(
     '/',
     async ({ db, query }) => {
-      const results = await db.query.alert.findMany({
+      const results = await db.query.alerts.findMany({
         offset: query.page * 20,
         limit: 20,
-        orderBy: desc(alert.startDate)
+        orderBy: {
+          startDate: 'desc'
+        }
       });
-      const count = await db.$count(alert);
+
+      const count = await db.$count(alerts);
 
       return {
         results,
@@ -33,7 +35,7 @@ export default createElysia({
   .post(
     '/',
     async ({ db, body, user }) => {
-      await db.insert(alert).values({
+      await db.insert(alerts).values({
         ...body,
         createdBy: user.id
       });
@@ -47,14 +49,14 @@ export default createElysia({
   .put(
     '/:id',
     async ({ db, params, body }) => {
-      const total = await db.$count(alert, eq(alert.id, params.id));
+      const total = await db.$count(alerts, eq(alerts.id, params.id));
       if (total === 0) return status(404, `Alert ${params.id} was not found!`);
       await db
-        .update(alert)
+        .update(alerts)
         .set({
           ...body
         })
-        .where(eq(alert.id, params.id));
+        .where(eq(alerts.id, params.id));
 
       return status(200, {
         code: 'UPDATED_ALERT',
@@ -73,9 +75,9 @@ export default createElysia({
   .delete(
     '/:id',
     async ({ db, params }) => {
-      const total = await db.$count(alert, eq(alert.id, params.id));
+      const total = await db.$count(alerts, eq(alerts.id, params.id));
       if (total === 0) return status(404, `Alert ${params.id} was not found!`);
-      await db.delete(alert).where(eq(alert.id, params.id));
+      await db.delete(alerts).where(eq(alerts.id, params.id));
 
       return status(200, {
         code: 'DELETED_ALERT',

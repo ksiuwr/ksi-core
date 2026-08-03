@@ -2,10 +2,13 @@ import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { db } from '@ksi-core/backend/db';
 import { getUrls } from 'packages/shared';
+import * as schema from '../db/schema';
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
-    provider: 'pg'
+    provider: 'pg',
+    schema: schema,
+    usePlural: true
   }),
   trustedOrigins: [getUrls().FRONTEND],
 

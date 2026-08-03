@@ -1,12 +1,16 @@
 import { db } from '@ksi-core/backend/db';
-import { createElysia, createProtectedElysia } from '@ksi-core/backend/lib/createElysia';
+import { createProtectedElysia } from '@ksi-core/backend/lib/createElysia';
 import { discordBot, DiscordRankStatus } from '@ksi-core/backend/lib/discord';
 import Elysia, { status } from 'elysia';
 
-export const discordRank = (app: Elysia) =>
+export const discordRank = (app: ReturnType<typeof createProtectedElysia>) =>
   app.derive(async ({ user }) => {
-    const userAccount = await db.query.account.findFirst({
-      where: (account, { eq }) => eq(account.userId, user.id)
+    const userAccount = await db.query.accounts.findFirst({
+      where: {
+        userId: {
+          eq: user.id
+        }
+      }
     });
     if (!userAccount)
       return {

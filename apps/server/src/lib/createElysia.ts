@@ -1,17 +1,17 @@
 import Elysia, { type ElysiaConfig, status } from 'elysia';
-import { db, user } from '@ksi-core/backend/db';
+import { db, users } from '@ksi-core/backend/db';
 import { type InferSelectModel } from 'drizzle-orm';
 import { auth } from '@ksi-core/backend/lib/auth';
 
 // Define the context types based on protection level
 type ProtectedContext = {
-  user: NonNullable<InferSelectModel<typeof user>>;
+  user: NonNullable<InferSelectModel<typeof users>>;
   db: typeof db;
   unauthorizedError: null;
 };
 
 type UnprotectedContext = {
-  user: InferSelectModel<typeof user> | null;
+  user: InferSelectModel<typeof users> | null;
   db: typeof db;
   unauthorizedError: string | null;
 };
@@ -74,7 +74,7 @@ async function contextHandler(params: {
   if (protectedRoute) {
     // Force the narrower type for ProtectedContext.
     return {
-      user: session.user as NonNullable<InferSelectModel<typeof user>>,
+      user: session.user as NonNullable<InferSelectModel<typeof users>>,
       unauthorizedError: null,
       db
     };
