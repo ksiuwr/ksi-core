@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ChevronLeft, ChevronRight } from '@lucide/svelte';
-  import { fly } from 'svelte/transition';
+  import { fly, slide } from 'svelte/transition';
 
   // @wc-ignore
   const keys = {
@@ -10,86 +10,108 @@
   };
 
   let { images }: { images: string[] } = $props();
-  let splittedImages = $derived([
-    images.slice(0, Math.floor(images.length / 3)),
-    images.slice(Math.floor(images.length / 3), Math.floor((images.length / 3) * 2)),
-    images.slice(Math.floor((images.length / 3) * 2), images.length)
-  ]);
+  let splittedImages = $derived(
+    (() => {
+      let d: string[][] = [[], [], []];
 
-  let currImage = $state<number | null>(null);
+      images.forEach((image, i) => {
+        d[i % 3].push(image);
+      });
 
-  let debounce = $state<Timer | undefined>(undefined);
+      return d;
+    })()
+  );
+
+  let currentImageIndex = $state<number>(0);
+  let galleryOpen = $state<boolean>(false);
+
+  let focusedDirection = $state<'l' | 'r' | null>(null);
+
+  let eventDebounceTimer = $state<Timer | undefined>(undefined);
 
   if (typeof window !== 'undefined') {
     window.addEventListener('keydown', (e) => {
-      if (currImage === null) return;
+      if (!galleryOpen) return;
       if (e.key === keys.Escape) {
-        currImage = null;
+        galleryOpen = false;
       }
-      if (debounce != undefined) {
+      if (eventDebounceTimer != undefined) {
         return;
       }
-      debounce = setTimeout(() => {
-        debounce = undefined;
+      eventDebounceTimer = setTimeout(() => {
+        eventDebounceTimer = undefined;
       }, 150);
-      currImage = currImage as number;
       if (e.key === keys.ArrowRight) {
-        if (currImage < images.length - 1) currImage++;
+        navigateNextImage();
       } else if (e.key === keys.ArrowLeft) {
-        if (currImage > 0) currImage--;
+        navigatePreviousImage();
       }
     });
   }
+
+  let navigatePreviousImage = () => {
+    if (currentImageIndex > 0) currentImageIndex--;
+    if (currentImageIndex === 0) currentImageIndex = images.length - 1;
+  };
+
+  let navigateNextImage = () => {
+    if (currentImageIndex < images.length - 1) currentImageIndex++;
+    if (currentImageIndex === images.length - 1) currentImageIndex = 0;
+  };
 </script>
 
-{#if currImage !== null}
+{#if galleryOpen}
   <div
-    transition:fly={{ duration: 300 }}
-    onclickcapture={(e) => {
-      if (e.target && 'tagName' in e.target && e.target.tagName === 'DIV') currImage = null;
+    transition:slide={{ duration: 300 }}
+    role="presentation"
+    onpointerdown={(e) => {
+      if (e.target && 'tagName' in e.target && e.target.tagName === 'DIV') galleryOpen = false;
     }}
-    class="fixed top-0 left-0 flex flex-col items-center justify-center w-screen h-screen bg-base-100/90 z-90"
+    class="fixed top-0 left-0 flex flex-col items-center justify-center w-screen h-screen bg-base-100 z-90"
   >
     <img
-      src={images[currImage]}
-      class="md:max-w-[70vw] max-h-[90vh] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+      src={images[currentImageIndex]}
+      class="md:max-w-[70vw] max-h-[90vh] rounded-md transition-transform absolute"
       alt=""
+      style={focusedDirection === null
+        ? ''
+        : `${focusedDirection === 'l' ? 'transform: translateX(-10px)' : 'transform: translateX(10px)'}`}
     />
     <button
-      onclick={() => {
-        if (currImage! > 0) currImage!--;
+      onpointerdown={() => {
+        navigatePreviousImage();
+        focusedDirection = 'l';
       }}
-      class="absolute top-1/2 -translate-y-1/2 left-4 btn btn-square"
+      onpointerup={() => (focusedDirection = null)}
+      class="absolute bottom-4 md:top-1/2 md:-translate-y-1/2 left-4 p-10 md:h-screen cursor-pointer transition-all hover:text-white text-white/80 hover:-translate-x-2"
     >
-      <ChevronLeft class="size-4" />
+      <ChevronLeft class="size-8" />
     </button>
     <button
-      onclick={() => {
-        if (currImage! < images.length - 1) currImage!++;
+      onpointerdown={() => {
+        navigateNextImage();
+        focusedDirection = 'r';
       }}
-      class="absolute top-1/2 -translate-y-1/2 right-4 btn btn-square"
+      onpointerup={() => (focusedDirection = null)}
+      class="absolute bottom-4 md:top-1/2 md:-translate-y-1/2 right-4 p-10 md:h-screen cursor-pointer transition-all hover:text-white text-white/80 hover:translate-x-2"
     >
-      <ChevronRight class="size-4" />
+      <ChevronRight class="size-8" />
     </button>
   </div>
 {/if}
-<div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+<div class="grid grid-cols-1 md:grid-cols-3 group gap-2">
   {#each splittedImages as splitCol, splitI (splitI)}
     <div class="flex flex-col gap-2">
       {#each splitCol as image, i (i)}
         <button
           type="button"
-          title=""
           onclick={() => {
-            let index = 0;
-            if (splitI !== 0) {
-              for (let j = 0; j < splitI; j++) {
-                index += splittedImages[j].length;
-              }
-            }
-            currImage = index + i;
+            currentImageIndex = i * 3 + (splitI % 3);
+            galleryOpen = true;
           }}
-          class="w-full overflow-hidden transition-all hover:scale-[0.98] hover:opacity-85 hover:rounded-lg cursor-pointer"
+          class={[
+            'w-full overflow-hidden transition-all group-hover:opacity-80 hover:z-10 hover:opacity-100 duration-200 hover:scale-[1.04] hover:rounded-lg cursor-pointer'
+          ]}
         >
           <img src={image} class="w-full" alt="" />
         </button>
