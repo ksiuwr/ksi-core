@@ -23,3 +23,6 @@ jobs:
 
       - name: Check formatting
         run: bunx oxfmt --check
+
+      - name: Check lint
+        run: bunx oxlint
