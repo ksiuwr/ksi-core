@@ -22,6 +22,6 @@ export const editions: {
     location: 'Hotel Bornit, Mickiewicza 21, 58-580 Szklarska Poręba',
     participants: 274,
     date: '05.03.2026 - 08.03.2026',
-    bgImage: undefined,
-  },
+    bgImage: undefined
+  }
 };
