@@ -6,12 +6,18 @@ on:
   pull_request:
     branches: ['master']
 
+permissions:
+  contents: write
+
 jobs:
   format:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # Use the head ref so we can push back to the PR branch
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -21,8 +27,13 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Check formatting
-        run: bunx oxfmt --check
+      - name: Format
+        run: bunx oxfmt
 
       - name: Check lint
         run: bunx oxlint
+
+      - name: Commit formatting changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'style: auto-format with oxfmt'
