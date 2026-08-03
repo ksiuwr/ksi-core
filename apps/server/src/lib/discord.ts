@@ -73,6 +73,7 @@ class DiscordBot {
 
     const guildId = Bun.env.DISCORD_GUILD_ID!;
     if (!this.client.guilds.cache.has(guildId)) {
+      console.error(`Guild ID ${guildId} is not found in bot guilds!\nCheck .env and update it`);
       return this.#addCache(userId, DiscordRankStatus.NOT_FOUND);
     }
 
@@ -82,6 +83,7 @@ class DiscordBot {
 
     if (member.roles.cache.has(Bun.env.DISCORD_ROLE_DEV!))
       return this.#addCache(userId, DiscordRankStatus.RANK_DEV);
+
     if (member.roles.cache.has(Bun.env.DISCORD_ROLE_ADMIN!))
       return this.#addCache(userId, DiscordRankStatus.RANK_ADMIN);
 
