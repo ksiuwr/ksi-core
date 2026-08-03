@@ -11,7 +11,7 @@ COPY apps/web/package.json ./apps/web/package.json
 RUN bun install --frozen-lockfile
 
 FROM base AS builder
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app /app
 COPY . .
 
 RUN bun run --cwd apps/web prepare
@@ -22,10 +22,14 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3001
 
-COPY --from=builder /app/apps/web/build ./build
-COPY --from=builder /app/apps/web/package.json ./package.json
-
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
+COPY --from=builder /app/apps/web/build ./apps/web/build
+COPY --from=builder /app/apps/web/package.json ./apps/web/package.json
 COPY --from=builder /app/packages ./packages
+
+WORKDIR /app/apps/web
 
 EXPOSE 3001
 CMD ["bun", "run", "build/index.js"]
+
