@@ -2,7 +2,7 @@
   import { page } from '$app/state';
   import { editions } from '$lib/data/conferences.js';
   import { Calendar, MapPin, UsersRound } from '@lucide/svelte';
-  import DynamicGallery from '../../../components/DynamicGallery.svelte';
+  import DynamicGallery from '../../../../components/DynamicGallery.svelte';
   import { api } from '$lib/backend';
 
   let year = $derived(page.params.year ?? '');

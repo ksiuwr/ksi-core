@@ -1,6 +1,6 @@
 <script>
-  import Wrapper from '../../../components/Wrapper.svelte';
-  import Goal from '../../../components/Goal.svelte';
+  import Wrapper from '../../../../components/Wrapper.svelte';
+  import Goal from '../../../../components/Goal.svelte';
   import { Github } from '@lucide/svelte';
 </script>
 

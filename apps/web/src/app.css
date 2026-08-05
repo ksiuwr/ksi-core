@@ -1,6 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Space+Grotesk:wght@300..700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Azeret+Mono:ital,wght@0,100..900;1,100..900&display=swap');
+
 @import 'tailwindcss';
-@plugin "daisyui";
+@plugin "daisyui" {
+  themes: light, dark;
+}
+
+@theme {
+  --color-muted: var(--color-muted);
+  --color-muted-100: var(--color-muted-100);
+}
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
@@ -9,10 +17,12 @@
   default: true;
   prefersdark: false;
   color-scheme: 'light';
-  --font-mono: 'Space Mono';
+  --font-mono: 'Azeret Mono';
   --color-base-100: oklch(98% 0 0);
   --color-base-200: oklch(96% 0.001 286.375);
   --color-base-300: oklch(92% 0.004 286.32);
+  --color-muted: oklch(80% 0.004 286.32);
+  --color-muted-100: oklch(50% 0.004 286.32);
   --color-base-content: oklch(14% 0.004 49.25);
   --color-primary: oklch(0.53 0.17 256.43);
   --color-primary-content: oklch(0 0 0);
@@ -45,11 +55,12 @@
   default: false;
   prefersdark: true;
   color-scheme: 'dark';
-  --font-mono: 'Space Mono';
-
+  --font-mono: 'Azeret Mono';
   --color-base-100: oklch(14% 0.005 285.823);
   --color-base-200: oklch(21% 0.006 285.885);
   --color-base-300: oklch(27% 0.006 286.033);
+  --color-muted: oklch(45% 0.006 286.033);
+  --color-muted-100: oklch(80% 0.006 286.033);
   --color-base-content: oklch(96% 0.001 286.375);
 
   --color-primary: oklch(98% 0.12 232.17);
@@ -85,12 +96,9 @@
   --depth: 1;
   --noise: 0;
 }
-:root {
-  font-family: 'Space Grotesk', sans-serif;
-}
 
-@utility font-lora {
-  font-family: 'Lora', serif;
+:root {
+  font-family: 'Azeret Mono', monospace;
 }
 
 @utility btn-outline {
@@ -111,11 +119,15 @@
 
 @layer base {
   h1 {
-    @apply text-[clamp(3rem,5vw,3rem)] mb-4 leading-tight font-bold border-b border-b-base-content/10;
+    @apply text-4xl md:text-[clamp(3rem,5vw,3rem)] mb-4 leading-tight font-bold;
   }
 
   h2 {
-    @apply text-[1.75rem] mb-2 font-bold leading-snug;
+    @apply text-2xl md:text-[1.75rem] mb-2 font-bold leading-snug;
+  }
+
+  h3 {
+    @apply text-xl md:text-[1.25rem] font-bold leading-snug;
   }
 
   hr {

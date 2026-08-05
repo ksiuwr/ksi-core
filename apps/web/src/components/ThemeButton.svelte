@@ -1,48 +1,71 @@
 <script lang="ts">
   import { themeStore } from '$lib/themeStore';
   import { Moon, Sun } from '@lucide/svelte';
-  import { onMount } from 'svelte';
-
-  let mounted = $state(false);
-
-  onMount(() => {
-    mounted = true;
-  });
-
-  function spin(node: Element, { duration = 300, degree = 90 }) {
-    return {
-      duration: mounted ? duration : 0,
-      css: (t: number) => `
-        transform: rotate(${degree * (1 - t)}deg);
-        opacity: ${t};
-      `
-    };
-  }
 </script>
 
 <button
-  onclick={() => {
-    const newTheme = $themeStore === 'dark' ? 'light' : 'dark';
-    themeStore.set(newTheme);
-  }}
-  class="btn btn-square btn-outline size-15 border-0 border-base-200 border-l rounded-none relative overflow-hidden"
+  onclick={() => themeStore.set($themeStore === 'dark' ? 'light' : 'dark')}
+  class="md:hidden flex cursor-pointer gap-4 py-2 w-full items-center btn btn-lg"
   aria-label="Toggle theme"
 >
   {#if $themeStore === 'dark'}
+    <Moon class="w-4 h-4" />
+
+    Dark mode
+  {:else}
+    <Sun class="w-4 h-4" />
+    Light mode
+  {/if}
+</button>
+
+<button
+  onclick={() => themeStore.set($themeStore === 'dark' ? 'light' : 'dark')}
+  class="not-md:hidden cursor-pointer w-26 h-6 text-muted hover:text-base-content transition-colors relative group overflow-hidden"
+  aria-label="Toggle theme"
+>
+  <div
+    class="absolute left-0 w-6 h-full flex items-center justify-center group-hover:rotate-12 transition-transform"
+  >
     <div
-      class="absolute inset-0 flex items-center justify-center"
-      in:spin={{ duration: 300, degree: -90 }}
-      out:spin={{ duration: 300, degree: 90 }}
+      class="absolute transition-all duration-300"
+      class:opacity-100={$themeStore === 'dark'}
+      class:rotate-0={$themeStore === 'dark'}
+      class:opacity-0={$themeStore === 'light'}
+      class:rotate-90={$themeStore === 'light'}
     >
       <Moon class="w-4 h-4" />
     </div>
-  {:else if $themeStore === 'light'}
+
     <div
-      class="absolute inset-0 flex items-center justify-center"
-      in:spin={{ duration: 300, degree: 90 }}
-      out:spin={{ duration: 300, degree: -90 }}
+      class="absolute transition-all duration-300"
+      class:opacity-100={$themeStore === 'light'}
+      class:rotate-0={$themeStore === 'light'}
+      class:opacity-0={$themeStore === 'dark'}
+      class:-rotate-90={$themeStore === 'dark'}
     >
       <Sun class="w-4 h-4" />
     </div>
-  {/if}
+  </div>
+
+  <div class="grid w-full h-full text-sm items-center justify-center pl-6">
+    <p
+      class="col-start-1 row-start-1 transition-all duration-450"
+      class:translate-y-0={$themeStore === 'dark'}
+      class:opacity-100={$themeStore === 'dark'}
+      class:-translate-y-full={$themeStore === 'light'}
+      class:opacity-0={$themeStore === 'light'}
+    >
+      Dark
+    </p>
+
+    <p
+      class="col-start-1 row-start-1 transition-all duration-450"
+      class:translate-y-0={$themeStore === 'light'}
+      class:opacity-100={$themeStore === 'light'}
+      class:translate-y-full={$themeStore === 'dark'}
+      class:opacity-0={$themeStore === 'dark'}
+    >
+      Light
+    </p>
+  </div>
 </button>

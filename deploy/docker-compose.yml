@@ -8,8 +8,8 @@ services:
     networks:
       - ksi-network
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     environment:
       - TZ=Europe/Warsaw
     volumes:
@@ -20,26 +20,26 @@ services:
         #      - ./dynamic_conf.yml:/etc/traefik/dynamic_conf.yml:ro
     command:
       # Provider Settings
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
+      - '--providers.docker=true'
+      - '--providers.docker.exposedbydefault=false'
       # Entrypoints & HTTP to HTTPS Redirection
       #      - "--providers.file.filename=/etc/traefik/dynamic_conf.yml"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
-      - "--entrypoints.websecure.address=:443"
+      - '--entrypoints.web.address=:80'
+      - '--entrypoints.web.http.redirections.entryPoint.to=websecure'
+      - '--entrypoints.web.http.redirections.entryPoint.scheme=https'
+      - '--entrypoints.websecure.address=:443'
 
-      - "--certificatesresolvers.letsencrypt.acme.email=root@crqch.dev"
-      - "--certificatesresolvers.letsencrypt.acme.storage=/acme.json"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - '--certificatesresolvers.letsencrypt.acme.email=root@crqch.dev'
+      - '--certificatesresolvers.letsencrypt.acme.storage=/acme.json'
+      - '--certificatesresolvers.letsencrypt.acme.httpchallenge=true'
+      - '--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web'
     labels:
-      - "traefik.enable=true"
+      - 'traefik.enable=true'
       # Secure Traefik Dashboard (Optional - replace with your credentials)
-      - "traefik.http.routers.dashboard.rule=Host(`ksi.ii.uni.wroc.pl`) && PathPrefix(`/traefik`)"
-      - "traefik.http.routers.dashboard.service=api@internal"
-      - "traefik.http.routers.dashboard.entrypoints=websecure"
-      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+      - 'traefik.http.routers.dashboard.rule=Host(`ksi.ii.uni.wroc.pl`) && PathPrefix(`/traefik`)'
+      - 'traefik.http.routers.dashboard.service=api@internal'
+      - 'traefik.http.routers.dashboard.entrypoints=websecure'
+      - 'traefik.http.routers.dashboard.tls.certresolver=letsencrypt'
 
   postgres:
     image: postgres:13-alpine
@@ -56,7 +56,7 @@ services:
       - ksi-network
 
   backend:
-    image: "ghcr.io/ksiuwr/ksi-backend:latest"
+    image: 'ghcr.io/ksiuwr/ksi-backend:latest'
     container_name: ksi-backend-prod
     restart: unless-stopped
     env_file:
@@ -66,35 +66,35 @@ services:
     depends_on:
       - postgres
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`ksi.ii.uni.wroc.pl`) && PathPrefix(`/api`)"
-      - "traefik.http.routers.backend.entrypoints=websecure"
-      - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.backend.rule=Host(`ksi.ii.uni.wroc.pl`) && PathPrefix(`/api`)'
+      - 'traefik.http.routers.backend.entrypoints=websecure'
+      - 'traefik.http.routers.backend.tls.certresolver=letsencrypt'
         #- "traefik.http.routers.backend.tls=true"
-      - "traefik.http.routers.backend.priority=10"
+      - 'traefik.http.routers.backend.priority=10'
       # Define middlewares locally to this service
       #- "traefik.http.middlewares.api-strip.stripprefix.prefixes=/api"
-      - "traefik.http.middlewares.backend-gzip.compress=true"
+      - 'traefik.http.middlewares.backend-gzip.compress=true'
         #- "traefik.http.routers.backend.middlewares=api-strip,backend-gzip"
-      - "traefik.http.routers.backend.middlewares=backend-gzip"
-      - "traefik.http.services.backend.loadbalancer.server.port=3000"
+      - 'traefik.http.routers.backend.middlewares=backend-gzip'
+      - 'traefik.http.services.backend.loadbalancer.server.port=3000'
 
   frontend:
-    image: "ghcr.io/ksiuwr/ksi-frontend:latest"
+    image: 'ghcr.io/ksiuwr/ksi-frontend:latest'
     container_name: ksi-frontend-prod
     restart: unless-stopped
     networks:
       - ksi-network
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`ksi.ii.uni.wroc.pl`) && PathPrefix(`/`)"
-      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.frontend.rule=Host(`ksi.ii.uni.wroc.pl`) && PathPrefix(`/`)'
+      - 'traefik.http.routers.frontend.entrypoints=websecure'
         #- "traefik.http.routers.frontend.tls=true"
-      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.frontend.priority=1"
-      - "traefik.http.middlewares.frontend-gzip.compress=true"
-      - "traefik.http.routers.frontend.middlewares=frontend-gzip"
-      - "traefik.http.services.frontend.loadbalancer.server.port=3001"
+      - 'traefik.http.routers.frontend.tls.certresolver=letsencrypt'
+      - 'traefik.http.routers.frontend.priority=1'
+      - 'traefik.http.middlewares.frontend-gzip.compress=true'
+      - 'traefik.http.routers.frontend.middlewares=frontend-gzip'
+      - 'traefik.http.services.frontend.loadbalancer.server.port=3001'
   watchtower:
     image: nickfedor/watchtower:latest
     container_name: watchtower

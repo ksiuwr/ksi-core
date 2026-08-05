@@ -32,7 +32,7 @@
   }}
 >
   <div class={'flex justify-between items-center transition-colors'}>
-    <h1 class="text-[clamp(2rem,2cqw,4rem)] font-lora">{title}</h1>
+    <h1 class="text-[clamp(2rem,2cqw,4rem)]">{title}</h1>
   </div>
   <motion.div
     animate={show ? { height: 'auto' } : { height: 0 }}

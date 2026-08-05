@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Star, FolderOpen, ArrowUpRight } from '@lucide/svelte';
-  import Wrapper from '../../components/Wrapper.svelte';
+  import Wrapper from '../../../components/Wrapper.svelte';
   import { editions } from '$lib/data/conferences.js';
   import { page } from '$app/stores';
 </script>
