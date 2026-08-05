@@ -536,6 +536,7 @@ msgstr "Hour of Code"
 
 #: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
+#: src/routes/projects/ml/+page.svelte
 msgid "Machine Learning"
 msgstr "Machine Learning"
 
@@ -621,6 +622,7 @@ msgid "Search for projects"
 msgstr "Search for projects"
 
 #: src/routes/projects/+page.svelte
+#: src/routes/projects/ml/+page.svelte
 msgid "Work in progress..."
 msgstr "Work in progress..."
 

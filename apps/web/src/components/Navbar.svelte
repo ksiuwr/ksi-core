@@ -167,11 +167,7 @@
 <div class="not-lg:hidden flex flex-col gap-8 w-full p-10 bg-base-200">
   <h1 class="uppercase">Projects</h1>
   <NavbarAccordion title="Zosia" url="/projects/zosia" content={zosiaEditions} />
-  <NavbarAccordion
-    title="Machine Learning"
-    url="/projects/machine-learning"
-    content={machineLearning}
-  />
+  <NavbarAccordion title="Machine Learning" url="/projects/ml" content={machineLearning} />
   <a href="/projects" class="underline cursor-pointer w-max">and more...</a>
 
   <div class="flex gap-8 items-center justify-end">
