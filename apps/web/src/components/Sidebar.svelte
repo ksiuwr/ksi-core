@@ -1,12 +1,16 @@
 <script lang="ts">
   import { showAdmin, sidebarStore } from '$lib/sidebar';
   import {
+    Atom,
+    Blocks,
+    BrainCircuit,
     ChevronDown,
     File,
     FileIcon,
     LogIn,
     LogOut,
     Megaphone,
+    MountainSnow,
     PanelLeftClose,
     TableProperties,
     Wrench
@@ -15,11 +19,11 @@
   import { authClient } from '../lib/auth-client';
   import { api } from '$lib/backend';
   import { toast } from 'svelte-sonner';
-  import { editions } from '$lib/data/conferences.js';
   import SidebarAccordion from './SidebarAccordion.svelte';
   import { page } from '$app/stores';
   import SidebarLink from './SidebarLink.svelte';
   import { getUrls } from 'shared';
+  import { invalidateAll } from '$app/navigation';
   import ThemeButton from './ThemeButton.svelte';
   import { locale, setLocale } from '$lib/locale.svelte';
   import { locales } from '../locales/data';
@@ -56,6 +60,7 @@
       api.dashboard.user.get().then(async (r) => {
         if (r.error) {
           await authClient.signOut();
+          await invalidateAll();
           toast.error('Access denied.', {
             id: 'access_denied'
           });
@@ -73,85 +78,73 @@
 </script>
 
 {#snippet sidebarContent()}
-  <div class="flex flex-col flex-1 w-full gap-2 py-4 overflow-y-auto text-center">
-    <SidebarLink href="/" icon={File}>Home</SidebarLink>
-
-    <SidebarAccordion title="Zosia">
-      <SidebarLink href="/zosia">Project's site</SidebarLink>
-      {#each Object.keys(editions).sort((a, b) => parseInt(b) - parseInt(a)) as edition}
-        <SidebarLink href={`/zosia/${edition}`}>{edition}</SidebarLink>
-      {/each}
-    </SidebarAccordion>
-
+  <div class="flex flex-col flex-1 w-full overflow-y-auto px-3 py-3 gap-1">
     <SidebarAccordion title="Projects">
-      <SidebarLink href="/projects/hoc" icon={FileIcon} exact={false}>Hour of Code</SidebarLink>
-      <SidebarLink href="/projects/ket" icon={FileIcon} exact={false}>KET</SidebarLink>
-      <SidebarAccordion title="Machine Learning">
-        <SidebarLink href="/projects/ml" icon={FileIcon} exact={false}>Project's site</SidebarLink>
-        <SidebarLink href="/projects/ml/physarum" icon={FileIcon} exact={false}
-          >physarum</SidebarLink
-        >
-        <SidebarLink href="/projects/ml/krasnal" icon={FileIcon} exact={false}>krasnal</SidebarLink>
-      </SidebarAccordion>
+      <SidebarLink href="/projects/zosia" icon={MountainSnow} exact={false}>Zosia</SidebarLink>
+      <SidebarLink href="/projects/ml" icon={BrainCircuit} exact={false}
+        >Machine Learning</SidebarLink
+      >
+      <SidebarLink href="/projects/hoc" icon={Blocks} exact={false}>Hour of Code</SidebarLink>
+      <SidebarLink href="/projects/ket" icon={Atom} exact={false}>KET</SidebarLink>
     </SidebarAccordion>
 
-    <div class="flex flex-col w-full">
-      {#if session !== null}
-        <div class="pt-4">
-          <div class="w-full px-4 py-2 my-2 border-t border-base-200 bg-base-200/30">
-            <div class="flex items-center w-full justify-between px-2">
-              <div class="flex flex-col">
-                <span class="text-xs opacity-50">Logged in as</span>
-                <span class="text-sm font-bold text-primary truncate max-w-30">
-                  {user?.name}
-                </span>
-              </div>
-              <button
-                type="button"
-                onclick={() => {
-                  authClient.signOut();
-                }}
-                class="btn btn-ghost btn-sm btn-square text-error"
-                title="Logout"
-              >
-                <LogOut class="size-4" />
-              </button>
-            </div>
+    {#if session !== null}
+      <div class="mt-2 border-t border-base-200 pt-3 flex flex-col gap-1">
+        <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-base-200/50">
+          <div class="flex flex-col min-w-0">
+            <span class="text-xs opacity-50 leading-none mb-0.5">Logged in as</span>
+            <span class="text-sm font-semibold text-primary truncate">{user?.name}</span>
           </div>
-
-          <SidebarAccordion title="Dashboard">
-            <SidebarLink href="/dashboard" icon={Wrench}>HOME</SidebarLink>
-            <SidebarLink href="/dashboard/alerts" icon={Megaphone}>ALERTS</SidebarLink>
-            <SidebarLink href="/dashboard/s3cache" icon={TableProperties}>S3 CACHE</SidebarLink>
-          </SidebarAccordion>
+          <button
+            type="button"
+            onclick={async () => {
+              const r = await authClient.signOut();
+              if (r.data?.success) {
+                toast.success('Logged out');
+                await invalidateAll();
+              }
+            }}
+            class="btn btn-ghost btn-sm btn-square text-error shrink-0 ml-2"
+            title="Logout"
+          >
+            <LogOut class="size-4" />
+          </button>
         </div>
-      {/if}
-    </div>
 
-    <div class="dropdown dropdown-bottom">
+        <SidebarAccordion title="Dashboard">
+          <SidebarLink href="/dashboard" icon={Wrench}>Home</SidebarLink>
+          <SidebarLink href="/dashboard/alerts" icon={Megaphone}>Alerts</SidebarLink>
+          <SidebarLink href="/dashboard/s3cache" icon={TableProperties}>S3 Cache</SidebarLink>
+        </SidebarAccordion>
+      </div>
+    {/if}
+  </div>
+
+  <!-- Sticky bottom utility bar -->
+  <div class="shrink-0 border-t border-base-200 px-3 py-3 flex flex-col gap-2">
+    <!-- Locale picker — full width -->
+    <div class="dropdown dropdown-top w-full">
       <div
         tabindex="0"
         role="button"
-        class="btn btn-lg hover:text-base-content transition-colors duration-150 flex items-center gap-2 cursor-pointer capitalize"
+        class="btn btn-md w-full hover:text-base-content transition-colors duration-150 flex items-center gap-1.5 cursor-pointer capitalize"
       >
-        <span class="select-none">{activeLocale.emoji} {activeLocale.formattedLocale}</span>
-        <ChevronDown class="size-4" />
+        <span class="select-none truncate">{activeLocale.emoji} {activeLocale.formattedLocale}</span
+        >
+        <ChevronDown class="size-3 shrink-0 ml-auto" />
       </div>
-
       <ul
-        class="dropdown-content right-0 rounded-md w-full menu bg-base-200 border-muted border text-base-content z-99 p-2 shadow mt-2"
+        class="dropdown-content left-0 rounded-md w-full menu bg-base-200 border border-base-300 text-base-content z-99 p-1.5 shadow-lg mb-2"
       >
         {#each availableLocales as loc}
           <li>
             <button
-              class:active={locale.current === loc.code}
               onclick={() => setLocale(loc.code)}
               class={[
-                'btn flex items-centers w-full py-2 gap-2 capitalize font-semibold',
-
+                'flex items-center w-full px-3 py-1.5 gap-2 capitalize text-sm font-medium rounded-md',
                 locale.current === loc.code
-                  ? 'text-base-content bg-blue-400'
-                  : 'text-muted-100 hover:bg-base-300'
+                  ? 'bg-primary text-primary-content'
+                  : 'hover:bg-base-300'
               ]}
             >
               {loc.emoji}
@@ -161,20 +154,27 @@
         {/each}
       </ul>
     </div>
-    <ThemeButton />
-    <button
-      onclick={() => {
-        authClient.signIn.social({
-          provider: 'discord',
-          callbackURL: getUrls().FRONTEND + '/dashboard'
-        });
-      }}
-      class="text-error btn btn-lg group uppercase flex items-center font-mono text-sm cursor-pointer text-left"
-    >
-      <LogIn class="size-4 shrink-0" />
 
-      <div class="pl-3 whitespace-nowrap">Member access</div>
-    </button>
+    <!-- Theme toggle + login on same row -->
+    <div class="flex items-center gap-2">
+      <ThemeButton />
+
+      {#if session === null}
+        <button
+          onclick={() => {
+            authClient.signIn.social({
+              provider: 'discord',
+              callbackURL: getUrls().FRONTEND + '/dashboard'
+            });
+          }}
+          class="btn btn-md text-error shrink-0 ml-auto"
+          title="Member access"
+        >
+          <LogIn class="size-4" />
+          <span class="font-mono text-xs uppercase">Login</span>
+        </button>
+      {/if}
+    </div>
   </div>
 {/snippet}
 
@@ -183,16 +183,19 @@
     ? 'translate-x-0'
     : '-translate-x-full'}"
 >
-  <div class="flex h-20 items-center border-b border-r border-base-200 bg-base-100">
+  <div class="flex h-18 items-center border-b border-r border-base-200 bg-base-100">
     <button
       onclick={() => {
         $sidebarStore = false;
       }}
-      class="btn btn-square btn-outline size-20 rounded-none border-0 border-r border-base-200"
+      class="btn btn-square btn-ghost size-18 rounded-none border-r border-base-200"
     >
       <PanelLeftClose class="size-5" />
     </button>
-    <span class="ml-4 font-mono text-lg font-bold">Navigation</span>
+    <a href="/" class="flex flex-1 h-18 justify-center gap-3 items-center font-mono">
+      <img src="/logo.svg" alt="" class="size-10 dark:invert" />
+      <span class="text-lg font-bold tracking-tight">KSI UWr</span>
+    </a>
   </div>
 
   <div class="bg-base-100 flex flex-col w-full h-full overflow-hidden border-r border-base-200">
