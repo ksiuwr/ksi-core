@@ -5,15 +5,14 @@
 
 <button
   onclick={() => themeStore.set($themeStore === 'dark' ? 'light' : 'dark')}
-  class="md:hidden flex cursor-pointer gap-4 py-2 w-full items-center btn btn-lg"
+  class="md:hidden flex cursor-pointer gap-3 py-2 flex-1 items-center btn btn-md"
   aria-label="Toggle theme"
 >
   {#if $themeStore === 'dark'}
-    <Moon class="w-4 h-4" />
-
+    <Moon class="w-4 h-4 shrink-0" />
     Dark mode
   {:else}
-    <Sun class="w-4 h-4" />
+    <Sun class="w-4 h-4 shrink-0" />
     Light mode
   {/if}
 </button>

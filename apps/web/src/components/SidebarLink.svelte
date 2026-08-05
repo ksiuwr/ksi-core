@@ -14,13 +14,25 @@
     children?: any;
     exact?: boolean;
   } = $props();
+
+  let isActive = $derived(
+    exact ? $page.url.pathname === href : $page.url.pathname.startsWith(href)
+  );
 </script>
 
-<a {href} class="btn btn-lg btn-outline gap-4">
+<a
+  {href}
+  class={cn(
+    'flex items-center gap-3.5 w-full px-3 py-3 rounded-lg text-base font-medium transition-colors duration-150',
+    isActive
+      ? 'bg-primary/15 text-primary font-semibold'
+      : 'hover:bg-base-200 text-base-content/80 hover:text-base-content'
+  )}
+>
   {#if Icon}
-    <Icon class="size-4" />
+    <Icon class="size-5 shrink-0" />
   {/if}
-  <span>
+  <span class="truncate">
     {@render children?.()}
   </span>
 </a>

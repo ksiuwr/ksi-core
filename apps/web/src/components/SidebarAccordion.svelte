@@ -1,20 +1,69 @@
 <script lang="ts">
-  import { ChevronRight, Folder } from '@lucide/svelte';
+  import { page } from '$app/stores';
+  import { ChevronDown } from '@lucide/svelte';
+  import { cn } from '$lib/utils';
   import type { Snippet } from 'svelte';
 
   let {
     title,
+    href,
+    exact = false,
     children
   }: {
     title: string;
+    href?: string;
+    exact?: boolean;
     children: Snippet;
   } = $props();
 
-  let expanded = $state(false);
+  let expanded = $state(true);
+
+  let isActive = $derived(
+    href ? (exact ? $page.url.pathname === href : $page.url.pathname.startsWith(href)) : false
+  );
 </script>
 
-<div class="flex flex-col px-2 py-4 gap-2 select-none">
-  <b class="text-xl"> {title} </b>
+<div class="flex flex-col gap-0.5">
+  {#if href}
+    <!-- Clickable title row: link + separate chevron toggle -->
+    <div class="flex items-center gap-1">
+      <a
+        {href}
+        class={cn(
+          'flex-1 flex items-center px-3 py-3 rounded-lg text-base font-medium transition-colors duration-150',
+          isActive
+            ? 'bg-primary/15 text-primary font-semibold'
+            : 'hover:bg-base-200 text-base-content/80 hover:text-base-content'
+        )}
+      >
+        {title}
+      </a>
+      <button
+        type="button"
+        onclick={() => (expanded = !expanded)}
+        class="btn btn-ghost btn-square btn-sm shrink-0"
+        aria-label={expanded ? 'Collapse' : 'Expand'}
+      >
+        <ChevronDown
+          class={cn(
+            'size-4 transition-transform duration-200',
+            expanded ? 'rotate-0' : '-rotate-90'
+          )}
+        />
+      </button>
+    </div>
+  {:else}
+    <!-- Plain section label -->
+    <p
+      class="px-3 pt-3 pb-1 text-xs font-semibold uppercase tracking-wider text-base-content/40 select-none"
+    >
+      {title}
+    </p>
+  {/if}
 
-  {@render children()}
+  {#if expanded}
+    <div class="pl-3 flex flex-col gap-0.5">
+      {@render children()}
+    </div>
+  {/if}
 </div>
