@@ -35,7 +35,7 @@
     <Sidebar user={data.user} session={data.session} />
 
     <div class="relative flex flex-1 items-start">
-      <main class="flex-1 min-w-0 w-full px-4 sm:px-6 lg:px-12 py-8 md:py-12">
+      <main id="main-content" class="flex-1 min-w-0 w-full px-4 sm:px-6 lg:px-12 py-8 md:py-12">
         {@render children?.()}
       </main>
     </div>
