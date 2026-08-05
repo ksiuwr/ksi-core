@@ -19,7 +19,6 @@ msgstr "[OSTRZEŻENIE]"
 
 #: src/components/Footer.svelte
 #: src/routes/projects/zosia/[year]/+page.svelte
-#: src/routes/zosia/[year]/+page.svelte
 msgid "ksi [at] cs.uni.wroc.pl"
 msgstr "ksi [at] cs.uni.wroc.pl"
 
@@ -37,38 +36,7 @@ msgstr "Przełącz panel boczny"
 msgid "<0/> KSI"
 msgstr "<0/> KSI"
 
-#~ msgid "README"
-#~ msgstr "README"
-
-#: src/components/Sidebar.svelte
-msgid "physarum"
-msgstr "physarum"
-
-#: src/components/Sidebar.svelte
-msgid "krasnal"
-msgstr "krasnal"
-
-#~ msgid "hour-of-code"
-#~ msgstr "hour-of-code"
-
-#~ msgid "ket"
-#~ msgstr "ket"
-
-#~ msgid "Admin"
-#~ msgstr "Admin"
-
-#: src/components/Sidebar.svelte
-msgid "HOME"
-msgstr "GŁÓWNA"
-
-#: src/components/Sidebar.svelte
-msgid "ALERTS"
-msgstr "ALERTY"
-
-#: src/components/Sidebar.svelte
-msgid "S3 CACHE"
-msgstr "S3 CACHE"
-
+#: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
 msgid "Home"
 msgstr "Strona główna"
@@ -78,17 +46,16 @@ msgstr "Strona główna"
 msgid "Toggle theme"
 msgstr "Zmień motyw"
 
+#: src/components/Sidebar.svelte
 #: src/routes/+layout.svelte
 msgid "KSI UWr"
 msgstr "KSI UWr"
 
-#: src/routes/projects/krasnal/+page.svelte
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "<0/> GitHub"
 msgstr "<0/> GitHub"
 
 #: src/routes/projects/ml/physarum/+page.svelte
-#: src/routes/projects/physarum/+page.svelte
 msgid "Wizualizacja U-Matrix"
 msgstr "Wizualizacja U-Matrix"
 
@@ -113,7 +80,6 @@ msgid "Usuń"
 msgstr "Usuń"
 
 #: src/routes/projects/zosia/[year]/+page.svelte
-#: src/routes/zosia/[year]/+page.svelte
 msgid "Tumbleweed rolling"
 msgstr "Pustynny kłąb"
 
@@ -133,9 +99,6 @@ msgstr "<0/> Kod źródłowy"
 msgid "Access denied."
 msgstr "Brak dostępu."
 
-#~ msgid "<0/> Login"
-#~ msgstr "<0/> Zaloguj się"
-
 #: src/components/Sidebar.svelte
 msgid "Logged in as"
 msgstr "Zalogowano jako"
@@ -143,13 +106,6 @@ msgstr "Zalogowano jako"
 #: src/components/Sidebar.svelte
 msgid "Logout"
 msgstr "Wyloguj"
-
-#~ msgid "Navigation tree"
-#~ msgstr "Drzewo nawigacji"
-
-#: src/components/Sidebar.svelte
-msgid "Navigation"
-msgstr "Nawigacja"
 
 #: src/routes/+error.svelte
 msgid "Oops, what happened here?"
@@ -210,28 +166,22 @@ msgstr "Panel"
 
 #: src/routes/projects/zosia/+page.svelte
 #: src/routes/projects/zosia/[year]/+page.svelte
-#: src/routes/zosia/+page.svelte
-#: src/routes/zosia/[year]/+page.svelte
 msgid "Edition"
 msgstr "Edycja"
 
 #: src/routes/projects/zosia/+page.svelte
-#: src/routes/zosia/+page.svelte
 msgid "// Winter Camp of Computer Science Students"
-msgstr "// Zimowa Obóz Studentów Informatyki"
+msgstr "// Zimowy Obóz Studentów Informatyki"
 
 #: src/routes/projects/zosia/+page.svelte
-#: src/routes/zosia/+page.svelte
 msgid "Winter Camp of Computer Science Students (ZOSIA) is an event organized by the Computer Science Students' Association for over 20 years. The history of the camp began with informal trips of a group of friends; today, it brings together nearly 300 people every year: students from various universities, representatives of academia, and IT companies."
-msgstr "Zimowa Obóz Studentów Informatyki (ZOSIA) to wydarzenie organizowane przez Koło Studentów Informatyki od ponad 20 lat. Historia obozu rozpoczęła się od nieformalnych wyjazdów grupy przyjaciół; dziś gromadzi co roku blisko 300 osób: studentów z różnych uczelni, przedstawicieli środowiska akademickiego oraz firm IT."
+msgstr "Zimowy Obóz Studentów Informatyki (ZOSIA) to wydarzenie organizowane przez Koło Studentów Informatyki od ponad 20 lat. Historia obozu rozpoczęła się od nieformalnych wyjazdów grupy przyjaciół; dziś gromadzi co roku blisko 300 osób: studentów z różnych uczelni, przedstawicieli środowiska akademickiego oraz firm IT."
 
 #: src/routes/projects/zosia/+page.svelte
-#: src/routes/zosia/+page.svelte
 msgid "During the three-day trip, there are lectures, company presentations, as well as excursions and integration parties. ZOSIA traditionally takes place at the turn of February and March, sharing a passion for technology in a unique winter atmosphere."
 msgstr "Podczas trzydniowego wyjazdu odbywają się prelekcje, prezentacje firm, a także wycieczki i imprezy integracyjne. ZOSIA tradycyjnie odbywa się na przełomie lutego i marca, łącząc pasję do technologii w wyjątkowej zimowej atmosferze."
 
 #: src/routes/projects/zosia/+page.svelte
-#: src/routes/zosia/+page.svelte
 msgid "Archive of previous editions"
 msgstr "Archiwum poprzednich edycji"
 
@@ -382,19 +332,15 @@ msgstr "Nauka programowania uczniów szkół podstawowych, prezentowanie informa
 
 #: src/routes/projects/hoc/+page.svelte
 #: src/routes/projects/ket/+page.svelte
-#: src/routes/projects/krasnal/+page.svelte
 #: src/routes/projects/ml/krasnal/+page.svelte
 #: src/routes/projects/ml/physarum/+page.svelte
-#: src/routes/projects/physarum/+page.svelte
 msgid "Goals"
 msgstr "Cele"
 
 #: src/routes/projects/hoc/+page.svelte
 #: src/routes/projects/ket/+page.svelte
-#: src/routes/projects/krasnal/+page.svelte
 #: src/routes/projects/ml/krasnal/+page.svelte
 #: src/routes/projects/ml/physarum/+page.svelte
-#: src/routes/projects/physarum/+page.svelte
 msgid "Team Members"
 msgstr "Członkowie zespołu"
 
@@ -402,69 +348,56 @@ msgstr "Członkowie zespołu"
 msgid "The \"Hour of Code\" classes organized by the Computer Science Students' Club of the University of Wrocław introduce students to the Python programming language. They are intended for primary school students in grades 4-8. The classes consist of two parts:"
 msgstr "Zajęcia „Godzina Kodowania” organizowane przez Koło Studentów Informatyki Uniwersytetu Wrocławskiego wprowadzają uczniów w język programowania Python. Przeznaczone są dla uczniów szkół podstawowych z klas 4-8. Zajęcia składają się z dwóch części:"
 
-#: src/routes/projects/krasnal/+page.svelte
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Krasnal Chess Engine ♟️"
 msgstr "Silnik szachowy Krasnal ♟️"
 
 #: src/components/Navbar.svelte
-#: src/routes/projects/krasnal/+page.svelte
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Krasnal is a chess engine developed in Wrocław, based on the Transformer architecture. It utilizes deep neural networks to learn to play chess intuitively, departing from traditional, heavy calculations and game tree searching."
 msgstr "Krasnal to silnik szachowy rozwijany we Wrocławiu, oparty na architekturze Transformer. Wykorzystuje głębokie sieci neuronowe do intuicyjnej nauki gry w szachy, odchodząc od tradycyjnych, ciężkich obliczeń i przeszukiwania drzewa gry."
 
-#: src/routes/projects/krasnal/+page.svelte
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "System architecture"
 msgstr "Architektura systemu"
 
-#: src/routes/projects/krasnal/+page.svelte
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Investigating the model's behavior depending on the training method."
 msgstr "Badanie zachowania modelu w zależności od metody uczenia."
 
-#: src/routes/projects/krasnal/+page.svelte
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Training a model that generates legal and strong chess moves resembling human play."
 msgstr "Trening modelu generującego legalne i silne posunięcia szachowe przypominające grę człowieka."
 
-#: src/routes/projects/krasnal/+page.svelte
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Krasnal's goal is to generate strong, yet human-like chess moves. Balancing between the intuition known from the Maia Chess project and the playing strength of Stockfish."
 msgstr "Celem Krasnala jest generowanie silnych, a zarazem ludzkich posunięć szachowych. Balansowanie między intuicją znaną z projektu Maia Chess a siłą gry Stockfisha."
 
 #: src/routes/projects/ml/physarum/+page.svelte
-#: src/routes/projects/physarum/+page.svelte
 msgid "Can a Slime Mold train Neural Networks?"
 msgstr "Czy śluzowiec może trenować sieci neuronowe?"
 
 #: src/routes/projects/ml/physarum/+page.svelte
-#: src/routes/projects/physarum/+page.svelte
 msgid "// Computational Biology & AI"
 msgstr "// Biologia obliczeniowa i AI"
 
 #: src/routes/projects/ml/physarum/+page.svelte
-#: src/routes/projects/physarum/+page.svelte
 msgid "Visualization of U-Matrix, Hit Map, and Weight Vectors"
 msgstr "Wizualizacja macierzy U-Matrix, Hit Map oraz wektorów wag"
 
 #: src/routes/projects/ml/physarum/+page.svelte
-#: src/routes/projects/physarum/+page.svelte
 msgid "This project explores the fascinating intersection of biology and computer science, testing whether the natural processes of <0>Physarum polycephalum</0> can be used to perform computational tasks, such as training neural networks."
 msgstr "Projekt ten bada fascynujące pogranicze biologii i informatyki, sprawdzając, czy naturalne procesy <0>Physarum polycephalum</0> można wykorzystać do wykonywania zadań obliczeniowych, takich jak trening sieci neuronowych."
 
 #: src/routes/projects/ml/physarum/+page.svelte
-#: src/routes/projects/physarum/+page.svelte
 msgid "Behavioral and experimental research on <0>Physarum polycephalum</0>."
 msgstr "Badania behawioralne i eksperymentalne nad <0>Physarum polycephalum</0>."
 
 #: src/routes/projects/ml/physarum/+page.svelte
-#: src/routes/projects/physarum/+page.svelte
 msgid "Algorithmic analysis and modeling of transport networks."
 msgstr "Analiza algorytmiczna i modelowanie sieci transportowych."
 
 #: src/routes/projects/ml/physarum/+page.svelte
-#: src/routes/projects/physarum/+page.svelte
 msgid "Disseminating results within and beyond the academic community."
 msgstr "Upowszechnianie wyników w środowisku akademickim i poza nim."
 
@@ -485,21 +418,16 @@ msgid "Modeling computations and independently implementing proprietary quantum 
 msgstr "Modelowanie obliczeń oraz samodzielna implementacja autorskich algorytmów kwantowych w środowisku Qiskit, z docelowym wykonaniem kodu na fizycznym procesorze kwantowym."
 
 #. 0: year
-#. 0: year
 #: src/routes/projects/zosia/[year]/+page.svelte
-#: src/routes/zosia/[year]/+page.svelte
 msgid "Edition {0} was not found ;("
 msgstr "Nie znaleziono edycji {0} ;("
 
 #. 0: year
-#. 0: year
 #: src/routes/projects/zosia/[year]/+page.svelte
-#: src/routes/zosia/[year]/+page.svelte
 msgid "Archaeologists are wondering if ZOSIA {0} even took place. No evidence found..."
 msgstr "Archeolodzy zastanawiają się, czy ZOSIA {0} w ogóle się odbyła. Brak dowodów..."
 
 #: src/routes/projects/zosia/[year]/+page.svelte
-#: src/routes/zosia/[year]/+page.svelte
 msgid "We don't have photos from this edition of ZOSIA. If you have any, you can send them to us so we can post them here."
 msgstr "Nie posiadamy zdjęć z tej edycji ZOSI. Jeśli jakieś masz, możesz nam je przesłać, abyśmy mogli je tutaj zamieścić."
 
@@ -524,20 +452,19 @@ msgid "Refetch"
 msgstr "Odśwież"
 
 #: src/routes/projects/zosia/[year]/+page.svelte
-#: src/routes/zosia/[year]/+page.svelte
 msgid "<0/> Location"
 msgstr "<0/> Lokalizacja"
 
 #: src/routes/projects/zosia/[year]/+page.svelte
-#: src/routes/zosia/[year]/+page.svelte
 msgid "<0/> Number of Participants"
 msgstr "<0/> Liczba uczestników"
 
 #: src/routes/projects/zosia/[year]/+page.svelte
-#: src/routes/zosia/[year]/+page.svelte
 msgid "<0/> Camp Date"
 msgstr "<0/> Data obozu"
 
+#: src/components/Sidebar.svelte
+#: src/routes/dashboard/+page.svelte
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Alerts"
 msgstr "Alerty"
@@ -548,253 +475,155 @@ msgstr "Zarządzaj alertami wyświetlanymi na górze strony."
 
 #: src/components/Navbar copy.svelte
 msgid "Życie studenckie"
-msgstr ""
+msgstr "Życie studenckie"
 
 #: src/components/Navbar.svelte
+#: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
+#: src/routes/projects/+page.svelte
 msgid "Projects"
-msgstr ""
+msgstr "Projekty"
 
 #: src/components/ThemeButton.svelte
 msgid "Light"
-msgstr ""
-
-#~ msgid "Ligth"
-#~ msgstr ""
+msgstr "Jasny"
 
 #: src/components/ThemeButton.svelte
 msgid "Dark"
-msgstr ""
-
-#~ msgid "PROJECTS"
-#~ msgstr ""
+msgstr "Ciemny"
 
 #: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
 msgid "Zosia"
-msgstr ""
+msgstr "Zosia"
 
-#~ msgid "Zosia2K"
-#~ msgstr ""
-
-#~ msgid "Zosia2KXX"
-#~ msgstr ""
-
-#~ msgid "Zosia2"
-#~ msgstr ""
-
-#~ msgid "Zosia -"
-#~ msgstr ""
-
-#~ msgid "Zosia ---"
-#~ msgstr ""
-
-#~ msgid "- Zosia"
-#~ msgstr ""
-
-#~ msgid "⨯ Zosia"
-#~ msgstr ""
-
-#~ msgid "<0/> Zosia"
-#~ msgstr ""
-
-#~ msgid "<0/> Zosia <1/>"
-#~ msgstr ""
-
-#~ msgid "<0/> Zosia <1>See details</1>"
-#~ msgstr ""
-
-#~ msgid "<0/> <1/> Zosia <2>See details</2>"
-#~ msgstr ""
-
-#~ msgid "See details"
-#~ msgstr ""
-
-#~ msgid "See details >"
-#~ msgstr ""
-
-#~ msgid "Read more"
-#~ msgstr ""
-
-#~ msgid "details"
-#~ msgstr ""
-
-#~ msgid "Pr0jects"
-#~ msgstr ""
-
-#~ msgid "Proj3cts"
-#~ msgstr ""
-
-#~ msgid "Pr0j3cts"
-#~ msgstr ""
-
-#~ msgid "Pr0j3ct$"
-#~ msgstr ""
-
-#~ msgid "<0/> attendees...271"
-#~ msgstr ""
-
-#~ msgid "<0/> Member access"
-#~ msgstr ""
-
-#~ msgid "<0/> <1/>Member access"
-#~ msgstr ""
+#: src/components/NavbarAccordion.svelte
+msgid "details"
+msgstr "szczegóły"
 
 #: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
 msgid "Member access"
-msgstr ""
-
-#~ msgid "Added dark mode"
-#~ msgstr ""
-
-#~ msgid "Database migrations"
-#~ msgstr ""
-
-#~ msgid "Major redesign and new features released."
-#~ msgstr ""
-
-#~ msgid "Initial beta release and user testing."
-#~ msgstr ""
-
-#~ msgid "Project ideation and planning phase."
-#~ msgstr ""
-
-#~ msgid "Camp held 05.03.2026 - 08.03.2026"
-#~ msgstr ""
-
-#~ msgid "Camp held: 05.03.2026 - 08.03.2026"
-#~ msgstr ""
+msgstr "Dostęp dla członków"
 
 #: src/components/Navbar.svelte
 msgid "Date: 05.03.2026 - 08.03.2026"
-msgstr ""
-
-#~ msgid "Number of participants: 05.03.2026 - 08.03.2026"
-#~ msgstr ""
+msgstr "Data: 05.03.2026 - 08.03.2026"
 
 #: src/components/Navbar.svelte
 msgid "Number of participants: 274"
-msgstr ""
+msgstr "Liczba uczestników: 274"
 
 #: src/components/Navbar.svelte
 msgid "Number of participants: 217"
-msgstr ""
-
-#~ msgid "Date: 05.03.2025 - 08.03.2026"
-#~ msgstr ""
-
-#~ msgid "Date: 05.03.2025 - 08.03.2025"
-#~ msgstr ""
-
-#~ msgid "Date: 05.03.2025 - 03.03.2025"
-#~ msgstr ""
+msgstr "Liczba uczestników: 217"
 
 #: src/components/Navbar.svelte
 msgid "Date: 28.02.2025 - 03.03.2025"
-msgstr ""
+msgstr "Data: 28.02.2025 - 03.03.2025"
 
 #: src/components/Navbar.svelte
 msgid "Number of participants: 263"
-msgstr ""
-
-#~ msgid "Date: 28.02.2025 - 03.03.2024"
-#~ msgstr ""
-
-#~ msgid "Date: 28.02.2025 - 25.02.2024"
-#~ msgstr ""
-
-#~ msgid "Date: 28.02.2024 - 25.02.2024"
-#~ msgstr ""
-
-#~ msgid "Date: .2024 - 25.02.2024"
-#~ msgstr ""
+msgstr "Liczba uczestników: 263"
 
 #: src/components/Navbar.svelte
 msgid "Date: 22.02.2024 - 25.02.2024"
-msgstr ""
+msgstr "Data: 22.02.2024 - 25.02.2024"
 
 #: src/components/Sidebar.svelte
 msgid "Hour of Code"
-msgstr ""
+msgstr "Hour of Code"
 
 #: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
 msgid "Machine Learning"
-msgstr ""
+msgstr "Uczenie maszynowe"
 
 #: src/components/Navbar.svelte
 msgid "Krasnal"
-msgstr ""
+msgstr "Krasnal"
 
 #: src/components/Navbar.svelte
 msgid "Physarum"
-msgstr ""
-
-#~ msgid "Can a Slime Mold train Neural Networks? It turns out"
-#~ msgstr ""
-
-#~ msgid "Can a Slime Mold train Neural Networks? It turns out to be a fascinating subject,"
-#~ msgstr ""
-
-#~ msgid "Can a Slime Mold train Neural Networks? It turns out to be a fascinating subject, crossing"
-#~ msgstr ""
-
-#~ msgid "Can a Slime Mold train Neural Networks? It turns out to be a fascinating subject, lying in a crossing between"
-#~ msgstr ""
-
-#~ msgid "Can a Slime Mold train Neural Networks? It turns out to be a fascinating subject, lying in"
-#~ msgstr ""
-
-#~ msgid "Can a Slime Mold train Neural Networks? It turns out to be a fascinating subject, intersecting the"
-#~ msgstr ""
-
-#~ msgid "Can a Slime Mold train Neural Networks? It turns out to be a fascinating subject, intersecting the science"
-#~ msgstr ""
-
-#~ msgid "Can a Slime Mold train Neural Networks? It turns out to be a fascinating subject, intersecting the biology and"
-#~ msgstr ""
-
-#~ msgid "Can a Slime Mold train Neural Networks? It turns out to be a fascinating subject, intersecting the computational biology and"
-#~ msgstr ""
-
-#~ msgid "Can a Slime Mold train Neural Networks? It turns out to be a fascinating subject, intersecting the computational biology and machine learning."
-#~ msgstr ""
+msgstr "Physarum"
 
 #: src/components/Navbar.svelte
 msgid "Can a Slime Mold train Neural Networks? It turns out to be a fascinating subject, intersecting the computational biology and AI."
-msgstr ""
+msgstr "Czy śluzowiec może trenować sieci neuronowe? Okazuje się, że to fascynujący temat z pogranicza biologii obliczeniowej i AI."
 
 #: src/components/Navbar.svelte
 msgid "and more..."
-msgstr ""
-
-#~ msgid "j <0/>"
-#~ msgstr ""
-
-#~ msgid "<0/> Dark"
-#~ msgstr ""
-
-#~ msgid "<0/> Light"
-#~ msgstr ""
+msgstr "i więcej..."
 
 #: src/components/ThemeButton.svelte
 msgid "<0/> Light mode"
-msgstr ""
+msgstr "<0/> Tryb jasny"
 
 #: src/components/ThemeButton.svelte
 msgid "<0/> Dark mode"
-msgstr ""
+msgstr "<0/> Tryb ciemny"
 
+#: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
 msgid "Dashboard"
-msgstr ""
-
-#: src/components/Sidebar.svelte
-#: src/components/Sidebar.svelte
-msgid "Project's site"
-msgstr ""
+msgstr "Panel"
 
 #: src/components/Sidebar.svelte
 msgid "KET"
+msgstr "KET"
+
+#: src/components/Sidebar.svelte
+#: src/routes/dashboard/+page.svelte
+msgid "S3 Cache"
+msgstr "S3 Cache"
+
+#: src/components/Sidebar.svelte
+msgid "Login"
+msgstr "Zaloguj"
+
+#: src/components/SidebarAccordion.svelte
+msgid "Collapse"
+msgstr "Zwiń"
+
+#: src/components/SidebarAccordion.svelte
+msgid "Expand"
+msgstr "Rozwiń"
+
+#: src/components/Navbar.svelte
+#: src/components/Sidebar.svelte
+msgid "Logged out"
+msgstr "Wylogowano"
+
+#. 0: user.name
+#: src/components/Navbar.svelte
+msgid "{0}'s profile picture"
+msgstr "Zdjęcie profilowe użytkownika {0}"
+
+#: src/components/Navbar.svelte
+#: src/components/Navbar.svelte
+msgid "Scroll to content"
+msgstr "Przewiń do treści"
+
+#: src/components/Navbar.svelte
+msgid "Scroll to top"
+msgstr "Przewiń do góry"
+
+#: src/components/Navbar.svelte
+msgid "KSI"
+msgstr "KSI"
+
+#: src/routes/projects/+page.svelte
+msgid "Explore all projects of KSI"
+msgstr "Poznaj wszystkie projekty KSI"
+
+#: src/routes/projects/+page.svelte
+msgid "Search for projects"
+msgstr "Szukaj projektów"
+
+#: src/routes/projects/+page.svelte
+msgid "Work in progress..."
+msgstr "Prace w toku..."
+
+#: src/components/NavbarAccordion.svelte
+msgid "self-end underline cursor-pointer"
 msgstr ""

@@ -23,6 +23,7 @@
     />
     <p class="text-3xl font-bold uppercase mr-4">{title}</p>
     {#if url}
+      <!-- @wc-include -->
       <a href={url} class="self-end underline cursor-pointer">{urlText ?? 'details'}</a>
     {/if}
   </div>
