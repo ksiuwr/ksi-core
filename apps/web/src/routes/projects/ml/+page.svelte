@@ -8,12 +8,6 @@
     class="grid gap-8 border-b border-base-content/15 pb-14 lg:grid-cols-[1fr_0.75fr] lg:items-end"
   >
     <div>
-      <a
-        href="/projects"
-        class="mb-8 flex w-fit items-center gap-2 text-xs font-bold uppercase tracking-widest text-base-content/45 hover:text-primary"
-      >
-        <ArrowLeft class="size-4" /> All projects
-      </a>
       <p class="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-primary">Research group</p>
       <h1 class="mb-0! text-5xl leading-[0.95]! tracking-tighter md:text-7xl">Machine learning</h1>
     </div>

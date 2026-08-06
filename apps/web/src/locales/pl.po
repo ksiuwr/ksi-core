@@ -1207,10 +1207,6 @@ msgid "Try a different name, field, or technology."
 msgstr "Spróbuj użyć innej nazwy, dziedziny lub technologii."
 
 #: src/routes/projects/ml/+page.svelte
-msgid "<0/> All projects"
-msgstr "<0/> Wszystkie projekty"
-
-#: src/routes/projects/ml/+page.svelte
 msgid "Research group"
 msgstr "Grupa badawcza"
 
