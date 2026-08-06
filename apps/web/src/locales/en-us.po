@@ -18,7 +18,6 @@ msgid "[WARN]"
 msgstr "[WARN]"
 
 #: src/components/Footer.svelte
-#: src/routes/projects/zosia/[year]/+page.svelte
 msgid "ksi [at] cs.uni.wroc.pl"
 msgstr "ksi [at] cs.uni.wroc.pl"
 
@@ -38,6 +37,7 @@ msgstr "<0/> KSI"
 
 #: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
+#: src/components/Wrapper.svelte
 msgid "Home"
 msgstr "Home"
 
@@ -48,16 +48,13 @@ msgstr "Toggle theme"
 
 #: src/components/Sidebar.svelte
 #: src/routes/+layout.svelte
+#: src/routes/+page.svelte
 msgid "KSI UWr"
 msgstr "KSI UWr"
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "<0/> GitHub"
 msgstr "<0/> GitHub"
-
-#: src/routes/projects/ml/physarum/+page.svelte
-msgid "Wizualizacja U-Matrix"
-msgstr "Wizualizacja U-Matrix"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Alert updated successfully"
@@ -71,19 +68,8 @@ msgstr "Alert created successfully"
 msgid "Alert deleted"
 msgstr "Alert deleted"
 
-#: src/routes/dashboard/alerts/+page.svelte
-msgid "Edytuj"
-msgstr "Edytuj"
-
-#: src/routes/dashboard/alerts/+page.svelte
-msgid "Usuń"
-msgstr "Usuń"
-
-#: src/routes/projects/zosia/[year]/+page.svelte
-msgid "Tumbleweed rolling"
-msgstr "Tumbleweed rolling"
-
 #: src/components/Footer.svelte
+#: src/routes/projects/hoc/+page.svelte
 msgid "Institute of Computer Science, University of Wrocław"
 msgstr "Institute of Computer Science, University of Wrocław"
 
@@ -107,157 +93,31 @@ msgstr "Logged in as"
 msgid "Logout"
 msgstr "Logout"
 
-#: src/routes/+error.svelte
-msgid "Oops, what happened here?"
-msgstr "Oops, what happened here?"
-
-#: src/routes/+error.svelte
-msgid "Either something broke, or you were looking for luck on our website. We assure you that the only luck is hidden in <0>room 24</0> at the <1>Institute of Computer Science</1>!"
-msgstr "Either something broke, or you were looking for luck on our website. We assure you that the only luck is hidden in <0>room 24</0> at the <1>Institute of Computer Science</1>!"
-
-#: src/routes/+error.svelte
-msgid "Feel free to visit us in your spare time, and now <0>click here</0> to return home."
-msgstr "Feel free to visit us in your spare time, and now <0>click here</0> to return home."
-
-#: src/routes/+page.svelte
-msgid "Computer Science Students’ Association <0>University of Wrocław</0>"
-msgstr "Computer Science Students’ Association <0>University of Wrocław</0>"
-
-#: src/routes/+page.svelte
-msgid "Who are we?"
-msgstr "Who are we?"
-
-#: src/routes/+page.svelte
-msgid "We are a student research group operating at the Institute of Computer Science. We are united by a passion for technology – from low-level theory to practical implementations."
-msgstr "We are a student research group operating at the Institute of Computer Science. We are united by a passion for technology – from low-level theory to practical implementations."
-
-#: src/routes/+page.svelte
-msgid "We operate <0>socially</0>, <1>technically</1>, and <2>scientifically</2>."
-msgstr "We operate <0>socially</0>, <1>technically</1>, and <2>scientifically</2>."
-
-#: src/routes/+page.svelte
-msgid "👨‍💻 Hour of Code"
-msgstr "👨‍💻 Hour of Code"
-
-#: src/routes/+page.svelte
-msgid "Classes teaching the basics of programming to primary school students"
-msgstr "Classes teaching the basics of programming to primary school students"
-
-#: src/routes/+page.svelte
-msgid "♟️ Krasnal"
-msgstr "♟️ Krasnal"
-
-#: src/routes/+page.svelte
-msgid "Chess engine based on the Transformer architecture"
-msgstr "Chess engine based on the Transformer architecture"
-
-#: src/routes/+page.svelte
-msgid "Check out what we’re working on!"
-msgstr "Check out what we’re working on!"
-
-#: src/routes/+page.svelte
-msgid "See our selected projects"
-msgstr "See our selected projects"
-
 #: src/components/Navbar copy.svelte
-#: src/routes/dashboard/+page.svelte
 msgid "Panel"
 msgstr "Panel"
 
 #: src/routes/projects/zosia/+page.svelte
-#: src/routes/projects/zosia/[year]/+page.svelte
 msgid "Edition"
 msgstr "Edition"
-
-#: src/routes/projects/zosia/+page.svelte
-msgid "// Winter Camp of Computer Science Students"
-msgstr "// Winter Camp of Computer Science Students"
-
-#: src/routes/projects/zosia/+page.svelte
-msgid "Winter Camp of Computer Science Students (ZOSIA) is an event organized by the Computer Science Students' Association for over 20 years. The history of the camp began with informal trips of a group of friends; today, it brings together nearly 300 people every year: students from various universities, representatives of academia, and IT companies."
-msgstr "Winter Camp of Computer Science Students (ZOSIA) is an event organized by the Computer Science Students' Association for over 20 years. The history of the camp began with informal trips of a group of friends; today, it brings together nearly 300 people every year: students from various universities, representatives of academia, and IT companies."
-
-#: src/routes/projects/zosia/+page.svelte
-msgid "During the three-day trip, there are lectures, company presentations, as well as excursions and integration parties. ZOSIA traditionally takes place at the turn of February and March, sharing a passion for technology in a unique winter atmosphere."
-msgstr "During the three-day trip, there are lectures, company presentations, as well as excursions and integration parties. ZOSIA traditionally takes place at the turn of February and March, sharing a passion for technology in a unique winter atmosphere."
-
-#: src/routes/projects/zosia/+page.svelte
-msgid "Archive of previous editions"
-msgstr "Archive of previous editions"
-
-#: src/routes/dashboard/alerts/+page.svelte
-msgid "<0/> create new"
-msgstr "<0/> create new"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Edit alert"
 msgstr "Edit alert"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "New alert"
-msgstr "New alert"
-
-#: src/routes/dashboard/alerts/+page.svelte
 msgid "Title"
 msgstr "Title"
-
-#: src/routes/dashboard/alerts/+page.svelte
-msgid "Enter alert title"
-msgstr "Enter alert title"
-
-#: src/routes/dashboard/alerts/+page.svelte
-msgid "Color"
-msgstr "Color"
-
-#: src/routes/dashboard/alerts/+page.svelte
-msgid "Neutral (Gray)"
-msgstr "Neutral (Gray)"
-
-#: src/routes/dashboard/alerts/+page.svelte
-msgid "Info (Blue)"
-msgstr "Info (Blue)"
-
-#: src/routes/dashboard/alerts/+page.svelte
-msgid "Warning (Yellow)"
-msgstr "Warning (Yellow)"
-
-#: src/routes/dashboard/alerts/+page.svelte
-msgid "Danger (Red)"
-msgstr "Danger (Red)"
-
-#: src/routes/dashboard/alerts/+page.svelte
-msgid "Start date"
-msgstr "Start date"
-
-#: src/routes/dashboard/alerts/+page.svelte
-msgid "End date"
-msgstr "End date"
-
-#: src/routes/dashboard/alerts/+page.svelte
-msgid "Priority"
-msgstr "Priority"
-
-#: src/routes/dashboard/alerts/+page.svelte
-#: src/routes/dashboard/alerts/+page.svelte
-msgid "Optional"
-msgstr "Optional"
-
-#: src/routes/dashboard/alerts/+page.svelte
-msgid "Link"
-msgstr "Link"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Description"
 msgstr "Description"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Detailed description of the alert..."
-msgstr "Detailed description of the alert..."
-
-#: src/routes/dashboard/alerts/+page.svelte
 msgid "Save changes"
 msgstr "Save changes"
 
+#: src/routes/dashboard/alerts/+page.svelte
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Create alert"
 msgstr "Create alert"
@@ -307,10 +167,6 @@ msgid "Organizational details"
 msgstr "Organizational details"
 
 #: src/routes/projects/hoc/+page.svelte
-msgid "In 2026, the classes will take place on: April 10, April 24, May 4, and May 11. The classes are held in the lecture halls and computer labs of the Institute of Computer Science at the University of Wrocław, at 15 Fryderyka Joliota-Curie Street in Wrocław. We invite schools to register their willingness to participate in these classes by email at <0>hourofcode.ksi [at] gmail.com</0>"
-msgstr "In 2026, the classes will take place on: April 10, April 24, May 4, and May 11. The classes are held in the lecture halls and computer labs of the Institute of Computer Science at the University of Wrocław, at 15 Fryderyka Joliota-Curie Street in Wrocław. We invite schools to register their willingness to participate in these classes by email at <0>hourofcode.ksi [at] gmail.com</0>"
-
-#: src/routes/projects/hoc/+page.svelte
 msgid "Current edition"
 msgstr "Current edition"
 
@@ -348,10 +204,6 @@ msgstr "Team Members"
 msgid "The \"Hour of Code\" classes organized by the Computer Science Students' Club of the University of Wrocław introduce students to the Python programming language. They are intended for primary school students in grades 4-8. The classes consist of two parts:"
 msgstr "The \"Hour of Code\" classes organized by the Computer Science Students' Club of the University of Wrocław introduce students to the Python programming language. They are intended for primary school students in grades 4-8. The classes consist of two parts:"
 
-#: src/routes/projects/ml/krasnal/+page.svelte
-msgid "Krasnal Chess Engine ♟️"
-msgstr "Krasnal Chess Engine ♟️"
-
 #: src/components/Navbar.svelte
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Krasnal is a chess engine developed in Wrocław, based on the Transformer architecture. It utilizes deep neural networks to learn to play chess intuitively, departing from traditional, heavy calculations and game tree searching."
@@ -374,14 +226,6 @@ msgid "Krasnal's goal is to generate strong, yet human-like chess moves. Balanci
 msgstr "Krasnal's goal is to generate strong, yet human-like chess moves. Balancing between the intuition known from the Maia Chess project and the playing strength of Stockfish."
 
 #: src/routes/projects/ml/physarum/+page.svelte
-msgid "Can a Slime Mold train Neural Networks?"
-msgstr "Can a Slime Mold train Neural Networks?"
-
-#: src/routes/projects/ml/physarum/+page.svelte
-msgid "// Computational Biology & AI"
-msgstr "// Computational Biology & AI"
-
-#: src/routes/projects/ml/physarum/+page.svelte
 msgid "Visualization of U-Matrix, Hit Map, and Weight Vectors"
 msgstr "Visualization of U-Matrix, Hit Map, and Weight Vectors"
 
@@ -402,10 +246,6 @@ msgid "Disseminating results within and beyond the academic community."
 msgstr "Disseminating results within and beyond the academic community."
 
 #: src/routes/projects/ket/+page.svelte
-msgid "<0/> Join us"
-msgstr "<0/> Join us"
-
-#: src/routes/projects/ket/+page.svelte
 msgid "The KET project focuses on pure quantum algorithmics, moving computation modeling to a level of abstraction familiar from classical software engineering. It allows you to learn and run code on a real quantum processor without requiring advanced knowledge of physics, optics, or cryogenics. The development path leads from the basics of qubit operation and cryptography in the Qiskit environment, through complexity theory, to variational optimization methods. In the final phase, participants face the challenges of modern hardware, learning advanced error-correcting codes, magic state distillation, and Quantum Machine Learning."
 msgstr "The KET project focuses on pure quantum algorithmics, moving computation modeling to a level of abstraction familiar from classical software engineering. It allows you to learn and run code on a real quantum processor without requiring advanced knowledge of physics, optics, or cryogenics. The development path leads from the basics of qubit operation and cryptography in the Qiskit environment, through complexity theory, to variational optimization methods. In the final phase, participants face the challenges of modern hardware, learning advanced error-correcting codes, magic state distillation, and Quantum Machine Learning."
 
@@ -416,20 +256,6 @@ msgstr "Researching innovative quantum algorithms, computational complexity theo
 #: src/routes/projects/ket/+page.svelte
 msgid "Modeling computations and independently implementing proprietary quantum algorithms in the Qiskit environment, with the ultimate execution of the code on a real quantum processor."
 msgstr "Modeling computations and independently implementing proprietary quantum algorithms in the Qiskit environment, with the ultimate execution of the code on a real quantum processor."
-
-#. 0: year
-#: src/routes/projects/zosia/[year]/+page.svelte
-msgid "Edition {0} was not found ;("
-msgstr "Edition {0} was not found ;("
-
-#. 0: year
-#: src/routes/projects/zosia/[year]/+page.svelte
-msgid "Archaeologists are wondering if ZOSIA {0} even took place. No evidence found..."
-msgstr "Archaeologists are wondering if ZOSIA {0} even took place. No evidence found..."
-
-#: src/routes/projects/zosia/[year]/+page.svelte
-msgid "We don't have photos from this edition of ZOSIA. If you have any, you can send them to us so we can post them here."
-msgstr "We don't have photos from this edition of ZOSIA. If you have any, you can send them to us so we can post them here."
 
 #: src/components/Navbar copy.svelte
 msgid "Toggle language"
@@ -447,31 +273,15 @@ msgstr "// Scientifically"
 msgid "// Socially"
 msgstr "// Socially"
 
-#: src/routes/dashboard/s3cache/+page.svelte
-msgid "Refetch"
-msgstr "Refetch"
-
 #: src/routes/projects/zosia/[year]/+page.svelte
 msgid "<0/> Location"
 msgstr "<0/> Location"
-
-#: src/routes/projects/zosia/[year]/+page.svelte
-msgid "<0/> Number of Participants"
-msgstr "<0/> Number of Participants"
-
-#: src/routes/projects/zosia/[year]/+page.svelte
-msgid "<0/> Camp Date"
-msgstr "<0/> Camp Date"
 
 #: src/components/Sidebar.svelte
 #: src/routes/dashboard/+page.svelte
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Alerts"
 msgstr "Alerts"
-
-#: src/routes/dashboard/alerts/+page.svelte
-msgid "Manage the alert displayed at the top of the page."
-msgstr "Manage the alert displayed at the top of the page."
 
 #: src/components/Navbar copy.svelte
 msgid "Życie studenckie"
@@ -480,7 +290,6 @@ msgstr "Życie studenckie"
 #: src/components/Navbar.svelte
 #: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
-#: src/routes/projects/+page.svelte
 msgid "Projects"
 msgstr "Projects"
 
@@ -531,20 +340,26 @@ msgid "Date: 22.02.2024 - 25.02.2024"
 msgstr "Date: 22.02.2024 - 25.02.2024"
 
 #: src/components/Sidebar.svelte
+#: src/routes/+page.svelte
+#: src/routes/projects/+page.svelte
 msgid "Hour of Code"
 msgstr "Hour of Code"
 
 #: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
-#: src/routes/projects/ml/+page.svelte
 msgid "Machine Learning"
 msgstr "Machine Learning"
 
 #: src/components/Navbar.svelte
+#: src/routes/+page.svelte
+#: src/routes/projects/+page.svelte
+#: src/routes/projects/ml/+page.svelte
 msgid "Krasnal"
 msgstr "Krasnal"
 
 #: src/components/Navbar.svelte
+#: src/routes/projects/+page.svelte
+#: src/routes/projects/ml/+page.svelte
 msgid "Physarum"
 msgstr "Physarum"
 
@@ -574,7 +389,6 @@ msgid "KET"
 msgstr "KET"
 
 #: src/components/Sidebar.svelte
-#: src/routes/dashboard/+page.svelte
 msgid "S3 Cache"
 msgstr "S3 Cache"
 
@@ -613,19 +427,994 @@ msgstr "Scroll to top"
 msgid "KSI"
 msgstr "KSI"
 
-#: src/routes/projects/+page.svelte
-msgid "Explore all projects of KSI"
-msgstr "Explore all projects of KSI"
-
-#: src/routes/projects/+page.svelte
-msgid "Search for projects"
-msgstr "Search for projects"
-
-#: src/routes/projects/+page.svelte
-#: src/routes/projects/ml/+page.svelte
-msgid "Work in progress..."
-msgstr "Work in progress..."
-
 #: src/components/NavbarAccordion.svelte
 msgid "self-end underline cursor-pointer"
 msgstr "self-end underline cursor-pointer"
+
+#: src/routes/+page.svelte
+msgid "Explore our work <0/>"
+msgstr "Explore our work <0/>"
+
+#: src/routes/+page.svelte
+msgid "Meet the association"
+msgstr "Meet the association"
+
+#: src/routes/+page.svelte
+msgid "<0/> Student research group · Wrocław"
+msgstr "<0/> Student research group · Wrocław"
+
+#: src/routes/+page.svelte
+msgid "Curious minds.<0/> <1>Serious projects.</1>"
+msgstr "Curious minds.<0/> <1>Serious projects.</1>"
+
+#: src/routes/+page.svelte
+msgid "We are the Computer Science Students’ Association at the University of Wrocław — a community for learning, building, and exploring what technology can do."
+msgstr "We are the Computer Science Students’ Association at the University of Wrocław — a community for learning, building, and exploring what technology can do."
+
+#: src/routes/+page.svelte
+msgid "group"
+msgstr "group"
+
+#: src/routes/+page.svelte
+msgid "focus"
+msgstr "focus"
+
+#: src/routes/+page.svelte
+msgid "computer science"
+msgstr "computer science"
+
+#: src/routes/+page.svelte
+msgid "status"
+msgstr "status"
+
+#: src/routes/+page.svelte
+msgid "<0/>always learning"
+msgstr "<0/>always learning"
+
+#: src/routes/+page.svelte
+msgid "location"
+msgstr "location"
+
+#: src/routes/+page.svelte
+msgid "room 24"
+msgstr "room 24"
+
+#: src/routes/+page.svelte
+msgid "<0/> whoami"
+msgstr "<0/> whoami"
+
+#: src/routes/+page.svelte
+msgid "<0/> build --together<1/>"
+msgstr "<0/> build --together<1/>"
+
+#: src/routes/+page.svelte
+msgid "<0/> ksi@uwr:~"
+msgstr "<0/> ksi@uwr:~"
+
+#: src/routes/+page.svelte
+msgid "01 / About us"
+msgstr "01 / About us"
+
+#: src/routes/+page.svelte
+msgid "A place to turn curiosity into practice."
+msgstr "A place to turn curiosity into practice."
+
+#: src/routes/+page.svelte
+msgid "Socially"
+msgstr "Socially"
+
+#: src/routes/+page.svelte
+msgid "A community that learns and grows together."
+msgstr "A community that learns and grows together."
+
+#: src/routes/+page.svelte
+msgid "Technically"
+msgstr "Technically"
+
+#: src/routes/+page.svelte
+msgid "Ideas transformed into working systems."
+msgstr "Ideas transformed into working systems."
+
+#: src/routes/+page.svelte
+msgid "Scientifically"
+msgstr "Scientifically"
+
+#: src/routes/+page.svelte
+msgid "Questions explored with rigor and curiosity."
+msgstr "Questions explored with rigor and curiosity."
+
+#: src/routes/+page.svelte
+msgid "We are a student research group operating at the Institute of Computer Science. From low-level theory to practical implementations, we create space to exchange knowledge, experiment, and build ambitious things together."
+msgstr "We are a student research group operating at the Institute of Computer Science. From low-level theory to practical implementations, we create space to exchange knowledge, experiment, and build ambitious things together."
+
+#: src/routes/+page.svelte
+msgid "02 / Selected work"
+msgstr "02 / Selected work"
+
+#: src/routes/+page.svelte
+msgid "Projects built beyond the classroom."
+msgstr "Projects built beyond the classroom."
+
+#: src/routes/+page.svelte
+msgid "View all projects <0/>"
+msgstr "View all projects <0/>"
+
+#: src/routes/+page.svelte
+msgid "PROJECT / 01"
+msgstr "PROJECT / 01"
+
+#: src/routes/+page.svelte
+msgid "Programming classes that give primary school students their first tools to create with code."
+msgstr "Programming classes that give primary school students their first tools to create with code."
+
+#: src/routes/+page.svelte
+msgid "PROJECT / 02"
+msgstr "PROJECT / 02"
+
+#: src/routes/+page.svelte
+msgid "A chess engine that uses the Transformer architecture to learn a more intuitive way to play."
+msgstr "A chess engine that uses the Transformer architecture to learn a more intuitive way to play."
+
+#: src/routes/projects/hoc/+page.svelte
+msgid "Education · Python · Grades 4–8"
+msgstr "Education · Python · Grades 4–8"
+
+#: src/routes/projects/hoc/+page.svelte
+msgid "Email the Hour of Code organizers"
+msgstr "Email the Hour of Code organizers"
+
+#: src/routes/projects/hoc/+page.svelte
+msgid "<0/> Contact us <1/>"
+msgstr "<0/> Contact us <1/>"
+
+#: src/routes/projects/hoc/+page.svelte
+msgid "01 / Format"
+msgstr "01 / Format"
+
+#: src/routes/projects/hoc/+page.svelte
+msgid "Theory, then practice."
+msgstr "Theory, then practice."
+
+#: src/routes/projects/hoc/+page.svelte
+msgid "Part 01"
+msgstr "Part 01"
+
+#: src/routes/projects/hoc/+page.svelte
+msgid "Part 02"
+msgstr "Part 02"
+
+#: src/routes/projects/hoc/+page.svelte
+msgid "02 / Schedule"
+msgstr "02 / Schedule"
+
+#: src/routes/projects/hoc/+page.svelte
+msgid "03 / Why join"
+msgstr "03 / Why join"
+
+#: src/routes/projects/hoc/+page.svelte
+msgid "04 / Details"
+msgstr "04 / Details"
+
+#: src/routes/projects/hoc/+page.svelte
+msgid "2026 dates"
+msgstr "2026 dates"
+
+#: src/routes/projects/hoc/+page.svelte
+msgid "April 10 · April 24<0/>May 4 · May 11"
+msgstr "April 10 · April 24<0/>May 4 · May 11"
+
+#: src/routes/projects/hoc/+page.svelte
+msgid "Location"
+msgstr "Location"
+
+#: src/routes/projects/hoc/+page.svelte
+msgid "Duration"
+msgstr "Duration"
+
+#: src/routes/projects/hoc/+page.svelte
+msgid "About 3 hours"
+msgstr "About 3 hours"
+
+#: src/routes/projects/hoc/+page.svelte
+msgid "In 2026, the classes will take place on: April 10, April 24, May 4, and May 11. The classes are held in the lecture halls and computer labs of the Institute of Computer Science at the University of Wrocław, at 15 Fryderyka Joliota-Curie Street in Wrocław. We invite schools to register their willingness to participate in these classes by email at <0>hourofcode.ksi@gmail.com</0>"
+msgstr "In 2026, the classes will take place on: April 10, April 24, May 4, and May 11. The classes are held in the lecture halls and computer labs of the Institute of Computer Science at the University of Wrocław, at 15 Fryderyka Joliota-Curie Street in Wrocław. We invite schools to register their willingness to participate in these classes by email at <0>hourofcode.ksi@gmail.com</0>"
+
+#: src/routes/projects/hoc/+page.svelte
+msgid "05 / Gallery"
+msgstr "05 / Gallery"
+
+#: src/routes/projects/hoc/+page.svelte
+msgid "06 / Archive"
+msgstr "06 / Archive"
+
+#: src/routes/projects/hoc/+page.svelte
+msgid "07 / Purpose"
+msgstr "07 / Purpose"
+
+#: src/routes/projects/hoc/+page.svelte
+msgid "08 / People"
+msgstr "08 / People"
+
+#: src/routes/projects/ml/krasnal/+page.svelte
+msgid "Machine learning · Chess"
+msgstr "Machine learning · Chess"
+
+#: src/routes/projects/ml/krasnal/+page.svelte
+msgid "Krasnal<0/>Chess Engine <1/>"
+msgstr "Krasnal<0/>Chess Engine <1/>"
+
+#: src/routes/projects/ml/krasnal/+page.svelte
+msgid "01 / Approach"
+msgstr "01 / Approach"
+
+#: src/routes/projects/ml/krasnal/+page.svelte
+msgid "Intuition over exhaustive search."
+msgstr "Intuition over exhaustive search."
+
+#: src/routes/projects/ml/krasnal/+page.svelte
+msgid "Model"
+msgstr "Model"
+
+#: src/routes/projects/ml/krasnal/+page.svelte
+msgid "Transformer architecture"
+msgstr "Transformer architecture"
+
+#: src/routes/projects/ml/krasnal/+page.svelte
+msgid "Method"
+msgstr "Method"
+
+#: src/routes/projects/ml/krasnal/+page.svelte
+msgid "Deep neural networks"
+msgstr "Deep neural networks"
+
+#: src/routes/projects/ml/krasnal/+page.svelte
+msgid "Aim"
+msgstr "Aim"
+
+#: src/routes/projects/ml/krasnal/+page.svelte
+msgid "Strong, human-like chess moves"
+msgstr "Strong, human-like chess moves"
+
+#: src/routes/projects/ml/krasnal/+page.svelte
+msgid "02 / Architecture"
+msgstr "02 / Architecture"
+
+#: src/routes/projects/ml/krasnal/+page.svelte
+msgid "Three views of Krasnal's notation, Transformer model, and direct move-prediction approach."
+msgstr "Three views of Krasnal's notation, Transformer model, and direct move-prediction approach."
+
+#: src/routes/projects/ml/krasnal/+page.svelte
+msgid "Diagram comparing ambiguous standard UCI chess notation with Krasnal's color-aware tokenization"
+msgstr "Diagram comparing ambiguous standard UCI chess notation with Krasnal's color-aware tokenization"
+
+#: src/routes/projects/ml/krasnal/+page.svelte
+#: src/routes/projects/ml/physarum/+page.svelte
+msgid "FIG. 01"
+msgstr "FIG. 01"
+
+#: src/routes/projects/ml/krasnal/+page.svelte
+msgid "Color-aware Krasnal tokenization compared with standard UCI notation."
+msgstr "Color-aware Krasnal tokenization compared with standard UCI notation."
+
+#: src/routes/projects/ml/krasnal/+page.svelte
+msgid "Transformer architecture diagram showing token embedding, attention and feed-forward layers, normalization, and output logits"
+msgstr "Transformer architecture diagram showing token embedding, attention and feed-forward layers, normalization, and output logits"
+
+#: src/routes/projects/ml/krasnal/+page.svelte
+msgid "FIG. 02"
+msgstr "FIG. 02"
+
+#: src/routes/projects/ml/krasnal/+page.svelte
+msgid "Transformer flow from input tokens to output logits."
+msgstr "Transformer flow from input tokens to output logits."
+
+#: src/routes/projects/ml/krasnal/+page.svelte
+msgid "Diagram comparing Stockfish's explicit search tree with Krasnal's Transformer-based direct next-move prediction"
+msgstr "Diagram comparing Stockfish's explicit search tree with Krasnal's Transformer-based direct next-move prediction"
+
+#: src/routes/projects/ml/krasnal/+page.svelte
+msgid "FIG. 03"
+msgstr "FIG. 03"
+
+#: src/routes/projects/ml/krasnal/+page.svelte
+msgid "Traditional explicit search compared with Krasnal's direct prediction."
+msgstr "Traditional explicit search compared with Krasnal's direct prediction."
+
+#: src/routes/projects/ket/+page.svelte
+#: src/routes/projects/ml/krasnal/+page.svelte
+#: src/routes/projects/ml/physarum/+page.svelte
+msgid "03 / Direction"
+msgstr "03 / Direction"
+
+#: src/routes/projects/ket/+page.svelte
+#: src/routes/projects/ml/krasnal/+page.svelte
+#: src/routes/projects/ml/physarum/+page.svelte
+msgid "04 / People"
+msgstr "04 / People"
+
+#: src/routes/projects/ml/physarum/+page.svelte
+msgid "Computational Biology & AI"
+msgstr "Computational Biology & AI"
+
+#: src/routes/projects/ml/physarum/+page.svelte
+msgid "Can a Slime Mold<0/>train Neural Networks?"
+msgstr "Can a Slime Mold<0/>train Neural Networks?"
+
+#: src/routes/projects/ml/physarum/+page.svelte
+msgid "01 / Question"
+msgstr "01 / Question"
+
+#: src/routes/projects/ml/physarum/+page.svelte
+msgid "A biological route to computation."
+msgstr "A biological route to computation."
+
+#: src/routes/projects/ml/physarum/+page.svelte
+msgid "Physarum polycephalum"
+msgstr "Physarum polycephalum"
+
+#: src/routes/projects/ml/physarum/+page.svelte
+msgid "Organism"
+msgstr "Organism"
+
+#: src/routes/projects/ml/physarum/+page.svelte
+msgid "Intersection"
+msgstr "Intersection"
+
+#: src/routes/projects/ml/physarum/+page.svelte
+msgid "Biology and computer science"
+msgstr "Biology and computer science"
+
+#: src/routes/projects/ml/physarum/+page.svelte
+msgid "Technical focus"
+msgstr "Technical focus"
+
+#: src/routes/projects/ml/physarum/+page.svelte
+msgid "Algorithmic modeling of transport networks"
+msgstr "Algorithmic modeling of transport networks"
+
+#: src/routes/projects/ml/physarum/+page.svelte
+msgid "02 / Research view"
+msgstr "02 / Research view"
+
+#: src/routes/projects/ml/physarum/+page.svelte
+msgid "Mapping the model."
+msgstr "Mapping the model."
+
+#: src/routes/projects/ml/physarum/+page.svelte
+msgid "A visual view of the U-Matrix, activation frequency, and learned weight vectors."
+msgstr "A visual view of the U-Matrix, activation frequency, and learned weight vectors."
+
+#: src/routes/projects/ml/physarum/+page.svelte
+msgid "Three-panel visualization showing a U-Matrix heatmap, a neuron activation hit map, and neuron weight vectors"
+msgstr "Three-panel visualization showing a U-Matrix heatmap, a neuron activation hit map, and neuron weight vectors"
+
+#: src/routes/dashboard/+page.svelte
+msgid "Admin workspace"
+msgstr "Admin workspace"
+
+#: src/routes/dashboard/+page.svelte
+msgid "Site operations,<0/> <1>in one place.</1>"
+msgstr "Site operations,<0/> <1>in one place.</1>"
+
+#: src/routes/dashboard/+page.svelte
+msgid "Manage public announcements and inspect cached object listings used across the website."
+msgstr "Manage public announcements and inspect cached object listings used across the website."
+
+#: src/routes/dashboard/+page.svelte
+msgid "01 / Tools"
+msgstr "01 / Tools"
+
+#: src/routes/dashboard/+page.svelte
+msgid "Choose a workspace"
+msgstr "Choose a workspace"
+
+#: src/routes/dashboard/+page.svelte
+msgid "2 modules available"
+msgstr "2 modules available"
+
+#: src/routes/dashboard/+page.svelte
+msgid "Module / 01"
+msgstr "Module / 01"
+
+#: src/routes/dashboard/+page.svelte
+msgid "Create, schedule, edit, and remove the announcements shown to visitors across the site."
+msgstr "Create, schedule, edit, and remove the announcements shown to visitors across the site."
+
+#: src/routes/dashboard/+page.svelte
+msgid "Manage alerts →"
+msgstr "Manage alerts →"
+
+#: src/routes/dashboard/+page.svelte
+msgid "Module / 02"
+msgstr "Module / 02"
+
+#: src/routes/dashboard/+page.svelte
+#: src/routes/dashboard/s3cache/+page.svelte
+msgid "S3 cache"
+msgstr "S3 cache"
+
+#: src/routes/dashboard/+page.svelte
+msgid "Review cached Cloudflare R2 object lists and refresh individual cache keys on demand."
+msgstr "Review cached Cloudflare R2 object lists and refresh individual cache keys on demand."
+
+#: src/routes/dashboard/+page.svelte
+msgid "Inspect cache →"
+msgstr "Inspect cache →"
+
+#. 0: alert.title
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Delete “{0}”? This action cannot be undone."
+msgstr "Delete “{0}”? This action cannot be undone."
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Announcements"
+msgstr "Announcements"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Schedule and maintain the notices displayed at the top of the public website."
+msgstr "Schedule and maintain the notices displayed at the top of the public website."
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "<0/> New alert"
+msgstr "<0/> New alert"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Editor"
+msgstr "Editor"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Close alert editor"
+msgstr "Close alert editor"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Maintenance notice"
+msgstr "Maintenance notice"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Neutral"
+msgstr "Neutral"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Information"
+msgstr "Information"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Warning"
+msgstr "Warning"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Danger"
+msgstr "Danger"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Display style"
+msgstr "Display style"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Starts at"
+msgstr "Starts at"
+
+#: src/routes/dashboard/alerts/+page.svelte
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Your local time"
+msgstr "Your local time"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Ends at"
+msgstr "Ends at"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Priority <0>Optional</0>"
+msgstr "Priority <0>Optional</0>"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Link <0>Optional</0>"
+msgstr "Link <0>Optional</0>"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Explain what visitors need to know…"
+msgstr "Explain what visitors need to know…"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Saving…"
+msgstr "Saving…"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "01 / Published records"
+msgstr "01 / Published records"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "All alerts"
+msgstr "All alerts"
+
+#. 0: currentPage + 1; 1: Math.max(pageCount, 1)
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Page {0} / {1}"
+msgstr "Page {0} / {1}"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Loading alerts…"
+msgstr "Loading alerts…"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Alerts could not be loaded."
+msgstr "Alerts could not be loaded."
+
+#: src/routes/dashboard/alerts/+page.svelte
+#: src/routes/dashboard/s3cache/+page.svelte
+msgid "Try again"
+msgstr "Try again"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "No alerts on this page"
+msgstr "No alerts on this page"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Create an alert to publish the first announcement."
+msgstr "Create an alert to publish the first announcement."
+
+#. 0: alert.priority
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Priority {0}"
+msgstr "Priority {0}"
+
+#. 0: alert.title
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Edit {0}"
+msgstr "Edit {0}"
+
+#. 0: alert.title
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Delete {0}"
+msgstr "Delete {0}"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Alerts pagination"
+msgstr "Alerts pagination"
+
+#. 0: page + 1
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Go to page {0}"
+msgstr "Go to page {0}"
+
+#: src/routes/dashboard/s3cache/+page.svelte
+msgid "An unknown error occurred."
+msgstr "An unknown error occurred."
+
+#. 0: key
+#: src/routes/dashboard/s3cache/+page.svelte
+msgid "Refreshed cache key “{0}”"
+msgstr "Refreshed cache key “{0}”"
+
+#: src/routes/dashboard/s3cache/+page.svelte
+msgid "Storage operations"
+msgstr "Storage operations"
+
+#: src/routes/dashboard/s3cache/+page.svelte
+msgid "The website caches lists of object URLs from Cloudflare R2 to avoid repeatedly scanning storage. Inspect each cached group below or refresh a key after its bucket contents change."
+msgstr "The website caches lists of object URLs from Cloudflare R2 to avoid repeatedly scanning storage. Inspect each cached group below or refresh a key after its bucket contents change."
+
+#: src/routes/dashboard/s3cache/+page.svelte
+msgid "01 / Cached groups"
+msgstr "01 / Cached groups"
+
+#: src/routes/dashboard/s3cache/+page.svelte
+msgid "Object listings"
+msgstr "Object listings"
+
+#. 0: cacheEntries.length; 1: cacheEntries.length === 1 ? 'key' \\: 'keys'
+#: src/routes/dashboard/s3cache/+page.svelte
+msgid "{0} {1} cached"
+msgstr "{0} {1} cached"
+
+#: src/routes/dashboard/s3cache/+page.svelte
+msgid "Loading cached object listings…"
+msgstr "Loading cached object listings…"
+
+#: src/routes/dashboard/s3cache/+page.svelte
+msgid "The S3 cache could not be loaded."
+msgstr "The S3 cache could not be loaded."
+
+#: src/routes/dashboard/s3cache/+page.svelte
+msgid "No cache keys found"
+msgstr "No cache keys found"
+
+#: src/routes/dashboard/s3cache/+page.svelte
+msgid "Cached object listings will appear here after they are used."
+msgstr "Cached object listings will appear here after they are used."
+
+#: src/routes/dashboard/s3cache/+page.svelte
+msgid "Cache key"
+msgstr "Cache key"
+
+#. 0: formatLocalDate(cache.time)
+#: src/routes/dashboard/s3cache/+page.svelte
+msgid "Updated {0}"
+msgstr "Updated {0}"
+
+#. 0: key
+#: src/routes/dashboard/s3cache/+page.svelte
+msgid "Refresh cache key {0}"
+msgstr "Refresh cache key {0}"
+
+#: src/routes/dashboard/s3cache/+page.svelte
+msgid "Refreshing…"
+msgstr "Refreshing…"
+
+#: src/routes/dashboard/s3cache/+page.svelte
+msgid "Refresh"
+msgstr "Refresh"
+
+#: src/routes/dashboard/s3cache/+page.svelte
+msgid "This cache key contains no URLs."
+msgstr "This cache key contains no URLs."
+
+#: src/routes/projects/ket/+page.svelte
+msgid "Quantum algorithms · Qiskit"
+msgstr "Quantum algorithms · Qiskit"
+
+#: src/routes/projects/ket/+page.svelte
+msgid "Join us <0/>"
+msgstr "Join us <0/>"
+
+#: src/routes/projects/ket/+page.svelte
+msgid "01 / Project"
+msgstr "01 / Project"
+
+#: src/routes/projects/ket/+page.svelte
+msgid "From qubits to real hardware."
+msgstr "From qubits to real hardware."
+
+#: src/routes/projects/ket/+page.svelte
+msgid "Starting point"
+msgstr "Starting point"
+
+#: src/routes/projects/ket/+page.svelte
+msgid "Basics of qubit operation and cryptography"
+msgstr "Basics of qubit operation and cryptography"
+
+#: src/routes/projects/ket/+page.svelte
+msgid "Environment"
+msgstr "Environment"
+
+#: src/routes/projects/ket/+page.svelte
+msgid "Qiskit and a real quantum processor"
+msgstr "Qiskit and a real quantum processor"
+
+#: src/routes/projects/ket/+page.svelte
+msgid "Q"
+msgstr "Q"
+
+#: src/routes/projects/ket/+page.svelte
+msgid "Advanced path"
+msgstr "Advanced path"
+
+#: src/routes/projects/ket/+page.svelte
+msgid "Error correction, optimization, and Quantum Machine Learning"
+msgstr "Error correction, optimization, and Quantum Machine Learning"
+
+#: src/routes/projects/ket/+page.svelte
+msgid "02 / Recruitment"
+msgstr "02 / Recruitment"
+
+#: src/routes/projects/ket/+page.svelte
+msgid "Project poster"
+msgstr "Project poster"
+
+#: src/routes/projects/ket/+page.svelte
+msgid "KET quantum computing recruitment poster with project topics and a registration QR code"
+msgstr "KET quantum computing recruitment poster with project topics and a registration QR code"
+
+#: src/routes/projects/ket/+page.svelte
+msgid "KET recruitment poster"
+msgstr "KET recruitment poster"
+
+#: src/routes/projects/+page.svelte
+msgid "Education"
+msgstr "Education"
+
+#: src/routes/projects/+page.svelte
+msgid "Programming workshops introducing primary school students to Python and computational thinking."
+msgstr "Programming workshops introducing primary school students to Python and computational thinking."
+
+#: src/routes/projects/+page.svelte
+msgid "Python"
+msgstr "Python"
+
+#: src/routes/projects/+page.svelte
+msgid "Workshops"
+msgstr "Workshops"
+
+#: src/routes/projects/+page.svelte
+#: src/routes/projects/+page.svelte
+msgid "Community"
+msgstr "Community"
+
+#: src/routes/projects/+page.svelte
+msgid "Quantum computing"
+msgstr "Quantum computing"
+
+#: src/routes/projects/+page.svelte
+msgid "From qubit fundamentals to algorithms running on real quantum processors."
+msgstr "From qubit fundamentals to algorithms running on real quantum processors."
+
+#: src/routes/projects/+page.svelte
+msgid "Qiskit"
+msgstr "Qiskit"
+
+#: src/routes/projects/+page.svelte
+msgid "Algorithms"
+msgstr "Algorithms"
+
+#: src/routes/projects/+page.svelte
+msgid "Research"
+msgstr "Research"
+
+#: src/routes/projects/+page.svelte
+#: src/routes/projects/ml/+page.svelte
+msgid "Machine learning"
+msgstr "Machine learning"
+
+#: src/routes/projects/+page.svelte
+msgid "A Transformer-based chess engine learning to produce strong, human-like moves."
+msgstr "A Transformer-based chess engine learning to produce strong, human-like moves."
+
+#: src/routes/projects/+page.svelte
+msgid "Transformers"
+msgstr "Transformers"
+
+#: src/routes/projects/+page.svelte
+msgid "Chess"
+msgstr "Chess"
+
+#: src/routes/projects/+page.svelte
+msgid "Computational biology"
+msgstr "Computational biology"
+
+#: src/routes/projects/+page.svelte
+msgid "Exploring whether slime mold behavior can inspire methods for training neural networks."
+msgstr "Exploring whether slime mold behavior can inspire methods for training neural networks."
+
+#: src/routes/projects/+page.svelte
+msgid "Biology"
+msgstr "Biology"
+
+#: src/routes/projects/+page.svelte
+msgid "Networks"
+msgstr "Networks"
+
+#: src/routes/projects/+page.svelte
+msgid "Conference"
+msgstr "Conference"
+
+#: src/routes/projects/+page.svelte
+msgid "The annual winter camp bringing together students, researchers, and the technology community."
+msgstr "The annual winter camp bringing together students, researchers, and the technology community."
+
+#: src/routes/projects/+page.svelte
+#: src/routes/projects/zosia/+page.svelte
+msgid "Talks"
+msgstr "Talks"
+
+#: src/routes/projects/+page.svelte
+msgid "Wrocław"
+msgstr "Wrocław"
+
+#: src/routes/projects/+page.svelte
+msgid "What we build"
+msgstr "What we build"
+
+#: src/routes/projects/+page.svelte
+msgid "Projects driven by curiosity."
+msgstr "Projects driven by curiosity."
+
+#: src/routes/projects/+page.svelte
+msgid "Explore our work across education, machine learning, quantum computing, computational biology, and community events."
+msgstr "Explore our work across education, machine learning, quantum computing, computational biology, and community events."
+
+#: src/routes/projects/+page.svelte
+msgid "Search by name, field, or technology..."
+msgstr "Search by name, field, or technology..."
+
+#: src/routes/projects/+page.svelte
+msgid "Search projects"
+msgstr "Search projects"
+
+#: src/routes/projects/+page.svelte
+msgid "No matching projects."
+msgstr "No matching projects."
+
+#: src/routes/projects/+page.svelte
+msgid "Try a different name, field, or technology."
+msgstr "Try a different name, field, or technology."
+
+#: src/routes/projects/ml/+page.svelte
+msgid "<0/> All projects"
+msgstr "<0/> All projects"
+
+#: src/routes/projects/ml/+page.svelte
+msgid "Research group"
+msgstr "Research group"
+
+#: src/routes/projects/ml/+page.svelte
+msgid "We explore learning systems through projects spanning game intelligence and biologically inspired computation."
+msgstr "We explore learning systems through projects spanning game intelligence and biologically inspired computation."
+
+#: src/routes/projects/ml/+page.svelte
+msgid "Chess · Transformers"
+msgstr "Chess · Transformers"
+
+#: src/routes/projects/ml/+page.svelte
+msgid "A chess engine trained to generate legal, strong moves that resemble human play."
+msgstr "A chess engine trained to generate legal, strong moves that resemble human play."
+
+#: src/routes/projects/ml/+page.svelte
+msgid "Biology · Neural networks"
+msgstr "Biology · Neural networks"
+
+#: src/routes/projects/ml/+page.svelte
+msgid "Research into slime-mold behavior and its potential use in computational tasks."
+msgstr "Research into slime-mold behavior and its potential use in computational tasks."
+
+#: src/routes/projects/zosia/+page.svelte
+msgid "Since the early 2000s"
+msgstr "Since the early 2000s"
+
+#: src/routes/projects/zosia/+page.svelte
+msgid "ZOSIA"
+msgstr "ZOSIA"
+
+#: src/routes/projects/zosia/+page.svelte
+msgid "Winter Camp of Computer Science Students"
+msgstr "Winter Camp of Computer Science Students"
+
+#: src/routes/projects/zosia/+page.svelte
+msgid "What began as an informal trip among friends now brings together nearly 300 students, researchers, and technology professionals for three days of ideas and community."
+msgstr "What began as an informal trip among friends now brings together nearly 300 students, researchers, and technology professionals for three days of ideas and community."
+
+#: src/routes/projects/zosia/+page.svelte
+msgid "Lectures and presentations from academia and the technology industry."
+msgstr "Lectures and presentations from academia and the technology industry."
+
+#: src/routes/projects/zosia/+page.svelte
+msgid "People"
+msgstr "People"
+
+#: src/routes/projects/zosia/+page.svelte
+msgid "Students from different universities sharing knowledge and experience."
+msgstr "Students from different universities sharing knowledge and experience."
+
+#: src/routes/projects/zosia/+page.svelte
+msgid "Atmosphere"
+msgstr "Atmosphere"
+
+#: src/routes/projects/zosia/+page.svelte
+msgid "Excursions and social events in a unique winter setting."
+msgstr "Excursions and social events in a unique winter setting."
+
+#: src/routes/projects/zosia/+page.svelte
+msgid "Edition archive"
+msgstr "Edition archive"
+
+#: src/routes/projects/zosia/+page.svelte
+msgid "Every year tells a story."
+msgstr "Every year tells a story."
+
+#: src/routes/projects/zosia/+page.svelte
+msgid "Browse dates, attendance, locations, and photographs from previous camps."
+msgstr "Browse dates, attendance, locations, and photographs from previous camps."
+
+#. 0: edition.participants
+#: src/routes/projects/zosia/+page.svelte
+msgid "<0/> {0} participants"
+msgstr "<0/> {0} participants"
+
+#: src/routes/projects/zosia/[year]/+page.svelte
+msgid "No photographs in the archive yet."
+msgstr "No photographs in the archive yet."
+
+#. 0: data.year
+#: src/routes/projects/zosia/[year]/+page.svelte
+msgid "If you have photos from ZOSIA {0}, send them to <0>ksi [at] cs.uni.wroc.pl</0> so we can preserve them here."
+msgstr "If you have photos from ZOSIA {0}, send them to <0>ksi [at] cs.uni.wroc.pl</0> so we can preserve them here."
+
+#: src/routes/projects/zosia/[year]/+page.svelte
+msgid "ZOSIA edition"
+msgstr "ZOSIA edition"
+
+#: src/routes/projects/zosia/[year]/+page.svelte
+msgid "<0/> Participants"
+msgstr "<0/> Participants"
+
+#: src/routes/projects/zosia/[year]/+page.svelte
+msgid "<0/> Camp date"
+msgstr "<0/> Camp date"
+
+#: src/routes/projects/zosia/[year]/+page.svelte
+msgid "Photo archive"
+msgstr "Photo archive"
+
+#. 0: data.year
+#: src/routes/projects/zosia/[year]/+page.svelte
+msgid "Moments from {0}"
+msgstr "Moments from {0}"
+
+#: src/routes/projects/zosia/[year]/+page.svelte
+msgid "<0/> Back to all editions"
+msgstr "<0/> Back to all editions"
+
+#: src/components/DynamicGallery.svelte
+msgid "The gallery could not be loaded."
+msgstr "The gallery could not be loaded."
+
+#: src/components/DynamicGallery.svelte
+msgid "Loading gallery"
+msgstr "Loading gallery"
+
+#: src/components/DynamicGallery.svelte
+msgid "Gallery unavailable"
+msgstr "Gallery unavailable"
+
+#: src/components/DynamicGallery.svelte
+msgid "<0/> Try again"
+msgstr "<0/> Try again"
+
+#: src/components/DynamicGallery.svelte
+msgid "No photographs have been added yet."
+msgstr "No photographs have been added yet."
+
+#: src/components/Gallery.svelte
+msgid "Image viewer"
+msgstr "Image viewer"
+
+#: src/components/Gallery.svelte
+msgid "Close image viewer"
+msgstr "Close image viewer"
+
+#. 0: currentImageIndex + 1; 1: images.length
+#: src/components/Gallery.svelte
+msgid "Gallery image {0} of {1}"
+msgstr "Gallery image {0} of {1}"
+
+#: src/components/Gallery.svelte
+msgid "Previous image"
+msgstr "Previous image"
+
+#: src/components/Gallery.svelte
+msgid "Next image"
+msgstr "Next image"
+
+#. 0: i * 3 + splitI + 1
+#: src/components/Gallery.svelte
+msgid "Gallery thumbnail {0}"
+msgstr "Gallery thumbnail {0}"
+
+#. 0: page.status
+#: src/routes/+error.svelte
+msgid "{0} · KSI UWr"
+msgstr "{0} · KSI UWr"
+
+#: src/routes/+error.svelte
+msgid "The page may have moved, or something went wrong while loading it."
+msgstr "The page may have moved, or something went wrong while loading it."
+
+#: src/routes/+error.svelte
+msgid "<0/> Route not resolved"
+msgstr "<0/> Route not resolved"
+
+#: src/routes/+error.svelte
+msgid "This path led somewhere unexpected."
+msgstr "This path led somewhere unexpected."
+
+#. 0: page.error?.message || 'The page may have moved, or something went wrong while loading it.'
+#: src/routes/+error.svelte
+msgid "{0} The reliable route is back to the association — and room 24 at the Institute of Computer Science is always worth finding."
+msgstr "{0} The reliable route is back to the association — and room 24 at the Institute of Computer Science is always worth finding."
+
+#: src/routes/+error.svelte
+msgid "<0/> Return home"
+msgstr "<0/> Return home"
+
+#: src/components/Wrapper.svelte
+msgid "Breadcrumb"
+msgstr "Breadcrumb"
