@@ -73,11 +73,11 @@
     role="dialog"
     aria-modal="true"
     aria-label="Image viewer"
-    class="fixed inset-0 z-90 flex h-screen w-screen items-center justify-center bg-base-100/95 p-4 backdrop-blur-md md:p-12"
+    class="bg-base-100/95 fixed inset-0 z-90 flex h-screen w-screen items-center justify-center p-4 backdrop-blur-md md:p-12"
   >
     <button
       type="button"
-      class="btn btn-square btn-ghost absolute right-4 top-4 z-10"
+      class="btn btn-square btn-ghost absolute top-4 right-4 z-10"
       onclick={() => (galleryOpen = false)}
       aria-label="Close image viewer"
     >
@@ -94,7 +94,7 @@
     />
 
     <span
-      class="absolute bottom-5 left-1/2 -translate-x-1/2 text-xs font-bold tracking-widest text-base-content/45"
+      class="text-base-content/45 absolute bottom-5 left-1/2 -translate-x-1/2 text-xs font-bold tracking-widest"
     >
       {String(currentImageIndex + 1).padStart(2, '0')} / {String(images.length).padStart(2, '0')}
     </span>
@@ -106,7 +106,7 @@
         focusedDirection = 'l';
       }}
       onpointerup={() => (focusedDirection = null)}
-      class="btn btn-square btn-ghost absolute bottom-4 left-4 md:bottom-auto md:top-1/2 md:-translate-y-1/2"
+      class="btn btn-square btn-ghost absolute bottom-4 left-4 md:top-1/2 md:bottom-auto md:-translate-y-1/2"
       aria-label="Previous image"
     >
       <ChevronLeft class="size-7" />
@@ -118,7 +118,7 @@
         focusedDirection = 'r';
       }}
       onpointerup={() => (focusedDirection = null)}
-      class="btn btn-square btn-ghost absolute bottom-4 right-4 md:bottom-auto md:top-1/2 md:-translate-y-1/2"
+      class="btn btn-square btn-ghost absolute right-4 bottom-4 md:top-1/2 md:bottom-auto md:-translate-y-1/2"
       aria-label="Next image"
     >
       <ChevronRight class="size-7" />
@@ -136,7 +136,7 @@
             galleryOpen = true;
           }}
           class={[
-            'w-full cursor-pointer overflow-hidden transition-all duration-200 group-hover:opacity-75 hover:z-10 hover:scale-[1.02] hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
+            'focus-visible:outline-primary w-full cursor-pointer overflow-hidden transition-all duration-200 group-hover:opacity-75 hover:z-10 hover:scale-[1.02] hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2'
           ]}
         >
           <img

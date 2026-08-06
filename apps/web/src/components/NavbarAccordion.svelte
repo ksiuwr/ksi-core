@@ -16,21 +16,21 @@
 </script>
 
 <div class="group relative">
-  <div class="flex items-center gap-2 w-max cursor-default">
+  <div class="flex w-max cursor-default items-center gap-2">
     <X
       strokeWidth={5}
-      class="size-5 inline-block rotate-45 group-hover:rotate-0 scale-50 group-hover:scale-100 transition-transform duration-300"
+      class="inline-block size-5 scale-50 rotate-45 transition-transform duration-300 group-hover:scale-100 group-hover:rotate-0"
     />
-    <p class="text-3xl font-bold uppercase mr-4">{title}</p>
+    <p class="mr-4 text-3xl font-bold uppercase">{title}</p>
     {#if url}
       <!-- @wc-include -->
-      <a href={url} class="self-end underline cursor-pointer">{urlText ?? 'details'}</a>
+      <a href={url} class="cursor-pointer self-end underline">{urlText ?? 'details'}</a>
     {/if}
   </div>
 
   {#if content}
     <div
-      class="left-0 mt-2 overflow-hidden w-full h-0 group-hover:h-48 transition-all duration-700 ease-in-out rounded-box"
+      class="rounded-box left-0 mt-2 h-0 w-full overflow-hidden transition-all duration-700 ease-in-out group-hover:h-48"
     >
       {@render content()}
     </div>

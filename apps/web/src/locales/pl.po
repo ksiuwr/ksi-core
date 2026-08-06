@@ -417,10 +417,6 @@ msgstr "Przewiń do góry"
 msgid "KSI"
 msgstr "KSI"
 
-#: src/components/NavbarAccordion.svelte
-msgid "self-end underline cursor-pointer"
-msgstr "self-end underline cursor-pointer"
-
 #: src/routes/+page.svelte
 msgid "Explore our work <0/>"
 msgstr "Poznaj nasze projekty <0/>"
@@ -1448,3 +1444,7 @@ msgstr "Zmień język"
 #: src/routes/dashboard/+page.svelte
 msgid "Manage public announcements and perform other tasks."
 msgstr "Zarządzaj ogłoszeniami publicznymi i wykonuj inne zadania."
+
+#: src/components/NavbarAccordion.svelte
+msgid "cursor-pointer self-end underline"
+msgstr ""

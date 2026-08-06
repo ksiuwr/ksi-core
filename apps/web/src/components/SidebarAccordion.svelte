@@ -30,7 +30,7 @@
       <a
         {href}
         class={cn(
-          'flex-1 flex items-center px-3 py-3 rounded-lg text-base font-medium transition-colors duration-150',
+          'flex flex-1 items-center rounded-lg px-3 py-3 text-base font-medium transition-colors duration-150',
           isActive
             ? 'bg-primary/15 text-primary font-semibold'
             : 'hover:bg-base-200 text-base-content/80 hover:text-base-content'
@@ -55,14 +55,14 @@
   {:else}
     <!-- Plain section label -->
     <p
-      class="px-3 pt-3 pb-1 text-xs font-semibold uppercase tracking-wider text-base-content/40 select-none"
+      class="text-base-content/40 px-3 pt-3 pb-1 text-xs font-semibold tracking-wider uppercase select-none"
     >
       {title}
     </p>
   {/if}
 
   {#if expanded}
-    <div class="pl-3 flex flex-col gap-0.5">
+    <div class="flex flex-col gap-0.5 pl-3">
       {@render children()}
     </div>
   {/if}

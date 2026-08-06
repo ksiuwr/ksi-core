@@ -177,12 +177,12 @@
 
 <Wrapper name="dashboard / alerts" {icon}>
   <header
-    class="flex flex-col gap-8 border-b border-base-content/15 pb-10 md:flex-row md:items-end md:justify-between"
+    class="border-base-content/15 flex flex-col gap-8 border-b pb-10 md:flex-row md:items-end md:justify-between"
   >
     <div>
-      <p class="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-primary">Announcements</p>
+      <p class="text-primary mb-4 text-xs font-bold tracking-[0.2em] uppercase">Announcements</p>
       <h1 class="mb-0! text-4xl tracking-[-0.04em] sm:text-5xl">Alerts</h1>
-      <p class="mt-4 max-w-2xl text-lg leading-relaxed text-base-content/65">
+      <p class="text-base-content/65 mt-4 max-w-2xl text-lg leading-relaxed">
         Schedule and maintain the notices displayed at the top of the public website.
       </p>
     </div>
@@ -199,13 +199,13 @@
   </header>
 
   {#if creating}
-    <section class="border-b border-base-content/15 py-10" aria-labelledby="editor-heading">
-      <form class="border border-base-content/20 bg-base-100" onsubmit={saveAlert}>
+    <section class="border-base-content/15 border-b py-10" aria-labelledby="editor-heading">
+      <form class="border-base-content/20 bg-base-100 border" onsubmit={saveAlert}>
         <div
-          class="flex items-center justify-between border-b border-base-content/15 px-5 py-4 md:px-7"
+          class="border-base-content/15 flex items-center justify-between border-b px-5 py-4 md:px-7"
         >
           <div>
-            <p class="mb-1 font-mono text-xs uppercase tracking-[0.16em] text-primary">Editor</p>
+            <p class="text-primary mb-1 font-mono text-xs tracking-[0.16em] uppercase">Editor</p>
             <h2 id="editor-heading" class="mb-0! text-2xl">
               {editingId ? 'Edit alert' : 'Create alert'}
             </h2>
@@ -252,7 +252,7 @@
               oninput={(event) => (newAlert.startDate = new Date(event.currentTarget.value))}
               required
             />
-            <span class="mt-2 font-mono text-xs text-base-content/45">Your local time</span>
+            <span class="text-base-content/45 mt-2 font-mono text-xs">Your local time</span>
           </label>
 
           <label class="form-control w-full">
@@ -264,13 +264,13 @@
               oninput={(event) => (newAlert.endDate = new Date(event.currentTarget.value))}
               required
             />
-            <span class="mt-2 font-mono text-xs text-base-content/45">Your local time</span>
+            <span class="text-base-content/45 mt-2 font-mono text-xs">Your local time</span>
           </label>
 
           <label class="form-control w-full">
             <span class="mb-2 flex items-center justify-between gap-3 text-sm font-bold">
               Priority
-              <span class="font-mono text-xs font-normal text-base-content/45">Optional</span>
+              <span class="text-base-content/45 font-mono text-xs font-normal">Optional</span>
             </span>
             <input
               type="number"
@@ -284,7 +284,7 @@
           <label class="form-control w-full">
             <span class="mb-2 flex items-center justify-between gap-3 text-sm font-bold">
               Link
-              <span class="font-mono text-xs font-normal text-base-content/45">Optional</span>
+              <span class="text-base-content/45 font-mono text-xs font-normal">Optional</span>
             </span>
             <input
               type="url"
@@ -306,7 +306,7 @@
         </div>
 
         <div
-          class="flex flex-col-reverse gap-3 border-t border-base-content/15 p-5 sm:flex-row sm:justify-end md:px-7"
+          class="border-base-content/15 flex flex-col-reverse gap-3 border-t p-5 sm:flex-row sm:justify-end md:px-7"
         >
           <button class="btn btn-ghost" type="button" onclick={resetForm} disabled={saving}
             >Cancel</button
@@ -322,7 +322,7 @@
   <section class="py-10 md:py-14" aria-labelledby="alert-list-heading" aria-busy={loading}>
     <div class="mb-7 flex items-end justify-between gap-4">
       <div>
-        <p class="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+        <p class="text-primary mb-3 text-xs font-bold tracking-[0.2em] uppercase">
           01 / Published records
         </p>
         <h2 id="alert-list-heading" class="mb-0! text-2xl tracking-tight sm:text-3xl">
@@ -330,20 +330,20 @@
         </h2>
       </div>
       {#if !loading && !loadError}
-        <span class="font-mono text-xs text-base-content/45"
+        <span class="text-base-content/45 font-mono text-xs"
           >Page {currentPage + 1} / {Math.max(pageCount, 1)}</span
         >
       {/if}
     </div>
 
     {#if loading}
-      <div class="border border-base-content/15 p-8 text-center" role="status">
-        <p class="font-mono text-sm text-base-content/55">Loading alerts…</p>
+      <div class="border-base-content/15 border p-8 text-center" role="status">
+        <p class="text-base-content/55 font-mono text-sm">Loading alerts…</p>
       </div>
     {:else if loadError}
-      <div class="border border-error/30 bg-error/5 p-6">
-        <p class="font-bold text-error">Alerts could not be loaded.</p>
-        <p class="mt-1 text-sm text-base-content/65">{loadError}</p>
+      <div class="border-error/30 bg-error/5 border p-6">
+        <p class="text-error font-bold">Alerts could not be loaded.</p>
+        <p class="text-base-content/65 mt-1 text-sm">{loadError}</p>
         <button
           class="btn btn-outline btn-sm mt-4"
           type="button"
@@ -353,13 +353,13 @@
         </button>
       </div>
     {:else if alerts.length === 0}
-      <div class="border border-dashed border-base-content/25 px-6 py-14 text-center">
-        <Megaphone class="mx-auto mb-4 size-8 text-base-content/30" strokeWidth={1.5} />
+      <div class="border-base-content/25 border border-dashed px-6 py-14 text-center">
+        <Megaphone class="text-base-content/30 mx-auto mb-4 size-8" strokeWidth={1.5} />
         <h3 class="mb-2! text-xl">No alerts on this page</h3>
         <p class="text-base-content/55">Create an alert to publish the first announcement.</p>
       </div>
     {:else}
-      <div class="grid gap-px border border-base-content/15 bg-base-content/15">
+      <div class="border-base-content/15 bg-base-content/15 grid gap-px border">
         {#each alerts as alert (alert.id)}
           {@const status = alertStatus(alert)}
           <article class="bg-base-100 p-5 md:p-7">
@@ -367,29 +367,29 @@
               <div class="min-w-0 flex-1">
                 <div class="mb-3 flex flex-wrap items-center gap-2">
                   <span
-                    class={`border px-2 py-1 font-mono text-[0.65rem] font-bold uppercase tracking-[0.12em] ${statusClass(status)}`}
+                    class={`border px-2 py-1 font-mono text-[0.65rem] font-bold tracking-[0.12em] uppercase ${statusClass(status)}`}
                   >
                     {status}
                   </span>
                   <span
-                    class={`border px-2 py-1 font-mono text-[0.65rem] uppercase tracking-[0.12em] ${colorClass(alert.color)}`}
+                    class={`border px-2 py-1 font-mono text-[0.65rem] tracking-[0.12em] uppercase ${colorClass(alert.color)}`}
                   >
                     {alert.color}
                   </span>
                   {#if alert.priority}
                     <span
-                      class="border border-base-content/15 px-2 py-1 font-mono text-[0.65rem] uppercase tracking-[0.12em] text-base-content/50"
+                      class="border-base-content/15 text-base-content/50 border px-2 py-1 font-mono text-[0.65rem] tracking-[0.12em] uppercase"
                     >
                       Priority {alert.priority}
                     </span>
                   {/if}
                 </div>
                 <h3 class="mb-2! text-xl tracking-tight sm:text-2xl">{alert.title}</h3>
-                <p class="mb-4 font-mono text-xs leading-relaxed text-base-content/50">
+                <p class="text-base-content/50 mb-4 font-mono text-xs leading-relaxed">
                   {formatLocalDate(alert.startDate)} — {formatLocalDate(alert.endDate)}
                 </p>
                 <p
-                  class="wrap-anywhere max-w-4xl whitespace-pre-wrap leading-relaxed text-base-content/75"
+                  class="text-base-content/75 max-w-4xl leading-relaxed wrap-anywhere whitespace-pre-wrap"
                 >
                   {alert.description}
                 </p>
@@ -398,7 +398,7 @@
                     href={alert.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="link link-primary mt-4 inline-block max-w-full wrap-anywhere text-sm"
+                    class="link link-primary mt-4 inline-block max-w-full text-sm wrap-anywhere"
                     >{alert.link}</a
                   >
                 {/if}

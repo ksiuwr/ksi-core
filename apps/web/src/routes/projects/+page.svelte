@@ -56,15 +56,15 @@
 
 <Wrapper name="projects">
   <header
-    class="grid gap-8 border-b border-base-content/15 pb-14 lg:grid-cols-[1fr_0.8fr] lg:items-end"
+    class="border-base-content/15 grid gap-8 border-b pb-14 lg:grid-cols-[1fr_0.8fr] lg:items-end"
   >
     <div>
-      <p class="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-primary">What we build</p>
+      <p class="text-primary mb-4 text-xs font-bold tracking-[0.2em] uppercase">What we build</p>
       <h1 class="mb-0! max-w-3xl text-5xl leading-[0.95]! tracking-tighter md:text-7xl">
         Projects driven by curiosity.
       </h1>
     </div>
-    <p class="max-w-xl text-lg leading-relaxed text-base-content/65">
+    <p class="text-base-content/65 max-w-xl text-lg leading-relaxed">
       Explore our work across education, machine learning, quantum computing, computational biology,
       and community events.
     </p>
@@ -74,50 +74,50 @@
     <label class="relative block max-w-xl" for="project-search">
       <span class="sr-only">Search projects</span>
       <Search
-        class="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-base-content/35"
+        class="text-base-content/35 pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2"
       />
       <input
         id="project-search"
         type="search"
-        class="input input-lg w-full rounded-none border-base-content/20 bg-transparent pl-12"
+        class="input input-lg border-base-content/20 w-full rounded-none bg-transparent pl-12"
         placeholder="Search by name, field, or technology..."
         bind:value={query}
       />
     </label>
 
-    <div class="mt-8 grid gap-px border border-base-content/15 bg-base-content/15 md:grid-cols-2">
+    <div class="border-base-content/15 bg-base-content/15 mt-8 grid gap-px border md:grid-cols-2">
       {#each filteredProjects as project, index (project.href)}
         <a
           href={project.href}
-          class="group flex min-h-72 flex-col bg-base-100 p-6 transition-colors hover:bg-primary/8 md:p-8"
+          class="group bg-base-100 hover:bg-primary/8 flex min-h-72 flex-col p-6 transition-colors md:p-8"
         >
           <div
-            class="flex items-start justify-between text-xs uppercase tracking-widest text-base-content/40"
+            class="text-base-content/40 flex items-start justify-between text-xs tracking-widest uppercase"
           >
             <span>{String(index + 1).padStart(2, '0')} / {project.category}</span>
             <ArrowUpRight
-              class="size-5 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-primary"
+              class="group-hover:text-primary size-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
             />
           </div>
 
           <div class="my-auto py-10">
             <h2 class="mb-3! text-3xl tracking-tight md:text-4xl">{project.title}</h2>
-            <p class="max-w-lg leading-relaxed text-base-content/60">{project.summary}</p>
+            <p class="text-base-content/60 max-w-lg leading-relaxed">{project.summary}</p>
           </div>
 
           <div class="flex flex-wrap gap-2">
             {#each project.tags as tag (tag)}
               <span
-                class="border border-base-content/15 px-2.5 py-1 text-[0.65rem] uppercase tracking-wider text-base-content/50"
+                class="border-base-content/15 text-base-content/50 border px-2.5 py-1 text-[0.65rem] tracking-wider uppercase"
                 >{tag}</span
               >
             {/each}
           </div>
         </a>
       {:else}
-        <div class="col-span-full bg-base-100 px-6 py-20 text-center">
+        <div class="bg-base-100 col-span-full px-6 py-20 text-center">
           <p class="text-lg font-bold">No matching projects.</p>
-          <p class="mt-2 text-sm text-base-content/50">
+          <p class="text-base-content/50 mt-2 text-sm">
             Try a different name, field, or technology.
           </p>
         </div>

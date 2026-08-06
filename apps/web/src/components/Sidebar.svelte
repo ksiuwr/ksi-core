@@ -78,7 +78,7 @@
 </script>
 
 {#snippet sidebarContent()}
-  <div class="flex flex-col flex-1 w-full overflow-y-auto px-3 py-3 gap-1">
+  <div class="flex w-full flex-1 flex-col gap-1 overflow-y-auto px-3 py-3">
     <SidebarAccordion title="Projects">
       <SidebarLink href="/projects/zosia" icon={MountainSnow} exact={false}>Zosia</SidebarLink>
       <SidebarLink href="/projects/ml" icon={BrainCircuit} exact={false}
@@ -89,11 +89,11 @@
     </SidebarAccordion>
 
     {#if session !== null}
-      <div class="mt-2 border-t border-base-200 pt-3 flex flex-col gap-1">
-        <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-base-200/50">
-          <div class="flex flex-col min-w-0">
-            <span class="text-xs opacity-50 leading-none mb-0.5">Logged in as</span>
-            <span class="text-sm font-semibold text-primary truncate">{user?.name}</span>
+      <div class="border-base-200 mt-2 flex flex-col gap-1 border-t pt-3">
+        <div class="bg-base-200/50 flex items-center justify-between rounded-lg px-3 py-2">
+          <div class="flex min-w-0 flex-col">
+            <span class="mb-0.5 text-xs leading-none opacity-50">Logged in as</span>
+            <span class="text-primary truncate text-sm font-semibold">{user?.name}</span>
           </div>
           <button
             type="button"
@@ -104,7 +104,7 @@
                 await invalidateAll();
               }
             }}
-            class="btn btn-ghost btn-sm btn-square text-error shrink-0 ml-2"
+            class="btn btn-ghost btn-sm btn-square text-error ml-2 shrink-0"
             title="Logout"
           >
             <LogOut class="size-4" />
@@ -121,27 +121,27 @@
   </div>
 
   <!-- Sticky bottom utility bar -->
-  <div class="shrink-0 border-t border-base-200 px-3 py-3 flex flex-col gap-2">
+  <div class="border-base-200 flex shrink-0 flex-col gap-2 border-t px-3 py-3">
     <!-- Locale picker — full width -->
     <div class="dropdown dropdown-top w-full">
       <div
         tabindex="0"
         role="button"
-        class="btn btn-md w-full hover:text-base-content transition-colors duration-150 flex items-center gap-1.5 cursor-pointer capitalize"
+        class="btn btn-md hover:text-base-content flex w-full cursor-pointer items-center gap-1.5 capitalize transition-colors duration-150"
       >
-        <span class="select-none truncate">{activeLocale.emoji} {activeLocale.formattedLocale}</span
+        <span class="truncate select-none">{activeLocale.emoji} {activeLocale.formattedLocale}</span
         >
-        <ChevronDown class="size-3 shrink-0 ml-auto" />
+        <ChevronDown class="ml-auto size-3 shrink-0" />
       </div>
       <ul
-        class="dropdown-content left-0 rounded-md w-full menu bg-base-200 border border-base-300 text-base-content z-99 p-1.5 shadow-lg mb-2"
+        class="dropdown-content menu bg-base-200 border-base-300 text-base-content left-0 z-99 mb-2 w-full rounded-md border p-1.5 shadow-lg"
       >
         {#each availableLocales as loc}
           <li>
             <button
               onclick={() => setLocale(loc.code)}
               class={[
-                'flex items-center w-full px-3 py-1.5 gap-2 capitalize text-sm font-medium rounded-md',
+                'flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium capitalize',
                 locale.current === loc.code
                   ? 'bg-primary text-primary-content'
                   : 'hover:bg-base-300'
@@ -167,7 +167,7 @@
               callbackURL: getUrls().FRONTEND + '/dashboard'
             });
           }}
-          class="btn btn-md text-error shrink-0 ml-auto"
+          class="btn btn-md text-error ml-auto shrink-0"
           title="Member access"
         >
           <LogIn class="size-4" />
@@ -179,34 +179,34 @@
 {/snippet}
 
 <div
-  class="fixed top-0 left-0 h-screen w-full flex flex-col z-50 lg:hidden shadow-2xl transition-transform duration-300 ease-out {$sidebarStore
+  class="fixed top-0 left-0 z-50 flex h-screen w-full flex-col shadow-2xl transition-transform duration-300 ease-out lg:hidden {$sidebarStore
     ? 'translate-x-0'
     : '-translate-x-full'}"
 >
-  <div class="flex h-18 items-center border-b border-r border-base-200 bg-base-100">
+  <div class="border-base-200 bg-base-100 flex h-18 items-center border-r border-b">
     <button
       onclick={() => {
         $sidebarStore = false;
       }}
-      class="btn btn-square btn-ghost size-18 rounded-none border-r border-base-200"
+      class="btn btn-square btn-ghost border-base-200 size-18 rounded-none border-r"
     >
       <PanelLeftClose class="size-5" />
     </button>
-    <a href="/" class="flex flex-1 h-18 justify-center gap-3 items-center font-mono">
+    <a href="/" class="flex h-18 flex-1 items-center justify-center gap-3 font-mono">
       <img src="/logo.svg" alt="" class="size-10 dark:invert" />
       <span class="text-lg font-bold tracking-tight">KSI UWr</span>
     </a>
   </div>
 
-  <div class="bg-base-100 flex flex-col w-full h-full overflow-hidden border-r border-base-200">
+  <div class="bg-base-100 border-base-200 flex h-full w-full flex-col overflow-hidden border-r">
     {@render sidebarContent()}
   </div>
 </div>
 
 <div
   role="presentation"
-  class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden transition-opacity duration-300 ease-out {$sidebarStore
+  class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-out lg:hidden {$sidebarStore
     ? 'opacity-100'
-    : 'opacity-0 pointer-events-none'}"
+    : 'pointer-events-none opacity-0'}"
   onclick={() => ($sidebarStore = false)}
 ></div>

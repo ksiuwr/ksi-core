@@ -417,10 +417,6 @@ msgstr "Scroll to top"
 msgid "KSI"
 msgstr "KSI"
 
-#: src/components/NavbarAccordion.svelte
-msgid "self-end underline cursor-pointer"
-msgstr "self-end underline cursor-pointer"
-
 #: src/routes/+page.svelte
 msgid "Explore our work <0/>"
 msgstr "Explore our work <0/>"
@@ -1448,3 +1444,7 @@ msgstr "Change language"
 #: src/routes/dashboard/+page.svelte
 msgid "Manage public announcements and perform other tasks."
 msgstr "Manage public announcements and perform other tasks."
+
+#: src/components/NavbarAccordion.svelte
+msgid "cursor-pointer self-end underline"
+msgstr "cursor-pointer self-end underline"

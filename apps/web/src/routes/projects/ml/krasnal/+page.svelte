@@ -18,16 +18,16 @@
 <Wrapper name="projects / ml / krasnal">
   <article class="text-base-content">
     <header
-      class="grid gap-10 border-b border-base-content/15 pb-14 pt-2 lg:grid-cols-[1fr_auto] lg:items-end lg:pb-20"
+      class="border-base-content/15 grid gap-10 border-b pt-2 pb-14 lg:grid-cols-[1fr_auto] lg:items-end lg:pb-20"
     >
       <div class="max-w-4xl">
-        <p class="mb-5 text-xs font-bold uppercase tracking-[0.2em] text-secondary">
+        <p class="text-secondary mb-5 text-xs font-bold tracking-[0.2em] uppercase">
           Machine learning · Chess
         </p>
         <h1 class="mb-0! text-5xl leading-[0.95]! tracking-[-0.055em] sm:text-6xl lg:text-8xl">
           Krasnal<br />Chess Engine <span aria-hidden="true">♟️</span>
         </h1>
-        <p class="mt-8 max-w-3xl text-lg leading-relaxed text-base-content/70 md:text-xl">
+        <p class="text-base-content/70 mt-8 max-w-3xl text-lg leading-relaxed md:text-xl">
           Krasnal is a chess engine developed in Wrocław, based on the Transformer architecture. It
           utilizes deep neural networks to learn to play chess intuitively, departing from
           traditional, heavy calculations and game tree searching.
@@ -35,7 +35,7 @@
       </div>
 
       <a
-        class="btn btn-outline w-fit gap-2 border-base-content/30 px-6"
+        class="btn btn-outline border-base-content/30 w-fit gap-2 px-6"
         href="https://github.com/KSI-ML-research/krasnal"
         target="_blank"
         rel="noopener"
@@ -45,34 +45,34 @@
       </a>
     </header>
 
-    <section class="border-b border-base-content/15 py-14 lg:py-20">
+    <section class="border-base-content/15 border-b py-14 lg:py-20">
       <div class="grid gap-10 lg:grid-cols-[0.55fr_1.45fr] lg:gap-16">
         <div>
-          <p class="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-secondary">
+          <p class="text-secondary mb-3 text-xs font-bold tracking-[0.2em] uppercase">
             01 / Approach
           </p>
           <h2 class="mb-0! text-3xl tracking-tight md:text-4xl">
             Intuition over exhaustive search.
           </h2>
         </div>
-        <dl class="grid border-l border-t border-base-content/15 sm:grid-cols-3">
-          <div class="border-b border-r border-base-content/15 p-5">
-            <Bot class="mb-8 size-6 text-secondary" strokeWidth={1.5} />
-            <dt class="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-base-content/45">
+        <dl class="border-base-content/15 grid border-t border-l sm:grid-cols-3">
+          <div class="border-base-content/15 border-r border-b p-5">
+            <Bot class="text-secondary mb-8 size-6" strokeWidth={1.5} />
+            <dt class="text-base-content/45 mb-2 text-xs font-bold tracking-[0.16em] uppercase">
               Model
             </dt>
             <dd>Transformer architecture</dd>
           </div>
-          <div class="border-b border-r border-base-content/15 p-5">
-            <Network class="mb-8 size-6 text-secondary" strokeWidth={1.5} />
-            <dt class="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-base-content/45">
+          <div class="border-base-content/15 border-r border-b p-5">
+            <Network class="text-secondary mb-8 size-6" strokeWidth={1.5} />
+            <dt class="text-base-content/45 mb-2 text-xs font-bold tracking-[0.16em] uppercase">
               Method
             </dt>
             <dd>Deep neural networks</dd>
           </div>
-          <div class="border-b border-r border-base-content/15 p-5">
-            <Swords class="mb-8 size-6 text-secondary" strokeWidth={1.5} />
-            <dt class="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-base-content/45">
+          <div class="border-base-content/15 border-r border-b p-5">
+            <Swords class="text-secondary mb-8 size-6" strokeWidth={1.5} />
+            <dt class="text-base-content/45 mb-2 text-xs font-bold tracking-[0.16em] uppercase">
               Aim
             </dt>
             <dd>Strong, human-like chess moves</dd>
@@ -81,20 +81,20 @@
       </div>
     </section>
 
-    <section class="border-b border-base-content/15 py-14 lg:py-20">
+    <section class="border-base-content/15 border-b py-14 lg:py-20">
       <div class="mb-10 grid gap-6 lg:grid-cols-[0.55fr_1.45fr] lg:gap-16">
         <div>
-          <p class="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-secondary">
+          <p class="text-secondary mb-3 text-xs font-bold tracking-[0.2em] uppercase">
             02 / Architecture
           </p>
           <h2 class="mb-0! text-3xl tracking-tight md:text-4xl">System architecture</h2>
         </div>
-        <p class="max-w-2xl leading-relaxed text-base-content/65">
+        <p class="text-base-content/65 max-w-2xl leading-relaxed">
           Three views of Krasnal's notation, Transformer model, and direct move-prediction approach.
         </p>
       </div>
 
-      <div class="grid gap-px border border-base-content/15 bg-base-content/15 lg:grid-cols-2">
+      <div class="border-base-content/15 bg-base-content/15 grid gap-px border lg:grid-cols-2">
         <figure class="bg-base-100 p-4 md:p-6 lg:col-span-2">
           <div class="flex min-h-64 items-center justify-center bg-white p-3 md:p-6">
             <img
@@ -104,10 +104,10 @@
             />
           </div>
           <figcaption
-            class="mt-4 grid gap-2 border-t border-base-content/15 pt-4 sm:grid-cols-[auto_1fr]"
+            class="border-base-content/15 mt-4 grid gap-2 border-t pt-4 sm:grid-cols-[auto_1fr]"
           >
-            <span class="text-xs font-bold text-secondary">FIG. 01</span>
-            <span class="text-sm leading-relaxed text-base-content/60">
+            <span class="text-secondary text-xs font-bold">FIG. 01</span>
+            <span class="text-base-content/60 text-sm leading-relaxed">
               Color-aware Krasnal tokenization compared with standard UCI notation.
             </span>
           </figcaption>
@@ -122,10 +122,10 @@
             />
           </div>
           <figcaption
-            class="mt-4 grid gap-2 border-t border-base-content/15 pt-4 sm:grid-cols-[auto_1fr]"
+            class="border-base-content/15 mt-4 grid gap-2 border-t pt-4 sm:grid-cols-[auto_1fr]"
           >
-            <span class="text-xs font-bold text-secondary">FIG. 02</span>
-            <span class="text-sm leading-relaxed text-base-content/60">
+            <span class="text-secondary text-xs font-bold">FIG. 02</span>
+            <span class="text-base-content/60 text-sm leading-relaxed">
               Transformer flow from input tokens to output logits.
             </span>
           </figcaption>
@@ -140,10 +140,10 @@
             />
           </div>
           <figcaption
-            class="mt-4 grid gap-2 border-t border-base-content/15 pt-4 sm:grid-cols-[auto_1fr]"
+            class="border-base-content/15 mt-4 grid gap-2 border-t pt-4 sm:grid-cols-[auto_1fr]"
           >
-            <span class="text-xs font-bold text-secondary">FIG. 03</span>
-            <span class="text-sm leading-relaxed text-base-content/60">
+            <span class="text-secondary text-xs font-bold">FIG. 03</span>
+            <span class="text-base-content/60 text-sm leading-relaxed">
               Traditional explicit search compared with Krasnal's direct prediction.
             </span>
           </figcaption>
@@ -151,16 +151,16 @@
       </div>
     </section>
 
-    <section class="border-b border-base-content/15 py-14 lg:py-20">
+    <section class="border-base-content/15 border-b py-14 lg:py-20">
       <div class="grid gap-10 lg:grid-cols-[0.55fr_1.45fr] lg:gap-16">
         <div>
-          <p class="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-secondary">
+          <p class="text-secondary mb-3 text-xs font-bold tracking-[0.2em] uppercase">
             03 / Direction
           </p>
           <h2 class="mb-0! text-3xl tracking-tight md:text-4xl">Goals</h2>
         </div>
         <div>
-          <p class="mb-8 max-w-3xl text-lg leading-relaxed text-base-content/75">
+          <p class="text-base-content/75 mb-8 max-w-3xl text-lg leading-relaxed">
             Krasnal's goal is to generate strong, yet human-like chess moves. Balancing between the
             intuition known from the Maia Chess project and the playing strength of Stockfish.
           </p>
@@ -179,18 +179,18 @@
     <section class="py-14 lg:py-20">
       <div class="grid gap-10 lg:grid-cols-[0.55fr_1.45fr] lg:gap-16">
         <div>
-          <p class="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-secondary">
+          <p class="text-secondary mb-3 text-xs font-bold tracking-[0.2em] uppercase">
             04 / People
           </p>
           <h2 class="mb-0! text-3xl tracking-tight md:text-4xl">Team Members</h2>
         </div>
-        <div class="grid border-l border-t border-base-content/15 sm:grid-cols-2">
+        <div class="border-base-content/15 grid border-t border-l sm:grid-cols-2">
           <!-- @wc-ignore -->
           {#each team as member, i (member)}
             <div
-              class="flex min-h-16 items-center gap-4 border-b border-r border-base-content/15 p-4"
+              class="border-base-content/15 flex min-h-16 items-center gap-4 border-r border-b p-4"
             >
-              <span class="text-xs font-bold text-base-content/30"
+              <span class="text-base-content/30 text-xs font-bold"
                 >{String(i + 1).padStart(2, '0')}</span
               >
               <span class="font-medium tracking-tight">{member}</span>

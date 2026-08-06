@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 
-@plugin "daisyui" {
+@plugin 'daisyui' {
   themes: light, dark;
 }
 
@@ -12,7 +12,7 @@
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-@plugin "daisyui/theme" {
+@plugin 'daisyui/theme' {
   name: 'light';
   default: true;
   prefersdark: false;
@@ -51,7 +51,7 @@
   --noise: 0;
 }
 
-@plugin "daisyui/theme" {
+@plugin 'daisyui/theme' {
   name: 'dark';
   default: false;
   prefersdark: true;
@@ -104,32 +104,32 @@
 }
 
 @utility btn-outline {
-  @apply border border-base-300;
+  @apply border-base-300 border;
 }
 
 @utility input {
-  @apply outline-0 focus:outline-0 focus:border-primary focus-visible:outline-0 focus-visible:border-primary focus-within:outline-0 focus-within:border-primary transition-colors;
+  @apply focus:border-primary focus-visible:border-primary focus-within:border-primary outline-0 transition-colors focus-within:outline-0 focus:outline-0 focus-visible:outline-0;
 }
 
 @utility textarea {
-  @apply outline-0 focus:outline-0 focus:border-primary focus-visible:outline-0 focus-visible:border-primary focus-within:outline-0 focus-within:border-primary transition-colors;
+  @apply focus:border-primary focus-visible:border-primary focus-within:border-primary outline-0 transition-colors focus-within:outline-0 focus:outline-0 focus-visible:outline-0;
 }
 
 @utility select {
-  @apply outline-0 focus:outline-0 focus:border-primary focus-visible:outline-0 focus-visible:border-primary focus-within:outline-0 focus-within:border-primary transition-colors;
+  @apply focus:border-primary focus-visible:border-primary focus-within:border-primary outline-0 transition-colors focus-within:outline-0 focus:outline-0 focus-visible:outline-0;
 }
 
 @layer base {
   h1 {
-    @apply text-4xl md:text-[clamp(3rem,5vw,3rem)] mb-4 leading-tight font-bold;
+    @apply mb-4 text-4xl leading-tight font-bold md:text-[clamp(3rem,5vw,3rem)];
   }
 
   h2 {
-    @apply text-2xl md:text-[1.75rem] mb-2 font-bold leading-snug;
+    @apply mb-2 text-2xl leading-snug font-bold md:text-[1.75rem];
   }
 
   h3 {
-    @apply text-xl md:text-[1.25rem] font-bold leading-snug;
+    @apply text-xl leading-snug font-bold md:text-[1.25rem];
   }
 
   hr {
@@ -140,13 +140,13 @@
 @utility markdown-file {
   p a,
   li a {
-    @apply text-primary font-medium hover:underline underline-offset-4 decoration-2 decoration-primary/30 transition-all;
+    @apply text-primary decoration-primary/30 font-medium decoration-2 underline-offset-4 transition-all hover:underline;
   }
 
   ul {
-    @apply list-disc list-inside space-y-2 mb-6;
+    @apply mb-6 list-inside list-disc space-y-2;
   }
   li {
-    @apply text-lg md:text-xl text-base-content/90;
+    @apply text-base-content/90 text-lg md:text-xl;
   }
 }

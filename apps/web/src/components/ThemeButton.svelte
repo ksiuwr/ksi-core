@@ -5,25 +5,25 @@
 
 <button
   onclick={() => themeStore.set($themeStore === 'dark' ? 'light' : 'dark')}
-  class="md:hidden flex cursor-pointer gap-3 py-2 flex-1 items-center btn btn-md"
+  class="btn btn-md flex flex-1 cursor-pointer items-center gap-3 py-2 md:hidden"
   aria-label="Toggle theme"
 >
   {#if $themeStore === 'dark'}
-    <Moon class="w-4 h-4 shrink-0" />
+    <Moon class="h-4 w-4 shrink-0" />
     Dark mode
   {:else}
-    <Sun class="w-4 h-4 shrink-0" />
+    <Sun class="h-4 w-4 shrink-0" />
     Light mode
   {/if}
 </button>
 
 <button
   onclick={() => themeStore.set($themeStore === 'dark' ? 'light' : 'dark')}
-  class="not-md:hidden cursor-pointer w-26 h-6 text-muted hover:text-base-content transition-colors relative group overflow-hidden"
+  class="text-muted hover:text-base-content group relative h-6 w-26 cursor-pointer overflow-hidden transition-colors not-md:hidden"
   aria-label="Toggle theme"
 >
   <div
-    class="absolute left-0 w-6 h-full flex items-center justify-center group-hover:rotate-12 transition-transform"
+    class="absolute left-0 flex h-full w-6 items-center justify-center transition-transform group-hover:rotate-12"
   >
     <div
       class="absolute transition-all duration-300"
@@ -32,7 +32,7 @@
       class:opacity-0={$themeStore === 'light'}
       class:rotate-90={$themeStore === 'light'}
     >
-      <Moon class="w-4 h-4" />
+      <Moon class="h-4 w-4" />
     </div>
 
     <div
@@ -42,11 +42,11 @@
       class:opacity-0={$themeStore === 'dark'}
       class:-rotate-90={$themeStore === 'dark'}
     >
-      <Sun class="w-4 h-4" />
+      <Sun class="h-4 w-4" />
     </div>
   </div>
 
-  <div class="grid w-full h-full text-sm items-center justify-center pl-6">
+  <div class="grid h-full w-full items-center justify-center pl-6 text-sm">
     <p
       class="col-start-1 row-start-1 transition-all duration-450"
       class:translate-y-0={$themeStore === 'dark'}

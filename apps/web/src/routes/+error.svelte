@@ -10,22 +10,22 @@
 
 <Wrapper name={`error / ${page.status}`}>
   <div
-    class="grid min-h-[60vh] items-center gap-10 border-y border-base-content/15 py-16 lg:grid-cols-[0.55fr_1fr]"
+    class="border-base-content/15 grid min-h-[60vh] items-center gap-10 border-y py-16 lg:grid-cols-[0.55fr_1fr]"
   >
     <div
-      class="text-[clamp(7rem,20vw,15rem)] font-bold leading-none -tracking-widest text-base-content/10"
+      class="text-base-content/10 text-[clamp(7rem,20vw,15rem)] leading-none font-bold -tracking-widest"
     >
       {page.status}
     </div>
 
     <div class="max-w-2xl">
       <p
-        class="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-primary"
+        class="text-primary mb-4 flex items-center gap-2 text-xs font-bold tracking-[0.2em] uppercase"
       >
         <Compass class="size-4" /> Route not resolved
       </p>
       <h1 class="mb-6! text-4xl tracking-tight md:text-6xl">This path led somewhere unexpected.</h1>
-      <p class="text-lg leading-relaxed text-base-content/65">
+      <p class="text-base-content/65 text-lg leading-relaxed">
         {page.error?.message ||
           'The page may have moved, or something went wrong while loading it.'}
         The reliable route is back to the association — and room 24 at the Institute of Computer Science
