@@ -42,8 +42,10 @@
   ];
 </script>
 
-<footer class="mt-auto w-full border-t border-base-content/15 bg-base-100 text-base-content">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12">
+<footer
+  class="w-full border-t border-base-content/15 px-4 sm:px-6 lg:px-12 bg-base-50 text-base-content"
+>
+  <div class="mx-auto max-w-7xl">
     <div class="grid gap-8 py-12 md:grid-cols-[1fr_auto] md:items-end lg:py-16">
       <div>
         <p class="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-primary">Get in touch</p>
@@ -123,17 +125,17 @@
     </div>
 
     <div
-      class="flex flex-col gap-3 border-t border-base-content/15 py-5 text-xs text-base-content/40 sm:flex-row sm:items-center sm:justify-between"
+      class="flex flex-col gap-3 border-t border-base-content/15 py-5 text-xs text-base-content/40 sm:flex-row items-center sm:justify-between"
     >
       <span>© KSI {new Date().getFullYear()}</span>
 
-      <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
-        <div class="dropdown dropdown-top dropdown-end">
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-3 not-sm:w-full">
+        <div class="dropdown dropdown-top dropdown-end not-sm:w-full">
           <button
             type="button"
             tabindex="0"
             aria-label="Change language"
-            class="flex items-center gap-2 uppercase transition-colors hover:text-primary"
+            class="flex not-sm:w-full items-center justify-center gap-2 uppercase transition-colors hover:text-primary"
           >
             <span aria-hidden="true">{activeLocale.emoji}</span>
             <span>{activeLocale.formattedLocale}</span>
@@ -142,7 +144,7 @@
 
           <ul
             tabindex="-1"
-            class="dropdown-content menu z-50 mb-3 w-56 border border-base-content/15 bg-base-100 p-2 text-base-content shadow-lg"
+            class="dropdown-content not-sm:w-full menu z-50 mb-3 w-56 border border-base-content/15 bg-base-100 p-2 text-base-content shadow-lg"
           >
             {#each availableLocales as availableLocale (availableLocale.code)}
               <li>
@@ -168,7 +170,7 @@
           href="https://github.com/ksiuwr/ksi-core"
           target="_blank"
           rel="noreferrer"
-          class="group flex w-fit items-center gap-2 transition-colors hover:text-primary"
+          class="group flex w-full sm:w-fit justify-center items-center gap-2 transition-colors hover:text-primary"
         >
           <Github class="size-3.5" />
           Source code

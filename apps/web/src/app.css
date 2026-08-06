@@ -5,6 +5,7 @@
 }
 
 @theme {
+  --color-base-50: var(--color-base-50);
   --color-muted: var(--color-muted);
   --color-muted-100: var(--color-muted-100);
 }
@@ -17,6 +18,7 @@
   prefersdark: false;
   color-scheme: 'light';
   --font-mono: 'Azeret Mono';
+  --color-base-50: oklch(100% 0 0);
   --color-base-100: oklch(98% 0 0);
   --color-base-200: oklch(96% 0.001 286.375);
   --color-base-300: oklch(92% 0.004 286.32);
@@ -55,6 +57,7 @@
   prefersdark: true;
   color-scheme: 'dark';
   --font-mono: 'Azeret Mono';
+  --color-base-50: oklch(0% 0.005 285.823);
   --color-base-100: oklch(14% 0.005 285.823);
   --color-base-200: oklch(21% 0.006 285.885);
   --color-base-300: oklch(27% 0.006 286.033);

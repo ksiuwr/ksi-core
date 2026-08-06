@@ -164,113 +164,189 @@
   </div>
 {/snippet}
 
-<div class="not-lg:hidden flex flex-col gap-8 w-full p-10 bg-base-200">
-  <h1 class="uppercase">Projects</h1>
-  <NavbarAccordion title="Zosia" url="/projects/zosia" content={zosiaEditions} />
-  <NavbarAccordion title="Machine Learning" url="/projects/ml" content={machineLearning} />
-  <a href="/projects" class="underline cursor-pointer w-max">and more...</a>
+<div class="not-lg:hidden bg-base-200 w-full px-4 sm:px-6 lg:px-12">
+  <div class="flex flex-col gap-8 w-full py-10 mx-auto lg:max-w-7xl">
+    <h1 class="uppercase">Projects</h1>
+    <NavbarAccordion title="Zosia" url="/projects/zosia" content={zosiaEditions} />
+    <NavbarAccordion title="Machine Learning" url="/projects/ml" content={machineLearning} />
+    <a href="/projects" class="underline cursor-pointer w-max">and more...</a>
 
-  <div class="flex gap-8 items-center justify-end">
-    <div class="dropdown dropdown-bottom">
-      <div
-        tabindex="0"
-        role="button"
-        class="text-muted text-sm hover:text-base-content transition-colors duration-150 flex items-center gap-2 cursor-pointer uppercase"
-      >
-        <span class="select-none">{activeLocale.emoji} {activeLocale.formattedLocale}</span>
-        <ChevronDown class="size-4" />
-      </div>
-
-      <ul
-        class="dropdown-content right-0 menu bg-base-200 border text-base-content z-99 w-60 p-2 shadow mt-2"
-      >
-        {#each availableLocales as loc}
-          <li>
-            <button
-              class:active={locale.current === loc.code}
-              onclick={() => setLocale(loc.code)}
-              class={[
-                'flex items-centers rounded-none py-2 gap-2 uppercase font-semibold',
-
-                locale.current === loc.code
-                  ? 'text-base-content bg-blue-600'
-                  : 'text-muted-100 hover:bg-base-300'
-              ]}
-            >
-              {loc.emoji}
-              {loc.formattedLocale}
-            </button>
-          </li>
-        {/each}
-      </ul>
-    </div>
-    <ThemeButton />
-    {#if session && user}
-      <div class="flex gap-4">
-        <a
-          href="/dashboard"
-          class="flex gap-4 text-muted hover:text-base-content text-sm items-center"
-        >
-          {#if user.image}
-            <img
-              src={user.image}
-              class="size-6 rounded-full"
-              alt={`${user.name}'s profile picture`}
-            />
-          {/if}
-          {user.name}
-        </a>
-        <button
-          class="btn btn-circle text-error"
-          onclick={async () => {
-            const r = await authClient.signOut();
-            if (r.data?.success) {
-              toast.success('Logged out');
-              await invalidateAll();
-            }
-          }}
-        >
-          <LogOut class="size-4 shrink-0" />
-        </button>
-      </div>
-    {:else}
-      <button
-        onclick={() => {
-          authClient.signIn.social({
-            provider: 'discord',
-            callbackURL: getUrls().FRONTEND + '/dashboard'
-          });
-        }}
-        class="hover:text-error group uppercase flex items-center font-mono text-sm text-muted cursor-pointer text-left"
-      >
-        <LogIn class="size-4 shrink-0" />
-
+    <div class="flex gap-8 items-center justify-end">
+      <div class="dropdown dropdown-bottom">
         <div
-          class="max-w-0 overflow-hidden transition-all duration-450 ease-out group-hover:max-w-54"
+          tabindex="0"
+          role="button"
+          class="text-muted text-sm hover:text-base-content transition-colors duration-150 flex items-center gap-2 cursor-pointer uppercase"
         >
-          <div class="pl-3 whitespace-nowrap">Member access</div>
+          <span class="select-none">{activeLocale.emoji} {activeLocale.formattedLocale}</span>
+          <ChevronDown class="size-4" />
         </div>
-      </button>
-    {/if}
+
+        <ul
+          class="dropdown-content right-0 menu bg-base-200 border text-base-content z-99 w-60 p-2 shadow mt-2"
+        >
+          {#each availableLocales as loc}
+            <li>
+              <button
+                class:active={locale.current === loc.code}
+                onclick={() => setLocale(loc.code)}
+                class={[
+                  'flex items-centers rounded-none py-2 gap-2 uppercase font-semibold',
+
+                  locale.current === loc.code
+                    ? 'text-base-content bg-blue-600'
+                    : 'text-muted-100 hover:bg-base-300'
+                ]}
+              >
+                {loc.emoji}
+                {loc.formattedLocale}
+              </button>
+            </li>
+          {/each}
+        </ul>
+      </div>
+      <ThemeButton />
+      {#if session && user}
+        <div class="flex gap-4">
+          <a
+            href="/dashboard"
+            class="flex gap-4 text-muted hover:text-base-content text-sm items-center"
+          >
+            {#if user.image}
+              <img
+                src={user.image}
+                class="size-6 rounded-full"
+                alt={`${user.name}'s profile picture`}
+              />
+            {/if}
+            {user.name}
+          </a>
+          <button
+            class="btn btn-circle text-error"
+            onclick={async () => {
+              const r = await authClient.signOut();
+              if (r.data?.success) {
+                toast.success('Logged out');
+                await invalidateAll();
+              }
+            }}
+          >
+            <LogOut class="size-4 shrink-0" />
+          </button>
+        </div>
+      {:else}
+        <button
+          onclick={() => {
+            authClient.signIn.social({
+              provider: 'discord',
+              callbackURL: getUrls().FRONTEND + '/dashboard'
+            });
+          }}
+          class="hover:text-error group uppercase flex items-center font-mono text-sm text-muted cursor-pointer text-left"
+        >
+          <LogIn class="size-4 shrink-0" />
+
+          <div
+            class="max-w-0 overflow-hidden transition-all duration-450 ease-out group-hover:max-w-54"
+          >
+            <div class="pl-3 whitespace-nowrap">Member access</div>
+          </div>
+        </button>
+      {/if}
+    </div>
   </div>
 </div>
+
 <header
   id="navbar"
-  class="sticky top-0 z-40 flex h-18 w-full flex-row items-center justify-between border-b border-b-base-200 bg-base-100/95 backdrop-blur-sm"
+  class="sticky top-0 z-40 flex h-18 lg:px-12 border-b border-b-base-200 bg-base-100/95 backdrop-blur-sm w-full"
 >
-  <!-- Left: mobile toggle + logo + site name -->
-  <div class="flex h-full items-center">
-    <!-- Mobile dual-purpose button -->
+  <div class="flex flex-row w-full items-center justify-between lg:max-w-7xl mx-auto">
+    <!-- Left: mobile toggle + logo + site name -->
+    <div class="flex h-full items-center">
+      <!-- Mobile dual-purpose button -->
+      <button
+        onclick={() => {
+          if (preNavbarVisible) {
+            scrollToNavbar();
+          } else {
+            $sidebarStore = !$sidebarStore;
+          }
+        }}
+        class="btn btn-square btn-ghost h-18 w-18 rounded-none border-r border-base-200 lg:hidden"
+        aria-label={preNavbarVisible ? 'Scroll to content' : 'Toggle sidebar'}
+      >
+        <div class="relative size-5">
+          <span
+            class="absolute inset-0 flex items-center justify-center transition-all duration-200 {preNavbarVisible
+              ? 'opacity-100 scale-100'
+              : 'opacity-0 scale-75'}"
+          >
+            <ChevronDown class="size-5" />
+          </span>
+          <span
+            class="absolute inset-0 flex items-center justify-center transition-all duration-200 {preNavbarVisible
+              ? 'opacity-0 scale-75'
+              : 'opacity-100 scale-100'}"
+          >
+            <Menu class="size-5" />
+          </span>
+        </div>
+      </button>
+
+      <a
+        href="/"
+        class="flex h-full items-center gap-3 px-4 font-mono opacity-80 transition-all duration-150 hover:opacity-100 hover:bg-base-200/50 lg:border-r lg:border-base-200 lg:pr-6"
+      >
+        <img src="/logo.svg" alt="" class="size-10 dark:invert shrink-0" />
+        <span class="not-lg:hidden text-lg tracking-tight">KSI</span>
+      </a>
+
+      <nav class="not-lg:hidden flex h-full items-center">
+        <a
+          href="/"
+          class="flex h-full items-center px-5 text-sm font-medium text-base-content/60 hover:text-base-content border-r border-base-200 transition-colors duration-150 hover:bg-base-200/40 {$page
+            .url.pathname === '/'
+            ? 'text-base-content bg-base-200/30'
+            : ''}"
+        >
+          Home
+        </a>
+        <a
+          href="/projects"
+          class="flex h-full items-center px-5 text-sm font-medium text-base-content/60 hover:text-base-content border-r border-base-200 transition-colors duration-150 hover:bg-base-200/40 {$page.url.pathname.startsWith(
+            '/projects'
+          ) || $page.url.pathname.startsWith('/zosia')
+            ? 'text-base-content bg-base-200/30'
+            : ''}"
+        >
+          Projects
+        </a>
+        {#if session && user}
+          <a
+            href="/dashboard"
+            class="flex h-full items-center px-5 text-sm font-medium text-base-content/60 hover:text-base-content border-r border-base-200 transition-colors duration-150 hover:bg-base-200/40 {$page.url.pathname.startsWith(
+              '/dashboard'
+            )
+              ? 'text-base-content bg-base-200/30'
+              : ''}"
+          >
+            Dashboard
+          </a>
+        {/if}
+      </nav>
+    </div>
+
     <button
       onclick={() => {
         if (preNavbarVisible) {
-          scrollToNavbar();
+          document.getElementById('main-content')?.scrollIntoView({ behavior: 'smooth' });
         } else {
-          $sidebarStore = !$sidebarStore;
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       }}
-      class="btn btn-square btn-ghost h-18 w-18 rounded-none border-r border-base-200 lg:hidden"
-      aria-label={preNavbarVisible ? 'Scroll to content' : 'Toggle sidebar'}
+      class="not-lg:hidden btn btn-ghost h-18 w-18 rounded-none border-l border-r-0 border-y-0 border-base-200 relative"
+      aria-label={preNavbarVisible ? 'Scroll to content' : 'Scroll to top'}
     >
       <div class="relative size-5">
         <span
@@ -285,85 +361,14 @@
             ? 'opacity-0 scale-75'
             : 'opacity-100 scale-100'}"
         >
-          <Menu class="size-5" />
+          <ChevronUp class="size-5" />
         </span>
       </div>
-    </button>
-
-    <a
-      href="/"
-      class="flex h-full items-center gap-3 px-4 font-mono opacity-80 transition-all duration-150 hover:opacity-100 hover:bg-base-200/50 lg:border-r lg:border-base-200 lg:pr-6"
-    >
-      <img src="/logo.svg" alt="" class="size-10 dark:invert shrink-0" />
-      <span class="not-lg:hidden text-lg tracking-tight">KSI</span>
-    </a>
-
-    <nav class="not-lg:hidden flex h-full items-center">
-      <a
-        href="/"
-        class="flex h-full items-center px-5 text-sm font-medium text-base-content/60 hover:text-base-content border-r border-base-200 transition-colors duration-150 hover:bg-base-200/40 {$page
-          .url.pathname === '/'
-          ? 'text-base-content bg-base-200/30'
-          : ''}"
-      >
-        Home
-      </a>
-      <a
-        href="/projects"
-        class="flex h-full items-center px-5 text-sm font-medium text-base-content/60 hover:text-base-content border-r border-base-200 transition-colors duration-150 hover:bg-base-200/40 {$page.url.pathname.startsWith(
-          '/projects'
-        ) || $page.url.pathname.startsWith('/zosia')
-          ? 'text-base-content bg-base-200/30'
-          : ''}"
-      >
-        Projects
-      </a>
-      {#if session && user}
-        <a
-          href="/dashboard"
-          class="flex h-full items-center px-5 text-sm font-medium text-base-content/60 hover:text-base-content border-r border-base-200 transition-colors duration-150 hover:bg-base-200/40 {$page.url.pathname.startsWith(
-            '/dashboard'
-          )
-            ? 'text-base-content bg-base-200/30'
-            : ''}"
-        >
-          Dashboard
-        </a>
-      {/if}
-    </nav>
-  </div>
-
-  <button
-    onclick={() => {
-      if (preNavbarVisible) {
-        document.getElementById('main-content')?.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    }}
-    class="not-lg:hidden btn btn-ghost h-18 w-18 rounded-none border-l border-r-0 border-y-0 border-base-200 relative"
-    aria-label={preNavbarVisible ? 'Scroll to content' : 'Scroll to top'}
-  >
-    <div class="relative size-5">
       <span
-        class="absolute inset-0 flex items-center justify-center transition-all duration-200 {preNavbarVisible
-          ? 'opacity-100 scale-100'
-          : 'opacity-0 scale-75'}"
-      >
-        <ChevronDown class="size-5" />
-      </span>
-      <span
-        class="absolute inset-0 flex items-center justify-center transition-all duration-200 {preNavbarVisible
-          ? 'opacity-0 scale-75'
+        class="absolute top-3 right-3 size-1.5 rounded-full bg-primary transition-all duration-300 {preNavbarVisible
+          ? 'opacity-0 scale-0'
           : 'opacity-100 scale-100'}"
-      >
-        <ChevronUp class="size-5" />
-      </span>
-    </div>
-    <span
-      class="absolute top-3 right-3 size-1.5 rounded-full bg-primary transition-all duration-300 {preNavbarVisible
-        ? 'opacity-0 scale-0'
-        : 'opacity-100 scale-100'}"
-    ></span>
-  </button>
+      ></span>
+    </button>
+  </div>
 </header>
