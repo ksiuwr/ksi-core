@@ -1,90 +1,113 @@
-<script>
-  import { page } from '$app/state';
-  import { editions } from '$lib/data/conferences.js';
-  import { Calendar, MapPin, UsersRound } from '@lucide/svelte';
+<script lang="ts">
+  import { ArrowLeft, Calendar, Images, MapPin, UsersRound } from '@lucide/svelte';
   import DynamicGallery from '../../../../components/DynamicGallery.svelte';
+  import Wrapper from '../../../../components/Wrapper.svelte';
   import { api } from '$lib/backend';
 
-  let year = $derived(page.params.year ?? '');
-  let data = $derived(editions[year]);
-
+  let {
+    data
+  }: {
+    data: {
+      year: string;
+      edition: {
+        location: string;
+        participants: number;
+        date: string;
+        bgImage?: string;
+      };
+    };
+  } = $props();
   let bgImage = $state('');
 
   $effect(() => {
-    if (!data.bgImage) return;
+    bgImage = '';
+    if (!data.edition.bgImage) return;
+
     api
-      .gallery({ id: `zosia-${year}` })
-      .bg({ name: data.bgImage })
+      .gallery({ id: `zosia-${data.year}` })
+      .bg({ name: data.edition.bgImage })
       .get()
-      .then((r) => {
-        if (r.data) bgImage = r.data;
+      .then((response) => {
+        if (response.data) bgImage = response.data;
+      })
+      .catch(() => {
+        bgImage = '';
       });
   });
 </script>
 
-{#if data}
-  <div class="relative w-full py-20 flex flex-col items-center justify-center overflow-hidden">
-    <div
-      class="absolute inset-0 bg-no-repeat bg-cover bg-center opacity-30"
-      style={`background-image: url(${bgImage})`}
-    ></div>
-
-    <span class="text-xl uppercase tracking-widest opacity-50 font-semibold"> Edition </span>
-    <h1 class="lg:text-[14rem] text-[8rem] font-bold scale-y-[0.80] z-10">
-      {year}
-    </h1>
-  </div>
-  <div class="w-full py-20 mb-2 flex flex-col items-center justify-center relative overflow-hidden">
-    <div class="flex md:flex-row flex-col border border-base-200">
-      <div class="flex flex-col items-center text-center p-8">
-        <span class="font-mono opacity-50 mb-4 uppercase flex gap-2 items-center">
-          <MapPin class="size-4" /> Location
-        </span>
-        {#each data.location.split(',') as loc (loc)}
-          <span>{loc}</span>
-        {/each}
-      </div>
-      <div
-        class="flex flex-col md:border-l border-t md:border-t-0 border-base-200 items-center text-center p-8"
-      >
-        <span class="font-mono opacity-50 mb-4 uppercase flex gap-2 items-center"
-          ><UsersRound class="size-4" /> Number of Participants</span
-        >
-        {data.participants}
-      </div>
-      <div
-        class="flex flex-col md:border-l border-t md:border-t-0 border-base-200 items-center text-center p-8"
-      >
-        <span class=" font-mono opacity-50 mb-4 uppercase flex gap-2 items-center"
-          ><Calendar class="size-4" /> Camp Date</span
-        >
-        {data.date}
-      </div>
-    </div>
-  </div>
-  <DynamicGallery empty={emptyState} id={`zosia-${year}`} />
-{:else}
-  <div class="h-screen flex items-center justify-center">
-    <h1 class="text-2xl opacity-50 uppercase tracking-tighter">
-      Edition {year} was not found ;(
-    </h1>
-  </div>
-{/if}
-
 {#snippet emptyState()}
-  <div class="flex flex-col gap-4 items-center w-full py-20 text-center px-6">
-    <h2 class="text-2xl font-bold max-w-2xl">
-      Archaeologists are wondering if ZOSIA {year} even took place. No evidence found...
-    </h2>
-    <p class="opacity-70">
-      We don't have photos from this edition of ZOSIA. If you have any, you can send them to us so
-      we can post them here.
+  <div class="border border-dashed border-base-content/20 px-6 py-16 text-center">
+    <Images class="mx-auto mb-5 size-8 text-base-content/25" />
+    <h3 class="mb-3! text-xl">No photographs in the archive yet.</h3>
+    <p class="mx-auto max-w-2xl text-sm leading-relaxed text-base-content/55">
+      If you have photos from ZOSIA {data.year}, send them to
+      <span class="font-medium text-primary">ksi [at] cs.uni.wroc.pl</span> so we can preserve them here.
     </p>
-    <p class="font-mono font-medium text-primary transition-colors">ksi [at] cs.uni.wroc.pl</p>
-    <img
-      src="https://media.tenor.com/CEfTyE7rrA0AAAAi/tumbleweed-transparent.gif"
-      alt="Tumbleweed rolling"
-      class="w-64 opacity-80"
-    />
   </div>
 {/snippet}
+
+<Wrapper name={`projects / zosia / ${data.year}`}>
+  <a
+    href="/projects/zosia"
+    class="mb-8 flex w-fit items-center gap-2 text-xs font-bold uppercase tracking-widest text-base-content/45 hover:text-primary"
+  >
+    <ArrowLeft class="size-4" /> Back to all editions
+  </a>
+
+  <header class="relative min-h-112 overflow-hidden border border-base-content/15 bg-base-200">
+    {#if bgImage}
+      <div
+        class="absolute inset-0 bg-cover bg-center opacity-35"
+        style={`background-image: url(${bgImage})`}
+      ></div>
+      <div
+        class="absolute inset-0 bg-linear-to-t from-base-100 via-base-100/30 to-transparent"
+      ></div>
+    {/if}
+
+    <div class="relative flex min-h-112 flex-col justify-between p-6 md:p-10">
+      <span
+        class="w-fit border border-base-content/20 bg-base-100/70 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.2em] backdrop-blur"
+        >ZOSIA edition</span
+      >
+      <h1 class="mb-0! text-7xl leading-[0.75]! tracking-[-0.08em] sm:text-8xl lg:text-[10rem]">
+        {data.year}
+      </h1>
+    </div>
+  </header>
+
+  <section
+    class="grid gap-px bg-base-content/15 border-x border-b border-base-content/15 md:grid-cols-3"
+  >
+    <div class="bg-base-100 p-6 md:p-8">
+      <span
+        class="mb-8 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-base-content/40"
+        ><MapPin class="size-4 text-primary" /> Location</span
+      >
+      <p class="leading-relaxed">{data.edition.location}</p>
+    </div>
+    <div class="bg-base-100 p-6 md:p-8">
+      <span
+        class="mb-8 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-base-content/40"
+        ><UsersRound class="size-4 text-primary" /> Participants</span
+      >
+      <p class="text-3xl font-bold">{data.edition.participants}</p>
+    </div>
+    <div class="bg-base-100 p-6 md:p-8">
+      <span
+        class="mb-8 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-base-content/40"
+        ><Calendar class="size-4 text-primary" /> Camp date</span
+      >
+      <p class="leading-relaxed">{data.edition.date}</p>
+    </div>
+  </section>
+
+  <section class="py-16 lg:py-24">
+    <div class="mb-10">
+      <p class="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-primary">Photo archive</p>
+      <h2 class="mb-0! text-3xl tracking-tight md:text-5xl">Moments from {data.year}</h2>
+    </div>
+    <DynamicGallery empty={emptyState} id={`zosia-${data.year}`} />
+  </section>
+</Wrapper>
