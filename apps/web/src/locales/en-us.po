@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Plural-Forms: nplurals=2; plural=n == 1 ? 0 : 1;\n"
 "Source-Language: en-us\n"
-"Language: pl\n"
+"Language: en-us\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -10,12 +10,12 @@ msgstr ""
 #: src/components/Alert.svelte
 #: src/components/Alert.svelte
 msgid "[ERROR]"
-msgstr "[BŁĄD]"
+msgstr "[ERROR]"
 
 #: src/components/Alert.svelte
 #: src/components/Alert.svelte
 msgid "[WARN]"
-msgstr "[OSTRZEŻENIE]"
+msgstr "[WARN]"
 
 #. 0: new Date().getFullYear()
 #: src/components/Footer.svelte
@@ -25,7 +25,7 @@ msgstr "© KSI {0}"
 #: src/components/Navbar copy.svelte
 #: src/components/Navbar.svelte
 msgid "Toggle sidebar"
-msgstr "Przełącz panel boczny"
+msgstr "Toggle sidebar"
 
 #: src/components/Navbar copy.svelte
 msgid "<0/> KSI"
@@ -35,12 +35,12 @@ msgstr "<0/> KSI"
 #: src/components/Sidebar.svelte
 #: src/components/Wrapper.svelte
 msgid "Home"
-msgstr "Strona główna"
+msgstr "Home"
 
 #: src/components/ThemeButton.svelte
 #: src/components/ThemeButton.svelte
 msgid "Toggle theme"
-msgstr "Zmień motyw"
+msgstr "Toggle theme"
 
 #: src/components/Footer.svelte
 #: src/components/Sidebar.svelte
@@ -55,31 +55,31 @@ msgstr "<0/> GitHub"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Alert updated successfully"
-msgstr "Pomyślnie zaktualizowano alert"
+msgstr "Alert updated successfully"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Alert created successfully"
-msgstr "Pomyślnie utworzono alert"
+msgstr "Alert created successfully"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Alert deleted"
-msgstr "Usunięto alert"
+msgstr "Alert deleted"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "Institute of Computer Science, University of Wrocław"
-msgstr "Instytut Informatyki Uniwersytetu Wrocławskiego"
+msgstr "Institute of Computer Science, University of Wrocław"
 
 #: src/components/Sidebar.svelte
 msgid "Access denied."
-msgstr "Brak dostępu."
+msgstr "Access denied."
 
 #: src/components/Sidebar.svelte
 msgid "Logged in as"
-msgstr "Zalogowano jako"
+msgstr "Logged in as"
 
 #: src/components/Sidebar.svelte
 msgid "Logout"
-msgstr "Wyloguj"
+msgstr "Logout"
 
 #: src/components/Navbar copy.svelte
 msgid "Panel"
@@ -87,189 +87,189 @@ msgstr "Panel"
 
 #: src/routes/projects/zosia/+page.svelte
 msgid "Edition"
-msgstr "Edycja"
+msgstr "Edition"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Edit alert"
-msgstr "Edytuj alert"
+msgstr "Edit alert"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Title"
-msgstr "Tytuł"
+msgstr "Title"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Description"
-msgstr "Opis"
+msgstr "Description"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Save changes"
-msgstr "Zapisz zmiany"
+msgstr "Save changes"
 
 #: src/routes/dashboard/alerts/+page.svelte
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Create alert"
-msgstr "Utwórz alert"
+msgstr "Create alert"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Cancel"
-msgstr "Anuluj"
+msgstr "Cancel"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "Lecture"
-msgstr "Wykład"
+msgstr "Lecture"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "The basics of programming in <0>Python</0> will be presented in an interactive, accessible, yet academic way."
-msgstr "Podstawy programowania w języku <0>Python</0> zostaną przedstawione w sposób interaktywny, przystępny, a zarazem akademicki."
+msgstr "The basics of programming in <0>Python</0> will be presented in an interactive, accessible, yet academic way."
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "Exercises"
-msgstr "Warsztaty"
+msgstr "Exercises"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "With the help of volunteers, computer science students, the pupils will independently solve programming tasks in computer labs."
-msgstr "Z pomocą wolontariuszy, studentów informatyki, uczniowie będą samodzielnie rozwiązywać zadania programistyczne w pracowniach komputerowych."
+msgstr "With the help of volunteers, computer science students, the pupils will independently solve programming tasks in computer labs."
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "Event schedule"
-msgstr "Plan wydarzenia"
+msgstr "Event schedule"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "We will start with a lecture where students will get acquainted with the theory: they will learn how to run the environment and write simple programs in Python, using standard input and output, basic data types, and conditional statements. Then they will learn about more advanced constructs like loops or functions. They will also have the opportunity to see interesting projects encouraging further learning."
-msgstr "Rozpoczniemy od wykładu, na którym uczniowie zapoznają się z teorią: dowiedzą się, jak uruchomić środowisko i pisać proste programy w Pythonie, korzystając ze standardowego wejścia i wyjścia, podstawowych typów danych oraz instrukcji warunkowych. Następnie poznają bardziej zaawansowane konstrukcje, takie jak pętle czy funkcje. Będą mieli również okazję zobaczyć ciekawe projekty zachęcające do dalszej nauki."
+msgstr "We will start with a lecture where students will get acquainted with the theory: they will learn how to run the environment and write simple programs in Python, using standard input and output, basic data types, and conditional statements. Then they will learn about more advanced constructs like loops or functions. They will also have the opportunity to see interesting projects encouraging further learning."
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "After a break and a sweet treat, students will be able to put newly learned concepts into practice during the lab session by solving tasks independently. Volunteers will be present at the lab, ready to help the participants. The estimated total duration of the workshops is about 3 hours."
-msgstr "Po przerwie i słodkim poczęstunku uczniowie będą mogli zastosować nowo poznane pojęcia w praktyce podczas sesji laboratoryjnej, rozwiązując zadania samodzielnie. Na sali obecni będą wolontariusze, gotowi pomóc uczestnikom. Szacowany łączny czas trwania warsztatów wynosi około 3 godziny."
+msgstr "After a break and a sweet treat, students will be able to put newly learned concepts into practice during the lab session by solving tasks independently. Volunteers will be present at the lab, ready to help the participants. The estimated total duration of the workshops is about 3 hours."
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "Benefits of participating"
-msgstr "Korzyści z udziału"
+msgstr "Benefits of participating"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "Hour of Code is a chance for students to have their first encounter with and become fascinated by computer science. We try to conduct the classes in such a way that participants not only get to know a programming language, but also can develop their logical thinking and problem-solving skills."
-msgstr "Godzina Kodowania to szansa dla uczniów na pierwsze spotkanie i zafascynowanie się informatyką. Staramy się prowadzić zajęcia w taki sposób, aby uczestnicy nie tylko poznali język programowania, ale także rozwijali umiejętność logicznego myślenia i rozwiązywania problemów."
+msgstr "Hour of Code is a chance for students to have their first encounter with and become fascinated by computer science. We try to conduct the classes in such a way that participants not only get to know a programming language, but also can develop their logical thinking and problem-solving skills."
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "Organizational details"
-msgstr "Szczegóły organizacyjne"
+msgstr "Organizational details"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "Current edition"
-msgstr "Aktualna edycja"
+msgstr "Current edition"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "See images from Hour of Code 2026!"
-msgstr "Zobacz zdjęcia z Hour of Code 2026!"
+msgstr "See images from Hour of Code 2026!"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "Previous editions"
-msgstr "Poprzednie edycje"
+msgstr "Previous editions"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "Hour of Code organized by the Computer Science Students' Club of the University of Wrocław is already a tradition. We present selected photos from previous editions of Hour of Code"
-msgstr "Godzina Kodowania organizowana przez Koło Studentów Informatyki Uniwersytetu Wrocławskiego to już tradycja. Prezentujemy wybrane zdjęcia z poprzednich edycji Godziny Kodowania"
+msgstr "Hour of Code organized by the Computer Science Students' Club of the University of Wrocław is already a tradition. We present selected photos from previous editions of Hour of Code"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "Teaching primary school students programming, presenting computer science as a field of work and study."
-msgstr "Nauka programowania uczniów szkół podstawowych, prezentowanie informatyki jako dziedziny pracy i nauki."
+msgstr "Teaching primary school students programming, presenting computer science as a field of work and study."
 
 #: src/routes/projects/hoc/+page.svelte
 #: src/routes/projects/ket/+page.svelte
 #: src/routes/projects/ml/krasnal/+page.svelte
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "Goals"
-msgstr "Cele"
+msgstr "Goals"
 
 #: src/routes/projects/hoc/+page.svelte
 #: src/routes/projects/ket/+page.svelte
 #: src/routes/projects/ml/krasnal/+page.svelte
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "Team Members"
-msgstr "Członkowie zespołu"
+msgstr "Team Members"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "The \"Hour of Code\" classes organized by the Computer Science Students' Club of the University of Wrocław introduce students to the Python programming language. They are intended for primary school students in grades 4-8. The classes consist of two parts:"
-msgstr "Zajęcia „Godzina Kodowania” organizowane przez Koło Studentów Informatyki Uniwersytetu Wrocławskiego wprowadzają uczniów w język programowania Python. Przeznaczone są dla uczniów szkół podstawowych z klas 4-8. Zajęcia składają się z dwóch części:"
+msgstr "The \"Hour of Code\" classes organized by the Computer Science Students' Club of the University of Wrocław introduce students to the Python programming language. They are intended for primary school students in grades 4-8. The classes consist of two parts:"
 
 #: src/components/Navbar.svelte
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Krasnal is a chess engine developed in Wrocław, based on the Transformer architecture. It utilizes deep neural networks to learn to play chess intuitively, departing from traditional, heavy calculations and game tree searching."
-msgstr "Krasnal to silnik szachowy rozwijany we Wrocławiu, oparty na architekturze Transformer. Wykorzystuje głębokie sieci neuronowe do intuicyjnej nauki gry w szachy, odchodząc od tradycyjnych, ciężkich obliczeń i przeszukiwania drzewa gry."
+msgstr "Krasnal is a chess engine developed in Wrocław, based on the Transformer architecture. It utilizes deep neural networks to learn to play chess intuitively, departing from traditional, heavy calculations and game tree searching."
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "System architecture"
-msgstr "Architektura systemu"
+msgstr "System architecture"
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Investigating the model's behavior depending on the training method."
-msgstr "Badanie zachowania modelu w zależności od metody uczenia."
+msgstr "Investigating the model's behavior depending on the training method."
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Training a model that generates legal and strong chess moves resembling human play."
-msgstr "Trening modelu generującego legalne i silne posunięcia szachowe przypominające grę człowieka."
+msgstr "Training a model that generates legal and strong chess moves resembling human play."
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Krasnal's goal is to generate strong, yet human-like chess moves. Balancing between the intuition known from the Maia Chess project and the playing strength of Stockfish."
-msgstr "Celem Krasnala jest generowanie silnych, a zarazem ludzkich posunięć szachowych. Balansowanie między intuicją znaną z projektu Maia Chess a siłą gry Stockfisha."
+msgstr "Krasnal's goal is to generate strong, yet human-like chess moves. Balancing between the intuition known from the Maia Chess project and the playing strength of Stockfish."
 
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "Visualization of U-Matrix, Hit Map, and Weight Vectors"
-msgstr "Wizualizacja macierzy U-Matrix, Hit Map oraz wektorów wag"
+msgstr "Visualization of U-Matrix, Hit Map, and Weight Vectors"
 
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "This project explores the fascinating intersection of biology and computer science, testing whether the natural processes of <0>Physarum polycephalum</0> can be used to perform computational tasks, such as training neural networks."
-msgstr "Projekt ten bada fascynujące pogranicze biologii i informatyki, sprawdzając, czy naturalne procesy <0>Physarum polycephalum</0> można wykorzystać do wykonywania zadań obliczeniowych, takich jak trening sieci neuronowych."
+msgstr "This project explores the fascinating intersection of biology and computer science, testing whether the natural processes of <0>Physarum polycephalum</0> can be used to perform computational tasks, such as training neural networks."
 
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "Behavioral and experimental research on <0>Physarum polycephalum</0>."
-msgstr "Badania behawioralne i eksperymentalne nad <0>Physarum polycephalum</0>."
+msgstr "Behavioral and experimental research on <0>Physarum polycephalum</0>."
 
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "Algorithmic analysis and modeling of transport networks."
-msgstr "Analiza algorytmiczna i modelowanie sieci transportowych."
+msgstr "Algorithmic analysis and modeling of transport networks."
 
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "Disseminating results within and beyond the academic community."
-msgstr "Upowszechnianie wyników w środowisku akademickim i poza nim."
+msgstr "Disseminating results within and beyond the academic community."
 
 #: src/routes/projects/ket/+page.svelte
 msgid "The KET project focuses on pure quantum algorithmics, moving computation modeling to a level of abstraction familiar from classical software engineering. It allows you to learn and run code on a real quantum processor without requiring advanced knowledge of physics, optics, or cryogenics. The development path leads from the basics of qubit operation and cryptography in the Qiskit environment, through complexity theory, to variational optimization methods. In the final phase, participants face the challenges of modern hardware, learning advanced error-correcting codes, magic state distillation, and Quantum Machine Learning."
-msgstr "Projekt KET skupia się na czystej algorytmice kwantowej, przenosząc modelowanie obliczeń na poziom abstrakcji znany z klasycznej inżynierii oprogramowania. Pozwala na naukę i uruchamianie kodu na prawdziwym procesorze kwantowym bez konieczności posiadania zaawansowanej wiedzy z zakresu fizyki, optyki czy kriogeniki. Ścieżka rozwoju prowadzi od podstaw działania kubitów i kryptografii w środowisku Qiskit, przez teorię złożoności, po wariacyjne metody optymalizacji. W końcowej fazie uczestnicy mierzą się z wyzwaniami współczesnego sprzętu, poznając zaawansowane kody korekcji błędów, destylację stanów magicznych oraz kwantowe uczenie maszynowe."
+msgstr "The KET project focuses on pure quantum algorithmics, moving computation modeling to a level of abstraction familiar from classical software engineering. It allows you to learn and run code on a real quantum processor without requiring advanced knowledge of physics, optics, or cryogenics. The development path leads from the basics of qubit operation and cryptography in the Qiskit environment, through complexity theory, to variational optimization methods. In the final phase, participants face the challenges of modern hardware, learning advanced error-correcting codes, magic state distillation, and Quantum Machine Learning."
 
 #: src/routes/projects/ket/+page.svelte
 msgid "Researching innovative quantum algorithms, computational complexity theory, and quantum machine learning to push the boundaries of modern cybersecurity and optimization paradigms."
-msgstr "Badanie innowacyjnych algorytmów kwantowych, teorii złożoności obliczeniowej oraz kwantowego uczenia maszynowego w celu przesunięcia granic współczesnego bezpieczeństwa cyfrowego i paradygmatów optymalizacji."
+msgstr "Researching innovative quantum algorithms, computational complexity theory, and quantum machine learning to push the boundaries of modern cybersecurity and optimization paradigms."
 
 #: src/routes/projects/ket/+page.svelte
 msgid "Modeling computations and independently implementing proprietary quantum algorithms in the Qiskit environment, with the ultimate execution of the code on a real quantum processor."
-msgstr "Modelowanie obliczeń oraz samodzielna implementacja autorskich algorytmów kwantowych w środowisku Qiskit, z docelowym wykonaniem kodu na fizycznym procesorze kwantowym."
+msgstr "Modeling computations and independently implementing proprietary quantum algorithms in the Qiskit environment, with the ultimate execution of the code on a real quantum processor."
 
 #: src/components/Navbar copy.svelte
 msgid "Toggle language"
-msgstr "Zmień język"
+msgstr "Toggle language"
 
 #: src/components/Goal.svelte
 msgid "// Technically"
-msgstr "// Technicznie"
+msgstr "// Technically"
 
 #: src/components/Goal.svelte
 msgid "// Scientifically"
-msgstr "// Naukowo"
+msgstr "// Scientifically"
 
 #: src/components/Goal.svelte
 msgid "// Socially"
-msgstr "// Społecznie"
+msgstr "// Socially"
 
 #: src/routes/projects/zosia/[year]/+page.svelte
 msgid "<0/> Location"
-msgstr "<0/> Lokalizacja"
+msgstr "<0/> Location"
 
 #: src/components/Sidebar.svelte
 #: src/routes/dashboard/+page.svelte
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Alerts"
-msgstr "Alerty"
+msgstr "Alerts"
 
 #: src/components/Navbar copy.svelte
 msgid "Życie studenckie"
@@ -280,15 +280,15 @@ msgstr "Życie studenckie"
 #: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
 msgid "Projects"
-msgstr "Projekty"
+msgstr "Projects"
 
 #: src/components/ThemeButton.svelte
 msgid "Light"
-msgstr "Jasny"
+msgstr "Light"
 
 #: src/components/ThemeButton.svelte
 msgid "Dark"
-msgstr "Ciemny"
+msgstr "Dark"
 
 #: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
@@ -297,36 +297,36 @@ msgstr "Zosia"
 
 #: src/components/NavbarAccordion.svelte
 msgid "details"
-msgstr "szczegóły"
+msgstr "details"
 
 #: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
 msgid "Member access"
-msgstr "Dostęp dla członków"
+msgstr "Member access"
 
 #: src/components/Navbar.svelte
 msgid "Date: 05.03.2026 - 08.03.2026"
-msgstr "Data: 05.03.2026 - 08.03.2026"
+msgstr "Date: 05.03.2026 - 08.03.2026"
 
 #: src/components/Navbar.svelte
 msgid "Number of participants: 274"
-msgstr "Liczba uczestników: 274"
+msgstr "Number of participants: 274"
 
 #: src/components/Navbar.svelte
 msgid "Number of participants: 217"
-msgstr "Liczba uczestników: 217"
+msgstr "Number of participants: 217"
 
 #: src/components/Navbar.svelte
 msgid "Date: 28.02.2025 - 03.03.2025"
-msgstr "Data: 28.02.2025 - 03.03.2025"
+msgstr "Date: 28.02.2025 - 03.03.2025"
 
 #: src/components/Navbar.svelte
 msgid "Number of participants: 263"
-msgstr "Liczba uczestników: 263"
+msgstr "Number of participants: 263"
 
 #: src/components/Navbar.svelte
 msgid "Date: 22.02.2024 - 25.02.2024"
-msgstr "Data: 22.02.2024 - 25.02.2024"
+msgstr "Date: 22.02.2024 - 25.02.2024"
 
 #: src/components/Sidebar.svelte
 #: src/routes/+page.svelte
@@ -337,7 +337,7 @@ msgstr "Hour of Code"
 #: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
 msgid "Machine Learning"
-msgstr "Uczenie maszynowe"
+msgstr "Machine Learning"
 
 #: src/components/Navbar.svelte
 #: src/routes/+page.svelte
@@ -354,25 +354,25 @@ msgstr "Physarum"
 
 #: src/components/Navbar.svelte
 msgid "Can a Slime Mold train Neural Networks? It turns out to be a fascinating subject, intersecting the computational biology and AI."
-msgstr "Czy śluzowiec może trenować sieci neuronowe? Okazuje się, że to fascynujący temat z pogranicza biologii obliczeniowej i AI."
+msgstr "Can a Slime Mold train Neural Networks? It turns out to be a fascinating subject, intersecting the computational biology and AI."
 
 #: src/components/Navbar.svelte
 msgid "and more..."
-msgstr "i więcej..."
+msgstr "and more..."
 
 #: src/components/ThemeButton.svelte
 msgid "<0/> Light mode"
-msgstr "<0/> Tryb jasny"
+msgstr "<0/> Light mode"
 
 #: src/components/ThemeButton.svelte
 msgid "<0/> Dark mode"
-msgstr "<0/> Tryb ciemny"
+msgstr "<0/> Dark mode"
 
 #: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
 #: src/routes/dashboard/+page.svelte
 msgid "Dashboard"
-msgstr "Panel"
+msgstr "Dashboard"
 
 #: src/components/Sidebar.svelte
 msgid "KET"
@@ -384,34 +384,34 @@ msgstr "S3 Cache"
 
 #: src/components/Sidebar.svelte
 msgid "Login"
-msgstr "Zaloguj"
+msgstr "Login"
 
 #: src/components/SidebarAccordion.svelte
 msgid "Collapse"
-msgstr "Zwiń"
+msgstr "Collapse"
 
 #: src/components/SidebarAccordion.svelte
 msgid "Expand"
-msgstr "Rozwiń"
+msgstr "Expand"
 
 #: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
 msgid "Logged out"
-msgstr "Wylogowano"
+msgstr "Logged out"
 
 #. 0: user.name
 #: src/components/Navbar.svelte
 msgid "{0}'s profile picture"
-msgstr "Zdjęcie profilowe użytkownika {0}"
+msgstr "{0}'s profile picture"
 
 #: src/components/Navbar.svelte
 #: src/components/Navbar.svelte
 msgid "Scroll to content"
-msgstr "Przewiń do treści"
+msgstr "Scroll to content"
 
 #: src/components/Navbar.svelte
 msgid "Scroll to top"
-msgstr "Przewiń do góry"
+msgstr "Scroll to top"
 
 #: src/components/Navbar.svelte
 msgid "KSI"
@@ -419,31 +419,31 @@ msgstr "KSI"
 
 #: src/routes/+page.svelte
 msgid "Explore our work <0/>"
-msgstr "Poznaj nasze projekty <0/>"
+msgstr "Explore our work <0/>"
 
 #: src/routes/+page.svelte
 msgid "Meet the association"
-msgstr "Poznaj nasze koło"
+msgstr "Meet the association"
 
 #: src/routes/+page.svelte
 msgid "<0/> Student research group · Wrocław"
-msgstr "<0/> Studenckie koło naukowe · Wrocław"
+msgstr "<0/> Student research group · Wrocław"
 
 #: src/routes/+page.svelte
 msgid "We are the Computer Science Students’ Association at the University of Wrocław — a community for learning, building, and exploring what technology can do."
-msgstr "Jesteśmy Kołem Studentów Informatyki Uniwersytetu Wrocławskiego — społecznością, w której uczymy się, tworzymy i odkrywamy możliwości technologii."
+msgstr "We are the Computer Science Students’ Association at the University of Wrocław — a community for learning, building, and exploring what technology can do."
 
 #: src/routes/+page.svelte
 msgid "group"
-msgstr "grupa"
+msgstr "group"
 
 #: src/routes/+page.svelte
 msgid "focus"
-msgstr "dziedzina"
+msgstr "focus"
 
 #: src/routes/+page.svelte
 msgid "computer science"
-msgstr "informatyka"
+msgstr "computer science"
 
 #: src/routes/+page.svelte
 msgid "status"
@@ -451,15 +451,15 @@ msgstr "status"
 
 #: src/routes/+page.svelte
 msgid "<0/>always learning"
-msgstr "<0/>ciągle się uczymy"
+msgstr "<0/>always learning"
 
 #: src/routes/+page.svelte
 msgid "location"
-msgstr "lokalizacja"
+msgstr "location"
 
 #: src/routes/+page.svelte
 msgid "room 24"
-msgstr "pokój 24"
+msgstr "room 24"
 
 #: src/routes/+page.svelte
 msgid "<0/> whoami"
@@ -475,163 +475,163 @@ msgstr "<0/> ksi@uwr:~"
 
 #: src/routes/+page.svelte
 msgid "01 / About us"
-msgstr "01 / O nas"
+msgstr "01 / About us"
 
 #: src/routes/+page.svelte
 msgid "A place to turn curiosity into practice."
-msgstr "Miejsce, w którym ciekawość przekuwamy w praktykę."
+msgstr "A place to turn curiosity into practice."
 
 #: src/routes/+page.svelte
 msgid "Socially"
-msgstr "Społecznie"
+msgstr "Socially"
 
 #: src/routes/+page.svelte
 msgid "A community that learns and grows together."
-msgstr "Społeczność, która wspólnie się uczy i rozwija."
+msgstr "A community that learns and grows together."
 
 #: src/routes/+page.svelte
 msgid "Technically"
-msgstr "Technicznie"
+msgstr "Technically"
 
 #: src/routes/+page.svelte
 msgid "Ideas transformed into working systems."
-msgstr "Pomysły przekuwane w działające systemy."
+msgstr "Ideas transformed into working systems."
 
 #: src/routes/+page.svelte
 msgid "Scientifically"
-msgstr "Naukowo"
+msgstr "Scientifically"
 
 #: src/routes/+page.svelte
 msgid "Questions explored with rigor and curiosity."
-msgstr "Zagadnienia badane z dociekliwością i naukową rzetelnością."
+msgstr "Questions explored with rigor and curiosity."
 
 #: src/routes/+page.svelte
 msgid "We are a student research group operating at the Institute of Computer Science. From low-level theory to practical implementations, we create space to exchange knowledge, experiment, and build ambitious things together."
-msgstr "Jesteśmy studenckim kołem naukowym działającym przy Instytucie Informatyki. Od teorii niskiego poziomu po praktyczne wdrożenia — tworzymy przestrzeń do wymiany wiedzy, eksperymentowania i wspólnej realizacji ambitnych pomysłów."
+msgstr "We are a student research group operating at the Institute of Computer Science. From low-level theory to practical implementations, we create space to exchange knowledge, experiment, and build ambitious things together."
 
 #: src/routes/+page.svelte
 msgid "02 / Selected work"
-msgstr "02 / Wybrane projekty"
+msgstr "02 / Selected work"
 
 #: src/routes/+page.svelte
 msgid "Projects built beyond the classroom."
-msgstr "Projekty tworzone poza salą wykładową."
+msgstr "Projects built beyond the classroom."
 
 #: src/routes/+page.svelte
 msgid "View all projects <0/>"
-msgstr "Zobacz wszystkie projekty <0/>"
+msgstr "View all projects <0/>"
 
 #: src/routes/+page.svelte
 msgid "PROJECT / 01"
-msgstr "PROJEKT / 01"
+msgstr "PROJECT / 01"
 
 #: src/routes/+page.svelte
 msgid "Programming classes that give primary school students their first tools to create with code."
-msgstr "Zajęcia z programowania, podczas których uczniowie szkół podstawowych poznają pierwsze narzędzia do tworzenia za pomocą kodu."
+msgstr "Programming classes that give primary school students their first tools to create with code."
 
 #: src/routes/+page.svelte
 msgid "PROJECT / 02"
-msgstr "PROJEKT / 02"
+msgstr "PROJECT / 02"
 
 #: src/routes/+page.svelte
 msgid "A chess engine that uses the Transformer architecture to learn a more intuitive way to play."
-msgstr "Silnik szachowy wykorzystujący architekturę Transformer, aby nauczyć się bardziej intuicyjnego sposobu gry."
+msgstr "A chess engine that uses the Transformer architecture to learn a more intuitive way to play."
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "Education · Python · Grades 4–8"
-msgstr "Edukacja · Python · Klasy 4–8"
+msgstr "Education · Python · Grades 4–8"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "Email the Hour of Code organizers"
-msgstr "Napisz do organizatorów Hour of Code"
+msgstr "Email the Hour of Code organizers"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "<0/> Contact us <1/>"
-msgstr "<0/> Skontaktuj się z nami <1/>"
+msgstr "<0/> Contact us <1/>"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "01 / Format"
-msgstr "01 / Formuła"
+msgstr "01 / Format"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "Theory, then practice."
-msgstr "Najpierw teoria, potem praktyka."
+msgstr "Theory, then practice."
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "Part 01"
-msgstr "Część 01"
+msgstr "Part 01"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "Part 02"
-msgstr "Część 02"
+msgstr "Part 02"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "02 / Schedule"
-msgstr "02 / Harmonogram"
+msgstr "02 / Schedule"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "03 / Why join"
-msgstr "03 / Dlaczego warto"
+msgstr "03 / Why join"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "04 / Details"
-msgstr "04 / Szczegóły"
+msgstr "04 / Details"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "2026 dates"
-msgstr "Terminy w 2026 roku"
+msgstr "2026 dates"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "April 10 · April 24<0/>May 4 · May 11"
-msgstr "10 kwietnia · 24 kwietnia<0/>4 maja · 11 maja"
+msgstr "April 10 · April 24<0/>May 4 · May 11"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "Location"
-msgstr "Miejsce"
+msgstr "Location"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "Duration"
-msgstr "Czas trwania"
+msgstr "Duration"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "About 3 hours"
-msgstr "Około 3 godzin"
+msgstr "About 3 hours"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "In 2026, the classes will take place on: April 10, April 24, May 4, and May 11. The classes are held in the lecture halls and computer labs of the Institute of Computer Science at the University of Wrocław, at 15 Fryderyka Joliota-Curie Street in Wrocław. We invite schools to register their willingness to participate in these classes by email at <0>hourofcode.ksi@gmail.com</0>"
-msgstr "W 2026 roku zajęcia odbędą się 10 i 24 kwietnia oraz 4 i 11 maja. Zajęcia odbywają się w salach wykładowych i pracowniach komputerowych Instytutu Informatyki Uniwersytetu Wrocławskiego przy ul. Fryderyka Joliot-Curie 15 we Wrocławiu. Zapraszamy szkoły do zgłaszania chęci udziału w zajęciach drogą mailową na adres <0>hourofcode.ksi@gmail.com</0>"
+msgstr "In 2026, the classes will take place on: April 10, April 24, May 4, and May 11. The classes are held in the lecture halls and computer labs of the Institute of Computer Science at the University of Wrocław, at 15 Fryderyka Joliota-Curie Street in Wrocław. We invite schools to register their willingness to participate in these classes by email at <0>hourofcode.ksi@gmail.com</0>"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "05 / Gallery"
-msgstr "05 / Galeria"
+msgstr "05 / Gallery"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "06 / Archive"
-msgstr "06 / Archiwum"
+msgstr "06 / Archive"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "07 / Purpose"
-msgstr "07 / Cel"
+msgstr "07 / Purpose"
 
 #: src/routes/projects/hoc/+page.svelte
 msgid "08 / People"
-msgstr "08 / Zespół"
+msgstr "08 / People"
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Machine learning · Chess"
-msgstr "Uczenie maszynowe · Szachy"
+msgstr "Machine learning · Chess"
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Krasnal<0/>Chess Engine <1/>"
-msgstr "Krasnal<0/>Silnik szachowy <1/>"
+msgstr "Krasnal<0/>Chess Engine <1/>"
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "01 / Approach"
-msgstr "01 / Podejście"
+msgstr "01 / Approach"
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Intuition over exhaustive search."
-msgstr "Intuicja zamiast wyczerpującego przeszukiwania."
+msgstr "Intuition over exhaustive search."
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Model"
@@ -639,96 +639,96 @@ msgstr "Model"
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Transformer architecture"
-msgstr "Architektura Transformer"
+msgstr "Transformer architecture"
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Method"
-msgstr "Metoda"
+msgstr "Method"
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Deep neural networks"
-msgstr "Głębokie sieci neuronowe"
+msgstr "Deep neural networks"
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Aim"
-msgstr "Cel"
+msgstr "Aim"
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Strong, human-like chess moves"
-msgstr "Silne ruchy szachowe przypominające ludzką grę"
+msgstr "Strong, human-like chess moves"
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "02 / Architecture"
-msgstr "02 / Architektura"
+msgstr "02 / Architecture"
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Three views of Krasnal's notation, Transformer model, and direct move-prediction approach."
-msgstr "Trzy spojrzenia na notację Krasnala, model Transformer i podejście oparte na bezpośrednim przewidywaniu ruchu."
+msgstr "Three views of Krasnal's notation, Transformer model, and direct move-prediction approach."
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Diagram comparing ambiguous standard UCI chess notation with Krasnal's color-aware tokenization"
-msgstr "Diagram porównujący niejednoznaczną standardową notację szachową UCI z tokenizacją Krasnala uwzględniającą kolor"
+msgstr "Diagram comparing ambiguous standard UCI chess notation with Krasnal's color-aware tokenization"
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "FIG. 01"
-msgstr "RYS. 01"
+msgstr "FIG. 01"
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Color-aware Krasnal tokenization compared with standard UCI notation."
-msgstr "Tokenizacja Krasnala uwzględniająca kolor w porównaniu ze standardową notacją UCI."
+msgstr "Color-aware Krasnal tokenization compared with standard UCI notation."
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Transformer architecture diagram showing token embedding, attention and feed-forward layers, normalization, and output logits"
-msgstr "Diagram architektury Transformer przedstawiający osadzanie tokenów, warstwy uwagi i sieci jednokierunkowej, normalizację oraz logity wyjściowe"
+msgstr "Transformer architecture diagram showing token embedding, attention and feed-forward layers, normalization, and output logits"
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "FIG. 02"
-msgstr "RYS. 02"
+msgstr "FIG. 02"
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Transformer flow from input tokens to output logits."
-msgstr "Przepływ w modelu Transformer od tokenów wejściowych do logitów wyjściowych."
+msgstr "Transformer flow from input tokens to output logits."
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Diagram comparing Stockfish's explicit search tree with Krasnal's Transformer-based direct next-move prediction"
-msgstr "Diagram porównujący jawne drzewo przeszukiwania Stockfisha z bezpośrednim przewidywaniem kolejnego ruchu przez Krasnala opartym na modelu Transformer"
+msgstr "Diagram comparing Stockfish's explicit search tree with Krasnal's Transformer-based direct next-move prediction"
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "FIG. 03"
-msgstr "RYS. 03"
+msgstr "FIG. 03"
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Traditional explicit search compared with Krasnal's direct prediction."
-msgstr "Tradycyjne jawne przeszukiwanie w porównaniu z bezpośrednim przewidywaniem Krasnala."
+msgstr "Traditional explicit search compared with Krasnal's direct prediction."
 
 #: src/routes/projects/ket/+page.svelte
 #: src/routes/projects/ml/krasnal/+page.svelte
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "03 / Direction"
-msgstr "03 / Kierunek"
+msgstr "03 / Direction"
 
 #: src/routes/projects/ket/+page.svelte
 #: src/routes/projects/ml/krasnal/+page.svelte
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "04 / People"
-msgstr "04 / Zespół"
+msgstr "04 / People"
 
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "Computational Biology & AI"
-msgstr "Biologia obliczeniowa i AI"
+msgstr "Computational Biology & AI"
 
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "Can a Slime Mold<0/>train Neural Networks?"
-msgstr "Czy śluzowiec może<0/>uczyć sieci neuronowe?"
+msgstr "Can a Slime Mold<0/>train Neural Networks?"
 
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "01 / Question"
-msgstr "01 / Pytanie"
+msgstr "01 / Question"
 
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "A biological route to computation."
-msgstr "Biologiczna droga do obliczeń."
+msgstr "A biological route to computation."
 
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "Physarum polycephalum"
@@ -736,324 +736,324 @@ msgstr "Physarum polycephalum"
 
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "Organism"
-msgstr "Organizm"
+msgstr "Organism"
 
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "Intersection"
-msgstr "Pogranicze"
+msgstr "Intersection"
 
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "Biology and computer science"
-msgstr "Biologia i informatyka"
+msgstr "Biology and computer science"
 
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "Technical focus"
-msgstr "Główny obszar techniczny"
+msgstr "Technical focus"
 
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "Algorithmic modeling of transport networks"
-msgstr "Algorytmiczne modelowanie sieci transportowych"
+msgstr "Algorithmic modeling of transport networks"
 
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "02 / Research view"
-msgstr "02 / Perspektywa badawcza"
+msgstr "02 / Research view"
 
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "Mapping the model."
-msgstr "Wizualizacja modelu."
+msgstr "Mapping the model."
 
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "A visual view of the U-Matrix, activation frequency, and learned weight vectors."
-msgstr "Wizualne przedstawienie macierzy U-Matrix, częstotliwości aktywacji i wyuczonych wektorów wag."
+msgstr "A visual view of the U-Matrix, activation frequency, and learned weight vectors."
 
 #: src/routes/projects/ml/physarum/+page.svelte
 msgid "Three-panel visualization showing a U-Matrix heatmap, a neuron activation hit map, and neuron weight vectors"
-msgstr "Trójpanelowa wizualizacja przedstawiająca mapę cieplną U-Matrix, mapę trafień aktywacji neuronów i wektory wag neuronów"
+msgstr "Three-panel visualization showing a U-Matrix heatmap, a neuron activation hit map, and neuron weight vectors"
 
 #: src/routes/dashboard/+page.svelte
 msgid "Admin workspace"
-msgstr "Panel administratora"
+msgstr "Admin workspace"
 
 #: src/routes/dashboard/+page.svelte
 msgid "01 / Tools"
-msgstr "01 / Narzędzia"
+msgstr "01 / Tools"
 
 #: src/routes/dashboard/+page.svelte
 msgid "Choose a workspace"
-msgstr "Wybierz obszar roboczy"
+msgstr "Choose a workspace"
 
 #: src/routes/dashboard/+page.svelte
 msgid "2 modules available"
-msgstr "Dostępne moduły: 2"
+msgstr "2 modules available"
 
 #: src/routes/dashboard/+page.svelte
 msgid "Module / 01"
-msgstr "Moduł / 01"
+msgstr "Module / 01"
 
 #: src/routes/dashboard/+page.svelte
 msgid "Create, schedule, edit, and remove the announcements shown to visitors across the site."
-msgstr "Twórz, planuj, edytuj i usuwaj komunikaty wyświetlane odwiedzającym w całej witrynie."
+msgstr "Create, schedule, edit, and remove the announcements shown to visitors across the site."
 
 #: src/routes/dashboard/+page.svelte
 msgid "Manage alerts →"
-msgstr "Zarządzaj alertami →"
+msgstr "Manage alerts →"
 
 #: src/routes/dashboard/+page.svelte
 msgid "Module / 02"
-msgstr "Moduł / 02"
+msgstr "Module / 02"
 
 #: src/routes/dashboard/+page.svelte
 #: src/routes/dashboard/s3cache/+page.svelte
 msgid "S3 cache"
-msgstr "Pamięć podręczna S3"
+msgstr "S3 cache"
 
 #: src/routes/dashboard/+page.svelte
 msgid "Review cached Cloudflare R2 object lists and refresh individual cache keys on demand."
-msgstr "Przeglądaj listy obiektów Cloudflare R2 zapisane w pamięci podręcznej i w razie potrzeby odświeżaj poszczególne klucze."
+msgstr "Review cached Cloudflare R2 object lists and refresh individual cache keys on demand."
 
 #: src/routes/dashboard/+page.svelte
 msgid "Inspect cache →"
-msgstr "Przejrzyj pamięć podręczną →"
+msgstr "Inspect cache →"
 
 #. 0: alert.title
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Delete “{0}”? This action cannot be undone."
-msgstr "Usunąć „{0}”? Tej operacji nie można cofnąć."
+msgstr "Delete “{0}”? This action cannot be undone."
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Announcements"
-msgstr "Komunikaty"
+msgstr "Announcements"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Schedule and maintain the notices displayed at the top of the public website."
-msgstr "Planuj i aktualizuj powiadomienia wyświetlane u góry publicznej witryny."
+msgstr "Schedule and maintain the notices displayed at the top of the public website."
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "<0/> New alert"
-msgstr "<0/> Nowy alert"
+msgstr "<0/> New alert"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Editor"
-msgstr "Edytor"
+msgstr "Editor"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Close alert editor"
-msgstr "Zamknij edytor alertu"
+msgstr "Close alert editor"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Maintenance notice"
-msgstr "Przerwa techniczna"
+msgstr "Maintenance notice"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Neutral"
-msgstr "Neutralny"
+msgstr "Neutral"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Information"
-msgstr "Informacja"
+msgstr "Information"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Warning"
-msgstr "Ostrzeżenie"
+msgstr "Warning"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Danger"
-msgstr "Zagrożenie"
+msgstr "Danger"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Display style"
-msgstr "Styl wyświetlania"
+msgstr "Display style"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Starts at"
-msgstr "Początek"
+msgstr "Starts at"
 
 #: src/routes/dashboard/alerts/+page.svelte
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Your local time"
-msgstr "Twój czas lokalny"
+msgstr "Your local time"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Ends at"
-msgstr "Koniec"
+msgstr "Ends at"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Priority <0>Optional</0>"
-msgstr "Priorytet <0>Opcjonalnie</0>"
+msgstr "Priority <0>Optional</0>"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Link <0>Optional</0>"
-msgstr "Link <0>Opcjonalnie</0>"
+msgstr "Link <0>Optional</0>"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Explain what visitors need to know…"
-msgstr "Napisz, co powinni wiedzieć odwiedzający…"
+msgstr "Explain what visitors need to know…"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Saving…"
-msgstr "Zapisywanie…"
+msgstr "Saving…"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "01 / Published records"
-msgstr "01 / Opublikowane wpisy"
+msgstr "01 / Published records"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "All alerts"
-msgstr "Wszystkie alerty"
+msgstr "All alerts"
 
 #. 0: currentPage + 1; 1: Math.max(pageCount, 1)
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Page {0} / {1}"
-msgstr "Strona {0} / {1}"
+msgstr "Page {0} / {1}"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Loading alerts…"
-msgstr "Ładowanie alertów…"
+msgstr "Loading alerts…"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Alerts could not be loaded."
-msgstr "Nie udało się załadować alertów."
+msgstr "Alerts could not be loaded."
 
 #: src/routes/dashboard/alerts/+page.svelte
 #: src/routes/dashboard/s3cache/+page.svelte
 msgid "Try again"
-msgstr "Spróbuj ponownie"
+msgstr "Try again"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "No alerts on this page"
-msgstr "Brak alertów na tej stronie"
+msgstr "No alerts on this page"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Create an alert to publish the first announcement."
-msgstr "Utwórz alert, aby opublikować pierwszy komunikat."
+msgstr "Create an alert to publish the first announcement."
 
 #. 0: alert.priority
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Priority {0}"
-msgstr "Priorytet {0}"
+msgstr "Priority {0}"
 
 #. 0: alert.title
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Edit {0}"
-msgstr "Edytuj {0}"
+msgstr "Edit {0}"
 
 #. 0: alert.title
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Delete {0}"
-msgstr "Usuń {0}"
+msgstr "Delete {0}"
 
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Alerts pagination"
-msgstr "Stronicowanie alertów"
+msgstr "Alerts pagination"
 
 #. 0: page + 1
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Go to page {0}"
-msgstr "Przejdź do strony {0}"
+msgstr "Go to page {0}"
 
 #: src/routes/dashboard/s3cache/+page.svelte
 msgid "An unknown error occurred."
-msgstr "Wystąpił nieznany błąd."
+msgstr "An unknown error occurred."
 
 #. 0: key
 #: src/routes/dashboard/s3cache/+page.svelte
 msgid "Refreshed cache key “{0}”"
-msgstr "Odświeżono klucz pamięci podręcznej „{0}”"
+msgstr "Refreshed cache key “{0}”"
 
 #: src/routes/dashboard/s3cache/+page.svelte
 msgid "Storage operations"
-msgstr "Operacje na magazynie danych"
+msgstr "Storage operations"
 
 #: src/routes/dashboard/s3cache/+page.svelte
 msgid "The website caches lists of object URLs from Cloudflare R2 to avoid repeatedly scanning storage. Inspect each cached group below or refresh a key after its bucket contents change."
-msgstr "Witryna zapisuje w pamięci podręcznej listy adresów URL obiektów z Cloudflare R2, aby uniknąć wielokrotnego skanowania magazynu. Przejrzyj poniżej każdą zapisaną grupę lub odśwież klucz po zmianie zawartości jego zasobnika."
+msgstr "The website caches lists of object URLs from Cloudflare R2 to avoid repeatedly scanning storage. Inspect each cached group below or refresh a key after its bucket contents change."
 
 #: src/routes/dashboard/s3cache/+page.svelte
 msgid "01 / Cached groups"
-msgstr "01 / Grupy w pamięci podręcznej"
+msgstr "01 / Cached groups"
 
 #: src/routes/dashboard/s3cache/+page.svelte
 msgid "Object listings"
-msgstr "Listy obiektów"
+msgstr "Object listings"
 
 #. 0: cacheEntries.length; 1: cacheEntries.length === 1 ? 'key' \\: 'keys'
 #: src/routes/dashboard/s3cache/+page.svelte
 msgid "{0} {1} cached"
-msgstr "Zapisano w pamięci podręcznej: {0} {1}"
+msgstr "{0} {1} cached"
 
 #: src/routes/dashboard/s3cache/+page.svelte
 msgid "Loading cached object listings…"
-msgstr "Ładowanie list obiektów z pamięci podręcznej…"
+msgstr "Loading cached object listings…"
 
 #: src/routes/dashboard/s3cache/+page.svelte
 msgid "The S3 cache could not be loaded."
-msgstr "Nie udało się załadować pamięci podręcznej S3."
+msgstr "The S3 cache could not be loaded."
 
 #: src/routes/dashboard/s3cache/+page.svelte
 msgid "No cache keys found"
-msgstr "Nie znaleziono kluczy pamięci podręcznej"
+msgstr "No cache keys found"
 
 #: src/routes/dashboard/s3cache/+page.svelte
 msgid "Cached object listings will appear here after they are used."
-msgstr "Listy obiektów pojawią się tutaj po zapisaniu ich w pamięci podręcznej."
+msgstr "Cached object listings will appear here after they are used."
 
 #: src/routes/dashboard/s3cache/+page.svelte
 msgid "Cache key"
-msgstr "Klucz pamięci podręcznej"
+msgstr "Cache key"
 
 #. 0: formatLocalDate(cache.time)
 #: src/routes/dashboard/s3cache/+page.svelte
 msgid "Updated {0}"
-msgstr "Zaktualizowano {0}"
+msgstr "Updated {0}"
 
 #. 0: key
 #: src/routes/dashboard/s3cache/+page.svelte
 msgid "Refresh cache key {0}"
-msgstr "Odśwież klucz pamięci podręcznej {0}"
+msgstr "Refresh cache key {0}"
 
 #: src/routes/dashboard/s3cache/+page.svelte
 msgid "Refreshing…"
-msgstr "Odświeżanie…"
+msgstr "Refreshing…"
 
 #: src/routes/dashboard/s3cache/+page.svelte
 msgid "Refresh"
-msgstr "Odśwież"
+msgstr "Refresh"
 
 #: src/routes/dashboard/s3cache/+page.svelte
 msgid "This cache key contains no URLs."
-msgstr "Ten klucz pamięci podręcznej nie zawiera żadnych adresów URL."
+msgstr "This cache key contains no URLs."
 
 #: src/routes/projects/ket/+page.svelte
 msgid "Quantum algorithms · Qiskit"
-msgstr "Algorytmy kwantowe · Qiskit"
+msgstr "Quantum algorithms · Qiskit"
 
 #: src/routes/projects/ket/+page.svelte
 msgid "Join us <0/>"
-msgstr "Dołącz do nas <0/>"
+msgstr "Join us <0/>"
 
 #: src/routes/projects/ket/+page.svelte
 msgid "01 / Project"
-msgstr "01 / Projekt"
+msgstr "01 / Project"
 
 #: src/routes/projects/ket/+page.svelte
 msgid "From qubits to real hardware."
-msgstr "Od kubitów do prawdziwego sprzętu."
+msgstr "From qubits to real hardware."
 
 #: src/routes/projects/ket/+page.svelte
 msgid "Starting point"
-msgstr "Punkt wyjścia"
+msgstr "Starting point"
 
 #: src/routes/projects/ket/+page.svelte
 msgid "Basics of qubit operation and cryptography"
-msgstr "Podstawy działania kubitów i kryptografii"
+msgstr "Basics of qubit operation and cryptography"
 
 #: src/routes/projects/ket/+page.svelte
 msgid "Environment"
-msgstr "Środowisko"
+msgstr "Environment"
 
 #: src/routes/projects/ket/+page.svelte
 msgid "Qiskit and a real quantum processor"
-msgstr "Qiskit i prawdziwy procesor kwantowy"
+msgstr "Qiskit and a real quantum processor"
 
 #: src/routes/projects/ket/+page.svelte
 msgid "Q"
@@ -1061,35 +1061,35 @@ msgstr "Q"
 
 #: src/routes/projects/ket/+page.svelte
 msgid "Advanced path"
-msgstr "Ścieżka zaawansowana"
+msgstr "Advanced path"
 
 #: src/routes/projects/ket/+page.svelte
 msgid "Error correction, optimization, and Quantum Machine Learning"
-msgstr "Korekcja błędów, optymalizacja i kwantowe uczenie maszynowe"
+msgstr "Error correction, optimization, and Quantum Machine Learning"
 
 #: src/routes/projects/ket/+page.svelte
 msgid "02 / Recruitment"
-msgstr "02 / Rekrutacja"
+msgstr "02 / Recruitment"
 
 #: src/routes/projects/ket/+page.svelte
 msgid "Project poster"
-msgstr "Plakat projektu"
+msgstr "Project poster"
 
 #: src/routes/projects/ket/+page.svelte
 msgid "KET quantum computing recruitment poster with project topics and a registration QR code"
-msgstr "Plakat rekrutacyjny KET dotyczący obliczeń kwantowych, z tematami projektu i kodem QR do rejestracji"
+msgstr "KET quantum computing recruitment poster with project topics and a registration QR code"
 
 #: src/routes/projects/ket/+page.svelte
 msgid "KET recruitment poster"
-msgstr "Plakat rekrutacyjny KET"
+msgstr "KET recruitment poster"
 
 #: src/routes/projects/+page.svelte
 msgid "Education"
-msgstr "Edukacja"
+msgstr "Education"
 
 #: src/routes/projects/+page.svelte
 msgid "Programming workshops introducing primary school students to Python and computational thinking."
-msgstr "Warsztaty programistyczne wprowadzające uczniów szkół podstawowych w Python i myślenie komputacyjne."
+msgstr "Programming workshops introducing primary school students to Python and computational thinking."
 
 #: src/routes/projects/+page.svelte
 msgid "Python"
@@ -1097,20 +1097,20 @@ msgstr "Python"
 
 #: src/routes/projects/+page.svelte
 msgid "Workshops"
-msgstr "Warsztaty"
+msgstr "Workshops"
 
 #: src/routes/projects/+page.svelte
 #: src/routes/projects/+page.svelte
 msgid "Community"
-msgstr "Społeczność"
+msgstr "Community"
 
 #: src/routes/projects/+page.svelte
 msgid "Quantum computing"
-msgstr "Obliczenia kwantowe"
+msgstr "Quantum computing"
 
 #: src/routes/projects/+page.svelte
 msgid "From qubit fundamentals to algorithms running on real quantum processors."
-msgstr "Od podstaw kubitów po algorytmy działające na rzeczywistych procesorach kwantowych."
+msgstr "From qubit fundamentals to algorithms running on real quantum processors."
 
 #: src/routes/projects/+page.svelte
 msgid "Qiskit"
@@ -1118,57 +1118,57 @@ msgstr "Qiskit"
 
 #: src/routes/projects/+page.svelte
 msgid "Algorithms"
-msgstr "Algorytmy"
+msgstr "Algorithms"
 
 #: src/routes/projects/+page.svelte
 msgid "Research"
-msgstr "Badania"
+msgstr "Research"
 
 #: src/routes/projects/+page.svelte
 #: src/routes/projects/ml/+page.svelte
 msgid "Machine learning"
-msgstr "Uczenie maszynowe"
+msgstr "Machine learning"
 
 #: src/routes/projects/+page.svelte
 msgid "A Transformer-based chess engine learning to produce strong, human-like moves."
-msgstr "Silnik szachowy oparty na Transformerze, uczący się tworzyć silne, przypominające ludzkie posunięcia."
+msgstr "A Transformer-based chess engine learning to produce strong, human-like moves."
 
 #: src/routes/projects/+page.svelte
 msgid "Transformers"
-msgstr "Transformery"
+msgstr "Transformers"
 
 #: src/routes/projects/+page.svelte
 msgid "Chess"
-msgstr "Szachy"
+msgstr "Chess"
 
 #: src/routes/projects/+page.svelte
 msgid "Computational biology"
-msgstr "Biologia obliczeniowa"
+msgstr "Computational biology"
 
 #: src/routes/projects/+page.svelte
 msgid "Exploring whether slime mold behavior can inspire methods for training neural networks."
-msgstr "Badanie, czy zachowanie śluzowców może inspirować metody trenowania sieci neuronowych."
+msgstr "Exploring whether slime mold behavior can inspire methods for training neural networks."
 
 #: src/routes/projects/+page.svelte
 msgid "Biology"
-msgstr "Biologia"
+msgstr "Biology"
 
 #: src/routes/projects/+page.svelte
 msgid "Networks"
-msgstr "Sieci"
+msgstr "Networks"
 
 #: src/routes/projects/+page.svelte
 msgid "Conference"
-msgstr "Konferencja"
+msgstr "Conference"
 
 #: src/routes/projects/+page.svelte
 msgid "The annual winter camp bringing together students, researchers, and the technology community."
-msgstr "Coroczny zimowy obóz łączący studentów, naukowców i społeczność technologiczną."
+msgstr "The annual winter camp bringing together students, researchers, and the technology community."
 
 #: src/routes/projects/+page.svelte
 #: src/routes/projects/zosia/+page.svelte
 msgid "Talks"
-msgstr "Prelekcje"
+msgstr "Talks"
 
 #: src/routes/projects/+page.svelte
 msgid "Wrocław"
@@ -1176,59 +1176,59 @@ msgstr "Wrocław"
 
 #: src/routes/projects/+page.svelte
 msgid "What we build"
-msgstr "Co tworzymy"
+msgstr "What we build"
 
 #: src/routes/projects/+page.svelte
 msgid "Projects driven by curiosity."
-msgstr "Projekty napędzane ciekawością."
+msgstr "Projects driven by curiosity."
 
 #: src/routes/projects/+page.svelte
 msgid "Explore our work across education, machine learning, quantum computing, computational biology, and community events."
-msgstr "Poznaj nasze działania w obszarach edukacji, uczenia maszynowego, obliczeń kwantowych, biologii obliczeniowej i wydarzeń społecznościowych."
+msgstr "Explore our work across education, machine learning, quantum computing, computational biology, and community events."
 
 #: src/routes/projects/+page.svelte
 msgid "Search by name, field, or technology..."
-msgstr "Szukaj po nazwie, dziedzinie lub technologii..."
+msgstr "Search by name, field, or technology..."
 
 #: src/routes/projects/+page.svelte
 msgid "Search projects"
-msgstr "Szukaj projektów"
+msgstr "Search projects"
 
 #: src/routes/projects/+page.svelte
 msgid "No matching projects."
-msgstr "Brak pasujących projektów."
+msgstr "No matching projects."
 
 #: src/routes/projects/+page.svelte
 msgid "Try a different name, field, or technology."
-msgstr "Spróbuj użyć innej nazwy, dziedziny lub technologii."
+msgstr "Try a different name, field, or technology."
 
 #: src/routes/projects/ml/+page.svelte
 msgid "Research group"
-msgstr "Grupa badawcza"
+msgstr "Research group"
 
 #: src/routes/projects/ml/+page.svelte
 msgid "We explore learning systems through projects spanning game intelligence and biologically inspired computation."
-msgstr "Badamy systemy uczące się poprzez projekty obejmujące inteligencję gier i obliczenia inspirowane biologią."
+msgstr "We explore learning systems through projects spanning game intelligence and biologically inspired computation."
 
 #: src/routes/projects/ml/+page.svelte
 msgid "Chess · Transformers"
-msgstr "Szachy · Transformery"
+msgstr "Chess · Transformers"
 
 #: src/routes/projects/ml/+page.svelte
 msgid "A chess engine trained to generate legal, strong moves that resemble human play."
-msgstr "Silnik szachowy wytrenowany do generowania legalnych i silnych posunięć przypominających ludzką grę."
+msgstr "A chess engine trained to generate legal, strong moves that resemble human play."
 
 #: src/routes/projects/ml/+page.svelte
 msgid "Biology · Neural networks"
-msgstr "Biologia · Sieci neuronowe"
+msgstr "Biology · Neural networks"
 
 #: src/routes/projects/ml/+page.svelte
 msgid "Research into slime-mold behavior and its potential use in computational tasks."
-msgstr "Badania nad zachowaniem śluzowców i możliwością wykorzystania go w zadaniach obliczeniowych."
+msgstr "Research into slime-mold behavior and its potential use in computational tasks."
 
 #: src/routes/projects/zosia/+page.svelte
 msgid "Since the early 2000s"
-msgstr "Od początku lat 2000."
+msgstr "Since the early 2000s"
 
 #: src/routes/projects/zosia/+page.svelte
 msgid "ZOSIA"
@@ -1236,128 +1236,128 @@ msgstr "ZOSIA"
 
 #: src/routes/projects/zosia/+page.svelte
 msgid "Winter Camp of Computer Science Students"
-msgstr "Zimowy Obóz Studentów Informatyki"
+msgstr "Winter Camp of Computer Science Students"
 
 #: src/routes/projects/zosia/+page.svelte
 msgid "What began as an informal trip among friends now brings together nearly 300 students, researchers, and technology professionals for three days of ideas and community."
-msgstr "To, co zaczęło się jako nieformalny wyjazd znajomych, dziś gromadzi niemal 300 studentów, naukowców i specjalistów z branży technologicznej na trzy dni wymiany pomysłów i budowania społeczności."
+msgstr "What began as an informal trip among friends now brings together nearly 300 students, researchers, and technology professionals for three days of ideas and community."
 
 #: src/routes/projects/zosia/+page.svelte
 msgid "Lectures and presentations from academia and the technology industry."
-msgstr "Wykłady i prezentacje ze świata akademickiego oraz branży technologicznej."
+msgstr "Lectures and presentations from academia and the technology industry."
 
 #: src/routes/projects/zosia/+page.svelte
 msgid "People"
-msgstr "Ludzie"
+msgstr "People"
 
 #: src/routes/projects/zosia/+page.svelte
 msgid "Students from different universities sharing knowledge and experience."
-msgstr "Studenci różnych uczelni dzielący się wiedzą i doświadczeniem."
+msgstr "Students from different universities sharing knowledge and experience."
 
 #: src/routes/projects/zosia/+page.svelte
 msgid "Atmosphere"
-msgstr "Atmosfera"
+msgstr "Atmosphere"
 
 #: src/routes/projects/zosia/+page.svelte
 msgid "Excursions and social events in a unique winter setting."
-msgstr "Wycieczki i wydarzenia towarzyskie w wyjątkowej zimowej scenerii."
+msgstr "Excursions and social events in a unique winter setting."
 
 #: src/routes/projects/zosia/+page.svelte
 msgid "Edition archive"
-msgstr "Archiwum edycji"
+msgstr "Edition archive"
 
 #: src/routes/projects/zosia/+page.svelte
 msgid "Every year tells a story."
-msgstr "Każdy rok to osobna historia."
+msgstr "Every year tells a story."
 
 #: src/routes/projects/zosia/+page.svelte
 msgid "Browse dates, attendance, locations, and photographs from previous camps."
-msgstr "Przeglądaj daty, frekwencję, lokalizacje i zdjęcia z poprzednich obozów."
+msgstr "Browse dates, attendance, locations, and photographs from previous camps."
 
 #. 0: edition.participants
 #: src/routes/projects/zosia/+page.svelte
 msgid "<0/> {0} participants"
-msgstr "<0/> {0} uczestników"
+msgstr "<0/> {0} participants"
 
 #: src/routes/projects/zosia/[year]/+page.svelte
 msgid "No photographs in the archive yet."
-msgstr "W archiwum nie ma jeszcze zdjęć."
+msgstr "No photographs in the archive yet."
 
 #. 0: data.year
 #: src/routes/projects/zosia/[year]/+page.svelte
 msgid "If you have photos from ZOSIA {0}, send them to <0>ksi [at] cs.uni.wroc.pl</0> so we can preserve them here."
-msgstr "Jeśli masz zdjęcia z ZOSIA {0}, wyślij je na adres <0>ksi [at] cs.uni.wroc.pl</0>, abyśmy mogli zachować je tutaj."
+msgstr "If you have photos from ZOSIA {0}, send them to <0>ksi [at] cs.uni.wroc.pl</0> so we can preserve them here."
 
 #: src/routes/projects/zosia/[year]/+page.svelte
 msgid "ZOSIA edition"
-msgstr "Edycja ZOSIA"
+msgstr "ZOSIA edition"
 
 #: src/routes/projects/zosia/[year]/+page.svelte
 msgid "<0/> Participants"
-msgstr "<0/> Uczestnicy"
+msgstr "<0/> Participants"
 
 #: src/routes/projects/zosia/[year]/+page.svelte
 msgid "<0/> Camp date"
-msgstr "<0/> Data obozu"
+msgstr "<0/> Camp date"
 
 #: src/routes/projects/zosia/[year]/+page.svelte
 msgid "Photo archive"
-msgstr "Archiwum zdjęć"
+msgstr "Photo archive"
 
 #. 0: data.year
 #: src/routes/projects/zosia/[year]/+page.svelte
 msgid "Moments from {0}"
-msgstr "Chwile z {0}"
+msgstr "Moments from {0}"
 
 #: src/routes/projects/zosia/[year]/+page.svelte
 msgid "<0/> Back to all editions"
-msgstr "<0/> Wróć do wszystkich edycji"
+msgstr "<0/> Back to all editions"
 
 #: src/components/DynamicGallery.svelte
 msgid "The gallery could not be loaded."
-msgstr "Nie udało się wczytać galerii."
+msgstr "The gallery could not be loaded."
 
 #: src/components/DynamicGallery.svelte
 msgid "Loading gallery"
-msgstr "Wczytywanie galerii"
+msgstr "Loading gallery"
 
 #: src/components/DynamicGallery.svelte
 msgid "Gallery unavailable"
-msgstr "Galeria niedostępna"
+msgstr "Gallery unavailable"
 
 #: src/components/DynamicGallery.svelte
 msgid "<0/> Try again"
-msgstr "<0/> Spróbuj ponownie"
+msgstr "<0/> Try again"
 
 #: src/components/DynamicGallery.svelte
 msgid "No photographs have been added yet."
-msgstr "Nie dodano jeszcze żadnych zdjęć."
+msgstr "No photographs have been added yet."
 
 #: src/components/Gallery.svelte
 msgid "Image viewer"
-msgstr "Przeglądarka obrazów"
+msgstr "Image viewer"
 
 #: src/components/Gallery.svelte
 msgid "Close image viewer"
-msgstr "Zamknij przeglądarkę obrazów"
+msgstr "Close image viewer"
 
 #. 0: currentImageIndex + 1; 1: images.length
 #: src/components/Gallery.svelte
 msgid "Gallery image {0} of {1}"
-msgstr "Zdjęcie w galerii {0} z {1}"
+msgstr "Gallery image {0} of {1}"
 
 #: src/components/Gallery.svelte
 msgid "Previous image"
-msgstr "Poprzednie zdjęcie"
+msgstr "Previous image"
 
 #: src/components/Gallery.svelte
 msgid "Next image"
-msgstr "Następne zdjęcie"
+msgstr "Next image"
 
 #. 0: i * 3 + splitI + 1
 #: src/components/Gallery.svelte
 msgid "Gallery thumbnail {0}"
-msgstr "Miniatura zdjęcia w galerii {0}"
+msgstr "Gallery thumbnail {0}"
 
 #. 0: page.status
 #: src/routes/+error.svelte
@@ -1366,40 +1366,40 @@ msgstr "{0} · KSI UWr"
 
 #: src/routes/+error.svelte
 msgid "The page may have moved, or something went wrong while loading it."
-msgstr "Strona mogła zostać przeniesiona lub wystąpił błąd podczas jej wczytywania."
+msgstr "The page may have moved, or something went wrong while loading it."
 
 #: src/routes/+error.svelte
 msgid "<0/> Route not resolved"
-msgstr "<0/> Nie znaleziono ścieżki"
+msgstr "<0/> Route not resolved"
 
 #: src/routes/+error.svelte
 msgid "This path led somewhere unexpected."
-msgstr "Ta ścieżka prowadziła w nieoczekiwane miejsce."
+msgstr "This path led somewhere unexpected."
 
 #. 0: page.error?.message || 'The page may have moved, or something went wrong while loading it.'
 #: src/routes/+error.svelte
 msgid "{0} The reliable route is back to the association — and room 24 at the Institute of Computer Science is always worth finding."
-msgstr "{0} Niezawodna droga prowadzi z powrotem do stowarzyszenia — a pokój 24 w Instytucie Informatyki zawsze warto odnaleźć."
+msgstr "{0} The reliable route is back to the association — and room 24 at the Institute of Computer Science is always worth finding."
 
 #: src/routes/+error.svelte
 msgid "<0/> Return home"
-msgstr "<0/> Wróć na stronę główną"
+msgstr "<0/> Return home"
 
 #: src/components/Wrapper.svelte
 msgid "Breadcrumb"
-msgstr "Okruszki nawigacyjne"
+msgstr "Breadcrumb"
 
 #: src/routes/+page.svelte
 msgid "Curiosity, applied."
-msgstr "Ciekawość, zastosowana."
+msgstr "Curiosity, applied."
 
 #: src/components/Footer.svelte
 msgid "Get in touch"
-msgstr "Skontaktuj się"
+msgstr "Get in touch"
 
 #: src/components/Footer.svelte
 msgid "Have an idea worth exploring?"
-msgstr "Masz pomysł wart realizacji?"
+msgstr "Have an idea worth exploring?"
 
 #: src/components/Footer.svelte
 msgid "<0/> ksi@cs.uni.wroc.pl <1/>"
@@ -1407,44 +1407,44 @@ msgstr "<0/> ksi@cs.uni.wroc.pl <1/>"
 
 #: src/components/Footer.svelte
 msgid "Computer Science Students’ Association at the University of Wrocław."
-msgstr "Koło Studentów Informatyki Uniwersytetu Wrocławskiego."
+msgstr "Computer Science Students’ Association at the University of Wrocław."
 
 #: src/components/Footer.svelte
 msgid "Institute of Computer Science<0/> 15 Fryderyka Joliot-Curie St.<1/> 50-383 Wrocław · Room 24"
-msgstr "Instytut Informatyki<0/> ul. Fryderyka Joliot-Curie 15<1/> 50-383 Wrocław · pokój 24"
+msgstr "Institute of Computer Science<0/> 15 Fryderyka Joliot-Curie St.<1/> 50-383 Wrocław · Room 24"
 
 #: src/components/Footer.svelte
 msgid "Footer navigation"
-msgstr "Nawigacja w stopce"
+msgstr "Footer navigation"
 
 #: src/components/Footer.svelte
 msgid "About us"
-msgstr "O nas"
+msgstr "About us"
 
 #: src/components/Footer.svelte
 msgid "Contact"
-msgstr "Kontakt"
+msgstr "Contact"
 
 #: src/components/Footer.svelte
 msgid "Explore"
-msgstr "Odkrywaj"
+msgstr "Explore"
 
 #: src/components/Footer.svelte
 msgid "Find us online"
-msgstr "Znajdź nas w sieci"
+msgstr "Find us online"
 
 #: src/components/Footer.svelte
 msgid "<0/> Source code <1/>"
-msgstr "<0/> Kod źródłowy <1/>"
+msgstr "<0/> Source code <1/>"
 
 #: src/components/Footer.svelte
 msgid "Change language"
-msgstr "Zmień język"
+msgstr "Change language"
 
 #: src/routes/dashboard/+page.svelte
 msgid "Manage public announcements and perform other tasks."
-msgstr "Zarządzaj ogłoszeniami publicznymi i wykonuj inne zadania."
+msgstr "Manage public announcements and perform other tasks."
 
 #: src/components/NavbarAccordion.svelte
 msgid "cursor-pointer self-end underline"
-msgstr ""
+msgstr "cursor-pointer self-end underline"

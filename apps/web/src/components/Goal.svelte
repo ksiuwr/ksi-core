@@ -34,15 +34,15 @@
   const current = $derived(config[type]);
 </script>
 
-<div class={`flex gap-4 p-4 border-l-2 rounded-r-md w-full ${current.colorClass}`}>
-  <div class="shrink-0 mt-1">
+<div class={`flex w-full gap-4 rounded-r-md border-l-2 p-4 ${current.colorClass}`}>
+  <div class="mt-1 shrink-0">
     {#if current}
       {@const Icon = current.icon}
       <Icon class="size-5" />
     {/if}
   </div>
-  <div class="flex flex-col w-full">
-    <span class="font-mono text-xs font-bold uppercase tracking-wider mb-1 opacity-90">
+  <div class="flex w-full flex-col">
+    <span class="mb-1 font-mono text-xs font-bold tracking-wider uppercase opacity-90">
       {current.label}
     </span>
     <div class="text-base-content/90 leading-relaxed">

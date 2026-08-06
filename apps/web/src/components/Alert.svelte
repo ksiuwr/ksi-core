@@ -49,7 +49,7 @@
       >
         <div class="flex items-start justify-between gap-4">
           <div class="flex flex-col gap-1">
-            <div class="flex items-center gap-2 font-bold uppercase tracking-wider">
+            <div class="flex items-center gap-2 font-bold tracking-wider uppercase">
               {#if alertColor === 'danger'}
                 <span>[ERROR]</span>
               {:else if alertColor === 'warning'}
@@ -59,7 +59,7 @@
               {/if}
               <span>{alert.title}</span>
             </div>
-            <p class="opacity-90 leading-relaxed wrap-anywhere">
+            <p class="leading-relaxed wrap-anywhere opacity-90">
               {alert.description}
             </p>
           </div>
@@ -72,7 +72,7 @@
     {:else}
       <div class={cn(alertVariants({ color: alertColor, isLink: false }))}>
         <div class="flex flex-col gap-1">
-          <div class="flex items-center gap-2 font-bold uppercase tracking-wider">
+          <div class="flex items-center gap-2 font-bold tracking-wider uppercase">
             {#if alertColor === 'danger'}
               <span>[ERROR]</span>
             {:else if alertColor === 'warning'}
@@ -82,7 +82,7 @@
             {/if}
             <span>{alert.title}</span>
           </div>
-          <p class="opacity-90 leading-relaxed">{alert.description}</p>
+          <p class="leading-relaxed opacity-90">{alert.description}</p>
         </div>
       </div>
     {/if}

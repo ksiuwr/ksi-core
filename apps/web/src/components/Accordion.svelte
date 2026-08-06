@@ -19,7 +19,7 @@
 <button
   role="switch"
   class={[
-    'flex flex-col gap-2 cursor-pointer hover:bg-primary/10 transition-colors border border-base-300 w-full p-4 rounded-box',
+    'hover:bg-primary/10 border-base-300 rounded-box flex w-full cursor-pointer flex-col gap-2 border p-4 transition-colors',
     show && 'bg-primary/10'
   ]}
   aria-checked={show}
@@ -31,8 +31,8 @@
     }
   }}
 >
-  <div class={'flex justify-between items-center transition-colors'}>
-    <h1 class="text-[clamp(2rem,2cqw,4rem)] font-lora">{title}</h1>
+  <div class={'flex items-center justify-between transition-colors'}>
+    <h1 class="text-[clamp(2rem,2cqw,4rem)]">{title}</h1>
   </div>
   <motion.div
     animate={show ? { height: 'auto' } : { height: 0 }}
@@ -41,7 +41,7 @@
     }}
     class="overflow-hidden"
   >
-    <div class="w-full h-px bg-base-content/20 my-4"></div>
+    <div class="bg-base-content/20 my-4 h-px w-full"></div>
     {@render children()}
   </motion.div>
 </button>
