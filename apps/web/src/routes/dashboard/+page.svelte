@@ -11,11 +11,10 @@
   <header class="border-b border-base-content/15 pb-10 md:pb-14">
     <p class="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-primary">Admin workspace</p>
     <h1 class="mb-0! max-w-4xl text-4xl leading-tight tracking-[-0.04em] sm:text-5xl lg:text-6xl">
-      Site operations,<br />
-      <span class="text-base-content/35">in one place.</span>
+      Dashboard
     </h1>
     <p class="mt-6 max-w-2xl text-lg leading-relaxed text-base-content/65">
-      Manage public announcements and inspect cached object listings used across the website.
+      Manage public announcements and perform other tasks.
     </p>
   </header>
 

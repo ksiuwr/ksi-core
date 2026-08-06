@@ -17,10 +17,6 @@ msgstr "[ERROR]"
 msgid "[WARN]"
 msgstr "[WARN]"
 
-#: src/components/Footer.svelte
-msgid "ksi [at] cs.uni.wroc.pl"
-msgstr "ksi [at] cs.uni.wroc.pl"
-
 #. 0: new Date().getFullYear()
 #: src/components/Footer.svelte
 msgid "© KSI {0}"
@@ -46,6 +42,7 @@ msgstr "Home"
 msgid "Toggle theme"
 msgstr "Toggle theme"
 
+#: src/components/Footer.svelte
 #: src/components/Sidebar.svelte
 #: src/routes/+layout.svelte
 #: src/routes/+page.svelte
@@ -68,18 +65,9 @@ msgstr "Alert created successfully"
 msgid "Alert deleted"
 msgstr "Alert deleted"
 
-#: src/components/Footer.svelte
 #: src/routes/projects/hoc/+page.svelte
 msgid "Institute of Computer Science, University of Wrocław"
 msgstr "Institute of Computer Science, University of Wrocław"
-
-#: src/components/Footer.svelte
-msgid "15 Fryderyka Joliot-Curie St.<0/> 50-383 Wrocław, Room 24"
-msgstr "15 Fryderyka Joliot-Curie St.<0/> 50-383 Wrocław, Room 24"
-
-#: src/components/Footer.svelte
-msgid "<0/> Source code"
-msgstr "<0/> Source code"
 
 #: src/components/Sidebar.svelte
 msgid "Access denied."
@@ -287,6 +275,7 @@ msgstr "Alerts"
 msgid "Życie studenckie"
 msgstr "Życie studenckie"
 
+#: src/components/Footer.svelte
 #: src/components/Navbar.svelte
 #: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
@@ -381,6 +370,7 @@ msgstr "<0/> Dark mode"
 
 #: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
+#: src/routes/dashboard/+page.svelte
 msgid "Dashboard"
 msgstr "Dashboard"
 
@@ -787,14 +777,6 @@ msgstr "Three-panel visualization showing a U-Matrix heatmap, a neuron activatio
 #: src/routes/dashboard/+page.svelte
 msgid "Admin workspace"
 msgstr "Admin workspace"
-
-#: src/routes/dashboard/+page.svelte
-msgid "Site operations,<0/> <1>in one place.</1>"
-msgstr "Site operations,<0/> <1>in one place.</1>"
-
-#: src/routes/dashboard/+page.svelte
-msgid "Manage public announcements and inspect cached object listings used across the website."
-msgstr "Manage public announcements and inspect cached object listings used across the website."
 
 #: src/routes/dashboard/+page.svelte
 msgid "01 / Tools"
@@ -1418,3 +1400,55 @@ msgstr "Breadcrumb"
 #: src/routes/+page.svelte
 msgid "Curiosity, applied."
 msgstr "Curiosity, applied."
+
+#: src/components/Footer.svelte
+msgid "Get in touch"
+msgstr "Get in touch"
+
+#: src/components/Footer.svelte
+msgid "Have an idea worth exploring?"
+msgstr "Have an idea worth exploring?"
+
+#: src/components/Footer.svelte
+msgid "<0/> ksi@cs.uni.wroc.pl <1/>"
+msgstr "<0/> ksi@cs.uni.wroc.pl <1/>"
+
+#: src/components/Footer.svelte
+msgid "Computer Science Students’ Association at the University of Wrocław."
+msgstr "Computer Science Students’ Association at the University of Wrocław."
+
+#: src/components/Footer.svelte
+msgid "Institute of Computer Science<0/> 15 Fryderyka Joliot-Curie St.<1/> 50-383 Wrocław · Room 24"
+msgstr "Institute of Computer Science<0/> 15 Fryderyka Joliot-Curie St.<1/> 50-383 Wrocław · Room 24"
+
+#: src/components/Footer.svelte
+msgid "Footer navigation"
+msgstr "Footer navigation"
+
+#: src/components/Footer.svelte
+msgid "About us"
+msgstr "About us"
+
+#: src/components/Footer.svelte
+msgid "Contact"
+msgstr "Contact"
+
+#: src/components/Footer.svelte
+msgid "Explore"
+msgstr "Explore"
+
+#: src/components/Footer.svelte
+msgid "Find us online"
+msgstr "Find us online"
+
+#: src/components/Footer.svelte
+msgid "<0/> Source code <1/>"
+msgstr "<0/> Source code <1/>"
+
+#: src/components/Footer.svelte
+msgid "Change language"
+msgstr "Change language"
+
+#: src/routes/dashboard/+page.svelte
+msgid "Manage public announcements and perform other tasks."
+msgstr "Manage public announcements and perform other tasks."
