@@ -246,7 +246,7 @@
         <LogIn class="size-4 shrink-0" />
 
         <div
-          class="max-w-0 overflow-hidden transition-all duration-450 ease-out group-hover:max-w-37.5"
+          class="max-w-0 overflow-hidden transition-all duration-450 ease-out group-hover:max-w-54"
         >
           <div class="pl-3 whitespace-nowrap">Member access</div>
         </div>
