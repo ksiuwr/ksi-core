@@ -22,9 +22,10 @@
         Student research group · Wrocław
       </div>
 
-      <h1 class="mb-0! text-5xl leading-[0.95]! tracking-[-0.06em] sm:text-6xl lg:text-8xl">
-        Curious minds.<br />
-        <span class="text-base-content/35">Serious projects.</span>
+      <h1
+        class="mb-0! max-w-4xl text-balance text-5xl leading-[0.95]! tracking-[-0.06em] sm:text-6xl lg:text-7xl"
+      >
+        Curiosity, applied.
       </h1>
 
       <p class="mt-8 max-w-2xl text-lg leading-relaxed text-base-content/70 md:text-xl">

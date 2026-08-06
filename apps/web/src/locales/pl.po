@@ -444,10 +444,6 @@ msgid "<0/> Student research group · Wrocław"
 msgstr "<0/> Studenckie koło naukowe · Wrocław"
 
 #: src/routes/+page.svelte
-msgid "Curious minds.<0/> <1>Serious projects.</1>"
-msgstr "Ciekawe umysły.<0/> <1>Ambitne projekty.</1>"
-
-#: src/routes/+page.svelte
 msgid "We are the Computer Science Students’ Association at the University of Wrocław — a community for learning, building, and exploring what technology can do."
 msgstr "Jesteśmy Kołem Studentów Informatyki Uniwersytetu Wrocławskiego — społecznością, w której uczymy się, tworzymy i odkrywamy możliwości technologii."
 
@@ -1418,3 +1414,7 @@ msgstr "<0/> Wróć na stronę główną"
 #: src/components/Wrapper.svelte
 msgid "Breadcrumb"
 msgstr "Okruszki nawigacyjne"
+
+#: src/routes/+page.svelte
+msgid "Curiosity, applied."
+msgstr "Ciekawość, zastosowana."
