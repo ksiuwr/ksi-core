@@ -478,10 +478,6 @@ msgid "01 / About us"
 msgstr "01 / O nas"
 
 #: src/routes/+page.svelte
-msgid "A place to turn curiosity into practice."
-msgstr "Miejsce, w którym ciekawość przekuwamy w praktykę."
-
-#: src/routes/+page.svelte
 msgid "Socially"
 msgstr "Społecznie"
 
@@ -512,10 +508,6 @@ msgstr "Jesteśmy studenckim kołem naukowym działającym przy Instytucie Infor
 #: src/routes/+page.svelte
 msgid "02 / Selected work"
 msgstr "02 / Wybrane projekty"
-
-#: src/routes/+page.svelte
-msgid "Projects built beyond the classroom."
-msgstr "Projekty tworzone poza salą wykładową."
 
 #: src/routes/+page.svelte
 msgid "View all projects <0/>"
@@ -1389,10 +1381,6 @@ msgstr "<0/> Wróć na stronę główną"
 msgid "Breadcrumb"
 msgstr "Okruszki nawigacyjne"
 
-#: src/routes/+page.svelte
-msgid "Curiosity, applied."
-msgstr "Ciekawość, zastosowana."
-
 #: src/components/Footer.svelte
 msgid "Get in touch"
 msgstr "Skontaktuj się"
@@ -1448,3 +1436,15 @@ msgstr "Zarządzaj ogłoszeniami publicznymi i wykonuj inne zadania."
 #: src/components/NavbarAccordion.svelte
 msgid "cursor-pointer self-end underline"
 msgstr ""
+
+#: src/routes/+page.svelte
+msgid "Projects built beyond the classroom"
+msgstr "Projekty tworzone poza salą wykładową"
+
+#: src/routes/+page.svelte
+msgid "A place to turn curiosity into practice"
+msgstr "Miejsce, w którym ciekawość przekuwamy w praktykę"
+
+#: src/routes/+page.svelte
+msgid "Hello, world. We're KSI"
+msgstr "Witaj, świecie. Jesteśmy KSI"

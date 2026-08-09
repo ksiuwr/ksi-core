@@ -478,10 +478,6 @@ msgid "01 / About us"
 msgstr "01 / About us"
 
 #: src/routes/+page.svelte
-msgid "A place to turn curiosity into practice."
-msgstr "A place to turn curiosity into practice."
-
-#: src/routes/+page.svelte
 msgid "Socially"
 msgstr "Socially"
 
@@ -512,10 +508,6 @@ msgstr "We are a student research group operating at the Institute of Computer S
 #: src/routes/+page.svelte
 msgid "02 / Selected work"
 msgstr "02 / Selected work"
-
-#: src/routes/+page.svelte
-msgid "Projects built beyond the classroom."
-msgstr "Projects built beyond the classroom."
 
 #: src/routes/+page.svelte
 msgid "View all projects <0/>"
@@ -1389,10 +1381,6 @@ msgstr "<0/> Return home"
 msgid "Breadcrumb"
 msgstr "Breadcrumb"
 
-#: src/routes/+page.svelte
-msgid "Curiosity, applied."
-msgstr "Curiosity, applied."
-
 #: src/components/Footer.svelte
 msgid "Get in touch"
 msgstr "Get in touch"
@@ -1448,3 +1436,15 @@ msgstr "Manage public announcements and perform other tasks."
 #: src/components/NavbarAccordion.svelte
 msgid "cursor-pointer self-end underline"
 msgstr "cursor-pointer self-end underline"
+
+#: src/routes/+page.svelte
+msgid "Projects built beyond the classroom"
+msgstr "Projects built beyond the classroom"
+
+#: src/routes/+page.svelte
+msgid "A place to turn curiosity into practice"
+msgstr "A place to turn curiosity into practice"
+
+#: src/routes/+page.svelte
+msgid "Hello, world. We're KSI"
+msgstr "Hello, world. We're KSI"

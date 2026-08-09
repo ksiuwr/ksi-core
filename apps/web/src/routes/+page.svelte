@@ -25,7 +25,7 @@
       <h1
         class="mb-0! max-w-4xl text-5xl leading-[0.95]! tracking-[-0.06em] text-balance sm:text-6xl lg:text-7xl"
       >
-        Curiosity, applied.
+        Hello, world. We're KSI
       </h1>
 
       <p class="text-base-content/70 mt-8 max-w-2xl text-lg leading-relaxed md:text-xl">
@@ -80,8 +80,8 @@
           <p class="text-primary mb-4 text-xs font-bold tracking-[0.2em] uppercase">
             01 / About us
           </p>
-          <h2 class="mb-0! text-3xl tracking-tight md:text-5xl">
-            A place to turn curiosity into practice.
+          <h2 class="mb-0! text-2xl tracking-tight md:text-4xl">
+            A place to turn curiosity into practice
           </h2>
         </div>
 
@@ -125,8 +125,8 @@
           <p class="text-primary mb-4 text-xs font-bold tracking-[0.2em] uppercase">
             02 / Selected work
           </p>
-          <h2 class="mb-0! max-w-2xl text-3xl tracking-tight md:text-5xl">
-            Projects built beyond the classroom.
+          <h2 class="mb-0! max-w-2xl text-3xl tracking-tight md:text-4xl">
+            Projects built beyond the classroom
           </h2>
         </div>
         <a
