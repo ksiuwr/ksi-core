@@ -49,6 +49,7 @@
     function updateFabState() {
       const navbar = document.getElementById('navbar');
       if (!navbar) return;
+      if (window.innerWidth < 1024) return (preNavbarVisible = false);
       preNavbarVisible = window.scrollY < navbar.offsetTop;
     }
     updateFabState();
@@ -283,7 +284,7 @@
             $sidebarStore = !$sidebarStore;
           }
         }}
-        class="btn btn-square btn-ghost border-base-200 h-18 w-18 rounded-none border-r lg:hidden"
+        class="btn btn-square btn-ghost border-base-200 h-18 w-18 rounded-none border-y-0 border-r border-l-0 lg:hidden"
         aria-label={preNavbarVisible ? 'Scroll to content' : 'Toggle sidebar'}
       >
         <div class="relative size-5">
@@ -306,7 +307,7 @@
 
       <a
         href="/"
-        class="hover:bg-base-200/50 lg:border-base-200 flex h-full items-center gap-3 px-4 font-mono opacity-80 transition-all duration-150 hover:opacity-100 lg:border-r lg:pr-6"
+        class="hover:bg-base-200/50 lg:border-r-base-200 flex h-full items-center gap-3 border-r border-r-transparent px-4 font-mono opacity-80 transition-colors duration-150 hover:opacity-100 lg:pr-6"
       >
         <img src="/logo.svg" alt="" class="size-10 shrink-0 dark:invert" />
         <span class="text-lg tracking-tight not-lg:hidden">KSI</span>
