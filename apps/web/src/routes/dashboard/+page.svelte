@@ -9,7 +9,6 @@
 
 <Wrapper name="dashboard" icon={dashboardIcon}>
   <header class="border-base-content/15 border-b pb-10 md:pb-14">
-    <p class="text-primary mb-4 text-xs font-bold tracking-[0.2em] uppercase">Admin workspace</p>
     <h1 class="mb-0! max-w-4xl text-4xl leading-tight tracking-[-0.04em] sm:text-5xl lg:text-6xl">
       Dashboard
     </h1>

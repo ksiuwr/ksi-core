@@ -733,10 +733,6 @@ msgid "Three-panel visualization showing a U-Matrix heatmap, a neuron activation
 msgstr "Trójpanelowa wizualizacja przedstawiająca mapę cieplną U-Matrix, mapę trafień aktywacji neuronów i wektory wag neuronów"
 
 #: src/routes/dashboard/+page.svelte
-msgid "Admin workspace"
-msgstr "Panel administratora"
-
-#: src/routes/dashboard/+page.svelte
 msgid "01 / Tools"
 msgstr "01 / Narzędzia"
 
