@@ -59,9 +59,8 @@
     class="border-base-content/15 grid gap-8 border-b pb-14 lg:grid-cols-[1fr_0.8fr] lg:items-end"
   >
     <div>
-      <p class="text-primary mb-4 text-xs font-bold tracking-[0.2em] uppercase">What we build</p>
       <h1 class="mb-0! max-w-3xl text-5xl leading-[0.95]! tracking-tighter md:text-7xl">
-        Projects driven by curiosity.
+        We build projects driven by curiosity
       </h1>
     </div>
     <p class="text-base-content/65 max-w-xl text-lg leading-relaxed">

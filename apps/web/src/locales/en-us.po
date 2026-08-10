@@ -1164,14 +1164,6 @@ msgid "Wrocław"
 msgstr "Wrocław"
 
 #: src/routes/projects/+page.svelte
-msgid "What we build"
-msgstr "What we build"
-
-#: src/routes/projects/+page.svelte
-msgid "Projects driven by curiosity."
-msgstr "Projects driven by curiosity."
-
-#: src/routes/projects/+page.svelte
 msgid "Explore our work across education, machine learning, quantum computing, computational biology, and community events."
 msgstr "Explore our work across education, machine learning, quantum computing, computational biology, and community events."
 
@@ -1450,3 +1442,7 @@ msgstr "Hello, world. We're KSI"
 #: src/components/Footer.svelte
 msgid "Commit {0}"
 msgstr "Commit {0}"
+
+#: src/routes/projects/+page.svelte
+msgid "We build projects driven by curiosity"
+msgstr "We build projects driven by curiosity"
