@@ -1424,3 +1424,20 @@ msgstr "Przewiń do góry by zobaczyć ogłoszenie: {0}"
 #: src/components/Navbar.svelte
 msgid "Scroll up to view alert"
 msgstr "Przewiń do góry by zobaczyć ogłoszenie"
+
+#: src/components/Navbar.svelte
+#: src/components/Sidebar.svelte
+msgid "Unknown error occurred"
+msgstr "Wystąpił nieznany błąd"
+
+#: src/components/Navbar.svelte
+#: src/components/Sidebar.svelte
+msgid "Network error when trying to sign in"
+msgstr "Błąd sieciowy podczas logowania"
+
+#. 0: error.message
+#. 0: error.message
+#: src/components/Navbar.svelte
+#: src/components/Sidebar.svelte
+msgid "Unknown error occurred ({0})"
+msgstr "Wystąpił nieznany błąd ({0})"

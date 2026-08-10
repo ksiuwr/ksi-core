@@ -1424,3 +1424,20 @@ msgstr "Scroll to top to view alert: {0}"
 #: src/components/Navbar.svelte
 msgid "Scroll up to view alert"
 msgstr "Scroll up to view alert"
+
+#: src/components/Navbar.svelte
+#: src/components/Sidebar.svelte
+msgid "Unknown error occurred"
+msgstr "Unknown error occurred"
+
+#: src/components/Navbar.svelte
+#: src/components/Sidebar.svelte
+msgid "Network error when trying to sign in"
+msgstr "Network error when trying to sign in"
+
+#. 0: error.message
+#. 0: error.message
+#: src/components/Navbar.svelte
+#: src/components/Sidebar.svelte
+msgid "Unknown error occurred ({0})"
+msgstr "Unknown error occurred ({0})"

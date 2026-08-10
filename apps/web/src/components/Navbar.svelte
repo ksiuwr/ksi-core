@@ -242,10 +242,20 @@
         {:else}
           <button
             onclick={() => {
-              authClient.signIn.social({
-                provider: 'discord',
-                callbackURL: getUrls().FRONTEND + '/dashboard'
-              });
+              authClient.signIn
+                .social({
+                  provider: 'discord',
+                  callbackURL: getUrls().FRONTEND + '/dashboard'
+                })
+                .catch((error) => {
+                  if (error instanceof Error) {
+                    if (/(fetch|network|load failed)/i.test(error.message))
+                      toast.error('Network error when trying to sign in');
+                    else toast.error(`Unknown error occurred (${error.message})`);
+                  } else {
+                    toast.error('Unknown error occurred');
+                  }
+                });
             }}
             class="hover:text-error group text-muted flex cursor-pointer items-center text-left font-mono text-sm uppercase"
           >
