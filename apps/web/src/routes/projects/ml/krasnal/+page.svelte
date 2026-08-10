@@ -25,7 +25,7 @@
           Machine learning · Chess
         </p>
         <h1 class="mb-0! text-5xl leading-[0.95]! tracking-[-0.055em] sm:text-6xl lg:text-8xl">
-          Krasnal<br />Chess Engine <span aria-hidden="true">♟️</span>
+          Krasnal
         </h1>
         <p class="text-base-content/70 mt-8 max-w-3xl text-lg leading-relaxed md:text-xl">
           Krasnal is a chess engine developed in Wrocław, based on the Transformer architecture. It

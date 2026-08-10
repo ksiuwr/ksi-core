@@ -343,6 +343,7 @@ msgstr "Uczenie maszynowe"
 #: src/routes/+page.svelte
 #: src/routes/projects/+page.svelte
 #: src/routes/projects/ml/+page.svelte
+#: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Krasnal"
 msgstr "Krasnal"
 
@@ -612,10 +613,6 @@ msgstr "08 / Zespół"
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Machine learning · Chess"
 msgstr "Uczenie maszynowe · Szachy"
-
-#: src/routes/projects/ml/krasnal/+page.svelte
-msgid "Krasnal<0/>Chess Engine <1/>"
-msgstr "Krasnal<0/>Silnik szachowy <1/>"
 
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "01 / Approach"
