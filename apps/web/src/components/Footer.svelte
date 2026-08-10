@@ -72,7 +72,10 @@
 
     <div class="border-base-content/15 grid border-t lg:grid-cols-[1.2fr_0.8fr_1fr]">
       <div class="lg:border-base-content/15 py-10 lg:border-r lg:pr-10">
-        <a href="/" class="hover:text-primary inline-block text-xl font-bold tracking-[-0.04em]">
+        <a
+          href="/"
+          class="hover:text-primary inline-block text-xl font-semibold tracking-[-0.04em]"
+        >
           KSI UWr
         </a>
         <p class="text-base-content/60 mt-4 max-w-sm text-sm leading-relaxed">

@@ -204,7 +204,7 @@
     </button>
     <a href="/" class="flex h-18 flex-1 items-center gap-3 px-2 font-mono">
       <img src="/logo.svg" alt="" class="size-10 dark:invert" />
-      <span class="text-lg font-bold tracking-tight">KSI UWr</span>
+      <span class="text-lg font-semibold tracking-tight">KSI UWr</span>
     </a>
   </div>
 
