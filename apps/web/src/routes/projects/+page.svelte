@@ -105,7 +105,7 @@
           </div>
 
           <div class="flex flex-wrap gap-2">
-            {#each project.tags as tag (tag)}
+            {#each project.tags as tag}
               <span
                 class="border-base-content/15 text-base-content/50 border px-2.5 py-1 text-[0.65rem] tracking-wider uppercase"
                 >{tag}</span
