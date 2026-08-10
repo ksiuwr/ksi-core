@@ -309,7 +309,7 @@
         href="/"
         class="hover:bg-base-200/50 lg:border-r-base-200 flex h-full items-center gap-3 border-r border-r-transparent px-4 font-mono opacity-80 transition-colors duration-150 hover:opacity-100 lg:pr-6"
       >
-        <img src="/logo.svg" alt="" class="size-10 shrink-0 dark:invert" />
+        <img src="/logo.svg" alt="" class="size-10 min-w-10 shrink-0 dark:invert" />
         <span class="text-lg tracking-tight not-lg:hidden">KSI</span>
       </a>
 
@@ -347,6 +347,45 @@
         {/if}
       </nav>
     </div>
+
+    {#if alert}
+      <button
+        onclick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        class={[
+          'mr-3 flex max-w-[50vw] min-w-0 shrink cursor-pointer items-center gap-1.5 overflow-hidden rounded-full border px-3 py-1.5 font-mono text-xs font-medium transition-all duration-200 hover:opacity-80 active:scale-95 sm:max-w-[300px] lg:hidden',
+          alert.color === 'warning' && 'border-warning/50 bg-warning/15 text-warning',
+          alert.color === 'danger' && 'border-error/50 bg-error/15 text-error',
+          alert.color === 'info' && 'border-info/50 bg-info/15 text-info',
+          (!alert.color || alert.color === 'neutral') &&
+            'border-base-content/20 bg-base-300 text-base-content/90'
+        ]}
+        aria-label={`Scroll to top to view alert: ${alert.title}`}
+        title="Scroll up to view alert"
+      >
+        <span class="relative flex size-2 shrink-0">
+          <span
+            class={[
+              'absolute inline-flex h-full w-full animate-ping rounded-full opacity-75',
+              alert.color === 'warning' && 'bg-warning',
+              alert.color === 'danger' && 'bg-error',
+              alert.color === 'info' && 'bg-info',
+              (!alert.color || alert.color === 'neutral') && 'bg-base-content/60'
+            ]}
+          ></span>
+          <span
+            class={[
+              'relative inline-flex size-2 rounded-full',
+              alert.color === 'warning' && 'bg-warning',
+              alert.color === 'danger' && 'bg-error',
+              alert.color === 'info' && 'bg-info',
+              (!alert.color || alert.color === 'neutral') && 'bg-base-content/60'
+            ]}
+          ></span>
+        </span>
+        <span class="truncate font-semibold">{alert.title}</span>
+        <ChevronUp class="size-3.5 shrink-0 opacity-75" />
+      </button>
+    {/if}
 
     <button
       onclick={() => {

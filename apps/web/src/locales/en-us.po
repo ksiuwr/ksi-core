@@ -1419,3 +1419,12 @@ msgstr "Commit {0}"
 #: src/routes/projects/+page.svelte
 msgid "We build projects driven by curiosity"
 msgstr "We build projects driven by curiosity"
+
+#. 0: alert.title
+#: src/components/Navbar.svelte
+msgid "Scroll to top to view alert: {0}"
+msgstr "Scroll to top to view alert: {0}"
+
+#: src/components/Navbar.svelte
+msgid "Scroll up to view alert"
+msgstr "Scroll up to view alert"

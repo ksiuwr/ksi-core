@@ -1419,3 +1419,12 @@ msgstr "Rewizja {0}"
 #: src/routes/projects/+page.svelte
 msgid "We build projects driven by curiosity"
 msgstr "Tworzymy projekty napędzane ciekawością"
+
+#. 0: alert.title
+#: src/components/Navbar.svelte
+msgid "Scroll to top to view alert: {0}"
+msgstr "Przewiń do góry by zobaczyć ogłoszenie: {0}"
+
+#: src/components/Navbar.svelte
+msgid "Scroll up to view alert"
+msgstr "Przewiń do góry by zobaczyć ogłoszenie"
