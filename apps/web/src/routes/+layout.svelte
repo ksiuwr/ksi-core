@@ -23,14 +23,13 @@
 
 <Toaster theme={$themeStore} richColors />
 
-<Navbar user={data.user} session={data.session} />
+{#if data.alert}
+  <div class="w-full lg:hidden">
+    <Alert alert={data.alert} />
+  </div>
+{/if}
+<Navbar user={data.user} alert={data.alert} session={data.session} />
 <div class="mx-auto flex min-h-screen flex-col gap-px lg:max-w-360 lg:gap-4">
-  {#if data.alert}
-    <div class="w-full">
-      <Alert alert={data.alert} />
-    </div>
-  {/if}
-
   <div class="bg-base-100 flex flex-1 flex-col">
     <Sidebar user={data.user} session={data.session} />
 

@@ -7,29 +7,14 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/components/Alert.svelte
-#: src/components/Alert.svelte
-msgid "[ERROR]"
-msgstr "[ERROR]"
-
-#: src/components/Alert.svelte
-#: src/components/Alert.svelte
-msgid "[WARN]"
-msgstr "[WARN]"
-
 #. 0: new Date().getFullYear()
 #: src/components/Footer.svelte
 msgid "© KSI {0}"
 msgstr "© KSI {0}"
 
-#: src/components/Navbar copy.svelte
 #: src/components/Navbar.svelte
 msgid "Toggle sidebar"
 msgstr "Toggle sidebar"
-
-#: src/components/Navbar copy.svelte
-msgid "<0/> KSI"
-msgstr "<0/> KSI"
 
 #: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
@@ -80,10 +65,6 @@ msgstr "Logged in as"
 #: src/components/Sidebar.svelte
 msgid "Logout"
 msgstr "Logout"
-
-#: src/components/Navbar copy.svelte
-msgid "Panel"
-msgstr "Panel"
 
 #: src/routes/projects/zosia/+page.svelte
 msgid "Edition"
@@ -245,10 +226,6 @@ msgstr "Researching innovative quantum algorithms, computational complexity theo
 msgid "Modeling computations and independently implementing proprietary quantum algorithms in the Qiskit environment, with the ultimate execution of the code on a real quantum processor."
 msgstr "Modeling computations and independently implementing proprietary quantum algorithms in the Qiskit environment, with the ultimate execution of the code on a real quantum processor."
 
-#: src/components/Navbar copy.svelte
-msgid "Toggle language"
-msgstr "Toggle language"
-
 #: src/components/Goal.svelte
 msgid "// Technically"
 msgstr "// Technically"
@@ -270,10 +247,6 @@ msgstr "<0/> Location"
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Alerts"
 msgstr "Alerts"
-
-#: src/components/Navbar copy.svelte
-msgid "Życie studenckie"
-msgstr "Życie studenckie"
 
 #: src/components/Footer.svelte
 #: src/components/Navbar.svelte

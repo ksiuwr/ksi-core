@@ -14,15 +14,14 @@
   } = $props();
 
   const alertVariants = cva(
-    'relative flex w-full flex-col gap-2 border-y md:border p-4 font-mono text-sm transition-all duration-200 md:rounded-sm',
+    'relative flex w-full flex-col gap-2 lg:border lg:rounded-md p-4 font-mono text-sm',
     {
       variants: {
         color: {
-          neutral:
-            'border-base-content/20 bg-base-300/10 text-base-content/80 hover:bg-base-300/20',
-          warning: 'border-warning/50 bg-warning/5 text-warning hover:bg-warning/10',
-          danger: 'border-error bg-error/5 text-error hover:bg-error/10',
-          info: 'border-info/50 bg-info/5 text-info hover:bg-info/10'
+          neutral: 'border-base-content/20 bg-base-300 text-base-content/80',
+          warning: 'border-warning/50 bg-warning/5 text-warning',
+          danger: 'border-error bg-error/5 text-error',
+          info: 'border-info/50 bg-info/5 text-info'
         },
         isLink: {
           true: 'cursor-pointer group',
@@ -49,14 +48,7 @@
       >
         <div class="flex items-start justify-between gap-4">
           <div class="flex flex-col gap-1">
-            <div class="flex items-center gap-2 font-bold tracking-wider uppercase">
-              {#if alertColor === 'danger'}
-                <span>[ERROR]</span>
-              {:else if alertColor === 'warning'}
-                <span>[WARN]</span>
-              {:else}
-                <span>&gt;</span>
-              {/if}
+            <div class="flex items-center gap-2 font-bold tracking-wider">
               <span>{alert.title}</span>
             </div>
             <p class="leading-relaxed wrap-anywhere opacity-90">
@@ -72,14 +64,7 @@
     {:else}
       <div class={cn(alertVariants({ color: alertColor, isLink: false }))}>
         <div class="flex flex-col gap-1">
-          <div class="flex items-center gap-2 font-bold tracking-wider uppercase">
-            {#if alertColor === 'danger'}
-              <span>[ERROR]</span>
-            {:else if alertColor === 'warning'}
-              <span>[WARN]</span>
-            {:else}
-              <span>&gt;</span>
-            {/if}
+          <div class="flex items-center gap-2 font-bold tracking-wider">
             <span>{alert.title}</span>
           </div>
           <p class="leading-relaxed opacity-90">{alert.description}</p>
