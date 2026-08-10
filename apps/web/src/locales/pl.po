@@ -1448,3 +1448,8 @@ msgstr "Miejsce, w którym ciekawość przekuwamy w praktykę"
 #: src/routes/+page.svelte
 msgid "Hello, world. We're KSI"
 msgstr "Witaj, świecie. Jesteśmy KSI"
+
+#. 0: commitHash
+#: src/components/Footer.svelte
+msgid "Commit {0}"
+msgstr "Rewizja {0}"

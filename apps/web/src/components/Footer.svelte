@@ -3,6 +3,7 @@
     ArrowUpRight,
     ChevronDown,
     Facebook,
+    GitCommitHorizontal,
     Github,
     Instagram,
     Linkedin,
@@ -10,6 +11,9 @@
   } from '@lucide/svelte';
   import { locale, setLocale } from '$lib/locale.svelte';
   import { locales } from '../locales/data';
+
+  const commitHash = import.meta.env.PUBLIC_COMMIT_HASH || '';
+  const shortCommitHash = commitHash.slice(0, 7);
 
   const availableLocales = $derived(
     locales
@@ -178,6 +182,19 @@
             class="size-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
           />
         </a>
+
+        {#if commitHash}
+          <a
+            href="https://github.com/ksiuwr/ksi-core/commit/{commitHash}"
+            target="_blank"
+            rel="noreferrer"
+            class="group hover:text-primary flex w-full items-center justify-center gap-1.5 font-mono transition-colors sm:w-fit"
+            title="Commit {commitHash}"
+          >
+            <GitCommitHorizontal class="size-3.5" />
+            <span>{shortCommitHash}</span>
+          </a>
+        {/if}
       </div>
     </div>
   </div>

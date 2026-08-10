@@ -49,6 +49,8 @@ jobs:
           file: apps/web/Dockerfile
           push: true
           tags: ghcr.io/ksiuwr/ksi-frontend:latest,ghcr.io/ksiuwr/ksi-frontend:${{ github.sha }}
+          build-args: |
+            PUBLIC_COMMIT_HASH=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
