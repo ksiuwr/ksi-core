@@ -5,7 +5,7 @@
 
 <button
   onclick={() => themeStore.set($themeStore === 'dark' ? 'light' : 'dark')}
-  class="btn btn-md flex flex-1 cursor-pointer items-center gap-3 py-2 md:hidden"
+  class="btn btn-md btn-outline flex flex-1 cursor-pointer items-center gap-3 py-2 md:hidden"
   aria-label="Toggle theme"
 >
   {#if $themeStore === 'dark'}

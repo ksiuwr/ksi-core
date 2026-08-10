@@ -127,7 +127,7 @@
       <div
         tabindex="0"
         role="button"
-        class="btn btn-md hover:text-base-content flex w-full cursor-pointer items-center gap-1.5 capitalize transition-colors duration-150"
+        class="btn btn-md btn-outline hover:text-base-content flex w-full cursor-pointer items-center gap-1.5 capitalize transition-colors duration-150"
       >
         <span class="truncate select-none">{activeLocale.emoji} {activeLocale.formattedLocale}</span
         >
@@ -167,7 +167,7 @@
               callbackURL: getUrls().FRONTEND + '/dashboard'
             });
           }}
-          class="btn btn-md text-error ml-auto shrink-0"
+          class="btn btn-md btn-outline text-error ml-auto shrink-0"
           title="Member access"
         >
           <LogIn class="size-4" />
