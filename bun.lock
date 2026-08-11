@@ -50,7 +50,7 @@
     },
     "apps/web": {
       "name": "@ksi-core/web",
-      "version": "0.1.0-rc.1",
+      "version": "0.1.0",
       "dependencies": {
         "@elysiajs/eden": "^1.4.9",
         "@lucide/svelte": "^0.548.0",
