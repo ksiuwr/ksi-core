@@ -15,7 +15,7 @@
     exact?: boolean;
   } = $props();
 
-  const isActive = $derived(
+  let isActive = $derived(
     exact ? $page.url.pathname === href : $page.url.pathname.startsWith(href)
   );
 </script>
@@ -23,15 +23,16 @@
 <a
   {href}
   class={cn(
-    'flex items-center gap-3 select-none font-mono text-sm w-full py-2.5 md:py-1.5 px-6 transition-all duration-150',
-    'text-base-content/70 hover:bg-base-200',
-    isActive && 'bg-secondary text-secondary-content hover:bg-secondary/80 font-bold shadow-sm'
+    'flex w-full items-center gap-3.5 rounded-lg px-3 py-3 text-base font-medium transition-colors duration-150',
+    isActive
+      ? 'bg-primary/15 text-primary font-semibold'
+      : 'hover:bg-base-200 text-base-content/80 hover:text-base-content'
   )}
 >
   {#if Icon}
-    <Icon class="size-4" />
+    <Icon class="size-5 shrink-0" />
   {/if}
-  <span>
+  <span class="truncate">
     {@render children?.()}
   </span>
 </a>

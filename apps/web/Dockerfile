@@ -14,6 +14,9 @@ FROM base AS builder
 COPY --from=deps /app /app
 COPY . .
 
+ARG PUBLIC_COMMIT_HASH
+ENV PUBLIC_COMMIT_HASH=$PUBLIC_COMMIT_HASH
+
 RUN bun run --cwd apps/web prepare
 RUN bun run --cwd apps/web build
 

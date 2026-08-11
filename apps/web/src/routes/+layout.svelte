@@ -23,26 +23,21 @@
 
 <Toaster theme={$themeStore} richColors />
 
-<div class="mx-auto flex min-h-screen flex-col gap-px lg:gap-4 lg:py-8 lg:max-w-[1440px]">
-  {#if data.alert}
-    <div class="w-full">
-      <Alert alert={data.alert} />
-    </div>
-  {/if}
-
-  <div class="flex flex-1 flex-col bg-base-100 lg:border lg:border-base-200">
-    <Navbar />
+{#if data.alert}
+  <div class="w-full lg:hidden">
+    <Alert alert={data.alert} />
+  </div>
+{/if}
+<Navbar user={data.user} alert={data.alert} session={data.session} />
+<div class="mx-auto flex min-h-screen flex-col gap-px lg:max-w-360 lg:gap-4">
+  <div class="bg-base-100 flex flex-1 flex-col">
+    <Sidebar user={data.user} session={data.session} />
 
     <div class="relative flex flex-1 items-start">
-      <Sidebar user={data.user} session={data.session} />
-
-      <main class="flex-1 min-w-0 w-full px-4 sm:px-6 lg:px-12 py-8 md:py-12">
+      <main id="main-content" class="w-full min-w-0 flex-1 px-4 py-8 sm:px-6 md:py-12 lg:px-12">
         {@render children?.()}
       </main>
     </div>
-
-    <div class="relative z-10 bg-base-100">
-      <Footer />
-    </div>
   </div>
 </div>
+<Footer />
