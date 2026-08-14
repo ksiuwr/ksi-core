@@ -24,6 +24,7 @@ FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3001
+ENV HOST=0.0.0.0
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
@@ -34,5 +35,4 @@ COPY --from=builder /app/packages ./packages
 WORKDIR /app/apps/web
 
 EXPOSE 3001
-CMD ["bun", "run", "build/index.js"]
-
+CMD ["bun", "build/index.js"]
