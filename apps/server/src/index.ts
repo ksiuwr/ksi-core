@@ -17,7 +17,7 @@ const betterAuthView = (context: Context) => {
 
 discordBot.ping();
 
-const app = new Elysia({ prefix: '/api' })
+const app = new Elysia()
   .use(
     cors({
       origin: (c) => {
