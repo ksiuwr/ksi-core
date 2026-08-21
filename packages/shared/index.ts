@@ -1,9 +1,9 @@
 export const getUrls = () => {
   if (process.env.NODE_ENV === 'production')
     return {
-      BACKEND: 'https://ksi.ii.uni.wroc.pl/api',
-      FRONTEND: 'https://ksi.ii.uni.wroc.pl',
-      AUTH: 'https://ksi.ii.uni.wroc.pl/'
+      BACKEND: 'https://api.ksi.edu.pl/',
+      FRONTEND: 'https://ksi.edu.pl/',
+      AUTH: 'https://api.ksi.edu.pl/'
     };
 
   return {

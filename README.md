@@ -90,9 +90,9 @@ docker compose up -d --build
 docker compose exec backend bun run db:migrate
 ```
 
-4. Strona powinna być dostępna pod https://ksi.ii.uni.wroc.pl, a API pod https://ksi.ii.uni.wroc.pl/api
+4. Strona powinna być dostępna pod https://ksi.edu.pl, a API pod https://api.ksi.edu.pl
 
 ### Uwagi
 
-- Po wdrożeniu zaktualizuj URL'e przekierowania OAuth w Discord Developer Portal na `https://ksi.ii.uni.wroc.pl/api/auth/oauth/discord/callback`
+- Po wdrożeniu zaktualizuj URL'e przekierowania OAuth w Discord Developer Portal na `https://api.ksi.edu.pl/auth/oauth/discord/callback`
 - Jeśli używasz istniejącej bazy danych, usuń usługę `postgres` z `deploy/docker-compose.yml` i dostosuj `DATABASE_URL`
