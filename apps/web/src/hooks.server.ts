@@ -4,7 +4,7 @@ import { getUrls } from 'shared';
 
 export const handle: Handle = async ({ event, resolve }) => {
   try {
-    const res = await event.fetch(`${getUrls().BACKEND}/auth/get-session`, {
+    const res = await event.fetch(`${getUrls().backend}/auth/get-session`, {
       headers: { cookie: event.request.headers.get('cookie') ?? '' }
     });
     if (res.ok) {

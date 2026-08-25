@@ -1,14 +1,29 @@
 export const getUrls = () => {
-  if (process.env.NODE_ENV === 'production')
-    return {
-      BACKEND: 'https://api.ksi.edu.pl',
-      FRONTEND: 'https://ksi.edu.pl',
-      AUTH: 'https://api.ksi.edu.pl/auth'
+  if (process.env.NODE_ENV === 'production') {
+    const frontendEndpoints = {
+      landing: 'https://ksi.edu.pl',
+      auth: 'https://auth.ksi.edu.pl'
     };
 
+    return {
+      backend: 'https://api.ksi.edu.pl',
+      frontend: {
+        ...frontendEndpoints,
+        all: Object.values(frontendEndpoints)
+      }
+    };
+  }
+
+  const frontendEndpoints = {
+    landing: 'http://localhost:5173',
+    auth: 'http://localhost:5174'
+  };
+
   return {
-    BACKEND: 'http://localhost:3000/api',
-    FRONTEND: 'http://localhost:5173',
-    AUTH: 'http://localhost:3000/api/auth'
+    backend: 'http://localhost:3000/api',
+    frontend: {
+      ...frontendEndpoints,
+      all: Object.values(frontendEndpoints)
+    }
   };
 };

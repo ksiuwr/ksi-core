@@ -10,9 +10,8 @@ export const auth = betterAuth({
     schema: schema,
     usePlural: true
   }),
-  trustedOrigins: [getUrls().FRONTEND],
-
-  baseURL: getUrls().AUTH,
+  trustedOrigins: getUrls().frontend.all,
+  baseURL: getUrls().backend + '/auth',
   socialProviders: {
     discord: {
       clientId: Bun.env.OAUTH2_DISCORD_ID!,

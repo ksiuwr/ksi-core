@@ -1,5 +1,5 @@
 {
-  "name": "ksi-website",
+  "name": "ksi-core",
   "version": "0.0.1",
   "workspaces": [
     "packages/*",

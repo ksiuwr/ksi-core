@@ -4,7 +4,7 @@
   import Sidebar from '../components/Sidebar.svelte';
   import Footer from '../components/Footer.svelte';
   import { Toaster } from 'svelte-sonner';
-  import { themeStore } from '$lib/themeStore';
+  import { themeStore } from '@ksi-core/ui/lib';
   import Alert from '../components/Alert.svelte';
   import { loadLocale } from 'wuchale/load-utils';
   import '../locales/main.loader.svelte.js';

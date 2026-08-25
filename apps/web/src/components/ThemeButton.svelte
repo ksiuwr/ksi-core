@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { themeStore } from '$lib/themeStore';
+  import { themeStore } from '@ksi-core/ui/lib';
   import { Moon, Sun } from '@lucide/svelte';
 </script>
 
 <button
-  onclick={() => themeStore.set($themeStore === 'dark' ? 'light' : 'dark')}
+  onclick={() => themeStore.toggle()}
   class="btn btn-md btn-outline flex flex-1 cursor-pointer items-center gap-3 py-2 md:hidden"
   aria-label="Toggle theme"
 >
@@ -18,7 +18,7 @@
 </button>
 
 <button
-  onclick={() => themeStore.set($themeStore === 'dark' ? 'light' : 'dark')}
+  onclick={() => themeStore.toggle()}
   class="text-muted hover:text-base-content group relative h-6 w-26 cursor-pointer overflow-hidden transition-colors not-md:hidden"
   aria-label="Toggle theme"
 >

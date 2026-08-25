@@ -2,14 +2,14 @@ import { treaty } from '@elysiajs/eden';
 import { getUrls } from 'shared';
 import type { App } from 'shared/eden';
 
-export const api = treaty<App>(getUrls().BACKEND, {
+export const api = treaty<App>(getUrls().backend, {
   fetch: {
     credentials: 'include'
   }
 });
 
 export const makeApi = (fetcher: typeof fetch) =>
-  treaty<App>(getUrls().BACKEND, {
+  treaty<App>(getUrls().backend, {
     fetch: {
       credentials: 'include'
     },

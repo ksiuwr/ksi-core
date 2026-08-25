@@ -13,44 +13,13 @@
     %sveltekit.head%
     <script>
       (function () {
-        const savedTheme = localStorage.getItem('theme');
-        let theme;
+        try {
+          var savedTheme = localStorage.getItem('theme');
+          var supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var theme = savedTheme || (supportDarkMode ? 'dark' : 'light');
 
-        if (savedTheme) {
-          // If a theme is saved in localStorage, use it
-          theme = savedTheme;
-        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-          // If no theme is saved, check the user's system preference
-          theme = 'dark';
-        } else {
-          // Default to 'light' if no preference is found
-          theme = 'light';
-        }
-
-        const style = document.createElement('style');
-        style.textContent = `
-        *, *::before, *::after {
-          transition-duration: 0s !important;
-          animation-duration: 0s !important;
-        }
-      `;
-        document.head.appendChild(style);
-
-        const setTheme = () => {
-          document.body.setAttribute('data-theme', theme);
-
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              document.head.removeChild(style);
-            });
-          });
-        };
-
-        if (document.body) {
-          setTheme();
-        } else {
-          document.addEventListener('DOMContentLoaded', setTheme);
-        }
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {}
       })();
     </script>
   </head>
