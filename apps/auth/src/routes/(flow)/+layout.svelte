@@ -19,32 +19,34 @@
     <span class="text-primary">ksi</span>.auth
   </a>
   <div class="border-muted/40 relative border">
-    <button
-      onclick={() => {
-        goto('/sign-in');
-      }}
-      class={[
-        'border-muted/40 bg-base-100 absolute top-0 right-0 -mt-px -mr-8 flex h-24 w-8 items-center justify-center border px-2 py-1 transition-all',
-        isSignIn
-          ? 'border-l-0'
-          : 'text-muted hover:text-base-content cursor-pointer opacity-80 hover:-mr-9 hover:w-9 hover:opacity-100'
-      ]}
-    >
-      <div class="rotate-90 text-nowrap">SIGN IN</div>
-    </button>
-    <button
-      onclick={() => {
-        goto('/sign-up');
-      }}
-      class={[
-        'border-muted/40 bg-base-100 absolute top-0 right-0 mt-24 -mr-8 flex h-24 w-8 items-center justify-center border px-2 py-1 transition-all',
-        !isSignIn
-          ? 'border-l-0'
-          : 'text-muted hover:text-base-content cursor-pointer opacity-80 hover:-mr-9 hover:w-9 hover:opacity-100'
-      ]}
-    >
-      <div class="rotate-90 text-nowrap">SIGN UP</div>
-    </button>
+    <div class="absolute top-0 left-full -mt-px flex flex-col items-start gap-px">
+      <button
+        onclick={() => {
+          goto('/sign-in');
+        }}
+        class={[
+          'border-muted/40 bg-base-100 flex w-8 items-center justify-center border py-4 transition-all',
+          isSignIn
+            ? 'border-l-0'
+            : 'text-muted hover:text-base-content cursor-pointer opacity-80 hover:w-9 hover:opacity-100'
+        ]}
+      >
+        <div class="text-nowrap [writing-mode:vertical-rl]">SIGN IN</div>
+      </button>
+      <button
+        onclick={() => {
+          goto('/sign-up');
+        }}
+        class={[
+          'border-muted/40 bg-base-100 flex w-8 items-center justify-center border py-4 transition-all',
+          !isSignIn
+            ? 'border-l-0'
+            : 'text-muted hover:text-base-content cursor-pointer opacity-80 hover:w-9 hover:opacity-100'
+        ]}
+      >
+        <div class="text-nowrap [writing-mode:vertical-rl]">SIGN UP</div>
+      </button>
+    </div>
     <div class="flex gap-12 p-8 not-lg:flex-col">
       {#if $pastUsersStore.length > 0}
         <div class="flex flex-col gap-4">
