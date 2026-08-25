@@ -49,7 +49,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: apps/web/Dockerfile
+          file: apps/landing/Dockerfile
           platforms: linux/arm64
           push: true
           tags: ghcr.io/ksiuwr/ksi-frontend:latest,ghcr.io/ksiuwr/ksi-frontend:${{ github.sha }}

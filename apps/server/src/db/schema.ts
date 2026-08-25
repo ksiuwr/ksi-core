@@ -3,6 +3,8 @@ import { text, timestamp, boolean, integer, pgEnum, snakeCase } from 'drizzle-or
 
 export const users = snakeCase.table('users', {
   id: text().primaryKey().$defaultFn(createId),
+  username: text().unique(),
+  displayUsername: text(),
   name: text().notNull(),
   email: text().notNull().unique(),
   emailVerified: boolean().default(false).notNull(),
@@ -37,6 +39,7 @@ export const accounts = snakeCase.table('accounts', {
   id: text().primaryKey().$defaultFn(createId),
   accountId: text().notNull(),
   providerId: text().notNull(),
+  issuer: text().notNull(),
   userId: text()
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),

@@ -46,7 +46,7 @@
   --radius-box: 0rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
-  --border: 2px;
+  --border: 1px;
   --depth: 1;
   --noise: 0;
 }
@@ -74,13 +74,13 @@
   --color-accent: oklch(82% 0.12 354.308);
   --color-accent-content: oklch(10% 0.02 354.308);
 
-  --color-neutral: oklch(37% 0.013 285.805);
-  --color-neutral-content: oklch(98% 0 0);
+  --color-neutral: oklch(96% 0.001 286.375);
+  --color-neutral-content: oklch(14% 0.005 285.823);
 
   --color-info: oklch(75% 0.15 250);
   --color-info-content: oklch(10% 0.02 250);
 
-  --color-success: oklch(78% 0.15 170);
+  --color-success: oklch(0.89 0.228 142.735);
   --color-success-content: oklch(10% 0.02 170);
 
   --color-warning: oklch(85% 0.16 90);
@@ -94,7 +94,7 @@
   --radius-box: 0rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
-  --border: 2px;
+  --border: 1px;
   --depth: 1;
   --noise: 0;
 }
