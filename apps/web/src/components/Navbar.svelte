@@ -170,105 +170,108 @@
 
 <div class="bg-base-200 w-full not-lg:hidden">
   <div class="px-4 sm:px-6 lg:px-12">
-    <div class="mx-auto flex w-full flex-col gap-8 py-10 lg:max-w-7xl">
-      <h1 class="uppercase">Projects</h1>
+    <div class="mx-auto flex w-full flex-col gap-4 py-10 lg:max-w-7xl">
+      <div class="flex items-start justify-between">
+        <h1 class="uppercase">Projects</h1>
+        <div class="flex w-full items-center justify-end gap-8">
+          <div class="dropdown dropdown-bottom">
+            <div
+              tabindex="0"
+              role="button"
+              class="text-muted hover:text-base-content flex cursor-pointer items-center gap-2 text-sm uppercase transition-colors duration-150"
+            >
+              <span class="select-none">{activeLocale.emoji} {activeLocale.formattedLocale}</span>
+              <ChevronDown class="size-4" />
+            </div>
+
+            <ul
+              class="dropdown-content menu bg-base-200 text-base-content right-0 z-99 mt-2 w-60 border p-2 shadow"
+            >
+              {#each availableLocales as loc}
+                <li>
+                  <button
+                    class:active={locale.current === loc.code}
+                    onclick={() => setLocale(loc.code)}
+                    class={[
+                      'items-centers flex gap-2 rounded-none py-2 font-semibold uppercase',
+
+                      locale.current === loc.code
+                        ? 'text-base-content bg-blue-600'
+                        : 'text-muted-100 hover:bg-base-300'
+                    ]}
+                  >
+                    {loc.emoji}
+                    {loc.formattedLocale}
+                  </button>
+                </li>
+              {/each}
+            </ul>
+          </div>
+          <ThemeButton />
+          {#if session && user}
+            <div class="flex gap-4">
+              <a
+                href="/dashboard"
+                class="text-muted hover:text-base-content flex items-center gap-4 text-sm"
+              >
+                {#if user.image}
+                  <img
+                    src={user.image}
+                    class="size-6 rounded-full"
+                    alt={`${user.name}'s profile picture`}
+                  />
+                {/if}
+                {user.name}
+              </a>
+              <button
+                class="btn btn-circle text-error"
+                onclick={async () => {
+                  const r = await authClient.signOut();
+                  if (r.data?.success) {
+                    toast.success('Logged out');
+                    await invalidateAll();
+                  }
+                }}
+              >
+                <LogOut class="size-4 shrink-0" />
+              </button>
+            </div>
+          {:else}
+            <button
+              onclick={() => {
+                authClient.signIn
+                  .social({
+                    provider: 'discord',
+                    callbackURL: getUrls().frontend.landing + '/dashboard'
+                  })
+                  .catch((error) => {
+                    if (error instanceof Error) {
+                      if (/(fetch|network|load failed)/i.test(error.message))
+                        toast.error('Network error when trying to sign in');
+                      else toast.error(`Unknown error occurred (${error.message})`);
+                    } else {
+                      toast.error('Unknown error occurred');
+                    }
+                  });
+              }}
+              class="hover:text-error group text-muted flex cursor-pointer items-center text-left font-mono text-sm uppercase"
+            >
+              <LogIn class="size-4 shrink-0" />
+
+              <div
+                class="max-w-0 overflow-hidden transition-all duration-450 ease-out group-hover:max-w-54"
+              >
+                <div class="pl-3 whitespace-nowrap">Member access</div>
+              </div>
+            </button>
+          {/if}
+        </div>
+      </div>
+
       <NavbarAccordion title="Zosia" url="/projects/zosia" content={zosiaEditions} />
       <NavbarAccordion title="Machine Learning" url="/projects/ml" content={machineLearning} />
-      <a href="/projects" class="w-max cursor-pointer underline">and more...</a>
+      <a href="/projects" class="mt-8 w-max cursor-pointer underline">and more...</a>
 
-      <div class="flex items-center justify-end gap-8">
-        <div class="dropdown dropdown-bottom">
-          <div
-            tabindex="0"
-            role="button"
-            class="text-muted hover:text-base-content flex cursor-pointer items-center gap-2 text-sm uppercase transition-colors duration-150"
-          >
-            <span class="select-none">{activeLocale.emoji} {activeLocale.formattedLocale}</span>
-            <ChevronDown class="size-4" />
-          </div>
-
-          <ul
-            class="dropdown-content menu bg-base-200 text-base-content right-0 z-99 mt-2 w-60 border p-2 shadow"
-          >
-            {#each availableLocales as loc}
-              <li>
-                <button
-                  class:active={locale.current === loc.code}
-                  onclick={() => setLocale(loc.code)}
-                  class={[
-                    'items-centers flex gap-2 rounded-none py-2 font-semibold uppercase',
-
-                    locale.current === loc.code
-                      ? 'text-base-content bg-blue-600'
-                      : 'text-muted-100 hover:bg-base-300'
-                  ]}
-                >
-                  {loc.emoji}
-                  {loc.formattedLocale}
-                </button>
-              </li>
-            {/each}
-          </ul>
-        </div>
-        <ThemeButton />
-        {#if session && user}
-          <div class="flex gap-4">
-            <a
-              href="/dashboard"
-              class="text-muted hover:text-base-content flex items-center gap-4 text-sm"
-            >
-              {#if user.image}
-                <img
-                  src={user.image}
-                  class="size-6 rounded-full"
-                  alt={`${user.name}'s profile picture`}
-                />
-              {/if}
-              {user.name}
-            </a>
-            <button
-              class="btn btn-circle text-error"
-              onclick={async () => {
-                const r = await authClient.signOut();
-                if (r.data?.success) {
-                  toast.success('Logged out');
-                  await invalidateAll();
-                }
-              }}
-            >
-              <LogOut class="size-4 shrink-0" />
-            </button>
-          </div>
-        {:else}
-          <button
-            onclick={() => {
-              authClient.signIn
-                .social({
-                  provider: 'discord',
-                  callbackURL: getUrls().frontend.landing + '/dashboard'
-                })
-                .catch((error) => {
-                  if (error instanceof Error) {
-                    if (/(fetch|network|load failed)/i.test(error.message))
-                      toast.error('Network error when trying to sign in');
-                    else toast.error(`Unknown error occurred (${error.message})`);
-                  } else {
-                    toast.error('Unknown error occurred');
-                  }
-                });
-            }}
-            class="hover:text-error group text-muted flex cursor-pointer items-center text-left font-mono text-sm uppercase"
-          >
-            <LogIn class="size-4 shrink-0" />
-
-            <div
-              class="max-w-0 overflow-hidden transition-all duration-450 ease-out group-hover:max-w-54"
-            >
-              <div class="pl-3 whitespace-nowrap">Member access</div>
-            </div>
-          </button>
-        {/if}
-      </div>
       {#if alert}
         <div class="w-full">
           <Alert {alert} />
