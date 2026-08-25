@@ -42,15 +42,6 @@ msgstr "{0} · KSI UWr"
 msgid "The page may have moved, or something went wrong while loading it."
 msgstr "The page may have moved, or something went wrong while loading it."
 
-#~ msgid "<0/> Route not resolved"
-#~ msgstr "<0/> Route not resolved"
-
-#~ msgid "This path led somewhere unexpected."
-#~ msgstr "This path led somewhere unexpected."
-
-#~ msgid "{0} The reliable route is back to the association — and room 24 at the Institute of Computer Science is always worth finding."
-#~ msgstr "{0} The reliable route is back to the association — and room 24 at the Institute of Computer Science is always worth finding."
-
 #: src/routes/+error.svelte
 msgid "<0/> Return home"
 msgstr "<0/> Return home"
@@ -72,120 +63,46 @@ msgstr "Commit {0}"
 msgid "KSI Auth"
 msgstr "KSI Auth"
 
-#~ msgid "<0/> This page was not found"
-#~ msgstr "<0/> This page was not found"
-
 #. 0: page.status
 #: src/routes/+error.svelte
 msgid "{0} · This path led somewhere unexpected."
 msgstr "{0} · This path led somewhere unexpected."
 
-#~ msgid "ksi.auth"
-#~ msgstr "ksi.auth"
-
-#~ msgid "<0/> ksi.auth"
-#~ msgstr "<0/> ksi.auth"
-
-#~ msgid "Logo KSI"
-#~ msgstr "Logo KSI"
-
-#~ msgid "<0/> <1/>ksi.auth"
-#~ msgstr "<0/> <1/>ksi.auth"
-
-#~ msgid "<0/> <1/>.auth"
-#~ msgstr "<0/> <1/>.auth"
-
-#~ msgid "<0/> <1>ksi</1>.auth"
-#~ msgstr "<0/> <1>ksi</1>.auth"
-
 #: src/routes/(flow)/+layout.svelte
-#: src/routes/sign-in/+page.svelte
 msgid "Welcome back"
 msgstr "Welcome back"
 
-#~ msgid ".auth"
-#~ msgstr ".auth"
-
-#~ msgid "ksi"
-#~ msgstr "ksi"
-
-#~ msgid "Sign in to your"
-#~ msgstr "Sign in to your"
-
-#~ msgid "Sign in to your KSI Account"
-#~ msgstr "Sign in to your KSI Account"
-
 #: src/routes/(flow)/sign-in/+page.svelte
-#: src/routes/sign-in/+page.svelte
 msgid "Sign in"
 msgstr "Sign in"
 
-#~ msgid "Pick your account"
-#~ msgstr "Pick your account"
-
-#~ msgid "Pick"
-#~ msgstr "Pick"
-
 #: src/routes/(flow)/+layout.svelte
-#: src/routes/sign-in/+page.svelte
 msgid "Choose one of your previous sessions"
 msgstr "Choose one of your previous sessions"
 
 #: src/routes/(flow)/+layout.svelte
-#: src/routes/sign-in/+page.svelte
 msgid "Previous sessions"
 msgstr "Previous sessions"
 
-#~ msgid "Remove session"
-#~ msgstr "Remove session"
-
-#~ msgid "Clear history"
-#~ msgstr "Clear history"
-
 #: src/routes/(flow)/+layout.svelte
-#: src/routes/sign-in/+page.svelte
 msgid "Clear history <0/>"
 msgstr "Clear history <0/>"
 
-#~ msgid "div.flex."
-#~ msgstr "div.flex."
-
-#. 0: pastUser.username
 #. 0: pastUser.username
 #: src/routes/(flow)/+layout.svelte
-#: src/routes/sign-in/+page.svelte
 msgid "{0}'s avatar"
 msgstr "{0}'s avatar"
 
-#~ msgid "Last logged in: {0}"
-#~ msgstr "Last logged in: {0}"
-
-#~ msgid "Last signed in: {0}"
-#~ msgstr "Last signed in: {0}"
-
-#. 0: pastUser.lastLoggedInDate.toLocaleDateString()
 #. 0: pastUser.lastLoggedInDate.toLocaleDateString()
 #: src/routes/(flow)/+layout.svelte
-#: src/routes/sign-in/+page.svelte
 msgid "Last signed in at: {0}"
 msgstr "Last signed in at: {0}"
 
-#~ msgid "Sign up instead"
-#~ msgstr "Sign up instead"
-
-#~ msgid "Don't have an account yet? <0>Sign up instead</0>"
-#~ msgstr "Don't have an account yet? <0>Sign up instead</0>"
-
 #: src/routes/(flow)/sign-in/+page.svelte
-#: src/routes/sign-in/+page.svelte
 msgid "Don't have an account yet? <0>Sign up</0> here."
 msgstr "Don't have an account yet? <0>Sign up</0> here."
 
-#~ msgid "Sign into"
-#~ msgstr "Sign into"
-
 #: src/routes/(flow)/sign-in/+page.svelte
-#: src/routes/sign-in/+page.svelte
 msgid "Sign into your KSI Account"
 msgstr "Sign into your KSI Account"
 
@@ -193,8 +110,6 @@ msgstr "Sign into your KSI Account"
 #: src/routes/(flow)/sign-in/+page.svelte
 #: src/routes/(flow)/sign-up/+page.svelte
 #: src/routes/(flow)/sign-up/+page.svelte
-#: src/routes/sign-in/+page.svelte
-#: src/routes/sign-in/+page.svelte
 msgid "Username"
 msgstr "Username"
 
@@ -202,53 +117,12 @@ msgstr "Username"
 #: src/routes/(flow)/sign-in/+page.svelte
 #: src/routes/(flow)/sign-up/+page.svelte
 #: src/routes/(flow)/sign-up/+page.svelte
-#: src/routes/sign-in/+page.svelte
-#: src/routes/sign-in/+page.svelte
 msgid "Password"
 msgstr "Password"
-
-#~ msgid "k"
-#~ msgstr "k"
-
-#~ msgid "Submit"
-#~ msgstr "Submit"
-
-#~ msgid "or use our"
-#~ msgstr "or use our"
-
-#~ msgid "or use our providers"
-#~ msgstr "or use our providers"
-
-#~ msgid "or use 3rd party providers"
-#~ msgstr "or use 3rd party providers"
-
-#~ msgid "div.or use 3rd party providers"
-#~ msgstr "div.or use 3rd party providers"
-
-#~ msgid "div.w-full.h-px.or use 3rd party providers"
-#~ msgstr "div.w-full.h-px.or use 3rd party providers"
-
-#~ msgid "<0/>or use 3rd party providers"
-#~ msgstr "<0/>or use 3rd party providers"
-
-#~ msgid "<0/> or use 3rd party providers"
-#~ msgstr "<0/> or use 3rd party providers"
-
-#~ msgid "<0/> or use 3rd party providers <1/>"
-#~ msgstr "<0/> or use 3rd party providers <1/>"
-
-#~ msgid "<0/> <1/> or use 3rd party providers <2/>"
-#~ msgstr "<0/> <1/> or use 3rd party providers <2/>"
 
 #: src/routes/(flow)/+layout.svelte
 msgid "SIGN IN"
 msgstr "SIGN IN"
-
-#~ msgid "di <0><0><0>Welcome back</0> <1>Choose one of your previous sessions</1></0> <1><0>Previous sessions</0> <1>Clear history <0/></1></1> <2><0/></2></0>"
-#~ msgstr "di <0><0><0>Welcome back</0> <1>Choose one of your previous sessions</1></0> <1><0>Previous sessions</0> <1>Clear history <0/></1></1> <2><0/></2></0>"
-
-#~ msgid "<0/> SIGN IN"
-#~ msgstr "<0/> SIGN IN"
 
 #: src/routes/(flow)/+layout.svelte
 msgid "SIGN UP"
@@ -300,18 +174,9 @@ msgstr "Differs from chosen password"
 msgid "Issues to fix:"
 msgstr "Issues to fix:"
 
-#~ msgid "Too short"
-#~ msgstr "Too short"
-
 #: src/routes/(flow)/sign-up/+page.svelte
 msgid "Too short, minimum: 6 characters"
 msgstr "Too short, minimum: 6 characters"
-
-#~ msgid "Too long, minimum: 6 characters"
-#~ msgstr "Too long, minimum: 6 characters"
-
-#~ msgid "Too long, maximum: 6 characters"
-#~ msgstr "Too long, maximum: 6 characters"
 
 #: src/routes/(flow)/sign-up/+page.svelte
 #: src/routes/(flow)/sign-up/+page.svelte
@@ -323,18 +188,9 @@ msgstr "Too long, maximum: 32 characters"
 msgid "Too short, minimum: 3 characters"
 msgstr "Too short, minimum: 3 characters"
 
-#~ msgid "Fix the errors"
-#~ msgstr "Fix the errors"
-
 #: src/routes/(flow)/sign-up/+page.svelte
 msgid "Fix the errors in input fields before submitting"
 msgstr "Fix the errors in input fields before submitting"
-
-#~ msgid "An unknown error occurred"
-#~ msgstr "An unknown error occurred"
-
-#~ msgid "An unknown error occurred while creating your account"
-#~ msgstr "An unknown error occurred while creating your account"
 
 #: src/routes/(flow)/sign-in/+page.svelte
 #: src/routes/(flow)/sign-up/+page.svelte
@@ -354,21 +210,9 @@ msgstr "Too long, maximum: 30 characters"
 msgid "Too long, maximum: 64 characters"
 msgstr "Too long, maximum: 64 characters"
 
-#~ msgid "Username is not available"
-#~ msgstr "Username is not available"
-
-#~ msgid "This Username is not available"
-#~ msgstr "This Username is not available"
-
-#~ msgid "This username is not available"
-#~ msgstr "This username is not available"
-
 #: src/routes/(flow)/sign-up/+page.svelte
 msgid "This username is taken"
 msgstr "This username is taken"
-
-#~ msgid "An unknown error has occurred during username "
-#~ msgstr "An unknown error has occurred during username "
 
 #: src/routes/(flow)/sign-up/+page.svelte
 msgid "An unknown error has occurred during username availability check"
