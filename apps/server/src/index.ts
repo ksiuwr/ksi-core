@@ -18,22 +18,33 @@ const betterAuthView = (context: Context) => {
 discordBot.ping();
 
 const app = new Elysia()
+  // .use(
+  //   cors({
+  //     origin: (c) => {
+  //       const origin = c.headers.get('origin');
+  //       if (!origin) return false;
+  //       const allowedOrigins = [getUrls().frontend.auth, getUrls().frontend.landing];
+  //       return allowedOrigins.includes(origin);
+  //     },
+  //     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  //     credentials: true,
+  //     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
+  //   })
+  // )
+  // .onAfterHandle((c) => {
+  //   /*
+  //     Temporary workaround, [@elysia/cors is not behaving](https://github.com/elysiajs/elysia-cors/issues/67).
+  //   */
+  //   c.set.headers['access-control-allow-origin'] = getUrls().frontend.landing;
+  // })
   .use(
     cors({
-      origin: (c) => {
-        return c.headers.get('origin') === getUrls().FRONTEND;
-      },
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
       credentials: true,
-      allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
+      methods: ['GET', 'POST', 'PUT', 'OPTIONS', 'DELETE', 'PATCH'],
+      origin: getUrls().frontend.all
     })
   )
-  .onAfterHandle((c) => {
-    /*
-      Temporary workaround, [@elysia/cors is not behaving](https://github.com/elysiajs/elysia-cors/issues/67).
-    */
-    c.set.headers['access-control-allow-origin'] = getUrls().FRONTEND;
-  })
   .all('/auth/*', betterAuthView)
   .use(routes)
   .listen(3000);

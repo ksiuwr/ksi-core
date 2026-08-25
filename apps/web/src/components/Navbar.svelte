@@ -245,7 +245,7 @@
               authClient.signIn
                 .social({
                   provider: 'discord',
-                  callbackURL: getUrls().FRONTEND + '/dashboard'
+                  callbackURL: getUrls().frontend.landing + '/dashboard'
                 })
                 .catch((error) => {
                   if (error instanceof Error) {
