@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { themeStore } from '$lib/themeStore';
+  import { themeStore } from '@ksi-core/ui/lib';
   import { Moon, Sun } from '@lucide/svelte';
 </script>
 

@@ -28,7 +28,8 @@
     "paths": {
       "@ksi-core/server/*": ["./apps/server/src/*"],
       "@ksi-core/web/*": ["./apps/web/src/*"],
-      "@ksi-core/shared": ["./packages/shared/index"]
+      "@ksi-core/shared": ["./packages/shared/index"],
+      "@ksi-core/ui": ["./packages/ui/index"]
     }
   }
 }
