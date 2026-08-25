@@ -27,8 +27,8 @@ FROM base AS prod-deps
 WORKDIR /app
 COPY apps/landing/package.json ./package.json
 
-# "shared" uses workspace:* protocol and is already bundled by Vite — strip it
 RUN sed -i '/"shared":/d' package.json
+RUN sed -i '/"@ksi-core\/ui":/d' package.json
 
 RUN bun install --production --ignore-scripts
 
