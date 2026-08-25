@@ -1,21 +1,27 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { db } from '@ksi-core/server/db';
-import { getUrls } from '@ksi-core/shared';
 import * as schema from '../db/schema';
+import { db } from '../db';
+import { getUrls } from '@ksi-core/shared';
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: 'pg',
     schema: schema,
-    usePlural: true
+    usePlural: true,
+    camelCase: true
   }),
+  emailAndPassword: { enabled: true },
   trustedOrigins: getUrls().frontend.all,
   baseURL: getUrls().backend + '/auth',
   socialProviders: {
     discord: {
-      clientId: Bun.env.OAUTH2_DISCORD_ID!,
-      clientSecret: Bun.env.OAUTH2_DISCORD_SECRET!
+      clientId: process.env.OAUTH2_DISCORD_ID!,
+      clientSecret: process.env.OAUTH2_DISCORD_SECRET!
+    },
+    google: {
+      clientId: process.env.OAUTH2_GOOGLE_ID!,
+      clientSecret: process.env.OAUTH2_GOOGLE_SECRET!
     }
   }
 });

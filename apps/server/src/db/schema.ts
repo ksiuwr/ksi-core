@@ -37,6 +37,7 @@ export const accounts = snakeCase.table('accounts', {
   id: text().primaryKey().$defaultFn(createId),
   accountId: text().notNull(),
   providerId: text().notNull(),
+  issuer: text().notNull(),
   userId: text()
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
