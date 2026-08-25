@@ -3,6 +3,7 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import * as schema from '../db/schema';
 import { db } from '../db';
 import { getUrls } from '@ksi-core/shared';
+import { username } from 'better-auth/plugins';
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -11,7 +12,20 @@ export const auth = betterAuth({
     usePlural: true,
     camelCase: true
   }),
-  emailAndPassword: { enabled: true },
+  emailAndPassword: {
+    enabled: true
+  },
+  plugins: [
+    username({
+      usernameNormalization: (username) => {
+        return username
+          .toLowerCase()
+          .replaceAll('0', 'o')
+          .replaceAll('3', 'e')
+          .replaceAll('4', 'a');
+      }
+    })
+  ],
   trustedOrigins: getUrls().frontend.all,
   baseURL: getUrls().backend + '/auth',
   socialProviders: {

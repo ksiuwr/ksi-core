@@ -3,6 +3,8 @@ import { text, timestamp, boolean, integer, pgEnum, snakeCase } from 'drizzle-or
 
 export const users = snakeCase.table('users', {
   id: text().primaryKey().$defaultFn(createId),
+  username: text().unique(),
+  displayUsername: text(),
   name: text().notNull(),
   email: text().notNull().unique(),
   emailVerified: boolean().default(false).notNull(),
