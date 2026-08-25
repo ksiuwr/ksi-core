@@ -42,7 +42,9 @@
   let validate = {
     email: () => {
       try {
-        z.email().max(64, { message: 'Too long, maximum: 64 characters' }).parse(formState.email);
+        z.email()
+          .max(64, { message: `Too long, maximum: ${64} characters` })
+          .parse(formState.email);
       } catch (e) {
         if (e instanceof z.ZodError) {
           return z.treeifyError(e).errors;
@@ -54,8 +56,8 @@
     name: () => {
       try {
         z.string()
-          .min(3, { message: 'Too short, minimum: 3 characters' })
-          .max(32, { message: 'Too long, maximum: 32 characters' })
+          .min(3, { message: `Too short, minimum: ${3} characters` })
+          .max(32, { message: `Too long, maximum: ${32} characters` })
           .parse(formState.name);
       } catch (e) {
         if (e instanceof z.ZodError) {
@@ -67,8 +69,8 @@
     username: async () => {
       try {
         z.string()
-          .min(3, { message: 'Too short, minimum: 3 characters' })
-          .max(30, { message: 'Too long, maximum: 30 characters' })
+          .min(3, { message: `Too short, minimum: ${3} characters` })
+          .max(30, { message: `Too long, maximum: ${30} characters` })
           .parse(formState.username);
       } catch (e) {
         if (e instanceof z.ZodError) {
@@ -93,8 +95,8 @@
     password: () => {
       try {
         z.string()
-          .min(6, { message: 'Too short, minimum: 6 characters' })
-          .max(32, { message: 'Too long, maximum: 32 characters' })
+          .min(6, { message: `Too short, minimum: ${6} characters` })
+          .max(32, { message: `Too long, maximum: ${32} characters` })
           .refine((password) => /[A-Z]/.test(password), {
             message: 'Missing an uppercase letter'
           })

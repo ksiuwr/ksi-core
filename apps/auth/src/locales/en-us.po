@@ -175,20 +175,6 @@ msgid "Issues to fix:"
 msgstr "Issues to fix:"
 
 #: src/routes/(flow)/sign-up/+page.svelte
-msgid "Too short, minimum: 6 characters"
-msgstr "Too short, minimum: 6 characters"
-
-#: src/routes/(flow)/sign-up/+page.svelte
-#: src/routes/(flow)/sign-up/+page.svelte
-msgid "Too long, maximum: 32 characters"
-msgstr "Too long, maximum: 32 characters"
-
-#: src/routes/(flow)/sign-up/+page.svelte
-#: src/routes/(flow)/sign-up/+page.svelte
-msgid "Too short, minimum: 3 characters"
-msgstr "Too short, minimum: 3 characters"
-
-#: src/routes/(flow)/sign-up/+page.svelte
 msgid "Fix the errors in input fields before submitting"
 msgstr "Fix the errors in input fields before submitting"
 
@@ -203,14 +189,6 @@ msgid "Name"
 msgstr "Name"
 
 #: src/routes/(flow)/sign-up/+page.svelte
-msgid "Too long, maximum: 30 characters"
-msgstr "Too long, maximum: 30 characters"
-
-#: src/routes/(flow)/sign-up/+page.svelte
-msgid "Too long, maximum: 64 characters"
-msgstr "Too long, maximum: 64 characters"
-
-#: src/routes/(flow)/sign-up/+page.svelte
 msgid "This username is taken"
 msgstr "This username is taken"
 
@@ -221,3 +199,23 @@ msgstr "An unknown error has occurred during username availability check"
 #: src/routes/(flow)/sign-up/+page.svelte
 msgid "Username is available!"
 msgstr "Username is available!"
+
+#. 0: 64
+#. 0: 32
+#. 0: 30
+#. 0: 32
+#: src/routes/(flow)/sign-up/+page.svelte
+#: src/routes/(flow)/sign-up/+page.svelte
+#: src/routes/(flow)/sign-up/+page.svelte
+#: src/routes/(flow)/sign-up/+page.svelte
+msgid "Too long, maximum: {0} characters"
+msgstr "Too long, maximum: {0} characters"
+
+#. 0: 3
+#. 0: 3
+#. 0: 6
+#: src/routes/(flow)/sign-up/+page.svelte
+#: src/routes/(flow)/sign-up/+page.svelte
+#: src/routes/(flow)/sign-up/+page.svelte
+msgid "Too short, minimum: {0} characters"
+msgstr "Too short, minimum: {0} characters"
