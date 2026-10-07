@@ -1,16 +1,14 @@
 <script lang="ts">
-  import { ChevronDown, ChevronUp, LogIn, LogOut, Menu } from '@lucide/svelte';
+  import { LogIn, LogOut, Menu } from '@lucide/svelte';
   import { locale, setLocale } from '$lib/locale.svelte';
   import { locales } from '../locales/data';
   import type { User, Session } from '@ksi-core/server/lib/auth.types';
-  import { page } from '$app/stores';
   import Alert from './Alert.svelte';
   import type { api } from '$lib/backend';
   import ThemeButton from './ThemeButton.svelte';
   import { authClient } from '$lib/auth-client';
   import { toast } from 'svelte-sonner';
   import { invalidateAll } from '$app/navigation';
-  import { getUrls } from 'shared';
 
   interface Props {
     alert: NonNullable<Awaited<ReturnType<typeof api.alerts.current.get>>['data']>;
