@@ -12,11 +12,6 @@ msgstr ""
 msgid "© KSI {0}"
 msgstr "© KSI {0}"
 
-#: src/components/Navbar.svelte
-msgid "Toggle sidebar"
-msgstr "Przełącz panel boczny"
-
-#: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
 #: src/components/Wrapper.svelte
 msgid "Home"
@@ -173,7 +168,6 @@ msgstr "Członkowie zespołu"
 msgid "The \"Hour of Code\" classes organized by the Computer Science Students' Club of the University of Wrocław introduce students to the Python programming language. They are intended for primary school students in grades 4-8. The classes consist of two parts:"
 msgstr "Zajęcia „Godzina Kodowania” organizowane przez Koło Studentów Informatyki Uniwersytetu Wrocławskiego wprowadzają uczniów w język programowania Python. Przeznaczone są dla uczniów szkół podstawowych z klas 4-8. Zajęcia składają się z dwóch części:"
 
-#: src/components/Navbar.svelte
 #: src/routes/projects/ml/krasnal/+page.svelte
 msgid "Krasnal is a chess engine developed in Wrocław, based on the Transformer architecture. It utilizes deep neural networks to learn to play chess intuitively, departing from traditional, heavy calculations and game tree searching."
 msgstr "Krasnal to silnik szachowy rozwijany we Wrocławiu, oparty na architekturze Transformer. Wykorzystuje głębokie sieci neuronowe do intuicyjnej nauki gry w szachy, odchodząc od tradycyjnych, ciężkich obliczeń i przeszukiwania drzewa gry."
@@ -250,7 +244,6 @@ msgstr "Alerty"
 
 #: src/components/Footer.svelte
 #: src/components/Navbar.svelte
-#: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
 msgid "Projects"
 msgstr "Projekty"
@@ -263,7 +256,6 @@ msgstr "Jasny"
 msgid "Dark"
 msgstr "Ciemny"
 
-#: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
 msgid "Zosia"
 msgstr "Zosia"
@@ -272,34 +264,9 @@ msgstr "Zosia"
 msgid "details"
 msgstr "szczegóły"
 
-#: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
 msgid "Member access"
 msgstr "Dostęp dla członków"
-
-#: src/components/Navbar.svelte
-msgid "Date: 05.03.2026 - 08.03.2026"
-msgstr "Data: 05.03.2026 - 08.03.2026"
-
-#: src/components/Navbar.svelte
-msgid "Number of participants: 274"
-msgstr "Liczba uczestników: 274"
-
-#: src/components/Navbar.svelte
-msgid "Number of participants: 217"
-msgstr "Liczba uczestników: 217"
-
-#: src/components/Navbar.svelte
-msgid "Date: 28.02.2025 - 03.03.2025"
-msgstr "Data: 28.02.2025 - 03.03.2025"
-
-#: src/components/Navbar.svelte
-msgid "Number of participants: 263"
-msgstr "Liczba uczestników: 263"
-
-#: src/components/Navbar.svelte
-msgid "Date: 22.02.2024 - 25.02.2024"
-msgstr "Data: 22.02.2024 - 25.02.2024"
 
 #: src/components/Sidebar.svelte
 #: src/routes/+page.svelte
@@ -307,12 +274,10 @@ msgstr "Data: 22.02.2024 - 25.02.2024"
 msgid "Hour of Code"
 msgstr "Hour of Code"
 
-#: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
 msgid "Machine Learning"
 msgstr "Uczenie maszynowe"
 
-#: src/components/Navbar.svelte
 #: src/routes/+page.svelte
 #: src/routes/projects/+page.svelte
 #: src/routes/projects/ml/+page.svelte
@@ -320,19 +285,10 @@ msgstr "Uczenie maszynowe"
 msgid "Krasnal"
 msgstr "Krasnal"
 
-#: src/components/Navbar.svelte
 #: src/routes/projects/+page.svelte
 #: src/routes/projects/ml/+page.svelte
 msgid "Physarum"
 msgstr "Physarum"
-
-#: src/components/Navbar.svelte
-msgid "Can a Slime Mold train Neural Networks? It turns out to be a fascinating subject, intersecting the computational biology and AI."
-msgstr "Czy śluzowiec może trenować sieci neuronowe? Okazuje się, że to fascynujący temat z pogranicza biologii obliczeniowej i AI."
-
-#: src/components/Navbar.svelte
-msgid "and more..."
-msgstr "i więcej..."
 
 #: src/components/ThemeButton.svelte
 msgid "<0/> Light mode"
@@ -377,15 +333,6 @@ msgstr "Wylogowano"
 #: src/components/Navbar.svelte
 msgid "{0}'s profile picture"
 msgstr "Zdjęcie profilowe użytkownika {0}"
-
-#: src/components/Navbar.svelte
-#: src/components/Navbar.svelte
-msgid "Scroll to content"
-msgstr "Przewiń do treści"
-
-#: src/components/Navbar.svelte
-msgid "Scroll to top"
-msgstr "Przewiń do góry"
 
 #: src/components/Navbar.svelte
 msgid "KSI"
@@ -1416,28 +1363,15 @@ msgstr "Rewizja {0}"
 msgid "We build projects driven by curiosity"
 msgstr "Tworzymy projekty napędzane ciekawością"
 
-#. 0: alert.title
-#: src/components/Navbar.svelte
-msgid "Scroll to top to view alert: {0}"
-msgstr "Przewiń do góry by zobaczyć ogłoszenie: {0}"
-
-#: src/components/Navbar.svelte
-msgid "Scroll up to view alert"
-msgstr "Przewiń do góry by zobaczyć ogłoszenie"
-
-#: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
 msgid "Unknown error occurred"
 msgstr "Wystąpił nieznany błąd"
 
-#: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
 msgid "Network error when trying to sign in"
 msgstr "Błąd sieciowy podczas logowania"
 
 #. 0: error.message
-#. 0: error.message
-#: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
 msgid "Unknown error occurred ({0})"
 msgstr "Wystąpił nieznany błąd ({0})"
