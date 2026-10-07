@@ -70,7 +70,7 @@ services:
   frontend:
     build:
       context: ..
-      dockerfile: apps/web/Dockerfile
+      dockerfile: apps/landing/Dockerfile
     container_name: ksi-frontend-local
     restart: unless-stopped
     networks:

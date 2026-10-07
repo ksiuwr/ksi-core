@@ -1,5 +1,5 @@
 {
-  "name": "@ksi-core/web",
+  "name": "@ksi-core/auth",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -17,13 +17,15 @@
   },
   "dependencies": {
     "@elysiajs/eden": "^1.4.9",
+    "@icons-pack/svelte-simple-icons": "^7.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "defu": "^6.1.7",
     "ms": "^2.1.3",
     "nanostores": "^1.4.2",
     "tailwind-merge": "^3.6.0",
-    "wuchale": "^0.25.6"
+    "wuchale": "^0.25.6",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@eslint/compat": "^1.4.1",

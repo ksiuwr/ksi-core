@@ -3,7 +3,7 @@ WORKDIR /app
 
 COPY package.json bun.lock tsconfig.base.json ./
 
-COPY apps/web/package.json ./apps/web/package.json
+COPY apps/landing/package.json ./apps/landing/package.json
 COPY apps/server/package.json ./apps/server/package.json
 
 COPY apps/server ./apps/server

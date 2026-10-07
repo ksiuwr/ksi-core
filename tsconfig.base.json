@@ -27,7 +27,7 @@
     "rootDir": ".",
     "paths": {
       "@ksi-core/server/*": ["./apps/server/src/*"],
-      "@ksi-core/web/*": ["./apps/web/src/*"],
+      "@ksi-core/web/*": ["./apps/landing/src/*"],
       "@ksi-core/shared": ["./packages/shared/index"],
       "@ksi-core/ui": ["./packages/ui/index"]
     }

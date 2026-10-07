@@ -1,0 +1,221 @@
+msgid ""
+msgstr ""
+"Plural-Forms: nplurals=2; plural=n == 1 ? 0 : 1;\n"
+"Source-Language: en-us\n"
+"Language: pl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. 0: new Date().getFullYear()
+#: src/components/Footer.svelte
+msgid "© KSI {0}"
+msgstr "© KSI {0}"
+
+#: src/components/ThemeButton.svelte
+#: src/components/ThemeButton.svelte
+msgid "Toggle theme"
+msgstr "Zmień motyw"
+
+#: src/components/ThemeButton.svelte
+msgid "Light"
+msgstr "Jasny"
+
+#: src/components/ThemeButton.svelte
+msgid "Dark"
+msgstr "Ciemny"
+
+#: src/components/ThemeButton.svelte
+msgid "<0/> Light mode"
+msgstr "<0/> Tryb jasny"
+
+#: src/components/ThemeButton.svelte
+msgid "<0/> Dark mode"
+msgstr "<0/> Tryb ciemny"
+
+#. 0: page.status
+#: src/routes/+error.svelte
+msgid "{0} · KSI UWr"
+msgstr "{0} · KSI UWr"
+
+#: src/routes/+error.svelte
+msgid "The page may have moved, or something went wrong while loading it."
+msgstr "Strona mogła zostać przeniesiona lub wystąpił błąd podczas jej wczytywania."
+
+#: src/routes/+error.svelte
+msgid "<0/> Return home"
+msgstr "<0/> Wróć na stronę główną"
+
+#: src/components/Footer.svelte
+msgid "<0/> Source code <1/>"
+msgstr "<0/> Kod źródłowy <1/>"
+
+#: src/components/Footer.svelte
+msgid "Change language"
+msgstr "Zmień język"
+
+#. 0: commitHash
+#: src/components/Footer.svelte
+msgid "Commit {0}"
+msgstr "Rewizja {0}"
+
+#: src/routes/+layout.svelte
+msgid "KSI Auth"
+msgstr "KSI Auth"
+
+#. 0: page.status
+#: src/routes/+error.svelte
+msgid "{0} · This path led somewhere unexpected."
+msgstr "{0} · Ta ścieżka prowadzi w nieznane."
+
+#: src/routes/(flow)/+layout.svelte
+msgid "Welcome back"
+msgstr "Witaj ponownie"
+
+#: src/routes/(flow)/sign-in/+page.svelte
+msgid "Sign in"
+msgstr "Zaloguj się"
+
+#: src/routes/(flow)/+layout.svelte
+msgid "Choose one of your previous sessions"
+msgstr "Wybierz jedną z poprzednich sesji"
+
+#: src/routes/(flow)/+layout.svelte
+msgid "Previous sessions"
+msgstr "Poprzednie sesje"
+
+#: src/routes/(flow)/+layout.svelte
+msgid "Clear history <0/>"
+msgstr "Wyczyść historię <0/>"
+
+#. 0: pastUser.username
+#: src/routes/(flow)/+layout.svelte
+msgid "{0}'s avatar"
+msgstr "Awatar użytkownika {0}"
+
+#. 0: pastUser.lastLoggedInDate.toLocaleDateString()
+#: src/routes/(flow)/+layout.svelte
+msgid "Last signed in at: {0}"
+msgstr "Ostatnio zalogowano: {0}"
+
+#: src/routes/(flow)/sign-in/+page.svelte
+msgid "Don't have an account yet? <0>Sign up</0> here."
+msgstr "Nie masz jeszcze konta? <0>Zarejestruj się</0> tutaj."
+
+#: src/routes/(flow)/sign-in/+page.svelte
+msgid "Sign into your KSI Account"
+msgstr "Zaloguj się do konta KSI"
+
+#: src/routes/(flow)/sign-in/+page.svelte
+#: src/routes/(flow)/sign-in/+page.svelte
+#: src/routes/(flow)/sign-up/+page.svelte
+#: src/routes/(flow)/sign-up/+page.svelte
+msgid "Username"
+msgstr "Nazwa użytkownika"
+
+#: src/routes/(flow)/sign-in/+page.svelte
+#: src/routes/(flow)/sign-in/+page.svelte
+#: src/routes/(flow)/sign-up/+page.svelte
+#: src/routes/(flow)/sign-up/+page.svelte
+msgid "Password"
+msgstr "Hasło"
+
+#: src/routes/(flow)/+layout.svelte
+msgid "SIGN IN"
+msgstr "ZALOGUJ SIĘ"
+
+#: src/routes/(flow)/+layout.svelte
+msgid "SIGN UP"
+msgstr "ZAREJESTRUJ SIĘ"
+
+#: src/routes/(flow)/sign-up/+page.svelte
+msgid "Create a KSI Account"
+msgstr "Utwórz konto KSI"
+
+#: src/routes/(flow)/sign-up/+page.svelte
+msgid "Already have an account? <0>Sign in</0> here."
+msgstr "Masz już konto? <0>Zaloguj się</0> tutaj."
+
+#: src/routes/(flow)/sign-up/+page.svelte
+#: src/routes/(flow)/sign-up/+page.svelte
+msgid "E-mail"
+msgstr "E-mail"
+
+#: src/routes/(flow)/sign-up/+page.svelte
+#: src/routes/(flow)/sign-up/+page.svelte
+msgid "Confirm Password"
+msgstr "Potwierdź hasło"
+
+#: src/routes/(flow)/sign-up/+page.svelte
+msgid "Sign up"
+msgstr "Zarejestruj się"
+
+#: src/routes/(flow)/sign-up/+page.svelte
+msgid "Missing an uppercase letter"
+msgstr "Brak dużej litery"
+
+#: src/routes/(flow)/sign-up/+page.svelte
+msgid "Missing an lowercase letter"
+msgstr "Brak małej litery"
+
+#: src/routes/(flow)/sign-up/+page.svelte
+msgid "Missing a digit"
+msgstr "Brak cyfry"
+
+#: src/routes/(flow)/sign-up/+page.svelte
+msgid "Missing a special character (!@#$%^&*-?)"
+msgstr "Brak znaku specjalnego (!@#$%^&*-?)"
+
+#: src/routes/(flow)/sign-up/+page.svelte
+msgid "Differs from chosen password"
+msgstr "Różni się od wybranego hasła"
+
+#: src/components/InputErrors.svelte
+msgid "Issues to fix:"
+msgstr "Problemy do poprawienia:"
+
+#: src/routes/(flow)/sign-up/+page.svelte
+msgid "Fix the errors in input fields before submitting"
+msgstr "Popraw błędy w polach przed wysłaniem"
+
+#: src/routes/(flow)/sign-in/+page.svelte
+#: src/routes/(flow)/sign-up/+page.svelte
+msgid "An unknown error occurred while creating your account."
+msgstr "Wystąpił nieznany błąd podczas tworzenia konta."
+
+#: src/routes/(flow)/sign-up/+page.svelte
+#: src/routes/(flow)/sign-up/+page.svelte
+msgid "Name"
+msgstr "Imię"
+
+#: src/routes/(flow)/sign-up/+page.svelte
+msgid "This username is taken"
+msgstr "Ta nazwa użytkownika jest zajęta"
+
+#: src/routes/(flow)/sign-up/+page.svelte
+msgid "An unknown error has occurred during username availability check"
+msgstr "Wystąpił nieznany błąd podczas sprawdzania dostępności nazwy użytkownika"
+
+#: src/routes/(flow)/sign-up/+page.svelte
+msgid "Username is available!"
+msgstr "Nazwa użytkownika jest dostępna!"
+
+#. 0: 64
+#. 0: 32
+#. 0: 30
+#. 0: 32
+#: src/routes/(flow)/sign-up/+page.svelte
+#: src/routes/(flow)/sign-up/+page.svelte
+#: src/routes/(flow)/sign-up/+page.svelte
+#: src/routes/(flow)/sign-up/+page.svelte
+msgid "Too long, maximum: {0} characters"
+msgstr "Zbyt długie, maksimum: {0} znaków"
+
+#. 0: 3
+#. 0: 3
+#. 0: 6
+#: src/routes/(flow)/sign-up/+page.svelte
+#: src/routes/(flow)/sign-up/+page.svelte
+#: src/routes/(flow)/sign-up/+page.svelte
+msgid "Too short, minimum: {0} characters"
+msgstr "Zbyt krótkie, minimum: {0} znaków"
