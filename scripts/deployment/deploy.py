@@ -175,7 +175,9 @@ def promote(cluster, branch, commit, images):
             if dependency['name'].startswith(slug + '-'):
                 dependency['readyExpr'] = "dep.metadata.labels['ksi.release'] == self.metadata.labels['ksi.release'] && dep.metadata.generation == dep.status.observedGeneration && dep.status.conditions.exists(c, c.type == 'Ready' && c.status == 'True')"
     document(target / 'flux.yaml', {'apiVersion': 'v1', 'kind': 'List', 'items': definitions})
-    configure_cleanup_controller(cluster, images['server'])
+    if production:
+        # The cleanup job holds preview database and DNS credentials, so it only runs images built from master.
+        configure_cleanup_controller(cluster, images['server'])
     refresh(cluster)
     return slug
 
