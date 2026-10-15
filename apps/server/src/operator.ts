@@ -7,6 +7,7 @@ import { db, auditEvents, outbox, sessions, users } from './db';
 import { auth } from './lib/auth';
 import { effectivePermissions, type Role } from './domain/permissions';
 import { anonymizeUser, manageUser } from './services/users';
+import { rejectExampleSecrets } from './lib/example-secrets';
 import { getUrls } from 'shared';
 
 const help = `KSI operator — execute inside the target namespace with its runtime Secret.
@@ -64,6 +65,7 @@ async function newAccount(options: Record<string, string>) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('INVALID_EMAIL');
   const password = Bun.env.KSI_BOOTSTRAP_PASSWORD;
   if (!password || password.length < 12) throw new Error('KSI_BOOTSTRAP_PASSWORD_MIN_12');
+  rejectExampleSecrets(['KSI_BOOTSTRAP_PASSWORD']);
   const result = await auth.api.signUpEmail({
     body: { email, password, name: need(options, 'name') }
   });
@@ -87,6 +89,7 @@ function databaseEnvironment() {
 async function backup(file: string) {
   if (!Bun.env.KSI_BACKUP_KEY || Bun.env.KSI_BACKUP_KEY.length < 32)
     throw new Error('KSI_BACKUP_KEY_MIN_32');
+  rejectExampleSecrets(['KSI_BACKUP_KEY']);
   const dump = Bun.spawn(['pg_dump', '--format=custom', '--no-owner', '--no-privileges'], {
     env: databaseEnvironment(),
     stdout: 'pipe',
