@@ -48,8 +48,9 @@ Bootstrap once from a trusted admin machine:
    the preview Environment secret `PREVIEW_KUBECONFIG_B64`.
 4. Configure wildcard `*.ksi.edu.pl` DNS and make its origin certificate the
    ingress-nginx default certificate. Per-branch DNS credentials are not needed.
-5. Configure required reviewers on the `preview` Environment. Preventing self-review
-   requires a second maintainer to approve each preview.
+5. Configure maintainers as required reviewers on the `preview` Environment. Leave
+   **Prevent self-review** disabled so an authorized PR author can approve their own
+   preview. Pull request merge approval remains controlled by branch protection.
 
 After approval, CI verifies that the branch still has an open pull request, provisions
 the branch database, migrates and seeds it, rolls out the workloads, and publishes the
