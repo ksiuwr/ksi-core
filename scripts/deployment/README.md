@@ -11,8 +11,10 @@ digest built from the merge-base. Server, shared package, lockfile, and containe
 changes rebuild every image. UI package changes rebuild all three frontends.
 
 Promotion requires a fine-grained `CLUSTER_WRITE_TOKEN` with contents write access
-to `ksiuwr/ksi-cluster`. It does not require SOPS, Flux, production application
-secrets, Cloudflare credentials, or Kubernetes credentials.
+to `ksiuwr/ksi-cluster` and the `PRODUCTION_KUBECONFIG_B64` secret in the protected
+`production` GitHub Environment. The kubeconfig belongs to a ServiceAccount that can
+patch only the existing production Deployments, Services, and Ingress by name. It
+cannot access preview resources or create/delete production resources.
 
 `promote_manifest.py` accepts exactly one server, web, auth, and dashboard image.
 It requires the expected GHCR repository and an immutable `sha256` digest for each
@@ -27,9 +29,11 @@ The final job verifies that `master` still points at the commit whose images wer
 built before it pushes the cluster commit. Cluster writes are serialized, and a
 non-fast-forward push fails safely.
 
-The cluster currently applies `production-platform.yaml` manually. Committing a
-promotion records the tested production version but does not contact Kubernetes.
-Automated rollout requires a separate deployment runner with cluster credentials.
+After CI confirms the tested commit is still the current `master`, it commits the
+production image digests to `ksi-cluster`, applies that manifest to Kubernetes, and
+waits for all four production Deployments to become ready. If the rollout fails, the
+manifest commit records the intended tested digests and the workflow reports failure;
+roll back by promoting the previous known-good image digests.
 
 ## Pull request previews
 

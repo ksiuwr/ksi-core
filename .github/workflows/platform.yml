@@ -286,3 +286,21 @@ jobs:
             git -C cluster commit -m "Deploy tested $COMMIT"
             git -C cluster push
           fi
+      - uses: azure/setup-kubectl@776406bce94f63e41d621b960d78ee25c8b76ede # v4.0.1
+        with:
+          version: v1.34.0
+      - name: Configure production-only cluster access
+        env:
+          PRODUCTION_KUBECONFIG_B64: ${{ secrets.PRODUCTION_KUBECONFIG_B64 }}
+        run: |
+          test -n "$PRODUCTION_KUBECONFIG_B64"
+          install -d -m 700 "$RUNNER_TEMP/kube"
+          printf '%s' "$PRODUCTION_KUBECONFIG_B64" | base64 --decode >"$RUNNER_TEMP/kube/config"
+          chmod 600 "$RUNNER_TEMP/kube/config"
+          echo "KUBECONFIG=$RUNNER_TEMP/kube/config" >>"$GITHUB_ENV"
+      - name: Apply production manifest and wait for rollout
+        run: |
+          kubectl apply -f cluster/production-platform.yaml
+          for app in server web auth dashboard; do
+            kubectl -n ksi-production rollout status "deployment/$app" --timeout=10m
+          done
