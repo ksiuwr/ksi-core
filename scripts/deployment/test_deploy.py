@@ -36,6 +36,8 @@ class DeploymentTest(unittest.TestCase):
             web = json.loads((target / 'workloads' / 'web.yaml').read_text())['spec']['template']['spec']['containers'][0]
             self.assertFalse(any('secretRef' in item for item in web['envFrom']))
             self.assertEqual(web['image'], images['web'])
+            dashboard = json.loads((target / 'workloads' / 'dashboard.yaml').read_text())['spec']['template']['spec']['containers'][0]
+            self.assertIn({'name': 'BODY_SIZE_LIMIT', 'value': '21M'}, dashboard['env'])
             cleanup(cluster, branch)
             self.assertFalse(target.exists())
             self.assertTrue((cluster / 'cleanup' / slug / 'release.json').exists())
