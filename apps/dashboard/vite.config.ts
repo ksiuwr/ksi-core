@@ -12,6 +12,7 @@ if (!commit) {
   } catch {}
 }
 export default defineConfig({
+  envDir: '../..',
   plugins: [wuchale(), sveltekit()],
   define: {
     'import.meta.env.PUBLIC_COMMIT_HASH': JSON.stringify(commit),
