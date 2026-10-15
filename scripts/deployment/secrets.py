@@ -48,6 +48,8 @@ def bootstrap(cluster, branch, recipient):
         # Per-environment session and proxy authorities, regardless of shared preview provider IDs.
         values['BETTER_AUTH_SECRET'] = token_urlsafe(48)
         values['PROXY_SECRET'] = token_urlsafe(48)
+        # Password for the sample accounts of the initial seed job, readable from this secret.
+        values['KSI_SEED_PASSWORD'] = token_urlsafe(24)
         encrypt(cluster / 'environments' / slug / 'database' / 'password.sops.yaml', 'ksi-preview-data', 'db-' + slug, {'password': password}, recipient)
     encrypt(path, 'ksi-' + slug, 'ksi-runtime', values, recipient)
 
