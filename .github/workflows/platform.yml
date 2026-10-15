@@ -54,13 +54,33 @@ jobs:
         app: [server, web, auth, dashboard]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Plan image
+        id: plan
+        env:
+          APP: ${{ matrix.app }}
+        run: |
+          if [ "$GITHUB_REF" = refs/heads/master ]; then
+            build=true
+            base=''
+          else
+            git fetch origin master --no-tags
+            base=$(git merge-base HEAD origin/master)
+            build=$(git diff --name-only -z "$base"...HEAD | \
+              python3 scripts/deployment/image_plan.py --app "$APP" --nul)
+          fi
+          echo "build=$build" >>"$GITHUB_OUTPUT"
+          echo "base=$base" >>"$GITHUB_OUTPUT"
+          printf '%s: build=%s base=%s\n' "$APP" "$build" "${base:-current}"
       - id: image
+        if: steps.plan.outputs.build == 'true'
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -73,16 +93,33 @@ jobs:
             PUBLIC_COMMIT_HASH=${{ github.sha }}
           cache-from: type=gha,scope=${{ matrix.app }}
           cache-to: type=gha,mode=max,scope=${{ matrix.app }}
+      - name: Resolve unchanged image
+        id: reuse
+        if: steps.plan.outputs.build != 'true'
+        env:
+          APP: ${{ matrix.app }}
+          REPOSITORY: ${{ github.repository }}
+          BASE: ${{ steps.plan.outputs.base }}
+        run: |
+          digest=$(docker buildx imagetools inspect \
+            "ghcr.io/$REPOSITORY-$APP:$BASE" --format '{{json .Manifest}}' | jq -r .digest)
+          [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
+          echo "digest=$digest" >>"$GITHUB_OUTPUT"
+          echo "Reusing ghcr.io/$REPOSITORY-$APP@$digest"
       - name: Record immutable digest
         env:
           APP: ${{ matrix.app }}
           REPOSITORY: ${{ github.repository }}
-          DIGEST: ${{ steps.image.outputs.digest }}
+          BUILT_DIGEST: ${{ steps.image.outputs.digest }}
+          REUSED_DIGEST: ${{ steps.reuse.outputs.digest }}
         run: |
           python3 - <<'PY'
           import json, os
           from pathlib import Path
-          Path('image.json').write_text(json.dumps({os.environ['APP']: 'ghcr.io/' + os.environ['REPOSITORY'] + '-' + os.environ['APP'] + '@' + os.environ['DIGEST']}))
+          digest = os.environ['BUILT_DIGEST'] or os.environ['REUSED_DIGEST']
+          if not digest:
+              raise SystemExit('No image digest was produced')
+          Path('image.json').write_text(json.dumps({os.environ['APP']: 'ghcr.io/' + os.environ['REPOSITORY'] + '-' + os.environ['APP'] + '@' + digest}))
           PY
       - uses: actions/upload-artifact@v4
         with:

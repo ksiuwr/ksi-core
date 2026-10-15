@@ -5,6 +5,11 @@ images tagged with the source commit. A successful `master` build records each
 image's immutable registry digest, updates `ksi-cluster/production-platform.yaml`,
 and commits the manifest to the cluster repository.
 
+Production always rebuilds all four images. Preview branches rebuild only applications
+affected by their diff from `master`; unchanged applications reuse the immutable image
+digest built from the merge-base. Server, shared package, lockfile, and container runtime
+changes rebuild every image. UI package changes rebuild all three frontends.
+
 Promotion requires a fine-grained `CLUSTER_WRITE_TOKEN` with contents write access
 to `ksiuwr/ksi-cluster`. It does not require SOPS, Flux, production application
 secrets, Cloudflare credentials, or Kubernetes credentials.
