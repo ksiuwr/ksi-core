@@ -1,5 +1,5 @@
 import { redirect, isRedirect } from '@sveltejs/kit';
-import { env } from '$env/dynamic/private';
+import { env } from '$lib/server/environment';
 import { startSso } from 'shared/server';
 import type { RequestHandler } from './$types';
 export const GET: RequestHandler = async (event) => {

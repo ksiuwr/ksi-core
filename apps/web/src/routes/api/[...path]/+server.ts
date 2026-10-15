@@ -1,5 +1,5 @@
 import type { RequestHandler } from './$types';
-import { env } from '$env/dynamic/private';
+import { env } from '$lib/server/environment';
 import { proxy } from 'shared/server';
 const handler: RequestHandler = (event) => proxy(event, env, 'web');
 export {
