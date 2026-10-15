@@ -95,6 +95,11 @@ export function publicProfile(user: typeof users.$inferSelect, locale?: string) 
     linkedin: user.linkedin
   };
 }
+// The creator is only shown through articleCredits, which honors their public credit choice.
+function publicArticle(article: typeof articles.$inferSelect, locale?: string) {
+  const { createdBy: _creator, ...visible } = localizeContent(article, locale);
+  return visible;
+}
 async function articleCredits(executor: Executor, articleId: string, locale?: string) {
   const records = await executor
     .select({ user: users })
@@ -153,7 +158,7 @@ export default createElysia({ prefix: '/platform' })
       ...publicProfile(member, locale),
       articles: await Promise.all(
         authored.map(async ({ article }) => ({
-          ...localizeContent(article, locale),
+          ...publicArticle(article, locale),
           authors: await articleCredits(db, article.id, locale)
         }))
       )
@@ -182,7 +187,7 @@ export default createElysia({ prefix: '/platform' })
       .where(eq(projectLinks.projectId, project.id))
       .orderBy(projectLinks.position);
     const publishedLocalized = published.map((article) =>
-      localizeContent(article, typeof query.locale === 'string' ? query.locale : undefined)
+      publicArticle(article, typeof query.locale === 'string' ? query.locale : undefined)
     );
     const mainArticle = publishedLocalized.find((a) => a.mainArticle) ?? null;
     const feed = await Promise.all(
@@ -241,7 +246,7 @@ export default createElysia({ prefix: '/platform' })
       .orderBy(desc(articles.updatedAt));
     return Promise.all(
       records.map(async (a) => ({
-        ...localizeContent(a, typeof query.locale === 'string' ? query.locale : undefined),
+        ...publicArticle(a, typeof query.locale === 'string' ? query.locale : undefined),
         authors: await articleCredits(
           db,
           a.id,
@@ -283,7 +288,7 @@ export default createElysia({ prefix: '/platform' })
         )
       );
     return {
-      ...localizeContent(article, locale),
+      ...publicArticle(article, locale),
       authors: await articleCredits(db, article.id, locale),
       project: project
         ? { id: project.id, slug: project.slug, name: localizeContent(project, locale).name }

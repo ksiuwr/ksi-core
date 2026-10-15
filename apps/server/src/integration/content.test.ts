@@ -355,6 +355,7 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
     ).json()) as any;
     expect(publicArticle.markdown).toBe('Final content');
     expect(publicArticle.authors).toHaveLength(0);
+    expect(publicArticle.createdBy).toBeUndefined();
     expect(
       (await content(`/articles/${articleId}/credit`, 'member', 'PUT', { publicCredit: true }))
         .status
