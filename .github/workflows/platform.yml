@@ -54,13 +54,33 @@ jobs:
         app: [server, web, auth, dashboard]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Plan image
+        id: plan
+        env:
+          APP: ${{ matrix.app }}
+        run: |
+          if [ "$GITHUB_REF" = refs/heads/master ]; then
+            build=true
+            base=''
+          else
+            git fetch origin master --no-tags
+            base=$(git merge-base HEAD origin/master)
+            build=$(git diff --name-only -z "$base"...HEAD | \
+              python3 scripts/deployment/image_plan.py --app "$APP" --nul)
+          fi
+          echo "build=$build" >>"$GITHUB_OUTPUT"
+          echo "base=$base" >>"$GITHUB_OUTPUT"
+          printf '%s: build=%s base=%s\n' "$APP" "$build" "${base:-current}"
       - id: image
+        if: steps.plan.outputs.build == 'true'
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -73,21 +93,148 @@ jobs:
             PUBLIC_COMMIT_HASH=${{ github.sha }}
           cache-from: type=gha,scope=${{ matrix.app }}
           cache-to: type=gha,mode=max,scope=${{ matrix.app }}
+      - name: Resolve unchanged image
+        id: reuse
+        if: steps.plan.outputs.build != 'true'
+        env:
+          APP: ${{ matrix.app }}
+          REPOSITORY: ${{ github.repository }}
+          BASE: ${{ steps.plan.outputs.base }}
+        run: |
+          digest=$(docker buildx imagetools inspect \
+            "ghcr.io/$REPOSITORY-$APP:$BASE" --format '{{json .Manifest}}' | jq -r .digest)
+          [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
+          echo "digest=$digest" >>"$GITHUB_OUTPUT"
+          echo "Reusing ghcr.io/$REPOSITORY-$APP@$digest"
       - name: Record immutable digest
         env:
           APP: ${{ matrix.app }}
           REPOSITORY: ${{ github.repository }}
-          DIGEST: ${{ steps.image.outputs.digest }}
+          BUILT_DIGEST: ${{ steps.image.outputs.digest }}
+          REUSED_DIGEST: ${{ steps.reuse.outputs.digest }}
         run: |
           python3 - <<'PY'
           import json, os
           from pathlib import Path
-          Path('image.json').write_text(json.dumps({os.environ['APP']: 'ghcr.io/' + os.environ['REPOSITORY'] + '-' + os.environ['APP'] + '@' + os.environ['DIGEST']}))
+          digest = os.environ['BUILT_DIGEST'] or os.environ['REUSED_DIGEST']
+          if not digest:
+              raise SystemExit('No image digest was produced')
+          Path('image.json').write_text(json.dumps({os.environ['APP']: 'ghcr.io/' + os.environ['REPOSITORY'] + '-' + os.environ['APP'] + '@' + digest}))
           PY
       - uses: actions/upload-artifact@v4
         with:
           name: image-${{ matrix.app }}
           path: image.json
+  preview:
+    needs: [checks, images]
+    if: github.event_name == 'push' && github.ref != 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    environment:
+      name: preview
+      url: ${{ steps.preview.outputs.url }}
+    concurrency:
+      group: preview-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: image-*
+          path: images
+      - uses: azure/setup-kubectl@776406bce94f63e41d621b960d78ee25c8b76ede # v4.0.1
+        with:
+          version: v1.34.0
+      - name: Configure preview-only cluster access
+        env:
+          PREVIEW_KUBECONFIG_B64: ${{ secrets.PREVIEW_KUBECONFIG_B64 }}
+        run: |
+          test -n "$PREVIEW_KUBECONFIG_B64"
+          install -d -m 700 "$RUNNER_TEMP/kube"
+          printf '%s' "$PREVIEW_KUBECONFIG_B64" | base64 --decode >"$RUNNER_TEMP/kube/config"
+          chmod 600 "$RUNNER_TEMP/kube/config"
+          echo "KUBECONFIG=$RUNNER_TEMP/kube/config" >>"$GITHUB_ENV"
+      - name: Reject stale build and render preview
+        id: preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          encoded=$(python3 -c 'import os,urllib.parse; print(urllib.parse.quote(os.environ["BRANCH"], safe=""))')
+          current=$(gh api "repos/$REPOSITORY/branches/$encoded" --jq .commit.sha)
+          test "$current" = "$COMMIT" || { echo 'Stale build: branch advanced; refusing preview'; exit 1; }
+          owner=${REPOSITORY%%/*}
+          pull_number=$(gh api --method GET "repos/$REPOSITORY/pulls" -f state=open -f "head=$owner:$BRANCH" --jq '.[0].number')
+          test -n "$pull_number" || { echo 'No open pull request for branch; refusing preview'; exit 1; }
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          images = {}
+          for path in Path('images').glob('*/image.json'):
+              images.update(json.loads(path.read_text()))
+          Path('images.json').write_text(json.dumps(images))
+          PY
+          slug=$(python3 scripts/deployment/preview.py render --branch "$BRANCH" --commit "$COMMIT" --images images.json --output rendered-preview)
+          echo "slug=$slug" >>"$GITHUB_OUTPUT"
+          echo "url=https://$slug-web.ksi.edu.pl" >>"$GITHUB_OUTPUT"
+          echo "pull_number=$pull_number" >>"$GITHUB_OUTPUT"
+      - name: Create stable preview credentials
+        env:
+          SLUG: ${{ steps.preview.outputs.slug }}
+        run: |
+          secret="runtime-$SLUG"
+          if ! kubectl -n ksi-previews get secret "$secret" >/dev/null 2>&1; then
+            database="ksi_$(printf '%s' "$SLUG" | tr '-' '_')"
+            database_password=$(openssl rand -hex 32)
+            auth_secret=$(openssl rand -hex 48)
+            proxy_secret=$(openssl rand -hex 48)
+            seed_password=$(openssl rand -base64 24 | tr -d '\n')
+            kubectl -n ksi-previews create secret generic "$secret" \
+              --from-literal="DATABASE_URL=postgresql://$database:$database_password@preview-postgres:5432/$database" \
+              --from-literal="PREVIEW_DATABASE=$database" \
+              --from-literal="PREVIEW_DATABASE_PASSWORD=$database_password" \
+              --from-literal="BETTER_AUTH_SECRET=$auth_secret" \
+              --from-literal="PROXY_SECRET=$proxy_secret" \
+              --from-literal="KSI_SEED_PASSWORD=$seed_password"
+            kubectl -n ksi-previews label secret "$secret" "ksi.preview=$SLUG"
+          fi
+      - name: Provision, migrate, seed, and roll out
+        env:
+          SLUG: ${{ steps.preview.outputs.slug }}
+        run: |
+          kubectl apply -f rendered-preview/prerequisite.json
+          for phase in provision migration seed; do
+            name=$(kubectl create --dry-run=client -f "rendered-preview/$phase.json" -o jsonpath='{.metadata.name}')
+            kubectl -n ksi-previews delete job "$name" --ignore-not-found --wait=true
+            kubectl apply -f "rendered-preview/$phase.json"
+            kubectl -n ksi-previews wait --for=condition=complete "job/$name" --timeout=10m
+          done
+          kubectl apply -f rendered-preview/workloads.json
+          for app in server web auth dashboard; do
+            kubectl -n ksi-previews rollout status "deployment/$SLUG-$app" --timeout=10m
+          done
+      - name: Publish preview URL
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          COMMIT: ${{ github.sha }}
+          PREVIEW_URL: ${{ steps.preview.outputs.url }}
+          PULL_NUMBER: ${{ steps.preview.outputs.pull_number }}
+        run: |
+          printf '### Preview\n\n%s\n' "$PREVIEW_URL" | tee -a "$GITHUB_STEP_SUMMARY"
+          marker='<!-- ksi-preview-deployment -->'
+          body=$(printf '%s\n### Preview deployment\n\n✅ [Open preview](%s)\n\nCommit `%s`' "$marker" "$PREVIEW_URL" "$COMMIT")
+          comment_id=$(gh api "repos/$REPOSITORY/issues/$PULL_NUMBER/comments" --paginate \
+            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("<!-- ksi-preview-deployment -->"))) | .id' | head -n 1)
+          if [ -n "$comment_id" ]; then
+            gh api --method PATCH "repos/$REPOSITORY/issues/comments/$comment_id" -f body="$body" >/dev/null
+          else
+            gh api --method POST "repos/$REPOSITORY/issues/$PULL_NUMBER/comments" -f body="$body" >/dev/null
+          fi
   promote:
     needs: [checks, images]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'

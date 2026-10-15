@@ -1,39 +1,49 @@
 name: Remove deleted branch preview
 on:
   delete:
+  pull_request_target:
+    types: [closed]
 permissions:
   contents: read
 jobs:
   cleanup:
-    if: github.event.ref_type == 'branch' && github.event.ref != 'master'
+    if: (github.event_name == 'delete' && github.event.ref_type == 'branch' && github.event.ref != 'master') || github.event_name == 'pull_request_target'
     runs-on: ubuntu-latest
     environment: preview
     concurrency:
-      group: ksi-cluster-writes
+      group: preview-${{ github.event.ref }}
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
+      - uses: azure/setup-kubectl@776406bce94f63e41d621b960d78ee25c8b76ede # v4.0.1
         with:
-          repository: ksiuwr/ksi-cluster
-          token: ${{ secrets.CLUSTER_WRITE_TOKEN }}
-          path: cluster
-      - name: Queue cleanup after workload pruning
+          version: v1.34.0
+      - name: Configure preview-only cluster access
         env:
-          BRANCH: ${{ github.event.ref }}
+          PREVIEW_KUBECONFIG_B64: ${{ secrets.PREVIEW_KUBECONFIG_B64 }}
+        run: |
+          test -n "$PREVIEW_KUBECONFIG_B64"
+          install -d -m 700 "$RUNNER_TEMP/kube"
+          printf '%s' "$PREVIEW_KUBECONFIG_B64" | base64 --decode >"$RUNNER_TEMP/kube/config"
+          chmod 600 "$RUNNER_TEMP/kube/config"
+          echo "KUBECONFIG=$RUNNER_TEMP/kube/config" >>"$GITHUB_ENV"
+      - name: Drop branch database and workloads
+        env:
+          BRANCH: ${{ github.event_name == 'delete' && github.event.ref || github.event.pull_request.head.ref }}
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
         run: |
-          encoded=$(python3 -c 'import os,urllib.parse; print(urllib.parse.quote(os.environ["BRANCH"], safe=""))')
-          if gh api "repos/$REPOSITORY/branches/$encoded" >/dev/null 2>&1; then
-            echo 'Branch recreated; refusing stale cleanup'
+          owner=${REPOSITORY%%/*}
+          open_pulls=$(gh api --method GET "repos/$REPOSITORY/pulls" -f state=open -f "head=$owner:$BRANCH" --jq length)
+          if test "$open_pulls" -gt 0; then
+            echo 'Branch still has an open pull request; refusing stale cleanup'
             exit 1
           fi
-          python3 scripts/deployment/deploy.py cleanup --cluster cluster --branch "$BRANCH"
-          git -C cluster config user.name ksi-deployment
-          git -C cluster config user.email deployment@ksi.edu.pl
-          git -C cluster add environments cleanup
-          if ! git -C cluster diff --cached --quiet; then
-            git -C cluster commit -m 'Remove deleted branch preview; queue data cleanup'
-            git -C cluster push
+          slug=$(python3 scripts/deployment/preview.py cleanup --branch "$BRANCH" --output cleanup.json)
+          if kubectl -n ksi-previews get secret "runtime-$slug" >/dev/null 2>&1; then
+            kubectl -n ksi-previews delete job "drop-$slug" --ignore-not-found --wait=true
+            kubectl apply -f cleanup.json
+            kubectl -n ksi-previews wait --for=condition=complete "job/drop-$slug" --timeout=10m
           fi
+          kubectl -n ksi-previews delete deployment,service,ingress,configmap,secret,job \
+            -l "ksi.preview=$slug" --ignore-not-found --wait=true
