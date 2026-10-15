@@ -597,6 +597,43 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
       ).status
     ).toBe(200);
   });
+  test('member profiles list only articles shown on the site', async () => {
+    const [listed, unlisted] = await db
+      .insert(articles)
+      .values([
+        {
+          projectId,
+          createdBy: ids.leader,
+          slug: `profile-listed-${suffix}`,
+          title: 'Listed',
+          state: 'published',
+          websiteFeed: true
+        },
+        {
+          projectId,
+          createdBy: ids.leader,
+          slug: `profile-unlisted-${suffix}`,
+          title: 'Unlisted',
+          state: 'published'
+        }
+      ])
+      .returning();
+    await db.insert(articleContributors).values(
+      [listed!, unlisted!].map((a) => ({
+        articleId: a.id,
+        userId: ids.board,
+        publicCredit: true
+      }))
+    );
+    const profile = (await (
+      await contentRoutes.handle(
+        new Request(`http://localhost/platform/public/members/${ids.board}`)
+      )
+    ).json()) as any;
+    const slugs = profile.articles.map((a: any) => a.slug);
+    expect(slugs).toContain(listed!.slug);
+    expect(slugs).not.toContain(unlisted!.slug);
+  });
   test('scope denial blocks unrelated publishing and audit history', async () => {
     expect((await content(`/articles/${articleId}`, 'outsider')).status).toBe(403);
     expect((await collaboration(`/events?projectId=${projectId}`, 'member')).status).toBe(403);

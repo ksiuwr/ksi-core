@@ -150,7 +150,12 @@ export default createElysia({ prefix: '/platform' })
         and(
           eq(articleContributors.userId, member.id),
           eq(articleContributors.publicCredit, true),
-          eq(articles.state, 'published')
+          eq(articles.state, 'published'),
+          or(
+            eq(articles.websiteFeed, true),
+            eq(articles.projectFeed, true),
+            eq(articles.mainArticle, true)
+          )
         )
       )
       .orderBy(desc(articles.publishedAt), desc(articles.createdAt));
