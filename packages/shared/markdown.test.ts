@@ -12,6 +12,15 @@ test('markdown cannot execute scripts or unsafe links', () => {
   expect(html).not.toContain('onerror');
   expect(html).not.toContain('javascript:');
 });
+test('code blocks keep only language classes', () => {
+  const html = renderMarkdown(
+    '```ts\nconst x = 1;\n```\n\n<code class="fixed inset-0 z-90">overlay</code>'
+  )
+    .map((b) => (b.type === 'html' ? b.html : ''))
+    .join('');
+  expect(html).toContain('class="language-ts"');
+  expect(html).not.toContain('inset-0');
+});
 test('gallery is allowlisted data with bounded preview', () => {
   const blocks = renderMarkdown(':::gallery preview=999\nfile:abcdefgh file:ijklmnop\n:::');
   const gallery = blocks.find((b) => b.type === 'gallery');
