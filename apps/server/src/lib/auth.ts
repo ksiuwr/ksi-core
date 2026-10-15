@@ -25,11 +25,11 @@ export const auth = betterAuth({
     requireEmailVerification: true,
     revokeSessionsOnPasswordReset: true,
     sendResetPassword: async ({ user, url }) =>
-      enqueueMail(user.email, 'KSI — reset hasła / password reset', url)
+      enqueueMail(user.email, 'KSI: reset hasła / password reset', url)
   },
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) =>
-      enqueueMail(user.email, 'KSI — potwierdź adres / verify email', url)
+      enqueueMail(user.email, 'KSI: potwierdź adres / verify email', url)
   },
   socialProviders: {
     ...(Bun.env.OAUTH_GITHUB_ID && Bun.env.OAUTH_GITHUB_SECRET

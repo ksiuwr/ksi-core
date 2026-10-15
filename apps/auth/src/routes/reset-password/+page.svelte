@@ -32,7 +32,7 @@
   }
 </script>
 
-<svelte:head><title>{'New password'} — KSI</title></svelte:head>
+<svelte:head><title>{'New password'} · KSI</title></svelte:head>
 <main class="auth-shell">
   <div class="auth-frame">
     <header class="auth-topbar">

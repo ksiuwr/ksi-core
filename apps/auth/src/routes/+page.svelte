@@ -102,7 +102,7 @@
 </script>
 
 <svelte:head>
-  <title>{'Sign in'} — KSI</title>
+  <title>{'Sign in'} · KSI</title>
 </svelte:head>
 
 <main class="auth-shell">

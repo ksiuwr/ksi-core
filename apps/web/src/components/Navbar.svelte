@@ -81,14 +81,14 @@
     },
     {
       title: 'LEOSIA',
-      description: "ZOSIA's summer counterpart — in the works.",
+      description: 'A summer version of ZOSIA, in preparation.',
       href: '/projects',
       icon: Mountain,
       badge: 'Soon'
     },
     {
       title: 'ksi-core',
-      description: 'This very website — open source and built by our members.',
+      description: 'The code behind this website.',
       href: 'https://github.com/ksiuwr/ksi-core',
       icon: Github,
       external: true
@@ -98,19 +98,19 @@
   const groupItems = [
     {
       title: 'Social',
-      description: 'Community events, camps, and meetups that bring students together.',
+      description: 'Camps, events, and meetups.',
       href: '/projects?field=community#project-directory',
       icon: Share2
     },
     {
       title: 'Technical',
-      description: 'Hands-on engineering — building tools, products, and side projects.',
+      description: 'Software and tools built by our members.',
       href: '/projects?field=engineering#project-directory',
       icon: CodeXml
     },
     {
       title: 'Scientific research',
-      description: 'Reading groups and early-stage research, mentored by faculty.',
+      description: 'Paper discussions and research with faculty.',
       href: '/projects?field=research#project-directory',
       icon: FlaskConical
     }

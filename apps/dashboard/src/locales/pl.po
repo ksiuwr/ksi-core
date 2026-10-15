@@ -177,8 +177,8 @@ msgstr "Tylko inicjały"
 
 #. 0: viewName
 #: src/routes/[...workspace]/+page.svelte
-msgid "{0} — KSI"
-msgstr "{0} — KSI"
+msgid "{0} · KSI"
+msgstr "{0} · KSI"
 
 #: src/routes/[...workspace]/+page.svelte
 msgid "Account activation required"
@@ -1432,3 +1432,8 @@ msgstr "Nieznana przeglądarka"
 #: src/routes/[...workspace]/+page.svelte
 msgid "Revoke"
 msgstr "Odwołaj"
+
+#. 0: firstResult; 1: lastResult; 2: total
+#: src/lib/Members.svelte
+msgid "{0} do {1} / {2} <0>członków</0>"
+msgstr ""

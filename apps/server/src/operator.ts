@@ -9,7 +9,7 @@ import { effectivePermissions, type Role } from './domain/permissions';
 import { anonymizeUser, manageUser } from './services/users';
 import { getUrls } from 'shared';
 
-const help = `KSI operator — execute inside the target namespace with its runtime Secret.
+const help = `Execute the KSI operator inside the target namespace with its runtime Secret.
 Usage: bun apps/server/src/operator.ts COMMAND --option value
  bootstrap       --email address --name name             KSI_BOOTSTRAP_PASSWORD required; only before the first active administrator
  create-admin    --actor id --email address --name name  KSI_BOOTSTRAP_PASSWORD required

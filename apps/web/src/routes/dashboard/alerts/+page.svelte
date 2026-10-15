@@ -388,7 +388,7 @@
                 </div>
                 <h3 class="mb-2! text-xl tracking-tight sm:text-2xl">{alert.title}</h3>
                 <p class="text-base-content/50 mb-4 font-mono text-xs leading-relaxed">
-                  {formatLocalDate(alert.startDate)} — {formatLocalDate(alert.endDate)}
+                  From {formatLocalDate(alert.startDate)} to {formatLocalDate(alert.endDate)}
                 </p>
                 <p
                   class="text-base-content/75 max-w-4xl leading-relaxed wrap-anywhere whitespace-pre-wrap"

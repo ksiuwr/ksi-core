@@ -323,7 +323,7 @@ export const userRoutes = createElysia({ prefix: '/users', protectedRoute: true 
           const url = `${urls.frontend.auth}/api/auth/verify-email?token=${encodeURIComponent(token)}&callbackURL=${encodeURIComponent(urls.frontend.auth)}`;
           await tx
             .insert(mailJobs)
-            .values({ to: email, subject: 'KSI — potwierdź adres / verify email', body: url });
+            .values({ to: email, subject: 'KSI: potwierdź adres / verify email', body: url });
           await recordEvent(tx, {
             actorId: actor.id,
             action: 'users.email.changed',

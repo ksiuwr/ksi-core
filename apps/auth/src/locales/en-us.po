@@ -54,8 +54,8 @@ msgstr "Welcome to KSI"
 #. 0: 'New password'
 #: src/routes/+page.svelte
 #: src/routes/reset-password/+page.svelte
-msgid "{0} — KSI"
-msgstr "{0} — KSI"
+msgid "{0} · KSI"
+msgstr "{0} · KSI"
 
 #: src/routes/+page.svelte
 #: src/routes/reset-password/+page.svelte

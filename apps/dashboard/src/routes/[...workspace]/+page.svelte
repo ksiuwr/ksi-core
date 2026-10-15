@@ -705,7 +705,7 @@
   });
 </script>
 
-<svelte:head><title>{viewName} — KSI</title></svelte:head>
+<svelte:head><title>{viewName} · KSI</title></svelte:head>
 <svelte:window onkeydown={closeMenus} onpointerdown={closeOutsideMenus} />
 
 <!-- Pending / not active -->

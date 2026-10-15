@@ -472,8 +472,8 @@ msgid "The page may have moved, or something went wrong while loading it."
 msgstr "The page may have moved, or something went wrong while loading it."
 
 #: src/routes/+error.svelte
-msgid "This path led somewhere unexpected."
-msgstr "This path led somewhere unexpected."
+msgid "We couldn't load this page."
+msgstr "We couldn't load this page."
 
 #: src/routes/+error.svelte
 msgid "<0/> Return home"
@@ -551,8 +551,8 @@ msgid "Groups <0/>"
 msgstr "Groups <0/>"
 
 #: src/routes/+page.svelte
-msgid "A student community exploring computer science through research, education, and events at the University of Wrocław."
-msgstr "A student community exploring computer science through research, education, and events at the University of Wrocław."
+msgid "We're computer science students at the University of Wrocław. We build software and organize workshops and events."
+msgstr "We're computer science students at the University of Wrocław. We build software and organize workshops and events."
 
 #: src/routes/+page.svelte
 msgid "See what we do <0/>"
@@ -579,32 +579,28 @@ msgid "( socially )"
 msgstr "( socially )"
 
 #: src/routes/+page.svelte
-msgid "We're still early in our research journey — no published papers to point to yet — but the habits that lead there are already part of how we work together."
-msgstr "We're still early in our research journey — no published papers to point to yet — but the habits that lead there are already part of how we work together."
-
-#: src/routes/+page.svelte
 msgid "Reading groups"
 msgstr "Reading groups"
 
 #: src/routes/+page.svelte
-msgid "We pick apart papers and ideas together, well outside the lecture hall."
-msgstr "We pick apart papers and ideas together, well outside the lecture hall."
+msgid "We meet to read and discuss research papers."
+msgstr "We meet to read and discuss research papers."
 
 #: src/routes/+page.svelte
 msgid "Guest seminars"
 msgstr "Guest seminars"
 
 #: src/routes/+page.svelte
-msgid "Researchers and alumni drop by to share what they're currently working on."
-msgstr "Researchers and alumni drop by to share what they're currently working on."
+msgid "Researchers and alumni talk about their work."
+msgstr "Researchers and alumni talk about their work."
 
 #: src/routes/+page.svelte
-msgid "Early-stage research"
-msgstr "Early-stage research"
+msgid "Research projects"
+msgstr "Research projects"
 
 #: src/routes/+page.svelte
-msgid "Members pair with faculty to explore open problems, long before any of it becomes a paper."
-msgstr "Members pair with faculty to explore open problems, long before any of it becomes a paper."
+msgid "We work on research problems with faculty."
+msgstr "We work on research problems with faculty."
 
 #: src/components/Goal.svelte
 msgid "( scientifically )"
@@ -615,16 +611,16 @@ msgid "Our winter camp for computer science students in Lower Silesia."
 msgstr "Our winter camp for computer science students in Lower Silesia."
 
 #: src/components/Navbar.svelte
-msgid "ZOSIA's summer counterpart — in the works."
-msgstr "ZOSIA's summer counterpart — in the works."
+msgid "A summer version of ZOSIA, in preparation."
+msgstr "A summer version of ZOSIA, in preparation."
 
 #: src/components/Navbar.svelte
 msgid "Soon"
 msgstr "Soon"
 
 #: src/components/Navbar.svelte
-msgid "This very website — open source and built by our members."
-msgstr "This very website — open source and built by our members."
+msgid "The code behind this website."
+msgstr "The code behind this website."
 
 #: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
@@ -632,8 +628,8 @@ msgid "Social"
 msgstr "Social"
 
 #: src/components/Navbar.svelte
-msgid "Community events, camps, and meetups that bring students together."
-msgstr "Community events, camps, and meetups that bring students together."
+msgid "Camps, events, and meetups."
+msgstr "Camps, events, and meetups."
 
 #: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
@@ -641,8 +637,8 @@ msgid "Technical"
 msgstr "Technical"
 
 #: src/components/Navbar.svelte
-msgid "Hands-on engineering — building tools, products, and side projects."
-msgstr "Hands-on engineering — building tools, products, and side projects."
+msgid "Software and tools built by our members."
+msgstr "Software and tools built by our members."
 
 #: src/components/Navbar.svelte
 #: src/components/Sidebar.svelte
@@ -650,8 +646,8 @@ msgid "Scientific research"
 msgstr "Scientific research"
 
 #: src/components/Navbar.svelte
-msgid "Reading groups and early-stage research, mentored by faculty."
-msgstr "Reading groups and early-stage research, mentored by faculty."
+msgid "Paper discussions and research with faculty."
+msgstr "Paper discussions and research with faculty."
 
 #: src/components/Navbar.svelte
 msgid "See more projects"
@@ -671,28 +667,28 @@ msgid "All projects"
 msgstr "All projects"
 
 #: src/routes/projects/+page.svelte
-msgid "Discover the projects built by KSI members, from student conferences and programming workshops to machine learning and quantum computing."
-msgstr "Discover the projects built by KSI members, from student conferences and programming workshops to machine learning and quantum computing."
+msgid "KSI projects: conferences, programming workshops, machine learning, and quantum computing."
+msgstr "KSI projects: conferences, programming workshops, machine learning, and quantum computing."
 
 #: src/routes/projects/+page.svelte
 msgid "Projects · KSI UWr"
 msgstr "Projects · KSI UWr"
 
 #: src/routes/projects/+page.svelte
-msgid "Good ideas.<0/>Real projects.<1/><2>Built together.</2>"
-msgstr "Good ideas.<0/>Real projects.<1/><2>Built together.</2>"
+msgid "Projects at KSI"
+msgstr "Projects at KSI"
 
 #: src/routes/projects/+page.svelte
-msgid "From a first line of Python to a winter camp in the mountains. We turn shared curiosity into things worth making."
-msgstr "From a first line of Python to a winter camp in the mountains. We turn shared curiosity into things worth making."
+msgid "Software, research, and events organized by KSI members."
+msgstr "Software, research, and events organized by KSI members."
 
 #: src/routes/projects/+page.svelte
-msgid "Find your kind of curiosity."
-msgstr "Find your kind of curiosity."
+msgid "Find a project to join."
+msgstr "Find a project to join."
 
 #: src/routes/projects/+page.svelte
-msgid "Different fields. One community.<0/>Take a closer look at what we do."
-msgstr "Different fields. One community.<0/>Take a closer look at what we do."
+msgid "Browse projects by topic<0/>or search by name."
+msgstr "Browse projects by topic<0/>or search by name."
 
 #: src/routes/projects/+page.svelte
 msgid "Search projects..."
@@ -703,12 +699,12 @@ msgid "Try another search or explore a different field."
 msgstr "Try another search or explore a different field."
 
 #: src/routes/projects/+page.svelte
-msgid "Your idea could be next."
-msgstr "Your idea could be next."
+msgid "Have a project idea?"
+msgstr "Have a project idea?"
 
 #: src/routes/projects/+page.svelte
-msgid "Let's build something <0/>"
-msgstr "Let's build something <0/>"
+msgid "Tell us about it <0/>"
+msgstr "Tell us about it <0/>"
 
 #. 0: filteredProjects.length; 1: projects.length
 #: src/routes/projects/+page.svelte
@@ -716,8 +712,8 @@ msgid "Showing {0} of {1} projects"
 msgstr "Showing {0} of {1} projects"
 
 #: src/routes/+error.svelte
-msgid "The reliable route is back to the association — and room 24 at the Institute of Computer Science is always worth finding."
-msgstr "The reliable route is back to the association — and room 24 at the Institute of Computer Science is always worth finding."
+msgid "Try again or return to the home page."
+msgstr "Try again or return to the home page."
 
 #: src/components/ui/GithubProjectCard.svelte
 msgid "View on GitHub <0/>"
@@ -732,12 +728,12 @@ msgid "About KSI"
 msgstr "About KSI"
 
 #: src/routes/+page.svelte
-msgid "Hello, World!<0/>We're KSI."
-msgstr "Hello, World!<0/>We're KSI."
+msgid "We're KSI."
+msgstr "We're KSI."
 
 #: src/routes/+page.svelte
-msgid "Our experienced team has been organizing the well-recognized conference in the mountainous regions of Lower Silesia in southwestern Poland. While our speakers give various talks, sharing their knowledge, scientific research, hobbies and so on, we love to spend some time together in the free time."
-msgstr "Our experienced team has been organizing the well-recognized conference in the mountainous regions of Lower Silesia in southwestern Poland. While our speakers give various talks, sharing their knowledge, scientific research, hobbies and so on, we love to spend some time together in the free time."
+msgid "Our winter camp in the mountains of Lower Silesia, with talks on research and hobbies, and time to hang out."
+msgstr "Our winter camp in the mountains of Lower Silesia, with talks on research and hobbies, and time to hang out."
 
 #: src/routes/+page.svelte
 #: src/routes/+page.svelte
@@ -745,20 +741,20 @@ msgid "Read more"
 msgstr "Read more"
 
 #: src/routes/+page.svelte
-msgid "Hour of Code is a global movement focused on bringing Computer Science and coding to students, in fun activities held within one hour. Multiple brilliant volunteers, one goal – share the passion for Computer Science with the youngest."
-msgstr "Hour of Code is a global movement focused on bringing Computer Science and coding to students, in fun activities held within one hour. Multiple brilliant volunteers, one goal – share the passion for Computer Science with the youngest."
+msgid "We teach children programming in one-hour workshops."
+msgstr "We teach children programming in one-hour workshops."
 
 #: src/routes/+page.svelte
-msgid "( socially ) Connecting the community"
-msgstr "( socially ) Connecting the community"
+msgid "Events and workshops"
+msgstr "Events and workshops"
 
 #: src/routes/+page.svelte
-msgid "( technically ) Engineering is our passion"
-msgstr "( technically ) Engineering is our passion"
+msgid "Our projects"
+msgstr "Our projects"
 
 #: src/routes/+page.svelte
-msgid "( scientifically ) Curiosity, kept rigorous"
-msgstr "( scientifically ) Curiosity, kept rigorous"
+msgid "Research at KSI"
+msgstr "Research at KSI"
 
 #: src/routes/projects/+page.svelte
 msgid "Project"
@@ -886,3 +882,8 @@ msgstr "All articles<0/>"
 #: src/routes/articles/[slug]/+page.svelte
 msgid "<0/>All articles"
 msgstr "<0/>All articles"
+
+#. 0: formatLocalDate(alert.startDate); 1: formatLocalDate(alert.endDate)
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "From {0} to {1}"
+msgstr "From {0} to {1}"

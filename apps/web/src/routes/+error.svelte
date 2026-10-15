@@ -15,11 +15,10 @@
         <h1
           class="font-anybody text-base-content mb-5 text-[clamp(40px,8vw,64px)] leading-[1.1] font-bold tracking-tight"
         >
-          This path led somewhere unexpected.
+          We couldn't load this page.
         </h1>
         <p class="text-base-content/70 mb-8 max-w-150 text-[18px] leading-relaxed">
-          The reliable route is back to the association — and room 24 at the Institute of Computer
-          Science is always worth finding.
+          Try again or return to the home page.
         </p>
         <div class="flex flex-wrap gap-3">
           <a href={resolve('/')} class="btn gap-2">

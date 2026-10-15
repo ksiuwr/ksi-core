@@ -62,7 +62,7 @@
   <title>Projects · KSI UWr</title>
   <meta
     name="description"
-    content="Discover the projects built by KSI members, from student conferences and programming workshops to machine learning and quantum computing."
+    content="KSI projects: conferences, programming workshops, machine learning, and quantum computing."
   />
 </svelte:head>
 
@@ -76,13 +76,10 @@
       <h1
         class="font-anybody text-base-content mb-5 text-[clamp(40px,8vw,64px)] leading-[1.1] font-bold tracking-tight"
       >
-        Good ideas.<br />Real projects.<br /><span
-          class="bg-primary text-primary-content rounded-sm px-3">Built together.</span
-        >
+        Projects at KSI
       </h1>
       <p class="text-base-content/70 mb-8 max-w-[600px] text-[18px] leading-relaxed">
-        From a first line of Python to a winter camp in the mountains. We turn shared curiosity into
-        things worth making.
+        Software, research, and events organized by KSI members.
       </p>
       <div class="flex flex-wrap gap-3">
         <a href="#project-directory" class="btn gap-2">
@@ -100,11 +97,11 @@
           <h2
             class="font-anybody text-base-content mb-0 text-[32px] font-bold tracking-tight md:text-[40px]"
           >
-            Find your kind of curiosity.
+            Find a project to join.
           </h2>
         </div>
         <p class="text-base-content/70 max-w-xs text-[14px] leading-relaxed">
-          Different fields. One community.<br />Take a closer look at what we do.
+          Browse projects by topic<br />or search by name.
         </p>
       </div>
 
@@ -230,11 +227,11 @@
             ( what's next? )
           </div>
           <h2 class="font-anybody text-base-content m-0 text-[24px] font-bold md:text-[32px]">
-            Your idea could be next.
+            Have a project idea?
           </h2>
         </div>
         <a href="mailto:ksi@cs.uni.wroc.pl" class="btn btn-primary group gap-2">
-          Let's build something
+          Tell us about it
           <ArrowUpRight
             class="size-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
           />

@@ -107,7 +107,7 @@
 
   <!-- Sticky bottom utility bar -->
   <div class="border-base-200 flex shrink-0 flex-col gap-2 border-t px-3 py-3">
-    <!-- Locale picker — full width -->
+    <!-- Full-width locale picker -->
     <div class="dropdown dropdown-top w-full">
       <div
         tabindex="0"
