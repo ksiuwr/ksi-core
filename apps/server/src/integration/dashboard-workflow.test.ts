@@ -358,11 +358,13 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       new Request('http://localhost:3000/api/auth/update-user', {
         method: 'POST',
         headers: { ...authHeaders, cookie },
-        body: JSON.stringify({ image: 'https://example.test/bypass.png' })
+        body: JSON.stringify({ image: 'https://example.test/bypass.png', name: 'Board (Zarząd)' })
       })
     );
     expect(update.status).toBe(200);
-    expect((await db.select().from(users).where(eq(users.id, signupId!)))[0]?.image).toBeNull();
+    const [updated] = await db.select().from(users).where(eq(users.id, signupId!));
+    expect(updated?.image).toBeNull();
+    expect(updated?.name).not.toBe('Board (Zarząd)');
   });
   test('custom statuses persist and reject foreign statuses and unauthorized changes', async () => {
     const statuses = [

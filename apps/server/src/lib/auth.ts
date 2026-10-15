@@ -55,8 +55,9 @@ export const auth = betterAuth({
           });
         }
       },
-      // Provider synchronization and Better Auth's update-user route cannot bypass avatar review.
-      update: { before: async (user) => ({ data: { ...user, image: undefined } }) }
+      // Provider synchronization and Better Auth's update-user route cannot bypass avatar review
+      // or the first and last name the display name is built from.
+      update: { before: async (user) => ({ data: { ...user, image: undefined, name: undefined } }) }
     }
   },
   user: {
