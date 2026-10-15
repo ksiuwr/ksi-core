@@ -8,10 +8,11 @@ import routes from './routes';
 import { ssoRoutes } from './routes/platform/sso';
 import { approvalRoutes } from './routes/platform/approvals';
 import { userRoutes } from './routes/platform/users';
-import content from './routes/platform/content';
+import content, { active } from './routes/platform/content';
 import collaboration from './routes/platform/collaboration';
 import { filesRoutes } from './routes/platform/files';
 import { realtimeRoutes } from './lib/realtime';
+import { createElysia } from './lib/createElysia';
 import { getUrls } from 'shared';
 export const app = new Elysia()
   .onError(({ error, set }) => {
@@ -31,9 +32,16 @@ export const app = new Elysia()
       return { code: message };
     }
   })
-  .post('/markdown', ({ body }) => renderMarkdown(body.markdown), {
-    body: t.Object({ markdown: t.String({ maxLength: 500000 }) })
-  })
+  .use(
+    createElysia().post(
+      '/markdown',
+      ({ body, user }) => {
+        active(user);
+        return renderMarkdown(body.markdown);
+      },
+      { body: t.Object({ markdown: t.String({ maxLength: 500000 }) }) }
+    )
+  )
   .get('/health', () => ({ status: 'ok', environment: getUrls().environment }))
   .get('/ready', async () => {
     await db.execute(sql`select 1`);
