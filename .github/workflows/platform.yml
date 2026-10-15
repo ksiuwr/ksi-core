@@ -1,4 +1,4 @@
-name: Platform CI and GitOps promotion
+name: Platform CI and production promotion
 on:
   push:
     branches: ['**']
@@ -90,9 +90,9 @@ jobs:
           path: image.json
   promote:
     needs: [checks, images]
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name == 'master' && 'production' || 'preview' }}
+    environment: production
     concurrency:
       group: ksi-cluster-writes
       cancel-in-progress: false
@@ -109,47 +109,7 @@ jobs:
         with:
           pattern: image-*
           path: images
-      - name: Install pinned SOPS
-        run: |
-          curl --fail --location --output sops https://github.com/getsops/sops/releases/download/v3.10.2/sops-v3.10.2.linux.amd64
-          curl --fail --location --output checksums https://github.com/getsops/sops/releases/download/v3.10.2/sops-v3.10.2.checksums.txt
-          expected=$(awk '$2 == "sops-v3.10.2.linux.amd64" {print $1}' checksums)
-          test -n "$expected"
-          echo "$expected  sops" | sha256sum --check
-          chmod +x sops
-          sudo mv sops /usr/local/bin/sops
-      - name: Encrypt initial environment configuration
-        env:
-          BRANCH: ${{ github.ref_name }}
-          SOPS_AGE_RECIPIENT: ${{ vars.SOPS_AGE_RECIPIENT }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
-          PROXY_SECRET: ${{ secrets.PROXY_SECRET }}
-          OAUTH_GITHUB_ID: ${{ secrets.OAUTH_GITHUB_ID }}
-          OAUTH_GITHUB_SECRET: ${{ secrets.OAUTH_GITHUB_SECRET }}
-          OAUTH_GOOGLE_ID: ${{ secrets.OAUTH_GOOGLE_ID }}
-          OAUTH_GOOGLE_SECRET: ${{ secrets.OAUTH_GOOGLE_SECRET }}
-          SMTP_HOST: ${{ secrets.SMTP_HOST }}
-          SMTP_PORT: ${{ secrets.SMTP_PORT }}
-          SMTP_USER: ${{ secrets.SMTP_USER }}
-          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          SMTP_FROM: ${{ secrets.SMTP_FROM }}
-          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
-          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          R2_PRIVATE_BUCKET: ${{ secrets.R2_PRIVATE_BUCKET }}
-          R2_PUBLIC_BUCKET: ${{ secrets.R2_PUBLIC_BUCKET }}
-          R2_PUBLIC_ORIGIN: ${{ vars.R2_PUBLIC_ORIGIN }}
-          ACTIVATION_CONTACT: ${{ vars.ACTIVATION_CONTACT }}
-          KSI_BACKUP_KEY: ${{ secrets.KSI_BACKUP_KEY }}
-        run: python3 core/scripts/deployment/secrets.py --cluster cluster --branch "$BRANCH"
-      - uses: azure/setup-kubectl@776406bce94f63e41d621b960d78ee25c8b76ede # v4.0.1
-        with:
-          version: v1.34.0
-      - name: Render tested release
-        env:
-          BRANCH: ${{ github.ref_name }}
-          COMMIT: ${{ github.sha }}
+      - name: Update production manifest
         run: |
           python3 - <<'PY'
           import json
@@ -159,16 +119,9 @@ jobs:
               images.update(json.loads(path.read_text()))
           Path('images.json').write_text(json.dumps(images))
           PY
-          python3 core/scripts/deployment/deploy.py promote --cluster cluster --branch "$BRANCH" --commit "$COMMIT" --images images.json
-          kubectl kustomize cluster/clusters/production >/dev/null
-          kubectl kustomize cluster/environments >/dev/null
-      - name: Configure owned preview DNS
-        env:
-          BRANCH: ${{ github.ref_name }}
-          CLOUDFLARE_DNS_TOKEN: ${{ secrets.CLOUDFLARE_DNS_TOKEN }}
-          CLOUDFLARE_ZONE_ID: ${{ vars.CLOUDFLARE_ZONE_ID }}
-          PREVIEW_DNS_TARGET: ${{ vars.PREVIEW_DNS_TARGET }}
-        run: python3 core/scripts/deployment/dns.py --branch "$BRANCH"
+          python3 core/scripts/deployment/promote_manifest.py \
+            --manifest cluster/production-platform.yaml \
+            --images images.json
       - name: Reject stale runs and commit promotion
         env:
           GH_TOKEN: ${{ github.token }}
@@ -181,7 +134,7 @@ jobs:
           test "$current" = "$COMMIT" || { echo 'Stale build: branch advanced; refusing promotion'; exit 1; }
           git -C cluster config user.name ksi-deployment
           git -C cluster config user.email deployment@ksi.edu.pl
-          git -C cluster add environments infrastructure cleanup
+          git -C cluster add production-platform.yaml
           if ! git -C cluster diff --cached --quiet; then
             git -C cluster commit -m "Deploy tested $COMMIT"
             git -C cluster push
