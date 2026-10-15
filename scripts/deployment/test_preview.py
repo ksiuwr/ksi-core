@@ -35,6 +35,14 @@ class PreviewTest(unittest.TestCase):
                 {item["spec"]["template"]["spec"]["containers"][0]["image"] for item in deployments},
                 set(images.values()),
             )
+            self.assertTrue(
+                all(
+                    item["spec"]["template"]["spec"]["containers"][0]["securityContext"]
+                    ["runAsUser"]
+                    == 1000
+                    for item in deployments
+                )
+            )
             ingress = next(item for item in workloads if item["kind"] == "Ingress")
             self.assertEqual(ingress["spec"]["ingressClassName"], "nginx")
             self.assertTrue(all(rule["host"].startswith(slug + "-") for rule in ingress["spec"]["rules"]))
@@ -42,6 +50,12 @@ class PreviewTest(unittest.TestCase):
             seed = json.loads((output / "seed.json").read_text())
             env_from = seed["spec"]["template"]["spec"]["containers"][0]["envFrom"]
             self.assertIn({"configMapRef": {"name": f"config-{slug}"}}, env_from)
+            migration = json.loads((output / "migration.json").read_text())
+            migration_security = migration["spec"]["template"]["spec"]["containers"][0][
+                "securityContext"
+            ]
+            self.assertEqual(migration_security["runAsUser"], 1000)
+            self.assertEqual(migration_security["runAsGroup"], 1000)
 
     def test_cleanup_targets_only_the_branch_database(self):
         with tempfile.TemporaryDirectory() as root:

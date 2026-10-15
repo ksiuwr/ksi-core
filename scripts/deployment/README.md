@@ -44,8 +44,9 @@ Bootstrap once from a trusted admin machine:
    `POSTGRES_PASSWORD`, then apply `preview-bootstrap.yaml`.
 2. Copy the GHCR pull Secret into `ksi-previews` as `ghcr-secret` when packages are
    private.
-3. Build a kubeconfig for `github-preview-deployer`, base64 encode it, and save it as
-   the preview Environment secret `PREVIEW_KUBECONFIG_B64`.
+3. Build a kubeconfig for `github-preview-deployer` using the CA from the
+   `ksi-previews/kube-root-ca.crt` ConfigMap, base64 encode it, and save it as the
+   preview Environment secret `PREVIEW_KUBECONFIG_B64`.
 4. Configure wildcard `*.ksi.edu.pl` DNS and make its origin certificate the
    ingress-nginx default certificate. Per-branch DNS credentials are not needed.
 5. Configure maintainers as required reviewers on the `preview` Environment. Leave

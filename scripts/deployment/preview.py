@@ -49,6 +49,8 @@ def job(name, image, command, slug, secret, env_from_admin=False):
     if image.startswith("postgres:"):
         container_security.update({"runAsUser": 70, "runAsGroup": 70})
         pod_security["fsGroup"] = 70
+    else:
+        container_security.update({"runAsUser": 1000, "runAsGroup": 1000})
     return resource(
         "Job",
         name,
@@ -160,7 +162,7 @@ def render(branch: str, commit: str, images: dict[str, str], output: Path) -> st
             "readinessProbe": {"tcpSocket": {"port": 3000}, "initialDelaySeconds": 5},
             "livenessProbe": {"tcpSocket": {"port": 3000}, "initialDelaySeconds": 30},
             "resources": {"requests": {"cpu": "50m", "memory": "64Mi"}, "limits": {"cpu": "500m", "memory": "512Mi"}},
-            "securityContext": {"allowPrivilegeEscalation": False, "capabilities": {"drop": ["ALL"]}, "runAsNonRoot": True},
+            "securityContext": {"allowPrivilegeEscalation": False, "capabilities": {"drop": ["ALL"]}, "runAsNonRoot": True, "runAsUser": 1000, "runAsGroup": 1000},
         }
         if app == "server":
             container["envFrom"].append({"secretRef": {"name": secret}})
