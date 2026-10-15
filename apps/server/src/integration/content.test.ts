@@ -264,10 +264,17 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
         })
       ).status
     ).toBe(200);
+    const links = { links: [{ label: 'Repository', url: 'https://github.com/ksiuwr/krasnal' }] };
+    expect((await content(`/projects/${projectId}/links`, 'leader', 'PUT', links)).status).toBe(
+      200
+    );
     await db
       .update(users)
       .set({ flags: ['-projects.layout.edit'] })
       .where(eq(users.id, ids.leader));
+    expect((await content(`/projects/${projectId}/links`, 'leader', 'PUT', links)).status).toBe(
+      403
+    );
     expect(
       (
         await content(`/projects/${projectId}/layout`, 'leader', 'PUT', {

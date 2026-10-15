@@ -484,7 +484,10 @@ export default createElysia({ prefix: '/platform' })
           .from(projects)
           .where(eq(projects.id, params.id))
           .for('update');
-        requireLeader(actor, await scopeFor(tx, params.id), 'projects.catalog.edit');
+        const scope = await scopeFor(tx, params.id);
+        requireLeader(actor, scope, 'projects.catalog.edit');
+        // Links are also part of the project layout, so a denial of either permission applies.
+        requireLeader(actor, scope, 'projects.layout.edit');
         await tx.delete(projectLinks).where(eq(projectLinks.projectId, params.id));
         if (body.links.length)
           await tx
