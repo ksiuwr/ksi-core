@@ -24,18 +24,18 @@ metadata:
   name: github-preview-deployer
   namespace: ksi-previews
 rules:
-- apiGroups: [""]
-  resources: ["configmaps", "secrets", "services", "pods"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
-- apiGroups: ["apps"]
-  resources: ["deployments"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
-- apiGroups: ["batch"]
-  resources: ["jobs"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
-- apiGroups: ["networking.k8s.io"]
-  resources: ["ingresses"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ['']
+    resources: ['configmaps', 'secrets', 'services', 'pods']
+    verbs: ['get', 'list', 'watch', 'create', 'update', 'patch', 'delete']
+  - apiGroups: ['apps']
+    resources: ['deployments']
+    verbs: ['get', 'list', 'watch', 'create', 'update', 'patch', 'delete']
+  - apiGroups: ['batch']
+    resources: ['jobs']
+    verbs: ['get', 'list', 'watch', 'create', 'update', 'patch', 'delete']
+  - apiGroups: ['networking.k8s.io']
+    resources: ['ingresses']
+    verbs: ['get', 'list', 'watch', 'create', 'update', 'patch', 'delete']
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -43,9 +43,9 @@ metadata:
   name: github-preview-deployer
   namespace: ksi-previews
 subjects:
-- kind: ServiceAccount
-  name: github-preview-deployer
-  namespace: ksi-previews
+  - kind: ServiceAccount
+    name: github-preview-deployer
+    namespace: ksi-previews
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -60,44 +60,44 @@ spec:
   serviceName: preview-postgres
   replicas: 1
   selector:
-    matchLabels: {app: preview-postgres}
+    matchLabels: { app: preview-postgres }
   template:
     metadata:
-      labels: {app: preview-postgres}
+      labels: { app: preview-postgres }
     spec:
       automountServiceAccountToken: false
       securityContext:
-        seccompProfile: {type: RuntimeDefault}
+        seccompProfile: { type: RuntimeDefault }
         runAsUser: 70
         runAsGroup: 70
         fsGroup: 70
       containers:
-      - name: postgres
-        image: postgres:17.6-alpine
-        ports: [{containerPort: 5432}]
-        env:
-        - {name: POSTGRES_USER, value: postgres}
-        - {name: POSTGRES_DB, value: postgres}
-        - name: POSTGRES_PASSWORD
-          valueFrom: {secretKeyRef: {name: preview-postgres-admin, key: POSTGRES_PASSWORD}}
-        - {name: PGDATA, value: /var/lib/postgresql/data/pgdata}
-        volumeMounts: [{name: data, mountPath: /var/lib/postgresql/data}]
-        readinessProbe:
-          exec: {command: [pg_isready, -U, postgres]}
-          initialDelaySeconds: 10
-        resources:
-          requests: {cpu: 250m, memory: 256Mi}
-          limits: {cpu: "1", memory: 1Gi}
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities: {drop: ["ALL"]}
-          runAsNonRoot: true
+        - name: postgres
+          image: postgres:17.6-alpine
+          ports: [{ containerPort: 5432 }]
+          env:
+            - { name: POSTGRES_USER, value: postgres }
+            - { name: POSTGRES_DB, value: postgres }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: preview-postgres-admin, key: POSTGRES_PASSWORD } }
+            - { name: PGDATA, value: /var/lib/postgresql/data/pgdata }
+          volumeMounts: [{ name: data, mountPath: /var/lib/postgresql/data }]
+          readinessProbe:
+            exec: { command: [pg_isready, -U, postgres] }
+            initialDelaySeconds: 10
+          resources:
+            requests: { cpu: 250m, memory: 256Mi }
+            limits: { cpu: '1', memory: 1Gi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: ['ALL'] }
+            runAsNonRoot: true
   volumeClaimTemplates:
-  - metadata: {name: data}
-    spec:
-      accessModes: [ReadWriteOnce]
-      storageClassName: local-path
-      resources: {requests: {storage: 20Gi}}
+    - metadata: { name: data }
+      spec:
+        accessModes: [ReadWriteOnce]
+        storageClassName: local-path
+        resources: { requests: { storage: 20Gi } }
 ---
 apiVersion: v1
 kind: Service
@@ -105,5 +105,5 @@ metadata:
   name: preview-postgres
   namespace: ksi-previews
 spec:
-  selector: {app: preview-postgres}
-  ports: [{port: 5432, targetPort: 5432}]
+  selector: { app: preview-postgres }
+  ports: [{ port: 5432, targetPort: 5432 }]
