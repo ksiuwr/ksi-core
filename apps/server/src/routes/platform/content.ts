@@ -14,7 +14,8 @@ import {
   articles,
   articleRevisions,
   articleProposals,
-  articleContributors
+  articleContributors,
+  threads
 } from '../../db';
 import { displayName } from '../../domain/profiles';
 import { hasScopedLeadership, canEditScope, safeLink } from '../../domain/content-policy';
@@ -595,13 +596,24 @@ export default createElysia({ prefix: '/platform' })
           and(eq(projectMembers.projectId, params.id), eq(projectMembers.userId, params.userId))
         )
         .returning();
-      if (removed)
+      if (removed) {
+        // Restricted thread invitations are only valid for project members.
+        await tx
+          .update(threads)
+          .set({ invitedIds: sql`array_remove(${threads.invitedIds}, ${params.userId})` })
+          .where(
+            and(
+              eq(threads.projectId, params.id),
+              sql`${params.userId} = any(${threads.invitedIds})`
+            )
+          );
         await recordEvent(tx, {
           actorId: actor.id,
           projectId: params.id,
           action: 'projects.membership.removed',
           targetId: params.userId
         });
+      }
       return { removed: !!removed };
     });
   })

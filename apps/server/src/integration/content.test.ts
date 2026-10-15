@@ -641,6 +641,25 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
     expect(slugs).toContain(listed!.slug);
     expect(slugs).not.toContain(unlisted!.slug);
   });
+  test('leaving a project ends restricted thread invitations', async () => {
+    const thread = await collaboration('/threads', 'leader', 'POST', {
+      projectId,
+      title: 'Invited discussion',
+      markdown: 'Initial message',
+      visibility: 'leaders',
+      invitedIds: [ids.member]
+    });
+    expect(thread.status).toBe(200);
+    expect((await collaboration(`/threads/${thread.body.id}`, 'member')).status).toBe(200);
+    const removed = await content(
+      `/projects/${projectId}/members/${ids.member}`,
+      'leader',
+      'DELETE'
+    );
+    expect(removed.body.removed).toBe(true);
+    expect((await collaboration(`/threads/${thread.body.id}`, 'member')).status).toBe(404);
+    await db.insert(projectMembers).values({ projectId, userId: ids.member });
+  });
   test('scope denial blocks unrelated publishing and audit history', async () => {
     expect((await content(`/articles/${articleId}`, 'outsider')).status).toBe(403);
     expect((await collaboration(`/events?projectId=${projectId}`, 'member')).status).toBe(403);
