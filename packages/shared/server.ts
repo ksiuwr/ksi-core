@@ -84,6 +84,12 @@ export async function backendFetch(
   if (token) headers.set('x-ksi-session', token);
   return fetch(`${urls.internalBackend}${path}`, { ...options, headers });
 }
+// Resolve like a browser does, so tabs, newlines or backslashes cannot turn a path into another host.
+function sameOriginPath(returnTo: string, origin: string): string {
+  if (!returnTo.startsWith('/') || !URL.canParse(returnTo, origin)) return '/';
+  const url = new URL(returnTo, origin);
+  return url.origin === origin ? url.pathname + url.search + url.hash : '/';
+}
 export function startSso(
   event: ProxyEvent,
   env: RuntimeEnvironment,
@@ -93,10 +99,7 @@ export function startSso(
   const urls = getUrls(env);
   const verifier = randomBytes(32).toString('base64url'),
     state = randomBytes(32).toString('base64url');
-  const safeReturn =
-    returnTo.startsWith('/') && !returnTo.startsWith('//') && !returnTo.includes('\\')
-      ? returnTo
-      : '/';
+  const safeReturn = sameOriginPath(returnTo, event.url.origin);
   event.cookies.set('ksi-sso-flow', JSON.stringify({ verifier, state, returnTo: safeReturn }), {
     path: '/',
     httpOnly: true,
@@ -128,7 +131,7 @@ export async function finishSso(event: ProxyEvent, env: RuntimeEnvironment): Pro
       sameSite: 'lax',
       maxAge: 60
     });
-    return flow.returnTo;
+    return sameOriginPath(flow.returnTo, event.url.origin);
   }
   const response = await backendFetch(event, env, '/sso/redeem', {
     method: 'POST',
@@ -149,9 +152,5 @@ export async function finishSso(event: ProxyEvent, env: RuntimeEnvironment): Pro
     sameSite: 'lax',
     expires: new Date(data.expiresAt)
   });
-  return flow.returnTo.startsWith('/') &&
-    !flow.returnTo.startsWith('//') &&
-    !flow.returnTo.includes('\\')
-    ? flow.returnTo
-    : '/';
+  return sameOriginPath(flow.returnTo, event.url.origin);
 }
