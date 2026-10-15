@@ -88,6 +88,95 @@ jobs:
         with:
           name: image-${{ matrix.app }}
           path: image.json
+  preview:
+    needs: [checks, images]
+    if: github.event_name == 'push' && github.ref != 'refs/heads/master'
+    runs-on: ubuntu-latest
+    environment: preview
+    concurrency:
+      group: preview-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: image-*
+          path: images
+      - uses: azure/setup-kubectl@776406bce94f63e41d621b960d78ee25c8b76ede # v4.0.1
+        with:
+          version: v1.34.0
+      - name: Configure preview-only cluster access
+        env:
+          PREVIEW_KUBECONFIG_B64: ${{ secrets.PREVIEW_KUBECONFIG_B64 }}
+        run: |
+          test -n "$PREVIEW_KUBECONFIG_B64"
+          install -d -m 700 "$RUNNER_TEMP/kube"
+          printf '%s' "$PREVIEW_KUBECONFIG_B64" | base64 --decode >"$RUNNER_TEMP/kube/config"
+          chmod 600 "$RUNNER_TEMP/kube/config"
+          echo "KUBECONFIG=$RUNNER_TEMP/kube/config" >>"$GITHUB_ENV"
+      - name: Reject stale build and render preview
+        id: preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          encoded=$(python3 -c 'import os,urllib.parse; print(urllib.parse.quote(os.environ["BRANCH"], safe=""))')
+          current=$(gh api "repos/$REPOSITORY/branches/$encoded" --jq .commit.sha)
+          test "$current" = "$COMMIT" || { echo 'Stale build: branch advanced; refusing preview'; exit 1; }
+          owner=${REPOSITORY%%/*}
+          open_pulls=$(gh api --method GET "repos/$REPOSITORY/pulls" -f state=open -f "head=$owner:$BRANCH" --jq length)
+          test "$open_pulls" -gt 0 || { echo 'No open pull request for branch; refusing preview'; exit 1; }
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          images = {}
+          for path in Path('images').glob('*/image.json'):
+              images.update(json.loads(path.read_text()))
+          Path('images.json').write_text(json.dumps(images))
+          PY
+          slug=$(python3 scripts/deployment/preview.py render --branch "$BRANCH" --commit "$COMMIT" --images images.json --output rendered-preview)
+          echo "slug=$slug" >>"$GITHUB_OUTPUT"
+      - name: Create stable preview credentials
+        env:
+          SLUG: ${{ steps.preview.outputs.slug }}
+        run: |
+          secret="runtime-$SLUG"
+          if ! kubectl -n ksi-previews get secret "$secret" >/dev/null 2>&1; then
+            database="ksi_$(printf '%s' "$SLUG" | tr '-' '_')"
+            database_password=$(openssl rand -hex 32)
+            auth_secret=$(openssl rand -hex 48)
+            proxy_secret=$(openssl rand -hex 48)
+            seed_password=$(openssl rand -base64 24 | tr -d '\n')
+            kubectl -n ksi-previews create secret generic "$secret" \
+              --from-literal="DATABASE_URL=postgresql://$database:$database_password@preview-postgres:5432/$database" \
+              --from-literal="PREVIEW_DATABASE=$database" \
+              --from-literal="PREVIEW_DATABASE_PASSWORD=$database_password" \
+              --from-literal="BETTER_AUTH_SECRET=$auth_secret" \
+              --from-literal="PROXY_SECRET=$proxy_secret" \
+              --from-literal="KSI_SEED_PASSWORD=$seed_password"
+            kubectl -n ksi-previews label secret "$secret" "ksi.preview=$SLUG"
+          fi
+      - name: Provision, migrate, seed, and roll out
+        env:
+          SLUG: ${{ steps.preview.outputs.slug }}
+        run: |
+          kubectl apply -f rendered-preview/prerequisite.json
+          for phase in provision migration seed; do
+            name=$(kubectl create --dry-run=client -f "rendered-preview/$phase.json" -o jsonpath='{.metadata.name}')
+            kubectl -n ksi-previews delete job "$name" --ignore-not-found --wait=true
+            kubectl apply -f "rendered-preview/$phase.json"
+            kubectl -n ksi-previews wait --for=condition=complete "job/$name" --timeout=10m
+          done
+          kubectl apply -f rendered-preview/workloads.json
+          for app in server web auth dashboard; do
+            kubectl -n ksi-previews rollout status "deployment/$SLUG-$app" --timeout=10m
+          done
+      - name: Publish preview URL
+        env:
+          SLUG: ${{ steps.preview.outputs.slug }}
+        run: printf '### Preview\n\nhttps://%s-web.ksi.edu.pl\n' "$SLUG" >>"$GITHUB_STEP_SUMMARY"
   promote:
     needs: [checks, images]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
