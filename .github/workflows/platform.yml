@@ -143,7 +143,7 @@ jobs:
           ACTIVATION_CONTACT: ${{ vars.ACTIVATION_CONTACT }}
           KSI_BACKUP_KEY: ${{ secrets.KSI_BACKUP_KEY }}
         run: python3 core/scripts/deployment/secrets.py --cluster cluster --branch "$BRANCH"
-      - uses: azure/setup-kubectl@v4
+      - uses: azure/setup-kubectl@776406bce94f63e41d621b960d78ee25c8b76ede # v4.0.1
         with:
           version: v1.34.0
       - name: Render tested release
