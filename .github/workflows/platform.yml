@@ -92,7 +92,12 @@ jobs:
     needs: [checks, images]
     if: github.event_name == 'push' && github.ref != 'refs/heads/master'
     runs-on: ubuntu-latest
-    environment: preview
+    permissions:
+      contents: read
+      pull-requests: write
+    environment:
+      name: preview
+      url: ${{ steps.preview.outputs.url }}
     concurrency:
       group: preview-${{ github.ref }}
       cancel-in-progress: true
@@ -126,8 +131,8 @@ jobs:
           current=$(gh api "repos/$REPOSITORY/branches/$encoded" --jq .commit.sha)
           test "$current" = "$COMMIT" || { echo 'Stale build: branch advanced; refusing preview'; exit 1; }
           owner=${REPOSITORY%%/*}
-          open_pulls=$(gh api --method GET "repos/$REPOSITORY/pulls" -f state=open -f "head=$owner:$BRANCH" --jq length)
-          test "$open_pulls" -gt 0 || { echo 'No open pull request for branch; refusing preview'; exit 1; }
+          pull_number=$(gh api --method GET "repos/$REPOSITORY/pulls" -f state=open -f "head=$owner:$BRANCH" --jq '.[0].number')
+          test -n "$pull_number" || { echo 'No open pull request for branch; refusing preview'; exit 1; }
           python3 - <<'PY'
           import json
           from pathlib import Path
@@ -138,6 +143,8 @@ jobs:
           PY
           slug=$(python3 scripts/deployment/preview.py render --branch "$BRANCH" --commit "$COMMIT" --images images.json --output rendered-preview)
           echo "slug=$slug" >>"$GITHUB_OUTPUT"
+          echo "url=https://$slug-web.ksi.edu.pl" >>"$GITHUB_OUTPUT"
+          echo "pull_number=$pull_number" >>"$GITHUB_OUTPUT"
       - name: Create stable preview credentials
         env:
           SLUG: ${{ steps.preview.outputs.slug }}
@@ -175,8 +182,22 @@ jobs:
           done
       - name: Publish preview URL
         env:
-          SLUG: ${{ steps.preview.outputs.slug }}
-        run: printf '### Preview\n\nhttps://%s-web.ksi.edu.pl\n' "$SLUG" >>"$GITHUB_STEP_SUMMARY"
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          COMMIT: ${{ github.sha }}
+          PREVIEW_URL: ${{ steps.preview.outputs.url }}
+          PULL_NUMBER: ${{ steps.preview.outputs.pull_number }}
+        run: |
+          printf '### Preview\n\n%s\n' "$PREVIEW_URL" | tee -a "$GITHUB_STEP_SUMMARY"
+          marker='<!-- ksi-preview-deployment -->'
+          body=$(printf '%s\n### Preview deployment\n\n✅ [Open preview](%s)\n\nCommit `%s`' "$marker" "$PREVIEW_URL" "$COMMIT")
+          comment_id=$(gh api "repos/$REPOSITORY/issues/$PULL_NUMBER/comments" --paginate \
+            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("<!-- ksi-preview-deployment -->"))) | .id' | head -n 1)
+          if [ -n "$comment_id" ]; then
+            gh api --method PATCH "repos/$REPOSITORY/issues/comments/$comment_id" -f body="$body" >/dev/null
+          else
+            gh api --method POST "repos/$REPOSITORY/issues/$PULL_NUMBER/comments" -f body="$body" >/dev/null
+          fi
   promote:
     needs: [checks, images]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'

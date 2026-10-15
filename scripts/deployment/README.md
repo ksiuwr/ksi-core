@@ -55,9 +55,10 @@ Bootstrap once from a trusted admin machine:
 
 After approval, CI verifies that the branch still has an open pull request, provisions
 the branch database, migrates and seeds it, rolls out the workloads, and publishes the
-web URL in the job summary. Closing the pull request or deleting its branch drops the
-database and deletes only resources carrying its `ksi.preview` label. Wildcard DNS
-requires no per-branch cleanup.
+web URL in the step log and job summary. GitHub also adds a **View deployment** link and
+creates or updates one preview comment on the pull request. Closing the pull request or
+deleting its branch drops the database and deletes only resources carrying its
+`ksi.preview` label. Wildcard DNS requires no per-branch cleanup.
 
 Preview credentials persist across updates. To read the sample-account password from
 a trusted admin machine, replace `$slug` with the job summary's hostname prefix:
