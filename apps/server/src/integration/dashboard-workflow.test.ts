@@ -630,4 +630,22 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       ).length
     ).toBe(0);
   });
+  test('one account cannot exhaust the realtime ticket pool', async () => {
+    const ticket = (actor: Actor) =>
+      app.handle(
+        new Request('http://localhost:3000/realtime/ticket', {
+          method: 'POST',
+          headers: {
+            'x-ksi-proxy-key': process.env.PROXY_SECRET!,
+            'x-ksi-origin': getUrls().frontend.dashboard,
+            'x-ksi-session': tokens[actor]
+          }
+        })
+      );
+    const statuses: number[] = [];
+    for (let i = 0; i < 21; i++) statuses.push((await ticket('outsider')).status);
+    expect(statuses.slice(0, 20)).toEqual(Array(20).fill(200));
+    expect(statuses[20]).toBe(429);
+    expect((await ticket('admin')).status).toBe(200);
+  });
 });

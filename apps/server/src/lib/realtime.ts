@@ -31,7 +31,10 @@ export const realtimeRoutes = createProtectedElysia({ prefix: '/realtime' }).pos
       );
     if (!frontend) throw status(401);
     for (const [key, value] of tickets) if (value.expiresAt < Date.now()) tickets.delete(key);
-    if (tickets.size > 1000) throw status(429);
+    // A per-account cap keeps one member from exhausting the shared pool.
+    let outstanding = 0;
+    for (const value of tickets.values()) if (value.userId === user.id) outstanding++;
+    if (tickets.size > 1000 || outstanding >= 20) throw status(429);
     const ticket = randomToken();
     tickets.set(digest(ticket), {
       sessionId: frontend.sessionId,
