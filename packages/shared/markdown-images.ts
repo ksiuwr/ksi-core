@@ -1,4 +1,4 @@
-import { Lexer } from 'marked';
+import { Lexer, Tokenizer, defaults } from 'marked';
 
 export const minimumImageWidth = 32;
 export const maximumImageWidth = 2000;
@@ -6,11 +6,18 @@ export function clampImageWidth(width: number) {
   return Math.round(Math.min(maximumImageWidth, Math.max(minimumImageWidth, width)));
 }
 
+// Tokenize only the image at the start of source instead of the whole remainder.
+function imageAt(source: string) {
+  const tokenizer = new Tokenizer();
+  tokenizer.lexer = new Lexer({ ...defaults, tokenizer });
+  return tokenizer.link(source);
+}
+
 // Ignore code: examples containing image syntax must remain literal examples.
 export function markdownImages(source: string) {
   const code = [
     ...source.matchAll(/(^|\n)(`{3,}|~{3,})[^\n]*\n[\s\S]*?(?:\n\2[^\n]*(?=\n|$)|$)|(`+)[^`]*?\3/g)
-  ].map((match) => [match.index!, match.index! + match[0].length]);
+  ].map((match) => [match.index!, match.index! + match[0].length] as const);
   const images: {
     start: number;
     end: number;
@@ -20,10 +27,15 @@ export function markdownImages(source: string) {
     title: string | null;
     width?: number;
   }[] = [];
+  // Without a ')' ahead no image can match, so the remaining candidates are skipped.
+  const lastParen = source.lastIndexOf(')');
+  let range = 0;
   for (const match of source.matchAll(/!\[/g)) {
-    if (code.some(([start, end]) => match.index! >= start! && match.index! < end!)) continue;
+    if (match.index! > lastParen) break;
+    while (range < code.length && code[range]![1] <= match.index!) range++;
+    if (range < code.length && code[range]![0] <= match.index!) continue;
     const remainder = source.slice(match.index!);
-    const [token] = Lexer.lexInline(remainder);
+    const token = imageAt(remainder);
     if (token?.type !== 'image') continue;
     const raw = token.raw;
     const flag = remainder.slice(raw.length).match(/^\{width=(\d+)\}/);
@@ -50,12 +62,15 @@ export function resizeMarkdownImage(source: string, index: number, width: number
 const escapeAttribute = (value: string) =>
   value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 export function prepareMarkdownImages(source: string) {
-  let result = source;
-  const images = markdownImages(source);
-  for (let index = images.length - 1; index >= 0; index--) {
-    const image = images[index]!;
+  const parts: string[] = [];
+  let cursor = 0;
+  markdownImages(source).forEach((image, index) => {
+    // An image nested in another image's alt text is part of that image.
+    if (image.start < cursor) return;
     const tag = `<span class="markdown-image-frame"><img src="${escapeAttribute(image.href)}" alt="${escapeAttribute(image.text)}"${image.title ? ` title="${escapeAttribute(image.title)}"` : ''}${image.width ? ` width="${image.width}"` : ''} data-ksi-image="${index}"></span>`;
-    result = result.slice(0, image.start) + tag + result.slice(image.end);
-  }
-  return result;
+    parts.push(source.slice(cursor, image.start), tag);
+    cursor = image.end;
+  });
+  parts.push(source.slice(cursor));
+  return parts.join('');
 }
