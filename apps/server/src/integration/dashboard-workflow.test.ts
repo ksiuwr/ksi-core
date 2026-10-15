@@ -223,6 +223,12 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       await db.delete(users).where(eq(users.id, id));
     }
   });
+  test('user search lists only active members to active members', async () => {
+    expect((await request('pending', '/users/search?q=member%20Workflow')).status).toBe(403);
+    expect((await request('member', '/users/search?q=pending%20Workflow')).body).toEqual([]);
+    const found = await request('member', '/users/search?q=member%20Workflow');
+    expect(found.body.map((user: { id: string }) => user.id)).toContain(ids.member);
+  });
   test('workspace rosters protect account data and expose scoped project settings', async () => {
     expect((await request('pending', '/platform/members')).status).toBe(403);
     const roster = await request('member', `/platform/projects/${projectId}/members`);
