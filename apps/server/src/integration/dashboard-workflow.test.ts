@@ -22,7 +22,7 @@ import {
   verifications
 } from '../db';
 import { app } from '../app';
-import { canReadFile } from '../routes/platform/files';
+import { canReadFile, referenceAccess } from '../routes/platform/files';
 const safe =
   process.env.KSI_ENVIRONMENT === 'integration' &&
   new URL(process.env.DATABASE_URL ?? 'postgres://none@localhost/none').pathname ===
@@ -485,6 +485,30 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       (await request('member', `/platform/boards/${boardId}/statuses/todo`, 'DELETE')).status
     ).toBe(200);
     expect((await request('member', path, 'DELETE')).status).toBe(422);
+  });
+  test('attachments of deleted comments and tasks follow their visibility', async () => {
+    const [leader] = await db.select().from(users).where(eq(users.id, ids.member));
+    const [outsider] = await db.select().from(users).where(eq(users.id, ids.outsider));
+    const taskId = createId(),
+      commentId = createId();
+    await db.insert(kanbanItems).values({
+      id: taskId,
+      boardId,
+      authorId: ids.member,
+      title: 'Removed',
+      column: 'todo',
+      deletedAt: new Date()
+    });
+    await db.insert(comments).values({
+      id: commentId,
+      itemId,
+      authorId: ids.member,
+      markdown: 'x',
+      deletedAt: new Date()
+    });
+    expect((await referenceAccess(db, 'item', taskId, outsider!)).read).toBe(false);
+    expect((await referenceAccess(db, 'item', taskId, leader!)).read).toBe(true);
+    expect((await referenceAccess(db, 'comment', commentId, leader!)).read).toBe(false);
   });
   test('avatar submissions stay private, preserve current avatar, and reject non-images', async () => {
     expect(
