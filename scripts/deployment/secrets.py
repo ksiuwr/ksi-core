@@ -3,9 +3,9 @@
 Never prints secret material. Reuses an existing preview password on promotion.
 """
 import argparse
+import base64
 import json
 import os
-import secrets
 import subprocess
 import urllib.parse
 from pathlib import Path
@@ -14,6 +14,11 @@ from deploy import branch_slug
 REQUIRED = ['BETTER_AUTH_SECRET', 'PROXY_SECRET', 'OAUTH_GITHUB_ID', 'OAUTH_GITHUB_SECRET',
             'OAUTH_GOOGLE_ID', 'OAUTH_GOOGLE_SECRET']
 OPTIONAL = ['SMTP_HOST', 'SMTP_PORT', 'SMTP_FROM', 'SMTP_USER', 'SMTP_PASSWORD', 'R2_ENDPOINT', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_PRIVATE_BUCKET', 'R2_PUBLIC_BUCKET', 'R2_PUBLIC_ORIGIN', 'ACTIVATION_CONTACT', 'KSI_BACKUP_KEY']
+
+
+def token_urlsafe(length):
+    # This file's name shadows the standard library secrets module, which offers the same.
+    return base64.urlsafe_b64encode(os.urandom(length)).rstrip(b'=').decode('ascii')
 
 
 def encrypt(path, namespace, name, values, recipient):
@@ -37,12 +42,14 @@ def bootstrap(cluster, branch, recipient):
     if branch == 'master':
         values['DATABASE_URL'] = os.environ['DATABASE_URL']
     else:
-        password = secrets.token_urlsafe(40)
+        password = token_urlsafe(40)
         database = 'ksi_' + slug.replace('-', '_')
         values['DATABASE_URL'] = f'postgresql://{database}:{urllib.parse.quote(password)}@preview-postgres.ksi-preview-data.svc.cluster.local:5432/{database}'
         # Per-environment session and proxy authorities, regardless of shared preview provider IDs.
-        values['BETTER_AUTH_SECRET'] = secrets.token_urlsafe(48)
-        values['PROXY_SECRET'] = secrets.token_urlsafe(48)
+        values['BETTER_AUTH_SECRET'] = token_urlsafe(48)
+        values['PROXY_SECRET'] = token_urlsafe(48)
+        # Password for the sample accounts of the initial seed job, readable from this secret.
+        values['KSI_SEED_PASSWORD'] = token_urlsafe(24)
         encrypt(cluster / 'environments' / slug / 'database' / 'password.sops.yaml', 'ksi-preview-data', 'db-' + slug, {'password': password}, recipient)
     encrypt(path, 'ksi-' + slug, 'ksi-runtime', values, recipient)
 

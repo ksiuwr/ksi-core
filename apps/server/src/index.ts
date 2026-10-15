@@ -1,15 +1,20 @@
 import { app } from './app';
 import { consumeTicket, websocket, startRealtime, type SocketData } from './lib/realtime';
+import { rejectExampleSecrets } from './lib/example-secrets';
+import { MAX_UPLOAD_BYTES } from './lib/storage';
 
 const required = ['DATABASE_URL', 'PROXY_SECRET', 'BETTER_AUTH_SECRET'];
 for (const envVar of required) {
   if (!Bun.env[envVar]) throw new Error(`Missing required environment variable: ${envVar}`);
 }
+rejectExampleSecrets(['PROXY_SECRET', 'BETTER_AUTH_SECRET']);
 
 const port = Number(Bun.env.PORT ?? 3000);
 const server = Bun.serve<SocketData>({
   port,
   hostname: '0.0.0.0',
+  // Bodies are buffered before authentication, so allow only the largest upload plus multipart framing.
+  maxRequestBodySize: MAX_UPLOAD_BYTES + 1024 * 1024,
   fetch: async (request, server) => {
     if (new URL(request.url).pathname === '/events') {
       const data = await consumeTicket(request);

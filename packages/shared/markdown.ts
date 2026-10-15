@@ -21,7 +21,7 @@ export function renderMarkdown(source: string): MarkdownBlock[] {
           code: ['class'],
           span: ['class']
         },
-        allowedClasses: { span: ['markdown-image-frame'] },
+        allowedClasses: { span: ['markdown-image-frame'], code: ['language-*'] },
         allowedSchemes: ['https', 'http', 'mailto'],
         allowedSchemesByTag: { img: ['https', 'http'] },
         allowProtocolRelative: false,

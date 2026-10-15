@@ -36,9 +36,34 @@ class DeploymentTest(unittest.TestCase):
             web = json.loads((target / 'workloads' / 'web.yaml').read_text())['spec']['template']['spec']['containers'][0]
             self.assertFalse(any('secretRef' in item for item in web['envFrom']))
             self.assertEqual(web['image'], images['web'])
+            dashboard = json.loads((target / 'workloads' / 'dashboard.yaml').read_text())['spec']['template']['spec']['containers'][0]
+            self.assertIn({'name': 'BODY_SIZE_LIMIT', 'value': '21M'}, dashboard['env'])
             cleanup(cluster, branch)
             self.assertFalse(target.exists())
             self.assertTrue((cluster / 'cleanup' / slug / 'release.json').exists())
+
+    def test_only_production_releases_configure_cleanup_controller(self):
+        with tempfile.TemporaryDirectory() as root:
+            cluster = Path(root)
+            preview = cluster / 'environments' / branch_slug('feature/sso')
+            for folder, name in [('prerequisites', 'runtime.sops.yaml'), ('database', 'password.sops.yaml')]:
+                (preview / folder).mkdir(parents=True)
+                (preview / folder / name).write_text('apiVersion: v1\nkind: Secret\nmetadata:\n  name: test\n')
+            (cluster / 'environments' / 'production' / 'prerequisites').mkdir(parents=True)
+            (cluster / 'environments' / 'production' / 'prerequisites' / 'runtime.sops.yaml').write_text('apiVersion: v1\nkind: Secret\nmetadata:\n  name: test\n')
+            controller = cluster / 'infrastructure' / 'cleanup-controller.yaml'
+
+            def images(digit):
+                return {app: 'ghcr.io/ksiuwr/ksi-' + app + '@sha256:' + digit * 64 for app in ['server', 'web', 'auth', 'dashboard']}
+
+            promote(cluster, 'feature/sso', 'b' * 40, images('a'))
+            self.assertFalse(controller.exists())
+            promote(cluster, 'master', 'c' * 40, images('d'))
+            cron = json.loads(controller.read_text())['items'][-1]
+            self.assertEqual(cron['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['image'], images('d')['server'])
+            promote(cluster, 'feature/sso', 'e' * 40, images('f'))
+            cron = json.loads(controller.read_text())['items'][-1]
+            self.assertEqual(cron['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['image'], images('d')['server'])
 
     def test_mutable_images_and_production_cleanup_rejected(self):
         with self.assertRaises(ValueError):

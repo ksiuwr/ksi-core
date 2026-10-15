@@ -22,7 +22,7 @@ import {
   verifications
 } from '../db';
 import { app } from '../app';
-import { canReadFile } from '../routes/platform/files';
+import { canReadFile, referenceAccess } from '../routes/platform/files';
 const safe =
   process.env.KSI_ENVIRONMENT === 'integration' &&
   new URL(process.env.DATABASE_URL ?? 'postgres://none@localhost/none').pathname ===
@@ -223,6 +223,12 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       await db.delete(users).where(eq(users.id, id));
     }
   });
+  test('user search lists only active members to active members', async () => {
+    expect((await request('pending', '/users/search?q=member%20Workflow')).status).toBe(403);
+    expect((await request('member', '/users/search?q=pending%20Workflow')).body).toEqual([]);
+    const found = await request('member', '/users/search?q=member%20Workflow');
+    expect(found.body.map((user: { id: string }) => user.id)).toContain(ids.member);
+  });
   test('workspace rosters protect account data and expose scoped project settings', async () => {
     expect((await request('pending', '/platform/members')).status).toBe(403);
     const roster = await request('member', `/platform/projects/${projectId}/members`);
@@ -352,11 +358,13 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       new Request('http://localhost:3000/api/auth/update-user', {
         method: 'POST',
         headers: { ...authHeaders, cookie },
-        body: JSON.stringify({ image: 'https://example.test/bypass.png' })
+        body: JSON.stringify({ image: 'https://example.test/bypass.png', name: 'Board (Zarząd)' })
       })
     );
     expect(update.status).toBe(200);
-    expect((await db.select().from(users).where(eq(users.id, signupId!)))[0]?.image).toBeNull();
+    const [updated] = await db.select().from(users).where(eq(users.id, signupId!));
+    expect(updated?.image).toBeNull();
+    expect(updated?.name).not.toBe('Board (Zarząd)');
   });
   test('custom statuses persist and reject foreign statuses and unauthorized changes', async () => {
     const statuses = [
@@ -477,6 +485,30 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       (await request('member', `/platform/boards/${boardId}/statuses/todo`, 'DELETE')).status
     ).toBe(200);
     expect((await request('member', path, 'DELETE')).status).toBe(422);
+  });
+  test('attachments of deleted comments and tasks follow their visibility', async () => {
+    const [leader] = await db.select().from(users).where(eq(users.id, ids.member));
+    const [outsider] = await db.select().from(users).where(eq(users.id, ids.outsider));
+    const taskId = createId(),
+      commentId = createId();
+    await db.insert(kanbanItems).values({
+      id: taskId,
+      boardId,
+      authorId: ids.member,
+      title: 'Removed',
+      column: 'todo',
+      deletedAt: new Date()
+    });
+    await db.insert(comments).values({
+      id: commentId,
+      itemId,
+      authorId: ids.member,
+      markdown: 'x',
+      deletedAt: new Date()
+    });
+    expect((await referenceAccess(db, 'item', taskId, outsider!)).read).toBe(false);
+    expect((await referenceAccess(db, 'item', taskId, leader!)).read).toBe(true);
+    expect((await referenceAccess(db, 'comment', commentId, leader!)).read).toBe(false);
   });
   test('avatar submissions stay private, preserve current avatar, and reject non-images', async () => {
     expect(
@@ -621,5 +653,23 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
           .where(inArray(fileReferences.fileId, [imageId, replacementId]))
       ).length
     ).toBe(0);
+  });
+  test('one account cannot exhaust the realtime ticket pool', async () => {
+    const ticket = (actor: Actor) =>
+      app.handle(
+        new Request('http://localhost:3000/realtime/ticket', {
+          method: 'POST',
+          headers: {
+            'x-ksi-proxy-key': process.env.PROXY_SECRET!,
+            'x-ksi-origin': getUrls().frontend.dashboard,
+            'x-ksi-session': tokens[actor]
+          }
+        })
+      );
+    const statuses: number[] = [];
+    for (let i = 0; i < 21; i++) statuses.push((await ticket('outsider')).status);
+    expect(statuses.slice(0, 20)).toEqual(Array(20).fill(200));
+    expect(statuses[20]).toBe(429);
+    expect((await ticket('admin')).status).toBe(200);
   });
 });

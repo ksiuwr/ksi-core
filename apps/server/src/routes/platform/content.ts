@@ -14,7 +14,8 @@ import {
   articles,
   articleRevisions,
   articleProposals,
-  articleContributors
+  articleContributors,
+  threads
 } from '../../db';
 import { displayName } from '../../domain/profiles';
 import { hasScopedLeadership, canEditScope, safeLink } from '../../domain/content-policy';
@@ -95,6 +96,11 @@ export function publicProfile(user: typeof users.$inferSelect, locale?: string) 
     linkedin: user.linkedin
   };
 }
+// The creator is only shown through articleCredits, which honors their public credit choice.
+function publicArticle(article: typeof articles.$inferSelect, locale?: string) {
+  const { createdBy: _creator, ...visible } = localizeContent(article, locale);
+  return visible;
+}
 async function articleCredits(executor: Executor, articleId: string, locale?: string) {
   const records = await executor
     .select({ user: users })
@@ -145,7 +151,12 @@ export default createElysia({ prefix: '/platform' })
         and(
           eq(articleContributors.userId, member.id),
           eq(articleContributors.publicCredit, true),
-          eq(articles.state, 'published')
+          eq(articles.state, 'published'),
+          or(
+            eq(articles.websiteFeed, true),
+            eq(articles.projectFeed, true),
+            eq(articles.mainArticle, true)
+          )
         )
       )
       .orderBy(desc(articles.publishedAt), desc(articles.createdAt));
@@ -153,7 +164,7 @@ export default createElysia({ prefix: '/platform' })
       ...publicProfile(member, locale),
       articles: await Promise.all(
         authored.map(async ({ article }) => ({
-          ...localizeContent(article, locale),
+          ...publicArticle(article, locale),
           authors: await articleCredits(db, article.id, locale)
         }))
       )
@@ -182,7 +193,7 @@ export default createElysia({ prefix: '/platform' })
       .where(eq(projectLinks.projectId, project.id))
       .orderBy(projectLinks.position);
     const publishedLocalized = published.map((article) =>
-      localizeContent(article, typeof query.locale === 'string' ? query.locale : undefined)
+      publicArticle(article, typeof query.locale === 'string' ? query.locale : undefined)
     );
     const mainArticle = publishedLocalized.find((a) => a.mainArticle) ?? null;
     const feed = await Promise.all(
@@ -241,7 +252,7 @@ export default createElysia({ prefix: '/platform' })
       .orderBy(desc(articles.updatedAt));
     return Promise.all(
       records.map(async (a) => ({
-        ...localizeContent(a, typeof query.locale === 'string' ? query.locale : undefined),
+        ...publicArticle(a, typeof query.locale === 'string' ? query.locale : undefined),
         authors: await articleCredits(
           db,
           a.id,
@@ -283,7 +294,7 @@ export default createElysia({ prefix: '/platform' })
         )
       );
     return {
-      ...localizeContent(article, locale),
+      ...publicArticle(article, locale),
       authors: await articleCredits(db, article.id, locale),
       project: project
         ? { id: project.id, slug: project.slug, name: localizeContent(project, locale).name }
@@ -474,7 +485,10 @@ export default createElysia({ prefix: '/platform' })
           .from(projects)
           .where(eq(projects.id, params.id))
           .for('update');
-        requireLeader(actor, await scopeFor(tx, params.id), 'projects.catalog.edit');
+        const scope = await scopeFor(tx, params.id);
+        requireLeader(actor, scope, 'projects.catalog.edit');
+        // Links are also part of the project layout, so a denial of either permission applies.
+        requireLeader(actor, scope, 'projects.layout.edit');
         await tx.delete(projectLinks).where(eq(projectLinks.projectId, params.id));
         if (body.links.length)
           await tx
@@ -582,13 +596,24 @@ export default createElysia({ prefix: '/platform' })
           and(eq(projectMembers.projectId, params.id), eq(projectMembers.userId, params.userId))
         )
         .returning();
-      if (removed)
+      if (removed) {
+        // Restricted thread invitations are only valid for project members.
+        await tx
+          .update(threads)
+          .set({ invitedIds: sql`array_remove(${threads.invitedIds}, ${params.userId})` })
+          .where(
+            and(
+              eq(threads.projectId, params.id),
+              sql`${params.userId} = any(${threads.invitedIds})`
+            )
+          );
         await recordEvent(tx, {
           actorId: actor.id,
           projectId: params.id,
           action: 'projects.membership.removed',
           targetId: params.userId
         });
+      }
       return { removed: !!removed };
     });
   })
@@ -810,10 +835,6 @@ export default createElysia({ prefix: '/platform' })
           .values({ ...body, articleId: article.id, authorId: actor.id })
           .returning();
         if (!proposal) throw new Error('Proposal creation failed');
-        await tx
-          .insert(articleContributors)
-          .values({ articleId: article.id, userId: actor.id })
-          .onConflictDoNothing();
         await syncFileReferences(tx, 'proposal', proposal.id, proposal.markdown, actor);
         await recordEvent(tx, {
           actorId: actor.id,
@@ -881,6 +902,10 @@ export default createElysia({ prefix: '/platform' })
           await syncFileReferences(tx, 'article', updated.id, articleMarkdown(updated), actor);
           if (revision)
             await syncFileReferences(tx, 'revision', revision.id, articleMarkdown(revision), actor);
+          await tx
+            .insert(articleContributors)
+            .values({ articleId: article.id, userId: proposal.authorId })
+            .onConflictDoNothing();
         }
         await tx
           .update(articleProposals)

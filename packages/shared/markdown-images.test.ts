@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test';
-import { markdownImages, resizeMarkdownImage } from './markdown-images';
+import { markdownImages, prepareMarkdownImages, resizeMarkdownImage } from './markdown-images';
 import { renderMarkdown } from './markdown';
 test('resize flags round-trip without altering other images, titles or prose', () => {
   const source =
@@ -28,4 +28,15 @@ test('image URLs with parentheses and escaped alt text keep their Markdown intac
   const source = '![A \\] label](https://example.test/a_(b).png "A title"){width=300}';
   expect(markdownImages(source)).toHaveLength(1);
   expect(resizeMarkdownImage(source, 0, 420)).toBe(source.replace('width=300', 'width=420'));
+});
+
+test('documents with many images are processed and nested images render once', () => {
+  const source = '![x](file:image_123){width=200} '.repeat(15000);
+  expect(markdownImages(source)).toHaveLength(15000);
+  expect(prepareMarkdownImages(source).match(/<img/g)).toHaveLength(15000);
+  const nested = renderMarkdown('![![inner](https://a.test/i)](https://a.test/o)')
+    .map((block) => (block.type === 'html' ? block.html : ''))
+    .join('');
+  expect(nested.match(/<img/g)).toHaveLength(1);
+  expect(nested).toContain('src="https://a.test/o"');
 });

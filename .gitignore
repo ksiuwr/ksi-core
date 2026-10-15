@@ -12,3 +12,6 @@ build/
 **/src/locales/data.js
 **/src/locales/*.loader.svelte.js
 **/src/locales/*.loader.js
+
+# Python
+__pycache__/

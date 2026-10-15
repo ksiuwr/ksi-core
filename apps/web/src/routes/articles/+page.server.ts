@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { backendFetch } from 'shared/server';
 import { contentLocale } from 'shared/content-locales';
-import { env } from '$env/dynamic/private';
+import { env } from '$lib/server/environment';
 import { error } from '@sveltejs/kit';
 export const load: PageServerLoad = async (event) => {
   event.depends('ksi:localized-content');

@@ -162,7 +162,8 @@ export async function referenceAccess(
     authorId: string | undefined;
   if (ownerType === 'comment') {
     const [comment] = await database.select().from(comments).where(eq(comments.id, ownerId));
-    if (!comment) return denied;
+    // Removed comments are never shown again, so neither are their attachments.
+    if (!comment || comment.deletedAt) return denied;
     threadId = comment.threadId;
     itemId = comment.itemId;
     authorId = comment.authorId;
@@ -194,7 +195,8 @@ export async function referenceAccess(
     if (!board) return denied;
     const scope = await fileScope(database, board.projectId);
     return {
-      read: true,
+      // Deleted tasks are only visible to leaders who may restore them.
+      read: !item.deletedAt || hasScopedLeadership(user!, scope, 'collaboration.items.restore'),
       public: false,
       edit:
         !item.deletedAt &&

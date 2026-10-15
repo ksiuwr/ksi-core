@@ -264,10 +264,17 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
         })
       ).status
     ).toBe(200);
+    const links = { links: [{ label: 'Repository', url: 'https://github.com/ksiuwr/krasnal' }] };
+    expect((await content(`/projects/${projectId}/links`, 'leader', 'PUT', links)).status).toBe(
+      200
+    );
     await db
       .update(users)
       .set({ flags: ['-projects.layout.edit'] })
       .where(eq(users.id, ids.leader));
+    expect((await content(`/projects/${projectId}/links`, 'leader', 'PUT', links)).status).toBe(
+      403
+    );
     expect(
       (
         await content(`/projects/${projectId}/layout`, 'leader', 'PUT', {
@@ -355,6 +362,7 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
     ).json()) as any;
     expect(publicArticle.markdown).toBe('Final content');
     expect(publicArticle.authors).toHaveLength(0);
+    expect(publicArticle.createdBy).toBeUndefined();
     expect(
       (await content(`/articles/${articleId}/credit`, 'member', 'PUT', { publicCredit: true }))
         .status
@@ -434,6 +442,32 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
           a.slug === `hidden-${suffix}` || a.slug === `draft-${suffix}` || a.id === articleId
       )
     ).toBe(false);
+  });
+  test('only accepted proposals make their authors article contributors', async () => {
+    const created = await content('/articles', 'leader', 'POST', {
+      projectId,
+      slug: `rejected-proposal-${suffix}`,
+      title: 'Rejected proposal',
+      markdown: 'Draft',
+      language: 'en'
+    });
+    const credit = () =>
+      content(`/articles/${created.body.id}/credit`, 'member', 'PUT', { publicCredit: true });
+    const proposal = await content(`/articles/${created.body.id}/proposals`, 'member', 'POST', {
+      baseVersion: 1,
+      title: 'Rejected proposal',
+      markdown: 'Change'
+    });
+    expect(proposal.status).toBe(200);
+    expect((await credit()).status).toBe(403);
+    const resolved = await content(
+      `/articles/${created.body.id}/proposals/${proposal.body.id}/resolve`,
+      'leader',
+      'POST',
+      { accept: false }
+    );
+    expect(resolved.status).toBe(200);
+    expect((await credit()).status).toBe(403);
   });
   test('board tags, task movement, tombstones and leader-only restoration', async () => {
     const board = await collaboration('/boards', 'leader', 'POST', { projectId });
@@ -522,13 +556,10 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
         })
       ).status
     ).toBe(200);
-    expect(
-      (
-        await collaboration(`/threads/${thread.body.id}/comments`, 'member', 'POST', {
-          markdown: 'Invited reply'
-        })
-      ).status
-    ).toBe(200);
+    const reply = await collaboration(`/threads/${thread.body.id}/comments`, 'member', 'POST', {
+      markdown: 'Invited reply'
+    });
+    expect(reply.status).toBe(200);
     expect(
       (
         await collaboration(`/threads/${thread.body.id}/archive`, 'leader', 'POST', {
@@ -544,6 +575,16 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
         })
       ).status
     ).toBe(409);
+    expect(
+      (
+        await collaboration(`/comments/${reply.body.id}`, 'member', 'PATCH', {
+          markdown: 'Rewritten'
+        })
+      ).status
+    ).toBe(409);
+    expect((await collaboration(`/comments/${reply.body.id}`, 'member', 'DELETE')).status).toBe(
+      409
+    );
     expect(
       (await collaboration(`/threads/${thread.body.id}`, 'member')).body.comments
     ).toHaveLength(2);
@@ -562,6 +603,62 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
         })
       ).status
     ).toBe(200);
+  });
+  test('member profiles list only articles shown on the site', async () => {
+    const [listed, unlisted] = await db
+      .insert(articles)
+      .values([
+        {
+          projectId,
+          createdBy: ids.leader,
+          slug: `profile-listed-${suffix}`,
+          title: 'Listed',
+          state: 'published',
+          websiteFeed: true
+        },
+        {
+          projectId,
+          createdBy: ids.leader,
+          slug: `profile-unlisted-${suffix}`,
+          title: 'Unlisted',
+          state: 'published'
+        }
+      ])
+      .returning();
+    await db.insert(articleContributors).values(
+      [listed!, unlisted!].map((a) => ({
+        articleId: a.id,
+        userId: ids.board,
+        publicCredit: true
+      }))
+    );
+    const profile = (await (
+      await contentRoutes.handle(
+        new Request(`http://localhost/platform/public/members/${ids.board}`)
+      )
+    ).json()) as any;
+    const slugs = profile.articles.map((a: any) => a.slug);
+    expect(slugs).toContain(listed!.slug);
+    expect(slugs).not.toContain(unlisted!.slug);
+  });
+  test('leaving a project ends restricted thread invitations', async () => {
+    const thread = await collaboration('/threads', 'leader', 'POST', {
+      projectId,
+      title: 'Invited discussion',
+      markdown: 'Initial message',
+      visibility: 'leaders',
+      invitedIds: [ids.member]
+    });
+    expect(thread.status).toBe(200);
+    expect((await collaboration(`/threads/${thread.body.id}`, 'member')).status).toBe(200);
+    const removed = await content(
+      `/projects/${projectId}/members/${ids.member}`,
+      'leader',
+      'DELETE'
+    );
+    expect(removed.body.removed).toBe(true);
+    expect((await collaboration(`/threads/${thread.body.id}`, 'member')).status).toBe(404);
+    await db.insert(projectMembers).values({ projectId, userId: ids.member });
   });
   test('scope denial blocks unrelated publishing and audit history', async () => {
     expect((await content(`/articles/${articleId}`, 'outsider')).status).toBe(403);

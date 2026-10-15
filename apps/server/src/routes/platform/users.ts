@@ -17,11 +17,13 @@ import {
 import { createElysia, requirePermission } from '../../lib/createElysia';
 import { manageUser, anonymizeUser } from '../../services/users';
 import { effectivePermissions, type Permission } from '../../domain/permissions';
+import { active } from './content';
 export const userRoutes = createElysia({ prefix: '/users', protectedRoute: true })
   .get('/me', ({ user }) => ({ user, permissions: user ? [...effectivePermissions(user)] : [] }))
   .get(
     '/search',
-    async ({ query: { q }, db }) => {
+    async ({ query: { q }, db, user }) => {
+      active(user);
       const parts = q.split(' ').map((p) => `%${p}%`);
       const limit = 10;
       if (!q) return [];
@@ -36,11 +38,14 @@ export const userRoutes = createElysia({ prefix: '/users', protectedRoute: true 
         })
         .from(users)
         .where(
-          or(
-            ilike(users.name, searchPattern),
-            ilike(users.nickname, searchPattern),
-            ilike(users.firstName, searchPattern),
-            ilike(users.lastName, searchPattern)
+          and(
+            eq(users.membershipStatus, 'active'),
+            or(
+              ilike(users.name, searchPattern),
+              ilike(users.nickname, searchPattern),
+              ilike(users.firstName, searchPattern),
+              ilike(users.lastName, searchPattern)
+            )
           )
         )
         .limit(limit);

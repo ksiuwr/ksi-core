@@ -140,6 +140,9 @@ def promote(cluster, branch, commit, images):
             'livenessProbe': {'httpGet': {'path': '/health', 'port': 3000}, 'initialDelaySeconds': 30} if app == 'server' else {'tcpSocket': {'port': 3000}, 'initialDelaySeconds': 30},
             'resources': {'requests': {'cpu': '100m', 'memory': '128Mi'}, 'limits': {'cpu': '750m', 'memory': '512Mi'}},
             'securityContext': {'allowPrivilegeEscalation': False, 'capabilities': {'drop': ['ALL']}}}
+        if app == 'dashboard':
+            # Uploads pass through the dashboard proxy, so match the server's 20 MiB limit plus multipart framing.
+            container['env'].append({'name': 'BODY_SIZE_LIMIT', 'value': '21M'})
         # Frontends receive proxy credentials, never database/provider/R2 credentials.
         container['envFrom'].append({'secretRef': {'name': 'ksi-runtime'}}) if app == 'server' else container['env'].extend([{'name': key, 'valueFrom': {'secretKeyRef': {'name': 'ksi-runtime', 'key': key}}} for key in ['PROXY_SECRET']])
         doc = resource('Deployment', app, {'replicas': 1, 'progressDeadlineSeconds': 300,
@@ -175,7 +178,9 @@ def promote(cluster, branch, commit, images):
             if dependency['name'].startswith(slug + '-'):
                 dependency['readyExpr'] = "dep.metadata.labels['ksi.release'] == self.metadata.labels['ksi.release'] && dep.metadata.generation == dep.status.observedGeneration && dep.status.conditions.exists(c, c.type == 'Ready' && c.status == 'True')"
     document(target / 'flux.yaml', {'apiVersion': 'v1', 'kind': 'List', 'items': definitions})
-    configure_cleanup_controller(cluster, images['server'])
+    if production:
+        # The cleanup job holds preview database and DNS credentials, so it only runs images built from master.
+        configure_cleanup_controller(cluster, images['server'])
     refresh(cluster)
     return slug
 

@@ -705,12 +705,14 @@ export default createElysia({ prefix: '/platform' })
           if (comment.authorId !== actor.id)
             requireLeader(actor, scope, 'collaboration.items.restore');
           else assertContribute(actor, scope);
+          if (thread.archivedAt) throw status(409, { code: 'THREAD_ARCHIVED' });
           projectId = thread.projectId;
         } else if (comment.itemId) {
-          const { board, scope } = await itemScope(tx, comment.itemId);
+          const { item, board, scope } = await itemScope(tx, comment.itemId);
           if (comment.authorId !== actor.id)
             requireLeader(actor, scope, 'collaboration.items.restore');
           else assertContribute(actor, scope);
+          if (item.deletedAt) throw status(409, { code: 'ITEM_DELETED' });
           projectId = board.projectId;
         } else throw status(409, { code: 'INVALID_COMMENT' });
 
@@ -747,6 +749,7 @@ export default createElysia({ prefix: '/platform' })
         if (comment.authorId !== actor.id)
           requireLeader(actor, scope, 'collaboration.items.restore');
         else assertContribute(actor, scope);
+        if (thread.archivedAt) throw status(409, { code: 'THREAD_ARCHIVED' });
         projectId = thread.projectId;
         metadata.threadId = thread.id;
       } else if (comment.itemId) {
@@ -754,6 +757,7 @@ export default createElysia({ prefix: '/platform' })
         if (comment.authorId !== actor.id)
           requireLeader(actor, scope, 'collaboration.items.restore');
         else assertContribute(actor, scope);
+        if (item.deletedAt) throw status(409, { code: 'ITEM_DELETED' });
         projectId = board.projectId;
         metadata.itemId = item.id;
       } else throw status(409, { code: 'INVALID_COMMENT' });

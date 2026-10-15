@@ -1,4 +1,4 @@
-import { env } from '$env/dynamic/private';
+import { env } from '$lib/server/environment';
 import { backendFetch, sessionCookie } from 'shared/server';
 import type { RequestHandler } from './$types';
 export const POST: RequestHandler = async (event) => {

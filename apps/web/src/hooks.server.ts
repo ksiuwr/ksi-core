@@ -1,5 +1,5 @@
 import { redirect, type Handle } from '@sveltejs/kit';
-import { env } from '$env/dynamic/private';
+import { env } from '$lib/server/environment';
 import { locales } from './locales/data.js';
 import { backendFetch, startSso, sessionCookie } from 'shared/server';
 export const handle: Handle = async ({ event, resolve }) => {

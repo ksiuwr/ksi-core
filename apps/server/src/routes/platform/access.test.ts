@@ -63,4 +63,15 @@ describe('platform HTTP authorization boundaries', () => {
     );
     expect(response.status).toBe(401);
   });
+  test('Markdown previews cannot be rendered anonymously', async () => {
+    const { app } = await import('../../app');
+    const response = await app.handle(
+      new Request('http://localhost/markdown', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ markdown: 'Hello' })
+      })
+    );
+    expect(response.status).toBe(401);
+  });
 });
