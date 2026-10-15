@@ -549,13 +549,10 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
         })
       ).status
     ).toBe(200);
-    expect(
-      (
-        await collaboration(`/threads/${thread.body.id}/comments`, 'member', 'POST', {
-          markdown: 'Invited reply'
-        })
-      ).status
-    ).toBe(200);
+    const reply = await collaboration(`/threads/${thread.body.id}/comments`, 'member', 'POST', {
+      markdown: 'Invited reply'
+    });
+    expect(reply.status).toBe(200);
     expect(
       (
         await collaboration(`/threads/${thread.body.id}/archive`, 'leader', 'POST', {
@@ -571,6 +568,16 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
         })
       ).status
     ).toBe(409);
+    expect(
+      (
+        await collaboration(`/comments/${reply.body.id}`, 'member', 'PATCH', {
+          markdown: 'Rewritten'
+        })
+      ).status
+    ).toBe(409);
+    expect((await collaboration(`/comments/${reply.body.id}`, 'member', 'DELETE')).status).toBe(
+      409
+    );
     expect(
       (await collaboration(`/threads/${thread.body.id}`, 'member')).body.comments
     ).toHaveLength(2);
