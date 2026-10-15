@@ -1,5 +1,11 @@
 import { describe, expect, test } from 'bun:test';
-import { hasScopedLeadership, canEditScope, validTags, safeLink } from './content-policy';
+import {
+  hasScopedLeadership,
+  canEditScope,
+  validTags,
+  safeLink,
+  safeAlertLink
+} from './content-policy';
 import { canReadThread, type Principal } from './permissions';
 import { assertRevision, visibleMemberIds, visibleSections, validateLayout } from './projects';
 const member: Principal = { id: 'anna', role: 'member', membershipStatus: 'active', flags: [] };
@@ -116,5 +122,12 @@ describe('content invariants', () => {
     expect(safeLink('javascript:alert(1)')).toBe(false);
     expect(safeLink('data:text/html,test')).toBe(false);
     expect(safeLink('/relative')).toBe(false);
+  });
+  test('alert links reject executable protocols', () => {
+    for (const link of ['', '/projects', 'https://ksi.edu.pl/zosia', 'mailto:board@ksi.edu.pl'])
+      expect(safeAlertLink(link)).toBe(true);
+    for (const link of ['javascript:alert(1)', ' JavaScript:alert(1)', 'java\tscript:alert(1)'])
+      expect(safeAlertLink(link)).toBe(false);
+    expect(safeAlertLink('data:text/html,test')).toBe(false);
   });
 });

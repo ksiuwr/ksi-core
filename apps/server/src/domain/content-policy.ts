@@ -35,3 +35,10 @@ export function safeLink(url: string): boolean {
     return false;
   }
 }
+// Alert links may be relative to the site, but must not run script or open data URLs when clicked.
+export function safeAlertLink(url: string): boolean {
+  const base = 'https://ksi.edu.pl';
+  return (
+    URL.canParse(url, base) && ['https:', 'http:', 'mailto:'].includes(new URL(url, base).protocol)
+  );
+}

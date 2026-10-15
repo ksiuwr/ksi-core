@@ -1,6 +1,7 @@
 import { alerts } from '@ksi-core/server/db';
 import { createElysia } from '@ksi-core/server/lib/createElysia';
 import { AlertBodyType } from '@ksi-core/server/routes/dashboard/admin/alerts/alerts.type';
+import { safeAlertLink } from '@ksi-core/server/domain/content-policy';
 import { eq } from 'drizzle-orm';
 import { status, t } from 'elysia';
 
@@ -35,6 +36,8 @@ export default createElysia({
   .post(
     '/',
     async ({ db, body, user }) => {
+      if (body.link && !safeAlertLink(body.link))
+        return status(400, 'Alert link must be a relative, http(s) or mailto link');
       await db.insert(alerts).values({
         ...body,
         createdBy: user!.id
@@ -49,6 +52,8 @@ export default createElysia({
   .put(
     '/:id',
     async ({ db, params, body }) => {
+      if (body.link && !safeAlertLink(body.link))
+        return status(400, 'Alert link must be a relative, http(s) or mailto link');
       const total = await db.$count(alerts, eq(alerts.id, params.id));
       if (total === 0) return status(404, `Alert ${params.id} was not found!`);
       await db
