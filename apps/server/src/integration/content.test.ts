@@ -435,6 +435,32 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
       )
     ).toBe(false);
   });
+  test('only accepted proposals make their authors article contributors', async () => {
+    const created = await content('/articles', 'leader', 'POST', {
+      projectId,
+      slug: `rejected-proposal-${suffix}`,
+      title: 'Rejected proposal',
+      markdown: 'Draft',
+      language: 'en'
+    });
+    const credit = () =>
+      content(`/articles/${created.body.id}/credit`, 'member', 'PUT', { publicCredit: true });
+    const proposal = await content(`/articles/${created.body.id}/proposals`, 'member', 'POST', {
+      baseVersion: 1,
+      title: 'Rejected proposal',
+      markdown: 'Change'
+    });
+    expect(proposal.status).toBe(200);
+    expect((await credit()).status).toBe(403);
+    const resolved = await content(
+      `/articles/${created.body.id}/proposals/${proposal.body.id}/resolve`,
+      'leader',
+      'POST',
+      { accept: false }
+    );
+    expect(resolved.status).toBe(200);
+    expect((await credit()).status).toBe(403);
+  });
   test('board tags, task movement, tombstones and leader-only restoration', async () => {
     const board = await collaboration('/boards', 'leader', 'POST', { projectId });
     expect(board.status).toBe(200);

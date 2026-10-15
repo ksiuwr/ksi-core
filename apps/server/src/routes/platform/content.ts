@@ -810,10 +810,6 @@ export default createElysia({ prefix: '/platform' })
           .values({ ...body, articleId: article.id, authorId: actor.id })
           .returning();
         if (!proposal) throw new Error('Proposal creation failed');
-        await tx
-          .insert(articleContributors)
-          .values({ articleId: article.id, userId: actor.id })
-          .onConflictDoNothing();
         await syncFileReferences(tx, 'proposal', proposal.id, proposal.markdown, actor);
         await recordEvent(tx, {
           actorId: actor.id,
@@ -881,6 +877,10 @@ export default createElysia({ prefix: '/platform' })
           await syncFileReferences(tx, 'article', updated.id, articleMarkdown(updated), actor);
           if (revision)
             await syncFileReferences(tx, 'revision', revision.id, articleMarkdown(revision), actor);
+          await tx
+            .insert(articleContributors)
+            .values({ articleId: article.id, userId: proposal.authorId })
+            .onConflictDoNothing();
         }
         await tx
           .update(articleProposals)
