@@ -3,7 +3,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import { wuchale } from 'wuchale/vite';
-import manifest from './package.json';
+import manifest from '../../package.json';
 let commit = process.env.PUBLIC_COMMIT_HASH || process.env.GITHUB_SHA || '';
 if (!commit) {
   try {
