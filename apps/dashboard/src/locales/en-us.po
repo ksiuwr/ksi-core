@@ -144,6 +144,7 @@ msgstr "Projects"
 msgid "My profile"
 msgstr "My profile"
 
+#: src/lib/ProjectPermissions.svelte
 #: src/lib/WorkspaceMembers.svelte
 #: src/lib/WorkspaceMembers.svelte
 #: src/routes/[...workspace]/+page.svelte
@@ -431,6 +432,7 @@ msgstr "Archive"
 msgid "Leaders"
 msgstr "Leaders"
 
+#: src/lib/ProjectPermissions.svelte
 #: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Project members"
@@ -488,6 +490,7 @@ msgstr "Introduce yourself to the association and choose what to share publicly.
 msgid "Saved"
 msgstr "Saved"
 
+#: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Save changes"
 msgstr "Save changes"
@@ -1437,3 +1440,166 @@ msgstr "Revoke"
 #: src/lib/Members.svelte
 msgid "{0} to {1} / {2} <0>members</0>"
 msgstr "{0} to {1} / {2} <0>members</0>"
+
+#: src/lib/PreviewCredentials.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "Preview credentials"
+msgstr "Preview credentials"
+
+#: src/lib/ProjectPermissions.svelte
+msgid "View preview sign-in credentials"
+msgstr "View preview sign-in credentials"
+
+#: src/lib/ProjectPermissions.svelte
+msgid "Show generated sample account passwords for this project’s previews."
+msgstr "Show generated sample account passwords for this project’s previews."
+
+#. 0: index + 1
+#: src/lib/ProjectPermissions.svelte
+msgid "Group {0}"
+msgstr "Group {0}"
+
+#: src/lib/ProjectPermissions.svelte
+msgid "Group name"
+msgstr "Group name"
+
+#: src/lib/ProjectPermissions.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "Permissions"
+msgstr "Permissions"
+
+#: src/lib/ProjectPermissions.svelte
+msgid "Remove group"
+msgstr "Remove group"
+
+#: src/lib/ProjectPermissions.svelte
+msgid "Add group"
+msgstr "Add group"
+
+#: src/lib/PreviewCredentials.svelte
+msgid "You are not in a project group with access to preview credentials."
+msgstr "You are not in a project group with access to preview credentials."
+
+#: src/lib/PreviewCredentials.svelte
+msgid "Unable to load preview credentials"
+msgstr "Unable to load preview credentials"
+
+#: src/lib/PreviewCredentials.svelte
+msgid "Refresh"
+msgstr "Refresh"
+
+#: src/lib/PreviewCredentials.svelte
+msgid "Loading credentials…"
+msgstr "Loading credentials…"
+
+#: src/lib/PreviewCredentials.svelte
+msgid "No preview credentials yet"
+msgstr "No preview credentials yet"
+
+#: src/lib/PreviewCredentials.svelte
+msgid "Credentials appear here after a preview deployment has completed."
+msgstr "Credentials appear here after a preview deployment has completed."
+
+#: src/lib/PreviewCredentials.svelte
+msgid "Commit"
+msgstr "Commit"
+
+#: src/lib/PreviewCredentials.svelte
+msgid "Updated"
+msgstr "Updated"
+
+#: src/lib/PreviewCredentials.svelte
+msgid "These are shared sample accounts for this preview. Keep the passwords within the project group."
+msgstr "These are shared sample accounts for this preview. Keep the passwords within the project group."
+
+#: src/lib/ProjectPermissions.svelte
+msgid "Example: Maintainers"
+msgstr "Example: Maintainers"
+
+#: src/lib/ProjectPermissions.svelte
+#: src/lib/ProjectPermissions.svelte
+#: src/lib/ProjectPermissions.svelte
+msgid "Create and propose articles"
+msgstr "Create and propose articles"
+
+#: src/lib/ProjectPermissions.svelte
+#: src/lib/ProjectPermissions.svelte
+#: src/lib/ProjectPermissions.svelte
+msgid "Publish articles"
+msgstr "Publish articles"
+
+#: src/lib/ProjectPermissions.svelte
+#: src/lib/ProjectPermissions.svelte
+#: src/lib/ProjectPermissions.svelte
+msgid "Edit articles created by anyone"
+msgstr "Edit articles created by anyone"
+
+#: src/lib/ProjectPermissions.svelte
+#: src/lib/ProjectPermissions.svelte
+#: src/lib/ProjectPermissions.svelte
+msgid "Create project articles and suggest changes to existing articles."
+msgstr "Create project articles and suggest changes to existing articles."
+
+#: src/lib/ProjectPermissions.svelte
+#: src/lib/ProjectPermissions.svelte
+#: src/lib/ProjectPermissions.svelte
+msgid "Review and publish project articles and proposed changes."
+msgstr "Review and publish project articles and proposed changes."
+
+#: src/lib/ProjectPermissions.svelte
+#: src/lib/ProjectPermissions.svelte
+#: src/lib/ProjectPermissions.svelte
+msgid "Edit any project article, but publishing still requires publish permission."
+msgstr "Edit any project article, but publishing still requires publish permission."
+
+#: src/lib/ProjectPermissions.svelte
+msgid "Unable to load project permissions."
+msgstr "Unable to load project permissions."
+
+#: src/lib/ProjectPermissions.svelte
+msgid "Project permissions saved."
+msgstr "Project permissions saved."
+
+#: src/lib/ProjectPermissions.svelte
+msgid "Unable to save project permissions."
+msgstr "Unable to save project permissions."
+
+#: src/lib/ProjectPermissions.svelte
+msgid "Project permissions"
+msgstr "Project permissions"
+
+#: src/lib/ProjectPermissions.svelte
+msgid "Choose article access defaults and create named groups for additional project permissions."
+msgstr "Choose article access defaults and create named groups for additional project permissions."
+
+#: src/lib/ProjectPermissions.svelte
+msgid "Save permissions"
+msgstr "Save permissions"
+
+#: src/lib/ProjectPermissions.svelte
+msgid "Loading project permissions…"
+msgstr "Loading project permissions…"
+
+#: src/lib/ProjectPermissions.svelte
+msgid "Default project access"
+msgstr "Default project access"
+
+#: src/lib/ProjectPermissions.svelte
+msgid "These permissions apply to everyone in the selected category. They are additional to existing account-role permissions."
+msgstr "These permissions apply to everyone in the selected category. They are additional to existing account-role permissions."
+
+#: src/lib/ProjectPermissions.svelte
+msgid "Non-members"
+msgstr "Non-members"
+
+#: src/lib/ProjectPermissions.svelte
+msgid "Active KSI members who are not members of this project."
+msgstr "Active KSI members who are not members of this project."
+
+#: src/lib/ProjectPermissions.svelte
+msgid "Named groups"
+msgstr "Named groups"
+
+#: src/lib/ProjectPermissions.svelte
+msgid "Only active project members can be assigned to a group."
+msgstr "Only active project members can be assigned to a group."

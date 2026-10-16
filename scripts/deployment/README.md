@@ -76,3 +76,14 @@ a trusted admin machine, replace `$slug` with the job summary's hostname prefix:
 kubectl -n ksi-previews get secret "runtime-$slug" \
   -o jsonpath='{.data.KSI_SEED_PASSWORD}' | base64 --decode
 ```
+
+The project portal can show these credentials to project groups without granting users
+Kubernetes access. Configure `PREVIEW_CREDENTIALS_API_ORIGIN` and
+`PREVIEW_CREDENTIALS_OIDC_AUDIENCE` as variables in the `preview` GitHub Environment;
+the audience must match the production API's `PREVIEW_CREDENTIALS_OIDC_AUDIENCE`.
+Optionally set `PREVIEW_CREDENTIALS_PROJECT_SLUG` (defaults to `ksi-core`). Configure
+`PREVIEW_CREDENTIALS_ENCRYPTION_KEY` on the production API as a base64 encoding of 32
+random bytes. The API verifies GitHub's OIDC signature and restricts ingestion to this
+repository's protected preview environment, encrypts stored passwords, and removes them
+when preview cleanup runs. In project settings, create a group such as “Maintainers”,
+assign project members, and enable “View preview sign-in credentials”.

@@ -128,6 +128,8 @@ export const projects = snakeCase.table('projects', {
   description: text().notNull().default(''),
   tags: text().array().notNull().default([]),
   fields: text().array().notNull().default([]),
+  memberPermissions: text().array().notNull().default([]),
+  nonMemberPermissions: text().array().notNull().default([]),
   locked: boolean().notNull().default(false),
   layout: jsonb()
     .$type<
@@ -152,6 +154,48 @@ export const projectMembers = snakeCase.table(
     createdAt: timestamp().notNull().defaultNow()
   },
   (t) => [uniqueIndex('project_member_unique').on(t.projectId, t.userId)]
+);
+export const projectGroups = snakeCase.table(
+  'project_groups',
+  {
+    id: text().primaryKey().$defaultFn(createId),
+    projectId: text()
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    name: text().notNull(),
+    permissions: text().array().notNull().default([]),
+    createdAt: timestamp().notNull().defaultNow()
+  },
+  (t) => [uniqueIndex('project_group_name_unique').on(t.projectId, t.name)]
+);
+export const projectGroupMembers = snakeCase.table(
+  'project_group_members',
+  {
+    groupId: text()
+      .notNull()
+      .references(() => projectGroups.id, { onDelete: 'cascade' }),
+    userId: text()
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: timestamp().notNull().defaultNow()
+  },
+  (t) => [uniqueIndex('project_group_member_unique').on(t.groupId, t.userId)]
+);
+export const previewCredentials = snakeCase.table(
+  'preview_credentials',
+  {
+    id: text().primaryKey().$defaultFn(createId),
+    projectId: text()
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    previewId: text().notNull(),
+    branch: text().notNull(),
+    commit: text().notNull(),
+    previewUrl: text().notNull(),
+    accounts: text().notNull(),
+    updatedAt: timestamp().notNull().defaultNow()
+  },
+  (t) => [uniqueIndex('preview_credentials_project_preview_unique').on(t.projectId, t.previewId)]
 );
 export const joinRequests = snakeCase.table(
   'join_requests',

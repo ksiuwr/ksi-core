@@ -21,6 +21,8 @@
   import Members from '$lib/Members.svelte';
   import WorkspaceMembers from '$lib/WorkspaceMembers.svelte';
   import ProjectSettings from '$lib/ProjectSettings.svelte';
+  import ProjectPermissions from '$lib/ProjectPermissions.svelte';
+  import PreviewCredentials from '$lib/PreviewCredentials.svelte';
   import Editor from '@ksi-core/ui/platform/Editor.svelte';
   import UserSelect from '$lib/UserSelect.svelte';
   import Dropdown from '@ksi-core/ui/platform/Dropdown.svelte';
@@ -94,6 +96,7 @@
     translations?: TranslationData;
     mainArticle: boolean;
     projectId: string | null;
+    createdBy?: string;
     projectFeed: boolean;
     websiteFeed: boolean;
     publicCredit?: boolean;
@@ -165,7 +168,28 @@
     { id: 'done', name: 'Done' }
   ]);
   let boardLeader = $state(false);
-  let projectAccess = $state({ isMember: false, canEdit: false, canManageMembers: false });
+  let projectAccess = $state({
+    isMember: false,
+    canEdit: false,
+    canManageMembers: false,
+    canManageGroups: false,
+    canReadPreviewCredentials: false,
+    canProposeArticles: false,
+    canPublishArticles: false,
+    canEditAnyArticles: false
+  });
+  const canCreateArticle = $derived(workspace !== 'project' || projectAccess.canProposeArticles);
+  const canEditArticle = $derived(
+    workspace === 'project'
+      ? projectAccess.canEditAnyArticles || projectAccess.canProposeArticles
+      : boardLeader
+  );
+  const canSaveArticle = $derived(
+    workspace === 'project' ? projectAccess.canEditAnyArticles : boardLeader
+  );
+  const canPublishArticle = $derived(
+    workspace === 'project' ? projectAccess.canPublishArticles : boardLeader
+  );
   let inbox = $state<InboxData>({ memberships: [], avatars: [] });
   let avatarRequest = $state<AvatarRequest | null>(null);
   const inboxCount = $derived(inbox.memberships.length + inbox.avatars.length);
@@ -422,7 +446,16 @@
     projectSlug = location.projectSlug;
     tab = location.tab;
     scope = '';
-    projectAccess = { isMember: false, canEdit: false, canManageMembers: false };
+    projectAccess = {
+      isMember: false,
+      canEdit: false,
+      canManageMembers: false,
+      canManageGroups: false,
+      canReadPreviewCredentials: false,
+      canProposeArticles: false,
+      canPublishArticles: false,
+      canEditAnyArticles: false
+    };
     boardLeader = false;
 
     resetView();
@@ -559,7 +592,11 @@
       version: selectedArticle.version,
       title,
       markdown,
-      state: publish ? 'published' : 'draft',
+      state: publish
+        ? 'published'
+        : workspace === 'project' && !projectAccess.canPublishArticles
+          ? selectedArticle.state
+          : 'draft',
       mainArticle: selectedArticle.mainArticle,
       projectFeed: selectedArticle.projectFeed,
       websiteFeed: selectedArticle.websiteFeed
@@ -602,6 +639,12 @@
     ['roster', 'Members'],
     ...(workspace === 'project' && (projectAccess.canEdit || projectAccess.canManageMembers)
       ? [['settings', 'Settings']]
+      : []),
+    ...(workspace === 'project' && projectAccess.canManageGroups
+      ? [['permissions', 'Permissions']]
+      : []),
+    ...(workspace === 'project' && projectAccess.canReadPreviewCredentials
+      ? [['previews', 'Preview credentials']]
       : [])
   ] as [string, string][]);
   const selectedProject = $derived(projects.find((project) => project.slug === projectSlug));
@@ -1094,6 +1137,10 @@
                     canManageMembers={projectAccess.canManageMembers}
                     onrefresh={() => load()}
                   />
+                {:else if tab === 'permissions' && selectedProject && projectAccess.canManageGroups}
+                  <ProjectPermissions project={selectedProject} onrefresh={() => load()} />
+                {:else if tab === 'previews' && selectedProject}
+                  <PreviewCredentials projectSlug={selectedProject.slug} />
                 {:else if tab === 'articles'}
                   <div class="workspace-header">
                     <h1>{selectedArticle ? selectedArticle.title : 'Articles'}</h1>
@@ -1108,7 +1155,7 @@
                         href={dashboardPath(workspace, projectSlug, 'articles')}
                         onclick={guardNavigation}><ArrowLeft size={16} />{'All articles'}</a
                       >
-                    {:else}
+                    {:else if canCreateArticle}
                       <button
                         class="btn"
                         disabled={busy}
@@ -1154,11 +1201,17 @@
                         {selectedArticle ? 'Article content' : 'New article'}
                       </h2>
                       <label for="a-title">{'Title'}</label>
-                      <input id="a-title" bind:value={title} required />
+                      <input
+                        id="a-title"
+                        bind:value={title}
+                        readonly={!!selectedArticle && !canEditArticle}
+                        required
+                      />
                       <label for="a-slug">Slug</label>
                       <input id="a-slug" bind:value={slug} readonly={!!selectedArticle} required />
                       <div class="article-editor">
-                        <Editor {language} allowGallery bind:value={markdown} />
+                        {#if canEditArticle}<Editor {language} allowGallery bind:value={markdown} />
+                        {:else}<MarkdownContent value={markdown} {language} />{/if}
                       </div>
                       {#if selectedArticle && workspace === 'project' && boardLeader}
                         <div class="main-article-setting">
@@ -1196,27 +1249,35 @@
                       {/if}
                       <div class="row" style="margin-top: 16px; gap: 8px;">
                         {#if selectedArticle}
-                          <button
-                            class="btn"
-                            disabled={busy}
-                            onclick={() => action(() => saveArticle(false))}
-                          >
-                            {'Save draft'}
-                          </button>
-                          <button
-                            class="btn-coral btn"
-                            disabled={busy}
-                            onclick={() => action(() => saveArticle(true))}
-                          >
-                            {'Publish'}
-                          </button>
-                          <button
-                            class="btn btn-outline"
-                            disabled={busy}
-                            onclick={() => action(propose)}
-                          >
-                            {'Propose edit'}
-                          </button>
+                          {#if canSaveArticle}
+                            <button
+                              class="btn"
+                              disabled={busy}
+                              onclick={() => action(() => saveArticle(false))}
+                            >
+                              {selectedArticle.state === 'published' && !canPublishArticle
+                                ? 'Save changes'
+                                : 'Save draft'}
+                            </button>
+                          {/if}
+                          {#if canPublishArticle}
+                            <button
+                              class="btn-coral btn"
+                              disabled={busy}
+                              onclick={() => action(() => saveArticle(true))}
+                            >
+                              {'Publish'}
+                            </button>
+                          {/if}
+                          {#if workspace !== 'project' || projectAccess.canProposeArticles}
+                            <button
+                              class="btn btn-outline"
+                              disabled={busy}
+                              onclick={() => action(propose)}
+                            >
+                              {'Propose edit'}
+                            </button>
+                          {/if}
                           {#if selectedArticle.canManageCredit}
                             <label
                               style="display: flex; align-items: center; gap: 6px; font-size: 12px; text-transform: none; letter-spacing: 0; color: var(--muted); cursor: pointer;"
