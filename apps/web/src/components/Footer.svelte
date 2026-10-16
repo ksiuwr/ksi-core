@@ -21,8 +21,8 @@
 </script>
 
 <footer class="relative w-full" style="background: var(--surface); color: var(--ink);">
-  <div class="grid grid-cols-1 md:mx-8 lg:grid-cols-3">
-    <div class="border-muted lg:border-base-content/15 border-r border-dashed p-4 py-8 md:py-16">
+  <div class="grid grid-cols-2 md:mx-8 lg:grid-cols-3">
+    <div class="border-muted lg:border-base-content/15 col-span-2 border-r border-dashed p-4 py-8 md:py-16 lg:col-span-1">
       <a
         href="/"
         class="hover:text-primary font-anybody inline-block text-6xl font-semibold tracking-[-0.04em]"
