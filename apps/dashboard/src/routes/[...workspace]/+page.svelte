@@ -1072,8 +1072,12 @@
                           ><ArrowUpRight size={15} />{'View public project'}</a
                         >{/if}
                       {#if selectedProject?.description}
-                        <div class="workspace-description"><MarkdownContent value={selectedProject.description} {language} /></div>
-                      {:else}<p class="workspace-description">{'Shared tasks, conversations, and publications in one place.'}</p>{/if}
+                        <div class="workspace-description">
+                          <MarkdownContent value={selectedProject.description} {language} />
+                        </div>
+                      {:else}<p class="workspace-description">
+                          {'Shared tasks, conversations, and publications in one place.'}
+                        </p>{/if}
                     </div>
                     {#if selectedProject}
                       <div class="row">

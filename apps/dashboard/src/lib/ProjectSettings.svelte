@@ -161,7 +161,10 @@
         <label>{'Name'}<input bind:value={name} required maxlength="200" /></label><label
           >{'Description'}<textarea bind:value={description} rows="6" maxlength="10000"
           ></textarea></label
-        ><div class="description-preview"><span class="muted">{'Preview'}</span><MarkdownContent value={description} /></div>
+        >
+        <div class="description-preview">
+          <span class="muted">{'Preview'}</span><MarkdownContent value={description} />
+        </div>
         <label>{'Tags (comma separated)'}<input bind:value={tags} /></label>
         <fieldset>
           <legend>{'Fields'}</legend>{#each ['research', 'community', 'engineering'] as field}<label
