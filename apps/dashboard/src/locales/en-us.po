@@ -309,10 +309,6 @@ msgid "Locked"
 msgstr "Locked"
 
 #: src/routes/[...workspace]/+page.svelte
-msgid "No description."
-msgstr "No description."
-
-#: src/routes/[...workspace]/+page.svelte
 msgid "Open project"
 msgstr "Open project"
 
@@ -1603,3 +1599,11 @@ msgstr "Named groups"
 #: src/lib/ProjectPermissions.svelte
 msgid "Only active project members can be assigned to a group."
 msgstr "Only active project members can be assigned to a group."
+
+#: src/lib/ProjectSettings.svelte
+msgid "Back to editing"
+msgstr "Back to editing"
+
+#: src/lib/ProjectSettings.svelte
+msgid "Show preview"
+msgstr "Show preview"

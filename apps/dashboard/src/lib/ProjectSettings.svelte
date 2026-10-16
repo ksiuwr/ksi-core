@@ -2,8 +2,9 @@
   import MarkdownContent from '@ksi-core/ui/platform/MarkdownContent.svelte';
   import ContentTranslations from './ContentTranslations.svelte';
   import type { ContentTranslations as TranslationData } from 'shared/content-locales';
-  import { Save, ArrowUpRight, Plus, Trash2 } from '@lucide/svelte';
+  import { Save, ArrowUpRight, Plus, Trash2, Eye } from '@lucide/svelte';
   import Skeleton from './Skeleton.svelte';
+
   let {
     project,
     canEdit,
@@ -29,21 +30,28 @@
     canManageMembers: boolean;
     onrefresh: () => Promise<void>;
   } = $props();
+
   let name = $state(''),
     description = $state(''),
     tags = $state(''),
     fields = $state<string[]>([]),
     locked = $state(false),
     leaders = $state<string[]>([]);
+
   let members = $state<{ id: string; firstName: string; lastName: string; leader: boolean }[]>([]),
     requests = $state<
       { request: { id: string; userId: string }; firstName: string; lastName: string }[]
     >([]);
+
   let busy = $state(false),
     loading = $state(true),
     error = $state(''),
     notice = $state('');
+
+  let descriptionPreview = $state(false);
+
   let generation = 0;
+
   async function api(path: string, method = 'GET', body?: unknown) {
     const response = await fetch(
       `/api/platform/projects/${encodeURIComponent(project.id)}${path}`,
@@ -64,6 +72,7 @@
     }
     return result;
   }
+
   $effect(() => {
     name = project.name;
     description = project.description;
@@ -158,12 +167,28 @@
         }}
       >
         <h2>{'Project details'}</h2>
-        <label>{'Name'}<input bind:value={name} required maxlength="200" /></label><label
-          >{'Description'}<textarea bind:value={description} rows="6" maxlength="10000"
-          ></textarea></label
-        >
-        <div class="description-preview">
-          <span class="muted">{'Preview'}</span><MarkdownContent value={description} />
+        <label>{'Name'}<input bind:value={name} required maxlength="200" /></label>
+        <div class="description-field">
+          <div class="description-header">
+            <label for="project-description">{'Description'}</label>
+            <button
+              type="button"
+              aria-pressed={descriptionPreview}
+              onclick={() => (descriptionPreview = !descriptionPreview)}
+              class="btn btn-outline btn-sm"
+            >
+              {descriptionPreview ? 'Back to editing' : 'Show preview'}
+              <Eye size={15} />
+            </button>
+          </div>
+          {#if descriptionPreview}
+            <div class="description-preview">
+              <MarkdownContent value={description} {language} />
+            </div>
+          {:else}
+            <textarea id="project-description" bind:value={description} rows="6" maxlength="10000"
+            ></textarea>
+          {/if}
         </div>
         <label>{'Tags (comma separated)'}<input bind:value={tags} /></label>
         <fieldset>
@@ -343,6 +368,27 @@
   .fields input,
   .fields textarea {
     margin: 0;
+  }
+  .description-field {
+    display: grid;
+    gap: 8px;
+  }
+  .description-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .description-header label {
+    margin: 0;
+  }
+  .description-preview {
+    min-height: 150px;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--surface);
+    overflow-wrap: anywhere;
   }
   .check {
     display: flex;
