@@ -72,6 +72,7 @@ msgstr "Request failed"
 msgid "Tab"
 msgstr "Tab"
 
+#: src/lib/KanbanBoard.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Escape"
 msgstr "Escape"
@@ -690,6 +691,7 @@ msgstr "Add status"
 msgid "Deleted statuses"
 msgstr "Deleted statuses"
 
+#: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 msgid "Close"
 msgstr "Close"
@@ -1607,3 +1609,11 @@ msgstr "Back to editing"
 #: src/lib/ProjectSettings.svelte
 msgid "Show preview"
 msgstr "Show preview"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Move task to a status"
+msgstr "Move task to a status"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Move task to"
+msgstr "Move task to"
