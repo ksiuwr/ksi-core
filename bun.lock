@@ -24,7 +24,6 @@
     },
     "apps/auth": {
       "name": "@ksi-core/auth",
-      "version": "0.1.0",
       "dependencies": {
         "@ksi-core/ui": "workspace:*",
         "@lucide/svelte": "0.548.0",
@@ -46,7 +45,6 @@
     },
     "apps/dashboard": {
       "name": "@ksi-core/dashboard",
-      "version": "0.1.0",
       "dependencies": {
         "@ksi-core/ui": "workspace:*",
         "@lucide/svelte": "0.548.0",
@@ -68,7 +66,6 @@
     },
     "apps/server": {
       "name": "@ksi-core/server",
-      "version": "0.0.1",
       "dependencies": {
         "@aws-sdk/client-s3": "3.1149.0",
         "@aws-sdk/s3-request-presigner": "3.1149.0",
@@ -97,7 +94,6 @@
     },
     "apps/web": {
       "name": "@ksi-core/web",
-      "version": "0.1.0",
       "dependencies": {
         "@elysiajs/eden": "^1.4.9",
         "class-variance-authority": "^0.7.1",

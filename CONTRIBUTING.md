@@ -97,6 +97,24 @@ Przykłady:
 - `crqch/user-login`
 - `janek/header-alignment`
 
+## Versioning
+
+The release version for the deployed KSI application lives in the root `package.json`.
+The web, auth, dashboard, and server apps ship together, so update that version once per
+application release. Frontend builds display the same root version. Keep their workspace
+package manifests unversioned to avoid implying that they are released independently.
+
+Use CalVer in `YYYY.MM.PATCH` form for production releases. Run `bun run version:bump`
+in the release PR to reset the patch to 0 when the UTC month changes, or increment it
+for another release in the same month. Since pushes to `master` deploy automatically,
+include the release version bump with each user-facing production change. If another
+release merges first, update your branch and rerun the command before merging. Image tags
+remain tied to the source commit, and production manifests pin immutable image digests;
+these identify the exact build and support rollback independently of the human-facing
+release version. The `ksi-cluster` repository tracks deployment state through Git commits
+and those image digests, not a separate copy of the application version. The
+`@ksi-core/ui` package may keep its own version if it is released independently.
+
 ## Pull Requesty
 
 Przed utworzeniem Pull Requesta (PR):
