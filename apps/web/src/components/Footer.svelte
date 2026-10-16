@@ -135,16 +135,16 @@
     row-gap: 12px;
   }
   .footer-copy {
-    grid-column: 1 / -1;
-    justify-self: center;
+    grid-column: 1;
+    grid-row: 1;
   }
   .footer-version {
     grid-column: 1;
-    grid-row: 2 / span 2;
+    grid-row: 2;
   }
   .footer-links {
     grid-column: 2;
-    grid-row: 2;
+    grid-row: 1 / span 2;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
