@@ -23,8 +23,11 @@ export const permissions = {
   'projects.membership.join': 'Join open projects or request access to locked projects.',
   'projects.membership.manage': 'Manage project leaders, memberships and join requests.',
   'projects.layout.edit': 'Reorder or hide sections and edit project links.',
+  'projects.preview-credentials.read': 'View generated sign-in credentials for project previews.',
   'articles.content.propose': 'Create drafts and propose article changes in your workspace.',
   'articles.content.publish': 'Review proposals and publish articles as a workspace leader.',
+  'articles.content.edit-any':
+    'Edit any article in the project, including articles created by others.',
   'articles.authors.manage-credit':
     'Choose whether your contribution receives public author credit.',
   'collaboration.items.contribute':
@@ -66,8 +69,12 @@ export const polishPermissionDescriptions: Record<Permission, string> = {
   'projects.membership.manage':
     'Zarządzaj liderami, członkostwem i prośbami o dołączenie do projektu.',
   'projects.layout.edit': 'Zmieniaj kolejność i widoczność sekcji oraz linki projektu.',
+  'projects.preview-credentials.read':
+    'Wyświetlaj wygenerowane dane logowania do podglądów projektu.',
   'articles.content.propose': 'Twórz szkice i proponuj zmiany artykułów w swojej przestrzeni.',
   'articles.content.publish': 'Oceniaj propozycje i publikuj artykuły jako lider przestrzeni.',
+  'articles.content.edit-any':
+    'Edytuj dowolny artykuł w projekcie, także utworzony przez inną osobę.',
   'articles.authors.manage-credit': 'Decyduj, czy Twój wkład będzie podpisany publicznie.',
   'collaboration.items.contribute':
     'Twórz i edytuj zadania, wątki i komentarze w przestrzeniach, do których należysz.',

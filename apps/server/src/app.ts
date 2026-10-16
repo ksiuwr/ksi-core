@@ -14,6 +14,7 @@ import { filesRoutes } from './routes/platform/files';
 import { realtimeRoutes } from './lib/realtime';
 import { createElysia } from './lib/createElysia';
 import { getUrls } from 'shared';
+import { previewCredentialRoutes } from './routes/platform/previews';
 export const app = new Elysia()
   .onError(({ error, set }) => {
     const message = error instanceof Error ? error.message : '';
@@ -63,6 +64,7 @@ export const app = new Elysia()
   .use(translationRoutes)
   .use(collaboration)
   .use(filesRoutes)
+  .use(previewCredentialRoutes)
   .use(realtimeRoutes)
   .use(routes);
 export type App = typeof app;

@@ -9,6 +9,8 @@ import {
   users,
   projects,
   projectMembers,
+  projectGroups,
+  projectGroupMembers,
   projectLinks,
   joinRequests,
   articles,
@@ -30,8 +32,71 @@ import {
   type Principal,
   type Permission,
   type ResourceScope,
-  canContribute
+  canContribute,
+  matches
 } from '../../domain/permissions';
+const projectDefaultPermissionKeys: Permission[] = [
+  'articles.content.propose',
+  'articles.content.publish',
+  'articles.content.edit-any'
+];
+const projectGroupPermissionKeys: Permission[] = [
+  ...projectDefaultPermissionKeys,
+  'projects.preview-credentials.read'
+];
+
+async function hasProjectPermission(
+  executor: Executor,
+  user: Principal,
+  projectId: string,
+  permission: Permission
+): Promise<boolean> {
+  if (user.flags.some((flag) => flag.startsWith('-') && matches(flag.slice(1), permission)))
+    return false;
+  const [project] = await executor
+    .select({
+      slug: projects.slug,
+      memberPermissions: projects.memberPermissions,
+      nonMemberPermissions: projects.nonMemberPermissions
+    })
+    .from(projects)
+    .where(eq(projects.id, projectId));
+  if (
+    !project ||
+    (permission === 'projects.preview-credentials.read' && project.slug !== 'ksi-core')
+  )
+    return false;
+  const [membership] = await executor
+    .select({ userId: projectMembers.userId })
+    .from(projectMembers)
+    .where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, user.id)));
+  const defaults = membership ? project.memberPermissions : project.nonMemberPermissions;
+  if (defaults.includes(permission)) return true;
+  if (membership) {
+    const groups = await executor
+      .select({ permissions: projectGroups.permissions })
+      .from(projectGroups)
+      .innerJoin(projectGroupMembers, eq(projectGroupMembers.groupId, projectGroups.id))
+      .where(and(eq(projectGroups.projectId, projectId), eq(projectGroupMembers.userId, user.id)));
+    if (groups.some((group) => group.permissions.includes(permission))) return true;
+  }
+  // Preserve existing role-based project access alongside the new scoped grants.
+  return false;
+}
+
+async function canReadProjectArticles(
+  executor: Executor,
+  user: Principal,
+  projectId: string | null,
+  scope?: ResourceScope
+) {
+  const resolvedScope = scope ?? (await scopeFor(executor, projectId));
+  if (canContribute(user, resolvedScope)) return true;
+  if (!projectId) return false;
+  for (const permission of projectDefaultPermissionKeys)
+    if (await hasProjectPermission(executor, user, projectId, permission)) return true;
+  return false;
+}
 
 const shortText = t.String({ minLength: 1, maxLength: 200 });
 const slug = t.String({ pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$', maxLength: 100 });
@@ -338,11 +403,28 @@ export default createElysia({ prefix: '/platform' })
     const actor = active(user);
     const scope = await scopeFor(db, params.id);
     const [project] = await db.select().from(projects).where(eq(projects.id, params.id));
+    if (!project) throw status(404, { code: 'PROJECT_NOT_FOUND' });
     return {
       ...project,
       isMember: scope.memberIds.includes(actor.id),
       canEdit: hasScopedLeadership(actor, scope, 'projects.catalog.edit'),
-      canManageMembers: hasScopedLeadership(actor, scope, 'projects.membership.manage')
+      canManageMembers: hasScopedLeadership(actor, scope, 'projects.membership.manage'),
+      canManageGroups: hasScopedLeadership(actor, scope, 'projects.membership.manage'),
+      canReadPreviewCredentials: await hasProjectPermission(
+        db,
+        actor,
+        params.id,
+        'projects.preview-credentials.read'
+      ),
+      canProposeArticles:
+        canEditScope(actor, scope, 'articles.content.propose') ||
+        (await hasProjectPermission(db, actor, params.id, 'articles.content.propose')),
+      canPublishArticles:
+        hasScopedLeadership(actor, scope, 'articles.content.publish') ||
+        (await hasProjectPermission(db, actor, params.id, 'articles.content.publish')),
+      canEditAnyArticles:
+        hasScopedLeadership(actor, scope, 'articles.content.edit-any') ||
+        (await hasProjectPermission(db, actor, params.id, 'articles.content.edit-any'))
     };
   })
   .get('/projects/:id/members', async ({ db, user, params }) => {
@@ -353,6 +435,49 @@ export default createElysia({ prefix: '/platform' })
       .from(projectMembers)
       .innerJoin(users, eq(projectMembers.userId, users.id))
       .where(and(eq(projectMembers.projectId, params.id), eq(users.membershipStatus, 'active')));
+  })
+  .get('/projects/:id/permissions', async ({ db, user, params }) => {
+    const actor = active(user);
+    requireLeader(actor, await scopeFor(db, params.id), 'projects.membership.manage');
+    const [project] = await db
+      .select({
+        slug: projects.slug,
+        memberPermissions: projects.memberPermissions,
+        nonMemberPermissions: projects.nonMemberPermissions
+      })
+      .from(projects)
+      .where(eq(projects.id, params.id));
+    if (!project) throw status(404, { code: 'PROJECT_NOT_FOUND' });
+    const groups = await db
+      .select()
+      .from(projectGroups)
+      .where(eq(projectGroups.projectId, params.id));
+    const memberships = groups.length
+      ? await db
+          .select()
+          .from(projectGroupMembers)
+          .where(
+            inArray(
+              projectGroupMembers.groupId,
+              groups.map((g) => g.id)
+            )
+          )
+      : [];
+    const allowedGroupPermissions =
+      project.slug === 'ksi-core' ? projectGroupPermissionKeys : projectDefaultPermissionKeys;
+    return {
+      memberPermissions: project.memberPermissions,
+      nonMemberPermissions: project.nonMemberPermissions,
+      groups: groups.map((group) => ({
+        ...group,
+        permissions: group.permissions.filter((permission) =>
+          allowedGroupPermissions.includes(permission as Permission)
+        ),
+        userIds: memberships
+          .filter((membership) => membership.groupId === group.id)
+          .map((membership) => membership.userId)
+      }))
+    };
   })
   .post(
     '/projects',
@@ -597,6 +722,20 @@ export default createElysia({ prefix: '/platform' })
         )
         .returning();
       if (removed) {
+        await tx
+          .delete(projectGroupMembers)
+          .where(
+            and(
+              eq(projectGroupMembers.userId, params.userId),
+              inArray(
+                projectGroupMembers.groupId,
+                tx
+                  .select({ id: projectGroups.id })
+                  .from(projectGroups)
+                  .where(eq(projectGroups.projectId, params.id))
+              )
+            )
+          );
         // Restricted thread invitations are only valid for project members.
         await tx
           .update(threads)
@@ -722,12 +861,106 @@ export default createElysia({ prefix: '/platform' })
       })
     }
   )
+  .put(
+    '/projects/:id/permissions',
+    async ({ db, user, params, body }) => {
+      const actor = active(user);
+      return db.transaction(async (tx) => {
+        const [project] = await tx
+          .select({ id: projects.id, slug: projects.slug })
+          .from(projects)
+          .where(eq(projects.id, params.id))
+          .for('update');
+        if (!project) throw status(404, { code: 'PROJECT_NOT_FOUND' });
+        requireLeader(actor, await scopeFor(tx, params.id), 'projects.membership.manage');
+        const roster = await tx
+          .select({ id: projectMembers.userId })
+          .from(projectMembers)
+          .innerJoin(users, eq(users.id, projectMembers.userId))
+          .where(
+            and(eq(projectMembers.projectId, params.id), eq(users.membershipStatus, 'active'))
+          );
+        const rosterIds = new Set(roster.map((member) => member.id));
+        if (
+          body.memberPermissions.some(
+            (permission: string) => !projectDefaultPermissionKeys.includes(permission as Permission)
+          ) ||
+          body.nonMemberPermissions.some(
+            (permission: string) => !projectDefaultPermissionKeys.includes(permission as Permission)
+          )
+        )
+          throw status(422, { code: 'UNKNOWN_PROJECT_PERMISSION' });
+        const groupPermissions =
+          project.slug === 'ksi-core' ? projectGroupPermissionKeys : projectDefaultPermissionKeys;
+        for (const group of body.groups) {
+          if (group.userIds.some((id: string) => !rosterIds.has(id)))
+            throw status(422, { code: 'GROUP_MEMBERS_MUST_BE_PROJECT_MEMBERS' });
+          if (
+            group.permissions.some(
+              (permission: string) => !groupPermissions.includes(permission as Permission)
+            )
+          )
+            throw status(422, { code: 'UNKNOWN_GROUP_PERMISSION' });
+        }
+        await tx
+          .update(projects)
+          .set({
+            memberPermissions: body.memberPermissions,
+            nonMemberPermissions: body.nonMemberPermissions
+          })
+          .where(eq(projects.id, params.id));
+        await tx.delete(projectGroups).where(eq(projectGroups.projectId, params.id));
+        if (body.groups.length) {
+          const inserted = await tx
+            .insert(projectGroups)
+            .values(
+              body.groups.map((group: { name: string; permissions: string[] }) => ({
+                projectId: params.id,
+                name: group.name.trim(),
+                permissions: group.permissions
+              }))
+            )
+            .returning();
+          for (const [index, group] of body.groups.entries())
+            if (group.userIds.length)
+              await tx
+                .insert(projectGroupMembers)
+                .values(
+                  group.userIds.map((userId: string) => ({ groupId: inserted[index]!.id, userId }))
+                );
+        }
+        await recordEvent(tx, {
+          actorId: actor.id,
+          projectId: params.id,
+          action: 'projects.permissions.updated',
+          targetId: params.id,
+          metadata: { groups: body.groups.length }
+        });
+        return { saved: true };
+      });
+    },
+    {
+      body: t.Object({
+        memberPermissions: t.Array(t.String(), { maxItems: 20, uniqueItems: true }),
+        nonMemberPermissions: t.Array(t.String(), { maxItems: 20, uniqueItems: true }),
+        groups: t.Array(
+          t.Object({
+            name: t.String({ minLength: 1, maxLength: 60, pattern: '.*\\S.*' }),
+            permissions: t.Array(t.String(), { maxItems: 20, uniqueItems: true }),
+            userIds: t.Array(t.String(), { maxItems: 100, uniqueItems: true })
+          }),
+          { maxItems: 30 }
+        )
+      })
+    }
+  )
   .get(
     '/articles',
     async ({ db, user, query }) => {
       const actor = active(user);
       const scope = await scopeFor(db, query.projectId ?? null);
-      if (!canContribute(actor, scope)) throw status(403, { code: 'FORBIDDEN' });
+      if (!(await canReadProjectArticles(db, actor, query.projectId ?? null, scope)))
+        throw status(403, { code: 'FORBIDDEN' });
       return db
         .select()
         .from(articles)
@@ -743,10 +976,16 @@ export default createElysia({ prefix: '/platform' })
   .post(
     '/articles',
     async ({ db, user, body }) => {
-      const actor = requirePermission(user, 'articles.content.propose');
+      const actor = active(user);
       return db.transaction(async (tx) => {
         const scope = await scopeFor(tx, body.projectId ?? null);
-        if (!canEditScope(actor, scope, 'articles.content.propose'))
+        if (
+          !canEditScope(actor, scope, 'articles.content.propose') &&
+          !(
+            body.projectId &&
+            (await hasProjectPermission(tx, actor, body.projectId, 'articles.content.propose'))
+          )
+        )
           throw status(403, { code: 'FORBIDDEN' });
         const [article] = await tx
           .insert(articles)
@@ -792,7 +1031,8 @@ export default createElysia({ prefix: '/platform' })
     const [found] = await db.select().from(articles).where(eq(articles.slug, params.slug));
     if (!found) throw status(404, { code: 'ARTICLE_NOT_FOUND' });
     const { article, scope } = await articleScope(db, found.id);
-    if (!canContribute(actor, scope)) throw status(403, { code: 'FORBIDDEN' });
+    if (!(await canReadProjectArticles(db, actor, article.projectId, scope)))
+      throw status(403, { code: 'FORBIDDEN' });
     const [credit] = await db
       .select({ publicCredit: articleContributors.publicCredit })
       .from(articleContributors)
@@ -804,7 +1044,8 @@ export default createElysia({ prefix: '/platform' })
   .get('/articles/:id', async ({ db, user, params }) => {
     const actor = active(user);
     const { article, scope } = await articleScope(db, params.id);
-    if (!canContribute(actor, scope)) throw status(403, { code: 'FORBIDDEN' });
+    if (!(await canReadProjectArticles(db, actor, article.projectId, scope)))
+      throw status(403, { code: 'FORBIDDEN' });
     const revisions = await db
       .select()
       .from(articleRevisions)
@@ -823,10 +1064,16 @@ export default createElysia({ prefix: '/platform' })
   .post(
     '/articles/:id/proposals',
     async ({ db, user, params, body }) => {
-      const actor = requirePermission(user, 'articles.content.propose');
+      const actor = active(user);
       return db.transaction(async (tx) => {
         const { article, scope } = await articleScope(tx, params.id);
-        if (!canEditScope(actor, scope, 'articles.content.propose'))
+        if (
+          !canEditScope(actor, scope, 'articles.content.propose') &&
+          !(
+            article.projectId &&
+            (await hasProjectPermission(tx, actor, article.projectId, 'articles.content.propose'))
+          )
+        )
           throw status(403, { code: 'FORBIDDEN' });
         if (body.baseVersion !== article.version)
           throw status(409, { code: 'REVISION_CONFLICT', currentVersion: article.version });
@@ -860,7 +1107,14 @@ export default createElysia({ prefix: '/platform' })
       const actor = active(user);
       return db.transaction(async (tx) => {
         const { article, scope } = await articleScope(tx, params.id);
-        requireLeader(actor, scope, 'articles.content.publish');
+        if (
+          !hasScopedLeadership(actor, scope, 'articles.content.publish') &&
+          !(
+            article.projectId &&
+            (await hasProjectPermission(tx, actor, article.projectId, 'articles.content.publish'))
+          )
+        )
+          throw status(403, { code: 'FORBIDDEN' });
         const [proposal] = await tx
           .select()
           .from(articleProposals)
@@ -935,7 +1189,36 @@ export default createElysia({ prefix: '/platform' })
       const actor = active(user);
       return db.transaction(async (tx) => {
         const { article, scope } = await articleScope(tx, params.id);
-        requireLeader(actor, scope, 'articles.content.publish');
+        const canPublish =
+          hasScopedLeadership(actor, scope, 'articles.content.publish') ||
+          (!!article.projectId &&
+            (await hasProjectPermission(tx, actor, article.projectId, 'articles.content.publish')));
+        const canEditAny =
+          hasScopedLeadership(actor, scope, 'articles.content.edit-any') ||
+          (!!article.projectId &&
+            (await hasProjectPermission(
+              tx,
+              actor,
+              article.projectId,
+              'articles.content.edit-any'
+            )));
+        const canEditOwn =
+          !!article.projectId &&
+          article.createdBy === actor.id &&
+          (canEditScope(actor, scope, 'articles.content.propose') ||
+            (await hasProjectPermission(tx, actor, article.projectId, 'articles.content.propose')));
+        const canEditContent = canEditAny || canEditOwn;
+        if (!canPublish && !canEditContent) throw status(403, { code: 'FORBIDDEN' });
+        if (!canEditContent && (body.title !== article.title || body.markdown !== article.markdown))
+          throw status(403, { code: 'FORBIDDEN' });
+        if (
+          !hasScopedLeadership(actor, scope, 'projects.catalog.edit') &&
+          (body.mainArticle !== article.mainArticle ||
+            body.projectFeed !== article.projectFeed ||
+            body.websiteFeed !== article.websiteFeed)
+        )
+          throw status(403, { code: 'FORBIDDEN' });
+        if (body.state !== article.state && !canPublish) throw status(403, { code: 'FORBIDDEN' });
         if (body.mainArticle && !article.projectId) throw status(422, { code: 'PROJECT_REQUIRED' });
         // Serialize main-article selection using the project row.
         if (article.projectId)

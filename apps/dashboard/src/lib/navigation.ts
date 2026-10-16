@@ -5,7 +5,9 @@ const viewPaths: Record<string, string> = {
   articles: 'articles',
   events: 'activity',
   roster: 'members',
-  settings: 'settings'
+  settings: 'settings',
+  permissions: 'permissions',
+  previews: 'previews'
 };
 export function parseDashboardPath(pathname: string): {
   workspace: Workspace;
@@ -62,7 +64,7 @@ export function parseDashboardPath(pathname: string): {
     : 'overview';
   if (
     !tab ||
-    (root === 'association' && tab === 'settings') ||
+    (root === 'association' && (tab === 'settings' || tab === 'permissions')) ||
     (root === 'association' && segments.length > 3) ||
     (root !== 'association' && (root !== 'projects' || !slug || slug === 'new'))
   )

@@ -3,7 +3,16 @@ import { describe, expect, test } from 'bun:test';
 import { dashboardPath, parseDashboardPath } from './navigation';
 describe('dashboard routes', () => {
   test('project tools keep the same project after a refresh', () => {
-    for (const tab of ['overview', 'board', 'forum', 'articles', 'events', 'roster', 'settings']) {
+    for (const tab of [
+      'overview',
+      'board',
+      'forum',
+      'articles',
+      'events',
+      'roster',
+      'settings',
+      'permissions'
+    ]) {
       const path = dashboardPath('project', 'roboty ksi', tab);
       expect(parseDashboardPath(path)).toEqual({
         workspace: 'project',
