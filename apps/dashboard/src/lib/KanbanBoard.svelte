@@ -66,6 +66,11 @@
   let busy = $state(false),
     dragged = $state<string | null>(null),
     over = $state<string | null>(null);
+  let mobileMoveItem = $state<Item | null>(null),
+    mobileDropTarget = $state<string | null>(null);
+  let touchPress: { item: Item; x: number; y: number } | null = null;
+  let holdTimer: ReturnType<typeof setTimeout> | null = null;
+  let suppressTaskClick: string | null = null;
   let composer = $state<string | null>(null),
     title = $state(''),
     markdown = $state(''),
@@ -201,6 +206,63 @@
       if (selected?.id === updated.id) selected = updated;
     });
   }
+  function clearHoldTimer() {
+    if (holdTimer) clearTimeout(holdTimer);
+    holdTimer = null;
+  }
+  function beginMobileHold(item: Item, event: PointerEvent) {
+    if (event.pointerType !== 'touch') return;
+    clearHoldTimer();
+    touchPress = { item, x: event.clientX, y: event.clientY };
+    holdTimer = setTimeout(() => {
+      mobileMoveItem = item;
+      mobileDropTarget = null;
+      suppressTaskClick = item.id;
+      if ('vibrate' in navigator) navigator.vibrate?.(20);
+      holdTimer = null;
+    }, 450);
+  }
+  function updateMobileDropTarget(event: PointerEvent) {
+    const target = document
+      .elementFromPoint(event.clientX, event.clientY)
+      ?.closest<HTMLElement>('[data-mobile-status]');
+    mobileDropTarget = target?.dataset.mobileStatus ?? null;
+  }
+  function handleMobilePointerMove(event: PointerEvent) {
+    if (holdTimer && touchPress) {
+      const dx = event.clientX - touchPress.x;
+      const dy = event.clientY - touchPress.y;
+      if (Math.hypot(dx, dy) > 18) {
+        clearHoldTimer();
+        touchPress = null;
+      }
+    }
+    if (mobileMoveItem) updateMobileDropTarget(event);
+  }
+  function finishMobileMove(statusId: string) {
+    if (!mobileMoveItem) return;
+    const item = mobileMoveItem;
+    mobileMoveItem = null;
+    mobileDropTarget = null;
+    touchPress = null;
+    suppressTaskClick = null;
+    clearHoldTimer();
+    void move(item, statusId);
+  }
+  function cancelMobileMove() {
+    clearHoldTimer();
+    touchPress = null;
+    mobileMoveItem = null;
+    mobileDropTarget = null;
+  }
+  function handleMobilePointerUp(event: PointerEvent) {
+    clearHoldTimer();
+    touchPress = null;
+    if (!mobileMoveItem) return;
+    updateMobileDropTarget(event);
+    const statusId = mobileDropTarget;
+    if (statusId) finishMobileMove(statusId);
+  }
   async function addStatus() {
     await run(async () => {
       const id = await ensureBoard();
@@ -313,6 +375,15 @@
   }
 </script>
 
+<svelte:window
+  onpointermove={handleMobilePointerMove}
+  onpointerup={handleMobilePointerUp}
+  onpointercancel={cancelMobileMove}
+  onkeydown={(event) => {
+    if (event.key === 'Escape' && mobileMoveItem) cancelMobileMove();
+  }}
+/>
+
 <div
   class="board"
   style:grid-template-columns={`repeat(${activeStatuses.length}, minmax(260px, 1fr))`}
@@ -373,7 +444,12 @@
             class:dragging={dragged === item.id}
             draggable={!busy}
             disabled={busy}
+            onpointerdown={(event) => beginMobileHold(item, event)}
             ondragstart={(event) => {
+              if (touchPress?.item.id === item.id || mobileMoveItem?.id === item.id) {
+                event.preventDefault();
+                return;
+              }
               dragged = item.id;
               if (event.dataTransfer) {
                 event.dataTransfer.setData('text/plain', item.id);
@@ -384,7 +460,14 @@
               dragged = null;
               over = null;
             }}
-            onclick={(event) => openItem(item, event)}
+            onclick={(event) => {
+              if (suppressTaskClick === item.id) {
+                suppressTaskClick = null;
+                event.preventDefault();
+                return;
+              }
+              openItem(item, event);
+            }}
           >
             <span class="task-title"
               ><strong>{item.title}</strong><GripVertical size={14} aria-hidden="true" /></span
@@ -408,6 +491,31 @@
     </section>
   {/each}
 </div>
+{#if mobileMoveItem}
+  <div class="mobile-move-tray" role="group" aria-label={'Move task to a status'}>
+    <div class="mobile-move-heading">
+      <span>{'Move task to'} <strong>{mobileMoveItem.title}</strong></span>
+      <button type="button" class="icon-button" aria-label={'Close'} onclick={cancelMobileMove}
+        ><X size={18} aria-hidden="true" /></button
+      >
+    </div>
+    <div class="mobile-move-options">
+      {#each activeStatuses as status (status.id)}
+        <button
+          type="button"
+          data-mobile-status={status.id}
+          class="mobile-move-option"
+          class:drop-target={mobileDropTarget === status.id}
+          style:border-color={color(status)}
+          disabled={busy}
+          onclick={() => finishMobileMove(status.id)}
+        >
+          <span class="column-dot" style:background={color(status)}></span>{label(status)}
+        </button>
+      {/each}
+    </div>
+  </div>
+{/if}
 {#if composer}<dialog
     bind:this={composerDialog}
     class="issue-dialog"
@@ -928,6 +1036,55 @@
     border-radius: 3px;
   }
   @media (max-width: 760px) {
+    .mobile-move-tray {
+      position: fixed;
+      z-index: 1000;
+      inset-inline: 12px;
+      bottom: calc(12px + env(safe-area-inset-bottom));
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+    .mobile-move-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+      font-size: 13px;
+    }
+    .mobile-move-heading > span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .mobile-move-options {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 2px 2px 6px;
+      overscroll-behavior-inline: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+    .mobile-move-option {
+      display: inline-flex;
+      flex: 0 0 auto;
+      min-height: 44px;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: var(--surface);
+      color: var(--ink);
+      font: inherit;
+      white-space: nowrap;
+      touch-action: manipulation;
+    }
     .board {
       grid-template-columns: none !important;
       grid-auto-flow: column;

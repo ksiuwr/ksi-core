@@ -72,6 +72,7 @@ msgstr "Żądanie nie powiodło się"
 msgid "Tab"
 msgstr "Tab"
 
+#: src/lib/KanbanBoard.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Escape"
 msgstr "Escape"
@@ -690,6 +691,7 @@ msgstr "Dodaj status"
 msgid "Deleted statuses"
 msgstr "Usunięte statusy"
 
+#: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 msgid "Close"
 msgstr "Zamknij"
@@ -1607,3 +1609,11 @@ msgstr "Wróć do edycji"
 #: src/lib/ProjectSettings.svelte
 msgid "Show preview"
 msgstr "Pokaż podgląd"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Move task to a status"
+msgstr "Przenieś zadanie do kategorii"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Move task to"
+msgstr "Przenieś zadanie do"
