@@ -1063,16 +1063,17 @@
       white-space: nowrap;
     }
     .mobile-move-options {
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
       gap: 8px;
-      overflow-x: auto;
+      max-height: min(35dvh, 240px);
+      overflow-y: auto;
       padding: 2px 2px 6px;
-      overscroll-behavior-inline: contain;
-      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
     }
     .mobile-move-option {
-      display: inline-flex;
-      flex: 0 0 auto;
+      display: flex;
+      width: 100%;
       min-height: 44px;
       align-items: center;
       gap: 8px;
@@ -1082,7 +1083,7 @@
       background: var(--surface);
       color: var(--ink);
       font: inherit;
-      white-space: nowrap;
+      text-align: left;
       touch-action: manipulation;
     }
     .board {
