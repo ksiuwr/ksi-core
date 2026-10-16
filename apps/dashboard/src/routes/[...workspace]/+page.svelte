@@ -1038,7 +1038,7 @@
                           {/if}
                         </div>
                         <h2>{project.name}</h2>
-                        <p>{project.description || 'No description.'}</p>
+                        <MarkdownContent value={project.description} {language} />
                         <div class="project-card-actions">
                           <a
                             class="btn"
@@ -1071,10 +1071,13 @@
                           href={`${data.websiteOrigin}/projects/${encodeURIComponent(selectedProject.slug)}`}
                           ><ArrowUpRight size={15} />{'View public project'}</a
                         >{/if}
-                      <p class="workspace-description">
-                        {selectedProject?.description ||
-                          'Shared tasks, conversations, and publications in one place.'}
-                      </p>
+                      {#if selectedProject?.description}
+                        <div class="workspace-description">
+                          <MarkdownContent value={selectedProject.description} {language} />
+                        </div>
+                      {:else}<p class="workspace-description">
+                          {'Shared tasks, conversations, and publications in one place.'}
+                        </p>{/if}
                     </div>
                     {#if selectedProject}
                       <div class="row">

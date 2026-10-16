@@ -34,6 +34,7 @@ export const load: PageServerLoad = async (event) => {
   }
   return {
     project,
+    descriptionBlocks: renderMarkdown(project.description ?? ''),
     mainArticleBlocks: project.mainArticle ? renderMarkdown(project.mainArticle.markdown) : [],
     access,
     dashboardOrigin: getUrls(environment).frontend.dashboard

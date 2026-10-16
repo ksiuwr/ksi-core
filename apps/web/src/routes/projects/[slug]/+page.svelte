@@ -11,6 +11,7 @@
   }>();
   let project = $derived(data.project);
   let user = $derived(data.user);
+  const language = $derived(locale.current === 'pl' ? 'pl' : 'en');
 </script>
 
 <div class="page-gutter py-12">
@@ -44,7 +45,9 @@
     </p>{/if}
   {#if form && 'message' in form}<p role="alert">{form.message}</p>{/if}
   <div class="prose max-w-none">
-    <p class="text-base-content/80 mb-8 text-xl">{project.description}</p>
+    <div class="text-base-content/80 mb-8 text-xl">
+      <Markdown blocks={data.descriptionBlocks} {language} />
+    </div>
 
     {#if project.tags?.length > 0}
       <div class="mb-8 flex gap-2">
@@ -58,10 +61,7 @@
       {#if section === 'main-article' && project.mainArticle}
         <section class="my-10">
           <h2 class="section-heading text-2xl font-semibold">{project.mainArticle.title}</h2>
-          <Markdown
-            blocks={data.mainArticleBlocks}
-            language={locale.current === 'pl' ? 'pl' : 'en'}
-          />
+          <Markdown blocks={data.mainArticleBlocks} {language} />
         </section>
       {:else if section === 'articles'}
         <section class="my-10">
@@ -79,7 +79,7 @@
                 <MemberPreview
                   {member}
                   href={`/members/${encodeURIComponent(member.id)}`}
-                  language={locale.current === 'pl' ? 'pl' : 'en'}
+                  {language}
                 />
               </div>
             {/each}
