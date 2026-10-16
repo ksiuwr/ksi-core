@@ -37,26 +37,38 @@ cd ./ksi-core
 bun i
 ```
 
-2. Odpal bazę danych
+2. Skonfiguruj zmienne środowiskowe
+
+```
+cp .env.example .env
+cp apps/server/.env.example apps/server/.env
+```
+
+Plik `.env` w katalogu głównym zawiera wspólny `PROXY_SECRET` używany lokalnie przez
+backend oraz wszystkie aplikacje frontendowe. Nie dodawaj tej zmiennej do plików `.env`
+poszczególnych aplikacji. Pozostałe zmienne backendu należą do `apps/server/.env`.
+Oba pliki są ignorowane przez Git.
+
+3. Odpal bazę danych
 
 ```
 docker compose up -d --build
 ```
 
-3. Przeprowadź migracje bazy (tylko za pierwszym razem lub po zmianach w modelach bazy danych)
+4. Przeprowadź migracje bazy (tylko za pierwszym razem lub po zmianach w modelach bazy danych)
 
 ```
 bun db:generate # Generuje pliki SQL do migracji
 bun db:migrate  # Przeprowadza migracje na bazie danych
 ```
 
-4. Uruchom serwery (backend i frontend)
+5. Uruchom serwery (backend i frontend)
 
 ```
 bun dev
 ```
 
-5. Frontend jest dostępny pod http://localhost:5173/, a backend pod http://localhost:3000/.
+6. Frontend jest dostępny pod http://localhost:5173/, a backend pod http://localhost:3000/.
 
 ## Produkcja
 
