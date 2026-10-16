@@ -21,10 +21,8 @@
 </script>
 
 <footer class="relative w-full" style="background: var(--surface); color: var(--ink);">
-  <div class="grid grid-cols-2 md:mx-8 lg:grid-cols-3">
-    <div
-      class="border-muted lg:border-base-content/15 col-span-2 border-r border-dashed p-4 py-8 md:py-16 lg:col-span-1"
-    >
+  <div class="grid grid-cols-1 md:mx-8 lg:grid-cols-3">
+    <div class="border-muted lg:border-base-content/15 border-r border-dashed p-4 py-8 md:py-16">
       <a
         href="/"
         class="hover:text-primary font-anybody inline-block text-6xl font-semibold tracking-[-0.04em]"
@@ -89,21 +87,21 @@
   </div>
 
   <div
-    class="flex flex-col items-center gap-3 border-t border-dashed px-4 py-3 text-xs sm:flex-row sm:justify-between md:px-12"
+    class="footer-bottom border-t border-dashed px-4 py-3 text-xs md:px-12"
     style="background: var(--surface-muted); color: var(--ink); border-color: var(--line);"
   >
-    <span>© KSI {new Date().getFullYear()}</span>
+    <span class="footer-copy">© KSI {new Date().getFullYear()}</span>
 
-    <div class="flex flex-wrap items-center gap-x-6 gap-y-3 not-sm:w-full">
-      <span class="font-mono" style="color: var(--muted);"
-        >v{import.meta.env.PUBLIC_APP_VERSION}</span
-      >
+    <span class="footer-version font-mono" style="color: var(--muted);"
+      >v{import.meta.env.PUBLIC_APP_VERSION}</span
+    >
 
+    <div class="footer-links">
       <a
         href="https://github.com/ksiuwr/ksi-core"
         target="_blank"
         rel="noreferrer"
-        class="group font-anybody hover:text-primary flex w-full items-center justify-center gap-2 transition-colors sm:w-fit"
+        class="group font-anybody hover:text-primary flex items-center gap-2 transition-colors"
       >
         <Github class="size-3.5" />
         Source code
@@ -117,7 +115,7 @@
           href="https://github.com/ksiuwr/ksi-core/commit/{commitHash}"
           target="_blank"
           rel="noreferrer"
-          class="group hover:text-primary flex w-full items-center justify-center gap-1.5 font-mono transition-colors sm:w-fit"
+          class="group hover:text-primary flex items-center gap-1.5 font-mono transition-colors"
           title="Commit {commitHash}"
         >
           <GitCommitHorizontal class="size-3.5" />
@@ -127,3 +125,48 @@
     </div>
   </div>
 </footer>
+
+<style>
+  .footer-bottom {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 12px;
+  }
+  .footer-copy {
+    grid-column: 1 / -1;
+    justify-self: center;
+  }
+  .footer-version {
+    grid-column: 1;
+    grid-row: 2 / span 2;
+  }
+  .footer-links {
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  @media (min-width: 640px) {
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .footer-copy,
+    .footer-version,
+    .footer-links {
+      grid-column: auto;
+      grid-row: auto;
+    }
+    .footer-links {
+      margin-left: auto;
+      flex-direction: row;
+      align-items: center;
+      gap: 24px;
+    }
+  }
+</style>
