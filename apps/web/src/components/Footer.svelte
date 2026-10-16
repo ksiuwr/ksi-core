@@ -147,7 +147,7 @@
     grid-row: 2;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: flex-end;
     gap: 12px;
   }
   @media (min-width: 640px) {
