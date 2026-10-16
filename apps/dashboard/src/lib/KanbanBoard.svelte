@@ -929,7 +929,11 @@
   }
   @media (max-width: 760px) {
     .board {
-      grid-template-columns: 1fr !important;
+      grid-template-columns: none !important;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(250px, 1fr);
+      overflow-x: auto;
+      touch-action: pan-x pan-y;
     }
     .issue-dialog {
       padding: 20px 16px;
