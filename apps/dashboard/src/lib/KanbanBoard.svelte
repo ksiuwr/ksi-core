@@ -25,6 +25,7 @@
   let {
     items,
     statuses,
+    boardTags = [],
     boardId,
     projectId,
     language,
@@ -36,6 +37,7 @@
   }: {
     items: Item[];
     statuses: BoardStatus[];
+    boardTags?: string[];
     boardId: string;
     projectId: string;
     language: 'pl' | 'en';
@@ -46,6 +48,34 @@
     reportError: (error: string) => void;
   } = $props();
 
+  let tagFilter = $state<string[]>([]);
+  let taskTags = $state<string[]>([]);
+  let editTags = $state<string[]>([]);
+  let tagDraft = $state('');
+  let managingTags = $state(false);
+  $effect(() => {
+    boardId;
+    tagFilter = [];
+  });
+  const visibleItems = $derived(
+    items.filter((item) => tagFilter.every((tag) => item.tags.includes(tag)))
+  );
+  async function saveTags() {
+    await run(async () => {
+      const id = await ensureBoard();
+      const tags = [
+        ...new Set(
+          tagDraft
+            .split('\n')
+            .map((tag) => tag.trim())
+            .filter(Boolean)
+        )
+      ];
+      await api(`/platform/boards/${id}/tags`, 'PUT', { tags });
+      tagFilter = tagFilter.filter((tag) => tags.includes(tag));
+      managingTags = false;
+    });
+  }
   const label = (s: BoardStatus) =>
     s.id === 'todo' && s.name === 'To do'
       ? 'To do'
@@ -127,6 +157,7 @@
     composer = column;
     title = '';
     markdown = '';
+    taskTags = [];
     await tick();
     composerDialog?.showModal();
     document.getElementById('task-title')?.focus();
@@ -187,7 +218,7 @@
       await api(`/platform/boards/${id}/items`, 'POST', {
         title,
         markdown,
-        tags: [],
+        tags: taskTags,
         column: composer,
         position:
           Math.max(-1, ...items.filter((i) => i.column === composer).map((i) => i.position)) + 1
@@ -338,7 +369,8 @@
       selected = await api<Item>(`/platform/items/${selected!.id}`, 'PATCH', {
         version: selected!.version,
         title: editTitle,
-        markdown: editMarkdown
+        markdown: editMarkdown,
+        tags: editTags
       });
       editing = false;
     });
@@ -385,6 +417,44 @@
   }}
 />
 
+<div class="tag-controls">
+  {#if boardTags.length}<fieldset>
+      <legend>{language === 'pl' ? 'Filtruj według tagów' : 'Filter by tags'}</legend>
+      {#each boardTags as tag}<label
+          ><input type="checkbox" value={tag} bind:group={tagFilter} />{tag}</label
+        >{/each}
+      {#if tagFilter.length}<button type="button" onclick={() => (tagFilter = [])}
+          >{language === 'pl' ? 'Wyczyść filtry' : 'Clear filters'}</button
+        >{/if}
+    </fieldset>{/if}
+  {#if canManage}<button
+      type="button"
+      class="btn btn-outline"
+      onclick={() => {
+        managingTags = !managingTags;
+        tagDraft = boardTags.join('\n');
+      }}>{language === 'pl' ? 'Zarządzaj tagami' : 'Manage tags'}</button
+    >{/if}
+  {#if canManage && managingTags}<form
+      onsubmit={(event) => {
+        event.preventDefault();
+        void saveTags();
+      }}
+    >
+      <label
+        >{language === 'pl' ? 'Tagi (jeden w wierszu)' : 'Tags (one per line)'}<textarea
+          bind:value={tagDraft}
+          rows={4}
+        ></textarea></label
+      >
+      <button class="btn" disabled={busy}>{'Save'}</button>
+      <p>
+        {language === 'pl'
+          ? 'Usuń tag z zadań przed usunięciem go z tablicy.'
+          : 'Remove a tag from tasks before deleting it from the board.'}
+      </p>
+    </form>{/if}
+</div>
 <div
   class="board"
   style:grid-template-columns={`repeat(${activeStatuses.length}, minmax(260px, 1fr))`}
@@ -436,7 +506,7 @@
         >
       </div>
       <div class="column-items">
-        {#each items
+        {#each visibleItems
           .filter((i) => i.column === status.id)
           .sort((a, b) => a.position - b.position) as item (item.id)}
           <button
@@ -556,6 +626,11 @@
         placeholder={'What needs to be done?'}
       />
       <Dropdown label={'Task status'} bind:value={composer} {options} />
+      {#if boardTags.length}<fieldset>
+          <legend>{'Tags'}</legend>{#each boardTags as tag}<label
+              ><input type="checkbox" value={tag} bind:group={taskTags} />{tag}</label
+            >{/each}
+        </fieldset>{/if}
       <Editor {language} bind:value={markdown} rows={10} />
       <div class="row">
         <button class="btn" disabled={busy || !title.trim()}>{'Add task'}</button><button
@@ -696,6 +771,7 @@
           editing = !editing;
           editTitle = selected!.title;
           editMarkdown = selected!.markdown;
+          editTags = [...selected!.tags];
         }}><Pencil size={14} aria-hidden="true" />{'Edit'}</button
       ><button
         type="button"
@@ -735,6 +811,11 @@
           required
           maxlength="200"
         /><Editor {language} bind:value={editMarkdown} />
+        {#if boardTags.length}<fieldset>
+            <legend>{'Tags'}</legend>{#each boardTags as tag}<label
+                ><input type="checkbox" value={tag} bind:group={editTags} />{tag}</label
+              >{/each}
+          </fieldset>{/if}
         <div class="row">
           <button class="btn" disabled={busy || !editTitle.trim()}
             ><Save size={14} aria-hidden="true" />{'Save'}</button
@@ -833,6 +914,27 @@
   </dialog>{/if}
 
 <style>
+  fieldset {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    border: 1px solid var(--line);
+    padding: 12px;
+  }
+  fieldset label {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+  }
+  fieldset input {
+    width: auto;
+    margin: 0;
+  }
+  .tag-controls {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
   .status-dialog {
     width: min(560px, calc(100vw - 32px));
   }

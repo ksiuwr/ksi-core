@@ -153,6 +153,7 @@
     }[]
   >([]);
 
+  let boardTags = $state<string[]>([]);
   let boardId = $state('');
   let title = $state('');
   let markdown = $state('');
@@ -342,9 +343,11 @@
         if (generation === loadGeneration) articles = result;
       }
       if (currentTab === 'board') {
-        let board: { id: string; statuses: BoardStatus[] } | null = null;
+        let board: { id: string; statuses: BoardStatus[]; tags: string[] } | null = null;
         try {
-          board = await api<{ id: string; statuses: BoardStatus[] }>(`/platform/boards${query}`);
+          board = await api<{ id: string; statuses: BoardStatus[]; tags: string[] }>(
+            `/platform/boards${query}`
+          );
         } catch (cause) {
           if (!(cause instanceof Error && cause.message === 'BOARD_NOT_FOUND')) throw cause;
         }
@@ -355,6 +358,7 @@
           : [];
         if (generation === loadGeneration) {
           boardId = id;
+          boardTags = board?.tags ?? [];
           statuses = board?.statuses ?? [
             { id: 'todo', name: 'To do' },
             { id: 'progress', name: 'In progress' },
@@ -1414,6 +1418,7 @@
                     <KanbanBoard
                       {items}
                       {statuses}
+                      {boardTags}
                       {boardId}
                       projectId={scope}
                       {language}

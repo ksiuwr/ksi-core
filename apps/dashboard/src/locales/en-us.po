@@ -708,6 +708,7 @@ msgstr "Deleted"
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Save"
 msgstr "Save"
@@ -1651,3 +1652,51 @@ msgstr "Choose thumbnail"
 #: src/lib/ArticleThumbnail.svelte
 msgid "Remove thumbnail"
 msgstr "Remove thumbnail"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Filtruj według tagów"
+msgstr "Filtruj według tagów"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Filter by tags"
+msgstr "Filter by tags"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Wyczyść filtry"
+msgstr "Wyczyść filtry"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Clear filters"
+msgstr "Clear filters"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Zarządzaj tagami"
+msgstr "Zarządzaj tagami"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Manage tags"
+msgstr "Manage tags"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Tagi (jeden w wierszu)"
+msgstr "Tagi (jeden w wierszu)"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Tags (one per line)"
+msgstr "Tags (one per line)"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Usuń tag z zadań przed usunięciem go z tablicy."
+msgstr "Usuń tag z zadań przed usunięciem go z tablicy."
+
+#: src/lib/KanbanBoard.svelte
+msgid "Remove a tag from tasks before deleting it from the board."
+msgstr "Remove a tag from tasks before deleting it from the board."
+
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "Tags"
+msgstr "Tags"
+
+#~ msgid "All statuses"
+#~ msgstr "All statuses"
