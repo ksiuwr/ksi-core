@@ -955,10 +955,6 @@ msgid "Filter status"
 msgstr "Filtr statusu"
 
 #: src/lib/Members.svelte
-msgid "All statuses"
-msgstr "Wszystkie statusy"
-
-#: src/lib/Members.svelte
 msgid "Filter role"
 msgstr "Filtr roli"
 
@@ -1617,3 +1613,12 @@ msgstr "Przenieś zadanie do kategorii"
 #: src/lib/KanbanBoard.svelte
 msgid "Move task to"
 msgstr "Przenieś zadanie do"
+
+#: src/lib/Members.svelte
+#: src/lib/Members.svelte
+msgid "Pending memberships awaiting approval"
+msgstr "Członkostwa oczekujące na zatwierdzenie"
+
+#: src/lib/Members.svelte
+msgid "Active and suspended"
+msgstr "Aktywni i zawieszeni"

@@ -542,6 +542,7 @@
             !event.defaultPrevented &&
             !event.isComposing &&
             (event.ctrlKey || event.metaKey) &&
+            // @wc-ignore
             event.key === 'Enter'
           ) {
             event.preventDefault();
