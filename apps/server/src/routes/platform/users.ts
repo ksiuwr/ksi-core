@@ -1,19 +1,12 @@
 import { createEmailVerificationToken } from 'better-auth/api';
 import { auth } from '../../lib/auth';
 import { recordEvent } from '../../lib/audit';
+import { contentChanges, profileChangeFields } from 'shared/activity';
 import { getUrls } from 'shared';
 import { validProfileLink } from 'shared/profile-links';
 import { status, t } from 'elysia';
 import { eq, and, or, ilike, asc, desc, count, gt, notInArray } from 'drizzle-orm';
-import {
-  users,
-  auditEvents,
-  outbox,
-  sessions,
-  frontendSessions,
-  verifications,
-  mailJobs
-} from '../../db';
+import { users, sessions, frontendSessions, verifications, mailJobs } from '../../db';
 import { createElysia, requirePermission } from '../../lib/createElysia';
 import { manageUser, anonymizeUser } from '../../services/users';
 import { effectivePermissions, type Permission } from '../../domain/permissions';
@@ -76,27 +69,27 @@ export const userRoutes = createElysia({ prefix: '/users', protectedRoute: true 
                 : 'Use a https://linkedin.com/in/username profile link.'
           });
       return db.transaction(async (tx) => {
+        const [previous] = await tx.select().from(users).where(eq(users.id, user.id)).for('update');
+        if (!previous) throw status(404, { code: 'USER_NOT_FOUND' });
+        if (previous.membershipStatus === 'deleted') throw status(409, { code: 'ACCOUNT_DELETED' });
+
         const [updated] = await tx
           .update(users)
           .set({
             ...body,
             name:
-              [body.firstName ?? user.firstName, body.lastName ?? user.lastName]
+              [body.firstName ?? previous.firstName, body.lastName ?? previous.lastName]
                 .filter(Boolean)
-                .join(' ') || user.name
+                .join(' ') || previous.name
           })
           .where(eq(users.id, user.id))
           .returning();
-        const [event] = await tx
-          .insert(auditEvents)
-          .values({
-            actorId: user.id,
-            targetId: user.id,
-            action: 'users.profile.updated',
-            metadata: { fields: Object.keys(body) }
-          })
-          .returning();
-        await tx.insert(outbox).values({ eventId: event!.id });
+        await recordEvent(tx, {
+          actorId: user.id,
+          targetId: user.id,
+          action: 'users.profile.updated',
+          metadata: { changes: contentChanges(previous, updated!, profileChangeFields) }
+        });
         return { user: updated };
       });
     },
@@ -163,7 +156,19 @@ export const userRoutes = createElysia({ prefix: '/users', protectedRoute: true 
         .from(sessions)
         .where(and(eq(sessions.id, params.id), eq(sessions.userId, user.id)));
       if (!session) throw status(404, { message: 'Session not found' });
-      await db.delete(sessions).where(eq(sessions.id, params.id));
+      await db.transaction(async (tx) => {
+        const removed = await tx
+          .delete(sessions)
+          .where(and(eq(sessions.id, params.id), eq(sessions.userId, user.id)))
+          .returning({ id: sessions.id });
+        if (removed.length)
+          await recordEvent(tx, {
+            actorId: user.id,
+            targetId: user.id,
+            action: 'users.session.revoked',
+            metadata: { changes: contentChanges({ active: true }, { active: false }, ['active']) }
+          });
+      });
       return { success: true };
     },
     {
@@ -268,16 +273,12 @@ export const userRoutes = createElysia({ prefix: '/users', protectedRoute: true 
           })
           .where(eq(users.id, params.id))
           .returning();
-        const [event] = await tx
-          .insert(auditEvents)
-          .values({
-            actorId: actor.id,
-            targetId: params.id,
-            action: 'users.profile.updated',
-            metadata: { fields: Object.keys(body) }
-          })
-          .returning();
-        await tx.insert(outbox).values({ eventId: event!.id });
+        await recordEvent(tx, {
+          actorId: actor.id,
+          targetId: params.id,
+          action: 'users.profile.updated',
+          metadata: { changes: contentChanges(member, updated!, profileChangeFields) }
+        });
         return updated;
       });
     },
@@ -348,7 +349,13 @@ export const userRoutes = createElysia({ prefix: '/users', protectedRoute: true 
           await recordEvent(tx, {
             actorId: actor.id,
             action: 'users.email.changed',
-            targetId: params.id
+            targetId: params.id,
+            metadata: {
+              changes: [
+                ...contentChanges(member, updated!, ['emailVerified']),
+                ...contentChanges({ emailChanged: false }, { emailChanged: true }, ['emailChanged'])
+              ]
+            }
           });
           return updated!;
         });
@@ -389,7 +396,8 @@ export const userRoutes = createElysia({ prefix: '/users', protectedRoute: true 
       await recordEvent(tx, {
         actorId: actor.id,
         action: 'users.password-reset.queued',
-        targetId: params.id
+        targetId: params.id,
+        metadata: { changes: contentChanges({}, { state: 'queued' }, ['state']) }
       });
     });
     return { queued: true };

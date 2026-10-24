@@ -1,3 +1,5 @@
+import { contentChanges } from 'shared/activity';
+import { recordEvent } from '../../lib/audit';
 import { and, eq } from 'drizzle-orm';
 import { status, t } from 'elysia';
 import {
@@ -134,27 +136,51 @@ export const previewCredentialRoutes = createElysia({ prefix: '/platform' })
         .from(projects)
         .where(eq(projects.slug, params.slug));
       if (!project || project.slug !== 'ksi-core') throw status(404, { code: 'PROJECT_NOT_FOUND' });
-      const [existing] = await db
-        .select({ id: previewCredentials.id })
-        .from(previewCredentials)
-        .where(
-          and(
-            eq(previewCredentials.projectId, project.id),
-            eq(previewCredentials.previewId, params.previewId)
-          )
-        );
-      const data = {
-        projectId: project.id,
-        previewId: params.previewId,
-        branch: body.branch,
-        commit: body.commit,
-        previewUrl: body.previewUrl,
-        accounts: encryptAccounts(body.accounts, `${project.id}:${params.previewId}`),
-        updatedAt: new Date()
-      };
-      if (existing)
-        await db.update(previewCredentials).set(data).where(eq(previewCredentials.id, existing.id));
-      else await db.insert(previewCredentials).values(data);
+      await db.transaction(async (tx) => {
+        await tx
+          .select({ id: projects.id })
+          .from(projects)
+          .where(eq(projects.id, project.id))
+          .for('update');
+        const [existing] = await tx
+          .select()
+          .from(previewCredentials)
+          .where(
+            and(
+              eq(previewCredentials.projectId, project.id),
+              eq(previewCredentials.previewId, params.previewId)
+            )
+          );
+        const data = {
+          projectId: project.id,
+          previewId: params.previewId,
+          branch: body.branch,
+          commit: body.commit,
+          previewUrl: body.previewUrl,
+          accounts: encryptAccounts(body.accounts, `${project.id}:${params.previewId}`),
+          updatedAt: new Date()
+        };
+        if (existing)
+          await tx
+            .update(previewCredentials)
+            .set(data)
+            .where(eq(previewCredentials.id, existing.id));
+        else await tx.insert(previewCredentials).values(data);
+        await recordEvent(tx, {
+          actorId: null,
+          projectId: project.id,
+          action: 'projects.preview.updated',
+          targetId: params.previewId,
+          metadata: {
+            previewId: params.previewId,
+            changes: contentChanges(
+              { ...(existing ?? {}), available: !!existing },
+              { ...data, available: true },
+              ['branch', 'commit', 'previewUrl', 'available']
+            )
+          }
+        });
+      });
       return { stored: true };
     },
     {
@@ -179,14 +205,38 @@ export const previewCredentialRoutes = createElysia({ prefix: '/platform' })
         .from(projects)
         .where(eq(projects.slug, params.slug));
       if (!project || project.slug !== 'ksi-core') throw status(404, { code: 'PROJECT_NOT_FOUND' });
-      await db
-        .delete(previewCredentials)
-        .where(
-          and(
-            eq(previewCredentials.projectId, project.id),
-            eq(previewCredentials.previewId, params.previewId)
+      await db.transaction(async (tx) => {
+        await tx
+          .select({ id: projects.id })
+          .from(projects)
+          .where(eq(projects.id, project.id))
+          .for('update');
+        const [removed] = await tx
+          .delete(previewCredentials)
+          .where(
+            and(
+              eq(previewCredentials.projectId, project.id),
+              eq(previewCredentials.previewId, params.previewId)
+            )
           )
-        );
+          .returning();
+        if (removed)
+          await recordEvent(tx, {
+            actorId: null,
+            projectId: project.id,
+            action: 'projects.preview.removed',
+            targetId: params.previewId,
+            metadata: {
+              previewId: params.previewId,
+              changes: contentChanges({ ...removed, available: true }, { available: false }, [
+                'branch',
+                'commit',
+                'previewUrl',
+                'available'
+              ])
+            }
+          });
+      });
       return { deleted: true };
     },
     { body: t.Object({ audience: t.String({ minLength: 1, maxLength: 200 }) }) }

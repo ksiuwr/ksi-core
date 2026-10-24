@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ContentHistory from '$lib/ContentHistory.svelte';
   import ArticleThumbnail from '$lib/ArticleThumbnail.svelte';
   import ChangeDetails from '@ksi-core/ui/platform/ChangeDetails.svelte';
   import ContentTranslations from '$lib/ContentTranslations.svelte';
@@ -1544,8 +1545,9 @@
                                   language === 'pl' ? 'pl-PL' : 'en-GB'
                                 )}</time
                               >{/if}
-                            {#if !archived && (comment.authorId === data.user.id || boardLeader)}
-                              <div class="comment-actions">
+                            <div class="comment-actions">
+                              <ContentHistory kind="comment" targetId={comment.id} {language} />
+                              {#if !archived && (comment.authorId === data.user.id || boardLeader)}
                                 <button
                                   type="button"
                                   class="icon-action-btn"
@@ -1573,8 +1575,8 @@
                                 >
                                   <Trash2 size={13} aria-hidden="true" />
                                 </button>
-                              </div>
-                            {/if}
+                              {/if}
+                            </div>
                           </div>
                           {#if editingCommentId === comment.id}
                             <form
@@ -2021,13 +2023,13 @@
                       <div class="event-meta">
                         <div>
                           <strong
-                            ><a
-                              href={`/members/${encodeURIComponent(event.event.actorId || '')}`}
-                              onclick={guardNavigation}
-                              >{event.firstName
-                                ? `${event.firstName} ${event.lastName}`
-                                : event.actorName || 'System'}</a
-                            ></strong
+                            >{#if event.event.actorId}<a
+                                href={`/members/${encodeURIComponent(event.event.actorId)}`}
+                                onclick={guardNavigation}
+                                >{event.firstName
+                                  ? `${event.firstName} ${event.lastName}`
+                                  : event.actorName || 'System'}</a
+                              >{:else}{'System'}{/if}</strong
                           >
                           {#if linkForAction(event.event.action, event.event.targetId, event.projectSlug)}
                             <a
@@ -2045,7 +2047,7 @@
                         </div>
                         {#if event.event.metadata && Object.keys(event.event.metadata).length > 0}
                           <div class="event-metadata">
-                            {#each Object.entries(event.event.metadata).filter(([key]) => key !== 'changes') as [key, val]}
+                            {#each Object.entries(event.event.metadata).filter(([key]) => key !== 'changes' && !(key === 'fields' && Array.isArray(event.event.metadata.changes))) as [key, val]}
                               {#if linkForMetadata(key, val, event.projectSlug)}
                                 <a
                                   class="meta-tag meta-link"
@@ -2159,10 +2161,13 @@
     border-bottom: 1px solid var(--line);
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
+    flex-wrap: wrap;
   }
   .event-meta {
+    flex: 1 1 480px;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     font-size: 13px;

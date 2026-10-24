@@ -276,6 +276,8 @@ msgstr "English"
 msgid "Appearance"
 msgstr "Appearance"
 
+#: src/lib/ContentHistory.svelte
+#: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "System"
@@ -845,6 +847,7 @@ msgstr "Withdraw request"
 msgid "The picture was declined. You can submit another."
 msgstr "The picture was declined. You can submit another."
 
+#: src/lib/ArticleThumbnail.svelte
 #: src/lib/AvatarUpload.svelte
 msgid "Uploading…"
 msgstr "Uploading…"
@@ -1767,3 +1770,139 @@ msgstr "ArrowDown"
 
 #~ msgid "All statuses"
 #~ msgstr "All statuses"
+
+#: src/lib/ContentHistory.svelte
+msgid "Historia zadania"
+msgstr "Historia zadania"
+
+#: src/lib/ContentHistory.svelte
+msgid "Task history"
+msgstr "Task history"
+
+#: src/lib/ContentHistory.svelte
+msgid "Historia komentarza"
+msgstr "Historia komentarza"
+
+#: src/lib/ContentHistory.svelte
+msgid "Comment history"
+msgstr "Comment history"
+
+#: src/lib/ContentHistory.svelte
+msgid "Utworzono"
+msgstr "Utworzono"
+
+#: src/lib/ContentHistory.svelte
+msgid "Created"
+msgstr "Created"
+
+#: src/lib/ContentHistory.svelte
+msgid "Zmieniono status"
+msgstr "Zmieniono status"
+
+#: src/lib/ContentHistory.svelte
+msgid "Status changed"
+msgstr "Status changed"
+
+#: src/lib/ContentHistory.svelte
+msgid "Edytowano"
+msgstr "Edytowano"
+
+#: src/lib/ContentHistory.svelte
+msgid "Edited"
+msgstr "Edited"
+
+#: src/lib/ContentHistory.svelte
+msgid "Sprawdź, co zmieniono i kto wprowadził zmiany."
+msgstr "Sprawdź, co zmieniono i kto wprowadził zmiany."
+
+#: src/lib/ContentHistory.svelte
+msgid "See what changed and who changed it."
+msgstr "See what changed and who changed it."
+
+#: src/lib/ContentHistory.svelte
+msgid "Zamknij historię"
+msgstr "Zamknij historię"
+
+#: src/lib/ContentHistory.svelte
+msgid "Close history"
+msgstr "Close history"
+
+#: src/lib/ContentHistory.svelte
+msgid "Od najnowszych"
+msgstr "Od najnowszych"
+
+#: src/lib/ContentHistory.svelte
+msgid "Newest first"
+msgstr "Newest first"
+
+#: src/lib/ContentHistory.svelte
+msgid "Dla tej starszej wersji nie zapisano szczegółów zmian."
+msgstr "Dla tej starszej wersji nie zapisano szczegółów zmian."
+
+#: src/lib/ContentHistory.svelte
+msgid "Detailed changes were not recorded for this older revision."
+msgstr "Detailed changes were not recorded for this older revision."
+
+#: src/lib/ContentHistory.svelte
+msgid "Bez zmian w treści."
+msgstr "Bez zmian w treści."
+
+#: src/lib/ContentHistory.svelte
+msgid "No content changes."
+msgstr "No content changes."
+
+#: src/lib/ContentHistory.svelte
+msgid "Wczytywanie historii…"
+msgstr "Wczytywanie historii…"
+
+#: src/lib/ContentHistory.svelte
+msgid "Loading history…"
+msgstr "Loading history…"
+
+#: src/lib/ContentHistory.svelte
+msgid "Nie udało się wczytać historii."
+msgstr "Nie udało się wczytać historii."
+
+#: src/lib/ContentHistory.svelte
+msgid "Could not load history."
+msgstr "Could not load history."
+
+#: src/lib/ContentHistory.svelte
+msgid "Spróbuj ponownie"
+msgstr "Spróbuj ponownie"
+
+#: src/lib/ContentHistory.svelte
+msgid "Try again"
+msgstr "Try again"
+
+#: src/lib/ContentHistory.svelte
+msgid "Brak zapisanych wersji"
+msgstr "Brak zapisanych wersji"
+
+#: src/lib/ContentHistory.svelte
+msgid "No revisions recorded"
+msgstr "No revisions recorded"
+
+#: src/lib/ContentHistory.svelte
+msgid "Nowe zmiany pojawią się tutaj po zapisaniu."
+msgstr "Nowe zmiany pojawią się tutaj po zapisaniu."
+
+#: src/lib/ContentHistory.svelte
+msgid "New changes will appear here when saved."
+msgstr "New changes will appear here when saved."
+
+#: src/lib/ContentHistory.svelte
+msgid "Pokaż starsze wersje"
+msgstr "Pokaż starsze wersje"
+
+#: src/lib/ContentHistory.svelte
+msgid "Load older revisions"
+msgstr "Load older revisions"
+
+#: src/lib/ContentHistory.svelte
+msgid "Historia jest widoczna dla osób z dostępem do tej treści."
+msgstr "Historia jest widoczna dla osób z dostępem do tej treści."
+
+#: src/lib/ContentHistory.svelte
+msgid "History is visible to everyone with access to this content."
+msgstr "History is visible to everyone with access to this content."

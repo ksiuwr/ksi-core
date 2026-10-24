@@ -1,3 +1,5 @@
+import { contentChanges, type ContentChange } from 'shared/activity';
+import { recordEvent } from '../../lib/audit';
 import { articleFileContent } from 'shared/content-locales';
 import { and, eq, inArray, isNull } from 'drizzle-orm';
 import { status, t } from 'elysia';
@@ -15,9 +17,7 @@ import {
   kanbanItems,
   projectMembers,
   threads,
-  users,
-  auditEvents,
-  outbox
+  users
 } from '../../db';
 import { createElysia, requirePermission } from '../../lib/createElysia';
 import {
@@ -309,13 +309,16 @@ async function recordFileEvent(
   actorId: string,
   action: string,
   fileId: string,
-  projectId: string | null = null
+  projectId: string | null,
+  changes: ContentChange[]
 ) {
-  const [event] = await transaction
-    .insert(auditEvents)
-    .values({ actorId, action, targetId: fileId, projectId })
-    .returning();
-  await transaction.insert(outbox).values({ eventId: event!.id });
+  await recordEvent(transaction, {
+    actorId,
+    action,
+    targetId: fileId,
+    projectId,
+    metadata: { changes }
+  });
 }
 export { referencedFileIds } from '../../lib/storage';
 /** Call inside the content mutation transaction, after content authorization. All writers lock the same file rows as garbage collection. */
@@ -405,7 +408,14 @@ export const filesRoutes = createElysia({ prefix: '/files' })
         await uploadPrivate(key, bytes, info.mime, info.filename);
         await db.transaction(async (tx) => {
           await tx.update(files).set({ state: 'private' }).where(eq(files.id, file!.id));
-          await recordFileEvent(tx, member.id, 'files.uploaded', file!.id);
+          await recordFileEvent(
+            tx,
+            member.id,
+            'files.uploaded',
+            file!.id,
+            null,
+            contentChanges({}, file!, ['filename', 'mime', 'size'])
+          );
         });
       } catch (e) {
         console.error('Storage Error:', e);
@@ -453,7 +463,7 @@ export const filesRoutes = createElysia({ prefix: '/files' })
           !(await referenceContainsFile(tx, body.ownerType, body.ownerId, file.id))
         )
           throw status(403, { code: 'FILE_REFERENCE_FORBIDDEN' });
-        await tx
+        const [added] = await tx
           .insert(fileReferences)
           .values({
             fileId: file.id,
@@ -461,9 +471,22 @@ export const filesRoutes = createElysia({ prefix: '/files' })
             ownerId: body.ownerId,
             public: access.public
           })
-          .onConflictDoNothing();
+          .onConflictDoNothing()
+          .returning();
         await tx.update(files).set({ orphanedAt: null }).where(eq(files.id, file.id));
-        await recordFileEvent(tx, member.id, 'files.reference-added', file.id, access.projectId);
+        if (added)
+          await recordFileEvent(
+            tx,
+            member.id,
+            'files.reference-added',
+            file.id,
+            access.projectId,
+            contentChanges(
+              {},
+              { reference: { ownerType: body.ownerType, ownerId: body.ownerId } },
+              ['reference']
+            )
+          );
         return { ok: true };
       });
     },
@@ -486,7 +509,7 @@ export const filesRoutes = createElysia({ prefix: '/files' })
         if (!access.edit) throw status(403, { code: 'FILE_REFERENCE_FORBIDDEN' });
         if (await referenceContainsFile(tx, body.ownerType, body.ownerId, file.id))
           throw status(409, { code: 'FILE_STILL_REFERENCED' });
-        await tx
+        const [removed] = await tx
           .delete(fileReferences)
           .where(
             and(
@@ -494,7 +517,8 @@ export const filesRoutes = createElysia({ prefix: '/files' })
               eq(fileReferences.ownerType, body.ownerType),
               eq(fileReferences.ownerId, body.ownerId)
             )
-          );
+          )
+          .returning();
         const [remaining] = await tx
           .select({ id: fileReferences.id })
           .from(fileReferences)
@@ -502,7 +526,19 @@ export const filesRoutes = createElysia({ prefix: '/files' })
           .limit(1);
         if (!remaining)
           await tx.update(files).set({ orphanedAt: new Date() }).where(eq(files.id, file.id));
-        await recordFileEvent(tx, member.id, 'files.reference-removed', file.id, access.projectId);
+        if (removed)
+          await recordFileEvent(
+            tx,
+            member.id,
+            'files.reference-removed',
+            file.id,
+            access.projectId,
+            contentChanges(
+              { reference: { ownerType: body.ownerType, ownerId: body.ownerId } },
+              {},
+              ['reference']
+            )
+          );
         return { ok: true };
       });
     },

@@ -1,3 +1,4 @@
+import { contentChanges } from 'shared/activity';
 import { and, eq, desc, sql } from 'drizzle-orm';
 import { status, t } from 'elysia';
 import { avatarRequests, users, files } from '../../db';
@@ -85,6 +86,11 @@ export const approvalRoutes = createElysia({ prefix: '/users', protectedRoute: t
             code: 'INVALID_AVATAR',
             message: 'Choose a JPEG, PNG, WebP, AVIF or GIF image up to 5 MiB.'
           });
+        const [previous] = await tx
+          .select()
+          .from(avatarRequests)
+          .where(eq(avatarRequests.userId, actor.id))
+          .for('update');
         const [request] = await tx
           .insert(avatarRequests)
           .values({ userId: actor.id, fileId: file.id })
@@ -104,7 +110,8 @@ export const approvalRoutes = createElysia({ prefix: '/users', protectedRoute: t
         await recordEvent(tx, {
           actorId: actor.id,
           action: 'users.avatar.requested',
-          targetId: actor.id
+          targetId: actor.id,
+          metadata: { changes: contentChanges(previous ?? {}, request!, ['fileId', 'state']) }
         });
         return request;
       });
@@ -130,7 +137,13 @@ export const approvalRoutes = createElysia({ prefix: '/users', protectedRoute: t
       await recordEvent(tx, {
         actorId: actor.id,
         action: 'users.avatar.withdrawn',
-        targetId: actor.id
+        targetId: actor.id,
+        metadata: {
+          changes: contentChanges(request, { state: 'withdrawn', fileId: null }, [
+            'fileId',
+            'state'
+          ])
+        }
       });
       return { ok: true };
     });
@@ -185,7 +198,18 @@ export const approvalRoutes = createElysia({ prefix: '/users', protectedRoute: t
         await recordEvent(tx, {
           actorId: actor.id,
           action: body.approved ? 'users.avatar.accepted' : 'users.avatar.declined',
-          targetId: target.id
+          targetId: target.id,
+          metadata: {
+            changes: contentChanges(
+              { ...request, image: target.image },
+              {
+                state: body.approved ? 'accepted' : 'declined',
+                fileId: null,
+                image: body.approved ? `/media/${request.fileId}` : target.image
+              },
+              ['state', 'fileId', 'image']
+            )
+          }
         });
         return { ok: true };
       });

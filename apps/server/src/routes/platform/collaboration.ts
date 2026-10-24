@@ -1,5 +1,10 @@
-import { contentChanges, taskChangeFields } from 'shared/activity';
-import { and, eq, desc, inArray, isNull, isNotNull, sql } from 'drizzle-orm';
+import {
+  contentChanges,
+  taskChangeFields,
+  hasContentChange,
+  type ContentChange
+} from 'shared/activity';
+import { and, eq, desc, inArray, isNull, isNotNull, sql, or, type SQL } from 'drizzle-orm';
 import { status, t } from 'elysia';
 import { syncFileReferences } from './files';
 import { createElysia, requirePermission } from '../../lib/createElysia';
@@ -55,7 +60,8 @@ async function persistStatuses(
     actorId,
     projectId: board.projectId,
     action: 'boards.statuses.updated',
-    targetId: board.id
+    targetId: board.id,
+    metadata: { changes: contentChanges(board, updated!, ['statuses']) }
   });
   return updated;
 }
@@ -107,6 +113,60 @@ async function validateInvitations(
     throw status(422, { code: 'INVALID_INVITATION' });
 }
 
+const revisionQuery = {
+  query: t.Object({ page: t.Optional(t.Numeric({ minimum: 0, maximum: 100000, multipleOf: 1 })) })
+};
+
+// Content readers can inspect revisions without gaining access to the administrative audit log.
+async function contentRevisions(
+  executor: Executor,
+  condition: SQL,
+  fields: readonly string[],
+  page = 0
+) {
+  const records = await executor
+    .select({
+      id: auditEvents.id,
+      createdAt: auditEvents.createdAt,
+      action: auditEvents.action,
+      metadata: auditEvents.metadata,
+      authorName: users.name
+    })
+    .from(auditEvents)
+    .leftJoin(users, eq(auditEvents.actorId, users.id))
+    .where(condition)
+    .orderBy(desc(auditEvents.createdAt), desc(auditEvents.id))
+    .limit(21)
+    .offset(page * 20);
+  return {
+    revisions: records.slice(0, 20).map((record) => ({
+      id: record.id,
+      createdAt: record.createdAt,
+      authorName: record.authorName,
+      kind: record.action.endsWith('.created')
+        ? 'created'
+        : record.action === 'kanban.reordered'
+          ? 'moved'
+          : 'edited',
+      changes: Array.isArray(record.metadata.changes)
+        ? record.metadata.changes
+            .filter(
+              (change: ContentChange) =>
+                change &&
+                fields.includes(change.field) &&
+                hasContentChange(change.before, change.after)
+            )
+            .map((change: ContentChange) => ({
+              field: change.field,
+              before: change.before,
+              after: change.after
+            }))
+        : null
+    })),
+    nextPage: records.length > 20 ? page + 1 : null
+  };
+}
+
 export default createElysia({ prefix: '/platform' })
   .get(
     '/boards',
@@ -138,7 +198,8 @@ export default createElysia({ prefix: '/platform' })
             actorId: actor.id,
             projectId: created.projectId,
             action: 'boards.created',
-            targetId: created.id
+            targetId: created.id,
+            metadata: { changes: contentChanges({}, created, ['statuses', 'labels']) }
           });
           return created;
         }
@@ -158,7 +219,12 @@ export default createElysia({ prefix: '/platform' })
       return db.transaction(async (tx) => {
         const { board, scope } = await boardScope(tx, params.id);
         requireLeader(actor, scope, 'projects.catalog.edit');
-        await tx.select().from(boards).where(eq(boards.id, board.id)).for('update');
+        const [current] = await tx
+          .select()
+          .from(boards)
+          .where(eq(boards.id, board.id))
+          .for('update');
+        if (!current) throw status(404, { code: 'BOARD_NOT_FOUND' });
         const items = await tx
           .select({ labels: kanbanItems.labels })
           .from(kanbanItems)
@@ -176,7 +242,8 @@ export default createElysia({ prefix: '/platform' })
           actorId: actor.id,
           projectId: board.projectId,
           action: 'boards.labels.updated',
-          targetId: board.id
+          targetId: board.id,
+          metadata: { changes: contentChanges(current, updated!, ['labels']) }
         });
         return updated;
       });
@@ -212,7 +279,8 @@ export default createElysia({ prefix: '/platform' })
           actorId: actor.id,
           projectId: board.projectId,
           action: 'boards.labels.updated',
-          targetId: board.id
+          targetId: board.id,
+          metadata: { changes: contentChanges(current, updated!, ['labels']) }
         });
         return updated;
       });
@@ -264,7 +332,8 @@ export default createElysia({ prefix: '/platform' })
           actorId: actor.id,
           projectId: board.projectId,
           action: 'boards.labels.updated',
-          targetId: board.id
+          targetId: board.id,
+          metadata: { changes: contentChanges(current, updated!, ['labels']) }
         });
         return updated;
       });
@@ -302,7 +371,8 @@ export default createElysia({ prefix: '/platform' })
         actorId: actor.id,
         projectId: board.projectId,
         action: 'boards.labels.updated',
-        targetId: board.id
+        targetId: board.id,
+        metadata: { changes: contentChanges(current, updated!, ['labels']) }
       });
       return updated;
     });
@@ -314,8 +384,13 @@ export default createElysia({ prefix: '/platform' })
       return db.transaction(async (tx) => {
         const { board, scope } = await boardScope(tx, params.id);
         requireLeader(actor, scope, 'projects.catalog.edit');
-        await tx.select().from(boards).where(eq(boards.id, board.id)).for('update');
-        return persistStatuses(tx, board, body.statuses, actor.id);
+        const [current] = await tx
+          .select()
+          .from(boards)
+          .where(eq(boards.id, board.id))
+          .for('update');
+        if (!current) throw status(404, { code: 'BOARD_NOT_FOUND' });
+        return persistStatuses(tx, current, body.statuses, actor.id);
       });
     },
     {
@@ -469,7 +544,26 @@ export default createElysia({ prefix: '/platform' })
             boardId: board.id,
             column: body.column,
             ...(body.move ? { fromColumn: body.move.fromColumn, itemId: body.move.id } : {}),
-            itemIds: body.items.map((item) => item.id)
+            itemIds: body.items.map((item) => item.id),
+            changes: [
+              ...(body.move
+                ? contentChanges(
+                    current.find((item) => item.id === body.move!.id)!,
+                    result.find((item) => item.id === body.move!.id)!,
+                    taskChangeFields
+                  )
+                : []),
+              ...contentChanges(
+                {
+                  order: current
+                    .filter((item) => item.column === body.column)
+                    .sort((a, b) => a.position - b.position || a.id.localeCompare(b.id))
+                    .map((item) => item.id)
+                },
+                { order: body.items.map((item) => item.id) },
+                ['order']
+              )
+            ]
           }
         });
         return result;
@@ -517,7 +611,12 @@ export default createElysia({ prefix: '/platform' })
           projectId: board.projectId,
           action: 'kanban.created',
           targetId: item.id,
-          metadata: { boardId: board.id, itemId: item.id, version: item.version }
+          metadata: {
+            boardId: board.id,
+            itemId: item.id,
+            version: item.version,
+            changes: contentChanges({}, item, taskChangeFields)
+          }
         });
         return item;
       });
@@ -612,7 +711,12 @@ export default createElysia({ prefix: '/platform' })
           projectId: board.projectId,
           action: 'kanban.tombstoned',
           targetId: item.id,
-          metadata: { boardId: board.id, itemId: item.id, version: updated.version }
+          metadata: {
+            boardId: board.id,
+            itemId: item.id,
+            version: updated.version,
+            changes: contentChanges(item, updated, ['deletedAt'])
+          }
         });
         return updated;
       });
@@ -650,12 +754,70 @@ export default createElysia({ prefix: '/platform' })
           projectId: board.projectId,
           action: 'kanban.restored',
           targetId: item.id,
-          metadata: { boardId: board.id, itemId: item.id, version: updated.version }
+          metadata: {
+            boardId: board.id,
+            itemId: item.id,
+            version: updated.version,
+            changes: contentChanges(item, updated, ['deletedAt'])
+          }
         });
         return updated;
       });
     },
     { body: t.Object({ version: t.Integer({ minimum: 1 }) }) }
+  )
+  .get(
+    '/items/:id/revisions',
+    async ({ db, user, params, query }) => {
+      const actor = active(user);
+      const { item, scope } = await itemScope(db, params.id);
+      if (item.deletedAt) requireLeader(actor, scope, 'collaboration.items.restore');
+      return contentRevisions(
+        db,
+        or(
+          and(
+            eq(auditEvents.targetId, item.id),
+            inArray(auditEvents.action, ['kanban.created', 'kanban.updated'])
+          ),
+          and(
+            eq(auditEvents.action, 'kanban.reordered'),
+            sql`${auditEvents.metadata}->>'itemId' = ${item.id}`
+          )
+        )!,
+        ['title', 'markdown', 'labels', 'column'],
+        query.page
+      );
+    },
+    revisionQuery
+  )
+  .get(
+    '/comments/:id/revisions',
+    async ({ db, user, params, query }) => {
+      const actor = active(user);
+      const [comment] = await db.select().from(comments).where(eq(comments.id, params.id));
+      if (!comment || comment.deletedAt) throw status(404, { code: 'COMMENT_NOT_FOUND' });
+      if (comment.threadId) {
+        const { thread, scope } = await threadScope(db, comment.threadId);
+        assertThreadRead(actor, thread, scope);
+      } else if (comment.itemId) {
+        const { item, scope } = await itemScope(db, comment.itemId);
+        if (item.deletedAt) requireLeader(actor, scope, 'collaboration.items.restore');
+      } else throw status(404, { code: 'COMMENT_NOT_FOUND' });
+      return contentRevisions(
+        db,
+        and(
+          eq(auditEvents.targetId, comment.id),
+          inArray(auditEvents.action, [
+            'comments.edited',
+            'kanban.comment.created',
+            'threads.comment.created'
+          ])
+        )!,
+        ['markdown'],
+        query.page
+      );
+    },
+    revisionQuery
   )
   .get('/items/:id/comments', async ({ db, user, params }) => {
     const actor = active(user);
@@ -698,7 +860,11 @@ export default createElysia({ prefix: '/platform' })
           projectId: board.projectId,
           action: 'kanban.comment.created',
           targetId: comment.id,
-          metadata: { itemId: item.id, boardId: board.id }
+          metadata: {
+            itemId: item.id,
+            boardId: board.id,
+            changes: contentChanges({}, comment, ['markdown'])
+          }
         });
         return comment;
       });
@@ -769,7 +935,16 @@ export default createElysia({ prefix: '/platform' })
           projectId: thread.projectId,
           action: 'threads.created',
           targetId: thread.id,
-          metadata: { threadId: thread.id, version: thread.version }
+          metadata: {
+            threadId: thread.id,
+            version: thread.version,
+            changes: contentChanges({}, { ...thread, markdown: body.markdown }, [
+              'title',
+              'markdown',
+              'visibility',
+              'invitedIds'
+            ])
+          }
         });
         return thread;
       });
@@ -834,7 +1009,11 @@ export default createElysia({ prefix: '/platform' })
           projectId: thread.projectId,
           action: 'threads.access.updated',
           targetId: thread.id,
-          metadata: { threadId: thread.id, version: updated.version }
+          metadata: {
+            threadId: thread.id,
+            version: updated.version,
+            changes: contentChanges(thread, updated, ['visibility', 'invitedIds', 'archivedAt'])
+          }
         });
         return updated;
       });
@@ -868,7 +1047,11 @@ export default createElysia({ prefix: '/platform' })
           projectId: thread.projectId,
           action: body.archived ? 'threads.archived' : 'threads.restored',
           targetId: thread.id,
-          metadata: { threadId: thread.id, version: updated.version }
+          metadata: {
+            threadId: thread.id,
+            version: updated.version,
+            changes: contentChanges(thread, updated, ['visibility', 'invitedIds', 'archivedAt'])
+          }
         });
         return updated;
       });
@@ -906,7 +1089,7 @@ export default createElysia({ prefix: '/platform' })
           projectId: thread.projectId,
           action: 'threads.comment.created',
           targetId: comment.id,
-          metadata: { threadId: thread.id }
+          metadata: { threadId: thread.id, changes: contentChanges({}, comment, ['markdown']) }
         });
         return comment;
       });
@@ -926,6 +1109,9 @@ export default createElysia({ prefix: '/platform' })
         if (!comment || comment.deletedAt) throw status(404, { code: 'COMMENT_NOT_FOUND' });
 
         let projectId: string | null = null;
+        const metadata: Record<string, unknown> = {
+          changes: contentChanges(comment, body, ['markdown'])
+        };
         if (comment.threadId) {
           const { thread, scope } = await threadScope(tx, comment.threadId);
           assertThreadRead(actor, thread, scope);
@@ -934,6 +1120,7 @@ export default createElysia({ prefix: '/platform' })
           else assertContribute(actor, scope);
           if (thread.archivedAt) throw status(409, { code: 'THREAD_ARCHIVED' });
           projectId = thread.projectId;
+          metadata.threadId = thread.id;
         } else if (comment.itemId) {
           const { item, board, scope } = await itemScope(tx, comment.itemId);
           if (comment.authorId !== actor.id)
@@ -941,20 +1128,25 @@ export default createElysia({ prefix: '/platform' })
           else assertContribute(actor, scope);
           if (item.deletedAt) throw status(409, { code: 'ITEM_DELETED' });
           projectId = board.projectId;
+          metadata.boardId = board.id;
+          metadata.itemId = item.id;
         } else throw status(409, { code: 'INVALID_COMMENT' });
 
-        await tx
+        const [updated] = await tx
           .update(comments)
           .set({ markdown: body.markdown })
-          .where(eq(comments.id, comment.id));
+          .where(eq(comments.id, comment.id))
+          .returning();
         await syncFileReferences(tx, 'comment', comment.id, body.markdown, actor);
 
         await recordEvent(tx, {
           actorId: actor.id,
           projectId,
           action: 'comments.edited',
-          targetId: comment.id
+          targetId: comment.id,
+          metadata
         });
+        return updated;
       });
     },
     { body: t.Object({ markdown }) }
@@ -969,7 +1161,9 @@ export default createElysia({ prefix: '/platform' })
         .for('update');
       if (!comment || comment.deletedAt) throw status(404, { code: 'COMMENT_NOT_FOUND' });
       let projectId: string | null = null;
-      const metadata: Record<string, unknown> = {};
+      const metadata: Record<string, unknown> = {
+        changes: contentChanges(comment, { markdown: null }, ['markdown'])
+      };
       if (comment.threadId) {
         const { thread, scope } = await threadScope(tx, comment.threadId);
         assertThreadRead(actor, thread, scope);
@@ -987,6 +1181,7 @@ export default createElysia({ prefix: '/platform' })
         if (item.deletedAt) throw status(409, { code: 'ITEM_DELETED' });
         projectId = board.projectId;
         metadata.itemId = item.id;
+        metadata.boardId = board.id;
       } else throw status(409, { code: 'INVALID_COMMENT' });
       await tx.update(comments).set({ deletedAt: new Date() }).where(eq(comments.id, comment.id));
       await recordEvent(tx, {

@@ -276,6 +276,8 @@ msgstr "English"
 msgid "Appearance"
 msgstr "Wygląd"
 
+#: src/lib/ContentHistory.svelte
+#: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "System"
@@ -845,6 +847,7 @@ msgstr "Wycofaj prośbę"
 msgid "The picture was declined. You can submit another."
 msgstr "Zdjęcie zostało odrzucone. Możesz przesłać inne."
 
+#: src/lib/ArticleThumbnail.svelte
 #: src/lib/AvatarUpload.svelte
 msgid "Uploading…"
 msgstr "Przesyłanie…"
@@ -1767,3 +1770,139 @@ msgstr ""
 
 #~ msgid "All statuses"
 #~ msgstr "Wszystkie statusy"
+
+#: src/lib/ContentHistory.svelte
+msgid "Historia zadania"
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Task history"
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Historia komentarza"
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Comment history"
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Utworzono"
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Created"
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Zmieniono status"
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Status changed"
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Edytowano"
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Edited"
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Sprawdź, co zmieniono i kto wprowadził zmiany."
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "See what changed and who changed it."
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Zamknij historię"
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Close history"
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Od najnowszych"
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Newest first"
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Dla tej starszej wersji nie zapisano szczegółów zmian."
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Detailed changes were not recorded for this older revision."
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Bez zmian w treści."
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "No content changes."
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Wczytywanie historii…"
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Loading history…"
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Nie udało się wczytać historii."
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Could not load history."
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Spróbuj ponownie"
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Try again"
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Brak zapisanych wersji"
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "No revisions recorded"
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Nowe zmiany pojawią się tutaj po zapisaniu."
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "New changes will appear here when saved."
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Pokaż starsze wersje"
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Load older revisions"
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "Historia jest widoczna dla osób z dostępem do tej treści."
+msgstr ""
+
+#: src/lib/ContentHistory.svelte
+msgid "History is visible to everyone with access to this content."
+msgstr ""

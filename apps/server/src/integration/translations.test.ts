@@ -223,4 +223,16 @@ describe.skipIf(!safe)('public content translations', () => {
       )
     ).toBe(true);
   });
+  test('translation events retain changed content and the edited locale', async () => {
+    const events = await db.select().from(auditEvents).where(eq(auditEvents.actorId, leader));
+    for (const [action, expected] of [
+      ['projects.translation.updated', { field: 'name', before: null, after: 'Robotyka' }],
+      ['articles.translation.updated', { field: 'title', before: null, after: 'Poradnik' }]
+    ] as const) {
+      const matching = events.filter((record) => record.action === action);
+      expect(matching.length).toBeGreaterThan(0);
+      expect(matching.every((event) => event.metadata.locale === 'pl')).toBe(true);
+      expect(matching.flatMap((event) => event.metadata.changes)).toContainEqual(expected);
+    }
+  });
 });

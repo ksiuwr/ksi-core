@@ -1,5 +1,6 @@
 <script lang="ts">
   import { tick } from 'svelte';
+  import ContentHistory from './ContentHistory.svelte';
   import { flip } from 'svelte/animate';
   import { prefersReducedMotion } from 'svelte/motion';
   import {
@@ -1260,9 +1261,12 @@
         </div>
         <h2 id="issue-title">{selected.title}</h2>
       </div>
-      <button type="button" class="icon-button" aria-label={'Close task'} onclick={closeItem}
-        ><X size={20} aria-hidden="true" /></button
-      >
+      <div class="issue-heading-actions">
+        <ContentHistory kind="task" targetId={selected.id} {language} />
+        <button type="button" class="icon-button" aria-label={'Close task'} onclick={closeItem}
+          ><X size={20} aria-hidden="true" /></button
+        >
+      </div>
     </div>
     <div class="issue-tools">
       <Dropdown
@@ -1377,8 +1381,9 @@
                   language === 'pl' ? 'pl-PL' : 'en-GB'
                 )}</time
               >
-              {#if comment.authorId === userId || canManage}
-                <div class="comment-actions">
+              <div class="comment-actions">
+                <ContentHistory kind="comment" targetId={comment.id} {language} />
+                {#if comment.authorId === userId || canManage}
                   <button
                     type="button"
                     class="icon-action-btn"
@@ -1398,8 +1403,8 @@
                   >
                     <Trash2 size={13} aria-hidden="true" />
                   </button>
-                </div>
-              {/if}
+                {/if}
+              </div>
             </div>
             {#if editingCommentId === comment.id}
               <form
@@ -1914,6 +1919,12 @@
     gap: 16px;
     margin-bottom: 20px;
   }
+  .issue-heading-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
   .issue-heading h2 {
     font-size: 24px;
     margin-top: 10px;
@@ -2047,6 +2058,7 @@
     }
   }
   .comment-actions {
+    align-items: center;
     display: flex;
     gap: 4px;
     margin-left: auto;
