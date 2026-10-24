@@ -6,6 +6,8 @@
   import ArticleThumbnail from '$lib/ArticleThumbnail.svelte';
   import ChangeDetails from '@ksi-core/ui/platform/ChangeDetails.svelte';
   import Assignees, { type AssignmentMember } from '$lib/Assignees.svelte';
+  import NotificationInbox from '$lib/NotificationInbox.svelte';
+  import WatchButton from '$lib/WatchButton.svelte';
   import ContentTranslations from '$lib/ContentTranslations.svelte';
   import type { ContentTranslations as TranslationData } from 'shared/content-locales';
   import { onMount, untrack, tick } from 'svelte';
@@ -1062,6 +1064,7 @@
           ><span aria-hidden="true">/</span><strong>{viewName}</strong>
         </div>
         <div class="topbar-controls">
+          <NotificationInbox {language} />
           {#if data.user.role !== 'member'}<a
               class="icon-button inbox-link"
               href="/inbox"
@@ -1644,6 +1647,7 @@
                       <h1 style="font-size:clamp(24px,3vw,36px);margin-bottom:24px">
                         {selectedThread.title}
                       </h1>
+                      <WatchButton type="thread" id={selectedThread.id} {language} />
                       <Assignees
                         projectId={scope}
                         value={selectedThread.assigneeIds ?? []}

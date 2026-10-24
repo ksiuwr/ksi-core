@@ -433,3 +433,46 @@ export const avatarRequests = snakeCase.table('avatar_requests', {
   reviewedAt: timestamp(),
   reviewedBy: text().references(() => users.id)
 });
+
+export const subscriptions = snakeCase.table(
+  'subscriptions',
+  {
+    id: text().primaryKey().$defaultFn(createId),
+    userId: text()
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    ownerType: text().notNull(),
+    ownerId: text().notNull(),
+    createdAt: timestamp().notNull().defaultNow()
+  },
+  (t) => [uniqueIndex('subscription_owner_user_unique').on(t.ownerType, t.ownerId, t.userId)]
+);
+export const notifications = snakeCase.table(
+  'notifications',
+  {
+    id: text().primaryKey().$defaultFn(createId),
+    userId: text()
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    eventId: text()
+      .notNull()
+      .references(() => auditEvents.id, { onDelete: 'cascade' }),
+    ownerType: text().notNull(),
+    ownerId: text().notNull(),
+    reason: text().notNull(),
+    createdAt: timestamp().notNull().defaultNow(),
+    readAt: timestamp(),
+    emailQueuedAt: timestamp()
+  },
+  (t) => [
+    uniqueIndex('notification_event_user_unique').on(t.eventId, t.userId),
+    index('notification_user_created_idx').on(t.userId, t.createdAt)
+  ]
+);
+export const notificationPreferences = snakeCase.table('notification_preferences', {
+  userId: text()
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  emailEnabled: boolean().notNull().default(false),
+  emailDelayMinutes: integer().notNull().default(60)
+});

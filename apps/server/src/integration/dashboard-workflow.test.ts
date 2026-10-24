@@ -1,3 +1,4 @@
+import { queueNotificationMailBatch } from '../services/notifications';
 import { beforeAll, afterAll, describe, expect, test } from 'bun:test';
 import { eq, inArray } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
@@ -11,6 +12,7 @@ import {
   frontendSessions,
   boards,
   kanbanItems,
+  notifications,
   threads,
   comments,
   files,
@@ -685,6 +687,97 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
     await db.delete(comments).where(eq(comments.threadId, thread.body.id));
     await db.delete(threads).where(eq(threads.id, thread.body.id));
     await db.delete(kanbanItems).where(eq(kanbanItems.id, task.body.id));
+  });
+  test('notifications persist mentions, assignments, watches, read state and delayed email without restricted-thread leaks', async () => {
+    const task = await request('admin', `/platform/boards/${boardId}/items`, 'POST', {
+      title: 'Notification task',
+      markdown: `Hello [@outsider](/members/${ids.outsider})`,
+      column: 'todo',
+      tags: [],
+      position: 0,
+      assigneeIds: [ids.member]
+    });
+    expect(task.status).toBe(200);
+    const memberInbox = await request('member', '/notifications');
+    expect(memberInbox.body.find((n: any) => n.ownerId === task.body.id).reason).toBe('assignment');
+    const mention = (await request('outsider', '/notifications')).body.find(
+      (n: any) => n.ownerId === task.body.id
+    );
+    expect(mention.reason).toBe('mention');
+    expect(mention.href).toBe(`/projects/${projectId}/kanban?item=${task.body.id}`);
+    expect(
+      (await request('admin', '/notifications')).body.some((n: any) => n.ownerId === task.body.id)
+    ).toBe(false);
+    expect((await request('member', `/notifications/${mention.id}/read`, 'POST')).status).toBe(404);
+    expect((await request('outsider', `/notifications/${mention.id}/read`, 'POST')).status).toBe(
+      200
+    );
+    expect(
+      (await request('outsider', '/notifications')).body.find((n: any) => n.id === mention.id)
+        .readAt
+    ).not.toBeNull();
+    await request('outsider', `/notifications/subscriptions/item/${task.body.id}`, 'PUT', {
+      watching: true
+    });
+    await request('admin', `/platform/items/${task.body.id}`, 'PATCH', {
+      version: 1,
+      title: 'Notification task updated'
+    });
+    const unread = (await request('outsider', '/notifications')).body.find(
+      (n: any) => n.ownerId === task.body.id && !n.readAt
+    );
+    expect(unread.reason).toBe('update');
+    expect(
+      (
+        await request('outsider', '/notifications/preferences', 'PUT', {
+          emailEnabled: true,
+          emailDelayMinutes: 60
+        })
+      ).status
+    ).toBe(200);
+    await db.update(users).set({ emailVerified: true }).where(eq(users.id, ids.outsider));
+    expect(await queueNotificationMailBatch()).toBe(0);
+    await db
+      .update(notifications)
+      .set({ createdAt: new Date(Date.now() - 7200000) })
+      .where(eq(notifications.id, unread.id));
+    expect(await queueNotificationMailBatch()).toBe(1);
+    expect(await queueNotificationMailBatch()).toBe(0);
+    const mail = await db
+      .select()
+      .from(mailJobs)
+      .where(eq(mailJobs.to, `${ids.outsider}@example.test`));
+    expect(mail.some((job) => job.subject === 'KSI: Notification task updated')).toBe(true);
+    await request('outsider', '/notifications/read-all', 'POST');
+    expect((await request('outsider', '/notifications')).body.every((n: any) => !!n.readAt)).toBe(
+      true
+    );
+    await request('outsider', `/notifications/subscriptions/item/${task.body.id}`, 'PUT', {
+      watching: false
+    });
+    expect(
+      (await request('outsider', `/notifications/subscriptions/item/${task.body.id}`)).body.watching
+    ).toBe(false);
+    const thread = await request('admin', '/platform/threads', 'POST', {
+      title: 'Restricted notification',
+      markdown: `Hello [@outsider](/members/${ids.outsider})`,
+      visibility: 'leaders',
+      invitedIds: []
+    });
+    expect(thread.status).toBe(200);
+    expect(
+      (await request('outsider', '/notifications')).body.some(
+        (n: any) => n.ownerId === thread.body.id
+      )
+    ).toBe(false);
+    expect(
+      (await request('outsider', `/notifications/subscriptions/thread/${thread.body.id}`)).status
+    ).toBe(404);
+    expect((await request('pending', '/notifications')).status).toBe(403);
+    await db.delete(comments).where(eq(comments.threadId, thread.body.id));
+    await db.delete(threads).where(eq(threads.id, thread.body.id));
+    await db.delete(kanbanItems).where(eq(kanbanItems.id, task.body.id));
+    await db.delete(mailJobs).where(eq(mailJobs.to, `${ids.outsider}@example.test`));
   });
   test('administrator email changes revoke access and require verification; recovery stays private', async () => {
     const id = createId(),

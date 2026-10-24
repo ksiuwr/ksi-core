@@ -1,3 +1,4 @@
+import { notificationRoutes } from './routes/platform/notifications';
 import { translationRoutes } from './routes/platform/translations';
 import { Elysia, status, t } from 'elysia';
 import { renderMarkdown } from 'shared/markdown';
@@ -63,6 +64,7 @@ export const app = new Elysia()
   .use(content)
   .use(translationRoutes)
   .use(collaboration)
+  .use(notificationRoutes)
   .use(filesRoutes)
   .use(previewCredentialRoutes)
   .use(realtimeRoutes)
