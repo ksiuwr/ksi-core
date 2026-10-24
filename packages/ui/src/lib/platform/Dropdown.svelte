@@ -25,6 +25,8 @@
     variant = 'default',
     onselect,
     leading,
+    panelContent,
+    footer,
     indicator
   }: {
     value?: string;
@@ -39,6 +41,8 @@
     variant?: 'default' | 'workspace' | 'compact';
     onselect?: (value: string) => void;
     leading?: Snippet;
+    panelContent?: Snippet<[close: () => void]>;
+    footer?: Snippet<[close: () => void]>;
     indicator?: string;
   } = $props();
   const uid = $props.id();
@@ -70,13 +74,19 @@
     const width = Math.min(
       Math.max(
         rect.width,
-        variant === 'workspace' ? 290 : options.some((option) => option.description) ? 320 : 220
+        panelContent
+          ? 360
+          : variant === 'workspace'
+            ? 290
+            : options.some((option) => option.description)
+              ? 320
+              : 220
       ),
       window.innerWidth - 24
     );
     const below = window.innerHeight - rect.bottom - 16;
     const above = rect.top - 16;
-    const height = Math.min(340, Math.max(below, above));
+    const height = Math.min(panelContent ? 480 : 340, Math.max(below, above));
     const upward = below < Math.min(260, panel.scrollHeight) && above > below;
     position = {
       left: Math.max(12, Math.min(rect.left, window.innerWidth - width - 12)),
@@ -96,7 +106,12 @@
     open = true;
     await tick();
     place();
-    (searchable ? search : list)?.focus();
+    (panelContent
+      ? panel?.querySelector<HTMLElement>('button, input, [tabindex]')
+      : searchable
+        ? search
+        : list
+    )?.focus();
     reveal();
   }
   function close(focus = false) {
@@ -124,7 +139,7 @@
       return;
     }
     if (event.key === 'Tab') {
-      close();
+      if (!footer) close();
       return;
     }
     if (['ArrowDown', 'ArrowUp'].includes(event.key)) {
@@ -146,6 +161,19 @@
         document.getElementById(`${uid}-option-${active}`)?.click();
     }
   }
+  $effect(() => {
+    void panelContent;
+    if (open)
+      void tick().then(() => {
+        place();
+        (panelContent
+          ? panel?.querySelector<HTMLElement>('button, input, [tabindex]')
+          : searchable
+            ? search
+            : list
+        )?.focus();
+      });
+  });
   onMount(() => {
     const update = () => {
       if (open) place();
@@ -171,8 +199,8 @@
     class="dropdown-trigger"
     {disabled}
     aria-label={label}
-    aria-haspopup="listbox"
-    aria-controls={listId}
+    aria-haspopup={panelContent ? 'dialog' : 'listbox'}
+    aria-controls={panelContent ? `${uid}-content` : listId}
     aria-expanded={open}
     onclick={() => (open ? close(true) : void show())}
     onkeydown={(event) => {
@@ -206,94 +234,103 @@
       open = event.newState === 'open';
     }}
   >
-    {#if searchable}
-      <div class="dropdown-search">
-        <Search size={16} aria-hidden="true" />
-        <input
-          bind:this={search}
-          type="search"
-          role="combobox"
-          aria-label={searchPlaceholder}
-          placeholder={searchPlaceholder}
-          aria-autocomplete="list"
-          aria-expanded={open}
-          aria-controls={listId}
-          aria-activedescendant={filtered.length ? `${uid}-option-${active}` : undefined}
-          bind:value={query}
-          oninput={() => (active = 0)}
-          onkeydown={keys}
-        />
+    {#if panelContent}
+      <div id="{uid}-content" class="dropdown-content" role="dialog" aria-label={label}>
+        {@render panelContent(() => close(true))}
+      </div>
+    {:else}
+      {#if searchable}
+        <div class="dropdown-search">
+          <Search size={16} aria-hidden="true" />
+          <input
+            bind:this={search}
+            type="search"
+            role="combobox"
+            aria-label={searchPlaceholder}
+            placeholder={searchPlaceholder}
+            aria-autocomplete="list"
+            aria-expanded={open}
+            aria-controls={listId}
+            aria-activedescendant={filtered.length ? `${uid}-option-${active}` : undefined}
+            bind:value={query}
+            oninput={() => (active = 0)}
+            onkeydown={keys}
+          />
+        </div>
+      {/if}
+      <div
+        bind:this={list}
+        id={listId}
+        class="dropdown-options"
+        role="listbox"
+        aria-label={label}
+        tabindex={searchable ? -1 : 0}
+        aria-activedescendant={filtered.length ? `${uid}-option-${active}` : undefined}
+        onkeydown={keys}
+      >
+        {#each filtered as option, index (option.value)}
+          {#if option.href}
+            <a
+              href={option.href}
+              class="dropdown-option"
+              class:highlighted={active === index}
+              id="{uid}-option-{index}"
+              role="option"
+              aria-selected={option.value === value}
+              aria-disabled={option.disabled || disabled}
+              tabindex="-1"
+              onpointermove={() => (active = index)}
+              onclick={(event) => choose(option, event)}
+            >
+              <span
+                ><span
+                  >{#if option.color}<span class="color-dot" style:background={option.color}
+                    ></span>{/if}{option.label}</span
+                >{#if option.description}<small>{option.description}</small>{/if}</span
+              >
+              {#if option.indicator}<span
+                  class="notification-dot"
+                  role="img"
+                  aria-label={option.indicator}
+                  title={option.indicator}
+                ></span>{/if}
+              {#if option.value === value}<Check size={16} aria-hidden="true" />{/if}
+            </a>
+          {:else}
+            <button
+              type="button"
+              class="dropdown-option"
+              class:highlighted={active === index}
+              id="{uid}-option-{index}"
+              role="option"
+              aria-selected={option.value === value}
+              disabled={option.disabled || disabled}
+              tabindex="-1"
+              onpointermove={() => (active = index)}
+              onclick={() => choose(option)}
+            >
+              <span
+                ><span
+                  >{#if option.color}<span class="color-dot" style:background={option.color}
+                    ></span>{/if}{option.label}</span
+                >{#if option.description}<small>{option.description}</small>{/if}</span
+              >
+              {#if option.indicator}<span
+                  class="notification-dot"
+                  role="img"
+                  aria-label={option.indicator}
+                  title={option.indicator}
+                ></span>{/if}
+              {#if option.value === value}<Check size={16} aria-hidden="true" />{/if}
+            </button>
+          {/if}
+        {/each}
+        {#if !filtered.length}<p class="dropdown-empty" role="status">{emptyLabel}</p>{/if}
       </div>
     {/if}
-    <div
-      bind:this={list}
-      id={listId}
-      class="dropdown-options"
-      role="listbox"
-      aria-label={label}
-      tabindex={searchable ? -1 : 0}
-      aria-activedescendant={filtered.length ? `${uid}-option-${active}` : undefined}
-      onkeydown={keys}
-    >
-      {#each filtered as option, index (option.value)}
-        {#if option.href}
-          <a
-            href={option.href}
-            class="dropdown-option"
-            class:highlighted={active === index}
-            id="{uid}-option-{index}"
-            role="option"
-            aria-selected={option.value === value}
-            aria-disabled={option.disabled || disabled}
-            tabindex="-1"
-            onpointermove={() => (active = index)}
-            onclick={(event) => choose(option, event)}
-          >
-            <span
-              ><span
-                >{#if option.color}<span class="color-dot" style:background={option.color}
-                  ></span>{/if}{option.label}</span
-              >{#if option.description}<small>{option.description}</small>{/if}</span
-            >
-            {#if option.indicator}<span
-                class="notification-dot"
-                role="img"
-                aria-label={option.indicator}
-                title={option.indicator}
-              ></span>{/if}
-            {#if option.value === value}<Check size={16} aria-hidden="true" />{/if}
-          </a>
-        {:else}
-          <button
-            type="button"
-            class="dropdown-option"
-            class:highlighted={active === index}
-            id="{uid}-option-{index}"
-            role="option"
-            aria-selected={option.value === value}
-            disabled={option.disabled || disabled}
-            tabindex="-1"
-            onpointermove={() => (active = index)}
-            onclick={() => choose(option)}
-          >
-            <span
-              ><span
-                >{#if option.color}<span class="color-dot" style:background={option.color}
-                  ></span>{/if}{option.label}</span
-              >{#if option.description}<small>{option.description}</small>{/if}</span
-            >
-            {#if option.indicator}<span
-                class="notification-dot"
-                role="img"
-                aria-label={option.indicator}
-                title={option.indicator}
-              ></span>{/if}
-            {#if option.value === value}<Check size={16} aria-hidden="true" />{/if}
-          </button>
-        {/if}
-      {/each}
-      {#if !filtered.length}<p class="dropdown-empty" role="status">{emptyLabel}</p>{/if}
-    </div>
+    {#if footer}
+      <div class="dropdown-footer">{@render footer(() => close(true))}</div>
+    {/if}
   </div>
 </div>
 
@@ -408,6 +445,16 @@
   }
   .dropdown-search:focus-within {
     border-color: var(--accent);
+  }
+  .dropdown-content {
+    min-height: 0;
+    overflow: auto;
+  }
+  .dropdown-footer {
+    flex-shrink: 0;
+    border-top: 1px solid var(--line, #dcd8d0);
+    margin-top: 5px;
+    padding: 5px 0 0;
   }
   .dropdown-options {
     min-height: 0;

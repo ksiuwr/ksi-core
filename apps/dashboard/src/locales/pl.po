@@ -666,6 +666,7 @@ msgstr "Status zadania"
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
 #: src/lib/Members.svelte
 #: src/lib/Members.svelte
 #: src/lib/ProjectSettings.svelte
@@ -693,9 +694,12 @@ msgstr "Usunięte statusy"
 
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
 msgid "Close"
 msgstr "Zamknij"
 
+#: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 msgid "Color"
 msgstr "Kolor"
@@ -1654,49 +1658,95 @@ msgid "Remove thumbnail"
 msgstr "Usuń miniaturę"
 
 #: src/lib/KanbanBoard.svelte
-msgid "Filtruj według tagów"
-msgstr ""
+msgid "Clear filter"
+msgstr "Wyczyść filtr"
 
 #: src/lib/KanbanBoard.svelte
-msgid "Filter by tags"
-msgstr ""
+msgid "Description (optional)"
+msgstr "Opis (opcjonalny)"
 
 #: src/lib/KanbanBoard.svelte
-msgid "Wyczyść filtry"
-msgstr ""
+msgid "Preview"
+msgstr "Podgląd"
 
 #: src/lib/KanbanBoard.svelte
-msgid "Clear filters"
-msgstr ""
+msgid "Brief description"
+msgstr "Krótki opis przeznaczenia etykiety"
 
 #: src/lib/KanbanBoard.svelte
-msgid "Zarządzaj tagami"
-msgstr ""
+msgid "All labels"
+msgstr "Wszystkie etykiety"
 
 #: src/lib/KanbanBoard.svelte
-msgid "Manage tags"
-msgstr ""
+msgid "A label with this name already exists."
+msgstr "Etykieta o tej nazwie już istnieje."
 
 #: src/lib/KanbanBoard.svelte
-msgid "Tagi (jeden w wierszu)"
-msgstr ""
+msgid "Invalid label or name already in use."
+msgstr "Nieprawidłowa etykieta lub nazwa jest już używana."
 
 #: src/lib/KanbanBoard.svelte
-msgid "Tags (one per line)"
-msgstr ""
-
-#: src/lib/KanbanBoard.svelte
-msgid "Usuń tag z zadań przed usunięciem go z tablicy."
-msgstr ""
-
-#: src/lib/KanbanBoard.svelte
-msgid "Remove a tag from tasks before deleting it from the board."
-msgstr ""
+msgid "Cannot delete label because it is assigned to tasks on the board. Remove it from tasks first."
+msgstr "Nie można usunąć etykiety, ponieważ jest przypisana do zadań na tablicy. Usuń ją najpierw z zadań."
 
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
-msgid "Tags"
-msgstr ""
+#: src/lib/KanbanBoard.svelte
+msgid "Filter by label"
+msgstr "Filtruj według etykiety"
 
-#~ msgid "All statuses"
-#~ msgstr "Wszystkie statusy"
+#: src/lib/KanbanBoard.svelte
+msgid "Search labels…"
+msgstr "Szukaj etykiet…"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Clear label filter"
+msgstr "Wyczyść filtr etykiet"
+
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "Manage labels"
+msgstr "Zarządzaj etykietami"
+
+#: src/lib/KanbanBoard.svelte
+msgid "New label"
+msgstr "Nowa etykieta"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Board labels"
+msgstr "Etykiety tablicy"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Remove a label from tasks before deleting it from the board."
+msgstr "Usuń etykietę z zadań przed usunięciem jej z tablicy."
+
+#: src/lib/KanbanBoard.svelte
+msgid "No labels on this board yet."
+msgstr "Brak etykiet na tej tablicy."
+
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "Label name"
+msgstr "Nazwa etykiety"
+
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "Edit label"
+msgstr "Edytuj etykietę"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Delete label"
+msgstr "Usuń etykietę"
+
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "Labels"
+msgstr "Etykiety"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Create new label"
+msgstr "Utwórz nową etykietę"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Create label"
+msgstr "Utwórz etykietę"

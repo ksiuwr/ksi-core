@@ -25,8 +25,11 @@ export function canEditScope(
 ): boolean {
   return effectivePermissions(user).has(permission) && canContribute(user, scope);
 }
-export function validTags(tags: string[], boardTags: string[]): boolean {
-  return tags.every((tag) => boardTags.includes(tag)) && new Set(tags).size === tags.length;
+export function validLabels(labels: string[], boardLabels: (string | { name: string })[]): boolean {
+  const allowed = new Set(
+    boardLabels.map((label) => (typeof label === 'string' ? label : label.name))
+  );
+  return labels.every((label) => allowed.has(label)) && new Set(labels).size === labels.length;
 }
 export function safeLink(url: string): boolean {
   try {

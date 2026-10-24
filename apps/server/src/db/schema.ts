@@ -1,5 +1,6 @@
 import type { ContentTranslations } from 'shared/content-locales';
 import { defaultBoardStatuses, type BoardStatus } from '../domain/board-statuses';
+import type { BoardLabel } from '../domain/board-labels';
 import { createId } from '@paralleldrive/cuid2';
 import {
   text,
@@ -294,7 +295,7 @@ export const boards = snakeCase.table('boards', {
   id: text().primaryKey().$defaultFn(createId),
   projectId: text().references(() => projects.id),
   scopeKey: text().notNull().unique(),
-  tags: text().array().notNull().default([]),
+  labels: jsonb().$type<BoardLabel[]>().notNull().default([]),
   statuses: jsonb().$type<BoardStatus[]>().notNull().default(defaultBoardStatuses)
 });
 export const kanbanItems = snakeCase.table('kanban_items', {
@@ -305,7 +306,7 @@ export const kanbanItems = snakeCase.table('kanban_items', {
   title: text().notNull(),
   markdown: text().notNull().default(''),
   column: text().notNull().default('todo'),
-  tags: text().array().notNull().default([]),
+  labels: text().array().notNull().default([]),
   position: integer().notNull().default(0),
   version: integer().notNull().default(1),
   deletedAt: timestamp(),

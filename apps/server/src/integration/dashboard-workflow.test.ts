@@ -346,7 +346,7 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       [
         `/platform/boards/${boardId}/items`,
         'POST',
-        { title: 'Bad gallery', markdown: gallery, column: 'todo', position: 0, tags: [] }
+        { title: 'Bad gallery', markdown: gallery, column: 'todo', position: 0, labels: [] }
       ],
       [`/platform/items/${itemId}`, 'PATCH', { version: 1, markdown: gallery }],
       [`/platform/items/${itemId}/comments`, 'POST', { markdown: gallery }],
@@ -444,7 +444,7 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
         await request('member', `/platform/boards/${boardId}/items`, 'POST', {
           title: 'Test',
           markdown: '**Description**',
-          tags: [],
+          labels: [],
           column: 'foreign',
           position: 0
         })
@@ -519,7 +519,7 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
           title: 'No',
           markdown: '',
           column: 'review',
-          tags: [],
+          labels: [],
           position: 0
         })
       ).status
