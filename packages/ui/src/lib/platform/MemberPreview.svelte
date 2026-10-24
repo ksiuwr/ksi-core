@@ -21,6 +21,8 @@
     avatarOnly?: boolean;
     language?: 'pl' | 'en';
   } = $props();
+  const uid = $props.id();
+  let touch = false;
   let anchor = $state<HTMLAnchorElement>(),
     card = $state<HTMLDivElement>();
   let open = $state(false),
@@ -73,6 +75,7 @@
     place();
   }
   function later() {
+    if (card?.contains(document.activeElement) || anchor === document.activeElement) return;
     cancelClose();
     timer = setTimeout(close, 120);
   }
@@ -100,11 +103,13 @@
   class="identity"
   role="group"
   aria-label={name}
-  onpointerenter={() => void show()}
+  onpointerenter={(event) => {
+    if (event.pointerType === 'mouse') void show();
+  }}
   onpointerleave={later}
   onfocusin={() => void show()}
   onfocusout={(event) => {
-    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) close();
+    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) later();
   }}
 >
   <a
@@ -113,6 +118,18 @@
     class:avatar-only={avatarOnly}
     aria-label={avatarOnly ? name : undefined}
     {href}
+    aria-expanded={open}
+    aria-controls={`${uid}-preview`}
+    onpointerdown={(event) => {
+      touch = event.pointerType === 'touch' || event.pointerType === 'pen';
+    }}
+    onclick={(event) => {
+      if (touch) {
+        event.preventDefault();
+        touch = false;
+        void show();
+      }
+    }}
   >
     {#if member.image && !brokenImage}<img
         src={member.image}
@@ -126,8 +143,14 @@
   </a>
   <div
     bind:this={card}
+    id={`${uid}-preview`}
     class="hover-card"
-    popover="manual"
+    popover="auto"
+    ontoggle={(event) => {
+      open = event.newState === 'open';
+    }}
+    onpointerenter={cancelClose}
+    onpointerleave={later}
     style:left={`${position.left}px`}
     style:top={`${position.top}px`}
     style:width={`${position.width}px`}
