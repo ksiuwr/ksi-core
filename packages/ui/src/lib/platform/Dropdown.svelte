@@ -8,6 +8,7 @@
     color?: string;
     label: string;
     description?: string;
+    indicator?: string;
     href?: string;
     disabled?: boolean;
   };
@@ -23,7 +24,8 @@
     disabled = false,
     variant = 'default',
     onselect,
-    leading
+    leading,
+    indicator
   }: {
     value?: string;
     options: DropdownOption[];
@@ -37,6 +39,7 @@
     variant?: 'default' | 'workspace' | 'compact';
     onselect?: (value: string) => void;
     leading?: Snippet;
+    indicator?: string;
   } = $props();
   const uid = $props.id();
   const listId = `${uid}-list`;
@@ -183,6 +186,12 @@
     {#if selected?.color}<span class="color-dot" style:background={selected.color}></span>{/if}<span
       class="dropdown-value">{selected?.label || placeholder || label}</span
     >
+    {#if indicator}<span
+        class="notification-dot"
+        role="img"
+        aria-label={indicator}
+        title={indicator}
+      ></span>{/if}
     <ChevronsUpDown size={15} strokeWidth={1.7} aria-hidden="true" />
   </button>
   <div
@@ -246,6 +255,12 @@
                   ></span>{/if}{option.label}</span
               >{#if option.description}<small>{option.description}</small>{/if}</span
             >
+            {#if option.indicator}<span
+                class="notification-dot"
+                role="img"
+                aria-label={option.indicator}
+                title={option.indicator}
+              ></span>{/if}
             {#if option.value === value}<Check size={16} aria-hidden="true" />{/if}
           </a>
         {:else}
@@ -267,6 +282,12 @@
                   ></span>{/if}{option.label}</span
               >{#if option.description}<small>{option.description}</small>{/if}</span
             >
+            {#if option.indicator}<span
+                class="notification-dot"
+                role="img"
+                aria-label={option.indicator}
+                title={option.indicator}
+              ></span>{/if}
             {#if option.value === value}<Check size={16} aria-hidden="true" />{/if}
           </button>
         {/if}
@@ -277,6 +298,15 @@
 </div>
 
 <style>
+  .notification-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--primary, #6750a4);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary, #6750a4) 20%, transparent);
+  }
   .color-dot {
     display: inline-block;
     width: 9px;
@@ -399,6 +429,10 @@
     text-align: left;
     text-decoration: none;
     cursor: pointer;
+  }
+  .dropdown-option > span:first-child {
+    flex: 1;
+    min-width: 0;
   }
   .dropdown-option small {
     display: block;

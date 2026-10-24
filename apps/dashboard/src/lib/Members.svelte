@@ -30,6 +30,7 @@
   ]);
   let records = $state<Profile[]>([]),
     total = $state(0),
+    pendingCount = $state(0),
     member = $state<Profile | null>(null),
     loading = $state(true),
     busy = $state(false),
@@ -119,6 +120,7 @@
       } else {
         records = result.users;
         total = result.total;
+        pendingCount = result.pendingCount;
         member = null;
       }
     } catch (e) {
@@ -404,7 +406,17 @@
     <Dropdown
       label={'Filter status'}
       value={page.url.searchParams.get('status') ?? ''}
-      options={[{ value: '', label: 'All statuses' }, ...statuses]}
+      indicator={pendingCount > 0 ? 'Pending memberships awaiting approval' : undefined}
+      options={[
+        { value: '', label: 'Active and suspended' },
+        ...statuses.map((status) => ({
+          ...status,
+          indicator:
+            status.value === 'pending' && pendingCount > 0
+              ? 'Pending memberships awaiting approval'
+              : undefined
+        }))
+      ]}
       onselect={(v) => filter('status', v)}
     />
     <Dropdown
@@ -478,6 +490,17 @@
     border: 1px solid var(--line);
     border-radius: 4px;
     background: var(--surface);
+  }
+  .member-directory table {
+    width: max-content;
+    min-width: 100%;
+  }
+  .member-directory th,
+  .member-directory td {
+    white-space: nowrap;
+  }
+  .member-directory :global(.identity-text) {
+    overflow-wrap: normal;
   }
   .member-directory :global(td) {
     vertical-align: middle;

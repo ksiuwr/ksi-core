@@ -4,7 +4,7 @@ import { recordEvent } from '../../lib/audit';
 import { getUrls } from 'shared';
 import { validProfileLink } from 'shared/profile-links';
 import { status, t } from 'elysia';
-import { eq, and, or, ilike, asc, desc, count, gt, ne } from 'drizzle-orm';
+import { eq, and, or, ilike, asc, desc, count, gt, notInArray } from 'drizzle-orm';
 import {
   users,
   auditEvents,
@@ -173,13 +173,13 @@ export const userRoutes = createElysia({ prefix: '/users', protectedRoute: true 
   .get(
     '/',
     async ({ user, db, query }) => {
-      requirePermission(user, 'users.membership.activate');
+      const actor = requirePermission(user, 'users.membership.activate');
       const pattern = query.search ? `%${query.search.replace(/[\\%_]/g, '\\$&')}%` : undefined;
       const where = and(
         query.role ? eq(users.role, query.role) : undefined,
         query.status
           ? eq(users.membershipStatus, query.status)
-          : ne(users.membershipStatus, 'deleted'),
+          : notInArray(users.membershipStatus, ['deleted', 'pending']),
         pattern
           ? or(
               ilike(users.name, pattern),
@@ -188,7 +188,7 @@ export const userRoutes = createElysia({ prefix: '/users', protectedRoute: true 
             )
           : undefined
       );
-      const [records, totals] = await Promise.all([
+      const [records, totals, pending] = await Promise.all([
         db
           .select()
           .from(users)
@@ -196,9 +196,23 @@ export const userRoutes = createElysia({ prefix: '/users', protectedRoute: true 
           .orderBy(asc(users.name), asc(users.id))
           .limit(50)
           .offset((query.page ?? 0) * 50),
-        db.select({ total: count() }).from(users).where(where)
+        db.select({ total: count() }).from(users).where(where),
+        db
+          .select({ total: count() })
+          .from(users)
+          .where(
+            and(
+              eq(users.membershipStatus, 'pending'),
+              actor.role === 'administrator' ? undefined : eq(users.role, 'member')
+            )
+          )
       ]);
-      return { users: records, total: totals[0]!.total };
+      return {
+        users: records,
+        total: totals[0]!.total,
+        pendingCount:
+          actor.role === 'administrator' || actor.role === 'board' ? pending[0]!.total : 0
+      };
     },
     {
       query: t.Object({

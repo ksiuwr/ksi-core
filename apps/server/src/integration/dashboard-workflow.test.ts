@@ -170,6 +170,48 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       await db.update(users).set({ membershipStatus: 'active' }).where(eq(users.id, ids.outsider));
     }
   });
+  test('pending users require an explicit filter and approvals remain discoverable', async () => {
+    const unfiltered = await request('admin', `/users?search=${ids.pending}`);
+    expect(unfiltered.status).toBe(200);
+    expect(unfiltered.body.users).toEqual([]);
+    expect(unfiltered.body.total).toBe(0);
+    expect(unfiltered.body.pendingCount).toBeGreaterThan(0);
+
+    const filtered = await request('admin', `/users?search=${ids.pending}&status=pending`);
+    expect(filtered.status).toBe(200);
+    expect(filtered.body.users.map((u: any) => u.id)).toEqual([ids.pending]);
+    expect(filtered.body.total).toBe(1);
+    expect(filtered.body.pendingCount).toBe(unfiltered.body.pendingCount);
+
+    // The indicator must ignore search, role, status and pagination filters.
+    const elsewhere = await request(
+      'admin',
+      '/users?search=no-match&role=board&status=active&page=1'
+    );
+    expect(elsewhere.body.pendingCount).toBe(unfiltered.body.pendingCount);
+
+    await db.update(users).set({ role: 'board' }).where(eq(users.id, ids.outsider));
+    try {
+      const board = await request('outsider', '/users');
+      expect(board.status).toBe(200);
+      expect(board.body.pendingCount).toBeGreaterThan(0);
+
+      await db.update(users).set({ role: 'board' }).where(eq(users.id, ids.pending));
+      const restricted = await request('outsider', '/users');
+      expect(restricted.body.pendingCount).toBe(board.body.pendingCount - 1);
+
+      await db
+        .update(users)
+        .set({ role: 'member', flags: ['+users.membership.activate'] })
+        .where(eq(users.id, ids.outsider));
+      const delegated = await request('outsider', '/users');
+      expect(delegated.status).toBe(200);
+      expect(delegated.body.pendingCount).toBe(0);
+    } finally {
+      await db.update(users).set({ role: 'member', flags: [] }).where(eq(users.id, ids.outsider));
+      await db.update(users).set({ role: 'member' }).where(eq(users.id, ids.pending));
+    }
+  });
   test('administrator email changes revoke access and require verification; recovery stays private', async () => {
     const id = createId(),
       email = `${id}@example.test`,
