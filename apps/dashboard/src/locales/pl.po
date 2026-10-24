@@ -61,7 +61,6 @@ msgstr "Nie znaleziono projektu."
 #: src/lib/AvatarUpload.svelte
 #: src/lib/ContentTranslations.svelte
 #: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
 #: src/lib/ProjectSettings.svelte
 #: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
@@ -277,6 +276,8 @@ msgid "Appearance"
 msgstr "Wygląd"
 
 #: src/lib/ContentHistory.svelte
+#: src/lib/TaskActivity.svelte
+#: src/lib/ThreadActivity.svelte
 #: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
@@ -662,6 +663,8 @@ msgstr "Co trzeba zrobić?"
 msgid "Task status"
 msgstr "Status zadania"
 
+#: src/lib/ConfirmDialog.svelte
+#: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
@@ -672,6 +675,7 @@ msgstr "Status zadania"
 #: src/lib/Members.svelte
 #: src/lib/Members.svelte
 #: src/lib/ProjectSettings.svelte
+#: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Cancel"
 msgstr "Anuluj"
@@ -764,6 +768,8 @@ msgid "Loading discussion"
 msgstr "Ładowanie dyskusji"
 
 #: src/lib/KanbanBoard.svelte
+#: src/lib/TaskActivity.svelte
+#: src/lib/ThreadActivity.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Association member"
 msgstr "Członek koła"
@@ -1001,7 +1007,10 @@ msgstr "Następna"
 msgid "Delete comment?"
 msgstr "Usunąć komentarz?"
 
+#: src/lib/ConfirmDialog.svelte
 #: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+#: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Delete"
 msgstr "Usuń"
@@ -1868,10 +1877,16 @@ msgid "Could not load history."
 msgstr ""
 
 #: src/lib/ContentHistory.svelte
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+#: src/routes/[...workspace]/+page.svelte
 msgid "Spróbuj ponownie"
 msgstr ""
 
 #: src/lib/ContentHistory.svelte
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+#: src/routes/[...workspace]/+page.svelte
 msgid "Try again"
 msgstr ""
 
@@ -1905,4 +1920,120 @@ msgstr ""
 
 #: src/lib/ContentHistory.svelte
 msgid "History is visible to everyone with access to this content."
+msgstr ""
+
+#~ msgid "Utworzono zadanie"
+#~ msgstr ""
+
+#~ msgid "Created task"
+#~ msgstr ""
+
+#~ msgid "Zaktualizowano zadanie"
+#~ msgstr ""
+
+#~ msgid "Updated task"
+#~ msgstr ""
+
+#~ msgid "Zmieniono status zadania"
+#~ msgstr ""
+
+#~ msgid "Changed task status"
+#~ msgstr ""
+
+#~ msgid "Usunięto zadanie"
+#~ msgstr ""
+
+#~ msgid "Deleted task"
+#~ msgstr ""
+
+#~ msgid "Przywrócono zadanie"
+#~ msgstr ""
+
+#~ msgid "Restored task"
+#~ msgstr ""
+
+#: src/lib/KanbanBoard.svelte
+msgid "Nie udało się wczytać komentarzy."
+msgstr ""
+
+#: src/lib/KanbanBoard.svelte
+msgid "Could not load comments."
+msgstr ""
+
+#: src/lib/KanbanBoard.svelte
+msgid "Nie udało się wczytać aktywności."
+msgstr ""
+
+#: src/lib/KanbanBoard.svelte
+msgid "Could not load activity."
+msgstr ""
+
+#: src/lib/KanbanBoard.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "Wczytywanie…"
+msgstr ""
+
+#: src/lib/KanbanBoard.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "Loading…"
+msgstr ""
+
+#: src/lib/KanbanBoard.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "Pokaż wcześniejszą aktywność"
+msgstr ""
+
+#: src/lib/KanbanBoard.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "Load earlier activity"
+msgstr ""
+
+#: src/lib/TaskActivity.svelte
+#: src/lib/ThreadActivity.svelte
+msgid "Członek stowarzyszenia"
+msgstr ""
+
+#: src/lib/TaskActivity.svelte
+msgid "label"
+msgstr ""
+
+#: src/routes/[...workspace]/+page.svelte
+msgid "Nie udało się wczytać aktywności wątku."
+msgstr ""
+
+#: src/routes/[...workspace]/+page.svelte
+msgid "Could not load thread activity."
+msgstr ""
+
+#: src/routes/[...workspace]/+page.svelte
+msgid "Ten komentarz był edytowany"
+msgstr ""
+
+#: src/routes/[...workspace]/+page.svelte
+msgid "This comment was edited"
+msgstr ""
+
+#: src/lib/KanbanBoard.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "Usunąć komentarz?"
+msgstr ""
+
+#: src/lib/KanbanBoard.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "Tej operacji nie można cofnąć."
+msgstr ""
+
+#: src/lib/KanbanBoard.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "This action cannot be undone."
+msgstr ""
+
+#: src/lib/KanbanBoard.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "Usuń"
+msgstr ""
+
+#: src/lib/KanbanBoard.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "Anuluj"
 msgstr ""

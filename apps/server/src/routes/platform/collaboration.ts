@@ -4,7 +4,7 @@ import {
   hasContentChange,
   type ContentChange
 } from 'shared/activity';
-import { and, eq, desc, inArray, isNull, isNotNull, sql, or, type SQL } from 'drizzle-orm';
+import { and, eq, desc, exists, inArray, isNull, isNotNull, sql, or, type SQL } from 'drizzle-orm';
 import { status, t } from 'elysia';
 import { syncFileReferences } from './files';
 import { createElysia, requirePermission } from '../../lib/createElysia';
@@ -35,6 +35,35 @@ async function boardScope(executor: Executor, id: string) {
   const [board] = await executor.select().from(boards).where(eq(boards.id, id));
   if (!board) throw status(404, { code: 'BOARD_NOT_FOUND' });
   return { board, scope: await scopeFor(executor, board.projectId) };
+}
+// Label definition edits affect every task using that label, including tasks in the graveyard.
+async function recordTaskLabelChanges(
+  tx: Transaction,
+  board: typeof boards.$inferSelect,
+  actorId: string,
+  replacements: {
+    before: ReturnType<typeof normalizeBoardLabel>;
+    after: ReturnType<typeof normalizeBoardLabel>;
+  }[]
+) {
+  for (const { before, after } of replacements) {
+    const changes = contentChanges({ label: before }, { label: after }, ['label']);
+    if (!changes.length) continue;
+    const affected = await tx
+      .select({ id: kanbanItems.id })
+      .from(kanbanItems)
+      .where(
+        and(eq(kanbanItems.boardId, board.id), sql`${after.name} = ANY(${kanbanItems.labels})`)
+      );
+    for (const item of affected)
+      await recordEvent(tx, {
+        actorId,
+        projectId: board.projectId,
+        action: 'kanban.label.updated',
+        targetId: item.id,
+        metadata: { boardId: board.id, itemId: item.id, changes }
+      });
+  }
 }
 async function persistStatuses(
   tx: Transaction,
@@ -117,20 +146,81 @@ const revisionQuery = {
   query: t.Object({ page: t.Optional(t.Numeric({ minimum: 0, maximum: 100000, multipleOf: 1 })) })
 };
 
-// Content readers can inspect revisions without gaining access to the administrative audit log.
-async function contentRevisions(
-  executor: Executor,
-  condition: SQL,
-  fields: readonly string[],
-  page = 0
-) {
+const itemRevisionFields = ['title', 'markdown', 'labels', 'column', 'label'] as const;
+function itemHistoryCondition(id: string, includeLifecycle = false) {
+  return or(
+    and(
+      eq(auditEvents.targetId, id),
+      inArray(auditEvents.action, [
+        'kanban.created',
+        'kanban.updated',
+        'kanban.label.updated',
+        ...(includeLifecycle ? ['kanban.tombstoned', 'kanban.restored'] : [])
+      ])
+    ),
+    and(eq(auditEvents.action, 'kanban.reordered'), sql`${auditEvents.metadata}->>'itemId' = ${id}`)
+  )!;
+}
+const threadRevisionFields = [
+  'title',
+  'markdown',
+  'visibility',
+  'invitedIds',
+  'archivedAt'
+] as const;
+function threadHistoryCondition(executor: Executor, id: string) {
+  const commentInThread = exists(
+    executor
+      .select({ id: comments.id })
+      .from(comments)
+      .where(and(eq(comments.threadId, id), eq(comments.id, auditEvents.targetId)))
+  );
+  return or(
+    and(
+      eq(auditEvents.targetId, id),
+      inArray(auditEvents.action, [
+        'threads.created',
+        'threads.access.updated',
+        'threads.archived',
+        'threads.restored'
+      ])
+    ),
+    and(eq(auditEvents.action, 'comments.removed'), commentInThread)
+  )!;
+}
+async function editedCommentIds(executor: Executor, ids: string[]) {
+  if (!ids.length) return new Set<string>();
+  const rows = await executor
+    .select({ targetId: auditEvents.targetId })
+    .from(auditEvents)
+    .where(and(eq(auditEvents.action, 'comments.edited'), inArray(auditEvents.targetId, ids)));
+  return new Set(rows.map((row) => row.targetId));
+}
+function historyChanges(metadata: Record<string, unknown>, fields: readonly string[]) {
+  return Array.isArray(metadata.changes)
+    ? metadata.changes
+        .filter(
+          (change: ContentChange) =>
+            change && fields.includes(change.field) && hasContentChange(change.before, change.after)
+        )
+        .map((change: ContentChange) => ({
+          field: change.field,
+          before: change.before,
+          after: change.after
+        }))
+    : null;
+}
+// Both reader-facing histories use the same ordering, pagination and field filtering.
+async function historyRecords(executor: Executor, condition: SQL, page: number) {
   const records = await executor
     .select({
       id: auditEvents.id,
       createdAt: auditEvents.createdAt,
       action: auditEvents.action,
       metadata: auditEvents.metadata,
-      authorName: users.name
+      targetId: auditEvents.targetId,
+      authorName: users.name,
+      authorId: auditEvents.actorId
     })
     .from(auditEvents)
     .leftJoin(users, eq(auditEvents.actorId, users.id))
@@ -138,6 +228,16 @@ async function contentRevisions(
     .orderBy(desc(auditEvents.createdAt), desc(auditEvents.id))
     .limit(21)
     .offset(page * 20);
+  return records;
+}
+// Content readers can inspect revisions without gaining access to the administrative audit log.
+async function contentRevisions(
+  executor: Executor,
+  condition: SQL,
+  fields: readonly string[],
+  page = 0
+) {
+  const records = await historyRecords(executor, condition, page);
   return {
     revisions: records.slice(0, 20).map((record) => ({
       id: record.id,
@@ -148,20 +248,7 @@ async function contentRevisions(
         : record.action === 'kanban.reordered'
           ? 'moved'
           : 'edited',
-      changes: Array.isArray(record.metadata.changes)
-        ? record.metadata.changes
-            .filter(
-              (change: ContentChange) =>
-                change &&
-                fields.includes(change.field) &&
-                hasContentChange(change.before, change.after)
-            )
-            .map((change: ContentChange) => ({
-              field: change.field,
-              before: change.before,
-              after: change.after
-            }))
-        : null
+      changes: historyChanges(record.metadata, fields)
     })),
     nextPage: records.length > 20 ? page + 1 : null
   };
@@ -238,6 +325,15 @@ export default createElysia({ prefix: '/platform' })
           .set({ labels: normalized })
           .where(eq(boards.id, board.id))
           .returning();
+        await recordTaskLabelChanges(
+          tx,
+          board,
+          actor.id,
+          current.labels.flatMap((label) => {
+            const after = normalized.find((candidate) => candidate.name === label.name);
+            return after ? [{ before: normalizeBoardLabel(label), after }] : [];
+          })
+        );
         await recordEvent(tx, {
           actorId: actor.id,
           projectId: board.projectId,
@@ -328,6 +424,14 @@ export default createElysia({ prefix: '/platform' })
           .set({ labels: updatedLabels })
           .where(eq(boards.id, board.id))
           .returning();
+        await recordTaskLabelChanges(tx, board, actor.id, [
+          {
+            before: normalizeBoardLabel(
+              current.labels.find((label) => label.name === params.name)!
+            ),
+            after: replacement
+          }
+        ]);
         await recordEvent(tx, {
           actorId: actor.id,
           projectId: board.projectId,
@@ -772,21 +876,7 @@ export default createElysia({ prefix: '/platform' })
       const actor = active(user);
       const { item, scope } = await itemScope(db, params.id);
       if (item.deletedAt) requireLeader(actor, scope, 'collaboration.items.restore');
-      return contentRevisions(
-        db,
-        or(
-          and(
-            eq(auditEvents.targetId, item.id),
-            inArray(auditEvents.action, ['kanban.created', 'kanban.updated'])
-          ),
-          and(
-            eq(auditEvents.action, 'kanban.reordered'),
-            sql`${auditEvents.metadata}->>'itemId' = ${item.id}`
-          )
-        )!,
-        ['title', 'markdown', 'labels', 'column'],
-        query.page
-      );
+      return contentRevisions(db, itemHistoryCondition(item.id), itemRevisionFields, query.page);
     },
     revisionQuery
   )
@@ -819,11 +909,33 @@ export default createElysia({ prefix: '/platform' })
     },
     revisionQuery
   )
+  .get(
+    '/items/:id/activity',
+    async ({ db, user, params, query }) => {
+      const actor = active(user);
+      const { item, scope } = await itemScope(db, params.id);
+      if (item.deletedAt) requireLeader(actor, scope, 'collaboration.items.restore');
+      const records = await historyRecords(
+        db,
+        itemHistoryCondition(item.id, true),
+        query.page ?? 0
+      );
+      return records.slice(0, 20).map((record) => ({
+        id: record.id,
+        action: record.action,
+        createdAt: record.createdAt,
+        authorName: record.authorName,
+        authorId: record.authorId,
+        metadata: { changes: historyChanges(record.metadata, [...itemRevisionFields, 'deletedAt']) }
+      }));
+    },
+    revisionQuery
+  )
   .get('/items/:id/comments', async ({ db, user, params }) => {
     const actor = active(user);
     const { item, scope } = await itemScope(db, params.id);
     if (item.deletedAt) requireLeader(actor, scope, 'collaboration.items.restore');
-    return db
+    const posts = await db
       .select({
         id: comments.id,
         markdown: comments.markdown,
@@ -835,6 +947,11 @@ export default createElysia({ prefix: '/platform' })
       .leftJoin(users, eq(comments.authorId, users.id))
       .where(and(eq(comments.itemId, item.id), isNull(comments.deletedAt)))
       .orderBy(comments.createdAt);
+    const edited = await editedCommentIds(
+      db,
+      posts.map((post) => post.id)
+    );
+    return posts.map((post) => ({ ...post, edited: edited.has(post.id) }));
   })
   .post(
     '/items/:id/comments',
@@ -975,8 +1092,38 @@ export default createElysia({ prefix: '/platform' })
       .leftJoin(users, eq(comments.authorId, users.id))
       .where(and(eq(comments.threadId, thread.id), isNull(comments.deletedAt)))
       .orderBy(comments.createdAt);
-    return { ...thread, comments: posts };
+    const edited = await editedCommentIds(
+      db,
+      posts.map((post) => post.id)
+    );
+    return {
+      ...thread,
+      comments: posts.map((post) => ({ ...post, edited: edited.has(post.id) }))
+    };
   })
+  .get(
+    '/threads/:id/activity',
+    async ({ db, user, params, query }) => {
+      const actor = active(user);
+      const { thread, scope } = await threadScope(db, params.id);
+      assertThreadRead(actor, thread, scope);
+      const records = await historyRecords(
+        db,
+        threadHistoryCondition(db, thread.id),
+        query.page ?? 0
+      );
+      return records.slice(0, 20).map((record) => ({
+        id: record.id,
+        action: record.action,
+        createdAt: record.createdAt,
+        targetId: record.targetId,
+        authorName: record.authorName,
+        authorId: record.authorId,
+        metadata: { changes: historyChanges(record.metadata, threadRevisionFields) }
+      }));
+    },
+    revisionQuery
+  )
   .put(
     '/threads/:id/access',
     async ({ db, user, params, body }) => {

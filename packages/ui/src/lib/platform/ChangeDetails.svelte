@@ -60,6 +60,7 @@
     markdown: ['Treść', 'Description'],
     column: ['Status', 'Status'],
     labels: ['Etykiety', 'Labels'],
+    label: ['Etykieta', 'Label'],
     tags: ['Tagi projektu', 'Project tags'],
     name: ['Nazwa', 'Name'],
     description: ['Opis', 'Description'],

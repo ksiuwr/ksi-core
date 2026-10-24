@@ -1,5 +1,8 @@
 <script lang="ts">
   import ContentHistory from '$lib/ContentHistory.svelte';
+  import ConfirmDialog from '$lib/ConfirmDialog.svelte';
+  import ThreadActivity from '$lib/ThreadActivity.svelte';
+  import type { ContentChange } from 'shared/activity';
   import ArticleThumbnail from '$lib/ArticleThumbnail.svelte';
   import ChangeDetails from '@ksi-core/ui/platform/ChangeDetails.svelte';
   import ContentTranslations from '$lib/ContentTranslations.svelte';
@@ -130,6 +133,7 @@
       authorName?: string;
       createdAt?: string;
       authorId?: string;
+      edited?: boolean;
     }[];
   };
 
@@ -164,10 +168,43 @@
   let thumbnailUploading = $state(false);
   let selectedArticle = $state<Article | null>(null);
   let selectedThread = $state<Thread | null>(null);
+  type ThreadEvent = {
+    id: string;
+    action: string;
+    createdAt: string;
+    targetId: string;
+    authorName: string | null;
+    authorId: string | null;
+    metadata: { changes: ContentChange[] | null };
+  };
+  let threadEvents = $state<ThreadEvent[]>([]);
+  let threadEventsNextPage = $state<number | null>(null);
+  let threadEventsLoading = $state(false);
+  let threadEventsError = $state(false);
+  let threadNow = $state(Date.now());
+  const threadTimeline = $derived(
+    [
+      ...(selectedThread?.comments ?? []).map((comment) => ({
+        kind: 'comment' as const,
+        id: comment.id,
+        createdAt: comment.createdAt ?? '',
+        comment
+      })),
+      ...threadEvents
+        .filter((event) => event.action !== 'comments.edited')
+        .map((event) => ({
+          kind: 'event' as const,
+          id: event.id,
+          createdAt: event.createdAt,
+          event
+        }))
+    ].sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id))
+  );
   let visibility = $state('association');
   let leaderIdsArray = $state<string[]>([]);
   let editingCommentId = $state<string | null>(null);
   let editingCommentMarkdown = $state('');
+  let pendingCommentDelete = $state<string | null>(null);
   let graveyard = $state(untrack(() => data.navigation.graveyard ?? false));
   let statuses = $state<BoardStatus[]>([
     { id: 'todo', name: 'To do' },
@@ -393,9 +430,20 @@
           const detail = await api<Thread>(`/platform/threads/${encodeURIComponent(threadId)}`);
           if ((detail.projectId ?? null) !== (currentScope || null))
             throw new Error('This thread belongs to another workspace.');
+          let history: ThreadEvent[] | null = null;
+          try {
+            history = await api<ThreadEvent[]>(
+              `/platform/threads/${encodeURIComponent(threadId)}/activity`
+            );
+          } catch {
+            history = null;
+          }
           if (generation === loadGeneration) {
             selectedThread = detail;
             archived = !!detail.archivedAt;
+            threadEvents = history ?? [];
+            threadEventsNextPage = history ? (history.length === 20 ? 1 : null) : 0;
+            threadEventsError = history === null;
           }
         } else {
           const result = await api<Thread[]>(
@@ -404,6 +452,9 @@
           if (generation === loadGeneration) {
             threads = result;
             selectedThread = null;
+            threadEvents = [];
+            threadEventsNextPage = null;
+            threadEventsError = false;
           }
         }
       }
@@ -416,6 +467,40 @@
         error = cause instanceof Error ? cause.message : 'Request failed';
     } finally {
       if (generation === loadGeneration) loading = false;
+    }
+  }
+
+  async function confirmDeleteComment() {
+    const id = pendingCommentDelete;
+    if (!id) return;
+    await action(async () => {
+      await api(`/platform/comments/${encodeURIComponent(id)}`, 'DELETE');
+      if (selectedThread?.comments)
+        selectedThread.comments = selectedThread.comments.filter((comment) => comment.id !== id);
+    });
+    pendingCommentDelete = null;
+  }
+
+  async function loadOlderThreadActivity() {
+    if (!selectedThread || threadEventsLoading || threadEventsNextPage === null) return;
+    const id = selectedThread.id,
+      page = threadEventsNextPage,
+      generation = loadGeneration;
+    threadEventsLoading = true;
+    threadEventsError = false;
+    try {
+      const events = await api<ThreadEvent[]>(
+        `/platform/threads/${encodeURIComponent(id)}/activity?page=${page}`
+      );
+      if (generation !== loadGeneration) return;
+      threadEvents = [
+        ...new Map([...threadEvents, ...events].map((event) => [event.id, event])).values()
+      ];
+      threadEventsNextPage = events.length === 20 ? page + 1 : null;
+    } catch {
+      if (generation === loadGeneration) threadEventsError = true;
+    } finally {
+      if (generation === loadGeneration) threadEventsLoading = false;
     }
   }
 
@@ -442,6 +527,9 @@
     items = [];
     threads = [];
     events = [];
+    threadEvents = [];
+    threadEventsNextPage = null;
+    threadEventsError = false;
 
     boardId = '';
     title = '';
@@ -741,6 +829,11 @@
     `${(data.user.firstName || data.user.name)[0] ?? ''}${data.user.lastName?.[0] ?? ''}`.toUpperCase() ||
       'U'
   );
+
+  onMount(() => {
+    const timer = setInterval(() => (threadNow = Date.now()), 60000);
+    return () => clearInterval(timer);
+  });
 
   onMount(() => {
     if (data.user.membershipStatus !== 'active') return;
@@ -1534,88 +1627,132 @@
                         {selectedThread.title}
                       </h1>
                       {#if archived}<p class="notice">{'This thread is archived.'}</p>{/if}
-                      {#each selectedThread.comments ?? [] as comment (comment.id)}
-                        <div
-                          style="border-top: 1px solid var(--line); padding: 12px 0; font-size: 13px; white-space: pre-wrap;"
-                        >
-                          <div class="forum-post-meta">
-                            <strong>{comment.authorName || 'Association member'}</strong
-                            >{#if comment.createdAt}<time datetime={comment.createdAt}
-                                >{new Date(comment.createdAt).toLocaleString(
-                                  language === 'pl' ? 'pl-PL' : 'en-GB'
-                                )}</time
-                              >{/if}
-                            <div class="comment-actions">
-                              <ContentHistory kind="comment" targetId={comment.id} {language} />
-                              {#if !archived && (comment.authorId === data.user.id || boardLeader)}
-                                <button
-                                  type="button"
-                                  class="icon-action-btn"
-                                  title="Edit"
-                                  onclick={() => {
-                                    editingCommentId = comment.id;
-                                    editingCommentMarkdown = comment.markdown;
-                                  }}
-                                >
-                                  <Pencil size={13} aria-hidden="true" />
-                                </button>
-                                <button
-                                  type="button"
-                                  class="icon-action-btn danger"
-                                  title="Delete"
-                                  onclick={() => {
-                                    void action(async () => {
-                                      if (!confirm('Delete comment?')) return;
-                                      await api(`/platform/comments/${comment.id}`, 'DELETE');
-                                      selectedThread!.comments = selectedThread!.comments!.filter(
-                                        (c) => c.id !== comment.id
+                      {#if threadEventsNextPage !== null}
+                        <div class="thread-timeline-more">
+                          {#if threadEventsError}<p role="alert">
+                              {language === 'pl'
+                                ? 'Nie udało się wczytać aktywności wątku.'
+                                : 'Could not load thread activity.'}
+                            </p>{/if}
+                          <button
+                            type="button"
+                            class="btn btn-outline"
+                            disabled={threadEventsLoading}
+                            onclick={loadOlderThreadActivity}
+                          >
+                            {threadEventsLoading
+                              ? language === 'pl'
+                                ? 'Wczytywanie…'
+                                : 'Loading…'
+                              : threadEventsError
+                                ? language === 'pl'
+                                  ? 'Spróbuj ponownie'
+                                  : 'Try again'
+                                : language === 'pl'
+                                  ? 'Pokaż wcześniejszą aktywność'
+                                  : 'Load earlier activity'}
+                          </button>
+                        </div>
+                      {/if}
+                      <div class="thread-timeline">
+                        {#each threadTimeline as entry (`${entry.kind}-${entry.id}`)}
+                          {#if entry.kind === 'event'}
+                            <ThreadActivity event={entry.event} {language} now={threadNow} />
+                          {:else}
+                            {@const comment = entry.comment}
+                            <article class="discussion-post timeline-comment">
+                              <span class="comment-marker"
+                                ><MessagesSquare size={14} aria-hidden="true" /></span
+                              >
+                              <div class="post-meta">
+                                <strong>{comment.authorName || 'Association member'}</strong
+                                >{#if comment.createdAt}<time datetime={comment.createdAt}
+                                    >{new Date(comment.createdAt).toLocaleString(
+                                      language === 'pl' ? 'pl-PL' : 'en-GB'
+                                    )}</time
+                                  >{/if}
+                                {#if comment.edited}<span
+                                    class="edited-badge"
+                                    title={language === 'pl'
+                                      ? 'Ten komentarz był edytowany'
+                                      : 'This comment was edited'}
+                                    >{language === 'pl' ? 'edytowany' : 'edited'}</span
+                                  >{/if}
+                                <div class="comment-actions">
+                                  {#if comment.edited}
+                                    <ContentHistory
+                                      kind="comment"
+                                      targetId={comment.id}
+                                      {language}
+                                    />
+                                  {/if}
+                                  {#if !archived && (comment.authorId === data.user.id || boardLeader)}
+                                    <button
+                                      type="button"
+                                      class="icon-action-btn"
+                                      title="Edit"
+                                      onclick={() => {
+                                        editingCommentId = comment.id;
+                                        editingCommentMarkdown = comment.markdown;
+                                      }}
+                                    >
+                                      <Pencil size={13} aria-hidden="true" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      class="icon-action-btn danger"
+                                      title="Delete"
+                                      onclick={() => (pendingCommentDelete = comment.id)}
+                                    >
+                                      <Trash2 size={13} aria-hidden="true" />
+                                    </button>
+                                  {/if}
+                                </div>
+                              </div>
+                              {#if editingCommentId === comment.id}
+                                <form
+                                  class="issue-reply"
+                                  onsubmit={(event) => {
+                                    event.preventDefault();
+                                    action(async () => {
+                                      await api(`/platform/comments/${comment.id}`, 'PATCH', {
+                                        markdown: editingCommentMarkdown
+                                      });
+                                      const c = selectedThread!.comments!.find(
+                                        (c) => c.id === comment.id
                                       );
+                                      if (c) {
+                                        c.markdown = editingCommentMarkdown;
+                                        c.edited = true;
+                                      }
+                                      editingCommentId = null;
+                                      editingCommentMarkdown = '';
                                     });
                                   }}
                                 >
-                                  <Trash2 size={13} aria-hidden="true" />
-                                </button>
+                                  <Editor {language} bind:value={editingCommentMarkdown} rows={4} />
+                                  <div style="display: flex; gap: 8px;">
+                                    <button
+                                      class="btn"
+                                      disabled={busy || !editingCommentMarkdown.trim()}
+                                      >{'Save'}</button
+                                    >
+                                    <button
+                                      type="button"
+                                      class="btn ghost"
+                                      onclick={() => {
+                                        editingCommentId = null;
+                                      }}>{'Cancel'}</button
+                                    >
+                                  </div>
+                                </form>
+                              {:else}
+                                <MarkdownContent value={comment.markdown} {language} />
                               {/if}
-                            </div>
-                          </div>
-                          {#if editingCommentId === comment.id}
-                            <form
-                              style="margin-top: 8px; display: grid; gap: 8px;"
-                              onsubmit={(event) => {
-                                event.preventDefault();
-                                action(async () => {
-                                  await api(`/platform/comments/${comment.id}`, 'PATCH', {
-                                    markdown: editingCommentMarkdown
-                                  });
-                                  const c = selectedThread!.comments!.find(
-                                    (c) => c.id === comment.id
-                                  );
-                                  if (c) c.markdown = editingCommentMarkdown;
-                                  editingCommentId = null;
-                                  editingCommentMarkdown = '';
-                                });
-                              }}
-                            >
-                              <Editor {language} bind:value={editingCommentMarkdown} rows={4} />
-                              <div style="display: flex; gap: 8px;">
-                                <button
-                                  class="btn"
-                                  disabled={busy || !editingCommentMarkdown.trim()}>{'Save'}</button
-                                >
-                                <button
-                                  type="button"
-                                  class="btn ghost"
-                                  onclick={() => {
-                                    editingCommentId = null;
-                                  }}>{'Cancel'}</button
-                                >
-                              </div>
-                            </form>
-                          {:else}
-                            <MarkdownContent value={comment.markdown} {language} />
+                            </article>
                           {/if}
-                        </div>
-                      {/each}
+                        {/each}
+                      </div>
                       <form
                         style="margin-top: 16px; display: grid; gap: 8px;"
                         onsubmit={(event) => {
@@ -2115,6 +2252,17 @@
   </div>
 {/if}
 
+<ConfirmDialog
+  open={pendingCommentDelete !== null}
+  title={language === 'pl' ? 'Usunąć komentarz?' : 'Delete comment?'}
+  message={language === 'pl' ? 'Tej operacji nie można cofnąć.' : 'This action cannot be undone.'}
+  confirmLabel={language === 'pl' ? 'Usuń' : 'Delete'}
+  cancelLabel={language === 'pl' ? 'Anuluj' : 'Cancel'}
+  {busy}
+  onconfirm={() => void confirmDeleteComment()}
+  onclose={() => (pendingCommentDelete = null)}
+/>
+
 <style>
   .article-editor {
     width: 100%;
@@ -2200,11 +2348,78 @@
   .action-link:hover {
     text-decoration: underline;
   }
+  .thread-timeline {
+    position: relative;
+  }
+  .thread-timeline::before {
+    content: '';
+    position: absolute;
+    left: 14px;
+    top: 12px;
+    bottom: 12px;
+    width: 2px;
+    background: var(--line);
+  }
+  .discussion-post.timeline-comment {
+    position: relative;
+    margin: 14px 0 14px 44px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: var(--surface);
+  }
+  .comment-marker {
+    position: absolute;
+    left: -45px;
+    top: 9px;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border: 3px solid var(--surface);
+    border-radius: 50%;
+    color: var(--muted);
+    background: var(--surface-muted);
+  }
+  .post-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .post-meta time {
+    font-size: 11px;
+  }
+  .issue-reply {
+    display: grid;
+    gap: 16px;
+    margin-top: 24px;
+  }
   .comment-actions {
-    display: inline-flex;
+    display: flex;
+    align-items: center;
     gap: 4px;
     margin-left: auto;
     vertical-align: middle;
+  }
+  .edited-badge {
+    color: var(--muted);
+    font-size: 11px;
+    font-style: italic;
+  }
+  .thread-timeline-more {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-top: 1px solid var(--line);
+  }
+  .thread-timeline-more p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
   }
   .icon-action-btn {
     display: inline-flex;
@@ -2224,5 +2439,20 @@
   }
   .icon-action-btn.danger:hover {
     color: var(--red);
+  }
+  @media (max-width: 600px) {
+    .thread-timeline::before {
+      left: 11px;
+    }
+    .discussion-post.timeline-comment {
+      margin-left: 36px;
+      padding: 12px;
+    }
+    .comment-marker {
+      left: -40px;
+    }
+    .post-meta {
+      flex-wrap: wrap;
+    }
   }
 </style>
