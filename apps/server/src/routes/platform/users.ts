@@ -4,7 +4,7 @@ import { recordEvent } from '../../lib/audit';
 import { getUrls } from 'shared';
 import { validProfileLink } from 'shared/profile-links';
 import { status, t } from 'elysia';
-import { eq, and, or, ilike, asc, desc, count, gt } from 'drizzle-orm';
+import { eq, and, or, ilike, asc, desc, count, gt, ne } from 'drizzle-orm';
 import {
   users,
   auditEvents,
@@ -177,7 +177,9 @@ export const userRoutes = createElysia({ prefix: '/users', protectedRoute: true 
       const pattern = query.search ? `%${query.search.replace(/[\\%_]/g, '\\$&')}%` : undefined;
       const where = and(
         query.role ? eq(users.role, query.role) : undefined,
-        query.status ? eq(users.membershipStatus, query.status) : undefined,
+        query.status
+          ? eq(users.membershipStatus, query.status)
+          : ne(users.membershipStatus, 'deleted'),
         pattern
           ? or(
               ilike(users.name, pattern),

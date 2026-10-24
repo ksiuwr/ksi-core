@@ -154,6 +154,22 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       )
     ).toBe(true);
   });
+  test('deleted users appear only with the explicit deleted status filter', async () => {
+    await db.update(users).set({ membershipStatus: 'deleted' }).where(eq(users.id, ids.outsider));
+    try {
+      for (const suffix of ['', '&role=member']) {
+        const result = await request('admin', `/users?search=${ids.outsider}${suffix}`);
+        expect(result.status).toBe(200);
+        expect(result.body.users.some((u: any) => u.id === ids.outsider)).toBe(false);
+        expect(result.body.total).toBe(result.body.users.length);
+      }
+      const deleted = await request('admin', `/users?search=${ids.outsider}&status=deleted`);
+      expect(deleted.body.users.map((u: any) => u.id)).toEqual([ids.outsider]);
+      expect(deleted.body.total).toBe(1);
+    } finally {
+      await db.update(users).set({ membershipStatus: 'active' }).where(eq(users.id, ids.outsider));
+    }
+  });
   test('administrator email changes revoke access and require verification; recovery stays private', async () => {
     const id = createId(),
       email = `${id}@example.test`,
