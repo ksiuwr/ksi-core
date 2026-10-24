@@ -33,7 +33,8 @@
     "ms": "^2.1.3",
     "nodemailer": "^10.1.0",
     "pg": "^8.22.0",
-    "shared": "workspace:*"
+    "shared": "workspace:*",
+    "sharp": "0.35.5"
   },
   "devDependencies": {
     "@types/bun": "^1.3.14",

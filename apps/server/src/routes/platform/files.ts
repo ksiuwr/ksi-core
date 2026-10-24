@@ -1,5 +1,6 @@
 import { contentChanges, type ContentChange } from 'shared/activity';
 import { recordEvent } from '../../lib/audit';
+import { optimizeUpload } from '../../lib/image-optimization';
 import { articleFileContent } from 'shared/content-locales';
 import { and, eq, inArray, isNull } from 'drizzle-orm';
 import { status, t } from 'elysia';
@@ -383,10 +384,12 @@ export const filesRoutes = createElysia({ prefix: '/files' })
     async ({ user, body }) => {
       const member = requirePermission(user, 'files.objects.upload');
       if (body.file.size > MAX_UPLOAD_BYTES) throw status(413, { code: 'FILE_SIZE_INVALID' });
-      const bytes = new Uint8Array(await body.file.arrayBuffer());
+      let bytes = new Uint8Array(await body.file.arrayBuffer());
       let info: ReturnType<typeof validateUpload>;
       try {
-        info = validateUpload(bytes, body.file.name, body.file.type);
+        const optimized = await optimizeUpload(bytes, body.file.name, body.file.type);
+        bytes = new Uint8Array(optimized.bytes);
+        info = optimized.info;
       } catch (error) {
         throw status(400, { code: (error as Error).message });
       }
