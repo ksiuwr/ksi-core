@@ -7,7 +7,7 @@ import { active, scopeFor, requireLeader } from './content';
 import { syncFileReferences } from './files';
 import {
   contentLocales,
-  articleMarkdown,
+  articleFileContent,
   hasEnglishSources,
   type ContentTranslations
 } from 'shared/content-locales';
@@ -165,12 +165,19 @@ export const translationRoutes = createElysia({
           version: updated!.version,
           title: article.title,
           markdown: article.markdown,
+          thumbnailFileId: article.thumbnailFileId,
           translations,
           actorId: principal.id
         })
         .returning();
-      await syncFileReferences(tx, 'article', article.id, articleMarkdown(updated!), principal);
-      await syncFileReferences(tx, 'revision', revision!.id, articleMarkdown(updated!), principal);
+      await syncFileReferences(tx, 'article', article.id, articleFileContent(updated!), principal);
+      await syncFileReferences(
+        tx,
+        'revision',
+        revision!.id,
+        articleFileContent(updated!),
+        principal
+      );
       await recordEvent(tx, {
         actorId: principal.id,
         projectId: article.projectId,

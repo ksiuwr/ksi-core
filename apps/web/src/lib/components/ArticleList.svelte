@@ -11,6 +11,7 @@
       slug: string;
       title: string;
       markdown: string;
+      thumbnailFileId?: string | null;
       publishedAt?: string | null;
       authors: {
         id: string;
@@ -48,6 +49,20 @@
 <div class="article-list">
   {#each articles as article (article.id)}
     <article class="article-card">
+      {#if article.thumbnailFileId}<a
+          class="thumbnail"
+          href={`/articles/${encodeURIComponent(article.slug)}`}
+          aria-label={article.title}
+        >
+          <img
+            src={`/media/${encodeURIComponent(article.thumbnailFileId)}`}
+            alt=""
+            loading="lazy"
+            onerror={(event) => {
+              event.currentTarget.setAttribute('hidden', '');
+            }}
+          />
+        </a>{/if}
       <a class="article-link" href={`/articles/${encodeURIComponent(article.slug)}`}>
         <h3>{article.title}</h3>
         <ArrowUpRight size={20} aria-hidden="true" />
@@ -80,6 +95,18 @@
   .article-list {
     display: grid;
     gap: 16px;
+  }
+  .thumbnail {
+    display: block;
+    margin-bottom: 20px;
+  }
+  .thumbnail img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    max-height: 240px;
+    display: block;
+    object-fit: cover;
+    border-radius: 3px;
   }
   .article-card {
     padding: 24px;

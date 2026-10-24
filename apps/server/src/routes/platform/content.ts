@@ -1,4 +1,4 @@
-import { localizeContent, articleMarkdown } from 'shared/content-locales';
+import { localizeContent, articleFileContent } from 'shared/content-locales';
 import { relatedArticles } from '../../domain/related-articles';
 import { and, eq, inArray, desc, sql, or } from 'drizzle-orm';
 import { status, t } from 'elysia';
@@ -14,6 +14,7 @@ import {
   projectLinks,
   joinRequests,
   articles,
+  files,
   articleRevisions,
   articleProposals,
   articleContributors,
@@ -35,6 +36,15 @@ import {
   canContribute,
   matches
 } from '../../domain/permissions';
+async function validateThumbnail(executor: Executor, fileId: string | null | undefined) {
+  if (!fileId) return;
+  const [file] = await executor
+    .select({ mime: files.mime })
+    .from(files)
+    .where(eq(files.id, fileId));
+  if (!file?.mime.startsWith('image/')) throw status(422, { code: 'THUMBNAIL_IMAGE_REQUIRED' });
+}
+
 const projectDefaultPermissionKeys: Permission[] = [
   'articles.content.propose',
   'articles.content.publish',
@@ -987,6 +997,7 @@ export default createElysia({ prefix: '/platform' })
           )
         )
           throw status(403, { code: 'FORBIDDEN' });
+        await validateThumbnail(tx, body.thumbnailFileId);
         const [article] = await tx
           .insert(articles)
           .values({ ...body, createdBy: actor.id })
@@ -1000,12 +1011,19 @@ export default createElysia({ prefix: '/platform' })
             version: 1,
             title: article.title,
             markdown: article.markdown,
+            thumbnailFileId: article.thumbnailFileId,
             actorId: actor.id
           })
           .returning();
-        await syncFileReferences(tx, 'article', article.id, article.markdown, actor);
+        await syncFileReferences(tx, 'article', article.id, articleFileContent(article), actor);
         if (revision)
-          await syncFileReferences(tx, 'revision', revision.id, articleMarkdown(revision), actor);
+          await syncFileReferences(
+            tx,
+            'revision',
+            revision.id,
+            articleFileContent(revision),
+            actor
+          );
         await recordEvent(tx, {
           actorId: actor.id,
           projectId: article.projectId,
@@ -1022,6 +1040,9 @@ export default createElysia({ prefix: '/platform' })
         slug,
         title: shortText,
         markdown: t.String({ maxLength: 500000 }),
+        thumbnailFileId: t.Optional(
+          t.Union([t.Null(), t.String({ pattern: '^[A-Za-z0-9_-]{8,64}$' })])
+        ),
         language: t.Optional(t.Literal('en'))
       })
     }
@@ -1149,13 +1170,20 @@ export default createElysia({ prefix: '/platform' })
               version: updated.version,
               title: updated.title,
               markdown: updated.markdown,
+              thumbnailFileId: updated.thumbnailFileId,
               translations: updated.translations,
               actorId: actor.id
             })
             .returning();
-          await syncFileReferences(tx, 'article', updated.id, articleMarkdown(updated), actor);
+          await syncFileReferences(tx, 'article', updated.id, articleFileContent(updated), actor);
           if (revision)
-            await syncFileReferences(tx, 'revision', revision.id, articleMarkdown(revision), actor);
+            await syncFileReferences(
+              tx,
+              'revision',
+              revision.id,
+              articleFileContent(revision),
+              actor
+            );
           await tx
             .insert(articleContributors)
             .values({ articleId: article.id, userId: proposal.authorId })
@@ -1209,7 +1237,13 @@ export default createElysia({ prefix: '/platform' })
             (await hasProjectPermission(tx, actor, article.projectId, 'articles.content.propose')));
         const canEditContent = canEditAny || canEditOwn;
         if (!canPublish && !canEditContent) throw status(403, { code: 'FORBIDDEN' });
-        if (!canEditContent && (body.title !== article.title || body.markdown !== article.markdown))
+        if (
+          !canEditContent &&
+          (body.title !== article.title ||
+            body.markdown !== article.markdown ||
+            (body.thumbnailFileId !== undefined &&
+              body.thumbnailFileId !== article.thumbnailFileId))
+        )
           throw status(403, { code: 'FORBIDDEN' });
         if (
           !hasScopedLeadership(actor, scope, 'projects.catalog.edit') &&
@@ -1220,6 +1254,7 @@ export default createElysia({ prefix: '/platform' })
           throw status(403, { code: 'FORBIDDEN' });
         if (body.state !== article.state && !canPublish) throw status(403, { code: 'FORBIDDEN' });
         if (body.mainArticle && !article.projectId) throw status(422, { code: 'PROJECT_REQUIRED' });
+        await validateThumbnail(tx, body.thumbnailFileId);
         // Serialize main-article selection using the project row.
         if (article.projectId)
           await tx
@@ -1237,6 +1272,7 @@ export default createElysia({ prefix: '/platform' })
           .set({
             title: body.title,
             markdown: body.markdown,
+            thumbnailFileId: body.thumbnailFileId,
             state: body.state,
             publishedAt:
               body.state === 'published'
@@ -1258,13 +1294,20 @@ export default createElysia({ prefix: '/platform' })
             version: updated.version,
             title: updated.title,
             markdown: updated.markdown,
+            thumbnailFileId: updated.thumbnailFileId,
             translations: updated.translations,
             actorId: actor.id
           })
           .returning();
-        await syncFileReferences(tx, 'article', updated.id, articleMarkdown(updated), actor);
+        await syncFileReferences(tx, 'article', updated.id, articleFileContent(updated), actor);
         if (revision)
-          await syncFileReferences(tx, 'revision', revision.id, articleMarkdown(revision), actor);
+          await syncFileReferences(
+            tx,
+            'revision',
+            revision.id,
+            articleFileContent(revision),
+            actor
+          );
         await recordEvent(tx, {
           actorId: actor.id,
           projectId: article.projectId,
@@ -1280,6 +1323,9 @@ export default createElysia({ prefix: '/platform' })
         version: t.Integer({ minimum: 1 }),
         title: shortText,
         markdown: t.String({ maxLength: 500000 }),
+        thumbnailFileId: t.Optional(
+          t.Union([t.Null(), t.String({ pattern: '^[A-Za-z0-9_-]{8,64}$' })])
+        ),
         state: t.Union([t.Literal('draft'), t.Literal('published')]),
         mainArticle: t.Boolean(),
         projectFeed: t.Boolean(),

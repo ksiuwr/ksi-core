@@ -2,6 +2,7 @@ import { beforeAll, afterAll, describe, expect, test } from 'bun:test';
 import { and, eq, inArray } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
 import { getUrls } from 'shared';
+import { canReadFile, fileIsPublic } from '../routes/platform/files';
 import contentRoutes from '../routes/platform/content';
 import collaborationRoutes from '../routes/platform/collaboration';
 import {
@@ -23,7 +24,8 @@ import {
   comments,
   auditEvents,
   outbox,
-  fileReferences
+  fileReferences,
+  files
 } from '../db';
 
 const disposable =
@@ -39,6 +41,7 @@ const tokens = Object.fromEntries(actors.map((actor) => [actor, createId()])) as
   string
 >;
 const projectIds: string[] = [];
+const thumbnailIds = [createId(), createId(), createId()];
 let projectId: string, boardId: string, articleId: string;
 const headers = (actor: Actor) => ({
   'content-type': 'application/json',
@@ -151,6 +154,7 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
       await db.delete(articleProposals).where(inArray(articleProposals.articleId, articleIds));
       await db.delete(articles).where(inArray(articles.id, articleIds));
     }
+    await db.delete(files).where(inArray(files.id, thumbnailIds));
     await db.delete(comments).where(inArray(comments.authorId, userIds));
     await db.delete(threads).where(inArray(threads.authorId, userIds));
     await db.delete(kanbanItems).where(inArray(kanbanItems.authorId, userIds));
@@ -284,6 +288,97 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
       ).status
     ).toBe(403);
     await db.update(users).set({ flags: [] }).where(eq(users.id, ids.leader));
+  });
+  test('optional thumbnails are explicit, image-only, authorized and retained in revisions', async () => {
+    await db.insert(files).values(
+      thumbnailIds.map((id, index) => ({
+        id,
+        uploaderId: index === 2 ? ids.outsider : ids.leader,
+        hash: id,
+        objectKey: `integration/${id}`,
+        environment: 'integration',
+        filename: index === 1 ? 'document.pdf' : 'thumbnail.webp',
+        mime: index === 1 ? 'application/pdf' : 'image/webp',
+        size: 100,
+        state: 'private'
+      }))
+    );
+    const draft = {
+      projectId,
+      title: 'Explicit thumbnail',
+      markdown: 'No inline images',
+      language: 'en'
+    };
+    const created = await content('/articles', 'leader', 'POST', {
+      ...draft,
+      slug: `thumbnail-${suffix}`,
+      thumbnailFileId: thumbnailIds[0]
+    });
+    expect(created.status).toBe(200);
+    expect(created.body.thumbnailFileId).toBe(thumbnailIds[0]);
+    expect(created.body.markdown).toBe('No inline images');
+    expect(await fileIsPublic(db, thumbnailIds[0]!)).toBe(false);
+
+    const rejected = await content('/articles', 'leader', 'POST', {
+      ...draft,
+      slug: `thumbnail-pdf-${suffix}`,
+      thumbnailFileId: thumbnailIds[1]
+    });
+    expect(rejected.status).toBe(422);
+    expect(rejected.body.code).toBe('THUMBNAIL_IMAGE_REQUIRED');
+    const forbidden = await content('/articles', 'leader', 'POST', {
+      ...draft,
+      slug: `thumbnail-private-${suffix}`,
+      thumbnailFileId: thumbnailIds[2]
+    });
+    expect(forbidden.status).toBe(403);
+
+    const update = {
+      title: draft.title,
+      markdown: draft.markdown,
+      state: 'published',
+      mainArticle: false,
+      projectFeed: true,
+      websiteFeed: false
+    };
+    // Omitting the optional field preserves the chosen thumbnail.
+    const published = await content(`/articles/${created.body.id}`, 'leader', 'PUT', {
+      ...update,
+      version: 1
+    });
+    expect(published.status).toBe(200);
+    expect(published.body.thumbnailFileId).toBe(thumbnailIds[0]);
+    expect(await fileIsPublic(db, thumbnailIds[0]!)).toBe(true);
+    const publicResult = await contentRoutes.handle(
+      new Request(`http://localhost/platform/public/articles/${created.body.slug}`)
+    );
+    expect(((await publicResult.json()) as any).thumbnailFileId).toBe(thumbnailIds[0]);
+
+    const removed = await content(`/articles/${created.body.id}`, 'leader', 'PUT', {
+      ...update,
+      version: 2,
+      thumbnailFileId: null
+    });
+    expect(removed.status).toBe(200);
+    expect(removed.body.thumbnailFileId).toBeNull();
+    expect(await fileIsPublic(db, thumbnailIds[0]!)).toBe(false);
+    const [stored] = await db.select().from(files).where(eq(files.id, thumbnailIds[0]!));
+    expect(stored!.orphanedAt).toBeNull();
+    expect(await canReadFile(db, stored!, null)).toBe(false);
+    const history = await content(`/articles/${created.body.id}`, 'leader');
+    expect(history.body.revisions.map((revision: any) => revision.thumbnailFileId)).toEqual([
+      null,
+      thumbnailIds[0],
+      thumbnailIds[0]
+    ]);
+
+    const plain = await content('/articles', 'leader', 'POST', {
+      ...draft,
+      slug: `thumbnail-none-${suffix}`,
+      markdown: `![Content](file:${thumbnailIds[0]})`
+    });
+    expect(plain.status).toBe(200);
+    expect(plain.body.thumbnailFileId).toBeNull();
   });
   test('drafts, proposals and leader publication persist with optimistic conflicts and private author credits', async () => {
     const created = await content('/articles', 'leader', 'POST', {

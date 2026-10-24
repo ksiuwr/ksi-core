@@ -840,6 +840,7 @@ msgstr "Wycofaj prośbę"
 msgid "The picture was declined. You can submit another."
 msgstr "Zdjęcie zostało odrzucone. Możesz przesłać inne."
 
+#: src/lib/ArticleThumbnail.svelte
 #: src/lib/AvatarUpload.svelte
 msgid "Uploading…"
 msgstr "Przesyłanie…"
@@ -1622,3 +1623,31 @@ msgstr "Członkostwa oczekujące na zatwierdzenie"
 #: src/lib/Members.svelte
 msgid "Active and suspended"
 msgstr "Aktywni i zawieszeni"
+
+#: src/lib/ArticleThumbnail.svelte
+msgid "Choose a JPEG, PNG, WebP, AVIF or GIF image up to 20 MiB."
+msgstr "Wybierz obraz JPEG, PNG, WebP, AVIF lub GIF o rozmiarze do 20 MiB."
+
+#: src/lib/ArticleThumbnail.svelte
+msgid "Upload failed."
+msgstr "Nie udało się przesłać pliku."
+
+#: src/lib/ArticleThumbnail.svelte
+msgid "Thumbnail (optional)"
+msgstr "Miniatura (opcjonalnie)"
+
+#: src/lib/ArticleThumbnail.svelte
+msgid "Shown in article lists. Choose an image separately from the article content."
+msgstr "Wyświetlana na listach artykułów. Wybierz obraz niezależnie od treści artykułu."
+
+#: src/lib/ArticleThumbnail.svelte
+msgid "Thumbnail preview"
+msgstr "Podgląd miniatury"
+
+#: src/lib/ArticleThumbnail.svelte
+msgid "Choose thumbnail"
+msgstr "Wybierz miniaturę"
+
+#: src/lib/ArticleThumbnail.svelte
+msgid "Remove thumbnail"
+msgstr "Usuń miniaturę"

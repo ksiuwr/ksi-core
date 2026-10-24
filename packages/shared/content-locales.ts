@@ -19,12 +19,14 @@ export function localizeContent<T extends object>(
   );
   return { ...value, ...fields };
 }
-export function articleMarkdown(value: {
+export function articleFileContent(value: {
   markdown: string;
+  thumbnailFileId?: string | null;
   translations?: ContentTranslations;
 }): string {
   return [
     value.markdown,
+    value.thumbnailFileId ? `file:${value.thumbnailFileId}` : '',
     ...Object.values(value.translations ?? {})
       .map((fields) => fields?.markdown)
       .filter((text): text is string => typeof text === 'string')
