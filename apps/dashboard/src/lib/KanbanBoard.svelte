@@ -1,5 +1,7 @@
 <script lang="ts">
   import { tick } from 'svelte';
+  import { flip } from 'svelte/animate';
+  import { prefersReducedMotion } from 'svelte/motion';
   import {
     Plus,
     X,
@@ -102,10 +104,20 @@
     managingLabels = false;
     editingLabelName = null;
     manageLabelError = '';
+    finishDrag();
   });
 
+  let optimisticOrder = $state<{ column: string; ids: string[] } | null>(null);
+  const displayedItems = $derived(
+    items.map((item) => {
+      const position = optimisticOrder?.ids.indexOf(item.id) ?? -1;
+      return position < 0 ? item : { ...item, column: optimisticOrder!.column, position };
+    })
+  );
   const visibleItems = $derived(
-    selectedLabel ? items.filter((item) => item.labels.includes(selectedLabel)) : items
+    selectedLabel
+      ? displayedItems.filter((item) => item.labels.includes(selectedLabel))
+      : displayedItems
   );
 
   const labelFilterOptions = $derived<DropdownOption[]>([
@@ -208,6 +220,117 @@
   let busy = $state(false),
     dragged = $state<string | null>(null),
     over = $state<string | null>(null);
+  let boardElement = $state<HTMLDivElement>();
+  let dragLayout: Record<string, { top: number; height: number; span: number }> = {};
+  let dragStartFrame: number | undefined;
+  let dragDestination = $state<{ column: string; index: number } | null>(null);
+  const dragPreview = $derived.by(() => {
+    const offsets = new Map<string, number>();
+    const source = visibleItems.find((item) => item.id === dragged);
+    const size = source ? dragLayout[source.id] : undefined;
+    if (!source || !size || !dragDestination) return { offsets, slot: null };
+    const ordered = (column: string) =>
+      visibleItems
+        .filter((item) => item.column === column)
+        .sort((a, b) => a.position - b.position || a.id.localeCompare(b.id));
+    const origin = ordered(source.column);
+    const originIndex = origin.findIndex((item) => item.id === source.id);
+    const destination = ordered(dragDestination.column).filter((item) => item.id !== source.id);
+    const index = dragDestination.index;
+    for (let i = originIndex + 1; i < origin.length; i++) offsets.set(origin[i].id, -size.span);
+    if (source.column === dragDestination.column) {
+      for (const item of origin) offsets.delete(item.id);
+      origin.forEach((item, i) => {
+        if (i > originIndex && i <= index) offsets.set(item.id, -size.span);
+        if (i >= index && i < originIndex) offsets.set(item.id, size.span);
+      });
+    }
+    if (source.column !== dragDestination.column) {
+      for (const item of destination.slice(index)) offsets.set(item.id, size.span);
+    }
+    const top = destination
+      .slice(0, index)
+      .reduce((sum, item) => sum + (dragLayout[item.id]?.span ?? 0), 0);
+    return {
+      offsets,
+      slot: {
+        column: dragDestination.column,
+        top,
+        height: size.height,
+        extraSpace: source.column === dragDestination.column ? 0 : size.span
+      }
+    };
+  });
+
+  function finishDrag() {
+    if (dragStartFrame !== undefined) cancelAnimationFrame(dragStartFrame);
+    dragStartFrame = undefined;
+    dragged = null;
+    over = null;
+    dragDestination = null;
+  }
+  function startDrag(item: Item, event: DragEvent) {
+    dragLayout = {};
+    boardElement?.querySelectorAll<HTMLElement>('[data-item-id]').forEach((element) => {
+      dragLayout[element.dataset.itemId!] = {
+        top: element.offsetTop,
+        height: element.offsetHeight,
+        span: element.offsetHeight + parseFloat(getComputedStyle(element).marginBottom)
+      };
+    });
+    if (event.dataTransfer) {
+      event.dataTransfer.setData('text/plain', item.id);
+      event.dataTransfer.effectAllowed = 'move';
+    }
+    // Let the browser capture the native drag image before styling its source.
+    dragStartFrame = requestAnimationFrame(() => {
+      dragStartFrame = undefined;
+      dragged = item.id;
+      over = item.column;
+      dragDestination = {
+        column: item.column,
+        index: visibleItems
+          .filter((candidate) => candidate.column === item.column)
+          .sort((a, b) => a.position - b.position || a.id.localeCompare(b.id))
+          .findIndex((candidate) => candidate.id === item.id)
+      };
+    });
+  }
+
+  function previewDrag(column: string, event: DragEvent) {
+    const source = items.find((item) => item.id === dragged);
+    if (!source) return;
+    event.preventDefault();
+    over = column;
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+    const container = (event.currentTarget as HTMLElement).querySelector<HTMLElement>(
+      '.column-items'
+    );
+    if (!container) return;
+    const y = event.clientY - container.getBoundingClientRect().top;
+    const candidates = visibleItems.filter((item) => item.column === column && item.id !== dragged);
+    const index = candidates.filter((item) => {
+      const layout = dragLayout[item.id];
+      return layout && y > layout.top + layout.height / 2;
+    }).length;
+    if (dragDestination?.column !== column || dragDestination.index !== index)
+      dragDestination = { column, index };
+  }
+  function dropTask(column: string, event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    const source = items.find((item) => item.id === dragged);
+    const destination = dragDestination;
+    finishDrag();
+    if (!source) return;
+    if (!destination || destination.column !== column) return;
+    const candidates = visibleItems
+      .filter((item) => item.column === column && item.id !== source.id)
+      .sort((a, b) => a.position - b.position || a.id.localeCompare(b.id));
+    const target = candidates[destination.index] ?? candidates.at(-1);
+    if (target) void reorder(source, target, destination.index === candidates.length);
+    else if (source.column !== column) void move(source, column);
+  }
   let mobileMoveItem = $state<Item | null>(null),
     mobileDropTarget = $state<string | null>(null);
   let touchPress: { item: Item; x: number; y: number } | null = null;
@@ -341,15 +464,51 @@
   }
   async function move(item: Item, column: string) {
     if (item.column === column || busy) return;
-    await run(async () => {
-      const updated = await api<Item>(`/platform/items/${item.id}`, 'PATCH', {
-        version: item.version,
-        column,
-        position:
-          Math.max(-1, ...items.filter((i) => i.column === column).map((i) => i.position)) + 1
+    await saveOrder(item, column, [...columnItems(column), item]);
+  }
+
+  function columnItems(column: string) {
+    return items
+      .filter((item) => item.column === column)
+      .sort((a, b) => a.position - b.position || a.id.localeCompare(b.id));
+  }
+  async function reorder(item: Item, target: Item, after = false) {
+    if (busy || item.id === target.id) return;
+    const previous = columnItems(target.column);
+    const ordered = previous.filter((candidate) => candidate.id !== item.id);
+    ordered.splice(
+      ordered.findIndex((candidate) => candidate.id === target.id) + Number(after),
+      0,
+      item
+    );
+    if (
+      item.column === target.column &&
+      ordered.every((candidate, index) => candidate.id === previous[index]?.id)
+    )
+      return;
+    await saveOrder(item, target.column, ordered);
+  }
+  async function saveOrder(item: Item, column: string, ordered: Item[]) {
+    optimisticOrder = { column, ids: ordered.map((candidate) => candidate.id) };
+    try {
+      await run(async () => {
+        const updated = await api<Item[]>(`/platform/boards/${boardId}/order`, 'PUT', {
+          column,
+          items: ordered.map(({ id, version }) => ({ id, version })),
+          ...(item.column !== column ? { move: { id: item.id, fromColumn: item.column } } : {})
+        });
+        if (selected)
+          selected = updated.find((candidate) => candidate.id === selected?.id) ?? selected;
       });
-      if (selected?.id === updated.id) selected = updated;
-    });
+    } finally {
+      optimisticOrder = null;
+    }
+  }
+
+  function step(item: Item, direction: number) {
+    const ordered = columnItems(item.column);
+    const target = ordered[ordered.findIndex((candidate) => candidate.id === item.id) + direction];
+    if (target) void reorder(item, target, direction > 0);
   }
   function clearHoldTimer() {
     if (holdTimer) clearTimeout(holdTimer);
@@ -652,30 +811,34 @@
 {/snippet}
 <div
   class="board"
+  role="group"
+  bind:this={boardElement}
+  class:drag-active={!!dragged}
   style:grid-template-columns={`repeat(${activeStatuses.length}, minmax(260px, 1fr))`}
+  ondragover={(event) => {
+    if (dragged) {
+      event.preventDefault();
+      if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+    }
+  }}
+  ondrop={(event) => {
+    if (dragged && dragDestination) dropTask(dragDestination.column, event);
+  }}
+  ondragleave={(event) => {
+    if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget as Node)) {
+      over = null;
+      dragDestination = null;
+    }
+  }}
 >
   {#each activeStatuses as status (status.id)}
     <section
       class="board-column"
       class:drop-target={over === status.id}
       aria-label={label(status)}
-      ondragover={(event) => {
-        if (dragged) {
-          event.preventDefault();
-          over = status.id;
-          if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
-        }
-      }}
-      ondragleave={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget as Node)) over = null;
-      }}
-      ondrop={(event) => {
-        event.preventDefault();
-        const item = items.find((i) => i.id === dragged);
-        dragged = null;
-        over = null;
-        if (item) void move(item, status.id);
-      }}
+      ondragenter={(event) => previewDrag(status.id, event)}
+      ondragover={(event) => previewDrag(status.id, event)}
+      ondrop={(event) => dropTask(status.id, event)}
     >
       <div class="column-header">
         <span class="column-label"
@@ -700,32 +863,45 @@
           onclick={() => openComposer(status.id)}><Plus size={17} aria-hidden="true" /></button
         >
       </div>
-      <div class="column-items">
+      <div
+        class="column-items"
+        style:padding-bottom={`${dragPreview.slot?.column === status.id ? dragPreview.slot.extraSpace : 0}px`}
+      >
+        {#if dragPreview.slot?.column === status.id}
+          <div
+            class="drag-slot"
+            aria-hidden="true"
+            style:top={`${dragPreview.slot.top}px`}
+            style:height={`${dragPreview.slot.height}px`}
+          ></div>
+        {/if}
         {#each visibleItems
           .filter((i) => i.column === status.id)
           .sort((a, b) => a.position - b.position) as item (item.id)}
           <button
             type="button"
             class="kanban-card task-card"
+            data-item-id={item.id}
+            animate:flip={{ duration: prefersReducedMotion.current ? 0 : 180 }}
+            style:translate={`0 ${dragPreview.offsets.get(item.id) ?? 0}px`}
             class:dragging={dragged === item.id}
             draggable={!busy}
             disabled={busy}
             onpointerdown={(event) => beginMobileHold(item, event)}
+            onkeydown={(event) => {
+              if (event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+                event.preventDefault();
+                step(item, event.key === 'ArrowUp' ? -1 : 1);
+              }
+            }}
             ondragstart={(event) => {
               if (touchPress?.item.id === item.id || mobileMoveItem?.id === item.id) {
                 event.preventDefault();
                 return;
               }
-              dragged = item.id;
-              if (event.dataTransfer) {
-                event.dataTransfer.setData('text/plain', item.id);
-                event.dataTransfer.effectAllowed = 'move';
-              }
+              startDrag(item, event);
             }}
-            ondragend={() => {
-              dragged = null;
-              over = null;
-            }}
+            ondragend={finishDrag}
             onclick={(event) => {
               if (suppressTaskClick === item.id) {
                 suppressTaskClick = null;
@@ -1594,6 +1770,29 @@
     overflow-x: auto;
     padding: 3px 3px 12px;
   }
+  .column-items {
+    position: relative;
+    transition: padding-bottom 180ms ease;
+  }
+  .board-column {
+    padding: 0 20px 20px;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease;
+  }
+  .drag-slot {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border: 1px dashed var(--accent);
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    pointer-events: none;
+    transition:
+      top 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      height 180ms ease;
+  }
+
   .task-card {
     width: 100%;
     text-align: left;
@@ -1603,12 +1802,26 @@
     display: grid;
     gap: 9px;
     margin-bottom: 10px;
+    transition:
+      translate 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      opacity 120ms ease;
   }
   .task-card:active {
     cursor: grabbing;
   }
+  .board.drag-active .task-card:not(.dragging) {
+    pointer-events: none;
+  }
   .task-card.dragging {
-    opacity: 0.45;
+    opacity: 0.15;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .column-items,
+    .board-column,
+    .drag-slot,
+    .task-card {
+      transition: none;
+    }
   }
   .task-title {
     display: flex;

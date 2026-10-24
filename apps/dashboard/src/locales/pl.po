@@ -1750,3 +1750,18 @@ msgstr "Utwórz nową etykietę"
 #: src/lib/KanbanBoard.svelte
 msgid "Create label"
 msgstr "Utwórz etykietę"
+
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "ArrowUp"
+msgstr ""
+
+#: src/lib/KanbanBoard.svelte
+msgid "ArrowDown"
+msgstr ""
+
+#~ msgid "Move up"
+#~ msgstr ""
+
+#~ msgid "Move down"
+#~ msgstr ""

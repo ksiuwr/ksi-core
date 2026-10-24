@@ -401,6 +401,94 @@ export default createElysia({ prefix: '/platform' })
     },
     { query: t.Object({ graveyard: t.Optional(t.Union([t.Literal('true'), t.Literal('false')])) }) }
   )
+  .put(
+    '/boards/:id/order',
+    async ({ db, user, params, body }) => {
+      const actor = requirePermission(user, 'collaboration.items.contribute');
+      return db.transaction(async (tx) => {
+        const { board, scope } = await boardScope(tx, params.id);
+        assertContribute(actor, scope);
+        const [lockedBoard] = await tx
+          .select()
+          .from(boards)
+          .where(eq(boards.id, board.id))
+          .for('update');
+        if (!lockedBoard || !statusExists(lockedBoard.statuses, body.column))
+          throw status(422, { code: 'INVALID_BOARD_STATUS' });
+        const current = await tx
+          .select()
+          .from(kanbanItems)
+          .where(
+            and(
+              eq(kanbanItems.boardId, board.id),
+              eq(kanbanItems.column, body.column),
+              isNull(kanbanItems.deletedAt)
+            )
+          )
+          .for('update');
+        if (body.move) {
+          const [moving] = await tx
+            .select()
+            .from(kanbanItems)
+            .where(
+              and(
+                eq(kanbanItems.id, body.move.id),
+                eq(kanbanItems.boardId, board.id),
+                eq(kanbanItems.column, body.move.fromColumn),
+                isNull(kanbanItems.deletedAt)
+              )
+            )
+            .for('update');
+          if (!moving || body.move.fromColumn === body.column)
+            throw status(409, { code: 'REVISION_CONFLICT_OR_DELETED' });
+          current.push(moving);
+        }
+        const expected = new Map(body.items.map((item) => [item.id, item.version]));
+        if (
+          expected.size !== body.items.length ||
+          current.length !== expected.size ||
+          current.some((item) => expected.get(item.id) !== item.version)
+        )
+          throw status(409, { code: 'REVISION_CONFLICT_OR_DELETED' });
+        const result = [];
+        for (const [position, item] of body.items.entries()) {
+          const [updated] = await tx
+            .update(kanbanItems)
+            .set({ column: body.column, position, version: sql`${kanbanItems.version} + 1` })
+            .where(eq(kanbanItems.id, item.id))
+            .returning();
+          result.push(updated!);
+        }
+        await recordEvent(tx, {
+          actorId: actor.id,
+          projectId: board.projectId,
+          action: 'kanban.reordered',
+          targetId: board.id,
+          metadata: {
+            boardId: board.id,
+            column: body.column,
+            ...(body.move ? { fromColumn: body.move.fromColumn, itemId: body.move.id } : {}),
+            itemIds: body.items.map((item) => item.id)
+          }
+        });
+        return result;
+      });
+    },
+    {
+      body: t.Object({
+        column: t.String({ minLength: 1, maxLength: 40 }),
+        move: t.Optional(
+          t.Object({
+            id: t.String({ minLength: 1 }),
+            fromColumn: t.String({ minLength: 1, maxLength: 40 })
+          })
+        ),
+        items: t.Array(t.Object({ id: t.String(), version: t.Integer({ minimum: 1 }) }), {
+          maxItems: 10000
+        })
+      })
+    }
+  )
   .post(
     '/boards/:id/items',
     async ({ db, user, params, body }) => {

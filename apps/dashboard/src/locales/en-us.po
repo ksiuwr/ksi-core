@@ -1750,3 +1750,18 @@ msgstr "Create new label"
 #: src/lib/KanbanBoard.svelte
 msgid "Create label"
 msgstr "Create label"
+
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "ArrowUp"
+msgstr "ArrowUp"
+
+#: src/lib/KanbanBoard.svelte
+msgid "ArrowDown"
+msgstr "ArrowDown"
+
+#~ msgid "Move up"
+#~ msgstr "Move up"
+
+#~ msgid "Move down"
+#~ msgstr "Move down"

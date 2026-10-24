@@ -212,6 +212,213 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       await db.update(users).set({ role: 'member' }).where(eq(users.id, ids.pending));
     }
   });
+  test('task ordering is atomic, versioned, and rejects stale or foreign lists', async () => {
+    const created = [];
+    for (const title of ['First', 'Second', 'Third']) {
+      const result = await request('member', `/platform/boards/${boardId}/items`, 'POST', {
+        title,
+        markdown: '',
+        column: 'todo',
+        labels: [],
+        position: created.length
+      });
+      expect(result.status).toBe(200);
+      created.push(result.body);
+    }
+    const all = (await request('member', `/platform/boards/${boardId}/items`)).body;
+    const order = [...all].reverse().map(({ id, version }: any) => ({ id, version }));
+    const result = await request('member', `/platform/boards/${boardId}/order`, 'PUT', {
+      column: 'todo',
+      items: order
+    });
+    expect(result.status).toBe(200);
+    expect(result.body.map((item: any) => item.id)).toEqual(order.map((item: any) => item.id));
+    expect(result.body.map((item: any) => item.position)).toEqual(
+      order.map((_: any, i: number) => i)
+    );
+    expect(
+      (
+        await request('member', `/platform/boards/${boardId}/order`, 'PUT', {
+          column: 'todo',
+          items: order
+        })
+      ).status
+    ).toBe(409);
+    const current = result.body.map(({ id, version }: any) => ({ id, version }));
+    expect(
+      (
+        await request('member', `/platform/boards/${boardId}/order`, 'PUT', {
+          column: 'todo',
+          items: current.slice(1)
+        })
+      ).status
+    ).toBe(409);
+    expect(
+      (
+        await request('pending', `/platform/boards/${boardId}/order`, 'PUT', {
+          column: 'todo',
+          items: current
+        })
+      ).status
+    ).toBe(403);
+    await db.delete(kanbanItems).where(
+      inArray(
+        kanbanItems.id,
+        created.map((item) => item.id)
+      )
+    );
+  });
+  test('cross-column ordering preserves exact insertion positions and rejects stale or invalid moves atomically', async () => {
+    const localBoardId = createId();
+    const foreignBoardId = createId();
+    await db.insert(boards).values([
+      { id: localBoardId, projectId, scopeKey: `cross-order:${localBoardId}` },
+      { id: foreignBoardId, projectId, scopeKey: `cross-order:${foreignBoardId}` }
+    ]);
+    const sourceId = createId(),
+      firstId = createId(),
+      secondId = createId(),
+      foreignId = createId();
+    try {
+      await db.insert(kanbanItems).values([
+        {
+          id: sourceId,
+          boardId: localBoardId,
+          authorId: ids.member,
+          title: 'Moving',
+          column: 'todo',
+          position: 0
+        },
+        {
+          id: firstId,
+          boardId: localBoardId,
+          authorId: ids.member,
+          title: 'First',
+          column: 'progress',
+          position: 0
+        },
+        {
+          id: secondId,
+          boardId: localBoardId,
+          authorId: ids.member,
+          title: 'Second',
+          column: 'progress',
+          position: 1
+        },
+        {
+          id: foreignId,
+          boardId: foreignBoardId,
+          authorId: ids.member,
+          title: 'Foreign',
+          column: 'todo',
+          position: 0
+        }
+      ]);
+      const path = `/platform/boards/${localBoardId}/order`;
+      const input = {
+        column: 'progress',
+        move: { id: sourceId, fromColumn: 'todo' },
+        items: [
+          { id: firstId, version: 1 },
+          { id: sourceId, version: 1 },
+          { id: secondId, version: 1 }
+        ]
+      };
+      const snapshot = async () =>
+        (await db.select().from(kanbanItems).where(eq(kanbanItems.boardId, localBoardId))).sort(
+          (a, b) => a.id.localeCompare(b.id)
+        );
+      const before = await snapshot();
+      expect((await request('outsider', path, 'PUT', input)).status).toBe(403);
+      expect(
+        (
+          await request('member', path, 'PUT', {
+            ...input,
+            move: { id: sourceId, fromColumn: 'done' }
+          })
+        ).status
+      ).toBe(409);
+      expect(
+        (await request('member', path, 'PUT', { ...input, items: input.items.slice(1) })).status
+      ).toBe(409);
+      expect(
+        (
+          await request('member', path, 'PUT', {
+            ...input,
+            items: input.items.map((item) =>
+              item.id === sourceId ? { ...item, version: 2 } : item
+            )
+          })
+        ).status
+      ).toBe(409);
+      expect(
+        (
+          await request('member', path, 'PUT', {
+            ...input,
+            items: input.items.map((item) => (item.id === firstId ? { ...item, version: 2 } : item))
+          })
+        ).status
+      ).toBe(409);
+      expect(
+        (
+          await request('member', path, 'PUT', {
+            ...input,
+            move: { id: foreignId, fromColumn: 'todo' },
+            items: input.items.map((item) =>
+              item.id === sourceId ? { ...item, id: foreignId } : item
+            )
+          })
+        ).status
+      ).toBe(409);
+      expect((await request('member', path, 'PUT', { column: 'missing', items: [] })).status).toBe(
+        422
+      );
+      expect(await snapshot()).toEqual(before);
+      const moved = await request('member', path, 'PUT', input);
+      expect(moved.status).toBe(200);
+      expect(
+        moved.body.map((item: any) => [item.id, item.column, item.position, item.version])
+      ).toEqual([
+        [firstId, 'progress', 0, 2],
+        [sourceId, 'progress', 1, 2],
+        [secondId, 'progress', 2, 2]
+      ]);
+      const persisted = (await request('member', `/platform/boards/${localBoardId}/items`)).body;
+      expect(persisted.map((item: any) => item.id)).toEqual([firstId, sourceId, secondId]);
+      expect((await request('member', path, 'PUT', input)).status).toBe(409);
+      const empty = await request('member', path, 'PUT', {
+        column: 'done',
+        move: { id: sourceId, fromColumn: 'progress' },
+        items: [{ id: sourceId, version: 2 }]
+      });
+      expect(empty.status).toBe(200);
+      expect(empty.body[0]).toMatchObject({
+        id: sourceId,
+        column: 'done',
+        position: 0,
+        version: 3
+      });
+      await db
+        .update(kanbanItems)
+        .set({ deletedAt: new Date() })
+        .where(eq(kanbanItems.id, sourceId));
+      expect(
+        (
+          await request('member', path, 'PUT', {
+            column: 'todo',
+            move: { id: sourceId, fromColumn: 'done' },
+            items: [{ id: sourceId, version: 3 }]
+          })
+        ).status
+      ).toBe(409);
+    } finally {
+      // Audit events are cleaned up by the suite's actor cleanup.
+      await db
+        .delete(kanbanItems)
+        .where(inArray(kanbanItems.boardId, [localBoardId, foreignBoardId]));
+      await db.delete(boards).where(inArray(boards.id, [localBoardId, foreignBoardId]));
+    }
+  });
   test('administrator email changes revoke access and require verification; recovery stays private', async () => {
     const id = createId(),
       email = `${id}@example.test`,
