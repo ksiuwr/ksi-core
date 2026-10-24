@@ -401,6 +401,64 @@ export default createElysia({ prefix: '/platform' })
     },
     { query: t.Object({ graveyard: t.Optional(t.Union([t.Literal('true'), t.Literal('false')])) }) }
   )
+  .put(
+    '/boards/:id/order',
+    async ({ db, user, params, body }) => {
+      const actor = requirePermission(user, 'collaboration.items.contribute');
+      return db.transaction(async (tx) => {
+        const { board, scope } = await boardScope(tx, params.id);
+        assertContribute(actor, scope);
+        await tx.select().from(boards).where(eq(boards.id, board.id)).for('update');
+        const current = await tx
+          .select()
+          .from(kanbanItems)
+          .where(
+            and(
+              eq(kanbanItems.boardId, board.id),
+              eq(kanbanItems.column, body.column),
+              isNull(kanbanItems.deletedAt)
+            )
+          )
+          .for('update');
+        const expected = new Map(body.items.map((item) => [item.id, item.version]));
+        if (
+          expected.size !== body.items.length ||
+          current.length !== expected.size ||
+          current.some((item) => expected.get(item.id) !== item.version)
+        )
+          throw status(409, { code: 'REVISION_CONFLICT_OR_DELETED' });
+        const result = [];
+        for (const [position, item] of body.items.entries()) {
+          const [updated] = await tx
+            .update(kanbanItems)
+            .set({ position, version: sql`${kanbanItems.version} + 1` })
+            .where(eq(kanbanItems.id, item.id))
+            .returning();
+          result.push(updated!);
+        }
+        await recordEvent(tx, {
+          actorId: actor.id,
+          projectId: board.projectId,
+          action: 'kanban.reordered',
+          targetId: board.id,
+          metadata: {
+            boardId: board.id,
+            column: body.column,
+            itemIds: body.items.map((item) => item.id)
+          }
+        });
+        return result;
+      });
+    },
+    {
+      body: t.Object({
+        column: t.String({ minLength: 1, maxLength: 40 }),
+        items: t.Array(t.Object({ id: t.String(), version: t.Integer({ minimum: 1 }) }), {
+          maxItems: 10000
+        })
+      })
+    }
+  )
   .post(
     '/boards/:id/items',
     async ({ db, user, params, body }) => {

@@ -351,6 +351,34 @@
       if (selected?.id === updated.id) selected = updated;
     });
   }
+  function columnItems(column: string) {
+    return items
+      .filter((item) => item.column === column)
+      .sort((a, b) => a.position - b.position || a.id.localeCompare(b.id));
+  }
+  async function reorder(item: Item, target: Item, after = false) {
+    if (busy || item.id === target.id) return;
+    if (item.column !== target.column) return move(item, target.column);
+    const ordered = columnItems(item.column).filter((candidate) => candidate.id !== item.id);
+    ordered.splice(
+      ordered.findIndex((candidate) => candidate.id === target.id) + Number(after),
+      0,
+      item
+    );
+    await run(async () => {
+      const updated = await api<Item[]>(`/platform/boards/${boardId}/order`, 'PUT', {
+        column: item.column,
+        items: ordered.map(({ id, version }) => ({ id, version }))
+      });
+      if (selected)
+        selected = updated.find((candidate) => candidate.id === selected?.id) ?? selected;
+    });
+  }
+  function step(item: Item, direction: number) {
+    const ordered = columnItems(item.column);
+    const target = ordered[ordered.findIndex((candidate) => candidate.id === item.id) + direction];
+    if (target) void reorder(item, target, direction > 0);
+  }
   function clearHoldTimer() {
     if (holdTimer) clearTimeout(holdTimer);
     holdTimer = null;
@@ -711,6 +739,25 @@
             draggable={!busy}
             disabled={busy}
             onpointerdown={(event) => beginMobileHold(item, event)}
+            onkeydown={(event) => {
+              if (event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+                event.preventDefault();
+                step(item, event.key === 'ArrowUp' ? -1 : 1);
+              }
+            }}
+            ondragover={(event) => {
+              if (dragged) event.preventDefault();
+            }}
+            ondrop={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              const source = items.find((candidate) => candidate.id === dragged);
+              const rect = event.currentTarget.getBoundingClientRect();
+              const after = event.clientY > rect.top + rect.height / 2;
+              dragged = null;
+              over = null;
+              if (source) void reorder(source, item, after);
+            }}
             ondragstart={(event) => {
               if (touchPress?.item.id === item.id || mobileMoveItem?.id === item.id) {
                 event.preventDefault();
@@ -1111,6 +1158,20 @@
         disabled={busy}
         onclick={() => (confirmingDelete = true)}
         ><Trash2 size={14} aria-hidden="true" />{'Remove'}</button
+      >
+    </div>
+    <div class="row">
+      <button
+        type="button"
+        class="btn btn-outline"
+        disabled={busy || columnItems(selected.column)[0]?.id === selected.id}
+        onclick={() => step(selected!, -1)}><ArrowUp size={14} />{'Move up'}</button
+      >
+      <button
+        type="button"
+        class="btn btn-outline"
+        disabled={busy || columnItems(selected.column).at(-1)?.id === selected.id}
+        onclick={() => step(selected!, 1)}><ArrowDown size={14} />{'Move down'}</button
       >
     </div>
     {#if confirmingDelete}<section

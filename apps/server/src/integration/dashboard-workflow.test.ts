@@ -211,6 +211,61 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       await db.update(users).set({ role: 'member', flags: [] }).where(eq(users.id, ids.outsider));
       await db.update(users).set({ role: 'member' }).where(eq(users.id, ids.pending));
     }
+  test('task ordering is atomic, versioned, and rejects stale or foreign lists', async () => {
+    const created = [];
+    for (const title of ['First', 'Second', 'Third']) {
+      const result = await request('member', `/platform/boards/${boardId}/items`, 'POST', {
+        title,
+        markdown: '',
+        column: 'todo',
+        tags: [],
+        position: created.length
+      });
+      expect(result.status).toBe(200);
+      created.push(result.body);
+    }
+    const all = (await request('member', `/platform/boards/${boardId}/items`)).body;
+    const order = [...all].reverse().map(({ id, version }: any) => ({ id, version }));
+    const result = await request('member', `/platform/boards/${boardId}/order`, 'PUT', {
+      column: 'todo',
+      items: order
+    });
+    expect(result.status).toBe(200);
+    expect(result.body.map((item: any) => item.id)).toEqual(order.map((item: any) => item.id));
+    expect(result.body.map((item: any) => item.position)).toEqual(
+      order.map((_: any, i: number) => i)
+    );
+    expect(
+      (
+        await request('member', `/platform/boards/${boardId}/order`, 'PUT', {
+          column: 'todo',
+          items: order
+        })
+      ).status
+    ).toBe(409);
+    const current = result.body.map(({ id, version }: any) => ({ id, version }));
+    expect(
+      (
+        await request('member', `/platform/boards/${boardId}/order`, 'PUT', {
+          column: 'todo',
+          items: current.slice(1)
+        })
+      ).status
+    ).toBe(409);
+    expect(
+      (
+        await request('pending', `/platform/boards/${boardId}/order`, 'PUT', {
+          column: 'todo',
+          items: current
+        })
+      ).status
+    ).toBe(403);
+    await db.delete(kanbanItems).where(
+      inArray(
+        kanbanItems.id,
+        created.map((item) => item.id)
+      )
+    );
   });
   test('administrator email changes revoke access and require verification; recovery stays private', async () => {
     const id = createId(),
