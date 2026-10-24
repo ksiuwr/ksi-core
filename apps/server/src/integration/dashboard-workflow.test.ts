@@ -574,6 +574,14 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       { field: 'labels', before: [], after: ['urgent'] }
     ]);
     await db.update(boards).set({ labels: [] }).where(eq(boards.id, boardId));
+    const timeline = await request('member', `/platform/items/${created.body.id}/activity`);
+    expect(timeline.status).toBe(200);
+    expect(
+      timeline.body.find((entry: any) => entry.action === 'kanban.updated').metadata.changes
+    ).toEqual(event?.metadata.changes);
+    expect((await request('pending', `/platform/items/${created.body.id}/activity`)).status).toBe(
+      403
+    );
     await db.delete(kanbanItems).where(eq(kanbanItems.id, created.body.id));
   });
   test('alert creation, edits and deletion retain their editable values', async () => {

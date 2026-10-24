@@ -819,6 +819,35 @@ export default createElysia({ prefix: '/platform' })
     },
     revisionQuery
   )
+  .get('/items/:id/activity', async ({ db, user, params }) => {
+    const actor = active(user);
+    const { item, scope } = await itemScope(db, params.id);
+    if (item.deletedAt) requireLeader(actor, scope, 'collaboration.items.restore');
+    return db
+      .select({
+        id: auditEvents.id,
+        action: auditEvents.action,
+        metadata: auditEvents.metadata,
+        createdAt: auditEvents.createdAt,
+        authorName: users.name,
+        authorId: auditEvents.actorId
+      })
+      .from(auditEvents)
+      .leftJoin(users, eq(auditEvents.actorId, users.id))
+      .where(
+        and(
+          eq(auditEvents.targetId, item.id),
+          inArray(auditEvents.action, [
+            'kanban.created',
+            'kanban.updated',
+            'kanban.tombstoned',
+            'kanban.restored'
+          ])
+        )
+      )
+      .orderBy(desc(auditEvents.createdAt))
+      .limit(200);
+  })
   .get('/items/:id/comments', async ({ db, user, params }) => {
     const actor = active(user);
     const { item, scope } = await itemScope(db, params.id);

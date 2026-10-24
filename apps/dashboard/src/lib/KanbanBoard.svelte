@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { ContentChange } from 'shared/activity';
+  import ChangeDetails from '@ksi-core/ui/platform/ChangeDetails.svelte';
   import { tick } from 'svelte';
   import ContentHistory from './ContentHistory.svelte';
   import { flip } from 'svelte/animate';
@@ -350,11 +352,36 @@
     editTitle = $state(''),
     editMarkdown = $state(''),
     reply = $state('');
+  type Activity = {
+    id: string;
+    action: string;
+    metadata: { changes?: ContentChange[] };
+    createdAt: string;
+    authorName?: string;
+    authorId?: string;
+  };
+  let activity = $state<Activity[]>([]);
   let comments = $state<Comment[]>([]),
     commentsLoading = $state(false),
     editingCommentId = $state<string | null>(null),
     editingCommentMarkdown = $state(''),
     dialog = $state<HTMLDialogElement>();
+  const timeline = $derived(
+    [
+      ...comments.map((comment) => ({
+        kind: 'comment' as const,
+        id: comment.id,
+        createdAt: comment.createdAt,
+        comment
+      })),
+      ...activity.map((event) => ({
+        kind: 'event' as const,
+        id: event.id,
+        createdAt: event.createdAt,
+        event
+      }))
+    ].sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id))
+  );
   let lastTrigger: HTMLElement | null = null,
     detailGeneration = 0;
   async function api<T>(path: string, method = 'GET', body?: unknown): Promise<T> {
@@ -500,6 +527,7 @@
         });
         if (selected)
           selected = updated.find((candidate) => candidate.id === selected?.id) ?? selected;
+        if (selected) await loadComments(selected.id);
       });
     } finally {
       optimisticOrder = null;
@@ -589,8 +617,14 @@
     const generation = ++detailGeneration;
     commentsLoading = true;
     try {
-      const result = await api<Comment[]>(`/platform/items/${id}/comments`);
-      if (generation === detailGeneration) comments = result;
+      const [result, events] = await Promise.all([
+        api<Comment[]>(`/platform/items/${id}/comments`),
+        api<Activity[]>(`/platform/items/${id}/activity`)
+      ]);
+      if (generation === detailGeneration) {
+        comments = result;
+        activity = events;
+      }
     } catch (error) {
       if (generation === detailGeneration)
         reportError(error instanceof Error ? error.message : 'Request failed');
@@ -605,6 +639,7 @@
     confirmingDelete = false;
     reply = '';
     comments = [];
+    activity = [];
     await tick();
     dialog?.showModal();
     void loadComments(item.id);
@@ -622,6 +657,7 @@
         confirmingDelete = false;
         reply = '';
         comments = [];
+        activity = [];
         void tick().then(() => {
           dialog?.showModal();
           void loadComments(target.id);
@@ -646,6 +682,7 @@
         labels: editLabels
       });
       editing = false;
+      await loadComments(selected!.id);
     });
   }
   async function removeItem() {
@@ -1373,65 +1410,92 @@
           class="discussion-skeleton"
           aria-label={'Loading discussion'}
         ></div>{:else}
-        {#each comments as comment (comment.id)}<article class="discussion-post">
-            <div class="post-meta">
-              <strong>{comment.authorName || 'Association member'}</strong><time
-                datetime={comment.createdAt}
-                >{new Date(comment.createdAt).toLocaleString(
-                  language === 'pl' ? 'pl-PL' : 'en-GB'
-                )}</time
-              >
-              <div class="comment-actions">
-                <ContentHistory kind="comment" targetId={comment.id} {language} />
-                {#if comment.authorId === userId || canManage}
-                  <button
-                    type="button"
-                    class="icon-action-btn"
-                    title="Edit"
-                    onclick={() => {
-                      editingCommentId = comment.id;
-                      editingCommentMarkdown = comment.markdown;
-                    }}
-                  >
-                    <Pencil size={13} aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    class="icon-action-btn danger"
-                    title="Delete"
-                    onclick={() => deleteComment(comment.id)}
-                  >
-                    <Trash2 size={13} aria-hidden="true" />
-                  </button>
-                {/if}
+        {#each timeline as entry (entry.id)}
+          {#if entry.kind === 'event'}<article class="discussion-post">
+              <div class="post-meta">
+                <strong>{entry.event.authorName || 'System'}</strong><time
+                  datetime={entry.createdAt}
+                  >{new Date(entry.createdAt).toLocaleString(
+                    language === 'pl' ? 'pl-PL' : 'en-GB'
+                  )}</time
+                >
               </div>
-            </div>
-            {#if editingCommentId === comment.id}
-              <form
-                class="issue-reply"
-                onsubmit={(event) => {
-                  event.preventDefault();
-                  void saveCommentEdit(comment.id);
-                }}
-              >
-                <Editor {language} bind:value={editingCommentMarkdown} rows={4} />
-                <div style="display: flex; gap: 8px;">
-                  <button class="btn" disabled={busy || !editingCommentMarkdown.trim()}
-                    >{'Save'}</button
-                  >
-                  <button
-                    type="button"
-                    class="btn ghost"
-                    onclick={() => {
-                      editingCommentId = null;
-                    }}>{'Cancel'}</button
-                  >
+              <p>
+                {entry.event.action === 'kanban.updated'
+                  ? language === 'pl'
+                    ? 'Zaktualizowano zadanie'
+                    : 'Updated task'
+                  : entry.event.action === 'kanban.created'
+                    ? language === 'pl'
+                      ? 'Utworzono zadanie'
+                      : 'Created task'
+                    : entry.event.action}
+              </p>
+              {#if entry.event.metadata.changes?.length}<ChangeDetails
+                  changes={entry.event.metadata.changes}
+                  {language}
+                />{/if}
+            </article>{:else}
+            {@const comment = entry.comment}
+            <article class="discussion-post">
+              <div class="post-meta">
+                <strong>{comment.authorName || 'Association member'}</strong><time
+                  datetime={comment.createdAt}
+                  >{new Date(comment.createdAt).toLocaleString(
+                    language === 'pl' ? 'pl-PL' : 'en-GB'
+                  )}</time
+                >
+                <div class="comment-actions">
+                  <ContentHistory kind="comment" targetId={comment.id} {language} />
+                  {#if comment.authorId === userId || canManage}
+                    <button
+                      type="button"
+                      class="icon-action-btn"
+                      title="Edit"
+                      onclick={() => {
+                        editingCommentId = comment.id;
+                        editingCommentMarkdown = comment.markdown;
+                      }}
+                    >
+                      <Pencil size={13} aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      class="icon-action-btn danger"
+                      title="Delete"
+                      onclick={() => deleteComment(comment.id)}
+                    >
+                      <Trash2 size={13} aria-hidden="true" />
+                    </button>
+                  {/if}
                 </div>
-              </form>
-            {:else}
-              <MarkdownContent value={comment.markdown} {language} />
-            {/if}
-          </article>{/each}
+              </div>
+              {#if editingCommentId === comment.id}
+                <form
+                  class="issue-reply"
+                  onsubmit={(event) => {
+                    event.preventDefault();
+                    void saveCommentEdit(comment.id);
+                  }}
+                >
+                  <Editor {language} bind:value={editingCommentMarkdown} rows={4} />
+                  <div style="display: flex; gap: 8px;">
+                    <button class="btn" disabled={busy || !editingCommentMarkdown.trim()}
+                      >{'Save'}</button
+                    >
+                    <button
+                      type="button"
+                      class="btn ghost"
+                      onclick={() => {
+                        editingCommentId = null;
+                      }}>{'Cancel'}</button
+                    >
+                  </div>
+                </form>
+              {:else}
+                <MarkdownContent value={comment.markdown} {language} />
+              {/if}
+            </article>{/if}{/each}
         {#if !comments.length}<p class="muted">
             {'Start a discussion about this task.'}
           </p>{/if}{/if}
