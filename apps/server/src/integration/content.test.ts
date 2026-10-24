@@ -702,6 +702,48 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
       true
     );
     expect(stored.every((task) => task.version > 1)).toBe(true);
+    for (const task of tasks) {
+      const timeline = await collaboration(`/items/${task.id}/activity`, 'leader');
+      expect(timeline.status).toBe(200);
+      const edit = timeline.body.find((event: any) => event.action === 'kanban.label.updated');
+      expect(edit?.metadata.changes).toEqual([
+        {
+          field: 'label',
+          before: { name: 'Bug', color: '#ef4444', description: 'Something is broken' },
+          after: { name: 'Defect', color: '#123456', description: 'Renamed label' }
+        }
+      ]);
+    }
+    const noOpBefore = (await collaboration(`/items/${tasks[0].id}/activity`, 'leader')).body
+      .length;
+    expect(
+      (
+        await collaboration(`${path}/Defect`, 'leader', 'PATCH', {
+          name: 'Defect',
+          color: '#123456',
+          description: 'Renamed label'
+        })
+      ).status
+    ).toBe(200);
+    expect((await collaboration(`/items/${tasks[0].id}/activity`, 'leader')).body).toHaveLength(
+      noOpBefore
+    );
+    const updatedDefinitions = renamed.body.labels.map((label: any) =>
+      label.name === 'Defect' ? { ...label, color: '#abcdef' } : label
+    );
+    expect(
+      (await collaboration(path, 'leader', 'PUT', { labels: updatedDefinitions })).status
+    ).toBe(200);
+    const colorHistory = await collaboration(`/items/${tasks[0].id}/revisions`, 'member');
+    expect(colorHistory.status).toBe(200);
+    expect(colorHistory.body.revisions[0].changes).toEqual([
+      {
+        field: 'label',
+        before: { name: 'Defect', color: '#123456', description: 'Renamed label' },
+        after: { name: 'Defect', color: '#abcdef', description: 'Renamed label' }
+      }
+    ]);
+
     expect(
       (
         await collaboration(`/items/${tasks[0].id}`, 'member', 'PATCH', {
@@ -714,6 +756,27 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
       422
     );
     expect((await collaboration(`${path}/Defect`, 'leader', 'DELETE')).status).toBe(409);
+  });
+  test('task label assignments and removals carry their names into the activity timeline', async () => {
+    const created = await collaboration(`/boards/${boardId}/items`, 'member', 'POST', {
+      title: 'Label picker fixture',
+      markdown: '',
+      column: 'todo',
+      position: 5,
+      labels: ['ML']
+    });
+    expect(created.status).toBe(200);
+    const changed = await collaboration(`/items/${created.body.id}`, 'member', 'PATCH', {
+      version: created.body.version,
+      labels: ['Defect']
+    });
+    expect(changed.status).toBe(200);
+    const activity = await collaboration(`/items/${created.body.id}/activity`, 'member');
+    expect(activity.status).toBe(200);
+    const edit = activity.body.find((event: any) => event.action === 'kanban.updated');
+    expect(edit?.metadata.changes).toEqual([
+      { field: 'labels', before: ['ML'], after: ['Defect'] }
+    ]);
   });
   test('restricted forums hide threads until invited; archives block new comments but preserve history', async () => {
     const thread = await collaboration('/threads', 'leader', 'POST', {
@@ -879,6 +942,13 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
         ...context,
         changes: [{ field: 'markdown', before: 'Original comment', after: 'Dupa dupa' }]
       });
+      const saved = (
+        'itemId' in context
+          ? await collaboration(path, 'member')
+          : await collaboration(`/threads/${context.threadId}`, 'member')
+      ).body;
+      const savedComments = 'itemId' in context ? saved : saved.comments;
+      expect(savedComments.find((entry: any) => entry.id === created.body.id).edited).toBe(true);
       const count = events.length;
       const denied = await collaboration(`/comments/${created.body.id}`, 'outsider', 'PATCH', {
         markdown: 'Unauthorized'
@@ -1068,6 +1138,16 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
       changes: [{ field: 'column', before: 'todo', after: 'progress' }]
     });
     expect(JSON.stringify(movedHistory.body)).not.toContain('itemIds');
+    const activity = await collaboration(`/items/${task.id}/activity`, 'outsider');
+    expect(activity.status).toBe(200);
+    expect(activity.body[0]).toMatchObject({
+      action: 'kanban.reordered',
+      metadata: { changes: movedHistory.body.revisions[0].changes }
+    });
+    expect(activity.body.some((entry: any) => entry.action === 'kanban.comment.created')).toBe(
+      false
+    );
+    expect(JSON.stringify(activity.body)).not.toContain('itemIds');
 
     // Older records remain visible without inventing values that were never stored.
     const [legacy] = await db
@@ -1103,7 +1183,78 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
       ).status
     ).toBe(200);
     expect((await collaboration(`/items/${task.id}/revisions`, 'outsider')).status).toBe(403);
+    expect((await collaboration(`/items/${task.id}/activity`, 'outsider')).status).toBe(403);
+    const deletedActivity = await collaboration(`/items/${task.id}/activity`, 'leader');
+    expect(deletedActivity.status).toBe(200);
+    expect(deletedActivity.body[0].action).toBe('kanban.tombstoned');
+
     expect((await collaboration(`/items/${task.id}/revisions`, 'leader')).status).toBe(200);
+  });
+  test('task timeline paginates safely and shares filtered diffs with the revision popup', async () => {
+    const created = await collaboration(`/boards/${boardId}/items`, 'member', 'POST', {
+      title: 'Timeline fixture',
+      markdown: 'Initial text',
+      labels: [],
+      column: 'todo',
+      position: 100
+    });
+    expect(created.status).toBe(200);
+    let version = created.body.version;
+    for (let index = 1; index <= 23; index++) {
+      const updated = await collaboration(`/items/${created.body.id}`, 'member', 'PATCH', {
+        version,
+        markdown: `Update ${index}`
+      });
+      expect(updated.status).toBe(200);
+      version = updated.body.version;
+    }
+    const first = await collaboration(`/items/${created.body.id}/activity`, 'outsider');
+    const next = await collaboration(`/items/${created.body.id}/activity?page=1`, 'outsider');
+    expect(first.status).toBe(200);
+    expect(first.body).toHaveLength(20);
+    expect(next.body).toHaveLength(4);
+    expect(first.body[0].metadata.changes).toEqual([
+      { field: 'markdown', before: 'Update 22', after: 'Update 23' }
+    ]);
+    expect(next.body.at(-1).action).toBe('kanban.created');
+    expect(new Set([...first.body, ...next.body].map((entry: any) => entry.id)).size).toBe(24);
+    expect(
+      (await collaboration(`/items/${created.body.id}/activity?page=2`, 'outsider')).body
+    ).toEqual([]);
+    expect(
+      (await collaboration(`/items/${created.body.id}/activity?page=-1`, 'outsider')).status
+    ).toBe(422);
+    const revisions = await collaboration(`/items/${created.body.id}/revisions`, 'outsider');
+    expect(first.body.map((entry: any) => entry.metadata.changes)).toEqual(
+      revisions.body.revisions.map((entry: any) => entry.changes)
+    );
+    const [legacy] = await db
+      .insert(auditEvents)
+      .values({
+        actorId: ids.member,
+        projectId,
+        targetId: created.body.id,
+        action: 'kanban.updated',
+        metadata: {
+          token: 'hidden-timeline-secret',
+          changes: [
+            { field: 'nickname', before: null, after: '' },
+            { field: 'markdown', before: null, after: '' },
+            { field: 'title', before: 'First', after: 'Second' },
+            { field: 'password', before: 'secret', after: 'hidden-timeline-secret' }
+          ]
+        }
+      })
+      .returning();
+    try {
+      const activity = await collaboration(`/items/${created.body.id}/activity`, 'outsider');
+      expect(activity.body.find((entry: any) => entry.id === legacy!.id).metadata).toEqual({
+        changes: [{ field: 'title', before: 'First', after: 'Second' }]
+      });
+      expect(JSON.stringify(activity.body)).not.toContain('hidden-timeline-secret');
+    } finally {
+      await db.delete(auditEvents).where(eq(auditEvents.id, legacy!.id));
+    }
   });
   test('forum comment history follows current thread visibility, invitations and archives', async () => {
     const thread = await collaboration('/threads', 'leader', 'POST', {
@@ -1153,6 +1304,85 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
     expect((await collaboration(`/comments/${comment.body.id}/revisions`, 'leader')).status).toBe(
       200
     );
+  });
+  test('thread activity is scoped to the thread and follows its current access rules', async () => {
+    const thread = await collaboration('/threads', 'leader', 'POST', {
+      projectId,
+      title: 'Timeline thread',
+      markdown: 'Opening post',
+      visibility: 'members',
+      invitedIds: []
+    });
+    expect(thread.status).toBe(200);
+    const comment = await collaboration(`/threads/${thread.body.id}/comments`, 'member', 'POST', {
+      markdown: 'Timeline reply'
+    });
+    expect(comment.status).toBe(200);
+    expect(
+      (
+        await collaboration(`/comments/${comment.body.id}`, 'member', 'PATCH', {
+          markdown: 'Timeline reply edited'
+        })
+      ).status
+    ).toBe(200);
+    expect((await collaboration(`/threads/${thread.body.id}/activity`, 'outsider')).status).toBe(
+      404
+    );
+    const access = await collaboration(`/threads/${thread.body.id}/access`, 'leader', 'PUT', {
+      version: thread.body.version,
+      visibility: 'leaders',
+      invitedIds: [ids.member]
+    });
+    expect(access.status).toBe(200);
+    const activity = await collaboration(`/threads/${thread.body.id}/activity`, 'member');
+    expect(activity.status).toBe(200);
+    expect(activity.body[0]).toMatchObject({
+      action: 'threads.access.updated',
+      metadata: {
+        changes: [
+          { field: 'visibility', before: 'members', after: 'leaders' },
+          { field: 'invitedIds', before: [], after: [ids.member] }
+        ]
+      }
+    });
+    expect(activity.body.some((event: any) => event.action === 'comments.edited')).toBe(false);
+    const detail = await collaboration(`/threads/${thread.body.id}`, 'member');
+    expect(detail.body.comments.find((entry: any) => entry.id === comment.body.id).edited).toBe(
+      true
+    );
+    expect((await collaboration(`/threads/${thread.body.id}/activity`, 'outsider')).status).toBe(
+      404
+    );
+
+    const other = await collaboration('/threads', 'leader', 'POST', {
+      projectId,
+      title: 'Unrelated timeline thread',
+      markdown: 'Other post',
+      visibility: 'members',
+      invitedIds: []
+    });
+    const otherComment = await collaboration(
+      `/threads/${other.body.id}/comments`,
+      'member',
+      'POST',
+      { markdown: 'Other reply' }
+    );
+    await collaboration(`/comments/${otherComment.body.id}`, 'member', 'PATCH', {
+      markdown: 'Other reply edited'
+    });
+    const scoped = await collaboration(`/threads/${thread.body.id}/activity`, 'member');
+    expect(scoped.body.some((event: any) => event.targetId === otherComment.body.id)).toBe(false);
+
+    const archived = await collaboration(`/threads/${thread.body.id}/archive`, 'leader', 'POST', {
+      version: access.body.version,
+      archived: true
+    });
+    expect(archived.status).toBe(200);
+    const afterArchive = await collaboration(`/threads/${thread.body.id}/activity`, 'member');
+    expect(afterArchive.body[0].action).toBe('threads.archived');
+    expect(
+      (await collaboration(`/threads/${thread.body.id}/activity?page=-1`, 'member')).status
+    ).toBe(422);
   });
   test('scope denial blocks unrelated publishing and audit history', async () => {
     expect((await content(`/articles/${articleId}`, 'outsider')).status).toBe(403);

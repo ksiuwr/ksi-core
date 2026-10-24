@@ -1,8 +1,9 @@
 <script lang="ts">
   import type { ContentChange } from 'shared/activity';
-  import ChangeDetails from '@ksi-core/ui/platform/ChangeDetails.svelte';
-  import { tick } from 'svelte';
+  import TaskActivity from './TaskActivity.svelte';
+  import { tick, onMount } from 'svelte';
   import ContentHistory from './ContentHistory.svelte';
+  import ConfirmDialog from './ConfirmDialog.svelte';
   import { flip } from 'svelte/animate';
   import { prefersReducedMotion } from 'svelte/motion';
   import {
@@ -14,7 +15,9 @@
     MessagesSquare,
     GripVertical,
     Check,
-    Settings2
+    Settings2,
+    RotateCcw,
+    ArrowUp
   } from '@lucide/svelte';
   import Dropdown, { type DropdownOption } from '@ksi-core/ui/platform/Dropdown.svelte';
   import Editor from '@ksi-core/ui/platform/Editor.svelte';
@@ -37,6 +40,7 @@
     createdAt: string;
     authorName?: string;
     authorId?: string;
+    edited?: boolean;
   };
   let {
     items,
@@ -355,16 +359,26 @@
   type Activity = {
     id: string;
     action: string;
-    metadata: { changes?: ContentChange[] };
+    metadata: { changes: ContentChange[] | null };
     createdAt: string;
-    authorName?: string;
-    authorId?: string;
+    authorName: string | null;
+    authorId: string | null;
   };
   let activity = $state<Activity[]>([]);
+  let activityNextPage = $state<number | null>(null);
+  let activityLoading = $state(false);
+  let activityError = $state(false);
+  let discussionError = $state(false);
+  let activityNow = $state(Date.now());
+  onMount(() => {
+    const timer = setInterval(() => (activityNow = Date.now()), 60000);
+    return () => clearInterval(timer);
+  });
   let comments = $state<Comment[]>([]),
     commentsLoading = $state(false),
     editingCommentId = $state<string | null>(null),
     editingCommentMarkdown = $state(''),
+    pendingCommentDelete = $state<string | null>(null),
     dialog = $state<HTMLDialogElement>();
   const timeline = $derived(
     [
@@ -616,20 +630,41 @@
   async function loadComments(id: string) {
     const generation = ++detailGeneration;
     commentsLoading = true;
+    activityLoading = false;
+    activityError = false;
+    discussionError = false;
+    const [result, events] = await Promise.allSettled([
+      api<Comment[]>(`/platform/items/${id}/comments`),
+      api<Activity[]>(`/platform/items/${id}/activity`)
+    ]);
+    if (generation !== detailGeneration) return;
+    if (result.status === 'fulfilled') comments = result.value;
+    else discussionError = true;
+    if (events.status === 'fulfilled') {
+      activity = events.value;
+      activityNextPage = events.value.length === 20 ? 1 : null;
+    } else {
+      activityError = true;
+      activityNextPage = 0;
+    }
+    commentsLoading = false;
+  }
+  async function loadOlderActivity() {
+    if (!selected || activityLoading || activityNextPage === null) return;
+    const id = selected.id,
+      page = activityNextPage,
+      generation = detailGeneration;
+    activityLoading = true;
+    activityError = false;
     try {
-      const [result, events] = await Promise.all([
-        api<Comment[]>(`/platform/items/${id}/comments`),
-        api<Activity[]>(`/platform/items/${id}/activity`)
-      ]);
-      if (generation === detailGeneration) {
-        comments = result;
-        activity = events;
-      }
-    } catch (error) {
-      if (generation === detailGeneration)
-        reportError(error instanceof Error ? error.message : 'Request failed');
+      const events = await api<Activity[]>(`/platform/items/${id}/activity?page=${page}`);
+      if (generation !== detailGeneration) return;
+      activity = [...new Map([...activity, ...events].map((event) => [event.id, event])).values()];
+      activityNextPage = events.length === 20 ? page + 1 : null;
+    } catch {
+      if (generation === detailGeneration) activityError = true;
     } finally {
-      if (generation === detailGeneration) commentsLoading = false;
+      if (generation === detailGeneration) activityLoading = false;
     }
   }
   async function openItem(item: Item, event: MouseEvent) {
@@ -710,11 +745,17 @@
     });
   }
   async function deleteComment(id: string) {
-    if (!selected || !confirm('Delete comment?')) return;
+    if (!selected) return;
     await run(async () => {
       await api(`/platform/comments/${id}`, 'DELETE');
       await loadComments(selected!.id);
     });
+  }
+  async function confirmDeleteComment() {
+    const id = pendingCommentDelete;
+    if (!id) return;
+    await deleteComment(id);
+    pendingCommentDelete = null;
   }
 </script>
 
@@ -1410,93 +1451,126 @@
           class="discussion-skeleton"
           aria-label={'Loading discussion'}
         ></div>{:else}
-        {#each timeline as entry (entry.id)}
-          {#if entry.kind === 'event'}<article class="discussion-post">
-              <div class="post-meta">
-                <strong>{entry.event.authorName || 'System'}</strong><time
-                  datetime={entry.createdAt}
-                  >{new Date(entry.createdAt).toLocaleString(
-                    language === 'pl' ? 'pl-PL' : 'en-GB'
-                  )}</time
-                >
-              </div>
-              <p>
-                {entry.event.action === 'kanban.updated'
-                  ? language === 'pl'
-                    ? 'Zaktualizowano zadanie'
-                    : 'Updated task'
-                  : entry.event.action === 'kanban.created'
-                    ? language === 'pl'
-                      ? 'Utworzono zadanie'
-                      : 'Created task'
-                    : entry.event.action}
-              </p>
-              {#if entry.event.metadata.changes?.length}<ChangeDetails
-                  changes={entry.event.metadata.changes}
-                  {language}
+        {#if discussionError}
+          <p class="timeline-error" role="alert">
+            {language === 'pl' ? 'Nie udało się wczytać komentarzy.' : 'Could not load comments.'}
+            <button
+              type="button"
+              class="timeline-load"
+              onclick={() => selected && loadComments(selected.id)}
+              ><RotateCcw size={13} aria-hidden="true" />{language === 'pl'
+                ? 'Spróbuj ponownie'
+                : 'Try again'}</button
+            >
+          </p>
+        {/if}
+        {#if activityNextPage !== null}
+          <div class="timeline-pagination">
+            {#if activityError}<p role="alert">
+                {language === 'pl'
+                  ? 'Nie udało się wczytać aktywności.'
+                  : 'Could not load activity.'}
+              </p>{/if}
+            <button
+              type="button"
+              class="timeline-load"
+              disabled={activityLoading}
+              onclick={loadOlderActivity}
+            >
+              {#if activityError}<RotateCcw size={13} aria-hidden="true" />{:else}<ArrowUp
+                  size={13}
+                  aria-hidden="true"
                 />{/if}
-            </article>{:else}
-            {@const comment = entry.comment}
-            <article class="discussion-post">
-              <div class="post-meta">
-                <strong>{comment.authorName || 'Association member'}</strong><time
-                  datetime={comment.createdAt}
-                  >{new Date(comment.createdAt).toLocaleString(
-                    language === 'pl' ? 'pl-PL' : 'en-GB'
-                  )}</time
-                >
-                <div class="comment-actions">
-                  <ContentHistory kind="comment" targetId={comment.id} {language} />
-                  {#if comment.authorId === userId || canManage}
-                    <button
-                      type="button"
-                      class="icon-action-btn"
-                      title="Edit"
-                      onclick={() => {
-                        editingCommentId = comment.id;
-                        editingCommentMarkdown = comment.markdown;
-                      }}
-                    >
-                      <Pencil size={13} aria-hidden="true" />
-                    </button>
-                    <button
-                      type="button"
-                      class="icon-action-btn danger"
-                      title="Delete"
-                      onclick={() => deleteComment(comment.id)}
-                    >
-                      <Trash2 size={13} aria-hidden="true" />
-                    </button>
-                  {/if}
-                </div>
-              </div>
-              {#if editingCommentId === comment.id}
-                <form
-                  class="issue-reply"
-                  onsubmit={(event) => {
-                    event.preventDefault();
-                    void saveCommentEdit(comment.id);
-                  }}
-                >
-                  <Editor {language} bind:value={editingCommentMarkdown} rows={4} />
-                  <div style="display: flex; gap: 8px;">
-                    <button class="btn" disabled={busy || !editingCommentMarkdown.trim()}
-                      >{'Save'}</button
-                    >
-                    <button
-                      type="button"
-                      class="btn ghost"
-                      onclick={() => {
-                        editingCommentId = null;
-                      }}>{'Cancel'}</button
-                    >
+              {activityLoading
+                ? language === 'pl'
+                  ? 'Wczytywanie…'
+                  : 'Loading…'
+                : activityError
+                  ? language === 'pl'
+                    ? 'Spróbuj ponownie'
+                    : 'Try again'
+                  : language === 'pl'
+                    ? 'Pokaż wcześniejszą aktywność'
+                    : 'Load earlier activity'}
+            </button>
+          </div>
+        {/if}
+        <div class="discussion-timeline">
+          {#each timeline as entry (`${entry.kind}-${entry.id}`)}
+            {#if entry.kind === 'event'}
+              <TaskActivity
+                event={entry.event}
+                {statuses}
+                labels={normalizedLabels}
+                {language}
+                now={activityNow}
+              />
+            {:else}
+              {@const comment = entry.comment}
+              <article class="discussion-post timeline-comment">
+                <span class="comment-marker"><MessagesSquare size={14} aria-hidden="true" /></span>
+                <div class="post-meta">
+                  <strong>{comment.authorName || 'Association member'}</strong><time
+                    datetime={comment.createdAt}
+                    >{new Date(comment.createdAt).toLocaleString(
+                      language === 'pl' ? 'pl-PL' : 'en-GB'
+                    )}</time
+                  >
+                  <div class="comment-actions">
+                    {#if comment.edited}
+                      <ContentHistory kind="comment" targetId={comment.id} {language} />
+                    {/if}
+                    {#if comment.authorId === userId || canManage}
+                      <button
+                        type="button"
+                        class="icon-action-btn"
+                        title="Edit"
+                        onclick={() => {
+                          editingCommentId = comment.id;
+                          editingCommentMarkdown = comment.markdown;
+                        }}
+                      >
+                        <Pencil size={13} aria-hidden="true" />
+                      </button>
+                      <button
+                        type="button"
+                        class="icon-action-btn danger"
+                        title="Delete"
+                        onclick={() => (pendingCommentDelete = comment.id)}
+                      >
+                        <Trash2 size={13} aria-hidden="true" />
+                      </button>
+                    {/if}
                   </div>
-                </form>
-              {:else}
-                <MarkdownContent value={comment.markdown} {language} />
-              {/if}
-            </article>{/if}{/each}
-        {#if !comments.length}<p class="muted">
+                </div>
+                {#if editingCommentId === comment.id}
+                  <form
+                    class="issue-reply"
+                    onsubmit={(event) => {
+                      event.preventDefault();
+                      void saveCommentEdit(comment.id);
+                    }}
+                  >
+                    <Editor {language} bind:value={editingCommentMarkdown} rows={4} />
+                    <div style="display: flex; gap: 8px;">
+                      <button class="btn" disabled={busy || !editingCommentMarkdown.trim()}
+                        >{'Save'}</button
+                      >
+                      <button
+                        type="button"
+                        class="btn ghost"
+                        onclick={() => {
+                          editingCommentId = null;
+                        }}>{'Cancel'}</button
+                      >
+                    </div>
+                  </form>
+                {:else}
+                  <MarkdownContent value={comment.markdown} {language} />
+                {/if}
+              </article>{/if}{/each}
+        </div>
+        {#if !comments.length && !discussionError}<p class="muted">
             {'Start a discussion about this task.'}
           </p>{/if}{/if}
       <form
@@ -1514,7 +1588,99 @@
     </section>
   </dialog>{/if}
 
+<ConfirmDialog
+  open={pendingCommentDelete !== null}
+  title={language === 'pl' ? 'Usunąć komentarz?' : 'Delete comment?'}
+  message={language === 'pl' ? 'Tej operacji nie można cofnąć.' : 'This action cannot be undone.'}
+  confirmLabel={language === 'pl' ? 'Usuń' : 'Delete'}
+  cancelLabel={language === 'pl' ? 'Anuluj' : 'Cancel'}
+  {busy}
+  onconfirm={() => void confirmDeleteComment()}
+  onclose={() => (pendingCommentDelete = null)}
+/>
+
 <style>
+  .discussion-timeline {
+    position: relative;
+  }
+  .discussion-timeline::before {
+    content: '';
+    position: absolute;
+    left: 14px;
+    top: 12px;
+    bottom: 12px;
+    width: 2px;
+    background: var(--line);
+  }
+  .discussion-post.timeline-comment {
+    position: relative;
+    margin: 14px 0 14px 44px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: var(--surface);
+  }
+  .comment-marker {
+    position: absolute;
+    left: -45px;
+    top: 9px;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border: 3px solid var(--surface);
+    border-radius: 50%;
+    color: var(--muted);
+    background: var(--surface-muted);
+  }
+  @media (max-width: 600px) {
+    .discussion-timeline::before {
+      left: 11px;
+    }
+    .discussion-post.timeline-comment {
+      margin-left: 36px;
+      padding: 12px;
+    }
+    .comment-marker {
+      left: -40px;
+    }
+  }
+  .timeline-pagination {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    padding: 12px 0;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .timeline-load {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    background: var(--surface);
+    color: var(--ink);
+    padding: 7px 10px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .timeline-load:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+  .timeline-load:hover {
+    background: var(--surface-muted);
+  }
+  .timeline-error {
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
   .board-toolbar {
     display: flex;
     align-items: center;
