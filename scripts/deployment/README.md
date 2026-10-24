@@ -13,8 +13,9 @@ changes rebuild every image. UI package changes rebuild all three frontends.
 Promotion requires a fine-grained `CLUSTER_WRITE_TOKEN` with contents write access
 to `ksiuwr/ksi-cluster` and the `PRODUCTION_KUBECONFIG_B64` secret in the protected
 `production` GitHub Environment. The kubeconfig belongs to a ServiceAccount that can
-patch only the existing production Deployments, Services, and Ingress by name. It
-cannot access preview resources or create/delete production resources.
+patch only the existing production Deployments, Services and Ingress by name. It
+can create migration Jobs and get/list/watch/delete the named `production-migration`
+Job, but cannot directly read Secrets or Pods or access preview resources.
 
 `promote_manifest.py` accepts exactly one server, web, auth, and dashboard image.
 It requires the expected GHCR repository and an immutable `sha256` digest for each
@@ -29,8 +30,9 @@ The final job verifies that `master` still points at the commit whose images wer
 built before it pushes the cluster commit. Cluster writes are serialized, and a
 non-fast-forward push fails safely.
 
-After CI confirms the tested commit is still the current `master`, it commits the
-production image digests to `ksi-cluster`, applies that manifest to Kubernetes, and
+After CI confirms the tested commit is still the current `master`, it runs the
+production migration Job with the new server image. On success, it rechecks `master`,
+commits the production image digests to `ksi-cluster`, applies that manifest, and
 waits for all four production Deployments to become ready. If the rollout fails, the
 manifest commit records the intended tested digests and the workflow reports failure;
 roll back by promoting the previous known-good image digests.
@@ -87,3 +89,33 @@ random bytes. The API verifies GitHub's OIDC signature and restricts ingestion t
 repository's protected preview environment, encrypts stored passwords, and removes them
 when preview cleanup runs. In project settings, create a group such as “Maintainers”,
 assign project members, and enable “View preview sign-in credentials”.
+
+## Production migrations
+
+The protected production promotion job runs `production_migration.py` with the new,
+immutable server image and the existing `ksi-production/ksi-runtime` Secret. The Job
+runs `bun run --cwd apps/server db:migrate`; it does not seed or reset production.
+Promotion is recorded and workloads are updated only after the Job completes. A
+failed migration or timeout fails the workflow and leaves existing workloads running.
+
+The production deployer Role in `ksi-cluster/infrastructure/production-deployer.yaml`
+must first allow Job creation and get/watch/delete for `production-migration`. Merge
+and reconcile that infrastructure change before enabling this workflow. No runtime
+Secret or database credential needs to be copied into GitHub Actions.
+
+Deployments are serialized by the existing production promotion concurrency group.
+Every attempt deletes and waits for the previous migration Job, then creates a new
+one, so retries cannot reuse a completed Job from an older release. Jobs have no
+automatic retries, a ten-minute deadline and a one-day cleanup TTL. Drizzle records
+applied migrations, so reruns skip migrations already applied successfully. Migrations
+must remain compatible with the previous application release while rollout occurs.
+
+To diagnose failures, an administrator can inspect the retained Job and Pod logs:
+
+```sh
+kubectl -n ksi-production describe job production-migration
+kubectl -n ksi-production logs job/production-migration
+```
+
+After correcting the failure, rerun the production workflow. Do not bypass the
+migration step or use an older image that does not contain the release's migrations.
