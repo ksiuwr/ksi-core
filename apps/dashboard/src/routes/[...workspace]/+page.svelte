@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ArticleThumbnail from '$lib/ArticleThumbnail.svelte';
   import ContentTranslations from '$lib/ContentTranslations.svelte';
   import type { ContentTranslations as TranslationData } from 'shared/content-locales';
   import { onMount, untrack, tick } from 'svelte';
@@ -91,6 +92,7 @@
     title: string;
     slug: string;
     markdown: string;
+    thumbnailFileId: string | null;
     version: number;
     state: string;
     translations?: TranslationData;
@@ -155,6 +157,8 @@
   let title = $state('');
   let markdown = $state('');
   let slug = $state('');
+  let thumbnailFileId = $state<string | null>(null);
+  let thumbnailUploading = $state(false);
   let selectedArticle = $state<Article | null>(null);
   let selectedThread = $state<Thread | null>(null);
   let visibility = $state('association');
@@ -316,6 +320,7 @@
         title = article.title;
         slug = article.slug;
         markdown = article.markdown;
+        thumbnailFileId = article.thumbnailFileId;
       }
       if (workspace === 'project') {
         const project = projectList.find((project) => project.slug === projectSlug);
@@ -418,6 +423,8 @@
     title = '';
     markdown = '';
     slug = '';
+    thumbnailFileId = null;
+    thumbnailUploading = false;
     leaderIdsArray = [];
     graveyard = false;
     archived = false;
@@ -563,7 +570,8 @@
         title,
         markdown,
         ...(scope ? { projectId: scope } : {}),
-        language: 'en'
+        language: 'en',
+        thumbnailFileId
       });
       await goto(`/articles/${encodeURIComponent(result.slug)}`);
       return result;
@@ -592,6 +600,7 @@
       version: selectedArticle.version,
       title,
       markdown,
+      thumbnailFileId,
       state: publish
         ? 'published'
         : workspace === 'project' && !projectAccess.canPublishArticles
@@ -1168,6 +1177,8 @@
                           title = '';
                           markdown = '';
                           slug = '';
+                          thumbnailFileId = null;
+                          thumbnailUploading = false;
                         }}><Plus size={16} aria-hidden="true" />{'New article'}</button
                       >
                     {/if}
@@ -1212,6 +1223,13 @@
                       />
                       <label for="a-slug">Slug</label>
                       <input id="a-slug" bind:value={slug} readonly={!!selectedArticle} required />
+                      {#key selectedArticle?.id ?? 'new'}
+                        <ArticleThumbnail
+                          bind:fileId={thumbnailFileId}
+                          bind:uploading={thumbnailUploading}
+                          disabled={busy || (!!selectedArticle && !canSaveArticle)}
+                        />
+                      {/key}
                       <div class="article-editor">
                         {#if canEditArticle}<Editor {language} allowGallery bind:value={markdown} />
                         {:else}<MarkdownContent value={markdown} {language} />{/if}
@@ -1255,7 +1273,7 @@
                           {#if canSaveArticle}
                             <button
                               class="btn"
-                              disabled={busy}
+                              disabled={busy || thumbnailUploading}
                               onclick={() => action(() => saveArticle(false))}
                             >
                               {selectedArticle.state === 'published' && !canPublishArticle
@@ -1266,7 +1284,7 @@
                           {#if canPublishArticle}
                             <button
                               class="btn-coral btn"
-                              disabled={busy}
+                              disabled={busy || thumbnailUploading}
                               onclick={() => action(() => saveArticle(true))}
                             >
                               {'Publish'}
@@ -1275,7 +1293,7 @@
                           {#if workspace !== 'project' || projectAccess.canProposeArticles}
                             <button
                               class="btn btn-outline"
-                              disabled={busy}
+                              disabled={busy || thumbnailUploading}
                               onclick={() => action(propose)}
                             >
                               {'Propose edit'}
@@ -1301,7 +1319,7 @@
                         {:else}
                           <button
                             class="btn"
-                            disabled={busy || !title.trim() || !slug.trim()}
+                            disabled={busy || thumbnailUploading || !title.trim() || !slug.trim()}
                             onclick={() => action(create)}
                           >
                             {'Create'}

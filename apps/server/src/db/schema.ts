@@ -229,6 +229,7 @@ export const articles = snakeCase.table('articles', {
   slug: text().notNull().unique(),
   title: text().notNull(),
   markdown: text().notNull().default(''),
+  thumbnailFileId: text().references(() => files.id),
   language: text().notNull().default('en'),
   state: text().notNull().default('draft'),
   mainArticle: boolean().notNull().default(false),
@@ -253,6 +254,7 @@ export const articleRevisions = snakeCase.table(
     version: integer().notNull(),
     title: text().notNull(),
     markdown: text().notNull(),
+    thumbnailFileId: text().references(() => files.id),
     actorId: text()
       .notNull()
       .references(() => users.id),

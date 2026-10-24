@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { articleThumbnail } from 'shared/article-thumbnail';
   import { markdownImages } from 'shared/markdown-images';
   import MemberPreview from '@ksi-core/ui/platform/MemberPreview.svelte';
   import { ArrowUpRight, CalendarDays } from '@lucide/svelte';
@@ -12,6 +11,7 @@
       slug: string;
       title: string;
       markdown: string;
+      thumbnailFileId?: string | null;
       publishedAt?: string | null;
       authors: {
         id: string;
@@ -48,15 +48,14 @@
 
 <div class="article-list">
   {#each articles as article (article.id)}
-    {@const thumbnail = articleThumbnail(article.markdown)}
     <article class="article-card">
-      {#if thumbnail}<a
+      {#if article.thumbnailFileId}<a
           class="thumbnail"
           href={`/articles/${encodeURIComponent(article.slug)}`}
           aria-label={article.title}
         >
           <img
-            src={thumbnail}
+            src={`/media/${encodeURIComponent(article.thumbnailFileId)}`}
             alt=""
             loading="lazy"
             onerror={(event) => {
@@ -104,6 +103,8 @@
   .thumbnail img {
     width: 100%;
     aspect-ratio: 16 / 9;
+    max-height: 240px;
+    display: block;
     object-fit: cover;
     border-radius: 3px;
   }

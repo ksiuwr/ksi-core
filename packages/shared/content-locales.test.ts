@@ -2,7 +2,7 @@ import { expect, test } from 'bun:test';
 import {
   localizeContent,
   contentLocale,
-  articleMarkdown,
+  articleFileContent,
   hasEnglishSources,
   frontendLocales,
   contentLocales
@@ -24,11 +24,12 @@ test('public translations fall back per field and only support frontend locales'
   expect(hasEnglishSources({ name: '' }, { name: 'Nazwa' })).toBe(false);
   expect(hasEnglishSources({ bio: null }, { bio: '' })).toBe(true);
 });
-test('file references include all translated article content', () => {
+test('file references include the thumbnail and all translated article content', () => {
   expect(
-    articleMarkdown({
+    articleFileContent({
       markdown: 'file:english12',
+      thumbnailFileId: 'thumbnail123',
       translations: { pl: { markdown: 'file:polish123' } }
     })
-  ).toContain('file:polish123');
+  ).toBe('file:english12\nfile:thumbnail123\nfile:polish123');
 });
