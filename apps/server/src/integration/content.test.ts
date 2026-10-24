@@ -840,11 +840,343 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
     expect((await collaboration(`/threads/${thread.body.id}`, 'member')).status).toBe(404);
     await db.insert(projectMembers).values({ projectId, userId: ids.member });
   });
+  test('task and forum comment edits preserve text diffs and navigation context; denied edits leave no event', async () => {
+    const task = await collaboration(`/boards/${boardId}/items`, 'member', 'POST', {
+      title: 'Comment audit fixture',
+      markdown: '',
+      column: 'todo',
+      position: 50,
+      labels: []
+    });
+    expect(task.status).toBe(200);
+    const thread = await collaboration('/threads', 'leader', 'POST', {
+      projectId,
+      title: 'Comment audit thread',
+      markdown: 'Initial post',
+      visibility: 'members',
+      invitedIds: []
+    });
+    expect(thread.status).toBe(200);
+    for (const [path, context] of [
+      [`/items/${task.body.id}/comments`, { itemId: task.body.id, boardId }],
+      [`/threads/${thread.body.id}/comments`, { threadId: thread.body.id }]
+    ] as const) {
+      const created = await collaboration(path, 'member', 'POST', { markdown: 'Original comment' });
+      expect(created.status).toBe(200);
+      expect(
+        (
+          await collaboration(`/comments/${created.body.id}`, 'member', 'PATCH', {
+            markdown: 'Dupa dupa'
+          })
+        ).status
+      ).toBe(200);
+      let events = await db
+        .select()
+        .from(auditEvents)
+        .where(eq(auditEvents.targetId, created.body.id));
+      const edit = events.find((event) => event.action === 'comments.edited');
+      expect(edit?.metadata).toMatchObject({
+        ...context,
+        changes: [{ field: 'markdown', before: 'Original comment', after: 'Dupa dupa' }]
+      });
+      const count = events.length;
+      const denied = await collaboration(`/comments/${created.body.id}`, 'outsider', 'PATCH', {
+        markdown: 'Unauthorized'
+      });
+      expect([403, 404]).toContain(denied.status);
+      events = await db.select().from(auditEvents).where(eq(auditEvents.targetId, created.body.id));
+      expect(events).toHaveLength(count);
+      expect((await collaboration(`/comments/${created.body.id}`, 'member', 'DELETE')).status).toBe(
+        200
+      );
+      const deleted = (
+        await db.select().from(auditEvents).where(eq(auditEvents.targetId, created.body.id))
+      ).find((event) => event.action === 'comments.removed');
+      expect(deleted?.metadata).toMatchObject({
+        ...context,
+        changes: [{ field: 'markdown', before: 'Dupa dupa', after: null }]
+      });
+    }
+  });
+  test('project settings and board configuration retain actual prior values', async () => {
+    const created = await content('/projects', 'board', 'POST', {
+      slug: `audit-${suffix}`,
+      name: 'Audit project',
+      tags: [],
+      fields: ['engineering'],
+      leaderIds: [ids.leader]
+    });
+    expect(created.status).toBe(200);
+    const id = created.body.id;
+    projectIds.push(id);
+    const links = [{ label: 'Repository', url: 'https://example.test/repository' }];
+    expect((await content(`/projects/${id}/links`, 'leader', 'PUT', { links })).status).toBe(200);
+    const layout = [
+      { type: 'main-article', hidden: false },
+      { type: 'leaders', hidden: false }
+    ];
+    expect(
+      (await content(`/projects/${id}/layout`, 'leader', 'PUT', { version: 1, layout })).status
+    ).toBe(200);
+    expect(
+      (
+        await content(`/projects/${id}/leaders`, 'leader', 'PUT', {
+          userIds: [ids.board, ids.leader]
+        })
+      ).status
+    ).toBe(200);
+    const permissions = {
+      memberPermissions: ['articles.content.propose'],
+      nonMemberPermissions: [],
+      groups: [
+        { name: 'Contributors', permissions: ['articles.content.propose'], userIds: [ids.leader] }
+      ]
+    };
+    expect(
+      (await content(`/projects/${id}/permissions`, 'leader', 'PUT', permissions)).status
+    ).toBe(200);
+    const events = await db.select().from(auditEvents).where(eq(auditEvents.projectId, id));
+    expect(
+      events.find((event) => event.action === 'projects.links.updated')?.metadata.changes
+    ).toEqual([{ field: 'links', before: [], after: links }]);
+    expect(
+      events.find((event) => event.action === 'projects.layout.updated')?.metadata.changes
+    ).toEqual([{ field: 'layout', before: created.body.layout, after: layout }]);
+    expect(
+      events.find((event) => event.action === 'projects.leaders.updated')?.metadata.changes
+    ).toEqual([
+      { field: 'leaderIds', before: [ids.leader], after: [ids.board, ids.leader].sort() }
+    ]);
+    const permissionChanges = events.find(
+      (event) => event.action === 'projects.permissions.updated'
+    )?.metadata.changes as any[];
+    expect(permissionChanges.find((change) => change.field === 'groups')).toEqual({
+      field: 'groups',
+      before: [],
+      after: permissions.groups
+    });
+    const board = await collaboration('/boards', 'leader', 'POST', { projectId: id });
+    expect(board.status).toBe(200);
+    const label = { name: 'Bug', color: '#ef4444', description: 'Broken' };
+    const added = await collaboration(`/boards/${board.body.id}/labels`, 'leader', 'POST', label);
+    expect(added.status).toBe(200);
+    const renamed = await collaboration(`/boards/${board.body.id}/labels/Bug`, 'leader', 'PATCH', {
+      ...label,
+      name: 'Defect'
+    });
+    expect(renamed.status).toBe(200);
+    const statuses = [...board.body.statuses, { id: 'review', name: 'Review', color: '#123456' }];
+    expect(
+      (await collaboration(`/boards/${board.body.id}/statuses`, 'leader', 'PUT', { statuses }))
+        .status
+    ).toBe(200);
+    const boardEvents = await db
+      .select()
+      .from(auditEvents)
+      .where(eq(auditEvents.targetId, board.body.id));
+    expect(
+      boardEvents
+        .filter((event) => event.action === 'boards.labels.updated')
+        .map((event) => event.metadata.changes)
+    ).toContainEqual([{ field: 'labels', before: added.body.labels, after: renamed.body.labels }]);
+    expect(
+      boardEvents.find((event) => event.action === 'boards.statuses.updated')?.metadata.changes
+    ).toEqual([{ field: 'statuses', before: board.body.statuses, after: statuses }]);
+  });
+  test('content history is readable by ordinary viewers, paginated and scoped to its content', async () => {
+    const created = await collaboration(`/boards/${boardId}/items`, 'leader', 'POST', {
+      title: 'Original task',
+      markdown: 'Original task body',
+      position: 60,
+      column: 'todo',
+      labels: []
+    });
+    expect(created.status).toBe(200);
+    const task = created.body;
+    const edited = await collaboration(`/items/${task.id}`, 'leader', 'PATCH', {
+      version: task.version,
+      title: 'Revised task',
+      markdown: 'Revised task body',
+      column: 'todo',
+      labels: []
+    });
+    expect(edited.status).toBe(200);
+    const history = await collaboration(`/items/${task.id}/revisions`, 'outsider');
+    expect(history.status).toBe(200);
+    expect(history.body.revisions).toHaveLength(2);
+    expect(history.body.nextPage).toBeNull();
+    expect(history.body.revisions[0]).toMatchObject({
+      kind: 'edited',
+      authorName: 'leader Integration',
+      changes: [
+        { field: 'title', before: 'Original task', after: 'Revised task' },
+        { field: 'markdown', before: 'Original task body', after: 'Revised task body' }
+      ]
+    });
+    expect(history.body.revisions[1].kind).toBe('created');
+    expect(Object.keys(history.body.revisions[0]).sort()).toEqual(
+      ['id', 'createdAt', 'authorName', 'kind', 'changes'].sort()
+    );
+    expect((await collaboration(`/items/${task.id}/revisions`, 'pending')).status).toBe(403);
+    expect((await collaboration(`/items/missing/revisions`, 'member')).status).toBe(404);
+    expect((await collaboration(`/items/${task.id}/revisions?page=-1`, 'member')).status).toBe(422);
+    expect((await collaboration(`/items/${task.id}/revisions?page=0.5`, 'member')).status).toBe(
+      422
+    );
+    const comment = await collaboration(`/items/${task.id}/comments`, 'leader', 'POST', {
+      markdown: 'First version'
+    });
+    for (let i = 1; i <= 23; i++) {
+      expect(
+        (
+          await collaboration(`/comments/${comment.body.id}`, 'leader', 'PATCH', {
+            markdown: `Version ${i}`
+          })
+        ).status
+      ).toBe(200);
+    }
+    const first = await collaboration(`/comments/${comment.body.id}/revisions`, 'outsider');
+    const second = await collaboration(
+      `/comments/${comment.body.id}/revisions?page=${first.body.nextPage}`,
+      'outsider'
+    );
+    expect(first.status).toBe(200);
+    expect(first.body.revisions).toHaveLength(20);
+    expect(first.body.revisions[0].changes).toEqual([
+      { field: 'markdown', before: 'Version 22', after: 'Version 23' }
+    ]);
+    expect(second.body.revisions).toHaveLength(4);
+    expect(second.body.nextPage).toBeNull();
+    expect(
+      new Set(
+        [...first.body.revisions, ...second.body.revisions].map((revision: any) => revision.id)
+      ).size
+    ).toBe(24);
+    expect(second.body.revisions.at(-1).kind).toBe('created');
+    const liveItems = (await collaboration(`/boards/${boardId}/items`, 'leader')).body;
+    const moved = await collaboration(`/boards/${boardId}/order`, 'leader', 'PUT', {
+      column: 'progress',
+      move: { id: task.id, fromColumn: 'todo' },
+      items: [...liveItems.filter((item: any) => item.column === 'progress'), edited.body].map(
+        (item: any) => ({ id: item.id, version: item.version })
+      )
+    });
+    expect(moved.status).toBe(200);
+    const movedHistory = await collaboration(`/items/${task.id}/revisions`, 'outsider');
+    expect(movedHistory.body.revisions[0]).toMatchObject({
+      kind: 'moved',
+      changes: [{ field: 'column', before: 'todo', after: 'progress' }]
+    });
+    expect(JSON.stringify(movedHistory.body)).not.toContain('itemIds');
+
+    // Older records remain visible without inventing values that were never stored.
+    const [legacy] = await db
+      .insert(auditEvents)
+      .values({
+        actorId: ids.leader,
+        projectId,
+        targetId: comment.body.id,
+        action: 'comments.edited',
+        metadata: { token: 'never-return-this-secret' }
+      })
+      .returning();
+    try {
+      const older = await collaboration(`/comments/${comment.body.id}/revisions`, 'outsider');
+      expect(JSON.stringify(older.body)).not.toContain('never-return-this-secret');
+      expect(
+        older.body.revisions.find((revision: any) => revision.id === legacy!.id).changes
+      ).toBeNull();
+    } finally {
+      await db.delete(auditEvents).where(eq(auditEvents.id, legacy!.id));
+    }
+    expect((await collaboration(`/comments/${comment.body.id}`, 'leader', 'DELETE')).status).toBe(
+      200
+    );
+    expect((await collaboration(`/comments/${comment.body.id}/revisions`, 'outsider')).status).toBe(
+      404
+    );
+    expect(
+      (
+        await collaboration(`/items/${task.id}`, 'leader', 'DELETE', {
+          version: moved.body.find((item: any) => item.id === task.id).version
+        })
+      ).status
+    ).toBe(200);
+    expect((await collaboration(`/items/${task.id}/revisions`, 'outsider')).status).toBe(403);
+    expect((await collaboration(`/items/${task.id}/revisions`, 'leader')).status).toBe(200);
+  });
+  test('forum comment history follows current thread visibility, invitations and archives', async () => {
+    const thread = await collaboration('/threads', 'leader', 'POST', {
+      projectId,
+      title: 'Private revision thread',
+      markdown: 'First post',
+      visibility: 'leaders',
+      invitedIds: [ids.member]
+    });
+    expect(thread.status).toBe(200);
+    const comment = await collaboration(`/threads/${thread.body.id}/comments`, 'member', 'POST', {
+      markdown: 'Original forum reply'
+    });
+    expect(comment.status).toBe(200);
+    expect(
+      (
+        await collaboration(`/comments/${comment.body.id}`, 'member', 'PATCH', {
+          markdown: 'Revised forum reply'
+        })
+      ).status
+    ).toBe(200);
+    expect((await collaboration(`/comments/${comment.body.id}/revisions`, 'outsider')).status).toBe(
+      404
+    );
+    const history = await collaboration(`/comments/${comment.body.id}/revisions`, 'member');
+    expect(history.status).toBe(200);
+    expect(history.body.revisions[0].changes).toEqual([
+      { field: 'markdown', before: 'Original forum reply', after: 'Revised forum reply' }
+    ]);
+    const access = await collaboration(`/threads/${thread.body.id}/access`, 'leader', 'PUT', {
+      version: thread.body.version,
+      visibility: 'leaders',
+      invitedIds: []
+    });
+    expect(access.status).toBe(200);
+    expect((await collaboration(`/comments/${comment.body.id}/revisions`, 'member')).status).toBe(
+      404
+    );
+    expect(
+      (
+        await collaboration(`/threads/${thread.body.id}/archive`, 'leader', 'POST', {
+          version: access.body.version,
+          archived: true
+        })
+      ).status
+    ).toBe(200);
+    expect((await collaboration(`/comments/${comment.body.id}/revisions`, 'leader')).status).toBe(
+      200
+    );
+  });
   test('scope denial blocks unrelated publishing and audit history', async () => {
     expect((await content(`/articles/${articleId}`, 'outsider')).status).toBe(403);
     expect((await collaboration(`/events?projectId=${projectId}`, 'member')).status).toBe(403);
     const history = await collaboration(`/events?projectId=${projectId}`, 'leader');
     expect(history.status).toBe(200);
     expect(history.body.length).toBeGreaterThan(5);
+  });
+  test('all exercised content mutations carry a structured change payload', async () => {
+    const events = await db
+      .select()
+      .from(auditEvents)
+      .where(inArray(auditEvents.actorId, Object.values(ids)));
+    expect(events.length).toBeGreaterThan(30);
+    for (const event of events) {
+      expect(
+        Array.isArray(event.metadata.changes),
+        `${event.action} (${event.id}) has no diff`
+      ).toBe(true);
+      for (const change of event.metadata.changes as any[]) {
+        expect(typeof change.field).toBe('string');
+        expect(Object.hasOwn(change, 'before')).toBe(true);
+        expect(Object.hasOwn(change, 'after')).toBe(true);
+      }
+    }
   });
 });

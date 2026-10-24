@@ -1,3 +1,4 @@
+import { contentChanges } from 'shared/activity';
 import { localizeContent, articleFileContent } from 'shared/content-locales';
 import { relatedArticles } from '../../domain/related-articles';
 import { and, eq, inArray, desc, sql, or } from 'drizzle-orm';
@@ -518,7 +519,17 @@ export default createElysia({ prefix: '/platform' })
           projectId: project.id,
           action: 'projects.created',
           targetId: project.id,
-          metadata: { version: project.version }
+          metadata: {
+            version: project.version,
+            changes: contentChanges({}, project, [
+              'name',
+              'description',
+              'tags',
+              'fields',
+              'locked',
+              'layout'
+            ])
+          }
         });
         return project;
       });
@@ -541,6 +552,11 @@ export default createElysia({ prefix: '/platform' })
       return db.transaction(async (tx) => {
         const scope = await scopeFor(tx, params.id);
         requireLeader(actor, scope, 'projects.catalog.edit');
+        const [previous] = await tx
+          .select()
+          .from(projects)
+          .where(eq(projects.id, params.id))
+          .for('update');
         const [project] = await tx
           .update(projects)
           .set({
@@ -559,7 +575,16 @@ export default createElysia({ prefix: '/platform' })
           projectId: project.id,
           action: 'projects.updated',
           targetId: project.id,
-          metadata: { version: project.version }
+          metadata: {
+            version: project.version,
+            changes: contentChanges(previous!, project, [
+              'name',
+              'description',
+              'tags',
+              'fields',
+              'locked'
+            ])
+          }
         });
         return project;
       });
@@ -582,6 +607,12 @@ export default createElysia({ prefix: '/platform' })
       validateLayout(body.layout);
       return db.transaction(async (tx) => {
         requireLeader(actor, await scopeFor(tx, params.id), 'projects.layout.edit');
+        const [previous] = await tx
+          .select()
+          .from(projects)
+          .where(eq(projects.id, params.id))
+          .for('update');
+        if (!previous) throw status(404, { code: 'PROJECT_NOT_FOUND' });
         const [project] = await tx
           .update(projects)
           .set({ layout: body.layout, version: sql`${projects.version} + 1` })
@@ -593,7 +624,10 @@ export default createElysia({ prefix: '/platform' })
           projectId: project.id,
           action: 'projects.layout.updated',
           targetId: project.id,
-          metadata: { version: project.version }
+          metadata: {
+            version: project.version,
+            changes: contentChanges(previous, project, ['layout'])
+          }
         });
         return project;
       });
@@ -624,6 +658,11 @@ export default createElysia({ prefix: '/platform' })
         requireLeader(actor, scope, 'projects.catalog.edit');
         // Links are also part of the project layout, so a denial of either permission applies.
         requireLeader(actor, scope, 'projects.layout.edit');
+        const previous = await tx
+          .select({ label: projectLinks.label, url: projectLinks.url })
+          .from(projectLinks)
+          .where(eq(projectLinks.projectId, params.id))
+          .orderBy(projectLinks.position);
         await tx.delete(projectLinks).where(eq(projectLinks.projectId, params.id));
         if (body.links.length)
           await tx
@@ -633,7 +672,8 @@ export default createElysia({ prefix: '/platform' })
           actorId: actor.id,
           projectId: params.id,
           action: 'projects.links.updated',
-          targetId: params.id
+          targetId: params.id,
+          metadata: { changes: contentChanges({ links: previous }, body, ['links']) }
         });
         return tx
           .select()
@@ -684,6 +724,10 @@ export default createElysia({ prefix: '/platform' })
         .where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, actor.id)));
       if (member) return { state: 'member' };
       if (project.locked) {
+        const [previous] = await tx
+          .select({ state: joinRequests.state })
+          .from(joinRequests)
+          .where(and(eq(joinRequests.projectId, project.id), eq(joinRequests.userId, actor.id)));
         await tx
           .insert(joinRequests)
           .values({ projectId: project.id, userId: actor.id })
@@ -695,7 +739,11 @@ export default createElysia({ prefix: '/platform' })
           actorId: actor.id,
           projectId: project.id,
           action: 'projects.join.requested',
-          targetId: project.id
+          targetId: project.id,
+          metadata: {
+            userId: actor.id,
+            changes: contentChanges(previous ?? {}, { state: 'pending' }, ['state'])
+          }
         });
         return { state: 'request' };
       }
@@ -707,7 +755,8 @@ export default createElysia({ prefix: '/platform' })
         actorId: actor.id,
         projectId: project.id,
         action: 'projects.membership.joined',
-        targetId: actor.id
+        targetId: actor.id,
+        metadata: { changes: contentChanges({ member: false }, { member: true }, ['member']) }
       });
       return { state: 'member' };
     });
@@ -760,7 +809,14 @@ export default createElysia({ prefix: '/platform' })
           actorId: actor.id,
           projectId: params.id,
           action: 'projects.membership.removed',
-          targetId: params.userId
+          targetId: params.userId,
+          metadata: {
+            changes: contentChanges(
+              { member: true, leader: removed.leader },
+              { member: false, leader: false },
+              ['member', 'leader']
+            )
+          }
         });
       }
       return { removed: !!removed };
@@ -819,7 +875,13 @@ export default createElysia({ prefix: '/platform' })
           actorId: actor.id,
           projectId: params.id,
           action: body.accept ? 'projects.join.accepted' : 'projects.join.rejected',
-          targetId: request.id
+          targetId: request.id,
+          metadata: {
+            userId: request.userId,
+            changes: contentChanges(request, { state: body.accept ? 'accepted' : 'rejected' }, [
+              'state'
+            ])
+          }
         });
         return { accepted: body.accept };
       });
@@ -844,6 +906,10 @@ export default createElysia({ prefix: '/platform' })
           .for('share');
         if (candidates.length !== body.userIds.length)
           throw status(422, { code: 'ACTIVE_LEADER_REQUIRED' });
+        const previous = await tx
+          .select({ userId: projectMembers.userId })
+          .from(projectMembers)
+          .where(and(eq(projectMembers.projectId, params.id), eq(projectMembers.leader, true)));
         await tx
           .update(projectMembers)
           .set({ leader: false })
@@ -860,7 +926,14 @@ export default createElysia({ prefix: '/platform' })
           actorId: actor.id,
           projectId: params.id,
           action: 'projects.leaders.updated',
-          targetId: params.id
+          targetId: params.id,
+          metadata: {
+            changes: contentChanges(
+              { leaderIds: previous.map((row) => row.userId).sort() },
+              { leaderIds: [...body.userIds].sort() },
+              ['leaderIds']
+            )
+          }
         });
         return { leaderIds: body.userIds };
       });
@@ -877,7 +950,7 @@ export default createElysia({ prefix: '/platform' })
       const actor = active(user);
       return db.transaction(async (tx) => {
         const [project] = await tx
-          .select({ id: projects.id, slug: projects.slug })
+          .select()
           .from(projects)
           .where(eq(projects.id, params.id))
           .for('update');
@@ -912,6 +985,44 @@ export default createElysia({ prefix: '/platform' })
           )
             throw status(422, { code: 'UNKNOWN_GROUP_PERMISSION' });
         }
+        const oldGroups = await tx
+          .select()
+          .from(projectGroups)
+          .where(eq(projectGroups.projectId, params.id))
+          .orderBy(projectGroups.name);
+        const oldMembers = oldGroups.length
+          ? await tx
+              .select()
+              .from(projectGroupMembers)
+              .where(
+                inArray(
+                  projectGroupMembers.groupId,
+                  oldGroups.map((group) => group.id)
+                )
+              )
+          : [];
+        const previous = {
+          memberPermissions: project.memberPermissions,
+          nonMemberPermissions: project.nonMemberPermissions,
+          groups: oldGroups.map((group) => ({
+            name: group.name,
+            permissions: group.permissions,
+            userIds: oldMembers
+              .filter((member) => member.groupId === group.id)
+              .map((member) => member.userId)
+              .sort()
+          }))
+        };
+        const next = {
+          ...body,
+          groups: body.groups
+            .map((group) => ({
+              ...group,
+              name: group.name.trim(),
+              userIds: [...group.userIds].sort()
+            }))
+            .sort((a, b) => a.name.localeCompare(b.name))
+        };
         await tx
           .update(projects)
           .set({
@@ -944,7 +1055,13 @@ export default createElysia({ prefix: '/platform' })
           projectId: params.id,
           action: 'projects.permissions.updated',
           targetId: params.id,
-          metadata: { groups: body.groups.length }
+          metadata: {
+            changes: contentChanges(previous, next, [
+              'memberPermissions',
+              'nonMemberPermissions',
+              'groups'
+            ])
+          }
         });
         return { saved: true };
       });
@@ -1029,7 +1146,18 @@ export default createElysia({ prefix: '/platform' })
           projectId: article.projectId,
           action: 'articles.created',
           targetId: article.id,
-          metadata: { version: article.version }
+          metadata: {
+            version: article.version,
+            changes: contentChanges({}, article, [
+              'title',
+              'markdown',
+              'state',
+              'thumbnailFileId',
+              'mainArticle',
+              'projectFeed',
+              'websiteFeed'
+            ])
+          }
         });
         return article;
       });
@@ -1109,7 +1237,10 @@ export default createElysia({ prefix: '/platform' })
           projectId: article.projectId,
           action: 'articles.proposal.created',
           targetId: proposal.id,
-          metadata: { articleId: article.id }
+          metadata: {
+            articleId: article.id,
+            changes: contentChanges({}, proposal, ['title', 'markdown', 'state'])
+          }
         });
         return proposal;
       });
@@ -1198,7 +1329,16 @@ export default createElysia({ prefix: '/platform' })
           projectId: article.projectId,
           action: body.accept ? 'articles.proposal.accepted' : 'articles.proposal.rejected',
           targetId: proposal.id,
-          metadata: { articleId: article.id, version: current.version }
+          metadata: {
+            articleId: article.id,
+            version: current.version,
+            changes: [
+              ...contentChanges(article, current, ['title', 'markdown']),
+              ...contentChanges(proposal, { state: body.accept ? 'accepted' : 'rejected' }, [
+                'state'
+              ])
+            ]
+          }
         });
         return current;
       });
@@ -1313,7 +1453,18 @@ export default createElysia({ prefix: '/platform' })
           projectId: article.projectId,
           action: 'articles.updated',
           targetId: article.id,
-          metadata: { version: updated.version }
+          metadata: {
+            version: updated.version,
+            changes: contentChanges(article, updated, [
+              'title',
+              'markdown',
+              'state',
+              'mainArticle',
+              'projectFeed',
+              'websiteFeed',
+              'thumbnailFileId'
+            ])
+          }
         });
         return updated;
       });
@@ -1340,6 +1491,17 @@ export default createElysia({ prefix: '/platform' })
       return db.transaction(async (tx) => {
         const { article, scope } = await articleScope(tx, params.id);
         if (!canContribute(actor, scope)) throw status(403, { code: 'FORBIDDEN' });
+        const [previous] = await tx
+          .select()
+          .from(articleContributors)
+          .where(
+            and(
+              eq(articleContributors.articleId, article.id),
+              eq(articleContributors.userId, actor.id)
+            )
+          )
+          .for('update');
+        if (!previous) throw status(403, { code: 'CONTRIBUTOR_REQUIRED' });
         const [credit] = await tx
           .update(articleContributors)
           .set({ publicCredit: body.publicCredit })
@@ -1355,7 +1517,11 @@ export default createElysia({ prefix: '/platform' })
           actorId: actor.id,
           projectId: article.projectId,
           action: 'articles.credit.updated',
-          targetId: article.id
+          targetId: article.id,
+          metadata: {
+            userId: actor.id,
+            changes: contentChanges(previous, credit, ['publicCredit'])
+          }
         });
         return credit;
       });

@@ -42,6 +42,8 @@ describe('platform HTTP authorization boundaries', () => {
     '/threads',
     '/threads/missing',
     '/items/missing/comments',
+    '/items/missing/revisions',
+    '/comments/missing/revisions',
     '/events'
   ])('collaboration read %s requires authentication before DB access', async (path) => {
     const response = await collaboration.handle(new Request(`http://localhost/platform${path}`));

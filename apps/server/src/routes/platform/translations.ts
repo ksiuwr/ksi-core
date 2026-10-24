@@ -1,3 +1,4 @@
+import { contentChanges } from 'shared/activity';
 import { status, t } from 'elysia';
 import { eq, sql } from 'drizzle-orm';
 import { users, projects, articles, articleRevisions } from '../../db';
@@ -96,7 +97,10 @@ export const translationRoutes = createElysia({
           actorId: principal.id,
           targetId: params.id,
           action: 'users.translation.updated',
-          metadata: { locale, fields: Object.keys(body.fields) }
+          metadata: {
+            locale,
+            changes: contentChanges(profile.translations[locale] ?? {}, body.fields, allowed)
+          }
         });
         return { translations };
       }
@@ -133,7 +137,11 @@ export const translationRoutes = createElysia({
           projectId: project.id,
           targetId: project.id,
           action: 'projects.translation.updated',
-          metadata: { locale, version: updated!.version }
+          metadata: {
+            locale,
+            version: updated!.version,
+            changes: contentChanges(project.translations[locale] ?? {}, body.fields, allowed)
+          }
         });
         return updated;
       }
@@ -183,7 +191,11 @@ export const translationRoutes = createElysia({
         projectId: article.projectId,
         targetId: article.id,
         action: 'articles.translation.updated',
-        metadata: { locale, version: updated!.version }
+        metadata: {
+          locale,
+          version: updated!.version,
+          changes: contentChanges(article.translations[locale] ?? {}, body.fields, allowed)
+        }
       });
       return updated;
     });

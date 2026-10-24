@@ -1,3 +1,4 @@
+import { contentChanges, profileChangeFields, accessChangeFields } from 'shared/activity';
 import { splitProfileName } from '../domain/profile-name';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
@@ -50,7 +51,10 @@ export const auth = betterAuth({
             await recordEvent(tx, {
               actorId: user.id,
               action: 'users.membership.requested',
-              targetId: user.id
+              targetId: user.id,
+              metadata: {
+                changes: contentChanges({}, user, [...profileChangeFields, ...accessChangeFields])
+              }
             });
           });
         }

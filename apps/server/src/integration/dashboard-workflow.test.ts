@@ -5,6 +5,7 @@ import { getUrls } from 'shared';
 import { digest } from '../domain/sso';
 import {
   db,
+  alerts,
   users,
   sessions,
   frontendSessions,
@@ -153,6 +154,129 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
         (u: any) => u.id === ids.outsider
       )
     ).toBe(true);
+  });
+  test('profile, translation and access changes persist allowlisted before/after values and notifications', async () => {
+    const before = (await request('member', '/users/me')).body.user;
+    const nickname = 'Audit nickname',
+      bio = 'Audit line one\nAudit line two';
+    try {
+      expect((await request('member', '/users/me', 'PATCH', { nickname, bio })).status).toBe(200);
+      const ownEvents = await db
+        .select()
+        .from(auditEvents)
+        .where(eq(auditEvents.targetId, ids.member));
+      const profileEvent = ownEvents.find(
+        (event) =>
+          event.action === 'users.profile.updated' &&
+          JSON.stringify(event.metadata.changes).includes(nickname)
+      );
+      expect(profileEvent?.metadata.changes).toEqual([
+        { field: 'nickname', before: before.nickname, after: nickname },
+        { field: 'bio', before: before.bio, after: bio }
+      ]);
+      expect(JSON.stringify(profileEvent?.metadata)).not.toContain(before.email);
+      expect(
+        await db.select().from(outbox).where(eq(outbox.eventId, profileEvent!.id))
+      ).toHaveLength(1);
+      expect(
+        (
+          await request('admin', `/users/${ids.member}/profile`, 'PATCH', {
+            firstName: 'Audit member'
+          })
+        ).status
+      ).toBe(200);
+      const adminEvents = await db
+        .select()
+        .from(auditEvents)
+        .where(eq(auditEvents.targetId, ids.member));
+      const adminEvent = adminEvents.find(
+        (event) => event.actorId === ids.admin && event.action === 'users.profile.updated'
+      );
+      expect(adminEvent?.metadata.changes).toEqual([
+        { field: 'firstName', before: before.firstName, after: 'Audit member' }
+      ]);
+      expect(
+        (
+          await request('member', `/platform/translations/profile/${ids.member}/pl`, 'PUT', {
+            fields: { bio: 'Zmieniona biografia' }
+          })
+        ).status
+      ).toBe(200);
+      const translated = (
+        await db.select().from(auditEvents).where(eq(auditEvents.targetId, ids.member))
+      ).find((event) => event.action === 'users.translation.updated');
+      expect(translated?.metadata.changes).toEqual([
+        { field: 'bio', before: null, after: 'Zmieniona biografia' }
+      ]);
+      expect(translated?.metadata.locale).toBe('pl');
+      expect(
+        (
+          await request('admin', `/users/${ids.outsider}/access`, 'PATCH', {
+            role: 'board',
+            flags: ['+audit.events.read']
+          })
+        ).status
+      ).toBe(200);
+      const access = (
+        await db.select().from(auditEvents).where(eq(auditEvents.targetId, ids.outsider))
+      ).find((event) => event.action === 'users.membership.changed');
+      expect(access?.metadata.changes).toEqual([
+        { field: 'role', before: 'member', after: 'board' },
+        { field: 'flags', before: [], after: ['+audit.events.read'] }
+      ]);
+      expect((await request('member', '/platform/events')).status).toBe(403);
+      const activity = await request('admin', '/platform/events');
+      expect(activity.status).toBe(200);
+      expect(
+        activity.body.some(
+          (row: any) => row.event.id === profileEvent!.id && row.event.metadata.changes.length === 2
+        )
+      ).toBe(true);
+    } finally {
+      await db
+        .update(users)
+        .set({
+          nickname: before.nickname,
+          bio: before.bio,
+          firstName: before.firstName,
+          name: before.name,
+          translations: before.translations
+        })
+        .where(eq(users.id, ids.member));
+      await db.update(users).set({ role: 'member', flags: [] }).where(eq(users.id, ids.outsider));
+    }
+  });
+  test('saving an otherwise empty profile logs only the field the user actually changed', async () => {
+    const [before] = await db.select().from(users).where(eq(users.id, ids.member));
+    await db.update(users).set({ nickname: null, bio: null }).where(eq(users.id, ids.member));
+    try {
+      const lastName = `Changed-${ids.member}`;
+      expect(
+        (await request('member', '/users/me', 'PATCH', { lastName, nickname: '', bio: '' })).status
+      ).toBe(200);
+      const events = await db
+        .select()
+        .from(auditEvents)
+        .where(eq(auditEvents.targetId, ids.member));
+      const event = events.find(
+        (event) =>
+          event.action === 'users.profile.updated' &&
+          JSON.stringify(event.metadata.changes).includes(lastName)
+      );
+      expect(event?.metadata.changes).toEqual([
+        { field: 'lastName', before: before!.lastName, after: lastName }
+      ]);
+    } finally {
+      await db
+        .update(users)
+        .set({
+          lastName: before!.lastName,
+          name: before!.name,
+          nickname: before!.nickname,
+          bio: before!.bio
+        })
+        .where(eq(users.id, ids.member));
+    }
   });
   test('deleted users appear only with the explicit deleted status filter', async () => {
     await db.update(users).set({ membershipStatus: 'deleted' }).where(eq(users.id, ids.outsider));
@@ -417,6 +541,81 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
         .delete(kanbanItems)
         .where(inArray(kanbanItems.boardId, [localBoardId, foreignBoardId]));
       await db.delete(boards).where(inArray(boards.id, [localBoardId, foreignBoardId]));
+    }
+  });
+  test('task audit metadata retains before and after values', async () => {
+    await db
+      .update(boards)
+      .set({ labels: [{ name: 'urgent', color: '#6b7280' }] })
+      .where(eq(boards.id, boardId));
+    const created = await request('member', `/platform/boards/${boardId}/items`, 'POST', {
+      title: 'Old title',
+      markdown: 'Old description',
+      column: 'todo',
+      labels: [],
+      position: 0
+    });
+    expect(created.status).toBe(200);
+    const updated = await request('member', `/platform/items/${created.body.id}`, 'PATCH', {
+      version: 1,
+      title: 'New title',
+      markdown: 'New description',
+      labels: ['urgent']
+    });
+    expect(updated.status).toBe(200);
+    const events = await db
+      .select()
+      .from(auditEvents)
+      .where(eq(auditEvents.targetId, created.body.id));
+    const event = events.find((event) => event.action === 'kanban.updated');
+    expect(event?.metadata.changes).toEqual([
+      { field: 'title', before: 'Old title', after: 'New title' },
+      { field: 'markdown', before: 'Old description', after: 'New description' },
+      { field: 'labels', before: [], after: ['urgent'] }
+    ]);
+    await db.update(boards).set({ labels: [] }).where(eq(boards.id, boardId));
+    await db.delete(kanbanItems).where(eq(kanbanItems.id, created.body.id));
+  });
+  test('alert creation, edits and deletion retain their editable values', async () => {
+    const title = `Audit alert ${createId()}`;
+    const body = {
+      title,
+      description: 'Original notice',
+      color: 'info',
+      startDate: '2026-01-01T00:00:00.000Z',
+      endDate: '2027-01-01T00:00:00.000Z',
+      priority: 1
+    };
+    const path = '/dashboard/admin/alerts';
+    expect((await request('member', path, 'POST', body)).status).toBe(403);
+    expect((await request('admin', path, 'POST', body)).status).toBe(200);
+    const [alert] = await db.select().from(alerts).where(eq(alerts.title, title));
+    expect(alert).toBeDefined();
+    try {
+      expect(
+        (
+          await request('admin', `${path}/${alert!.id}`, 'PUT', {
+            ...body,
+            description: 'Updated notice',
+            priority: 0
+          })
+        ).status
+      ).toBe(200);
+      let events = await db.select().from(auditEvents).where(eq(auditEvents.targetId, alert!.id));
+      expect(
+        events.find((event) => event.action === 'alerts.created')?.metadata.changes
+      ).toContainEqual({ field: 'description', before: null, after: 'Original notice' });
+      expect(events.find((event) => event.action === 'alerts.updated')?.metadata.changes).toEqual([
+        { field: 'description', before: 'Original notice', after: 'Updated notice' },
+        { field: 'priority', before: 1, after: 0 }
+      ]);
+      expect((await request('admin', `${path}/${alert!.id}`, 'DELETE')).status).toBe(200);
+      events = await db.select().from(auditEvents).where(eq(auditEvents.targetId, alert!.id));
+      expect(
+        events.find((event) => event.action === 'alerts.removed')?.metadata.changes
+      ).toContainEqual({ field: 'description', before: 'Updated notice', after: null });
+    } finally {
+      await db.delete(alerts).where(eq(alerts.id, alert!.id));
     }
   });
   test('administrator email changes revoke access and require verification; recovery stays private', async () => {
@@ -936,5 +1135,34 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
     expect(statuses.slice(0, 20)).toEqual(Array(20).fill(200));
     expect(statuses[20]).toBe(429);
     expect((await ticket('admin')).status).toBe(200);
+  });
+  test('user and approval mutation events include diffs without credential values', async () => {
+    const events = await db
+      .select()
+      .from(auditEvents)
+      .where(inArray(auditEvents.actorId, Object.values(ids)));
+    for (const event of events) {
+      expect(
+        Array.isArray(event.metadata.changes),
+        `${event.action} has no structured change data`
+      ).toBe(true);
+      for (const change of event.metadata.changes as any[]) {
+        expect([
+          'password',
+          'token',
+          'email',
+          'accounts',
+          'accessToken',
+          'refreshToken',
+          'objectKey'
+        ]).not.toContain(change.field);
+      }
+    }
+    const accepted = events.find((event) => event.action === 'users.avatar.accepted');
+    expect(
+      (accepted?.metadata.changes as any[])?.some(
+        (change) => change.field === 'image' && change.before !== change.after
+      )
+    ).toBe(true);
   });
 });

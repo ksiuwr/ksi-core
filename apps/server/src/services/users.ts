@@ -1,4 +1,6 @@
 import { and, eq, sql } from 'drizzle-orm';
+import { contentChanges, accessChangeFields } from 'shared/activity';
+import { recordEvent } from '../lib/audit';
 import { createId } from '@paralleldrive/cuid2';
 import {
   db,
@@ -8,9 +10,7 @@ import {
   accounts,
   verifications,
   projectMembers,
-  fileReferences,
-  auditEvents,
-  outbox
+  fileReferences
 } from '../db';
 import { anonymousAlias } from '../domain/profiles';
 import {
@@ -95,16 +95,12 @@ export async function manageUser(
     const [updated] = await tx.update(users).set(change).where(eq(users.id, userId)).returning();
     if (change.membershipStatus && change.membershipStatus !== 'active')
       await tx.delete(sessions).where(eq(sessions.userId, userId));
-    const [event] = await tx
-      .insert(auditEvents)
-      .values({
-        actorId,
-        targetId: userId,
-        action: 'users.membership.changed',
-        metadata: { fields: Object.keys(change) }
-      })
-      .returning();
-    await tx.insert(outbox).values({ eventId: event!.id });
+    await recordEvent(tx, {
+      actorId,
+      targetId: userId,
+      action: 'users.membership.changed',
+      metadata: { changes: contentChanges(target, updated!, accessChangeFields) }
+    });
     return updated;
   });
 }
@@ -201,11 +197,18 @@ export async function anonymizeUser(actorId: string, userId: string) {
         deletedAt: new Date()
       })
       .where(eq(users.id, userId));
-    const [event] = await tx
-      .insert(auditEvents)
-      .values({ actorId, targetId: userId, action: 'users.account.anonymized' })
-      .returning();
-    await tx.insert(outbox).values({ eventId: event!.id });
+    await recordEvent(tx, {
+      actorId,
+      targetId: userId,
+      action: 'users.account.anonymized',
+      metadata: {
+        changes: contentChanges(
+          target,
+          { role: 'member', membershipStatus: 'deleted', flags: [] },
+          accessChangeFields
+        )
+      }
+    });
     return { success: true };
   });
 }
