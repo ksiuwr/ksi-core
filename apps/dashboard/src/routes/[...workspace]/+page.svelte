@@ -117,6 +117,7 @@
     deletedAt?: string;
   };
   type Thread = {
+    referenceNumber?: number | null;
     assigneeIds?: string[];
     id: string;
     title: string;
@@ -1574,7 +1575,12 @@
                         onclick={guardNavigation}
                       >
                         <div class="list-strip-info">
-                          <h3>{thread.title}</h3>
+                          <h3>
+                            {#if thread.referenceNumber}<span class="muted"
+                                >#{thread.referenceNumber}</span
+                              >
+                            {/if}{thread.title}
+                          </h3>
                           {#if thread.createdAt}<time
                               class="list-strip-meta"
                               datetime={thread.createdAt}
@@ -1603,7 +1609,10 @@
                         ><ArrowLeft size={15} aria-hidden="true" />{'All threads'}</a
                       >
                       <h1 style="font-size:clamp(24px,3vw,36px);margin-bottom:24px">
-                        {selectedThread.title}
+                        {#if selectedThread.referenceNumber}<span class="muted"
+                            >#{selectedThread.referenceNumber}</span
+                          >
+                        {/if}{selectedThread.title}
                       </h1>
                       {#key (selectedThread.assigneeIds ?? []).join(',')}<WatchButton
                           type="thread"

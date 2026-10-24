@@ -38,3 +38,18 @@ test('gallery preview permits zero selected images and code examples remain lite
     renderMarkdown('```md\n' + source + '\n```').some((block) => block.type === 'gallery')
   ).toBe(false);
 });
+
+test('numeric references link current, explicit and association scopes without rewriting code or existing links', () => {
+  const html = renderMarkdown(
+    '#12 #ksi-core/34 ##56 `#78` [label #90](https://example.com)\n\n```md\n#123\n```',
+    'current-project'
+  )
+    .map((block) => (block.type === 'html' ? block.html : ''))
+    .join('');
+  expect(html).toContain('href="/references/current-project/12"');
+  expect(html).toContain('href="/references/ksi-core/34"');
+  expect(html).toContain('href="/references/~association/56"');
+  expect(html).not.toContain('/references/current-project/78');
+  expect(html).not.toContain('/references/current-project/90');
+  expect(html).not.toContain('/references/current-project/123');
+});

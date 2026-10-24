@@ -21,7 +21,12 @@
     fetch('/api/markdown', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ markdown }),
+      body: JSON.stringify({
+        markdown,
+        referenceScope: decodeURIComponent(
+          window.location.pathname.match(/^\/projects\/([^/]+)/)?.[1] ?? '~association'
+        )
+      }),
       signal: controller.signal
     })
       .then(async (response) => {

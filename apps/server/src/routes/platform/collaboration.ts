@@ -4,7 +4,8 @@ import {
   hasContentChange,
   type ContentChange
 } from 'shared/activity';
-import { notifyCollaboration, subscribe } from '../../services/notifications';
+import { allocateReferenceNumber } from '../../services/references';
+import { notificationTarget, notifyCollaboration, subscribe } from '../../services/notifications';
 import { and, eq, desc, exists, inArray, isNull, isNotNull, sql, or, type SQL } from 'drizzle-orm';
 import { status, t } from 'elysia';
 import { syncFileReferences } from './files';
@@ -284,6 +285,54 @@ async function validateAssignees(
 }
 
 export default createElysia({ prefix: '/platform' })
+  .get(
+    '/references/:scope/:number',
+    async ({ db, user, params }) => {
+      const actor = active(user);
+      let projectId: string | null = null;
+      if (params.scope !== '~association') {
+        const [project] = await db.select().from(projects).where(eq(projects.slug, params.scope));
+        if (!project) throw status(404, { code: 'REFERENCE_NOT_FOUND' });
+        projectId = project.id;
+      }
+      const [board] = await db
+        .select()
+        .from(boards)
+        .where(eq(boards.scopeKey, scopeKey(projectId)));
+      const [item] = board
+        ? await db
+            .select()
+            .from(kanbanItems)
+            .where(
+              and(
+                eq(kanbanItems.boardId, board.id),
+                eq(kanbanItems.referenceNumber, params.number),
+                isNull(kanbanItems.deletedAt)
+              )
+            )
+        : [];
+      const [thread] = await db
+        .select()
+        .from(threads)
+        .where(
+          and(
+            projectId ? eq(threads.projectId, projectId) : isNull(threads.projectId),
+            eq(threads.referenceNumber, params.number)
+          )
+        );
+      const type = item ? 'item' : 'thread';
+      const id = item?.id ?? thread?.id;
+      const target = id ? await notificationTarget(db, type, id) : null;
+      if (!target?.canRead(actor)) throw status(404, { code: 'REFERENCE_NOT_FOUND' });
+      return { href: target.href, title: target.title, type, number: params.number };
+    },
+    {
+      params: t.Object({
+        scope: t.String({ maxLength: 100 }),
+        number: t.Numeric({ minimum: 1, maximum: 2147483647, multipleOf: 1 })
+      })
+    }
+  )
   .get(
     '/boards',
     async ({ db, user, query }) => {
@@ -739,6 +788,7 @@ export default createElysia({ prefix: '/platform' })
           .values({
             ...body,
             dueAt: body.dueAt ? new Date(body.dueAt) : null,
+            referenceNumber: await allocateReferenceNumber(tx, board.scopeKey),
             authorId: actor.id,
             boardId: board.id
           })
@@ -1094,6 +1144,7 @@ export default createElysia({ prefix: '/platform' })
           .insert(threads)
           .values({
             projectId: body.projectId ?? null,
+            referenceNumber: await allocateReferenceNumber(tx, scopeKey(body.projectId ?? null)),
             title: body.title,
             assigneeIds: body.assigneeIds ?? [],
             visibility: body.visibility,

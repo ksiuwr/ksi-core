@@ -298,39 +298,49 @@ export const boards = snakeCase.table('boards', {
   labels: jsonb().$type<BoardLabel[]>().notNull().default([]),
   statuses: jsonb().$type<BoardStatus[]>().notNull().default(defaultBoardStatuses)
 });
-export const kanbanItems = snakeCase.table('kanban_items', {
-  dueAt: timestamp(),
-  assigneeIds: text().array().notNull().default([]),
-  id: text().primaryKey().$defaultFn(createId),
-  boardId: text()
-    .notNull()
-    .references(() => boards.id),
-  title: text().notNull(),
-  markdown: text().notNull().default(''),
-  column: text().notNull().default('todo'),
-  labels: text().array().notNull().default([]),
-  position: integer().notNull().default(0),
-  version: integer().notNull().default(1),
-  deletedAt: timestamp(),
-  authorId: text()
-    .notNull()
-    .references(() => users.id),
-  createdAt: timestamp().notNull().defaultNow()
-});
-export const threads = snakeCase.table('threads', {
-  assigneeIds: text().array().notNull().default([]),
-  id: text().primaryKey().$defaultFn(createId),
-  projectId: text().references(() => projects.id),
-  title: text().notNull(),
-  visibility: text().notNull().default('association'),
-  invitedIds: text().array().notNull().default([]),
-  authorId: text()
-    .notNull()
-    .references(() => users.id),
-  archivedAt: timestamp(),
-  version: integer().notNull().default(1),
-  createdAt: timestamp().notNull().defaultNow()
-});
+export const kanbanItems = snakeCase.table(
+  'kanban_items',
+  {
+    referenceNumber: integer(),
+    dueAt: timestamp(),
+    assigneeIds: text().array().notNull().default([]),
+    id: text().primaryKey().$defaultFn(createId),
+    boardId: text()
+      .notNull()
+      .references(() => boards.id),
+    title: text().notNull(),
+    markdown: text().notNull().default(''),
+    column: text().notNull().default('todo'),
+    labels: text().array().notNull().default([]),
+    position: integer().notNull().default(0),
+    version: integer().notNull().default(1),
+    deletedAt: timestamp(),
+    authorId: text()
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp().notNull().defaultNow()
+  },
+  (t) => [uniqueIndex('kanban_board_reference_unique').on(t.boardId, t.referenceNumber)]
+);
+export const threads = snakeCase.table(
+  'threads',
+  {
+    referenceNumber: integer(),
+    assigneeIds: text().array().notNull().default([]),
+    id: text().primaryKey().$defaultFn(createId),
+    projectId: text().references(() => projects.id),
+    title: text().notNull(),
+    visibility: text().notNull().default('association'),
+    invitedIds: text().array().notNull().default([]),
+    authorId: text()
+      .notNull()
+      .references(() => users.id),
+    archivedAt: timestamp(),
+    version: integer().notNull().default(1),
+    createdAt: timestamp().notNull().defaultNow()
+  },
+  (t) => [uniqueIndex('thread_project_reference_unique').on(t.projectId, t.referenceNumber)]
+);
 export const comments = snakeCase.table('comments', {
   id: text().primaryKey().$defaultFn(createId),
   threadId: text().references(() => threads.id),
@@ -491,3 +501,8 @@ export const deadlineReminders = snakeCase.table(
   },
   (t) => [uniqueIndex('deadline_reminder_unique').on(t.itemId, t.dueAt, t.days)]
 );
+
+export const collaborationCounters = snakeCase.table('collaboration_counters', {
+  scopeKey: text().primaryKey(),
+  lastNumber: integer().notNull().default(0)
+});

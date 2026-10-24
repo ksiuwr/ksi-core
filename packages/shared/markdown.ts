@@ -1,11 +1,39 @@
 import { prepareMarkdownImages, clampImageWidth } from './markdown-images';
 import { markdownGalleries } from './markdown-gallery';
-import { marked } from 'marked';
+import { Marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
 export type MarkdownBlock =
   | { type: 'html'; html: string }
   | { type: 'gallery'; ids: string[]; preview: number };
-export function renderMarkdown(source: string): MarkdownBlock[] {
+export function renderMarkdown(source: string, referenceScope = '~association'): MarkdownBlock[] {
+  const marked = new Marked({
+    extensions: [
+      {
+        name: 'collaborationReference',
+        level: 'inline',
+        start(source) {
+          return source.indexOf('#');
+        },
+        tokenizer(source) {
+          if (this.lexer.state.inLink) return;
+          const match = source.match(
+            /^(?:##([1-9]\d{0,8})|#([a-z0-9]+(?:-[a-z0-9]+)*)\/([1-9]\d{0,8})|#([1-9]\d{0,8}))(?![\w/])/
+          );
+          if (!match) return;
+          return {
+            type: 'collaborationReference',
+            raw: match[0],
+            text: match[0],
+            scope: match[1] ? '~association' : (match[2] ?? referenceScope),
+            number: match[1] ?? match[3] ?? match[4]
+          };
+        },
+        renderer(token) {
+          return `<a href="/references/${encodeURIComponent(token.scope)}/${token.number}">${token.text}</a>`;
+        }
+      }
+    ]
+  });
   const blocks: MarkdownBlock[] = [];
   source = prepareMarkdownImages(source);
   const html = (value: string) =>

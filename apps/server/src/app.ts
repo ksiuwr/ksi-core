@@ -39,9 +39,16 @@ export const app = new Elysia()
       '/markdown',
       ({ body, user }) => {
         active(user);
-        return renderMarkdown(body.markdown);
+        return renderMarkdown(body.markdown, body.referenceScope);
       },
-      { body: t.Object({ markdown: t.String({ maxLength: 500000 }) }) }
+      {
+        body: t.Object({
+          markdown: t.String({ maxLength: 500000 }),
+          referenceScope: t.Optional(
+            t.String({ maxLength: 100, pattern: '^(~association|[a-z0-9]+(?:-[a-z0-9]+)*)$' })
+          )
+        })
+      }
     )
   )
   .get('/health', () => ({ status: 'ok', environment: getUrls().environment }))

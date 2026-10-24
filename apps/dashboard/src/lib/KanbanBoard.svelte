@@ -37,6 +37,7 @@
     labels: string[];
     assigneeIds?: string[];
     dueAt?: string | null;
+    referenceNumber?: number | null;
     deletedAt?: string;
   };
   type Comment = {
@@ -1024,7 +1025,10 @@
             }}
           >
             <span class="task-title"
-              ><strong>{item.title}</strong><GripVertical size={14} aria-hidden="true" /></span
+              ><strong
+                >{#if item.referenceNumber}<span class="muted">#{item.referenceNumber}</span>
+                {/if}{item.title}</strong
+              ><GripVertical size={14} aria-hidden="true" /></span
             >
             {#if item.markdown}<div class="kanban-markdown-preview">
                 <MarkdownContent value={item.markdown} {language} />
@@ -1386,7 +1390,10 @@
             </div>
           {/if}
         </div>
-        <h2 id="issue-title">{selected.title}</h2>
+        <h2 id="issue-title">
+          {#if selected.referenceNumber}<span class="muted">#{selected.referenceNumber}</span>
+          {/if}{selected.title}
+        </h2>
       </div>
       <div class="issue-heading-actions">
         <ContentHistory kind="task" targetId={selected.id} {language} />
