@@ -39,7 +39,14 @@ export function contentChanges(
       : []
   );
 }
-export const taskChangeFields = ['title', 'markdown', 'column', 'labels', 'position'] as const;
+export const taskChangeFields = [
+  'title',
+  'markdown',
+  'column',
+  'labels',
+  'assigneeIds',
+  'position'
+] as const;
 export const profileChangeFields = [
   'firstName',
   'lastName',

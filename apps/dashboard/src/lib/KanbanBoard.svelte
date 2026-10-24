@@ -4,6 +4,7 @@
   import { tick, onMount } from 'svelte';
   import ContentHistory from './ContentHistory.svelte';
   import ConfirmDialog from './ConfirmDialog.svelte';
+  import Assignees, { type AssignmentMember } from './Assignees.svelte';
   import { flip } from 'svelte/animate';
   import { prefersReducedMotion } from 'svelte/motion';
   import {
@@ -32,6 +33,7 @@
     version: number;
     position: number;
     labels: string[];
+    assigneeIds?: string[];
     deletedAt?: string;
   };
   type Comment = {
@@ -207,6 +209,21 @@
       }
     });
   }
+  let members = $state<AssignmentMember[]>([]),
+    taskAssignees = $state<string[]>([]),
+    editAssignees = $state<string[]>([]);
+  $effect(() => {
+    const controller = new AbortController();
+    const path = projectId ? `/projects/${encodeURIComponent(projectId)}/members` : '/members';
+    fetch(`/api/platform${path}`, { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error('Unable to load members');
+        const result = await response.json();
+        if (!controller.signal.aborted) members = result;
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  });
   const label = (s: BoardStatus) =>
     s.id === 'todo' && s.name === 'To do'
       ? 'To do'
@@ -436,6 +453,7 @@
     title = '';
     markdown = '';
     taskLabels = [];
+    taskAssignees = [];
     await tick();
     composerDialog?.showModal();
     document.getElementById('task-title')?.focus();
@@ -497,6 +515,7 @@
         title,
         markdown,
         labels: taskLabels,
+        assigneeIds: taskAssignees,
         column: composer,
         position:
           Math.max(-1, ...items.filter((i) => i.column === composer).map((i) => i.position)) + 1
@@ -714,7 +733,8 @@
         version: selected!.version,
         title: editTitle,
         markdown: editMarkdown,
-        labels: editLabels
+        labels: editLabels,
+        assigneeIds: editAssignees
       });
       editing = false;
       await loadComments(selected!.id);
@@ -1009,6 +1029,12 @@
                   </span>
                 {/each}
               </div>{/if}
+            {#if item.assigneeIds?.length}<Assignees
+                value={item.assigneeIds}
+                {members}
+                {language}
+                readonly
+              />{/if}
           </button>
         {/each}
       </div>
@@ -1115,6 +1141,7 @@
           </div>
         </div>
       {/if}
+      <Assignees bind:value={taskAssignees} {members} {language} disabled={busy} />
       <Editor {language} bind:value={markdown} rows={10} />
       <div class="row">
         <button class="btn" disabled={busy || !title.trim()}>{'Add task'}</button><button
@@ -1362,6 +1389,7 @@
           editTitle = selected!.title;
           editMarkdown = selected!.markdown;
           editLabels = [...selected!.labels];
+          editAssignees = [...(selected!.assigneeIds ?? [])];
         }}><Pencil size={14} aria-hidden="true" />{'Edit'}</button
       ><button
         type="button"
@@ -1371,6 +1399,7 @@
         ><Trash2 size={14} aria-hidden="true" />{'Remove'}</button
       >
     </div>
+    <Assignees value={selected.assigneeIds ?? []} {members} {language} readonly />
     {#if confirmingDelete}<section
         class="delete-confirmation"
         role="alert"
@@ -1430,6 +1459,7 @@
             </div>
           </div>
         {/if}
+        <Assignees bind:value={editAssignees} {members} {language} disabled={busy} />
         <div class="row">
           <button class="btn" disabled={busy || !editTitle.trim()}
             ><Save size={14} aria-hidden="true" />{'Save'}</button

@@ -299,6 +299,7 @@ export const boards = snakeCase.table('boards', {
   statuses: jsonb().$type<BoardStatus[]>().notNull().default(defaultBoardStatuses)
 });
 export const kanbanItems = snakeCase.table('kanban_items', {
+  assigneeIds: text().array().notNull().default([]),
   id: text().primaryKey().$defaultFn(createId),
   boardId: text()
     .notNull()
@@ -316,6 +317,7 @@ export const kanbanItems = snakeCase.table('kanban_items', {
   createdAt: timestamp().notNull().defaultNow()
 });
 export const threads = snakeCase.table('threads', {
+  assigneeIds: text().array().notNull().default([]),
   id: text().primaryKey().$defaultFn(createId),
   projectId: text().references(() => projects.id),
   title: text().notNull(),
