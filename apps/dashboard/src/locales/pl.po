@@ -954,9 +954,6 @@ msgstr "Szukaj"
 msgid "Filter status"
 msgstr "Filtr statusu"
 
-#~ msgid "All statuses"
-#~ msgstr "Wszystkie statusy"
-
 #: src/lib/Members.svelte
 msgid "Filter role"
 msgstr "Filtr roli"
@@ -1616,10 +1613,6 @@ msgstr "Przenieś zadanie do kategorii"
 #: src/lib/KanbanBoard.svelte
 msgid "Move task to"
 msgstr "Przenieś zadanie do"
-
-#: src/lib/KanbanBoard.svelte
-msgid "Enter"
-msgstr "Enter"
 
 #: src/lib/Members.svelte
 #: src/lib/Members.svelte
