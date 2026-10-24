@@ -1173,4 +1173,24 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       )
     ).toBe(true);
   });
+  test('image upload rejects corrupt files before storage', async () => {
+    const corrupt = Buffer.alloc(40);
+    Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]).copy(corrupt);
+    corrupt.write('IHDR', 12);
+    const form = new FormData();
+    form.set('file', new File([corrupt], 'corrupt.png', { type: 'image/png' }));
+    const response = await app.handle(
+      new Request('http://localhost:3000/files', {
+        method: 'POST',
+        headers: {
+          'x-ksi-proxy-key': process.env.PROXY_SECRET!,
+          'x-ksi-origin': getUrls().frontend.dashboard,
+          'x-ksi-session': tokens.admin
+        },
+        body: form
+      })
+    );
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ code: 'IMAGE_CONTENT_INVALID' });
+  });
 });
