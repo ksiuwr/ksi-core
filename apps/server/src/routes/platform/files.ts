@@ -43,6 +43,13 @@ import {
 type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Database = typeof db | Transaction;
 type Member = typeof users.$inferSelect;
+const uploadInputCodes = new Set([
+  'FILE_SIZE_INVALID',
+  'FILE_TYPE_UNSUPPORTED',
+  'FILE_CONTENT_INVALID',
+  'IMAGE_CONTENT_INVALID',
+  'IMAGE_DIMENSIONS_INVALID'
+]);
 export const ownerTypes = [
   'profile',
   'avatar-request',
@@ -391,7 +398,10 @@ export const filesRoutes = createElysia({ prefix: '/files' })
         bytes = new Uint8Array(optimized.bytes);
         info = optimized.info;
       } catch (error) {
-        throw status(400, { code: (error as Error).message });
+        const code = (error as Error).message;
+        if (uploadInputCodes.has(code)) throw status(400, { code });
+        console.error('Image processing failed:', error);
+        throw status(503, { code: 'IMAGE_PROCESSING_FAILED' });
       }
       const environment = storageEnvironment(),
         key = objectKey(environment, info.hash);
