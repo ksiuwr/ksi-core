@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { insertMarkdownGallery } from 'shared/markdown-gallery';
+  import { markdownImages } from 'shared/markdown-images';
   import { resizeMarkdownImage } from 'shared/markdown-images';
   import MarkdownContent from './MarkdownContent.svelte';
   import { Eye, Pencil, Images, UploadCloud, Paperclip } from '@lucide/svelte';
@@ -32,6 +34,27 @@
     busy = $state(false),
     dragging = $state(false);
   let input = $state<HTMLInputElement>();
+  let galleryPicker = $state(false);
+  let gallerySelection = $state<string[]>([]);
+  let uploadedImages = $state<{ id: string; name: string }[]>([]);
+  let galleryPreview = $state(3);
+  const galleryImages = $derived([
+    ...new Map(
+      [
+        ...markdownImages(value).flatMap((image) => {
+          const match = image.href.match(/^file:([A-Za-z0-9_-]{8,64})$/);
+          return match ? [{ id: match[1], name: image.text }] : [];
+        }),
+        ...uploadedImages
+      ].map((image) => [image.id, image])
+    ).values()
+  ]);
+  function insertGallery() {
+    value = insertMarkdownGallery(value, gallerySelection, galleryPreview);
+    galleryPicker = false;
+    gallerySelection = [];
+    preview = false;
+  }
   async function upload(files: FileList | File[] | null) {
     if (!files?.length || busy) return;
     busy = true;
@@ -43,6 +66,13 @@
         const response = await fetch('/api/files', { method: 'POST', body });
         const data = await response.json();
         if (!response.ok) throw new Error(data.code ?? 'Upload failed.');
+        if (file.type.startsWith('image/')) {
+          uploadedImages = [...uploadedImages, { id: data.id, name: file.name }];
+          if (galleryPicker) {
+            gallerySelection = [...gallerySelection, data.id];
+            continue;
+          }
+        }
         value += `\n${file.type.startsWith('image/') ? '!' : ''}[${file.name.replace(/[[\]\\]/g, '_')}](file:${data.id})\n`;
       }
     } catch (error) {
@@ -171,11 +201,34 @@
         type="button"
         class="gallery-button"
         onclick={() => {
-          value += '\n:::gallery preview=3\nfile:IMAGE_ID\n:::\n';
-          preview = false;
+          galleryPicker = !galleryPicker;
+          gallerySelection = galleryImages.map((image) => image.id);
         }}><Images size={14} aria-hidden="true" />{labels.gallery}</button
       >{/if}
   </div>
+  {#if allowGallery && galleryPicker}<fieldset class="gallery-picker">
+      <legend>{language === 'pl' ? 'Wybierz zdjęcia do galerii' : 'Choose gallery images'}</legend>
+      {#each galleryImages as image (image.id)}<label class="gallery-choice">
+          <input type="checkbox" value={image.id} bind:group={gallerySelection} />
+          <img src={`/media/${image.id}`} alt="" />{image.name}
+        </label>{/each}
+      {#if !galleryImages.length}<p>
+          {language === 'pl'
+            ? 'Dodaj zdjęcia za pomocą przycisku załączników poniżej.'
+            : 'Upload images using the attachments button below.'}
+        </p>{/if}
+      <label
+        >{language === 'pl' ? 'Liczba zdjęć w podglądzie' : 'Preview image count'}<input
+          type="number"
+          min="1"
+          max="30"
+          bind:value={galleryPreview}
+        /></label
+      >
+      <button type="button" disabled={busy || !gallerySelection.length} onclick={insertGallery}
+        >{language === 'pl' ? 'Wstaw galerię' : 'Insert gallery'}</button
+      >
+    </fieldset>{/if}
   {#if preview}<div class="editor-preview">
       <MarkdownContent
         {value}
@@ -254,6 +307,25 @@
 </div>
 
 <style>
+  .gallery-picker {
+    display: grid;
+    gap: 12px;
+    border: 1px solid var(--line);
+    padding: 16px;
+  }
+  .gallery-choice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .gallery-choice img {
+    width: 64px;
+    height: 48px;
+    object-fit: cover;
+  }
+  .gallery-choice input {
+    width: auto;
+  }
   .editor {
     display: grid;
     gap: 10px;
