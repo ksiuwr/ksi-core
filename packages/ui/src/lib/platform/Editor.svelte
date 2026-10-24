@@ -1,9 +1,15 @@
 <script lang="ts">
-  import { insertMarkdownGallery } from 'shared/markdown-gallery';
+  import {
+    insertMarkdownGallery,
+    markdownGalleries,
+    updateMarkdownGallery,
+    type GalleryState
+  } from 'shared/markdown-gallery';
+  import GalleryEditor from './GalleryEditor.svelte';
   import { markdownImages } from 'shared/markdown-images';
   import { resizeMarkdownImage } from 'shared/markdown-images';
   import MarkdownContent from './MarkdownContent.svelte';
-  import { Eye, Pencil, Images, UploadCloud, Paperclip } from '@lucide/svelte';
+  import { Eye, Pencil, Images, Paperclip, LoaderCircle, ChevronDown } from '@lucide/svelte';
   let {
     value = $bindable(''),
     language = 'pl',
@@ -14,18 +20,34 @@
   const labels = $derived(
     language === 'pl'
       ? {
+          uploading: 'Przesyłanie…',
+          queued: 'Oczekiwanie…',
           write: 'Edytuj',
           preview: 'Podgląd',
-          gallery: 'Galeria',
+          gallery: 'Dodaj galerię',
+          galleryName: 'Galeria',
+          newGallery: 'Nowa galeria',
+          images: 'Zdjęcia',
+          drop: 'Upuść pliki w polu tekstowym lub wybierz załączniki',
+          insert: 'Wstaw galerię',
+          imagesOnly: 'Do galerii można dodać tylko obrazy JPEG, PNG, WebP, AVIF lub GIF.',
           placeholder: 'Napisz treść w Markdown…',
-          attachments: 'Przeciągnij pliki tutaj lub wybierz załączniki'
+          attachments: 'Załącz pliki'
         }
       : {
+          uploading: 'Uploading…',
+          queued: 'Waiting…',
           write: 'Write',
           preview: 'Preview',
-          gallery: 'Gallery',
+          gallery: 'Add gallery',
+          galleryName: 'Gallery',
+          newGallery: 'New gallery',
+          images: 'Images',
+          drop: 'Drop files into the text field or choose attachments',
+          insert: 'Insert gallery',
+          imagesOnly: 'Galleries accept JPEG, PNG, WebP, AVIF or GIF images only.',
           placeholder: 'Write a Markdown description…',
-          attachments: 'Drop files here or choose attachments'
+          attachments: 'Attach files'
         }
   );
 
@@ -35,49 +57,91 @@
     dragging = $state(false);
   let input = $state<HTMLInputElement>();
   let galleryPicker = $state(false);
-  let gallerySelection = $state<string[]>([]);
+  let activeGallery = $state<number | 'draft' | null>(null);
+  let uploadTarget = $state<'content' | 'draft' | number>('content');
+  let pendingUploads = $state<{ key: number; name: string; status: 'queued' | 'uploading' }[]>([]);
+  let galleryDraft = $state<GalleryState>({ ids: [], preview: 0 });
   let uploadedImages = $state<{ id: string; name: string }[]>([]);
-  let galleryPreview = $state(3);
-  const galleryImages = $derived([
-    ...new Map(
-      [
-        ...markdownImages(value).flatMap((image) => {
-          const match = image.href.match(/^file:([A-Za-z0-9_-]{8,64})$/);
-          return match ? [{ id: match[1], name: image.text }] : [];
-        }),
-        ...uploadedImages
-      ].map((image) => [image.id, image])
-    ).values()
-  ]);
+  const galleries = $derived(markdownGalleries(value));
+  const inlineImages = $derived(
+    markdownImages(value).flatMap((image) => {
+      const match = image.href.match(/^file:([A-Za-z0-9_-]{8,64})$/);
+      return match ? [{ id: match[1], name: image.text }] : [];
+    })
+  );
+  const imageNames = $derived(
+    Object.fromEntries([...inlineImages, ...uploadedImages].map((image) => [image.id, image.name]))
+  );
+
+  function beginGallery() {
+    preview = false;
+    if (!galleryPicker) {
+      const ids = [...new Set(inlineImages.map((image) => image.id))];
+      galleryDraft = { ids, preview: Math.min(3, ids.length) };
+      galleryPicker = true;
+      activeGallery = 'draft';
+    } else activeGallery = activeGallery === 'draft' ? null : 'draft';
+  }
   function insertGallery() {
-    value = insertMarkdownGallery(value, gallerySelection, galleryPreview);
+    const index = galleries.length;
+    value = insertMarkdownGallery(value, galleryDraft.ids, galleryDraft.preview);
     galleryPicker = false;
-    gallerySelection = [];
+    galleryDraft = { ids: [], preview: 0 };
+    activeGallery = index;
     preview = false;
   }
-  async function upload(files: FileList | File[] | null) {
+  function changeGallery(index: number, gallery: GalleryState) {
+    value = updateMarkdownGallery(value, index, gallery);
+    if (!gallery.ids.length) activeGallery = null;
+  }
+  async function upload(
+    files: FileList | File[] | null,
+    target: 'content' | 'draft' | number = 'content'
+  ) {
     if (!files?.length || busy) return;
     busy = true;
     message = '';
+    const uploads = Array.from(files).filter((file) => {
+      if (
+        target === 'content' ||
+        ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif'].includes(file.type)
+      )
+        return true;
+      message = labels.imagesOnly;
+      return false;
+    });
+    uploadTarget = target;
+    pendingUploads = uploads.map((file, key) => ({ key, name: file.name, status: 'queued' }));
     try {
-      for (const file of Array.from(files)) {
+      for (const [key, file] of uploads.entries()) {
+        pendingUploads = pendingUploads.map((upload) =>
+          upload.key === key ? { ...upload, status: 'uploading' } : upload
+        );
         const body = new FormData();
         body.set('file', file);
         const response = await fetch('/api/files', { method: 'POST', body });
         const data = await response.json();
-        if (!response.ok) throw new Error(data.code ?? 'Upload failed.');
-        if (file.type.startsWith('image/')) {
+        if (!response.ok) throw new Error(`${file.name}: ${data.code ?? 'Upload failed.'}`);
+        pendingUploads = pendingUploads.filter((upload) => upload.key !== key);
+        if (file.type.startsWith('image/'))
           uploadedImages = [...uploadedImages, { id: data.id, name: file.name }];
-          if (galleryPicker) {
-            gallerySelection = [...gallerySelection, data.id];
-            continue;
-          }
+        if (target !== 'content') {
+          const gallery = target === 'draft' ? galleryDraft : galleries[target];
+          if (!gallery || gallery.ids.includes(data.id)) continue;
+          const selected = gallery.preview === gallery.ids.length && gallery.preview < 3;
+          const ids = [...gallery.ids];
+          ids.splice(selected ? gallery.preview : ids.length, 0, data.id);
+          const updated = { ids, preview: gallery.preview + Number(selected) };
+          if (target === 'draft') galleryDraft = updated;
+          else changeGallery(target, updated);
+        } else {
+          value += `\n${file.type.startsWith('image/') ? '!' : ''}[${file.name.replace(/[[\]\\]/g, '_')}](file:${data.id})\n`;
         }
-        value += `\n${file.type.startsWith('image/') ? '!' : ''}[${file.name.replace(/[[\]\\]/g, '_')}](file:${data.id})\n`;
       }
     } catch (error) {
       message = error instanceof Error ? error.message : 'Upload failed.';
     } finally {
+      pendingUploads = [];
       busy = false;
       if (input) input.value = '';
     }
@@ -197,38 +261,19 @@
         ><Eye size={14} aria-hidden="true" />{labels.preview}</button
       >
     </div>
-    {#if allowGallery}<button
-        type="button"
-        class="gallery-button"
-        onclick={() => {
-          galleryPicker = !galleryPicker;
-          gallerySelection = galleryImages.map((image) => image.id);
-        }}><Images size={14} aria-hidden="true" />{labels.gallery}</button
-      >{/if}
+    <div class="editor-tools">
+      <button type="button" disabled={busy} onclick={() => input?.click()} title={labels.drop}
+        ><Paperclip size={14} aria-hidden="true" />{labels.attachments}</button
+      >
+      {#if allowGallery}<button
+          type="button"
+          class="gallery-button"
+          disabled={busy}
+          aria-expanded={activeGallery === 'draft'}
+          onclick={beginGallery}><Images size={14} aria-hidden="true" />{labels.gallery}</button
+        >{/if}
+    </div>
   </div>
-  {#if allowGallery && galleryPicker}<fieldset class="gallery-picker">
-      <legend>{language === 'pl' ? 'Wybierz zdjęcia do galerii' : 'Choose gallery images'}</legend>
-      {#each galleryImages as image (image.id)}<label class="gallery-choice">
-          <input type="checkbox" value={image.id} bind:group={gallerySelection} />
-          <img src={`/media/${image.id}`} alt="" />{image.name}
-        </label>{/each}
-      {#if !galleryImages.length}<p>
-          {language === 'pl'
-            ? 'Dodaj zdjęcia za pomocą przycisku załączników poniżej.'
-            : 'Upload images using the attachments button below.'}
-        </p>{/if}
-      <label
-        >{language === 'pl' ? 'Liczba zdjęć w podglądzie' : 'Preview image count'}<input
-          type="number"
-          min="1"
-          max="30"
-          bind:value={galleryPreview}
-        /></label
-      >
-      <button type="button" disabled={busy || !gallerySelection.length} onclick={insertGallery}
-        >{language === 'pl' ? 'Wstaw galerię' : 'Insert gallery'}</button
-      >
-    </fieldset>{/if}
   {#if preview}<div class="editor-preview">
       <MarkdownContent
         {value}
@@ -243,6 +288,20 @@
         bind:value
         {rows}
         placeholder={labels.placeholder}
+        class:dragging
+        aria-describedby={`${uid}-drop`}
+        ondragover={(event) => {
+          if (!event.dataTransfer?.types.includes('Files')) return;
+          event.preventDefault();
+          dragging = true;
+        }}
+        ondragleave={() => (dragging = false)}
+        ondrop={(event) => {
+          if (!event.dataTransfer?.types.includes('Files')) return;
+          event.preventDefault();
+          dragging = false;
+          void upload(event.dataTransfer.files, 'content');
+        }}
         oninput={handleInput}
         onkeydown={handleKeyDown}
         onclick={() => (showAutocomplete = false)}
@@ -281,50 +340,188 @@
     tabindex="-1"
     aria-hidden="true"
   />
-  <button
-    type="button"
-    class="upload-zone"
-    class:dragging
-    disabled={busy}
-    onclick={() => input?.click()}
-    ondragover={(event) => {
-      event.preventDefault();
-      dragging = true;
-    }}
-    ondragleave={() => (dragging = false)}
-    ondrop={(event) => {
-      event.preventDefault();
-      dragging = false;
-      void upload(event.dataTransfer?.files ?? null);
-    }}
-  >
-    {#if busy}<UploadCloud size={18} aria-hidden="true" />{'Uploading…'}{:else}<Paperclip
-        size={17}
-        aria-hidden="true"
-      /><span>{labels.attachments}</span>{/if}
-  </button>
+  <p class="upload-hint" id={`${uid}-drop`}>{busy ? labels.uploading : labels.drop}</p>
+  {#if uploadTarget === 'content' && pendingUploads.length}
+    <ul class="pending-uploads" aria-live="polite">
+      {#each pendingUploads as upload (upload.key)}<li>
+          <span class="upload-spinner"><LoaderCircle size={18} aria-hidden="true" /></span><span
+            >{upload.status === 'uploading' ? labels.uploading : labels.queued}<small
+              >{upload.name}</small
+            ></span
+          >
+        </li>{/each}
+    </ul>
+  {/if}
+  {#if allowGallery && !preview}
+    {#each galleries as gallery, index (index)}
+      <section class="gallery-section">
+        <button
+          id={`${uid}-gallery-${index}-summary`}
+          type="button"
+          class="gallery-summary"
+          class:expanded={activeGallery === index}
+          disabled={busy}
+          aria-expanded={activeGallery === index}
+          aria-controls={`${uid}-gallery-${index}`}
+          onclick={() => (activeGallery = activeGallery === index ? null : index)}
+        >
+          <Images size={16} aria-hidden="true" />
+          <span class="gallery-summary-title">{labels.galleryName} {index + 1}</span>
+          <span class="gallery-summary-count"
+            >{labels.images}: {gallery.ids.length} · {labels.preview}: {gallery.preview}</span
+          >
+          <ChevronDown size={16} aria-hidden="true" />
+        </button>
+        <div id={`${uid}-gallery-${index}`} hidden={activeGallery !== index}>
+          {#if activeGallery === index}
+            <GalleryEditor
+              {gallery}
+              {language}
+              {busy}
+              names={imageNames}
+              uploads={uploadTarget === index ? pendingUploads : []}
+              onchange={(state) => changeGallery(index, state)}
+              onupload={(files) => void upload(files, index)}
+              onremove={() => changeGallery(index, { ids: [], preview: 0 })}
+            />
+          {/if}
+        </div>
+      </section>
+    {/each}
+    {#if galleryPicker}
+      <section class="gallery-section">
+        <button
+          id={`${uid}-gallery-draft-summary`}
+          type="button"
+          class="gallery-summary"
+          class:expanded={activeGallery === 'draft'}
+          disabled={busy}
+          aria-expanded={activeGallery === 'draft'}
+          aria-controls={`${uid}-gallery-draft`}
+          onclick={() => (activeGallery = activeGallery === 'draft' ? null : 'draft')}
+        >
+          <Images size={16} aria-hidden="true" />
+          <span class="gallery-summary-title">{labels.newGallery}</span>
+          <span class="gallery-summary-count"
+            >{labels.images}: {galleryDraft.ids.length} · {labels.preview}: {galleryDraft.preview}</span
+          >
+          <ChevronDown size={16} aria-hidden="true" />
+        </button>
+        <div id={`${uid}-gallery-draft`} hidden={activeGallery !== 'draft'}>
+          {#if activeGallery === 'draft'}
+            <GalleryEditor
+              gallery={galleryDraft}
+              {language}
+              {busy}
+              names={imageNames}
+              uploads={uploadTarget === 'draft' ? pendingUploads : []}
+              onchange={(state) => (galleryDraft = state)}
+              onupload={(files) => void upload(files, 'draft')}
+              onremove={() => {
+                galleryPicker = false;
+                galleryDraft = { ids: [], preview: 0 };
+                activeGallery = null;
+              }}
+            />
+            <button
+              class="insert-gallery"
+              type="button"
+              disabled={busy || !galleryDraft.ids.length}
+              onclick={insertGallery}>{labels.insert}</button
+            >
+          {/if}
+        </div>
+      </section>
+    {/if}
+  {/if}
   {#if message}<p role="alert" class="error">{message}</p>{/if}
 </div>
 
 <style>
-  .gallery-picker {
-    display: grid;
-    gap: 12px;
-    border: 1px solid var(--line);
-    padding: 16px;
+  .gallery-section {
+    min-width: 0;
   }
-  .gallery-choice {
+  .editor .gallery-summary {
+    display: flex;
+    width: 100%;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--surface);
+    text-align: left;
+    color: var(--ink);
+  }
+  .gallery-summary-title {
+    flex: 1;
+    font-weight: 600;
+  }
+  .gallery-summary-count {
+    color: var(--muted);
+    font-size: 11px;
+  }
+  .gallery-summary :global(svg) {
+    flex-shrink: 0;
+  }
+  .gallery-summary :global(svg:last-child) {
+    transition: transform 150ms ease;
+  }
+  .gallery-summary.expanded :global(svg:last-child) {
+    transform: rotate(180deg);
+  }
+  .gallery-section .insert-gallery {
+    margin-top: 12px;
+  }
+  @media (max-width: 540px) {
+    .editor .gallery-summary {
+      flex-wrap: wrap;
+    }
+    .gallery-summary-count {
+      order: 1;
+      flex-basis: 100%;
+      margin-left: 26px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gallery-summary :global(svg:last-child) {
+      transition: none;
+    }
+  }
+  .pending-uploads {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 8px;
+  }
+  .pending-uploads li {
     display: flex;
     align-items: center;
     gap: 10px;
+    padding: 12px;
+    border: 1px dashed var(--line);
+    color: var(--muted);
+    font-size: 12px;
   }
-  .gallery-choice img {
-    width: 64px;
-    height: 48px;
-    object-fit: cover;
+  .pending-uploads small {
+    display: block;
+    margin-top: 4px;
+    overflow-wrap: anywhere;
   }
-  .gallery-choice input {
-    width: auto;
+  .upload-spinner {
+    display: inline-flex;
+    flex-shrink: 0;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .upload-spinner {
+      animation: none;
+    }
   }
   .editor {
     display: grid;
@@ -379,18 +576,27 @@
   .file-input {
     display: none;
   }
-  .editor .upload-zone {
-    width: 100%;
-    justify-content: center;
-    border: 1px dashed var(--line);
-    padding: 18px 12px;
-    line-height: 1.5;
-    text-align: center;
+  .editor-tools {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
   }
-  .editor .upload-zone:hover,
-  .editor .upload-zone.dragging {
+  .editor textarea.dragging {
     border-color: var(--accent);
+    outline: 2px dashed var(--accent);
+    outline-offset: -5px;
     background: var(--surface-muted);
+  }
+  .upload-hint {
+    margin: 0;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .editor .insert-gallery {
+    justify-self: start;
+    border-color: var(--line);
+    padding: 9px 12px;
   }
   .editor button:disabled {
     opacity: 0.5;

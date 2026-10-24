@@ -26,3 +26,15 @@ test('gallery is allowlisted data with bounded preview', () => {
   const gallery = blocks.find((b) => b.type === 'gallery');
   expect(gallery).toEqual({ type: 'gallery', ids: ['abcdefgh', 'ijklmnop'], preview: 2 });
 });
+
+test('gallery preview permits zero selected images and code examples remain literal', () => {
+  const source = ':::gallery preview=0\nfile:abcdefgh\n:::';
+  expect(renderMarkdown(source).find((block) => block.type === 'gallery')).toEqual({
+    type: 'gallery',
+    ids: ['abcdefgh'],
+    preview: 0
+  });
+  expect(
+    renderMarkdown('```md\n' + source + '\n```').some((block) => block.type === 'gallery')
+  ).toBe(false);
+});
