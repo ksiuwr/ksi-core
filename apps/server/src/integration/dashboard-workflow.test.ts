@@ -419,6 +419,31 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       await db.delete(boards).where(inArray(boards.id, [localBoardId, foreignBoardId]));
     }
   });
+  test('task audit metadata retains before and after values', async () => {
+    const created = await request('member', `/platform/boards/${boardId}/items`, 'POST', {
+      title: 'Old title',
+      markdown: 'Old description',
+      column: 'todo',
+      tags: [],
+      position: 0
+    });
+    const updated = await request('member', `/platform/items/${created.body.id}`, 'PATCH', {
+      version: 1,
+      title: 'New title',
+      markdown: 'New description'
+    });
+    expect(updated.status).toBe(200);
+    const events = await db
+      .select()
+      .from(auditEvents)
+      .where(eq(auditEvents.targetId, created.body.id));
+    const event = events.find((event) => event.action === 'kanban.updated');
+    expect(event?.metadata.changes).toEqual([
+      { field: 'title', before: 'Old title', after: 'New title' },
+      { field: 'markdown', before: 'Old description', after: 'New description' }
+    ]);
+    await db.delete(kanbanItems).where(eq(kanbanItems.id, created.body.id));
+  });
   test('administrator email changes revoke access and require verification; recovery stays private', async () => {
     const id = createId(),
       email = `${id}@example.test`,

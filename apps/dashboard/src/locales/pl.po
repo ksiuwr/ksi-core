@@ -845,7 +845,6 @@ msgstr "Wycofaj prośbę"
 msgid "The picture was declined. You can submit another."
 msgstr "Zdjęcie zostało odrzucone. Możesz przesłać inne."
 
-#: src/lib/ArticleThumbnail.svelte
 #: src/lib/AvatarUpload.svelte
 msgid "Uploading…"
 msgstr "Przesyłanie…"
@@ -1765,3 +1764,6 @@ msgstr ""
 
 #~ msgid "Move down"
 #~ msgstr ""
+
+#~ msgid "All statuses"
+#~ msgstr "Wszystkie statusy"

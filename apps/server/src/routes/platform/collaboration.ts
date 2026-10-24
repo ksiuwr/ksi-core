@@ -1,3 +1,4 @@
+import { contentChanges, taskChangeFields } from 'shared/activity';
 import { and, eq, desc, inArray, isNull, isNotNull, sql } from 'drizzle-orm';
 import { status, t } from 'elysia';
 import { syncFileReferences } from './files';
@@ -566,7 +567,12 @@ export default createElysia({ prefix: '/platform' })
           projectId: board.projectId,
           action: 'kanban.updated',
           targetId: item.id,
-          metadata: { boardId: board.id, itemId: item.id, version: updated.version }
+          metadata: {
+            boardId: board.id,
+            itemId: item.id,
+            version: updated.version,
+            changes: contentChanges(item, updated, taskChangeFields)
+          }
         });
         return updated;
       });

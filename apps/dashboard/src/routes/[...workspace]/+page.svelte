@@ -1,5 +1,6 @@
 <script lang="ts">
   import ArticleThumbnail from '$lib/ArticleThumbnail.svelte';
+  import ChangeDetails from '@ksi-core/ui/platform/ChangeDetails.svelte';
   import ContentTranslations from '$lib/ContentTranslations.svelte';
   import type { ContentTranslations as TranslationData } from 'shared/content-locales';
   import { onMount, untrack, tick } from 'svelte';
@@ -249,7 +250,8 @@
     if (action.startsWith('articles.')) return dashboardPath(wp, slug, 'articles');
     if (action.startsWith('threads.'))
       return `${dashboardPath(wp, slug, 'forum')}/${encodeURIComponent(targetId)}`;
-    if (action.startsWith('items.')) return dashboardPath(wp, slug, 'board');
+    if (action.startsWith('kanban.') || action.startsWith('items.'))
+      return dashboardPath(wp, slug, 'board');
     if (action.startsWith('projects.'))
       return projectSlug ? `/projects/${encodeURIComponent(projectSlug)}` : null;
     return null;
@@ -2043,7 +2045,7 @@
                         </div>
                         {#if event.event.metadata && Object.keys(event.event.metadata).length > 0}
                           <div class="event-metadata">
-                            {#each Object.entries(event.event.metadata) as [key, val]}
+                            {#each Object.entries(event.event.metadata).filter(([key]) => key !== 'changes') as [key, val]}
                               {#if linkForMetadata(key, val, event.projectSlug)}
                                 <a
                                   class="meta-tag meta-link"
@@ -2055,6 +2057,10 @@
                               {/if}
                             {/each}
                           </div>
+                          {#if Array.isArray(event.event.metadata.changes)}<ChangeDetails
+                              changes={event.event.metadata.changes}
+                              {language}
+                            />{/if}
                         {/if}
                       </div>
                       <time class="muted" datetime={event.event.createdAt}

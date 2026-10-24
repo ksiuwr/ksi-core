@@ -845,7 +845,6 @@ msgstr "Withdraw request"
 msgid "The picture was declined. You can submit another."
 msgstr "The picture was declined. You can submit another."
 
-#: src/lib/ArticleThumbnail.svelte
 #: src/lib/AvatarUpload.svelte
 msgid "Uploading…"
 msgstr "Uploading…"
@@ -1765,3 +1764,6 @@ msgstr "ArrowDown"
 
 #~ msgid "Move down"
 #~ msgstr "Move down"
+
+#~ msgid "All statuses"
+#~ msgstr "All statuses"

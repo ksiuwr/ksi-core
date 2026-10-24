@@ -1,3 +1,4 @@
+import { contentChanges } from 'shared/activity';
 import { localizeContent, articleFileContent } from 'shared/content-locales';
 import { relatedArticles } from '../../domain/related-articles';
 import { and, eq, inArray, desc, sql, or } from 'drizzle-orm';
@@ -541,6 +542,11 @@ export default createElysia({ prefix: '/platform' })
       return db.transaction(async (tx) => {
         const scope = await scopeFor(tx, params.id);
         requireLeader(actor, scope, 'projects.catalog.edit');
+        const [previous] = await tx
+          .select()
+          .from(projects)
+          .where(eq(projects.id, params.id))
+          .for('update');
         const [project] = await tx
           .update(projects)
           .set({
@@ -559,7 +565,16 @@ export default createElysia({ prefix: '/platform' })
           projectId: project.id,
           action: 'projects.updated',
           targetId: project.id,
-          metadata: { version: project.version }
+          metadata: {
+            version: project.version,
+            changes: contentChanges(previous!, project, [
+              'name',
+              'description',
+              'tags',
+              'fields',
+              'locked'
+            ])
+          }
         });
         return project;
       });
@@ -1313,7 +1328,17 @@ export default createElysia({ prefix: '/platform' })
           projectId: article.projectId,
           action: 'articles.updated',
           targetId: article.id,
-          metadata: { version: updated.version }
+          metadata: {
+            version: updated.version,
+            changes: contentChanges(article, updated, [
+              'title',
+              'markdown',
+              'state',
+              'mainArticle',
+              'projectFeed',
+              'websiteFeed'
+            ])
+          }
         });
         return updated;
       });
