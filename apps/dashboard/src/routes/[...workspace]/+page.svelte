@@ -1572,24 +1572,27 @@
                           {/if}
                         </div>
                       {/each}
-                      <div style="margin-top: 16px; display: grid; gap: 8px;">
+                      <form
+                        style="margin-top: 16px; display: grid; gap: 8px;"
+                        onsubmit={(event) => {
+                          event.preventDefault();
+                          if (busy || archived || !markdown.trim()) return;
+                          void action(async () => {
+                            await api(`/platform/threads/${selectedThread!.id}/comments`, 'POST', {
+                              markdown
+                            });
+                            markdown = '';
+                          });
+                        }}
+                      >
                         {#if !archived}<h3>{'Reply'}</h3>
                           <Editor {language} bind:value={markdown} />{/if}
                         <div class="row" style="gap: 8px;">
-                          {#if !archived}<button
-                              class="btn"
-                              disabled={busy || !markdown.trim()}
-                              onclick={() =>
-                                action(async () => {
-                                  await api(
-                                    `/platform/threads/${selectedThread!.id}/comments`,
-                                    'POST',
-                                    { markdown }
-                                  );
-                                  markdown = '';
-                                })}>{'Reply'}</button
+                          {#if !archived}<button class="btn" disabled={busy || !markdown.trim()}
+                              >{'Reply'}</button
                             >{/if}
                           <button
+                            type="button"
                             class="btn btn-outline"
                             disabled={busy}
                             onclick={() =>
@@ -1609,7 +1612,7 @@
                               />{'Archive thread'}{/if}
                           </button>
                         </div>
-                      </div>
+                      </form>
                     </div>
                   {/if}
 

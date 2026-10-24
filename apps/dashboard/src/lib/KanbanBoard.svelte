@@ -181,6 +181,7 @@
     }
   }
   async function create() {
+    if (busy || !title.trim()) return;
     await run(async () => {
       const id = await ensureBoard();
       await api(`/platform/boards/${id}/items`, 'POST', {
@@ -350,7 +351,7 @@
     });
   }
   async function postReply() {
-    if (!selected) return;
+    if (!selected || busy || !reply.trim()) return;
     await run(async () => {
       await api(`/platform/items/${selected!.id}/comments`, 'POST', { markdown: reply });
       reply = '';
@@ -536,6 +537,17 @@
       }}
     >
       <label for="task-title">{'Task title'}</label><input
+        onkeydown={(event) => {
+          if (
+            !event.defaultPrevented &&
+            !event.isComposing &&
+            (event.ctrlKey || event.metaKey) &&
+            event.key === 'Enter'
+          ) {
+            event.preventDefault();
+            if (!busy) event.currentTarget.form?.requestSubmit();
+          }
+        }}
         id="task-title"
         bind:value={title}
         required

@@ -101,6 +101,17 @@
   };
 
   function handleKeyDown(e: KeyboardEvent) {
+    if ((e.ctrlKey || e.metaKey) && e.key === KEYS.ENTER && !e.isComposing) {
+      const form = textarea?.closest('form');
+      const submit = form?.querySelector<HTMLButtonElement>(
+        'button:not([type]), button[type="submit"]'
+      );
+      if (form && submit && !submit.disabled) {
+        e.preventDefault();
+        form.requestSubmit(submit);
+      }
+      return;
+    }
     if (!showAutocomplete) return;
     if (e.key === KEYS.ARROW_DOWN) {
       e.preventDefault();
