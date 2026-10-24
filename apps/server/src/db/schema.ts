@@ -299,6 +299,7 @@ export const boards = snakeCase.table('boards', {
   statuses: jsonb().$type<BoardStatus[]>().notNull().default(defaultBoardStatuses)
 });
 export const kanbanItems = snakeCase.table('kanban_items', {
+  dueAt: timestamp(),
   assigneeIds: text().array().notNull().default([]),
   id: text().primaryKey().$defaultFn(createId),
   boardId: text()
@@ -476,3 +477,17 @@ export const notificationPreferences = snakeCase.table('notification_preferences
   emailEnabled: boolean().notNull().default(false),
   emailDelayMinutes: integer().notNull().default(60)
 });
+
+export const deadlineReminders = snakeCase.table(
+  'deadline_reminders',
+  {
+    id: text().primaryKey().$defaultFn(createId),
+    itemId: text()
+      .notNull()
+      .references(() => kanbanItems.id, { onDelete: 'cascade' }),
+    dueAt: timestamp().notNull(),
+    days: integer().notNull(),
+    createdAt: timestamp().notNull().defaultNow()
+  },
+  (t) => [uniqueIndex('deadline_reminder_unique').on(t.itemId, t.dueAt, t.days)]
+);

@@ -88,8 +88,8 @@ export async function notifyCollaboration(
   eventId: string,
   type: SubscriptionType,
   id: string,
-  actorId: string,
-  options: { markdown?: string; assigneeIds?: string[]; watch?: boolean } = {}
+  actorId: string | null,
+  options: { markdown?: string; assigneeIds?: string[]; watch?: boolean; reason?: string } = {}
 ) {
   const target = await notificationTarget(tx, type, id);
   if (!target) return;
@@ -103,7 +103,7 @@ export async function notifyCollaboration(
   const recipients = new Map(watchers.map((watcher) => [watcher.userId, 'update']));
   for (const userId of options.assigneeIds ?? []) recipients.set(userId, 'assignment');
   for (const userId of mentionedUserIds(options.markdown ?? '')) recipients.set(userId, 'mention');
-  recipients.delete(actorId);
+  if (actorId) recipients.delete(actorId);
   const candidateIds = [...new Set([...recipients.keys(), ...(options.assigneeIds ?? [])])];
   if (!candidateIds.length) return;
   const candidates = await tx.select().from(users).where(inArray(users.id, candidateIds));
@@ -118,7 +118,7 @@ export async function notifyCollaboration(
       eventId,
       ownerType: type,
       ownerId: id,
-      reason: recipients.get(user.id)!
+      reason: options.reason ?? recipients.get(user.id)!
     }));
   if (values.length) await tx.insert(notifications).values(values).onConflictDoNothing();
 }

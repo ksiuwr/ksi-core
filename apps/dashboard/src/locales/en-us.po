@@ -2378,3 +2378,67 @@ msgstr "Zapisywanie…"
 #: src/lib/NotificationSettings.svelte
 msgid "Saving…"
 msgstr "Saving…"
+
+#~ msgid "Zamknij"
+#~ msgstr "Zamknij"
+
+#~ msgid "Przypisane osoby"
+#~ msgstr "Przypisane osoby"
+
+#~ msgid "Assignees"
+#~ msgstr "Assignees"
+
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "Termin: "
+msgstr "Termin: "
+
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "Due: "
+msgstr "Due: "
+
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "Termin (czas lokalny)"
+msgstr "Termin (czas lokalny)"
+
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "Deadline (local time)"
+msgstr "Deadline (local time)"
+
+#~ msgid "All statuses"
+#~ msgstr "All statuses"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Przypomnienie o terminie"
+msgstr "Przypomnienie o terminie"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Deadline reminder"
+msgstr "Deadline reminder"
+
+#~ msgid "Brak powiadomień."
+#~ msgstr "Brak powiadomień."
+
+#~ msgid "No notifications."
+#~ msgstr "No notifications."
+
+#~ msgid "Email unread notifications"
+#~ msgstr "Email unread notifications"
+
+#~ msgid "Opóźnienie (minuty)"
+#~ msgstr "Opóźnienie (minuty)"
+
+#~ msgid "Delay (minutes)"
+#~ msgstr "Delay (minutes)"
+
+#~ msgid "Zapisz ustawienia"
+#~ msgstr "Zapisz ustawienia"
+
+#~ msgid "Save preferences"
+#~ msgstr "Save preferences"
+
+#~ msgid "Preferences"
+#~ msgstr "Preferences"

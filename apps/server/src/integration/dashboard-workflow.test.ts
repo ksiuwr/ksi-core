@@ -1,3 +1,4 @@
+import { queueDeadlineReminders } from '../services/deadlines';
 import { queueNotificationMailBatch } from '../services/notifications';
 import { beforeAll, afterAll, describe, expect, test } from 'bun:test';
 import { and, eq, inArray } from 'drizzle-orm';
@@ -907,6 +908,66 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
     await db
       .delete(projectMembers)
       .where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, ids.outsider)));
+  });
+  test('deadlines persist UTC dates, issue each reminder once, and stop for completed tasks', async () => {
+    const now = new Date('2030-01-01T12:00:00Z');
+    const dueAt = new Date(now.getTime() + 6 * 86400000).toISOString();
+    const task = await request('admin', `/platform/boards/${boardId}/items`, 'POST', {
+      title: 'Deadline task',
+      markdown: '',
+      column: 'todo',
+      labels: [],
+      position: 0,
+      assigneeIds: [ids.member],
+      dueAt
+    });
+    expect(task.status).toBe(200);
+    expect(new Date(task.body.dueAt).toISOString()).toBe(dueAt);
+    const first = await Promise.all([queueDeadlineReminders(now), queueDeadlineReminders(now)]);
+    expect(first.reduce((sum, count) => sum + count, 0)).toBe(1);
+    expect(await queueDeadlineReminders(now)).toBe(0);
+    for (const days of [4, 5.5, 7])
+      expect(await queueDeadlineReminders(new Date(now.getTime() + days * 86400000))).toBe(1);
+    const reminders = (await request('member', '/notifications')).body.filter(
+      (n: any) => n.ownerId === task.body.id && n.reason === 'deadline'
+    );
+    expect(reminders).toHaveLength(4);
+    const rescheduled = await request('admin', `/platform/items/${task.body.id}`, 'PATCH', {
+      version: 1,
+      dueAt: new Date(now.getTime() + 13 * 86400000).toISOString()
+    });
+    expect(rescheduled.status).toBe(200);
+    expect(await queueDeadlineReminders(new Date(now.getTime() + 7 * 86400000))).toBe(1);
+    expect(
+      (
+        await request('admin', `/platform/items/${task.body.id}`, 'PATCH', {
+          version: 2,
+          column: 'done'
+        })
+      ).status
+    ).toBe(200);
+    expect(await queueDeadlineReminders(new Date(now.getTime() + 20 * 86400000))).toBe(0);
+    const cleared = await request('admin', `/platform/items/${task.body.id}`, 'PATCH', {
+      version: 3,
+      dueAt: null
+    });
+    expect(cleared.body.dueAt).toBeNull();
+    expect(
+      (
+        await request('admin', `/platform/items/${task.body.id}`, 'PATCH', {
+          version: 4,
+          dueAt: 'not-a-date'
+        })
+      ).status
+    ).toBe(422);
+    await db.delete(kanbanItems).where(eq(kanbanItems.id, task.body.id));
+    const events = await db
+      .select()
+      .from(auditEvents)
+      .where(eq(auditEvents.targetId, task.body.id));
+    const eventIds = events.map((event) => event.id);
+    await db.delete(outbox).where(inArray(outbox.eventId, eventIds));
+    await db.delete(auditEvents).where(inArray(auditEvents.id, eventIds));
   });
   test('administrator email changes revoke access and require verification; recovery stays private', async () => {
     const id = createId(),

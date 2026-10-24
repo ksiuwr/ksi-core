@@ -35,6 +35,7 @@
     position: number;
     labels: string[];
     assigneeIds?: string[];
+    dueAt?: string | null;
     deletedAt?: string;
   };
   type Comment = {
@@ -225,6 +226,13 @@
       .catch(() => {});
     return () => controller.abort();
   });
+  let taskDueAt = $state(''),
+    editDueAt = $state('');
+  function localDate(value?: string | null) {
+    if (!value) return '';
+    const date = new Date(value);
+    return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  }
   const label = (s: BoardStatus) =>
     s.id === 'todo' && s.name === 'To do'
       ? 'To do'
@@ -455,6 +463,7 @@
     markdown = '';
     taskLabels = [];
     taskAssignees = [];
+    taskDueAt = '';
     await tick();
     composerDialog?.showModal();
     document.getElementById('task-title')?.focus();
@@ -517,6 +526,7 @@
         markdown,
         labels: taskLabels,
         assigneeIds: taskAssignees,
+        dueAt: taskDueAt ? new Date(taskDueAt).toISOString() : null,
         column: composer,
         position:
           Math.max(-1, ...items.filter((i) => i.column === composer).map((i) => i.position)) + 1
@@ -735,7 +745,8 @@
         title: editTitle,
         markdown: editMarkdown,
         labels: editLabels,
-        assigneeIds: editAssignees
+        assigneeIds: editAssignees,
+        dueAt: editDueAt ? new Date(editDueAt).toISOString() : null
       });
       editing = false;
       await loadComments(selected!.id);
@@ -1030,6 +1041,14 @@
                   </span>
                 {/each}
               </div>{/if}
+            {#if item.dueAt}<time
+                class:overdue={new Date(item.dueAt).getTime() < Date.now() &&
+                  item.column !== 'done'}
+                datetime={item.dueAt}
+                >{language === 'pl' ? 'Termin: ' : 'Due: '}{new Date(item.dueAt).toLocaleString(
+                  language === 'pl' ? 'pl-PL' : 'en-GB'
+                )}</time
+              >{/if}
             {#if item.assigneeIds?.length}<Assignees
                 value={item.assigneeIds}
                 {members}
@@ -1143,6 +1162,12 @@
         </div>
       {/if}
       <Assignees bind:value={taskAssignees} {members} {language} disabled={busy} />
+      <label
+        >{language === 'pl' ? 'Termin (czas lokalny)' : 'Deadline (local time)'}<input
+          type="datetime-local"
+          bind:value={taskDueAt}
+        /></label
+      >
       <Editor {language} bind:value={markdown} rows={10} />
       <div class="row">
         <button class="btn" disabled={busy || !title.trim()}>{'Add task'}</button><button
@@ -1374,6 +1399,11 @@
         >
       </div>
     </div>
+    {#if selected.dueAt}<p>
+        {language === 'pl' ? 'Termin: ' : 'Due: '}<time datetime={selected.dueAt}
+          >{new Date(selected.dueAt).toLocaleString(language === 'pl' ? 'pl-PL' : 'en-GB')}</time
+        >
+      </p>{/if}
     {#key (selected.assigneeIds ?? []).join(',')}<WatchButton
         type="item"
         id={selected.id}
@@ -1396,6 +1426,7 @@
           editMarkdown = selected!.markdown;
           editLabels = [...selected!.labels];
           editAssignees = [...(selected!.assigneeIds ?? [])];
+          editDueAt = localDate(selected!.dueAt);
         }}><Pencil size={14} aria-hidden="true" />{'Edit'}</button
       ><button
         type="button"
@@ -1466,6 +1497,12 @@
           </div>
         {/if}
         <Assignees bind:value={editAssignees} {members} {language} disabled={busy} />
+        <label
+          >{language === 'pl' ? 'Termin (czas lokalny)' : 'Deadline (local time)'}<input
+            type="datetime-local"
+            bind:value={editDueAt}
+          /></label
+        >
         <div class="row">
           <button class="btn" disabled={busy || !editTitle.trim()}
             ><Save size={14} aria-hidden="true" />{'Save'}</button
@@ -1996,6 +2033,10 @@
     gap: 6px;
     align-items: center;
     flex-shrink: 0;
+  }
+  .overdue {
+    color: var(--red, #b32c49);
+    font-weight: 600;
   }
   .status-dialog {
     width: min(560px, calc(100vw - 32px));
