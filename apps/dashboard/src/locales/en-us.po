@@ -666,6 +666,7 @@ msgstr "Task status"
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
 #: src/lib/Members.svelte
 #: src/lib/Members.svelte
 #: src/lib/ProjectSettings.svelte
@@ -693,9 +694,12 @@ msgstr "Deleted statuses"
 
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
 msgid "Close"
 msgstr "Close"
 
+#: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 msgid "Color"
 msgstr "Color"
@@ -705,6 +709,7 @@ msgstr "Color"
 msgid "Deleted"
 msgstr "Deleted"
 
+#: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
@@ -1651,3 +1656,97 @@ msgstr "Choose thumbnail"
 #: src/lib/ArticleThumbnail.svelte
 msgid "Remove thumbnail"
 msgstr "Remove thumbnail"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Clear filter"
+msgstr "Clear filter"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Description (optional)"
+msgstr "Description (optional)"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Preview"
+msgstr "Preview"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Brief description"
+msgstr "Brief description"
+
+#: src/lib/KanbanBoard.svelte
+msgid "All labels"
+msgstr "All labels"
+
+#: src/lib/KanbanBoard.svelte
+msgid "A label with this name already exists."
+msgstr "A label with this name already exists."
+
+#: src/lib/KanbanBoard.svelte
+msgid "Invalid label or name already in use."
+msgstr "Invalid label or name already in use."
+
+#: src/lib/KanbanBoard.svelte
+msgid "Cannot delete label because it is assigned to tasks on the board. Remove it from tasks first."
+msgstr "Cannot delete label because it is assigned to tasks on the board. Remove it from tasks first."
+
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "Filter by label"
+msgstr "Filter by label"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Search labels…"
+msgstr "Search labels…"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Clear label filter"
+msgstr "Clear label filter"
+
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "Manage labels"
+msgstr "Manage labels"
+
+#: src/lib/KanbanBoard.svelte
+msgid "New label"
+msgstr "New label"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Board labels"
+msgstr "Board labels"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Remove a label from tasks before deleting it from the board."
+msgstr "Remove a label from tasks before deleting it from the board."
+
+#: src/lib/KanbanBoard.svelte
+msgid "No labels on this board yet."
+msgstr "No labels on this board yet."
+
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "Label name"
+msgstr "Label name"
+
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "Edit label"
+msgstr "Edit label"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Delete label"
+msgstr "Delete label"
+
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "Labels"
+msgstr "Labels"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Create new label"
+msgstr "Create new label"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Create label"
+msgstr "Create label"

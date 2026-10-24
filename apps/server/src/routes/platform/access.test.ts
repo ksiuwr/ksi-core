@@ -48,6 +48,21 @@ describe('platform HTTP authorization boundaries', () => {
     expect(response.status).toBe(401);
     expect(await response.json()).toEqual({ code: 'AUTH_REQUIRED' });
   });
+  test.each([
+    ['POST', '/boards/missing/labels', { name: 'Bug' }],
+    ['PATCH', '/boards/missing/labels/Bug', { name: 'Defect' }],
+    ['DELETE', '/boards/missing/labels/Bug', undefined],
+    ['PUT', '/boards/missing/labels', { labels: [{ name: 'Bug' }] }]
+  ] as const)('label management %s requires authentication', async (method, path, body) => {
+    const response = await collaboration.handle(
+      new Request(`http://localhost/platform${path}`, {
+        method,
+        headers: { 'content-type': 'application/json' },
+        ...(body ? { body: JSON.stringify(body) } : {})
+      })
+    );
+    expect(response.status).toBe(401);
+  });
   test('thread creation cannot be called anonymously', async () => {
     const response = await collaboration.handle(
       new Request('http://localhost/platform/threads', {

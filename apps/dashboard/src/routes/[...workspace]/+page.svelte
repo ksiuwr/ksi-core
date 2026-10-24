@@ -12,7 +12,7 @@
     setTheme,
     type ThemePreference
   } from '$lib/preferences.svelte';
-  import KanbanBoard, { type BoardStatus } from '$lib/KanbanBoard.svelte';
+  import KanbanBoard, { type BoardStatus, type BoardLabel } from '$lib/KanbanBoard.svelte';
   import ApprovalInbox, { type InboxData } from '$lib/ApprovalInbox.svelte';
   import AvatarUpload, { type AvatarRequest } from '$lib/AvatarUpload.svelte';
   import { validProfileLink } from 'shared/profile-links';
@@ -111,7 +111,7 @@
     column: string;
     version: number;
     position: number;
-    tags: string[];
+    labels: string[];
     deletedAt?: string;
   };
   type Thread = {
@@ -153,6 +153,7 @@
     }[]
   >([]);
 
+  let boardLabels = $state<BoardLabel[]>([]);
   let boardId = $state('');
   let title = $state('');
   let markdown = $state('');
@@ -172,6 +173,16 @@
     { id: 'done', name: 'Done' }
   ]);
   let boardLeader = $state(false);
+  const canManageBoard = $derived(
+    boardLeader &&
+      !data.user.flags.some((flag) => {
+        if (!flag.startsWith('-')) return false;
+        const pattern = flag.slice(1);
+        return pattern.endsWith('*')
+          ? 'projects.catalog.edit'.startsWith(pattern.slice(0, -1))
+          : pattern === 'projects.catalog.edit';
+      })
+  );
   let projectAccess = $state({
     isMember: false,
     canEdit: false,
@@ -342,9 +353,14 @@
         if (generation === loadGeneration) articles = result;
       }
       if (currentTab === 'board') {
-        let board: { id: string; statuses: BoardStatus[] } | null = null;
+        let board: { id: string; statuses: BoardStatus[]; labels: (string | BoardLabel)[] } | null =
+          null;
         try {
-          board = await api<{ id: string; statuses: BoardStatus[] }>(`/platform/boards${query}`);
+          board = await api<{
+            id: string;
+            statuses: BoardStatus[];
+            labels: (string | BoardLabel)[];
+          }>(`/platform/boards${query}`);
         } catch (cause) {
           if (!(cause instanceof Error && cause.message === 'BOARD_NOT_FOUND')) throw cause;
         }
@@ -355,6 +371,11 @@
           : [];
         if (generation === loadGeneration) {
           boardId = id;
+          boardLabels = (board?.labels ?? []).map((t) =>
+            typeof t === 'string'
+              ? { name: t, color: '#6b7280' }
+              : { name: t.name, color: t.color || '#6b7280', description: t.description }
+          );
           statuses = board?.statuses ?? [
             { id: 'todo', name: 'To do' },
             { id: 'progress', name: 'In progress' },
@@ -1414,11 +1435,12 @@
                     <KanbanBoard
                       {items}
                       {statuses}
+                      {boardLabels}
                       {boardId}
                       projectId={scope}
                       {language}
                       activeItemId={page.url.searchParams.get('item')}
-                      canManage={boardLeader}
+                      canManage={canManageBoard}
                       userId={data.user.id}
                       refresh={() => load()}
                       reportError={(message) => (error = message)}

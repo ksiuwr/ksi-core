@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import {
   hasScopedLeadership,
   canEditScope,
-  validTags,
+  validLabels,
   safeLink,
   safeAlertLink
 } from './content-policy';
@@ -86,10 +86,10 @@ describe('restricted collaboration', () => {
       canReadThread({ ...outsider, membershipStatus: 'suspended' }, scope, 'leaders', ['outsider'])
     ).toBe(false);
   });
-  test('tag vocabulary belongs to its board and cannot contain duplicates', () => {
-    expect(validTags(['Research'], ['Research', 'Engineering'])).toBe(true);
-    expect(validTags(['Community'], ['Research'])).toBe(false);
-    expect(validTags(['Research', 'Research'], ['Research'])).toBe(false);
+  test('label vocabulary belongs to its board and cannot contain duplicates', () => {
+    expect(validLabels(['Research'], ['Research', 'Engineering'])).toBe(true);
+    expect(validLabels(['Community'], ['Research'])).toBe(false);
+    expect(validLabels(['Research', 'Research'], ['Research'])).toBe(false);
   });
 });
 describe('content invariants', () => {

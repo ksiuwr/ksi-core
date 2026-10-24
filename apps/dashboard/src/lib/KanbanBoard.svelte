@@ -1,10 +1,21 @@
 <script lang="ts">
   import { tick } from 'svelte';
-  import { Plus, X, Trash2, Pencil, Save, MessagesSquare, GripVertical } from '@lucide/svelte';
-  import Dropdown from '@ksi-core/ui/platform/Dropdown.svelte';
+  import {
+    Plus,
+    X,
+    Trash2,
+    Pencil,
+    Save,
+    MessagesSquare,
+    GripVertical,
+    Check,
+    Settings2
+  } from '@lucide/svelte';
+  import Dropdown, { type DropdownOption } from '@ksi-core/ui/platform/Dropdown.svelte';
   import Editor from '@ksi-core/ui/platform/Editor.svelte';
   import MarkdownContent from '@ksi-core/ui/platform/MarkdownContent.svelte';
   export type BoardStatus = { id: string; name: string; color?: string; deleted?: boolean };
+  export type BoardLabel = { name: string; color?: string; description?: string };
   export type Item = {
     id: string;
     title: string;
@@ -12,7 +23,7 @@
     column: string;
     version: number;
     position: number;
-    tags: string[];
+    labels: string[];
     deletedAt?: string;
   };
   type Comment = {
@@ -25,6 +36,7 @@
   let {
     items,
     statuses,
+    boardLabels = [],
     boardId,
     projectId,
     language,
@@ -36,6 +48,7 @@
   }: {
     items: Item[];
     statuses: BoardStatus[];
+    boardLabels?: (string | BoardLabel)[];
     boardId: string;
     projectId: string;
     language: 'pl' | 'en';
@@ -46,6 +59,135 @@
     reportError: (error: string) => void;
   } = $props();
 
+  const PRESET_LABEL_COLORS = [
+    '#6b7280', // Default Gray
+    '#ef4444', // Red
+    '#f97316', // Orange
+    '#f59e0b', // Amber
+    '#10b981', // Emerald
+    '#06b6d4', // Cyan
+    '#3b82f6', // Blue
+    '#8b5cf6', // Violet
+    '#ec4899', // Pink
+    '#374151' // Slate
+  ];
+
+  const normalizedLabels = $derived<BoardLabel[]>(
+    boardLabels.map((t) =>
+      typeof t === 'string'
+        ? { name: t, color: '#6b7280' }
+        : { name: t.name, color: t.color || '#6b7280', description: t.description }
+    )
+  );
+  const labelMap = $derived<Map<string, BoardLabel>>(
+    new Map(normalizedLabels.map((label) => [label.name, label]))
+  );
+
+  let selectedLabel = $state<string>('');
+  let taskLabels = $state<string[]>([]);
+  let editLabels = $state<string[]>([]);
+
+  let labelDialog = $state<HTMLDialogElement>();
+  let labelDraftName = $state('');
+  let labelDraftColor = $state('#6b7280');
+  let labelDraftDescription = $state('');
+  let labelFormError = $state('');
+  let editingLabelName = $state<string | null>(null);
+  let managingLabels = $state(false);
+  let manageLabelError = $state('');
+
+  $effect(() => {
+    void boardId;
+    selectedLabel = '';
+    managingLabels = false;
+    editingLabelName = null;
+    manageLabelError = '';
+  });
+
+  const visibleItems = $derived(
+    selectedLabel ? items.filter((item) => item.labels.includes(selectedLabel)) : items
+  );
+
+  const labelFilterOptions = $derived<DropdownOption[]>([
+    {
+      value: '',
+      label: 'All labels'
+    },
+    ...normalizedLabels.map((label) => ({
+      value: label.name,
+      label: label.name,
+      color: label.color || '#6b7280',
+      description: label.description
+    }))
+  ]);
+
+  function openLabelDialog(existing?: BoardLabel) {
+    editingLabelName = existing?.name ?? null;
+    labelDraftName = existing?.name ?? '';
+    labelDraftColor = existing?.color || '#6b7280';
+    labelDraftDescription = existing?.description ?? '';
+    labelFormError = '';
+    labelDialog?.showModal();
+    document.getElementById('label-name')?.focus();
+  }
+
+  function closeLabelDialog() {
+    labelDialog?.close();
+    editingLabelName = null;
+    labelFormError = '';
+  }
+
+  async function submitLabel() {
+    const trimmed = labelDraftName.trim();
+    if (!trimmed) return;
+    const originalName = editingLabelName;
+    labelFormError = '';
+    await run(async () => {
+      const id = await ensureBoard();
+      try {
+        const path = `/platform/boards/${id}/labels`;
+        await api(
+          originalName === null ? path : `${path}/${encodeURIComponent(originalName)}`,
+          originalName === null ? 'POST' : 'PATCH',
+          {
+            name: trimmed,
+            color: labelDraftColor,
+            description: labelDraftDescription.trim() || undefined
+          }
+        );
+        if (originalName !== null && selectedLabel === originalName) selectedLabel = trimmed;
+        closeLabelDialog();
+      } catch (error) {
+        const code = error instanceof Error ? error.message : '';
+        labelFormError =
+          code === 'LABEL_ALREADY_EXISTS'
+            ? 'A label with this name already exists.'
+            : code === 'INVALID_BOARD_LABELS'
+              ? 'Invalid label or name already in use.'
+              : code;
+        throw new Error(labelFormError);
+      }
+    });
+  }
+
+  async function deleteLabel(name: string) {
+    manageLabelError = '';
+    await run(async () => {
+      const id = await ensureBoard();
+      try {
+        await api(`/platform/boards/${id}/labels/${encodeURIComponent(name)}`, 'DELETE');
+        if (selectedLabel === name) selectedLabel = '';
+      } catch (err: any) {
+        const msg = err?.message || '';
+        if (msg === 'LABEL_IN_USE') {
+          manageLabelError =
+            'Cannot delete label because it is assigned to tasks on the board. Remove it from tasks first.';
+          throw new Error(manageLabelError);
+        }
+        throw err;
+      }
+    });
+  }
   const label = (s: BoardStatus) =>
     s.id === 'todo' && s.name === 'To do'
       ? 'To do'
@@ -107,6 +249,7 @@
     return result;
   }
   async function run(work: () => Promise<void>) {
+    if (busy) return;
     busy = true;
     reportError('');
     try {
@@ -127,6 +270,7 @@
     composer = column;
     title = '';
     markdown = '';
+    taskLabels = [];
     await tick();
     composerDialog?.showModal();
     document.getElementById('task-title')?.focus();
@@ -187,7 +331,7 @@
       await api(`/platform/boards/${id}/items`, 'POST', {
         title,
         markdown,
-        tags: [],
+        labels: taskLabels,
         column: composer,
         position:
           Math.max(-1, ...items.filter((i) => i.column === composer).map((i) => i.position)) + 1
@@ -338,7 +482,8 @@
       selected = await api<Item>(`/platform/items/${selected!.id}`, 'PATCH', {
         version: selected!.version,
         title: editTitle,
-        markdown: editMarkdown
+        markdown: editMarkdown,
+        labels: editLabels
       });
       editing = false;
     });
@@ -385,6 +530,126 @@
   }}
 />
 
+<div class="board-toolbar">
+  <div class="board-filters">
+    <div class="label-filter-container">
+      <Dropdown
+        label={'Filter by label'}
+        placeholder={'Filter by label'}
+        bind:value={selectedLabel}
+        options={labelFilterOptions}
+        searchable={true}
+        searchPlaceholder={'Search labels…'}
+        panelContent={canManage && managingLabels ? labelManagement : undefined}
+        footer={canManage ? labelActions : undefined}
+      />
+      {#if selectedLabel}
+        <button
+          type="button"
+          class="btn-clear-filter"
+          onclick={() => (selectedLabel = '')}
+          title={'Clear label filter'}
+          aria-label={'Clear filter'}
+        >
+          <X size={14} aria-hidden="true" />
+        </button>
+      {/if}
+    </div>
+  </div>
+</div>
+
+{#snippet labelActions(close: () => void)}
+  <div class="label-dropdown-actions">
+    <button
+      type="button"
+      class="label-dropdown-action"
+      disabled={busy}
+      onclick={() => (managingLabels = !managingLabels)}
+    >
+      <Settings2 size={15} aria-hidden="true" />
+      {managingLabels ? 'Filter by label' : 'Manage labels'}
+    </button>
+    <button
+      type="button"
+      class="label-dropdown-action"
+      disabled={busy}
+      onclick={() => {
+        close();
+        openLabelDialog();
+      }}
+    >
+      <Plus size={15} aria-hidden="true" />
+      {'New label'}
+    </button>
+  </div>
+{/snippet}
+
+{#snippet labelManagement(close: () => void)}
+  <section class="manage-labels-panel" aria-label={'Manage labels'}>
+    <div class="manage-labels-header">
+      <h4>{'Board labels'}</h4>
+      <button
+        type="button"
+        class="icon-button"
+        onclick={() => (managingLabels = false)}
+        aria-label={'Close'}
+      >
+        <X size={16} aria-hidden="true" />
+      </button>
+    </div>
+    {#if manageLabelError}
+      <p class="manage-label-error" role="alert">{manageLabelError}</p>
+    {/if}
+    <p class="manage-labels-hint">
+      {'Remove a label from tasks before deleting it from the board.'}
+    </p>
+
+    {#if normalizedLabels.length === 0}
+      <p class="muted">
+        {'No labels on this board yet.'}
+      </p>
+    {:else}
+      <div class="manage-labels-list">
+        {#each normalizedLabels as label}
+          <div class="manage-label-item">
+            <div class="manage-label-info">
+              <span class="label-badge" style:--label-color={label.color || '#6b7280'}>
+                <span class="label-dot"></span>
+                <span class="label-name">{label.name}</span>
+              </span>
+              {#if label.description}
+                <span class="manage-label-desc">{label.description}</span>
+              {/if}
+            </div>
+            <div class="manage-label-actions">
+              <button
+                type="button"
+                class="icon-button"
+                disabled={busy}
+                onclick={() => {
+                  close();
+                  openLabelDialog(label);
+                }}
+                aria-label={'Edit label'}
+              >
+                <Pencil size={14} aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                class="icon-button danger-button"
+                disabled={busy}
+                onclick={() => void deleteLabel(label.name)}
+                aria-label={'Delete label'}
+              >
+                <Trash2 size={14} aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        {/each}
+      </div>
+    {/if}
+  </section>
+{/snippet}
 <div
   class="board"
   style:grid-template-columns={`repeat(${activeStatuses.length}, minmax(260px, 1fr))`}
@@ -415,7 +680,7 @@
       <div class="column-header">
         <span class="column-label"
           ><span class="column-dot" style:background={color(status)}></span>{label(status)}<span
-            class="column-count">{items.filter((i) => i.column === status.id).length}</span
+            class="column-count">{visibleItems.filter((i) => i.column === status.id).length}</span
           ></span
         >
         {#if canManage}<button
@@ -436,7 +701,7 @@
         >
       </div>
       <div class="column-items">
-        {#each items
+        {#each visibleItems
           .filter((i) => i.column === status.id)
           .sort((a, b) => a.position - b.position) as item (item.id)}
           <button
@@ -476,9 +741,19 @@
             {#if item.markdown}<div class="kanban-markdown-preview">
                 <MarkdownContent value={item.markdown} {language} />
               </div>{/if}
-            {#if item.tags.length}<span class="task-tags"
-                >{#each item.tags as tag}<span class="tag">{tag}</span>{/each}</span
-              >{/if}
+            {#if item.labels.length}<div class="task-labels">
+                {#each item.labels as labelName}
+                  {@const label = labelMap.get(labelName)}
+                  <span
+                    class="label-badge"
+                    style:--label-color={label?.color || '#6b7280'}
+                    title={label?.description || labelName}
+                  >
+                    <span class="label-dot"></span>
+                    <span class="label-name">{labelName}</span>
+                  </span>
+                {/each}
+              </div>{/if}
           </button>
         {/each}
       </div>
@@ -556,6 +831,35 @@
         placeholder={'What needs to be done?'}
       />
       <Dropdown label={'Task status'} bind:value={composer} {options} />
+      {#if normalizedLabels.length}
+        <div class="task-label-picker">
+          <span class="label-picker-label">{'Labels'}</span>
+          <div class="label-chips">
+            {#each normalizedLabels as label}
+              {@const isSelected = taskLabels.includes(label.name)}
+              <button
+                type="button"
+                class="label-chip"
+                class:selected={isSelected}
+                aria-pressed={isSelected}
+                style:--label-color={label.color || '#6b7280'}
+                onclick={() => {
+                  taskLabels = isSelected
+                    ? taskLabels.filter((t) => t !== label.name)
+                    : [...taskLabels, label.name];
+                }}
+                title={label.description || label.name}
+              >
+                <span class="label-dot"></span>
+                <span>{label.name}</span>
+                {#if isSelected}
+                  <Check size={12} aria-hidden="true" />
+                {/if}
+              </button>
+            {/each}
+          </div>
+        </div>
+      {/if}
       <Editor {language} bind:value={markdown} rows={10} />
       <div class="row">
         <button class="btn" disabled={busy || !title.trim()}>{'Add task'}</button><button
@@ -567,6 +871,92 @@
       </div>
     </form>
   </dialog>{/if}
+{#if canManage}
+  <dialog
+    bind:this={labelDialog}
+    class="issue-dialog label-dialog"
+    aria-labelledby="label-heading"
+    oncancel={(event) => {
+      event.preventDefault();
+      closeLabelDialog();
+    }}
+  >
+    <div class="issue-heading">
+      <h2 id="label-heading">{editingLabelName === null ? 'Create new label' : 'Edit label'}</h2>
+      <button type="button" class="icon-button" aria-label={'Close'} onclick={closeLabelDialog}>
+        <X size={20} aria-hidden="true" />
+      </button>
+    </div>
+
+    <div class="label-preview-card">
+      <span class="preview-title">{'Preview'}:</span>
+      <span class="label-badge" style:--label-color={labelDraftColor || '#6b7280'}>
+        <span class="label-dot"></span>
+        <span class="label-name">{labelDraftName.trim() || 'Label name'}</span>
+      </span>
+      {#if labelDraftDescription.trim()}
+        <span class="preview-desc muted">{labelDraftDescription.trim()}</span>
+      {/if}
+    </div>
+
+    {#if labelFormError}
+      <p class="manage-label-error" role="alert">{labelFormError}</p>
+    {/if}
+
+    <form
+      class="issue-editor"
+      onsubmit={(event) => {
+        event.preventDefault();
+        void submitLabel();
+      }}
+    >
+      <label for="label-name">{'Label name'}</label>
+      <input
+        id="label-name"
+        bind:value={labelDraftName}
+        maxlength="50"
+        required
+        placeholder={'e.g. bug, docs'}
+      />
+
+      <label for="label-desc">{'Description (optional)'}</label>
+      <input
+        id="label-desc"
+        bind:value={labelDraftDescription}
+        maxlength="200"
+        placeholder={'Brief description'}
+      />
+
+      <label for="label-color">{'Color'}</label>
+      <div class="color-picker-row">
+        <input id="label-color" type="color" bind:value={labelDraftColor} />
+        <div class="preset-swatches">
+          {#each PRESET_LABEL_COLORS as preset}
+            <button
+              type="button"
+              class="color-swatch"
+              class:active={labelDraftColor.toLowerCase() === preset.toLowerCase()}
+              style:background-color={preset}
+              title={preset}
+              aria-label={preset}
+              aria-pressed={labelDraftColor.toLowerCase() === preset.toLowerCase()}
+              onclick={() => (labelDraftColor = preset)}
+            ></button>
+          {/each}
+        </div>
+      </div>
+
+      <div class="row">
+        <button class="btn" disabled={busy || !labelDraftName.trim()}>
+          {editingLabelName === null ? 'Create label' : 'Save'}
+        </button>
+        <button type="button" class="btn btn-outline" disabled={busy} onclick={closeLabelDialog}>
+          {'Cancel'}
+        </button>
+      </div>
+    </form>
+  </dialog>
+{/if}
 {#if canManage && activeStatuses.length < 20 && statuses.length < 100}<div class="status-create">
     {#if addingStatus}<form
         class="row"
@@ -674,7 +1064,24 @@
   >
     <div class="issue-heading">
       <div>
-        <span class="tag">{options.find((s) => s.value === selected?.column)?.label}</span>
+        <div class="issue-heading-meta">
+          <span class="tag">{options.find((s) => s.value === selected?.column)?.label}</span>
+          {#if selected.labels.length}
+            <div class="task-detail-labels">
+              {#each selected.labels as labelName}
+                {@const label = labelMap.get(labelName)}
+                <span
+                  class="label-badge"
+                  style:--label-color={label?.color || '#6b7280'}
+                  title={label?.description || labelName}
+                >
+                  <span class="label-dot"></span>
+                  <span class="label-name">{labelName}</span>
+                </span>
+              {/each}
+            </div>
+          {/if}
+        </div>
         <h2 id="issue-title">{selected.title}</h2>
       </div>
       <button type="button" class="icon-button" aria-label={'Close task'} onclick={closeItem}
@@ -696,6 +1103,7 @@
           editing = !editing;
           editTitle = selected!.title;
           editMarkdown = selected!.markdown;
+          editLabels = [...selected!.labels];
         }}><Pencil size={14} aria-hidden="true" />{'Edit'}</button
       ><button
         type="button"
@@ -735,6 +1143,35 @@
           required
           maxlength="200"
         /><Editor {language} bind:value={editMarkdown} />
+        {#if normalizedLabels.length}
+          <div class="task-label-picker">
+            <span class="label-picker-label">{'Labels'}</span>
+            <div class="label-chips">
+              {#each normalizedLabels as label}
+                {@const isSelected = editLabels.includes(label.name)}
+                <button
+                  type="button"
+                  class="label-chip"
+                  class:selected={isSelected}
+                  aria-pressed={isSelected}
+                  style:--label-color={label.color || '#6b7280'}
+                  onclick={() => {
+                    editLabels = isSelected
+                      ? editLabels.filter((t) => t !== label.name)
+                      : [...editLabels, label.name];
+                  }}
+                  title={label.description || label.name}
+                >
+                  <span class="label-dot"></span>
+                  <span>{label.name}</span>
+                  {#if isSelected}
+                    <Check size={12} aria-hidden="true" />
+                  {/if}
+                </button>
+              {/each}
+            </div>
+          </div>
+        {/if}
         <div class="row">
           <button class="btn" disabled={busy || !editTitle.trim()}
             ><Save size={14} aria-hidden="true" />{'Save'}</button
@@ -833,6 +1270,285 @@
   </dialog>{/if}
 
 <style>
+  .board-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .board-filters {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .label-filter-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 220px;
+  }
+  .label-filter-container :global(.dropdown) {
+    min-width: 200px;
+    margin: 0;
+  }
+  .btn-clear-filter {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn-clear-filter:hover {
+    color: var(--ink);
+    background: var(--surface-muted);
+  }
+  .label-dropdown-actions {
+    display: grid;
+    gap: 2px;
+  }
+  .label-dropdown-action {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 36px;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 2px;
+    background: transparent;
+    color: var(--ink);
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+  }
+  .label-dropdown-action:hover {
+    background: var(--surface-muted);
+  }
+  .label-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.2;
+    padding: 2px 7px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--label-color, #6b7280) 14%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--label-color, #6b7280) 45%, transparent);
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .label-badge,
+  .label-chip {
+    /* Keep neutral colors grey while lifting dark colors and enriching colored labels. */
+    color: hsl(
+      from var(--label-color, #6b7280) h min(100, calc(s * 1.25)) clamp(30, calc(l + 18), 65)
+    );
+  }
+  .label-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--label-color, #6b7280);
+    flex-shrink: 0;
+  }
+  .label-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .task-detail-labels {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-left: 8px;
+  }
+  .issue-heading-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .task-label-picker {
+    display: grid;
+    gap: 6px;
+    margin: 8px 0;
+  }
+  .label-picker-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .label-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .label-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 14px;
+    background: var(--surface);
+    border: 1px solid var(--control-border, var(--line));
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .label-chip:hover {
+    border-color: var(--label-color, #6b7280);
+    background: color-mix(in srgb, var(--label-color, #6b7280) 10%, var(--surface));
+  }
+  .label-chip.selected {
+    background: color-mix(in srgb, var(--label-color, #6b7280) 22%, var(--surface));
+    border-color: var(--label-color, #6b7280);
+    font-weight: 600;
+  }
+  .label-dialog {
+    width: min(540px, calc(100vw - 32px));
+  }
+  .label-preview-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 6px;
+    background: var(--surface-muted);
+    border: 1px solid var(--line);
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .preview-title {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+  .preview-desc {
+    font-size: 12px;
+  }
+  .color-picker-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .color-picker-row input[type='color'] {
+    box-sizing: border-box;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 36px;
+    min-height: 36px;
+    margin: 0;
+    padding: 2px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .label-dialog .row .btn {
+    height: 36px;
+    min-height: 36px;
+    padding: 8px 12px;
+    line-height: 1.2;
+  }
+  .preset-swatches {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .color-swatch {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.1s ease;
+  }
+  .color-swatch:hover {
+    transform: scale(1.18);
+  }
+  .color-swatch.active {
+    border-color: var(--ink);
+    box-shadow: 0 0 0 1px var(--surface);
+  }
+  .manage-labels-panel {
+    padding: 10px;
+    margin: 0;
+    display: grid;
+    gap: 12px;
+  }
+  .manage-labels-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .manage-labels-header h4 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .manage-labels-hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0;
+  }
+  .manage-label-error {
+    color: var(--danger, var(--red));
+    font-size: 13px;
+    margin: 0;
+    padding: 8px 12px;
+    border: 1px solid var(--danger, var(--red));
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--danger, var(--red)) 10%, transparent);
+  }
+  .manage-labels-list {
+    display: grid;
+    gap: 8px;
+  }
+  .manage-label-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+  }
+  .manage-label-info {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+  }
+  .manage-label-desc {
+    font-size: 12px;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+  }
+  .manage-label-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-shrink: 0;
+  }
   .status-dialog {
     width: min(560px, calc(100vw - 32px));
   }
@@ -937,7 +1653,7 @@
     border-radius: 4px;
     margin: 4px 0;
   }
-  .task-tags {
+  .task-labels {
     display: flex;
     gap: 5px;
     flex-wrap: wrap;

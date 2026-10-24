@@ -122,7 +122,7 @@ export async function seed() {
         .values({
           projectId: project!.id,
           scopeKey: project!.id,
-          tags: ['research', 'engineering']
+          labels: ['research', 'engineering'].map((name) => ({ name, color: '#6b7280' }))
         })
         .onConflictDoNothing();
       const articleSlug = `${sample.slug}-introduction`;
@@ -166,7 +166,14 @@ export async function seed() {
   }
   await db
     .insert(boards)
-    .values({ scopeKey: 'association', tags: ['community', 'engineering', 'research'] })
+    .values({
+      scopeKey: 'association',
+      labels: [
+        { name: 'community', color: '#6b7280', description: 'Community tasks and discussions' },
+        { name: 'engineering', color: '#2563eb', description: 'Software and infrastructure' },
+        { name: 'research', color: '#7c3aed', description: 'Academic and scientific work' }
+      ]
+    })
     .onConflictDoNothing();
   console.log('Synthetic seed complete; existing records preserved.');
 }

@@ -564,21 +564,21 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
     expect(resolved.status).toBe(200);
     expect((await credit()).status).toBe(403);
   });
-  test('board tags, task movement, tombstones and leader-only restoration', async () => {
+  test('board labels, task movement, tombstones and leader-only restoration', async () => {
     const board = await collaboration('/boards', 'leader', 'POST', { projectId });
     expect(board.status).toBe(200);
     boardId = board.body.id;
     expect(
-      (await collaboration(`/boards/${boardId}/tags`, 'leader', 'PUT', { tags: ['ML'] })).status
+      (await collaboration(`/boards/${boardId}/labels`, 'leader', 'PUT', { labels: ['ML'] })).status
     ).toBe(200);
     expect(
       (
         await collaboration(`/boards/${boardId}/items`, 'member', 'POST', {
-          title: 'Wrong tag',
+          title: 'Wrong label',
           markdown: '',
           column: 'todo',
           position: 0,
-          tags: ['Other board']
+          labels: ['Other board']
         })
       ).status
     ).toBe(422);
@@ -587,7 +587,7 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
       markdown: 'Baseline',
       column: 'todo',
       position: 0,
-      tags: ['ML']
+      labels: ['ML']
     });
     expect(task.status).toBe(200);
     const moved = await collaboration(`/items/${task.body.id}`, 'member', 'PATCH', {
@@ -629,6 +629,91 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
         })
       ).status
     ).toBe(200);
+  });
+  test('structured board labels enforce permissions and preserve task associations on rename', async () => {
+    const path = `/boards/${boardId}/labels`;
+    const input = { name: 'Bug', color: '#EF4444', description: 'Something is broken' };
+    expect((await collaboration(path, 'member', 'POST', input)).status).toBe(403);
+    expect((await collaboration(path, 'outsider', 'POST', input)).status).toBe(403);
+    expect((await collaboration(path, 'leader', 'POST', { ...input, color: 'red' })).status).toBe(
+      422
+    );
+    expect((await collaboration(path, 'leader', 'POST', { name: '   ' })).status).toBe(422);
+    const created = await collaboration(path, 'leader', 'POST', input);
+    expect(created.status).toBe(200);
+    expect(created.body.labels).toContainEqual({ ...input, color: '#ef4444' });
+    expect((await collaboration(path, 'leader', 'POST', { name: ' bug ' })).status).toBe(409);
+    const gray = await collaboration(path, 'leader', 'POST', { name: '100% ready' });
+    expect(gray.body.labels).toContainEqual({ name: '100% ready', color: '#6b7280' });
+    expect(
+      (await collaboration(`${path}/${encodeURIComponent('100% ready')}`, 'leader', 'DELETE'))
+        .status
+    ).toBe(200);
+    expect((await collaboration(`${path}/missing`, 'leader', 'DELETE')).status).toBe(404);
+    expect(
+      (await collaboration(path, 'leader', 'PUT', { labels: [{ name: 'Bug' }, { name: 'bug' }] }))
+        .status
+    ).toBe(422);
+
+    const tasks = [];
+    for (const title of ['Live labelged task', 'Deleted labelged task']) {
+      const task = await collaboration(`/boards/${boardId}/items`, 'member', 'POST', {
+        title,
+        markdown: '',
+        column: 'todo',
+        position: 0,
+        labels: ['Bug']
+      });
+      expect(task.status).toBe(200);
+      tasks.push(task.body);
+    }
+    expect(
+      (await collaboration(`/items/${tasks[1].id}`, 'member', 'DELETE', { version: 1 })).status
+    ).toBe(200);
+    expect((await collaboration(`${path}/Bug`, 'leader', 'DELETE')).status).toBe(409);
+    expect((await collaboration(`${path}/Bug`, 'member', 'PATCH', input)).status).toBe(403);
+    await db
+      .update(users)
+      .set({ flags: ['-projects.catalog.edit'] })
+      .where(eq(users.id, ids.leader));
+    expect((await collaboration(path, 'leader', 'POST', { name: 'Denied' })).status).toBe(403);
+    await db.update(users).set({ flags: [] }).where(eq(users.id, ids.leader));
+    const renamed = await collaboration(`${path}/Bug`, 'leader', 'PATCH', {
+      name: 'Defect',
+      color: '#123456',
+      description: 'Renamed label'
+    });
+    expect(renamed.status).toBe(200);
+    expect(renamed.body.labels).toContainEqual({
+      name: 'Defect',
+      color: '#123456',
+      description: 'Renamed label'
+    });
+    const stored = await db
+      .select()
+      .from(kanbanItems)
+      .where(
+        inArray(
+          kanbanItems.id,
+          tasks.map((task) => task.id)
+        )
+      );
+    expect(stored.every((task) => task.labels.length === 1 && task.labels[0] === 'Defect')).toBe(
+      true
+    );
+    expect(stored.every((task) => task.version > 1)).toBe(true);
+    expect(
+      (
+        await collaboration(`/items/${tasks[0].id}`, 'member', 'PATCH', {
+          version: 1,
+          labels: ['Bug']
+        })
+      ).status
+    ).toBe(422);
+    expect((await collaboration(`${path}/Defect`, 'leader', 'PATCH', { name: 'ML' })).status).toBe(
+      422
+    );
+    expect((await collaboration(`${path}/Defect`, 'leader', 'DELETE')).status).toBe(409);
   });
   test('restricted forums hide threads until invited; archives block new comments but preserve history', async () => {
     const thread = await collaboration('/threads', 'leader', 'POST', {

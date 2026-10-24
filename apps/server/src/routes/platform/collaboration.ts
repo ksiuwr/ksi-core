@@ -6,16 +6,23 @@ import { recordEvent, type Executor, type Transaction } from '../../lib/audit';
 import { boards, kanbanItems, threads, comments, users, auditEvents, projects } from '../../db';
 import { canContribute, canReadThread } from '../../domain/permissions';
 import { validBoardStatuses, statusExists, type BoardStatus } from '../../domain/board-statuses';
-import { validTags } from '../../domain/content-policy';
+import { validBoardLabels, normalizeBoardLabel } from '../../domain/board-labels';
+import { validLabels } from '../../domain/content-policy';
 import { active, scopeFor, requireLeader } from './content';
 
 const title = t.String({ minLength: 1, maxLength: 200 });
 const internalMarkdownPattern = '^(?![\\s\\S]*:::gallery)[\\s\\S]*$';
 const markdown = t.String({ minLength: 1, maxLength: 500000, pattern: internalMarkdownPattern });
-const tags = t.Array(t.String({ minLength: 1, maxLength: 50 }), {
+const labels = t.Array(t.String({ minLength: 1, maxLength: 50 }), {
   maxItems: 30,
   uniqueItems: true
 });
+const boardLabel = t.Object({
+  name: t.String({ minLength: 1, maxLength: 50 }),
+  color: t.Optional(t.String({ pattern: '^#[0-9a-fA-F]{6}$' })),
+  description: t.Optional(t.String({ maxLength: 200 }))
+});
+const boardLabelInput = t.Union([t.String({ minLength: 1, maxLength: 50 }), boardLabel]);
 const visibility = t.Union([t.Literal('association'), t.Literal('members'), t.Literal('leaders')]);
 const scopeKey = (projectId: string | null) => (projectId ? `project:${projectId}` : 'association');
 async function boardScope(executor: Executor, id: string) {
@@ -144,7 +151,7 @@ export default createElysia({ prefix: '/platform' })
     { body: t.Object({ projectId: t.Optional(t.String()) }) }
   )
   .put(
-    '/boards/:id/tags',
+    '/boards/:id/labels',
     async ({ db, user, params, body }) => {
       const actor = active(user);
       return db.transaction(async (tx) => {
@@ -152,27 +159,153 @@ export default createElysia({ prefix: '/platform' })
         requireLeader(actor, scope, 'projects.catalog.edit');
         await tx.select().from(boards).where(eq(boards.id, board.id)).for('update');
         const items = await tx
-          .select({ tags: kanbanItems.tags })
+          .select({ labels: kanbanItems.labels })
           .from(kanbanItems)
           .where(eq(kanbanItems.boardId, board.id));
-        if (items.some((item) => !validTags(item.tags, body.tags)))
-          throw status(409, { code: 'TAG_IN_USE' });
+        const normalized = body.labels.map(normalizeBoardLabel);
+        if (!validBoardLabels(normalized)) throw status(422, { code: 'INVALID_BOARD_LABELS' });
+        if (items.some((item) => !validLabels(item.labels, normalized)))
+          throw status(409, { code: 'LABEL_IN_USE' });
         const [updated] = await tx
           .update(boards)
-          .set({ tags: body.tags })
+          .set({ labels: normalized })
           .where(eq(boards.id, board.id))
           .returning();
         await recordEvent(tx, {
           actorId: actor.id,
           projectId: board.projectId,
-          action: 'boards.tags.updated',
+          action: 'boards.labels.updated',
           targetId: board.id
         });
         return updated;
       });
     },
-    { body: t.Object({ tags }) }
+    { body: t.Object({ labels: t.Array(boardLabelInput, { maxItems: 50 }) }) }
   )
+  .post(
+    '/boards/:id/labels',
+    async ({ db, user, params, body }) => {
+      const actor = active(user);
+      return db.transaction(async (tx) => {
+        const { board, scope } = await boardScope(tx, params.id);
+        requireLeader(actor, scope, 'projects.catalog.edit');
+        const [current] = await tx
+          .select()
+          .from(boards)
+          .where(eq(boards.id, board.id))
+          .for('update');
+        if (!current) throw status(404, { code: 'BOARD_NOT_FOUND' });
+        const currentLabels = current.labels.map(normalizeBoardLabel);
+        const newLabel = normalizeBoardLabel(body);
+        if (currentLabels.some((t) => t.name.toLowerCase() === newLabel.name.toLowerCase())) {
+          throw status(409, { code: 'LABEL_ALREADY_EXISTS' });
+        }
+        const updatedLabels = [...currentLabels, newLabel];
+        if (!validBoardLabels(updatedLabels)) throw status(422, { code: 'INVALID_BOARD_LABELS' });
+        const [updated] = await tx
+          .update(boards)
+          .set({ labels: updatedLabels })
+          .where(eq(boards.id, board.id))
+          .returning();
+        await recordEvent(tx, {
+          actorId: actor.id,
+          projectId: board.projectId,
+          action: 'boards.labels.updated',
+          targetId: board.id
+        });
+        return updated;
+      });
+    },
+    { body: boardLabel }
+  )
+  .patch(
+    '/boards/:id/labels/:name',
+    async ({ db, user, params, body }) => {
+      const actor = active(user);
+      return db.transaction(async (tx) => {
+        const { board, scope } = await boardScope(tx, params.id);
+        requireLeader(actor, scope, 'projects.catalog.edit');
+        const [current] = await tx
+          .select()
+          .from(boards)
+          .where(eq(boards.id, board.id))
+          .for('update');
+        if (!current) throw status(404, { code: 'BOARD_NOT_FOUND' });
+        if (!current.labels.some((label) => label.name === params.name))
+          throw status(404, { code: 'LABEL_NOT_FOUND' });
+        const replacement = normalizeBoardLabel(body);
+        const updatedLabels = current.labels.map((label) =>
+          label.name === params.name ? replacement : label
+        );
+        if (!validBoardLabels(updatedLabels)) throw status(422, { code: 'INVALID_BOARD_LABELS' });
+        if (replacement.name !== params.name) {
+          // Include deleted tasks so restoring them preserves valid associations.
+          // The board lock serializes this update with task creation and editing.
+          await tx
+            .update(kanbanItems)
+            .set({
+              labels: sql`array_replace(${kanbanItems.labels}, ${params.name}, ${replacement.name})`,
+              version: sql`${kanbanItems.version} + 1`
+            })
+            .where(
+              and(
+                eq(kanbanItems.boardId, board.id),
+                sql`${params.name} = ANY(${kanbanItems.labels})`
+              )
+            );
+        }
+        const [updated] = await tx
+          .update(boards)
+          .set({ labels: updatedLabels })
+          .where(eq(boards.id, board.id))
+          .returning();
+        await recordEvent(tx, {
+          actorId: actor.id,
+          projectId: board.projectId,
+          action: 'boards.labels.updated',
+          targetId: board.id
+        });
+        return updated;
+      });
+    },
+    { body: boardLabel }
+  )
+  .delete('/boards/:id/labels/:name', async ({ db, user, params }) => {
+    const actor = active(user);
+    return db.transaction(async (tx) => {
+      const { board, scope } = await boardScope(tx, params.id);
+      requireLeader(actor, scope, 'projects.catalog.edit');
+      const [current] = await tx.select().from(boards).where(eq(boards.id, board.id)).for('update');
+      if (!current) throw status(404, { code: 'BOARD_NOT_FOUND' });
+      const targetName = params.name;
+      if (!current.labels.some((label) => label.name === targetName))
+        throw status(404, { code: 'LABEL_NOT_FOUND' });
+      const items = await tx
+        .select({ labels: kanbanItems.labels })
+        .from(kanbanItems)
+        .where(eq(kanbanItems.boardId, board.id));
+      if (
+        items.some((item) => item.labels.some((t) => t.toLowerCase() === targetName.toLowerCase()))
+      ) {
+        throw status(409, { code: 'LABEL_IN_USE' });
+      }
+      const updatedLabels = current.labels
+        .map(normalizeBoardLabel)
+        .filter((t) => t.name.toLowerCase() !== targetName.toLowerCase());
+      const [updated] = await tx
+        .update(boards)
+        .set({ labels: updatedLabels })
+        .where(eq(boards.id, board.id))
+        .returning();
+      await recordEvent(tx, {
+        actorId: actor.id,
+        projectId: board.projectId,
+        action: 'boards.labels.updated',
+        targetId: board.id
+      });
+      return updated;
+    });
+  })
   .put(
     '/boards/:id/statuses',
     async ({ db, user, params, body }) => {
@@ -280,8 +413,8 @@ export default createElysia({ prefix: '/platform' })
           .from(boards)
           .where(eq(boards.id, board.id))
           .for('share');
-        if (!lockedBoard || !validTags(body.tags, lockedBoard.tags))
-          throw status(422, { code: 'INVALID_BOARD_TAGS' });
+        if (!lockedBoard || !validLabels(body.labels, lockedBoard.labels))
+          throw status(422, { code: 'INVALID_BOARD_LABELS' });
         if (!statusExists(lockedBoard.statuses, body.column))
           throw status(422, { code: 'INVALID_BOARD_STATUS' });
         const [item] = await tx
@@ -304,7 +437,7 @@ export default createElysia({ prefix: '/platform' })
       body: t.Object({
         title,
         markdown: t.String({ maxLength: 500000, pattern: internalMarkdownPattern }),
-        tags,
+        labels,
         column: t.String({ minLength: 1, maxLength: 40 }),
         position: t.Integer({ minimum: 0 })
       })
@@ -322,8 +455,8 @@ export default createElysia({ prefix: '/platform' })
           .from(boards)
           .where(eq(boards.id, board.id))
           .for('share');
-        if (body.tags && (!lockedBoard || !validTags(body.tags, lockedBoard.tags)))
-          throw status(422, { code: 'INVALID_BOARD_TAGS' });
+        if (body.labels && (!lockedBoard || !validLabels(body.labels, lockedBoard.labels)))
+          throw status(422, { code: 'INVALID_BOARD_LABELS' });
         if (body.column && (!lockedBoard || !statusExists(lockedBoard.statuses, body.column)))
           throw status(422, { code: 'INVALID_BOARD_STATUS' });
         const { version, ...values } = body;
@@ -355,7 +488,7 @@ export default createElysia({ prefix: '/platform' })
         version: t.Integer({ minimum: 1 }),
         title: t.Optional(title),
         markdown: t.Optional(t.String({ maxLength: 500000, pattern: internalMarkdownPattern })),
-        tags: t.Optional(tags),
+        labels: t.Optional(labels),
         column: t.Optional(t.String({ minLength: 1, maxLength: 40 })),
         position: t.Optional(t.Integer({ minimum: 0 }))
       })
