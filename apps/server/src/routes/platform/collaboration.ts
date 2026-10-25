@@ -153,7 +153,8 @@ const itemRevisionFields = [
   'labels',
   'assigneeIds',
   'column',
-  'label'
+  'label',
+  'dueAt'
 ] as const;
 function itemHistoryCondition(id: string, includeLifecycle = false) {
   return or(
@@ -263,6 +264,7 @@ async function contentRevisions(
     nextPage: records.length > 20 ? page + 1 : null
   };
 }
+const dueDate = t.Union([t.Null(), t.String({ format: 'date-time' })]);
 const assigneeIds = t.Array(t.String(), { maxItems: 50, uniqueItems: true });
 async function validateAssignees(
   executor: Executor,
@@ -734,7 +736,12 @@ export default createElysia({ prefix: '/platform' })
           throw status(422, { code: 'INVALID_BOARD_STATUS' });
         const [item] = await tx
           .insert(kanbanItems)
-          .values({ ...body, authorId: actor.id, boardId: board.id })
+          .values({
+            ...body,
+            dueAt: body.dueAt ? new Date(body.dueAt) : null,
+            authorId: actor.id,
+            boardId: board.id
+          })
           .returning();
         if (!item) throw new Error('Item creation failed');
         await syncFileReferences(tx, 'item', item.id, item.markdown, actor);
@@ -762,6 +769,7 @@ export default createElysia({ prefix: '/platform' })
       body: t.Object({
         title,
         assigneeIds: t.Optional(assigneeIds),
+        dueAt: t.Optional(dueDate),
         markdown: t.String({ maxLength: 500000, pattern: internalMarkdownPattern }),
         labels,
         column: t.String({ minLength: 1, maxLength: 40 }),
@@ -786,10 +794,14 @@ export default createElysia({ prefix: '/platform' })
           throw status(422, { code: 'INVALID_BOARD_LABELS' });
         if (body.column && (!lockedBoard || !statusExists(lockedBoard.statuses, body.column)))
           throw status(422, { code: 'INVALID_BOARD_STATUS' });
-        const { version, ...values } = body;
+        const { version, dueAt, ...values } = body;
         const [updated] = await tx
           .update(kanbanItems)
-          .set({ ...values, version: sql`${kanbanItems.version} + 1` })
+          .set({
+            ...values,
+            ...(dueAt === undefined ? {} : { dueAt: dueAt ? new Date(dueAt) : null }),
+            version: sql`${kanbanItems.version} + 1`
+          })
           .where(
             and(
               eq(kanbanItems.id, item.id),
@@ -815,7 +827,7 @@ export default createElysia({ prefix: '/platform' })
         await notifyCollaboration(tx, notificationEvent.id, 'item', item.id, actor.id, {
           markdown: body.markdown,
           assigneeIds: updated.assigneeIds.filter((id) => !item.assigneeIds.includes(id)),
-          watch: Object.keys(values).some((key) => key !== 'position')
+          watch: dueAt !== undefined || Object.keys(values).some((key) => key !== 'position')
         });
         return updated;
       });
@@ -824,6 +836,7 @@ export default createElysia({ prefix: '/platform' })
       body: t.Object({
         version: t.Integer({ minimum: 1 }),
         assigneeIds: t.Optional(assigneeIds),
+        dueAt: t.Optional(dueDate),
         title: t.Optional(title),
         markdown: t.Optional(t.String({ maxLength: 500000, pattern: internalMarkdownPattern })),
         labels: t.Optional(labels),

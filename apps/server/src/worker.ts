@@ -1,3 +1,4 @@
+import { queueDeadlineReminders } from './services/deadlines';
 import { queueNotificationMailBatch } from './services/notifications';
 import { and, eq, isNull, lt, sql } from 'drizzle-orm';
 import nodemailer from 'nodemailer';
@@ -172,6 +173,7 @@ export async function reconcileFileBatch(limit = 100) {
   return batch.length;
 }
 export async function maintenanceTick() {
+  await queueDeadlineReminders();
   await queueNotificationMailBatch();
   await deliverMailBatch();
   await deliverOutboxBatch();

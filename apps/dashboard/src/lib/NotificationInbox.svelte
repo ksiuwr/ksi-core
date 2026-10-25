@@ -295,6 +295,8 @@
     };
   });
   function reasonLabel(reason: string) {
+    if (reason === 'deadline')
+      return language === 'pl' ? 'Przypomnienie o terminie' : 'Deadline reminder';
     if (reason === 'mention') return language === 'pl' ? 'Wzmianka' : 'Mention';
     if (reason === 'assignment') return language === 'pl' ? 'Przypisanie' : 'Assignment';
     return language === 'pl' ? 'Aktualizacja' : 'Update';

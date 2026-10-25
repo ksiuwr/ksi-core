@@ -7,7 +7,8 @@
     Trash2,
     RotateCcw,
     UserMinus,
-    UserPlus
+    UserPlus,
+    CalendarClock
   } from '@lucide/svelte';
   import type { ContentChange } from 'shared/activity';
   import { taskActivitySummary } from 'shared/task-activity';
@@ -62,7 +63,9 @@
                 ? UserPlus
                 : kind === 'assignee-removed'
                   ? UserMinus
-                  : Pencil
+                  : kind === 'deadline'
+                    ? CalendarClock
+                    : Pencil
   );
   const absoluteTime = $derived(new Date(event.createdAt).toLocaleString(pl ? 'pl-PL' : 'en-GB'));
   const relativeTime = $derived.by(() => {
@@ -89,6 +92,11 @@
   });
   const statusName = (id: string) => statuses.find((status) => status.id === id)?.name ?? id;
   const labelInfo = (name: string) => labels.find((label) => label.name === name);
+  const deadlineText = (iso: string) =>
+    new Intl.DateTimeFormat(pl ? 'pl-PL' : 'en-GB', {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    }).format(new Date(iso));
 </script>
 
 <div class="task-activity" id={`activity-${event.id}`}>
@@ -108,6 +116,18 @@
       {:else if summary.kind === 'deleted'}{pl ? 'usunął to zadanie' : 'deleted this task'}
       {:else if summary.kind === 'restored'}{pl ? 'przywrócił to zadanie' : 'restored this task'}
       {:else if summary.kind === 'description'}{pl ? 'edytował opis' : 'edited the description'}
+      {:else if summary.kind === 'deadline'}
+        {#if summary.before && summary.after}
+          {pl ? 'zmienił termin z' : 'changed the deadline from'}
+          <del class="title-value">{deadlineText(summary.before)}</del>
+          {' '}{pl ? 'na' : 'to'}
+          <time class="title-value" datetime={summary.after}>{deadlineText(summary.after)}</time>
+        {:else if summary.after}
+          {pl ? 'ustawił termin na' : 'set the deadline to'}
+          <time class="title-value" datetime={summary.after}>{deadlineText(summary.after)}</time>
+        {:else}
+          {pl ? 'usunął termin' : 'removed the deadline'}
+        {/if}
       {:else if summary.kind === 'renamed'}
         {pl ? 'zmienił tytuł' : 'changed the title'}
         {#if summary.before}{' '}{pl ? 'z' : 'from'}
