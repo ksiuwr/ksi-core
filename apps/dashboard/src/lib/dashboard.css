@@ -156,12 +156,6 @@
   background: var(--surface);
   box-shadow: 0 8px 24px #0003;
 }
-.preferences-panel .dropdown {
-  margin-bottom: 18px;
-}
-.preferences-panel .dropdown:last-child {
-  margin-bottom: 0;
-}
 .account-panel strong {
   display: block;
   overflow-wrap: anywhere;
@@ -609,7 +603,6 @@ a[aria-disabled='true'] {
   .dash-workspace {
     padding: 22px;
   }
-  .preferences-label,
   .account-name {
     display: none;
   }
@@ -979,4 +972,32 @@ summary,
     flex-wrap: wrap;
     gap: 12px;
   }
+}
+
+.topbar-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 6px 8px;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  text-decoration: none;
+}
+.topbar-control:hover,
+.topbar-control.active {
+  background: var(--surface-muted);
+  color: var(--ink);
+  border-color: var(--control-border-hover);
+  outline: 1px solid var(--control-border-hover);
+  outline-offset: 2px;
+}
+.topbar-control:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }

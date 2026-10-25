@@ -7,7 +7,7 @@
   import ChangeDetails from '@ksi-core/ui/platform/ChangeDetails.svelte';
   import Assignees, { type AssignmentMember } from '$lib/Assignees.svelte';
   import NotificationInbox from '$lib/NotificationInbox.svelte';
-  import NotificationSettings from '$lib/NotificationSettings.svelte';
+  import UserSettings from '$lib/UserSettings.svelte';
   import WatchButton from '$lib/WatchButton.svelte';
   import ContentTranslations from '$lib/ContentTranslations.svelte';
   import type { ContentTranslations as TranslationData } from 'shared/content-locales';
@@ -15,12 +15,7 @@
   import { goto, invalidateAll } from '$app/navigation';
   import { page } from '$app/state';
   import { parseDashboardPath, dashboardPath, type Workspace } from '$lib/navigation';
-  import {
-    preferences,
-    setLanguage,
-    setTheme,
-    type ThemePreference
-  } from '$lib/preferences.svelte';
+  import { preferences } from '$lib/preferences.svelte';
   import KanbanBoard, { type BoardStatus, type BoardLabel } from '$lib/KanbanBoard.svelte';
   import type { InboxData } from '$lib/ApprovalInbox.svelte';
   import AvatarUpload, { type AvatarRequest } from '$lib/AvatarUpload.svelte';
@@ -72,7 +67,6 @@
   let language = $derived(preferences.language);
   let workspace = $state<Workspace>(untrack(() => data.navigation.workspace));
   let mobileNavigation = $state(false);
-  let preferencesMenu = $state<HTMLDetailsElement>();
   let accountMenu = $state<HTMLDetailsElement>();
   let loading = $state(true);
   let newArticle = $state(false);
@@ -561,7 +555,6 @@
     visibility = workspace === 'project' ? 'members' : 'association';
     mobileNavigation = false;
     if (accountMenu) accountMenu.open = false;
-    if (preferencesMenu) preferencesMenu.open = false;
   }
 
   function guardNavigation(event: MouseEvent) {
@@ -639,7 +632,7 @@
       mobileNavigation = false;
       document.getElementById('navigation-toggle')?.focus();
     }
-    for (const menu of [preferencesMenu, accountMenu]) {
+    for (const menu of [accountMenu]) {
       if (menu?.open) {
         menu.open = false;
         menu.querySelector('summary')?.focus();
@@ -649,7 +642,7 @@
 
   function closeOutsideMenus(event: PointerEvent) {
     if (!(event.target instanceof Node)) return;
-    for (const menu of [preferencesMenu, accountMenu]) {
+    for (const menu of [accountMenu]) {
       if (menu?.open && !menu.contains(event.target)) menu.open = false;
     }
   }
@@ -794,8 +787,8 @@
   const viewName = $derived(
     graveyard && tab === 'board'
       ? 'Removed tasks'
-      : tab === 'notification-settings'
-        ? 'Notification settings'
+      : tab === 'user-settings'
+        ? 'Settings'
         : tab === 'inbox'
           ? 'Notifications'
           : tab === 'projects'
@@ -1075,51 +1068,16 @@
             }}
             reportError={(message) => (error = message)}
           />
-          <details
-            class="topbar-menu"
-            bind:this={preferencesMenu}
-            ontoggle={() => {
-              if (preferencesMenu?.open && accountMenu) accountMenu.open = false;
-            }}
+          <a
+            class="topbar-control"
+            class:active={tab === 'user-settings'}
+            href="/settings"
+            aria-label={'Settings'}
+            title={'Settings'}
+            aria-current={tab === 'user-settings' ? 'page' : undefined}
+            onclick={guardNavigation}><SunMoon size={18} aria-hidden="true" /></a
           >
-            <summary aria-label={'Language and appearance'}
-              ><SunMoon size={18} aria-hidden="true" /><span class="preferences-label"
-                >{'Preferences'}</span
-              ></summary
-            >
-            <div class="menu-panel preferences-panel">
-              <label for="dashboard-language">{'Language'}</label>
-              <Dropdown
-                id="dashboard-language"
-                label={'Language'}
-                value={language}
-                options={[
-                  { value: 'pl', label: 'Polski' },
-                  { value: 'en', label: 'English' }
-                ]}
-                onselect={(value) => setLanguage(value as 'pl' | 'en')}
-              />
-              <label for="dashboard-theme">{'Appearance'}</label>
-              <Dropdown
-                id="dashboard-theme"
-                label={'Appearance'}
-                value={preferences.theme}
-                options={[
-                  { value: 'system', label: 'System' },
-                  { value: 'light', label: 'Light' },
-                  { value: 'dark', label: 'Dark' }
-                ]}
-                onselect={(value) => setTheme(value as ThemePreference)}
-              />
-            </div>
-          </details>
-          <details
-            class="topbar-menu"
-            bind:this={accountMenu}
-            ontoggle={() => {
-              if (accountMenu?.open && preferencesMenu) preferencesMenu.open = false;
-            }}
-          >
+          <details class="topbar-menu" bind:this={accountMenu}>
             <summary aria-label={'My account'}
               ><span class="account-avatar"
                 >{#if data.user.image}<img
@@ -1891,8 +1849,8 @@
                   {/if}
 
                   <!-- ── PROFILE ────────────────────────────────────────────────────── -->
-                {:else if tab === 'notification-settings'}
-                  <NotificationSettings {language} />
+                {:else if tab === 'user-settings'}
+                  <UserSettings {language} />
                 {:else if tab === 'inbox'}
                   <div class="workspace-header">
                     <div>

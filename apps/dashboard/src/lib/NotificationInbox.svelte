@@ -245,7 +245,7 @@
   <button
     bind:this={trigger}
     type="button"
-    class="notification-trigger"
+    class="topbar-control notification-trigger"
     class:active={open}
     aria-label={`${language === 'pl' ? 'Powiadomienia' : 'Notifications'}${totalUnread ? ` (${totalUnread})` : ''}`}
     title={language === 'pl' ? 'Powiadomienia' : 'Notifications'}
@@ -291,7 +291,7 @@
         >
         <a
           class="menu-icon"
-          href="/settings/notifications"
+          href="/settings#notifications"
           onclick={() => close()}
           aria-label={language === 'pl' ? 'Ustawienia powiadomień' : 'Notification settings'}
           title={language === 'pl' ? 'Ustawienia powiadomień' : 'Notification settings'}
@@ -461,24 +461,6 @@
 <style>
   .notification-trigger {
     position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 34px;
-    height: 34px;
-    padding: 0;
-    border: 1px solid transparent;
-    border-radius: 3px;
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-  .notification-trigger:hover,
-  .notification-trigger.active {
-    background: var(--surface-muted);
-    color: var(--ink);
-    border-color: var(--control-border-hover);
   }
   .notification-dot {
     position: absolute;
@@ -575,7 +557,6 @@
     opacity: 0.4;
     cursor: default;
   }
-  .notification-trigger:focus-visible,
   .notification-panel :global(:focus-visible) {
     outline: 2px solid var(--accent);
     outline-offset: 3px;

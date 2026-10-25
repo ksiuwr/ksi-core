@@ -251,46 +251,45 @@ msgstr "KSI · {0} <0>v{0} · <0/></0>"
 msgid "Current workspace"
 msgstr "Current workspace"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
 msgid "Language and appearance"
 msgstr "Language and appearance"
 
-#: src/routes/[...workspace]/+page.svelte
-msgid "Preferences"
-msgstr "Preferences"
+#~ msgid "Preferences"
+#~ msgstr "Preferences"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
+#: src/lib/UserSettings.svelte
 msgid "Language"
 msgstr "Language"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
 msgid "Polski"
 msgstr "Polski"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
 msgid "English"
 msgstr "English"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
+#: src/lib/UserSettings.svelte
 msgid "Appearance"
 msgstr "Appearance"
 
 #: src/lib/ContentHistory.svelte
 #: src/lib/TaskActivity.svelte
 #: src/lib/ThreadActivity.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
 #: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "System"
 msgstr "System"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
 msgid "Light"
 msgstr "Light"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
 msgid "Dark"
 msgstr "Dark"
 
@@ -1029,6 +1028,10 @@ msgstr "Delete"
 msgid "Search users..."
 msgstr "Search users..."
 
+#: src/lib/UserSettings.svelte
+#: src/routes/[...workspace]/+page.svelte
+#: src/routes/[...workspace]/+page.svelte
+#: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Settings"
 msgstr "Settings"
@@ -2186,13 +2189,11 @@ msgstr "Mark as read"
 msgid "E-mail o nieprzeczytanych powiadomieniach"
 msgstr "E-mail o nieprzeczytanych powiadomieniach"
 
-#: src/lib/NotificationSettings.svelte
-msgid "Opóźnienie (minuty)"
-msgstr "Opóźnienie (minuty)"
+#~ msgid "Opóźnienie (minuty)"
+#~ msgstr "Opóźnienie (minuty)"
 
-#: src/lib/NotificationSettings.svelte
-msgid "Delay (minutes)"
-msgstr "Delay (minutes)"
+#~ msgid "Delay (minutes)"
+#~ msgstr "Delay (minutes)"
 
 #: src/lib/NotificationSettings.svelte
 msgid "Zapisz ustawienia"
@@ -2240,14 +2241,11 @@ msgstr "Just now"
 
 #: src/lib/NotificationInbox.svelte
 #: src/lib/NotificationInbox.svelte
-#: src/lib/NotificationSettings.svelte
 msgid "Ustawienia powiadomień"
 msgstr "Ustawienia powiadomień"
 
 #: src/lib/NotificationInbox.svelte
 #: src/lib/NotificationInbox.svelte
-#: src/lib/NotificationSettings.svelte
-#: src/routes/[...workspace]/+page.svelte
 msgid "Notification settings"
 msgstr "Notification settings"
 
@@ -2371,21 +2369,17 @@ msgstr "Wzmianki, przypisania, aktualizacje i prośby o zatwierdzenie w jednym m
 msgid "Mentions, assignments, updates, and approval requests in one place."
 msgstr "Mentions, assignments, updates, and approval requests in one place."
 
-#: src/lib/NotificationSettings.svelte
-msgid "Wybierz, kiedy otrzymywać przypomnienia e-mail."
-msgstr "Wybierz, kiedy otrzymywać przypomnienia e-mail."
+#~ msgid "Wybierz, kiedy otrzymywać przypomnienia e-mail."
+#~ msgstr "Wybierz, kiedy otrzymywać przypomnienia e-mail."
 
-#: src/lib/NotificationSettings.svelte
-msgid "Choose when to receive email reminders."
-msgstr "Choose when to receive email reminders."
+#~ msgid "Choose when to receive email reminders."
+#~ msgstr "Choose when to receive email reminders."
 
-#: src/lib/NotificationSettings.svelte
-msgid "Powiadomienia e-mail"
-msgstr "Powiadomienia e-mail"
+#~ msgid "Powiadomienia e-mail"
+#~ msgstr "Powiadomienia e-mail"
 
-#: src/lib/NotificationSettings.svelte
-msgid "Email notifications"
-msgstr "Email notifications"
+#~ msgid "Email notifications"
+#~ msgstr "Email notifications"
 
 #: src/lib/NotificationSettings.svelte
 msgid "Ładowanie ustawień…"
@@ -2394,3 +2388,27 @@ msgstr "Ładowanie ustawień…"
 #: src/lib/NotificationSettings.svelte
 msgid "Loading settings…"
 msgstr "Loading settings…"
+
+#: src/lib/NotificationSettings.svelte
+msgid "Przypomnienie e-mail po (minuty)"
+msgstr "Przypomnienie e-mail po (minuty)"
+
+#: src/lib/NotificationSettings.svelte
+msgid "Email reminder after (minutes)"
+msgstr "Email reminder after (minutes)"
+
+#: src/lib/NotificationSettings.svelte
+msgid "Na przykład: 60 oznacza, że przypomnienie e-mail może zostać wysłane, jeśli powiadomienie pozostaje nieprzeczytane przez godzinę. Powiadomienia w aplikacji pojawiają się od razu."
+msgstr "Na przykład: 60 oznacza, że przypomnienie e-mail może zostać wysłane, jeśli powiadomienie pozostaje nieprzeczytane przez godzinę. Powiadomienia w aplikacji pojawiają się od razu."
+
+#: src/lib/NotificationSettings.svelte
+msgid "For example, 60 means an email reminder can be sent if a notification stays unread for an hour. In-app notifications appear immediately."
+msgstr "For example, 60 means an email reminder can be sent if a notification stays unread for an hour. In-app notifications appear immediately."
+
+#: src/lib/UserSettings.svelte
+msgid "Manage your language, appearance, and notifications."
+msgstr "Manage your language, appearance, and notifications."
+
+#: src/lib/UserSettings.svelte
+msgid "Language and appearance changes are saved automatically on this device."
+msgstr "Language and appearance changes are saved automatically on this device."

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { ArrowLeft, Bell, Check, Save } from '@lucide/svelte';
+  import { Bell, Check, Save } from '@lucide/svelte';
 
   let { language }: { language: 'pl' | 'en' } = $props();
   const uid = $props.id();
@@ -58,22 +58,8 @@
   });
 </script>
 
-<a class="back-link" href="/inbox"
-  ><ArrowLeft size={15} aria-hidden="true" />{language === 'pl'
-    ? 'Powiadomienia'
-    : 'Notifications'}</a
->
-<div class="workspace-header">
-  <div>
-    <h1>{language === 'pl' ? 'Ustawienia powiadomień' : 'Notification settings'}</h1>
-    <p class="workspace-description">
-      {language === 'pl'
-        ? 'Wybierz, kiedy otrzymywać przypomnienia e-mail.'
-        : 'Choose when to receive email reminders.'}
-    </p>
-  </div>
-</div>
 <form
+  id="notifications"
   class="card settings-card"
   onsubmit={(event) => {
     event.preventDefault();
@@ -83,7 +69,7 @@
 >
   <div class="section-heading">
     <Bell size={18} aria-hidden="true" />
-    <h2>{language === 'pl' ? 'Powiadomienia e-mail' : 'Email notifications'}</h2>
+    <h2>{language === 'pl' ? 'Powiadomienia' : 'Notifications'}</h2>
   </div>
   {#if error}<p role="alert" class="error">{error}</p>{/if}
   {#if loading}<p role="status">
@@ -106,10 +92,13 @@
       </p>
       <div class="delay-field">
         <label for={`${uid}-delay`}
-          >{language === 'pl' ? 'Opóźnienie (minuty)' : 'Delay (minutes)'}</label
+          >{language === 'pl'
+            ? 'Przypomnienie e-mail po (minuty)'
+            : 'Email reminder after (minutes)'}</label
         >
         <input
           id={`${uid}-delay`}
+          aria-describedby={`${uid}-delay-help`}
           type="number"
           bind:value={emailDelayMinutes}
           min="1"
@@ -117,6 +106,11 @@
           step="1"
           required
         />
+        <p id={`${uid}-delay-help`} class="field-help">
+          {language === 'pl'
+            ? 'Na przykład: 60 oznacza, że przypomnienie e-mail może zostać wysłane, jeśli powiadomienie pozostaje nieprzeczytane przez godzinę. Powiadomienia w aplikacji pojawiają się od razu.'
+            : 'For example, 60 means an email reminder can be sent if a notification stays unread for an hour. In-app notifications appear immediately.'}
+        </p>
       </div>
       <div class="save-row">
         <button class="btn" type="submit"
@@ -132,20 +126,7 @@
 </form>
 
 <style>
-  .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--muted);
-    font-size: 12px;
-    margin-bottom: 24px;
-    text-decoration: none;
-  }
-  .back-link:hover {
-    color: var(--ink);
-  }
   .settings-card {
-    max-width: 720px;
     padding: 24px;
   }
   fieldset {
