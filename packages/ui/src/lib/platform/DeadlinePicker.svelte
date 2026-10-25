@@ -239,7 +239,7 @@
       >
     </header>
     <div class="picker-weekdays" aria-hidden="true">
-      {#each weekdays as label (label)}<span>{label}</span>{/each}
+      {#each weekdays as label, index (index)}<span>{label}</span>{/each}
     </div>
     <div class="picker-grid" bind:this={grid}>
       {#each Array(month.offset) as _, index (index)}<span aria-hidden="true"></span>{/each}
