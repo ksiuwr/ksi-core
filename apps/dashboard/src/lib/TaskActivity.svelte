@@ -115,14 +115,14 @@
     {' '}
     {#each summaries as summary, index}
       {#if index > 0}{' '}<span class="activity-separator">·</span>{' '}{/if}
-      {#if summary.kind === 'created'}{pl ? 'utworzył to zadanie' : 'created this task'}
+      {#if summary.kind === 'created'}{pl ? 'utworzył(a) to zadanie' : 'created this task'}
       {:else if summary.kind === 'archived'}archived this task
-      {:else if summary.kind === 'deleted'}{pl ? 'usunął to zadanie' : 'deleted this task'}
-      {:else if summary.kind === 'restored'}{pl ? 'przywrócił to zadanie' : 'restored this task'}
-      {:else if summary.kind === 'description'}{pl ? 'edytował opis' : 'edited the description'}
+      {:else if summary.kind === 'deleted'}{pl ? 'usunął(a) to zadanie' : 'deleted this task'}
+      {:else if summary.kind === 'restored'}{pl ? 'przywrócił(a) to zadanie' : 'restored this task'}
+      {:else if summary.kind === 'description'}{pl ? 'edytował(a) opis' : 'edited the description'}
       {:else if summary.kind === 'deadline'}
         {#if summary.before && summary.after}
-          {pl ? 'zmienił termin z' : 'changed the deadline from'}
+          {pl ? 'zmienił(a) termin z' : 'changed the deadline from'}
           <del class="title-value">{deadlineText(summary.before)}</del>
           {' '}{pl ? 'na' : 'to'}
           <time class="title-value" datetime={summary.after}>{deadlineText(summary.after)}</time>
@@ -130,20 +130,20 @@
           {pl ? 'ustawił termin na' : 'set the deadline to'}
           <time class="title-value" datetime={summary.after}>{deadlineText(summary.after)}</time>
         {:else}
-          {pl ? 'usunął termin' : 'removed the deadline'}
+          {pl ? 'usunął(a) termin' : 'removed the deadline'}
         {/if}
       {:else if summary.kind === 'renamed'}
-        {pl ? 'zmienił tytuł' : 'changed the title'}
+        {pl ? 'zmienił(a) tytuł' : 'changed the title'}
         {#if summary.before}{' '}{pl ? 'z' : 'from'}
           <del class="title-value">{summary.before}</del>{/if}
         {' '}{pl ? 'na' : 'to'} <span class="title-value">{summary.after}</span>
       {:else if summary.kind === 'moved'}
-        {pl ? 'przeniósł zadanie' : 'moved this task'}
+        {pl ? 'przeniósł(a) zadanie' : 'moved this task'}
         {#if summary.before}{' '}{pl ? 'z' : 'from'}
           <span class="status-name">{statusName(summary.before)}</span>{/if}
         {' '}{pl ? 'do' : 'to'} <span class="status-name">{statusName(summary.after)}</span>
       {:else if summary.kind === 'label-renamed'}
-        {pl ? 'zmienił nazwę etykiety z' : 'renamed the label from'}
+        {pl ? 'zmienił(a) nazwę etykiety z' : 'renamed the label from'}
         <del class="title-value">{summary.before}</del>
         {pl ? 'na' : 'to'}
         <span
@@ -151,7 +151,7 @@
           style:--label-color={labelInfo(summary.after)?.color || '#6b7280'}>{summary.after}</span
         >
       {:else if summary.kind === 'label-color'}
-        {pl ? 'zmienił kolor etykiety' : 'changed the color of the'}
+        {pl ? 'zmienił(a) kolor etykiety' : 'changed the color of the'}
         <span class="activity-label" style:--label-color={summary.after}>{summary.label}</span>
         {pl ? 'z' : 'label from'}
         <span class="color-value"
@@ -165,10 +165,10 @@
       {:else if summary.kind === 'label-description'}
         {pl
           ? summary.operation === 'added'
-            ? 'dodał opis etykiety'
+            ? 'dodał(a) opis etykiety'
             : summary.operation === 'removed'
-              ? 'usunął opis etykiety'
-              : 'zmienił opis etykiety'
+              ? 'usunął(a) opis etykiety'
+              : 'zmienił(a) opis etykiety'
           : summary.operation === 'added'
             ? 'added a description to the'
             : summary.operation === 'removed'
@@ -182,10 +182,10 @@
       {:else if summary.kind === 'assignee-added' || summary.kind === 'assignee-removed'}
         {summary.kind === 'assignee-added'
           ? pl
-            ? 'przypisał'
+            ? 'przypisał(a)'
             : 'assigned'
           : pl
-            ? 'usunął przypisanie'
+            ? 'usunął(a) przypisanie'
             : 'unassigned'}
         {' '}{#each summary.ids as id, personIndex}{#if personIndex > 0}{', '}{/if}<MemberPreview
             member={person(id)}
@@ -195,7 +195,13 @@
             {language}
           />{/each}
       {:else if summary.kind === 'label-added' || summary.kind === 'label-removed'}
-        {summary.kind === 'label-added' ? (pl ? 'dodał' : 'added') : pl ? 'usunął' : 'removed'}
+        {summary.kind === 'label-added'
+          ? pl
+            ? 'dodał(a)'
+            : 'added'
+          : pl
+            ? 'usunął(a)'
+            : 'removed'}
         {' '}{pl
           ? summary.labels.length === 1
             ? 'etykietę'
@@ -206,7 +212,7 @@
             title={label?.description || name}>{name}</span
           >{' '}{/each}
         {#if !pl}{summary.labels.length === 1 ? 'label' : 'labels'}{/if}
-      {:else}{pl ? 'zaktualizował to zadanie' : 'updated this task'}{/if}
+      {:else}{pl ? 'zaktualizował(a) to zadanie' : 'updated this task'}{/if}
     {/each}
     {' '}<time datetime={event.createdAt} title={absoluteTime} aria-label={absoluteTime}
       >{relativeTime}</time

@@ -1797,11 +1797,11 @@ msgstr "Edytowano"
 
 #: src/lib/ContentHistory.svelte
 msgid "Sprawdź, co zmieniono i kto wprowadził zmiany."
-msgstr "Sprawdź, co zmieniono i kto wprowadził zmiany."
+msgstr "Sprawdź, co zmieniono i kto wprowadził(a) zmiany."
 
 #: src/lib/ContentHistory.svelte
 msgid "See what changed and who changed it."
-msgstr "Sprawdź, co zmieniono i kto wprowadził zmiany."
+msgstr "Sprawdź, co zmieniono i kto wprowadził(a) zmiany."
 
 #: src/lib/ContentHistory.svelte
 msgid "Zamknij historię"

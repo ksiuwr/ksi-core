@@ -129,26 +129,34 @@
     {' '}
     {#each summaries as summary, index}
       {#if index > 0}{' '}<span class="activity-separator">·</span>{' '}{/if}
-      {#if summary.kind === 'created'}{pl ? 'utworzył ten wątek' : 'created this thread'}
+      {#if summary.kind === 'created'}{pl ? 'utworzył(a) ten wątek' : 'created this thread'}
       {:else if summary.kind === 'archived'}{pl
-          ? 'zarchiwizował ten wątek'
+          ? 'zarchiwizował(a) ten wątek'
           : 'archived this thread'}
-      {:else if summary.kind === 'restored'}{pl ? 'przywrócił ten wątek' : 'restored this thread'}
-      {:else if summary.kind === 'comment-added'}{pl ? 'dodał komentarz' : 'added a comment'}
-      {:else if summary.kind === 'comment-edited'}{pl ? 'edytował komentarz' : 'edited a comment'}
-      {:else if summary.kind === 'comment-removed'}{pl ? 'usunął komentarz' : 'removed a comment'}
-      {:else if summary.kind === 'access'}{pl ? 'zmienił dostęp do wątku' : 'changed thread access'}
+      {:else if summary.kind === 'restored'}{pl
+          ? 'przywrócił(a) ten wątek'
+          : 'restored this thread'}
+      {:else if summary.kind === 'comment-added'}{pl ? 'dodał(a) komentarz' : 'added a comment'}
+      {:else if summary.kind === 'comment-edited'}{pl
+          ? 'edytował(a) komentarz'
+          : 'edited a comment'}
+      {:else if summary.kind === 'comment-removed'}{pl
+          ? 'usunął(a) komentarz'
+          : 'removed a comment'}
+      {:else if summary.kind === 'access'}{pl
+          ? 'zmienił(a) dostęp do wątku'
+          : 'changed thread access'}
       {:else if summary.kind === 'visibility'}
-        {pl ? 'zmienił widoczność z' : 'changed visibility from'}
+        {pl ? 'zmienił(a) widoczność z' : 'changed visibility from'}
         <span class="thread-value">{visibilityName(summary.before)}</span>
         {pl ? 'na' : 'to'} <span class="thread-value">{visibilityName(summary.after)}</span>
       {:else if summary.kind === 'assignee-added' || summary.kind === 'assignee-removed'}
         {summary.kind === 'assignee-added'
           ? pl
-            ? 'przypisał'
+            ? 'przypisał(a)'
             : 'assigned'
           : pl
-            ? 'usunął przypisanie'
+            ? 'usunął(a) przypisanie'
             : 'unassigned'}
         {' '}{#each summary.ids as id, personIndex}{#if personIndex > 0}{', '}{/if}<MemberPreview
             member={person(id)}
@@ -159,13 +167,13 @@
           />{/each}
       {:else if summary.kind === 'invited'}
         {pl
-          ? `zaprosił ${summary.count} ${personPlural(summary.count)}`
+          ? `zaprosił(a) ${summary.count} ${personPlural(summary.count)}`
           : `invited ${summary.count} ${summary.count === 1 ? 'member' : 'members'}`}
       {:else if summary.kind === 'uninvited'}
         {pl
-          ? `usunął ${summary.count} ${invitationPlural(summary.count)}`
+          ? `usunął(a) ${summary.count} ${invitationPlural(summary.count)}`
           : `removed ${summary.count} ${summary.count === 1 ? 'invitation' : 'invitations'}`}
-      {:else}{pl ? 'zaktualizował ten wątek' : 'updated this thread'}{/if}
+      {:else}{pl ? 'zaktualizował(a) ten wątek' : 'updated this thread'}{/if}
     {/each}
     {' '}<time datetime={event.createdAt} title={absoluteTime} aria-label={absoluteTime}
       >{relativeTime}</time

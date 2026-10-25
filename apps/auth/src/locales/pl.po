@@ -193,7 +193,7 @@ msgstr "Zapisz hasło"
 
 #: src/routes/+page.svelte
 msgid "You are signed in as"
-msgstr "Jesteś zalogowany jako"
+msgstr "Jesteś zalogowany(a) jako"
 
 #: src/routes/+page.svelte
 msgid "Go to Dashboard"
