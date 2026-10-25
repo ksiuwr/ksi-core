@@ -45,7 +45,8 @@ export const taskChangeFields = [
   'column',
   'labels',
   'assigneeIds',
-  'position'
+  'position',
+  'dueAt'
 ] as const;
 export const profileChangeFields = [
   'firstName',

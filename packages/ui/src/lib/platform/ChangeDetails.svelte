@@ -62,6 +62,7 @@
     labels: ['Etykiety', 'Labels'],
     assigneeIds: ['Przypisane osoby', 'Assignees'],
     label: ['Etykieta', 'Label'],
+    dueAt: ['Termin', 'Deadline'],
     tags: ['Tagi projektu', 'Project tags'],
     name: ['Nazwa', 'Name'],
     description: ['Opis', 'Description'],
@@ -85,7 +86,7 @@
     websiteFeed: ['Aktualności strony', 'Website feed'],
     thumbnailFileId: ['Miniatura', 'Thumbnail']
   };
-  function display(value: unknown): string {
+  function display(field: string, value: unknown): string {
     if (
       value === null ||
       value === undefined ||
@@ -95,12 +96,20 @@
       return language === 'pl' ? 'Brak wartości' : 'Not set';
     if (typeof value === 'boolean')
       return value ? (language === 'pl' ? 'Tak' : 'Yes') : language === 'pl' ? 'Nie' : 'No';
-    if (typeof value === 'string') return value;
+    if (typeof value === 'string') {
+      if (/^\d{4}-\d{2}-\d{2}T/.test(value) && !Number.isNaN(new Date(value).getTime()))
+        return new Intl.DateTimeFormat(language === 'pl' ? 'pl-PL' : 'en-GB', {
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        }).format(new Date(value));
+      return value;
+    }
     if (Array.isArray(value) && value.every((item) => typeof item === 'string'))
       return value.join('\n');
     return JSON.stringify(value, null, 2);
   }
-  const summary = (value: unknown) => display(value).replace(/\s+/g, ' ').slice(0, 70);
+  const summary = (field: string, value: unknown) =>
+    display(field, value).replace(/\s+/g, ' ').slice(0, 70);
 </script>
 
 {#if validChanges.length}
@@ -138,14 +147,18 @@
           />
           <strong>{names[change.field]?.[language === 'pl' ? 0 : 1] ?? change.field}</strong>
           <span class="change-summary"
-            ><span>{summary(change.before)}</span><ArrowRight size={12} aria-hidden="true" /><span
-              >{summary(change.after)}</span
-            ></span
+            ><span>{summary(change.field, change.before)}</span><ArrowRight
+              size={12}
+              aria-hidden="true"
+            /><span>{summary(change.field, change.after)}</span></span
           >
         </button>
         <div id={`${uid}-${index}`} hidden={!open}>
           {#if open}
-            {@const rows = activityDiffRows(display(change.before), display(change.after))}
+            {@const rows = activityDiffRows(
+              display(change.field, change.before),
+              display(change.field, change.after)
+            )}
             {@const limit = visibleLines[index] ?? 120}
             <div class="diff-headings" class:unified={layout === 'unified'}>
               <span class="before-heading"

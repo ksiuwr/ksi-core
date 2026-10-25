@@ -153,7 +153,8 @@ const itemRevisionFields = [
   'labels',
   'assigneeIds',
   'column',
-  'label'
+  'label',
+  'dueAt'
 ] as const;
 function itemHistoryCondition(id: string, includeLifecycle = false) {
   return or(

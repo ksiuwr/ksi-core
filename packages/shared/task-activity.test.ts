@@ -49,6 +49,24 @@ test('lifecycle and older events have concise summaries without inventing change
   ).toEqual([{ kind: 'updated' }]);
 });
 
+test('deadline changes summarize set, moved and cleared deadlines in UTC stamps', () => {
+  const noon = (days: number) => new Date(Date.UTC(2030, 0, 1 + days, 9)).toISOString();
+  expect(
+    taskActivitySummary('kanban.updated', [{ field: 'dueAt', before: null, after: noon(3) }])
+  ).toEqual([{ kind: 'deadline', before: null, after: noon(3) }]);
+  expect(
+    taskActivitySummary('kanban.updated', [{ field: 'dueAt', before: noon(3), after: noon(10) }])
+  ).toEqual([{ kind: 'deadline', before: noon(3), after: noon(10) }]);
+  expect(
+    taskActivitySummary('kanban.updated', [{ field: 'dueAt', before: noon(3), after: null }])
+  ).toEqual([{ kind: 'deadline', before: noon(3), after: null }]);
+  expect(
+    taskActivitySummary('kanban.updated', [
+      { field: 'dueAt', before: 'not-a-date', after: 'not-a-date-either' }
+    ])
+  ).toEqual([{ kind: 'updated' }]);
+});
+
 test('label definition edits name the label and distinguish rename, color and description', () => {
   expect(
     taskActivitySummary('kanban.label.updated', [

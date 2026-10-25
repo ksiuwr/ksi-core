@@ -3,6 +3,7 @@ import { hasContentChange, type ContentChange } from './activity';
 export type TaskActivitySummary =
   | { kind: 'created' | 'description' | 'deleted' | 'restored' | 'updated' }
   | { kind: 'renamed' | 'moved'; before: string; after: string }
+  | { kind: 'deadline'; before: string | null; after: string | null }
   | { kind: 'label-added' | 'label-removed'; labels: string[] }
   | { kind: 'assignee-added' | 'assignee-removed'; ids: string[] }
   | { kind: 'label-renamed'; before: string; after: string }
@@ -27,6 +28,17 @@ export function taskActivitySummary(
         after: change.after
       });
     if (change.field === 'markdown') result.push({ kind: 'description' });
+    if (change.field === 'dueAt') {
+      const stamp = (value: unknown) =>
+        typeof value === 'string' &&
+        /^\d{4}-\d{2}-\d{2}T/.test(value) &&
+        !Number.isNaN(new Date(value).getTime())
+          ? value
+          : null;
+      const before = stamp(change.before);
+      const after = stamp(change.after);
+      if (before || after) result.push({ kind: 'deadline', before, after });
+    }
     if (change.field === 'column' && typeof change.after === 'string')
       result.push({
         kind: 'moved',
