@@ -445,10 +445,12 @@ msgstr "Close image viewer"
 msgid "Gallery image {0} of {1}"
 msgstr "Gallery image {0} of {1}"
 
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
 #: src/components/Gallery.svelte
 msgid "Previous image"
 msgstr "Previous image"
 
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
 #: src/components/Gallery.svelte
 msgid "Next image"
 msgstr "Next image"
@@ -887,3 +889,68 @@ msgstr "<0/>All articles"
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "From {0} to {1}"
 msgstr "From {0} to {1}"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Open image"
+msgstr "Open image"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Gallery image"
+msgstr "Gallery image"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Loading…"
+msgstr "Loading…"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Reference not found"
+msgstr "Reference not found"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Preview unavailable"
+msgstr "Preview unavailable"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Association"
+msgstr "Association"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Task"
+msgstr "Task"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Thread"
+msgstr "Thread"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "No description."
+msgstr "No description."
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Association member"
+msgstr "Association member"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Due"
+msgstr "Due"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Open"
+msgstr "Open"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Gallery"
+msgstr "Gallery"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Close"
+msgstr "Close"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "opened this task"
+msgstr "opened this task"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "opened this thread"
+msgstr "opened this thread"

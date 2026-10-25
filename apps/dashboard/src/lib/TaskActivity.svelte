@@ -5,6 +5,7 @@
     ArrowRightLeft,
     Tag,
     Trash2,
+    Archive,
     RotateCcw,
     UserMinus,
     UserPlus,
@@ -51,21 +52,23 @@
   const Icon = $derived(
     kind === 'created'
       ? CircleDot
-      : kind === 'deleted'
-        ? Trash2
-        : kind === 'restored'
-          ? RotateCcw
-          : kind === 'moved'
-            ? ArrowRightLeft
-            : kind.startsWith('label-')
-              ? Tag
-              : kind === 'assignee-added'
-                ? UserPlus
-                : kind === 'assignee-removed'
-                  ? UserMinus
-                  : kind === 'deadline'
-                    ? CalendarClock
-                    : Pencil
+      : kind === 'archived'
+        ? Archive
+        : kind === 'deleted'
+          ? Trash2
+          : kind === 'restored'
+            ? RotateCcw
+            : kind === 'moved'
+              ? ArrowRightLeft
+              : kind.startsWith('label-')
+                ? Tag
+                : kind === 'assignee-added'
+                  ? UserPlus
+                  : kind === 'assignee-removed'
+                    ? UserMinus
+                    : kind === 'deadline'
+                      ? CalendarClock
+                      : Pencil
   );
   const absoluteTime = $derived(new Date(event.createdAt).toLocaleString(pl ? 'pl-PL' : 'en-GB'));
   const relativeTime = $derived.by(() => {
@@ -113,6 +116,7 @@
     {#each summaries as summary, index}
       {#if index > 0}{' '}<span class="activity-separator">·</span>{' '}{/if}
       {#if summary.kind === 'created'}{pl ? 'utworzył to zadanie' : 'created this task'}
+      {:else if summary.kind === 'archived'}archived this task
       {:else if summary.kind === 'deleted'}{pl ? 'usunął to zadanie' : 'deleted this task'}
       {:else if summary.kind === 'restored'}{pl ? 'przywrócił to zadanie' : 'restored this task'}
       {:else if summary.kind === 'description'}{pl ? 'edytował opis' : 'edited the description'}

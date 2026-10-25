@@ -445,10 +445,12 @@ msgstr "Zamknij przeglądarkę obrazów"
 msgid "Gallery image {0} of {1}"
 msgstr "Zdjęcie w galerii {0} z {1}"
 
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
 #: src/components/Gallery.svelte
 msgid "Previous image"
 msgstr "Poprzednie zdjęcie"
 
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
 #: src/components/Gallery.svelte
 msgid "Next image"
 msgstr "Następne zdjęcie"
@@ -887,3 +889,68 @@ msgstr "<0/>Wszystkie artykuły"
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "From {0} to {1}"
 msgstr "Od {0} do {1}"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Open image"
+msgstr "Otwórz zdjęcie"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Gallery image"
+msgstr "Zdjęcie w galerii"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Loading…"
+msgstr "Wczytywanie…"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Reference not found"
+msgstr "Nie znaleziono odwołania"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Preview unavailable"
+msgstr "Podgląd niedostępny"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Association"
+msgstr "Całe koło"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Task"
+msgstr "Zadanie"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Thread"
+msgstr "Wątek"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "No description."
+msgstr "Brak opisu."
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Association member"
+msgstr "Członek koła"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Due"
+msgstr "Termin"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Open"
+msgstr "Otwórz"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Gallery"
+msgstr "Galeria"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Close"
+msgstr "Zamknij"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "opened this task"
+msgstr "utworzył(a) to zadanie"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "opened this thread"
+msgstr "utworzył(a) ten wątek"

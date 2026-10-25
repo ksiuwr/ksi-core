@@ -787,7 +787,7 @@
   );
   const viewName = $derived(
     graveyard && tab === 'board'
-      ? 'Removed tasks'
+      ? 'Archived tasks'
       : tab === 'user-settings'
         ? 'Settings'
         : tab === 'inbox'
@@ -1447,7 +1447,7 @@
                 {:else if tab === 'board'}
                   <div class="workspace-header">
                     <h1>
-                      {graveyard ? 'Removed tasks' : 'Task board'}
+                      {graveyard ? 'Archived tasks' : 'Task board'}
                     </h1>
                     {#if graveyard}
                       <a
@@ -1461,7 +1461,7 @@
                         class="btn btn-outline"
                         href={`${dashboardPath(workspace, projectSlug, 'board')}/graveyard`}
                         onclick={guardNavigation}
-                        ><Trash2 size={15} aria-hidden="true" />{'Removed tasks'}</a
+                        ><Archive size={15} aria-hidden="true" />{'Archived tasks'}</a
                       >
                     {/if}
                   </div>
@@ -1469,7 +1469,7 @@
                     <div class="graveyard-notice">
                       <Archive size={18} aria-hidden="true" />
                       <p>
-                        {'Removed tasks are kept here. Leaders can restore them to their previous column.'}
+                        {'Archived tasks are kept here. Leaders can restore them to their previous column.'}
                       </p>
                     </div>
                     <div class="graveyard-list">
@@ -1500,10 +1500,10 @@
                         </article>
                       {/each}
                       {#if !loading && !items.length && !error}<div class="empty-state">
-                          <Trash2 size={28} strokeWidth={1.4} aria-hidden="true" />
-                          <h2>{'No removed tasks'}</h2>
+                          <Archive size={28} strokeWidth={1.4} aria-hidden="true" />
+                          <h2>{'No archived tasks'}</h2>
                           <p>
-                            {'Tasks removed from the board will appear here.'}
+                            {'Archived tasks will appear here.'}
                           </p>
                         </div>{/if}
                     </div>

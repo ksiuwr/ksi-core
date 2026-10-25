@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, tick } from 'svelte';
-  import { Check, ChevronsUpDown, Search, UserRoundPlus, X } from '@lucide/svelte';
+  import { ChevronsUpDown, Search, UserRoundPlus, X } from '@lucide/svelte';
 
   export type AssignmentMember = {
     id: string;
@@ -20,6 +20,7 @@
     language = 'en',
     readonly = false,
     disabled = false,
+    showLabel = true,
     onchange
   }: {
     value?: string[];
@@ -28,14 +29,14 @@
     language?: 'pl' | 'en';
     readonly?: boolean;
     disabled?: boolean;
+    showLabel?: boolean;
     onchange?: (value: string[]) => void;
   } = $props();
 
   const uid = $props.id();
-  const pl = $derived(language === 'pl');
   let loaded = $state<AssignmentMember[]>([]),
     loading = $state(false),
-    error = $state('');
+    error = $state(false);
   let broken = $state<string[]>([]);
   let trigger = $state<HTMLButtonElement>();
   let panel = $state<HTMLDivElement>();
@@ -68,20 +69,22 @@
       .normalize('NFD')
       .replace(/\p{Diacritic}/gu, '')
       .replace(/ł/g, 'l');
+  const available = $derived(choices.filter((person) => !value.includes(person.id)));
   const filtered = $derived.by(() => {
     const terms = normalize(query.trim()).split(/\s+/).filter(Boolean);
-    if (!terms.length) return choices;
-    return choices.filter((person) => {
+    if (!terms.length) return available;
+    return available.filter((person) => {
       const haystack = normalize(
         `${person.firstName} ${person.lastName} ${person.nickname ?? ''}`.trim()
       );
       return terms.every((term) => haystack.includes(term));
     });
   });
-  const personLabel = (person: AssignmentMember) =>
-    pl ? `Przypisz ${fullName(person)}` : `Assign ${fullName(person)}`;
-  const removeLabel = (person: AssignmentMember) =>
-    pl ? `Usuń ${fullName(person)}` : `Remove ${fullName(person)}`;
+  const personLabel = (person: AssignmentMember) => `Assign ${fullName(person)}`;
+  const removeLabel = (person: AssignmentMember) => `Remove ${fullName(person)}`;
+  $effect(() => {
+    if (!available.length) open = false;
+  });
 
   function breakImage(id: string) {
     if (!broken.includes(id)) broken = [...broken, id];
@@ -175,28 +178,21 @@
   $effect(() => {
     if (members !== undefined) {
       loading = false;
-      error = '';
+      error = false;
       return;
     }
     const controller = new AbortController();
     const path = projectId ? `/projects/${encodeURIComponent(projectId)}/members` : '/members';
-    error = '';
+    error = false;
     loading = true;
     fetch(`/api/platform${path}`, { signal: controller.signal })
       .then(async (response) => {
-        if (!response.ok)
-          throw new Error(pl ? 'Nie udało się wczytać osób' : 'Unable to load members');
+        if (!response.ok) throw new Error('Unable to load members');
         const result = await response.json();
         if (!controller.signal.aborted) loaded = result;
       })
-      .catch((cause) => {
-        if (!controller.signal.aborted)
-          error =
-            cause instanceof Error
-              ? cause.message
-              : pl
-                ? 'Nie udało się wczytać osób'
-                : 'Unable to load members';
+      .catch(() => {
+        if (!controller.signal.aborted) error = true;
       })
       .finally(() => {
         if (!controller.signal.aborted) loading = false;
@@ -243,8 +239,7 @@
 
 {#if readonly}
   <span class="assigned">
-    {#if selected.length}<span class="readonly-label">{pl ? 'Przypisane do' : 'Assigned to'}</span
-      >{/if}
+    {#if selected.length && showLabel}<span class="readonly-label">{'Assigned to'}</span>{/if}
     {#each selected as person (person.id)}
       <span class="person-chip compact" title={fullName(person)}
         >{@render avatar(person)}<span class="person-name">{fullName(person)}</span></span
@@ -253,13 +248,16 @@
   </span>
 {:else}
   <div class="assignees">
-    <span class="label" id={`${uid}-label`}>{pl ? 'Przypisane do' : 'Assigned to'}</span>
+    {#if showLabel}<span class="label" id={`${uid}-label`}>{'Assigned to'}</span>{/if}
     {#if selected.length}
       <span class="selected-chips">
         {#each selected as person (person.id)}
-          <span class="person-chip" title={fullName(person)}
-            >{@render avatar(person)}<span class="person-name">{fullName(person)}</span
-            >{#if !disabled}<button
+          <span class="person-chip" title={fullName(person)}>
+            <a class="person-link" href={`/members/${encodeURIComponent(person.id)}`}>
+              {@render avatar(person)}
+              <span class="person-name">{fullName(person)}</span>
+            </a>
+            {#if !disabled}<button
                 type="button"
                 class="remove"
                 aria-label={removeLabel(person)}
@@ -270,105 +268,93 @@
         {/each}
       </span>
     {/if}
-    <button
-      bind:this={trigger}
-      type="button"
-      class="trigger"
-      {disabled}
-      aria-labelledby={`${uid}-label`}
-      aria-haspopup="listbox"
-      aria-expanded={open}
-      aria-controls={`${uid}-list`}
-      onclick={() => (open ? close(true) : void show())}
-      onkeydown={(event) => {
-        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-          event.preventDefault();
-          void show();
-        }
-      }}
-    >
-      <UserRoundPlus size={15} aria-hidden="true" />
-      <span class="trigger-label">{pl ? 'Dodaj osoby' : 'Add assignees'}</span>
-      <ChevronsUpDown size={14} aria-hidden="true" />
-    </button>
-    <div
-      bind:this={panel}
-      popover="manual"
-      class="panel"
-      role="dialog"
-      tabindex="-1"
-      aria-label={pl ? 'Wybierz osoby' : 'Choose assignees'}
-      style:left="{position.left}px"
-      style:top="{position.top}px"
-      style:width="{position.width}px"
-      style:max-height="{position.height}px"
-      ontoggle={(event) => (open = event.newState === 'open')}
-      onkeydown={keys}
-    >
-      <div class="panel-search">
-        <Search size={15} aria-hidden="true" />
-        <input
-          bind:this={search}
-          type="search"
-          role="combobox"
-          aria-label={pl ? 'Szukaj osób' : 'Search people'}
-          placeholder={pl ? 'Szukaj osób…' : 'Search people…'}
-          aria-autocomplete="list"
-          aria-expanded={open}
-          aria-controls={`${uid}-list`}
-          aria-activedescendant={filtered.length ? `${uid}-option-${active}` : undefined}
-          bind:value={query}
-          oninput={() => {
-            active = 0;
-            place();
-          }}
-        />
-      </div>
-      <div
-        id={`${uid}-list`}
-        class="options"
-        role="listbox"
-        aria-label={pl ? 'Osoby w projekcie' : 'Project members'}
+    {#if available.length}
+      <button
+        bind:this={trigger}
+        type="button"
+        class="trigger"
+        {disabled}
+        aria-label={showLabel ? undefined : 'Add assignees'}
+        aria-labelledby={showLabel ? `${uid}-label` : undefined}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={`${uid}-list`}
+        onclick={() => (open ? close(true) : void show())}
+        onkeydown={(event) => {
+          if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            event.preventDefault();
+            void show();
+          }
+        }}
       >
-        {#each filtered as member, index (member.id)}
-          <button
-            type="button"
-            id={`${uid}-option-${index}`}
-            class="option"
-            class:chosen={value.includes(member.id)}
-            class:highlighted={active === index}
-            role="option"
-            aria-selected={value.includes(member.id)}
-            tabindex="-1"
-            title={personLabel(member)}
-            onpointermove={() => (active = index)}
-            onclick={() => toggle(member)}
-          >
-            {@render avatar(member)}
-            <span class="option-text">
-              <span class="person-name">{fullName(member)}</span>
-              {#if member.nickname && member.nickname !== fullName(member)}<small
-                  >@{member.nickname}</small
-                >{/if}
-            </span>
-            {#if value.includes(member.id)}<Check size={15} aria-hidden="true" />{/if}
-          </button>
-        {:else}
-          <p class="empty" role="status">
-            {loading
-              ? pl
-                ? 'Wczytywanie osób…'
-                : 'Loading members…'
-              : error
-                ? error
-                : pl
-                  ? 'Brak pasujących osób.'
-                  : 'No matching members.'}
-          </p>
-        {/each}
+        <UserRoundPlus size={15} aria-hidden="true" />
+        <span class="trigger-label">{'Add assignees'}</span>
+        <ChevronsUpDown size={14} aria-hidden="true" />
+      </button>
+      <div
+        bind:this={panel}
+        popover="manual"
+        class="panel"
+        role="dialog"
+        tabindex="-1"
+        aria-label={'Choose assignees'}
+        style:left="{position.left}px"
+        style:top="{position.top}px"
+        style:width="{position.width}px"
+        style:max-height="{position.height}px"
+        ontoggle={(event) => (open = event.newState === 'open')}
+        onkeydown={keys}
+      >
+        <div class="panel-search">
+          <Search size={15} aria-hidden="true" />
+          <input
+            bind:this={search}
+            type="search"
+            role="combobox"
+            aria-label={'Search people'}
+            placeholder={'Search people…'}
+            aria-autocomplete="list"
+            aria-expanded={open}
+            aria-controls={`${uid}-list`}
+            aria-activedescendant={filtered.length ? `${uid}-option-${active}` : undefined}
+            bind:value={query}
+            oninput={() => {
+              active = 0;
+              place();
+            }}
+          />
+        </div>
+        <div id={`${uid}-list`} class="options" role="listbox" aria-label={'Project members'}>
+          {#each filtered as member, index (member.id)}
+            <button
+              type="button"
+              id={`${uid}-option-${index}`}
+              class="option"
+              class:highlighted={active === index}
+              role="option"
+              aria-selected="false"
+              tabindex="-1"
+              title={personLabel(member)}
+              onpointermove={() => (active = index)}
+              onclick={() => toggle(member)}
+            >
+              {@render avatar(member)}
+              <span class="option-text">
+                <span class="person-name">{fullName(member)}</span>
+                {#if member.nickname && member.nickname !== fullName(member)}<small
+                    >@{member.nickname}</small
+                  >{/if}
+              </span>
+            </button>
+          {:else}
+            <p class="empty" role="status">
+              {#if loading}{'Loading members…'}{:else if error}{'Unable to load members'}{:else}{'No matching members.'}{/if}
+            </p>
+          {/each}
+        </div>
       </div>
-    </div>
-    {#if error && !open}<p class="error" role="alert">{error}</p>{/if}
+    {/if}
+    {#if error && !open}<p class="error" role="alert">{'Unable to load members'}</p>{/if}
   </div>
 {/if}
 
@@ -414,6 +400,18 @@
     padding: 0;
     border: 0;
     background: transparent;
+  }
+  .person-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+  }
+  .person-link:hover .person-name,
+  .person-link:focus-visible .person-name {
+    text-decoration: underline;
   }
   .person-name {
     overflow: hidden;
@@ -554,9 +552,6 @@
   }
   .option.highlighted {
     background: var(--surface-muted, #f0ede4);
-  }
-  .option.chosen {
-    background: color-mix(in srgb, var(--primary, #6750a4) 9%, transparent);
   }
   .option-text {
     display: flex;

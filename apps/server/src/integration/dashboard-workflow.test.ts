@@ -1345,8 +1345,11 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
     expect((await request('member', path, 'PATCH', { deleted: true })).status).toBe(409);
     const current = (await db.select().from(kanbanItems).where(eq(kanbanItems.id, itemId)))[0]!;
     expect(
-      (await request('member', `/platform/items/${itemId}`, 'DELETE', { version: current.version }))
-        .status
+      (
+        await request('member', `/platform/items/${itemId}/archive`, 'POST', {
+          version: current.version
+        })
+      ).status
     ).toBe(200);
     expect((await request('member', path, 'DELETE')).status).toBe(200);
     const deleted = (

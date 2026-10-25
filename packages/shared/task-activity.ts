@@ -1,7 +1,7 @@
 import { hasContentChange, type ContentChange } from './activity';
 
 export type TaskActivitySummary =
-  | { kind: 'created' | 'description' | 'deleted' | 'restored' | 'updated' }
+  | { kind: 'created' | 'description' | 'archived' | 'deleted' | 'restored' | 'updated' }
   | { kind: 'renamed' | 'moved'; before: string; after: string }
   | { kind: 'deadline'; before: string | null; after: string | null }
   | { kind: 'label-added' | 'label-removed'; labels: string[] }
@@ -16,6 +16,7 @@ export function taskActivitySummary(
   changes: ContentChange[] | null
 ): TaskActivitySummary[] {
   if (action === 'kanban.created') return [{ kind: 'created' }];
+  if (action === 'kanban.archived') return [{ kind: 'archived' }];
   if (action === 'kanban.tombstoned') return [{ kind: 'deleted' }];
   if (action === 'kanban.restored') return [{ kind: 'restored' }];
   const result: TaskActivitySummary[] = [];

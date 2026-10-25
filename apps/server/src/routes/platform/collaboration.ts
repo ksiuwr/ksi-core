@@ -54,6 +54,18 @@ const boardLabel = t.Object({
 const boardLabelInput = t.Union([t.String({ minLength: 1, maxLength: 50 }), boardLabel]);
 const visibility = t.Union([t.Literal('association'), t.Literal('members'), t.Literal('leaders')]);
 const scopeKey = (projectId: string | null) => (projectId ? `project:${projectId}` : 'association');
+function plainTextExcerpt(source: string, limit = 240) {
+  const text = source
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/file:[A-Za-z0-9_-]{8,64}/g, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/[`*_~>#]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return text.length > limit ? `${text.slice(0, limit).trimEnd()}…` : text;
+}
 async function boardScope(executor: Executor, id: string) {
   const [board] = await executor.select().from(boards).where(eq(boards.id, id));
   if (!board) throw status(404, { code: 'BOARD_NOT_FOUND' });
@@ -186,7 +198,7 @@ function itemHistoryCondition(id: string, includeLifecycle = false) {
         'kanban.created',
         'kanban.updated',
         'kanban.label.updated',
-        ...(includeLifecycle ? ['kanban.tombstoned', 'kanban.restored'] : [])
+        ...(includeLifecycle ? ['kanban.archived', 'kanban.tombstoned', 'kanban.restored'] : [])
       ])
     ),
     and(eq(auditEvents.action, 'kanban.reordered'), sql`${auditEvents.metadata}->>'itemId' = ${id}`)
@@ -544,11 +556,72 @@ export default createElysia({ prefix: '/platform' })
             eq(threads.referenceNumber, params.number)
           )
         );
-      const type = item ? 'item' : 'thread';
+      const type = item ? 'item' : thread ? 'thread' : 'item';
       const id = item?.id ?? thread?.id;
       const target = id ? await notificationTarget(db, type, id) : null;
       if (!target?.canRead(actor)) throw status(404, { code: 'REFERENCE_NOT_FOUND' });
-      return { href: target.href, title: target.title, type, number: params.number };
+
+      if (item) {
+        const [author] = item.authorId
+          ? await db.select({ name: users.name }).from(users).where(eq(users.id, item.authorId))
+          : [];
+        const assignees = item.assigneeIds?.length
+          ? await db
+              .select({ id: users.id, name: users.name })
+              .from(users)
+              .where(inArray(users.id, item.assigneeIds))
+          : [];
+        const statusEntry = (board?.statuses as BoardStatus[] | undefined)?.find(
+          (entry) => entry.id === item.column
+        );
+        const statusName = statusEntry?.name ?? item.column;
+        return {
+          href: target.href,
+          title: target.title,
+          type: 'item' as const,
+          number: params.number,
+          workspace: target.projectName ?? null,
+          createdAt: item.createdAt.toISOString(),
+          dueAt: item.dueAt ? item.dueAt.toISOString() : null,
+          assignees: assignees.map((user) => user.name),
+          author: author?.name ?? null,
+          labels: item.labels ?? [],
+          status: item.column,
+          statusName,
+          statusColor: statusEntry?.color ?? null,
+          excerpt: plainTextExcerpt(item.markdown) || null
+        };
+      }
+
+      const threadRecord = thread!;
+      const [author] = threadRecord.authorId
+        ? await db
+            .select({ name: users.name })
+            .from(users)
+            .where(eq(users.id, threadRecord.authorId))
+        : [];
+      const assignees = threadRecord.assigneeIds?.length
+        ? await db
+            .select({ id: users.id, name: users.name })
+            .from(users)
+            .where(inArray(users.id, threadRecord.assigneeIds))
+        : [];
+      return {
+        href: target.href,
+        title: target.title,
+        type: 'thread' as const,
+        number: params.number,
+        workspace: target.projectName ?? null,
+        createdAt: threadRecord.createdAt.toISOString(),
+        dueAt: null,
+        assignees: assignees.map((user) => user.name),
+        author: author?.name ?? null,
+        labels: [],
+        status: null,
+        statusName: null,
+        statusColor: null,
+        excerpt: null
+      };
     },
     {
       params: t.Object({
@@ -1119,8 +1192,8 @@ export default createElysia({ prefix: '/platform' })
       })
     }
   )
-  .delete(
-    '/items/:id',
+  .post(
+    '/items/:id/archive',
     async ({ db, user, params, body }) => {
       const actor = requirePermission(user, 'collaboration.items.contribute');
       return db.transaction(async (tx) => {
@@ -1137,11 +1210,11 @@ export default createElysia({ prefix: '/platform' })
             )
           )
           .returning();
-        if (!updated) throw status(409, { code: 'REVISION_CONFLICT_OR_DELETED' });
+        if (!updated) throw status(409, { code: 'REVISION_CONFLICT_OR_ARCHIVED' });
         await recordEvent(tx, {
           actorId: actor.id,
           projectId: board.projectId,
-          action: 'kanban.tombstoned',
+          action: 'kanban.archived',
           targetId: item.id,
           metadata: {
             boardId: board.id,

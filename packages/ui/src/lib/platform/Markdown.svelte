@@ -1,7 +1,7 @@
 <script lang="ts">
   import { imageResize } from './image-resize';
   import { tick, onDestroy } from 'svelte';
-  import { X, ChevronLeft, ChevronRight } from '@lucide/svelte';
+  import { X, ChevronLeft, ChevronRight, ArrowUpRight, CalendarClock } from '@lucide/svelte';
   import type { MarkdownBlock } from 'shared/markdown';
   let {
     blocks,
@@ -28,7 +28,22 @@
   });
   let active = $state<{ ids: string[]; index: number } | null>(null);
 
-  type PreviewData = { title: string; type: string; number: number; href: string };
+  type PreviewData = {
+    title: string;
+    type: string;
+    number: number;
+    href: string;
+    workspace: string | null;
+    createdAt: string;
+    dueAt: string | null;
+    assignees: string[];
+    author: string | null;
+    labels: string[];
+    status: string | null;
+    statusName: string | null;
+    statusColor: string | null;
+    excerpt: string | null;
+  };
   let previewVisible = $state(false);
   let previewLoading = $state(false);
   let previewError = $state(false);
@@ -40,33 +55,28 @@
   let previewToken = 0;
   let hideTimer: ReturnType<typeof setTimeout> | undefined;
 
-  const labels = $derived(
-    language === 'pl'
-      ? {
-          loading: 'Ładowanie…',
-          unavailable: 'Podgląd niedostępny',
-          notFound: 'Nie znaleziono odwołania',
-          open: 'Otwórz',
-          task: 'Zadanie',
-          thread: 'Wątek'
-        }
-      : {
-          loading: 'Loading…',
-          unavailable: 'Preview unavailable',
-          notFound: 'Reference not found',
-          open: 'Open',
-          task: 'Task',
-          thread: 'Thread'
-        }
-  );
+  const DATE_LOCALES = { pl: 'pl-PL', en: 'en-US' } as const;
+  const dateLocale = $derived(DATE_LOCALES[language]);
+
+  const initials = (name?: string | null) => {
+    const words = (name ?? '').trim().split(/\s+/).filter(Boolean);
+    const value = `${words[0]?.[0] ?? ''}${words.length > 1 ? words[words.length - 1]![0] : ''}`;
+    return value.toUpperCase() || '?';
+  };
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleDateString(dateLocale, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
 
   function positionPreview(link: HTMLElement) {
     const rect = link.getBoundingClientRect();
-    const width = 280;
+    const width = 340;
     let left = rect.left;
     if (left + width > window.innerWidth - 8) left = window.innerWidth - width - 8;
     if (left < 8) left = 8;
-    const estimatedHeight = 104;
+    const estimatedHeight = 330;
     let top = rect.bottom + 8;
     if (top + estimatedHeight > window.innerHeight - 8)
       top = Math.max(8, rect.top - estimatedHeight - 8);
@@ -109,7 +119,17 @@
           title: data.title,
           type: data.type,
           number: data.number,
-          href: data.href
+          href: data.href,
+          workspace: data.workspace ?? null,
+          createdAt: data.createdAt,
+          dueAt: data.dueAt ?? null,
+          assignees: Array.isArray(data.assignees) ? data.assignees : [],
+          author: data.author ?? null,
+          labels: Array.isArray(data.labels) ? data.labels : [],
+          status: data.status ?? null,
+          statusName: data.statusName ?? null,
+          statusColor: data.statusColor ?? null,
+          excerpt: data.excerpt ?? null
         };
       } catch (error) {
         if (token === previewToken) {
@@ -221,18 +241,87 @@
       role="tooltip"
     >
       {#if previewLoading && !previewData}
-        <p class="reference-preview-loading">{labels.loading}</p>
+        <p class="reference-preview-loading">{'Loading…'}</p>
       {:else if previewNotFound}
-        <p class="reference-preview-error">{labels.notFound}</p>
+        <p class="reference-preview-error">{'Reference not found'}</p>
       {:else if previewError}
-        <p class="reference-preview-error">{labels.unavailable}</p>
+        <p class="reference-preview-error">{'Preview unavailable'}</p>
       {:else if previewData}
-        <p class="reference-preview-type">
-          {previewData.type === 'item' ? labels.task : labels.thread}
-        </p>
-        <p class="reference-preview-number">#{previewData.number}</p>
-        <p class="reference-preview-title">{previewData.title}</p>
-        <a class="reference-preview-link" href={previewData.href}>{labels.open}</a>
+        <div class="reference-preview-header">
+          <p class="reference-preview-context">
+            <span
+              >{#if previewData.workspace}{previewData.workspace}{:else}{'Association'}{/if}</span
+            >
+            <span class="reference-preview-separator" aria-hidden="true">·</span>
+            <span
+              >{#if previewData.type === 'item'}{'Task'}{:else}{'Thread'}{/if}</span
+            >
+            <span class="reference-preview-separator" aria-hidden="true">·</span>
+            <time datetime={previewData.createdAt}>{formatDate(previewData.createdAt)}</time>
+          </p>
+          <p class="reference-preview-title">
+            {previewData.title}<span class="reference-preview-number">#{previewData.number}</span>
+          </p>
+          {#if previewData.statusName}
+            <span
+              class="reference-preview-status"
+              style:--status-color={previewData.statusColor || 'var(--accent, #a64128)'}
+            >
+              <span class="reference-preview-status-dot" aria-hidden="true"></span>
+              {previewData.statusName}
+            </span>
+          {/if}
+        </div>
+        {#if previewData.type === 'item'}
+          <p class="reference-preview-excerpt" class:empty={!previewData.excerpt}>
+            {#if previewData.excerpt}{previewData.excerpt}{:else}{'No description.'}{/if}
+          </p>
+        {/if}
+        {#if previewData.labels.length}
+          <div class="reference-preview-labels">
+            {#each previewData.labels as label}
+              <span class="reference-preview-chip">{label}</span>
+            {/each}
+          </div>
+        {/if}
+        <div class="reference-preview-footer">
+          <p class="reference-preview-person">
+            <span class="reference-preview-avatar" aria-hidden="true"
+              >{initials(previewData.author)}</span
+            >
+            <span>
+              <strong
+                >{#if previewData.author}{previewData.author}{:else}{'Association member'}{/if}</strong
+              >
+              <span class="reference-preview-muted"
+                >{#if previewData.type === 'item'}opened this task{:else}opened this thread{/if}</span
+              >
+            </span>
+          </p>
+          {#if previewData.assignees.length}
+            <p class="reference-preview-person">
+              <span class="reference-preview-avatar-stack" aria-hidden="true">
+                {#each previewData.assignees.slice(0, 3) as name}
+                  <span class="reference-preview-avatar">{initials(name)}</span>
+                {/each}
+              </span>
+              <span>{previewData.assignees.join(', ')}</span>
+            </p>
+          {/if}
+          {#if previewData.dueAt}
+            <p class="reference-preview-person">
+              <CalendarClock size={14} aria-hidden="true" />
+              <span>
+                {'Due'}:
+                <time datetime={previewData.dueAt}>{formatDate(previewData.dueAt)}</time>
+              </span>
+            </p>
+          {/if}
+        </div>
+        <a class="reference-preview-link" href={previewData.href}>
+          <span>{'Open'}</span>
+          <ArrowUpRight size={13} aria-hidden="true" />
+        </a>
       {/if}
     </div>
   {/if}
@@ -359,47 +448,168 @@
     inset: auto;
     margin: 0;
     z-index: 1000;
-    width: 280px;
-    padding: 10px 12px;
+    width: 340px;
+    padding: 0;
     border: 1px solid var(--line, #acbdb4);
-    border-radius: 6px;
+    border-radius: 8px;
     background: var(--surface, #fffefa);
     color: var(--ink, #272638);
-    box-shadow: 0 8px 24px #0003;
+    box-shadow: 0 12px 32px #0004;
     font-size: 12px;
+    overflow: hidden;
   }
-  .reference-preview-type {
-    margin: 0 0 2px;
+  .reference-preview-header {
+    display: grid;
+    gap: 6px;
+    padding: 12px 14px;
+    background: var(--surface-muted, #edf1ed);
+    border-bottom: 1px solid var(--line, #acbdb4);
+  }
+  .reference-preview-context {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 0;
     color: var(--muted, #6b6974);
-    font-family: var(--mono, ui-monospace, monospace);
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-size: 11px;
+    line-height: 1.3;
   }
-  .reference-preview-number {
-    margin: 0 0 4px;
-    color: var(--accent, #a64128);
-    font-family: var(--mono, ui-monospace, monospace);
-    font-size: 12px;
-    font-weight: 600;
+  .reference-preview-separator {
+    opacity: 0.6;
   }
   .reference-preview-title {
-    margin: 0 0 8px;
-    font-size: 13px;
+    margin: 0;
+    font-size: 14px;
     font-weight: 600;
-    line-height: 1.35;
+    line-height: 1.4;
     display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+  .reference-preview-number {
+    margin-left: 6px;
+    color: var(--muted, #6b6974);
+    font-family: var(--mono, ui-monospace, monospace);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .reference-preview-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    justify-self: start;
+    margin-top: 2px;
+    padding: 2px 9px;
+    border: 1px solid color-mix(in srgb, var(--status-color, #6b7280) 45%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--status-color, #6b7280) 16%, transparent);
+    color: var(--status-color, #6b7280);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+  .reference-preview-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .reference-preview-excerpt {
+    display: -webkit-box;
+    margin: 0;
+    padding: 12px 14px;
+    color: var(--muted, #6b6974);
+    font-size: 12px;
+    line-height: 1.5;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
     overflow: hidden;
   }
-  .reference-preview-link {
+  .reference-preview-excerpt.empty {
+    font-style: italic;
+  }
+  .reference-preview-labels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 0 14px 12px;
+  }
+  .reference-preview-chip {
+    display: inline-block;
+    padding: 1px 8px;
+    border: 1px solid var(--line, #acbdb4);
+    border-radius: 999px;
+    background: var(--surface-muted, #edf1ed);
     font-size: 11px;
+    line-height: 1.6;
+  }
+  .reference-preview-footer {
+    display: grid;
+    gap: 8px;
+    padding: 10px 14px;
+    border-top: 1px solid var(--line, #acbdb4);
+  }
+  .reference-preview-person {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    min-width: 0;
+    color: var(--ink, #272638);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .reference-preview-person > span:last-child {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .reference-preview-muted {
+    margin-left: 4px;
+    color: var(--muted, #6b6974);
+  }
+  .reference-preview-avatar {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    border: 1px solid var(--line, #acbdb4);
+    border-radius: 50%;
+    background: var(--surface-muted, #edf1ed);
+    color: var(--muted, #6b6974);
+    font-size: 9px;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .reference-preview-avatar-stack {
+    display: flex;
+    flex: 0 0 auto;
+  }
+  .reference-preview-avatar-stack .reference-preview-avatar + .reference-preview-avatar {
+    margin-left: -7px;
+  }
+  .reference-preview-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 9px 14px;
+    border-top: 1px solid var(--line, #acbdb4);
     color: var(--accent, #a33d29);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .reference-preview-link:hover,
+  .reference-preview-link:focus-visible {
+    background: var(--surface-muted, #edf1ed);
   }
   .reference-preview-loading,
   .reference-preview-error {
     margin: 0;
+    padding: 12px 14px;
     color: var(--muted, #6b6974);
     font-size: 12px;
   }
@@ -408,7 +618,7 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .reference-preview {
-      width: min(280px, calc(100vw - 16px));
+      width: min(340px, calc(100vw - 16px));
     }
   }
 </style>

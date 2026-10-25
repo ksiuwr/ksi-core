@@ -75,6 +75,7 @@ msgstr "Tab"
 
 #: src/lib/Assignees.svelte
 #: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
 #: src/lib/NotificationInbox.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Escape"
@@ -118,18 +119,13 @@ msgstr "Aktywność"
 msgid "Project"
 msgstr "Projekt"
 
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
 #: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Association"
 msgstr "Całe koło"
-
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
-msgid "Removed tasks"
-msgstr "Usunięte zadania"
 
 #: src/lib/ApprovalInbox.svelte
 msgid "Approval inbox"
@@ -391,20 +387,8 @@ msgid "Back to board"
 msgstr "Wróć do tablicy"
 
 #: src/routes/[...workspace]/+page.svelte
-msgid "Removed tasks are kept here. Leaders can restore them to their previous column."
-msgstr "Usunięte zadania są tu przechowywane. Liderzy mogą je przywrócić do poprzedniej kolumny."
-
-#: src/routes/[...workspace]/+page.svelte
 msgid "Restore"
 msgstr "Przywróć"
-
-#: src/routes/[...workspace]/+page.svelte
-msgid "No removed tasks"
-msgstr "Brak usuniętych zadań"
-
-#: src/routes/[...workspace]/+page.svelte
-msgid "Tasks removed from the board will appear here."
-msgstr "Zadania usunięte z tablicy pojawią się tutaj."
 
 #: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
@@ -659,12 +643,10 @@ msgid "What needs to be done?"
 msgstr "Co trzeba zrobić?"
 
 #: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
 msgid "Task status"
 msgstr "Status zadania"
 
 #: src/lib/ConfirmDialog.svelte
-#: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
@@ -698,6 +680,7 @@ msgstr "Dodaj status"
 msgid "Deleted statuses"
 msgstr "Usunięte statusy"
 
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
@@ -732,29 +715,14 @@ msgid "Close task"
 msgstr "Zamknij zadanie"
 
 #: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Edit"
 msgstr "Edytuj"
 
-#: src/lib/KanbanBoard.svelte
-msgid "Remove"
-msgstr "Usuń"
-
-#: src/lib/KanbanBoard.svelte
 #: src/lib/Members.svelte
 msgid "Confirm deletion"
 msgstr "Potwierdź usunięcie"
 
-#: src/lib/KanbanBoard.svelte
-msgid "Remove this task?"
-msgstr "Usunąć to zadanie?"
-
-#: src/lib/KanbanBoard.svelte
-msgid "The task will move to the graveyard. A leader can restore it."
-msgstr "Zadanie zostanie przeniesione na cmentarzysko. Lider może je przywrócić."
-
-#: src/lib/KanbanBoard.svelte
 #: src/lib/ProjectSettings.svelte
 msgid "Confirm removal"
 msgstr "Potwierdź usunięcie"
@@ -767,6 +735,8 @@ msgstr "Dyskusja"
 msgid "Loading discussion"
 msgstr "Ładowanie dyskusji"
 
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+#: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/TaskActivity.svelte
 #: src/lib/ThreadActivity.svelte
@@ -1882,8 +1852,6 @@ msgid "Could not load history."
 msgstr "Nie udało się wczytać historii."
 
 #: src/lib/ContentHistory.svelte
-#: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
 #: src/lib/NotificationSettings.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Spróbuj ponownie"
@@ -1930,38 +1898,28 @@ msgid "History is visible to everyone with access to this content."
 msgstr "Historia jest widoczna dla osób z dostępem do tej treści."
 
 #: src/lib/KanbanBoard.svelte
-msgid "Nie udało się wczytać komentarzy."
-msgstr "Nie udało się wczytać komentarzy."
-
-#: src/lib/KanbanBoard.svelte
 msgid "Could not load comments."
 msgstr "Nie udało się wczytać komentarzy."
-
-#: src/lib/KanbanBoard.svelte
-msgid "Nie udało się wczytać aktywności."
-msgstr "Nie udało się wczytać aktywności."
 
 #: src/lib/KanbanBoard.svelte
 msgid "Could not load activity."
 msgstr "Nie udało się wczytać aktywności."
 
-#: src/lib/KanbanBoard.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Wczytywanie…"
 msgstr "Wczytywanie…"
 
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/WatchButton.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Loading…"
 msgstr "Wczytywanie…"
 
-#: src/lib/KanbanBoard.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Pokaż wcześniejszą aktywność"
 msgstr "Pokaż wcześniejszą aktywność"
 
-#: src/lib/KanbanBoard.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Load earlier activity"
 msgstr "Pokaż wcześniejszą aktywność"
@@ -1991,12 +1949,10 @@ msgstr "Ten komentarz był edytowany"
 msgid "This comment was edited"
 msgstr "Ten komentarz był edytowany"
 
-#: src/lib/KanbanBoard.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Usunąć komentarz?"
 msgstr "Usunąć komentarz?"
 
-#: src/lib/KanbanBoard.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Tej operacji nie można cofnąć."
 msgstr "Tej operacji nie można cofnąć."
@@ -2006,30 +1962,18 @@ msgstr "Tej operacji nie można cofnąć."
 msgid "This action cannot be undone."
 msgstr "Tej operacji nie można cofnąć."
 
-#: src/lib/KanbanBoard.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Usuń"
 msgstr "Usuń"
 
-#: src/lib/KanbanBoard.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Anuluj"
 msgstr "Anuluj"
 
 #. 0: fullName(person)
 #: src/lib/Assignees.svelte
-msgid "Przypisz {0}"
-msgstr "Przypisz {0}"
-
-#. 0: fullName(person)
-#: src/lib/Assignees.svelte
 msgid "Assign {0}"
 msgstr "Przypisz {0}"
-
-#. 0: fullName(person)
-#: src/lib/Assignees.svelte
-msgid "Usuń {0}"
-msgstr "Usuń {0}"
 
 #. 0: fullName(person)
 #: src/lib/Assignees.svelte
@@ -2050,60 +1994,31 @@ msgid "End"
 msgstr "End"
 
 #: src/lib/Assignees.svelte
+#: src/lib/KanbanBoard.svelte
 msgid "Enter"
 msgstr "Enter"
 
 #: src/lib/Assignees.svelte
-msgid "Nie udało się wczytać osób"
-msgstr "Nie udało się wczytać osób"
-
 #: src/lib/Assignees.svelte
 msgid "Unable to load members"
 msgstr "Nie udało się wczytać osób"
 
 #: src/lib/Assignees.svelte
-msgid "Dodaj osoby"
-msgstr "Dodaj osoby"
-
 #: src/lib/Assignees.svelte
 msgid "Add assignees"
 msgstr "Dodaj osoby"
-
-#: src/lib/Assignees.svelte
-msgid "Szukaj osób"
-msgstr "Szukaj osób"
 
 #: src/lib/Assignees.svelte
 msgid "Search people"
 msgstr "Szukaj osób"
 
 #: src/lib/Assignees.svelte
-msgid "Szukaj osób…"
-msgstr "Szukaj osób…"
-
-#: src/lib/Assignees.svelte
 msgid "Search people…"
 msgstr "Szukaj osób…"
 
 #: src/lib/Assignees.svelte
-msgid "Osoby w projekcie"
-msgstr "Osoby w projekcie"
-
-#: src/lib/Assignees.svelte
-msgid "Wczytywanie osób…"
-msgstr "Wczytywanie osób…"
-
-#: src/lib/Assignees.svelte
 msgid "Loading members…"
 msgstr "Wczytywanie osób…"
-
-#: src/lib/Assignees.svelte
-msgid "Brak pasujących osób."
-msgstr "Brak pasujących osób."
-
-#: src/lib/Assignees.svelte
-msgid "Wybierz osoby"
-msgstr "Wybierz osoby"
 
 #: src/lib/Assignees.svelte
 msgid "Choose assignees"
@@ -2111,11 +2026,8 @@ msgstr "Wybierz osoby"
 
 #: src/lib/Assignees.svelte
 #: src/lib/Assignees.svelte
-msgid "Przypisane do"
-msgstr "Przypisane do"
-
-#: src/lib/Assignees.svelte
-#: src/lib/Assignees.svelte
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
 msgid "Assigned to"
 msgstr "Przypisane do"
 
@@ -2127,6 +2039,7 @@ msgstr "Przypisane do"
 msgid "Powiadomienia"
 msgstr "Powiadomienia"
 
+#: src/lib/KanbanBoard.svelte
 #: src/lib/NotificationInbox.svelte
 #: src/lib/NotificationInbox.svelte
 #: src/lib/NotificationInbox.svelte
@@ -2186,24 +2099,14 @@ msgid "E-mail o nieprzeczytanych powiadomieniach"
 msgstr "E-mail o nieprzeczytanych powiadomieniach"
 
 #: src/lib/WatchButton.svelte
-msgid "Przestań obserwować"
-msgstr "Przestań obserwować"
-
 #: src/lib/WatchButton.svelte
 msgid "Unwatch"
 msgstr "Przestań obserwować"
 
 #: src/lib/WatchButton.svelte
-msgid "Obserwuj"
-msgstr "Obserwuj"
-
 #: src/lib/WatchButton.svelte
 msgid "Watch"
 msgstr "Obserwuj"
-
-#: src/lib/WatchButton.svelte
-msgid "Ładowanie…"
-msgstr "Ładowanie…"
 
 #: src/lib/NotificationInbox.svelte
 msgid "Nowe zdjęcie profilowe"
@@ -2379,34 +2282,6 @@ msgstr ""
 msgid "Saving…"
 msgstr ""
 
-#~ msgid "Zamknij"
-#~ msgstr "Zamknij"
-
-#~ msgid "Przypisane osoby"
-#~ msgstr ""
-
-#~ msgid "Assignees"
-#~ msgstr ""
-
-#: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
-msgid "Termin: "
-msgstr ""
-
-#: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
-msgid "Due: "
-msgstr ""
-
-#~ msgid "Termin (czas lokalny)"
-#~ msgstr ""
-
-#~ msgid "Deadline (local time)"
-#~ msgstr ""
-
-#~ msgid "All statuses"
-#~ msgstr "Wszystkie statusy"
-
 #: src/lib/NotificationInbox.svelte
 msgid "Przypomnienie o terminie"
 msgstr ""
@@ -2415,26 +2290,133 @@ msgstr ""
 msgid "Deadline reminder"
 msgstr ""
 
-#~ msgid "Brak powiadomień."
-#~ msgstr ""
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "Due"
+msgstr "Termin"
 
-#~ msgid "No notifications."
-#~ msgstr ""
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "No description."
+msgstr "Brak opisu."
 
-#~ msgid "Email unread notifications"
-#~ msgstr ""
+#: src/lib/KanbanBoard.svelte
+msgid "None yet"
+msgstr "Brak etykiet"
 
-#~ msgid "Opóźnienie (minuty)"
-#~ msgstr ""
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "Edit title"
+msgstr "Edytuj tytuł"
 
-#~ msgid "Delay (minutes)"
-#~ msgstr ""
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "Edit description"
+msgstr "Edytuj opis"
 
-#~ msgid "Zapisz ustawienia"
-#~ msgstr ""
+#: src/lib/KanbanBoard.svelte
+msgid "Archive task"
+msgstr "Zarchiwizuj zadanie"
 
-#~ msgid "Save preferences"
-#~ msgstr ""
+#: src/routes/[...workspace]/+page.svelte
+#: src/routes/[...workspace]/+page.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "Archived tasks"
+msgstr "Zarchiwizowane zadania"
 
-#~ msgid "Preferences"
-#~ msgstr "Preferencje"
+#: src/routes/[...workspace]/+page.svelte
+msgid "Archived tasks are kept here. Leaders can restore them to their previous column."
+msgstr "Zarchiwizowane zadania są przechowywane tutaj. Liderzy mogą przywrócić je do poprzedniej kolumny."
+
+#: src/routes/[...workspace]/+page.svelte
+msgid "No archived tasks"
+msgstr "Brak zarchiwizowanych zadań"
+
+#: src/routes/[...workspace]/+page.svelte
+msgid "Archived tasks will appear here."
+msgstr "Zarchiwizowane zadania pojawią się tutaj."
+
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "Add label"
+msgstr "Dodaj etykietę"
+
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "Remove deadline"
+msgstr "Usuń termin"
+
+#. 0: labelName
+#. 0: labelName
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "Remove label {0}"
+msgstr "Usuń etykietę {0}"
+
+#. 0: hiddenTimelineItems
+#: src/lib/KanbanBoard.svelte
+msgid "{0} remaining items"
+msgstr "Pozostało: {0}"
+
+#: src/lib/KanbanBoard.svelte
+msgid "Load more"
+msgstr "Wczytaj więcej"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Open image"
+msgstr "Otwórz zdjęcie"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Gallery image"
+msgstr "Zdjęcie w galerii"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Reference not found"
+msgstr "Nie znaleziono odwołania"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Preview unavailable"
+msgstr "Podgląd niedostępny"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Task"
+msgstr "Zadanie"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Thread"
+msgstr "Wątek"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Open"
+msgstr "Otwórz"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Gallery"
+msgstr "Galeria"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Previous image"
+msgstr "Poprzednie zdjęcie"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Next image"
+msgstr "Następne zdjęcie"
+
+#: src/lib/TaskActivity.svelte
+msgid "archived this task"
+msgstr "zarchiwizował to zadanie"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+#: src/lib/KanbanBoard.svelte
+msgid "opened this task"
+msgstr "utworzył(a) to zadanie"
+
+#: src/lib/KanbanBoard.svelte
+msgid "commented"
+msgstr "skomentował(a)"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "opened this thread"
+msgstr "utworzył(a) ten wątek"

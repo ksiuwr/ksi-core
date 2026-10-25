@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "@lucide/svelte": "0.548.0",
+    "@wuchale/svelte": "^0.20.5",
     "shared": "workspace:*"
   },
   "devDependencies": {
