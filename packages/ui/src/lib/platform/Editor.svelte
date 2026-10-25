@@ -755,13 +755,13 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 12px;
+    padding: 6px 10px;
     border: none;
     background: transparent;
     cursor: pointer;
     text-align: left;
     width: 100%;
-    border-bottom: 1px solid var(--line);
+    line-height: 1.2;
   }
   .autocomplete-item:last-child {
     border-bottom: none;
@@ -774,8 +774,8 @@
     align-items: flex-start;
   }
   .autocomplete-item .avatar {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     object-fit: cover;
   }
@@ -783,7 +783,7 @@
     display: flex;
     flex-direction: row;
     align-items: baseline;
-    gap: 6px;
+    gap: 4px;
   }
   .autocomplete-item .name {
     font-weight: 500;
@@ -795,25 +795,25 @@
   }
   .autocomplete-item .reference-number {
     flex: 0 0 auto;
-    padding: 2px 6px;
+    padding: 1px 5px;
     border: 1px solid var(--line);
     border-radius: 3px;
     background: var(--surface-muted);
     color: var(--accent);
     font-family: var(--mono);
-    font-size: 11px;
-    line-height: 1.4;
+    font-size: 10px;
+    line-height: 1.3;
   }
   .autocomplete-item .reference-info {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
     min-width: 0;
   }
   .autocomplete-item .reference-title {
     overflow: hidden;
     color: var(--ink);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
     text-overflow: ellipsis;
     white-space: nowrap;

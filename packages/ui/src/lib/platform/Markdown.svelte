@@ -1,6 +1,6 @@
 <script lang="ts">
   import { imageResize } from './image-resize';
-  import { tick } from 'svelte';
+  import { tick, onDestroy } from 'svelte';
   import { X, ChevronLeft, ChevronRight } from '@lucide/svelte';
   import type { MarkdownBlock } from 'shared/markdown';
   let {
@@ -26,9 +26,145 @@
     }
   });
   let active = $state<{ ids: string[]; index: number } | null>(null);
+
+  type PreviewData = { title: string; type: string; number: number; href: string };
+  let previewVisible = $state(false);
+  let previewLoading = $state(false);
+  let previewError = $state(false);
+  let previewData = $state<PreviewData | null>(null);
+  let previewPos = $state({ left: 0, top: 0 });
+  let previewEl = $state<HTMLDivElement>();
+  let currentLink = $state<HTMLElement | null>(null);
+  let previewToken = 0;
+  let hideTimer: ReturnType<typeof setTimeout> | undefined;
+
+  const labels = $derived(
+    language === 'pl'
+      ? {
+          loading: 'Ładowanie…',
+          unavailable: 'Podgląd niedostępny',
+          open: 'Otwórz',
+          task: 'Zadanie',
+          thread: 'Wątek'
+        }
+      : {
+          loading: 'Loading…',
+          unavailable: 'Preview unavailable',
+          open: 'Open',
+          task: 'Task',
+          thread: 'Thread'
+        }
+  );
+
+  function positionPreview(link: HTMLElement) {
+    const rect = link.getBoundingClientRect();
+    const width = 280;
+    let left = rect.left;
+    if (left + width > window.innerWidth - 8) left = window.innerWidth - width - 8;
+    if (left < 8) left = 8;
+    let top = rect.bottom + 8;
+    const estimatedHeight = 104;
+    if (top + estimatedHeight > window.innerHeight - 8)
+      top = Math.max(8, rect.top - estimatedHeight - 8);
+    previewPos = { left, top };
+  }
+
+  function showPreview(link: HTMLElement) {
+    const scope = link.dataset.referenceScope;
+    const number = Number(link.dataset.referenceNumber);
+    if (!scope || !number) return;
+    if (currentLink === link && previewVisible) return;
+    clearTimeout(hideTimer);
+    currentLink = link;
+    previewData = null;
+    previewError = false;
+    previewLoading = true;
+    previewVisible = true;
+    positionPreview(link);
+    const token = ++previewToken;
+    void (async () => {
+      try {
+        const response = await fetch(
+          `/api/platform/references/${encodeURIComponent(scope)}/${number}`
+        );
+        if (!response.ok) throw new Error();
+        const data = await response.json();
+        if (token !== previewToken) return;
+        previewData = {
+          title: data.title,
+          type: data.type,
+          number: data.number,
+          href: data.href
+        };
+      } catch {
+        if (token === previewToken) previewError = true;
+      } finally {
+        if (token === previewToken) previewLoading = false;
+      }
+    })();
+  }
+
+  function scheduleHide() {
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
+      previewVisible = false;
+      previewData = null;
+      previewError = false;
+      previewLoading = false;
+      currentLink = null;
+    }, 120);
+  }
+
+  function handleMouseOver(event: MouseEvent) {
+    const link = (event.target as HTMLElement | null)?.closest?.(
+      '.reference-link'
+    ) as HTMLElement | null;
+    if (!link) return;
+    if (link === currentLink) return;
+    showPreview(link);
+  }
+
+  function handleMouseOut(event: MouseEvent) {
+    const link = (event.target as HTMLElement | null)?.closest?.(
+      '.reference-link'
+    ) as HTMLElement | null;
+    if (!link) return;
+    const related = event.relatedTarget as Node | null;
+    if (related && (link.contains(related) || previewEl?.contains(related))) return;
+    scheduleHide();
+  }
+
+  function handleFocusIn(event: FocusEvent) {
+    const link = (event.target as HTMLElement | null)?.closest?.(
+      '.reference-link'
+    ) as HTMLElement | null;
+    if (!link) return;
+    showPreview(link);
+  }
+
+  function handleFocusOut(event: FocusEvent) {
+    const link = (event.target as HTMLElement | null)?.closest?.(
+      '.reference-link'
+    ) as HTMLElement | null;
+    if (!link) return;
+    const related = event.relatedTarget as Node | null;
+    if (related && (link.contains(related) || previewEl?.contains(related))) return;
+    scheduleHide();
+  }
+
+  onDestroy(() => clearTimeout(hideTimer));
 </script>
 
-<div class="markdown" use:imageResize={{ language, onresize, blocks }}>
+<div
+  class="markdown"
+  bind:this={container}
+  onmouseover={handleMouseOver}
+  onmouseout={handleMouseOut}
+  onfocusin={handleFocusIn}
+  onfocusout={handleFocusOut}
+  onmouseleave={scheduleHide}
+  use:imageResize={{ language, onresize, blocks }}
+>
   {#each blocks as block}{#if block.type === 'html'}{@html block.html}{:else}<div class="gallery">
         {#each block.ids.slice(0, block.preview) as id, index}<button
             type="button"
@@ -46,6 +182,30 @@
           >{/if}
       </div>{/if}{/each}
 </div>
+{#if previewVisible}
+  <div
+    bind:this={previewEl}
+    class="reference-preview"
+    style:left="{previewPos.left}px"
+    style:top="{previewPos.top}px"
+    onmouseenter={() => clearTimeout(hideTimer)}
+    onmouseleave={scheduleHide}
+    role="tooltip"
+  >
+    {#if previewLoading && !previewData}
+      <p class="reference-preview-loading">{labels.loading}</p>
+    {:else if previewError}
+      <p class="reference-preview-error">{labels.unavailable}</p>
+    {:else if previewData}
+      <p class="reference-preview-type">
+        {previewData.type === 'item' ? labels.task : labels.thread}
+      </p>
+      <p class="reference-preview-number">#{previewData.number}</p>
+      <p class="reference-preview-title">{previewData.title}</p>
+      <a class="reference-preview-link" href={previewData.href}>{labels.open}</a>
+    {/if}
+  </div>
+{/if}
 {#if active}<dialog
     bind:this={dialog}
     aria-label={'Gallery'}
@@ -71,7 +231,10 @@
       /><button
         type="button"
         onclick={() =>
-          (active = { ids: active!.ids, index: (active!.index + 1) % active!.ids.length })}
+          (active = {
+            ids: active!.ids,
+            index: (active!.index + 1) % active!.ids.length
+          })}
         aria-label={'Next image'}><ChevronRight size={20} aria-hidden="true" /></button
       >
     </div>
@@ -80,6 +243,14 @@
 <style>
   .markdown {
     overflow-wrap: anywhere;
+  }
+  .markdown :global(.reference-link) {
+    color: var(--accent, #a33d29);
+    text-decoration: none;
+    border-bottom: 1px dotted currentColor;
+  }
+  .markdown :global(.reference-link:hover) {
+    text-decoration: underline;
   }
   .markdown :global(pre) {
     background: var(--surface-muted, #edf1ed);
@@ -151,9 +322,59 @@
     max-width: 70%;
     object-fit: contain;
   }
+  .reference-preview {
+    position: fixed;
+    z-index: 1000;
+    width: 280px;
+    padding: 10px 12px;
+    border: 1px solid var(--line, #acbdb4);
+    border-radius: 6px;
+    background: var(--surface, #fffefa);
+    color: var(--ink, #272638);
+    box-shadow: 0 8px 24px #0003;
+    font-size: 12px;
+  }
+  .reference-preview-type {
+    margin: 0 0 2px;
+    color: var(--muted, #6b6974);
+    font-family: var(--mono, ui-monospace, monospace);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .reference-preview-number {
+    margin: 0 0 4px;
+    color: var(--accent, #a64128);
+    font-family: var(--mono, ui-monospace, monospace);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .reference-preview-title {
+    margin: 0 0 8px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
+  .reference-preview-link {
+    font-size: 11px;
+    color: var(--accent, #a33d29);
+  }
+  .reference-preview-loading,
+  .reference-preview-error {
+    margin: 0;
+    color: var(--muted, #6b6974);
+    font-size: 12px;
+  }
   @media (max-width: 600px) {
     .gallery {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .reference-preview {
+      width: min(280px, calc(100vw - 16px));
     }
   }
 </style>

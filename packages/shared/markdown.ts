@@ -36,7 +36,7 @@ export function renderMarkdown(source: string, referenceScope?: string): Markdow
               };
             },
             renderer(token) {
-              return `<a href="/references/${encodeURIComponent(token.scope)}/${token.number}">${token.text}</a>`;
+              return `<a class="reference-link" data-reference-scope="${encodeURIComponent(token.scope)}" data-reference-number="${token.number}" href="/references/${encodeURIComponent(token.scope)}/${token.number}">${token.text}</a>`;
             }
           }
         ]
