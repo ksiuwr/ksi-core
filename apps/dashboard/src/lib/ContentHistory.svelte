@@ -117,7 +117,7 @@
         <h2 id={`${uid}-title`}>{title}</h2>
         <p>
           {pl
-            ? 'Sprawdź, co zmieniono i kto wprowadził zmiany.'
+            ? 'Sprawdź, co zmieniono i kto wprowadził(a) zmiany.'
             : 'See what changed and who changed it.'}
         </p>
       </div>
