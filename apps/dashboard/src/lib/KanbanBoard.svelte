@@ -1024,15 +1024,10 @@
               openItem(item, event);
             }}
           >
-            <span class="task-title"
-              ><strong
-                >{#if item.referenceNumber}<span class="muted">#{item.referenceNumber}</span>
-                {/if}{item.title}</strong
-              ><GripVertical size={14} aria-hidden="true" /></span
+            <span class="task-title">
+              {#if item.referenceNumber}<span class="task-reference">#{item.referenceNumber}</span>
+              {/if}<strong>{item.title}</strong><GripVertical size={14} aria-hidden="true" /></span
             >
-            {#if item.markdown}<div class="kanban-markdown-preview">
-                <MarkdownContent value={item.markdown} {language} allowReferences />
-              </div>{/if}
             {#if item.labels.length}<div class="task-labels">
                 {#each item.labels as labelName}
                   {@const label = labelMap.get(labelName)}
@@ -1046,20 +1041,22 @@
                   </span>
                 {/each}
               </div>{/if}
-            {#if item.dueAt}<time
-                class:overdue={new Date(item.dueAt).getTime() < Date.now() &&
-                  item.column !== 'done'}
-                datetime={item.dueAt}
-                >{language === 'pl' ? 'Termin: ' : 'Due: '}{new Date(item.dueAt).toLocaleString(
-                  language === 'pl' ? 'pl-PL' : 'en-GB'
-                )}</time
-              >{/if}
-            {#if item.assigneeIds?.length}<Assignees
-                value={item.assigneeIds}
-                {members}
-                {language}
-                readonly
-              />{/if}
+            {#if item.dueAt || item.assigneeIds?.length}<div class="task-meta">
+                {#if item.dueAt}<time
+                    class:overdue={new Date(item.dueAt).getTime() < Date.now() &&
+                      item.column !== 'done'}
+                    datetime={item.dueAt}
+                    >{language === 'pl' ? 'Termin: ' : 'Due: '}{new Date(item.dueAt).toLocaleString(
+                      language === 'pl' ? 'pl-PL' : 'en-GB'
+                    )}</time
+                  >{/if}
+                {#if item.assigneeIds?.length}<Assignees
+                    value={item.assigneeIds}
+                    {members}
+                    {language}
+                    readonly
+                  />{/if}
+              </div>{/if}
           </button>
         {/each}
       </div>
@@ -2145,6 +2142,12 @@
     gap: 12px;
     align-items: start;
   }
+  .task-reference {
+    margin-right: 6px;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
   .task-title :global(svg) {
     color: var(--muted);
     opacity: 0;
@@ -2153,39 +2156,21 @@
   .task-card:hover .task-title :global(svg) {
     opacity: 1;
   }
-  .kanban-markdown-preview {
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.5;
-    max-height: 100px;
-    overflow: hidden;
-    mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-  }
-  .kanban-markdown-preview :global(h1),
-  .kanban-markdown-preview :global(h2),
-  .kanban-markdown-preview :global(h3),
-  .kanban-markdown-preview :global(h4),
-  .kanban-markdown-preview :global(h5),
-  .kanban-markdown-preview :global(h6) {
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    margin: 4px 0 !important;
-    line-height: 1.4 !important;
-  }
-  .kanban-markdown-preview :global(p) {
-    margin: 2px 0 !important;
-  }
-  .kanban-markdown-preview :global(img) {
-    max-height: 60px;
-    width: auto;
-    border-radius: 4px;
-    margin: 4px 0;
-  }
   .task-labels {
     display: flex;
     gap: 5px;
     flex-wrap: wrap;
+  }
+  .task-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .task-meta time {
+    color: var(--muted);
   }
   .drop-target {
     border-color: var(--accent) !important;
