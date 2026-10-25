@@ -166,8 +166,8 @@
     if (!hourWheel || !minuteWheel) return;
     warping = false;
     syncing = true;
-    const hour = draftSlot(draftTime.slice(0, 2));
-    const minute = draftSlot(draftTime.slice(3, 5));
+    const hour = draftTime.slice(0, 2) ? draftSlot(draftTime.slice(0, 2)) : 9;
+    const minute = draftTime.slice(3, 5) ? draftSlot(draftTime.slice(3, 5)) : 0;
     const minuteK = Math.min(minutes.length - 1, Math.floor(minute / 5));
     hourActive = ((hour % hours.length) + hours.length) % hours.length;
     minuteActive = minuteK;
