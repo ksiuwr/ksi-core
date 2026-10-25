@@ -1025,11 +1025,9 @@
             }}
           >
             <span class="task-title">
-              {#if item.referenceNumber}<span class="task-reference"
-                  >#{item.referenceNumber}&nbsp;</span
-                >
-              {/if}<strong>{item.title}</strong><GripVertical size={14} aria-hidden="true" /></span
+              <strong>{item.title}</strong><GripVertical size={14} aria-hidden="true" /></span
             >
+            {#if item.referenceNumber}<div class="task-reference">#{item.referenceNumber}</div>{/if}
             {#if item.labels.length}<div class="task-labels">
                 {#each item.labels as labelName}
                   {@const label = labelMap.get(labelName)}
@@ -2145,10 +2143,15 @@
     align-items: start;
   }
   .task-reference {
-    margin: 0 0.5em;
+    margin: 2px 0 0;
     color: var(--muted);
     font-family: var(--mono);
-    font-size: 12px;
+    font-size: 11px;
+  }
+  .issue-heading .task-reference {
+    font-size: 0.72em;
+    font-weight: 400;
+    margin-left: 0.35em;
   }
   .task-title :global(svg) {
     color: var(--muted);
@@ -2164,10 +2167,8 @@
     flex-wrap: wrap;
   }
   .task-meta {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
+    display: grid;
+    gap: 6px;
     color: var(--muted);
     font-size: 12px;
   }

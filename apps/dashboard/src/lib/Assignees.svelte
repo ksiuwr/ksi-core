@@ -382,8 +382,8 @@
   .label,
   .readonly-label {
     color: var(--muted);
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 12px;
+    font-weight: 400;
   }
   .readonly-label {
     margin-right: 2px;

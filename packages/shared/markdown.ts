@@ -36,7 +36,7 @@ export function renderMarkdown(source: string, referenceScope?: string): Markdow
               };
             },
             renderer(token) {
-              return `<a class="reference-link" data-sveltekit-preload-data="off" data-reference-scope="${encodeURIComponent(token.scope)}" data-reference-number="${token.number}" href="/references/${encodeURIComponent(token.scope)}/${token.number}">${token.text}</a>`;
+              return `<a class="reference-link" data-sveltekit-reload data-sveltekit-preload-data="off" data-reference-scope="${encodeURIComponent(token.scope)}" data-reference-number="${token.number}" href="/references/${encodeURIComponent(token.scope)}/${token.number}">${token.text}</a>`;
             }
           }
         ]
@@ -52,17 +52,30 @@ export function renderMarkdown(source: string, referenceScope?: string): Markdow
       {
         allowedTags: [...sanitizeHtml.defaults.allowedTags, 'img'],
         allowedAttributes: {
-          a: ['href', 'title', 'rel'],
+          a: [
+            'href',
+            'title',
+            'rel',
+            'class',
+            'data-reference-scope',
+            'data-reference-number',
+            'data-sveltekit-preload-data',
+            'data-sveltekit-reload'
+          ],
           img: ['src', 'alt', 'title', 'width', 'data-ksi-image'],
           code: ['class'],
           span: ['class']
         },
-        allowedClasses: { span: ['markdown-image-frame'], code: ['language-*'] },
+        allowedClasses: {
+          span: ['markdown-image-frame'],
+          code: ['language-*'],
+          a: ['reference-link']
+        },
         allowedSchemes: ['https', 'http', 'mailto'],
         allowedSchemesByTag: { img: ['https', 'http'] },
         allowProtocolRelative: false,
         transformTags: {
-          a: sanitizeHtml.simpleTransform('a', { rel: 'noopener noreferrer' }),
+          a: sanitizeHtml.simpleTransform('a', { rel: 'noopener noreferrer external' }),
           img: (tagName, attribs) => {
             if (attribs.width && /^\d+$/.test(attribs.width))
               attribs.width = String(clampImageWidth(Number(attribs.width)));

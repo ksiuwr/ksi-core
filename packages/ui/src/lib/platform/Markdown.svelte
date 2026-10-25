@@ -14,6 +14,7 @@
   } = $props();
 
   let dialog = $state<HTMLDialogElement>();
+  let container = $state<HTMLDivElement>();
   function close() {
     dialog?.close();
     active = null;
@@ -65,8 +66,8 @@
     let left = rect.left;
     if (left + width > window.innerWidth - 8) left = window.innerWidth - width - 8;
     if (left < 8) left = 8;
-    let top = rect.bottom + 8;
     const estimatedHeight = 104;
+    let top = rect.bottom + 8;
     if (top + estimatedHeight > window.innerHeight - 8)
       top = Math.max(8, rect.top - estimatedHeight - 8);
     previewPos = { left, top };
@@ -85,6 +86,13 @@
     previewLoading = true;
     previewVisible = true;
     positionPreview(link);
+    void tick().then(() => {
+      try {
+        previewEl?.showPopover();
+      } catch {
+        // Ignore repeated open calls.
+      }
+    });
     const token = ++previewToken;
     void (async () => {
       try {
@@ -163,6 +171,15 @@
     scheduleHide();
   }
 
+  function portal(node: HTMLElement) {
+    document.body.appendChild(node);
+    return {
+      destroy() {
+        node.remove();
+      }
+    };
+  }
+
   onDestroy(() => clearTimeout(hideTimer));
 </script>
 
@@ -192,33 +209,34 @@
             >+{block.ids.length - block.preview}</button
           >{/if}
       </div>{/if}{/each}
+  {#if previewVisible}
+    <div
+      bind:this={previewEl}
+      class="reference-preview"
+      popover="manual"
+      style:left="{previewPos.left}px"
+      style:top="{previewPos.top}px"
+      onmouseenter={() => clearTimeout(hideTimer)}
+      onmouseleave={scheduleHide}
+      role="tooltip"
+    >
+      {#if previewLoading && !previewData}
+        <p class="reference-preview-loading">{labels.loading}</p>
+      {:else if previewNotFound}
+        <p class="reference-preview-error">{labels.notFound}</p>
+      {:else if previewError}
+        <p class="reference-preview-error">{labels.unavailable}</p>
+      {:else if previewData}
+        <p class="reference-preview-type">
+          {previewData.type === 'item' ? labels.task : labels.thread}
+        </p>
+        <p class="reference-preview-number">#{previewData.number}</p>
+        <p class="reference-preview-title">{previewData.title}</p>
+        <a class="reference-preview-link" href={previewData.href}>{labels.open}</a>
+      {/if}
+    </div>
+  {/if}
 </div>
-{#if previewVisible}
-  <div
-    bind:this={previewEl}
-    class="reference-preview"
-    style:left="{previewPos.left}px"
-    style:top="{previewPos.top}px"
-    onmouseenter={() => clearTimeout(hideTimer)}
-    onmouseleave={scheduleHide}
-    role="tooltip"
-  >
-    {#if previewLoading && !previewData}
-      <p class="reference-preview-loading">{labels.loading}</p>
-    {:else if previewNotFound}
-      <p class="reference-preview-error">{labels.notFound}</p>
-    {:else if previewError}
-      <p class="reference-preview-error">{labels.unavailable}</p>
-    {:else if previewData}
-      <p class="reference-preview-type">
-        {previewData.type === 'item' ? labels.task : labels.thread}
-      </p>
-      <p class="reference-preview-number">#{previewData.number}</p>
-      <p class="reference-preview-title">{previewData.title}</p>
-      <a class="reference-preview-link" href={previewData.href}>{labels.open}</a>
-    {/if}
-  </div>
-{/if}
 {#if active}<dialog
     bind:this={dialog}
     aria-label={'Gallery'}
@@ -255,6 +273,7 @@
 
 <style>
   .markdown {
+    position: relative;
     overflow-wrap: anywhere;
   }
   .markdown :global(.reference-link) {
@@ -337,6 +356,8 @@
   }
   .reference-preview {
     position: fixed;
+    inset: auto;
+    margin: 0;
     z-index: 1000;
     width: 280px;
     padding: 10px 12px;
