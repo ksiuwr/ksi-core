@@ -605,7 +605,8 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
       ).status
     ).toBe(409);
     expect(
-      (await collaboration(`/items/${task.body.id}`, 'member', 'DELETE', { version: 2 })).status
+      (await collaboration(`/items/${task.body.id}/archive`, 'member', 'POST', { version: 2 }))
+        .status
     ).toBe(200);
     expect((await collaboration(`/boards/${boardId}/items`, 'member')).body).toHaveLength(0);
     expect((await collaboration(`/boards/${boardId}/items?graveyard=true`, 'member')).status).toBe(
@@ -668,7 +669,8 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
       tasks.push(task.body);
     }
     expect(
-      (await collaboration(`/items/${tasks[1].id}`, 'member', 'DELETE', { version: 1 })).status
+      (await collaboration(`/items/${tasks[1].id}/archive`, 'member', 'POST', { version: 1 }))
+        .status
     ).toBe(200);
     expect((await collaboration(`${path}/Bug`, 'leader', 'DELETE')).status).toBe(409);
     expect((await collaboration(`${path}/Bug`, 'member', 'PATCH', input)).status).toBe(403);
@@ -1177,7 +1179,7 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
     );
     expect(
       (
-        await collaboration(`/items/${task.id}`, 'leader', 'DELETE', {
+        await collaboration(`/items/${task.id}/archive`, 'leader', 'POST', {
           version: moved.body.find((item: any) => item.id === task.id).version
         })
       ).status
@@ -1186,7 +1188,7 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
     expect((await collaboration(`/items/${task.id}/activity`, 'outsider')).status).toBe(403);
     const deletedActivity = await collaboration(`/items/${task.id}/activity`, 'leader');
     expect(deletedActivity.status).toBe(200);
-    expect(deletedActivity.body[0].action).toBe('kanban.tombstoned');
+    expect(deletedActivity.body[0].action).toBe('kanban.archived');
 
     expect((await collaboration(`/items/${task.id}/revisions`, 'leader')).status).toBe(200);
   });

@@ -40,6 +40,7 @@ test('lifecycle and older events have concise summaries without inventing change
     ])
   ).toEqual([{ kind: 'created' }]);
   expect(taskActivitySummary('kanban.tombstoned', null)).toEqual([{ kind: 'deleted' }]);
+  expect(taskActivitySummary('kanban.archived', null)).toEqual([{ kind: 'archived' }]);
   expect(taskActivitySummary('kanban.restored', [])).toEqual([{ kind: 'restored' }]);
   expect(taskActivitySummary('kanban.updated', null)).toEqual([{ kind: 'updated' }]);
   expect(

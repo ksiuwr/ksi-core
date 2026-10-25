@@ -1,11 +1,12 @@
 <script lang="ts">
   import type { ContentChange } from 'shared/activity';
   import TaskActivity from './TaskActivity.svelte';
-  import { tick, onMount } from 'svelte';
+  import { tick, onMount, onDestroy } from 'svelte';
   import ContentHistory from './ContentHistory.svelte';
   import ConfirmDialog from './ConfirmDialog.svelte';
   import WatchButton from './WatchButton.svelte';
   import Assignees, { type AssignmentMember } from './Assignees.svelte';
+  import MemberPreview from '@ksi-core/ui/platform/MemberPreview.svelte';
   import { flip } from 'svelte/animate';
   import { prefersReducedMotion } from 'svelte/motion';
   import {
@@ -14,12 +15,13 @@
     Trash2,
     Pencil,
     Save,
-    MessagesSquare,
     GripVertical,
     Check,
     Settings2,
     RotateCcw,
-    ArrowUp
+    Archive,
+    CalendarClock,
+    Users
   } from '@lucide/svelte';
   import Dropdown, { type DropdownOption } from '@ksi-core/ui/platform/Dropdown.svelte';
   import DeadlinePicker from '@ksi-core/ui/platform/DeadlinePicker.svelte';
@@ -37,7 +39,10 @@
     labels: string[];
     assigneeIds?: string[];
     dueAt?: string | null;
+    referenceNumber?: number | null;
     deletedAt?: string;
+    authorId?: string;
+    createdAt?: string;
   };
   type Comment = {
     id: string;
@@ -99,7 +104,6 @@
 
   let selectedLabel = $state<string>('');
   let taskLabels = $state<string[]>([]);
-  let editLabels = $state<string[]>([]);
 
   let labelDialog = $state<HTMLDialogElement>();
   let labelDraftName = $state('');
@@ -213,8 +217,7 @@
     });
   }
   let members = $state<AssignmentMember[]>([]),
-    taskAssignees = $state<string[]>([]),
-    editAssignees = $state<string[]>([]);
+    taskAssignees = $state<string[]>([]);
   $effect(() => {
     const controller = new AbortController();
     const path = projectId ? `/projects/${encodeURIComponent(projectId)}/members` : '/members';
@@ -227,8 +230,7 @@
       .catch(() => {});
     return () => controller.abort();
   });
-  let taskDueAt = $state(''),
-    editDueAt = $state('');
+  let taskDueAt = $state('');
   function localDate(value?: string | null) {
     if (!value) return '';
     const date = new Date(value);
@@ -376,13 +378,16 @@
     statusName = $state(''),
     addingStatus = $state(false),
     statusColor = $state('#8777b5'),
-    composerDialog = $state<HTMLDialogElement>(),
-    confirmingDelete = $state(false);
+    composerDialog = $state<HTMLDialogElement>();
   let selected = $state<Item | null>(null),
-    editing = $state(false),
-    editTitle = $state(''),
-    editMarkdown = $state(''),
-    reply = $state('');
+    reply = $state(''),
+    editingTitle = $state(false),
+    titleDraft = $state(''),
+    titleInput = $state<HTMLInputElement>(),
+    descriptionEditing = $state(false),
+    descriptionDraft = $state(''),
+    deadlineValue = $state(''),
+    deadlineSuppressed = false;
   type Activity = {
     id: string;
     action: string;
@@ -407,22 +412,94 @@
     editingCommentMarkdown = $state(''),
     pendingCommentDelete = $state<string | null>(null),
     dialog = $state<HTMLDialogElement>();
+  const TIMELINE_TAIL = 2;
+  const TIMELINE_CHUNK = 5;
+  let timelineHead = $state(1);
+  const memberFor = (id?: string | null, name?: string | null): AssignmentMember => {
+    const found = id ? members.find((member) => member.id === id) : undefined;
+    if (found) return found;
+    return {
+      id: id ?? '',
+      firstName: name ?? '',
+      lastName: '',
+      nickname: null,
+      image: null,
+      bio: null
+    };
+  };
+  const memberName = (member: AssignmentMember) =>
+    [member.firstName, member.lastName].filter(Boolean).join(' ') || member.nickname || '';
+  const unassignedLabels = $derived(
+    normalizedLabels.filter((label) => !(selected?.labels ?? []).includes(label.name))
+  );
+  const DATE_LOCALES = { pl: 'pl-PL', en: 'en-GB' } as const;
+  const dateLocale = $derived(DATE_LOCALES[language]);
+  const formatDateTime = (iso: string) => new Date(iso).toLocaleString(dateLocale);
+  const relativeDateTime = (iso: string) => {
+    const seconds = (new Date(iso).getTime() - activityNow) / 1000;
+    const abs = Math.abs(seconds);
+    const [divisor, unit]: [number, Intl.RelativeTimeFormatUnit] =
+      abs < 60
+        ? [1, 'second']
+        : abs < 3600
+          ? [60, 'minute']
+          : abs < 86400
+            ? [3600, 'hour']
+            : abs < 604800
+              ? [86400, 'day']
+              : abs < 2592000
+                ? [604800, 'week']
+                : abs < 31536000
+                  ? [2592000, 'month']
+                  : [31536000, 'year'];
+    return new Intl.RelativeTimeFormat(dateLocale, { numeric: 'auto' }).format(
+      abs < 60 ? 0 : Math.trunc(seconds / divisor),
+      unit
+    );
+  };
+  const creatorName = $derived(
+    activity.find((event) => event.action === 'kanban.created')?.authorName ?? null
+  );
   const timeline = $derived(
     [
+      ...(selected
+        ? [
+            {
+              kind: 'description' as const,
+              id: `description-${selected.id}`,
+              createdAt: selected.createdAt ?? '',
+              item: selected
+            }
+          ]
+        : []),
       ...comments.map((comment) => ({
         kind: 'comment' as const,
         id: comment.id,
         createdAt: comment.createdAt,
         comment
       })),
-      ...activity.map((event) => ({
-        kind: 'event' as const,
-        id: event.id,
-        createdAt: event.createdAt,
-        event
-      }))
+      ...activity
+        .filter((event) => event.action !== 'kanban.created')
+        .map((event) => ({
+          kind: 'event' as const,
+          id: event.id,
+          createdAt: event.createdAt,
+          event
+        }))
     ].sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id))
   );
+  const hiddenTimelineItems = $derived(Math.max(0, timeline.length - TIMELINE_TAIL - timelineHead));
+  const showTimelineGap = $derived(hiddenTimelineItems > 0 || activityNextPage !== null);
+  const remainingTimelineLabel = $derived(`${hiddenTimelineItems} remaining items`);
+  const visibleTimeline = $derived.by(() => {
+    if (!showTimelineGap) return timeline;
+    const tailStart = Math.max(timelineHead, timeline.length - TIMELINE_TAIL);
+    return [
+      ...timeline.slice(0, timelineHead),
+      { kind: 'gap' as const, id: 'timeline-gap', createdAt: '' },
+      ...timeline.slice(tailStart)
+    ];
+  });
   let lastTrigger: HTMLElement | null = null,
     detailGeneration = 0;
   async function api<T>(path: string, method = 'GET', body?: unknown): Promise<T> {
@@ -658,8 +735,41 @@
       addingStatus = false;
     });
   }
+  async function refreshActivity(id: string) {
+    try {
+      const events = await api<Activity[]>(`/platform/items/${id}/activity`);
+      if (selected?.id !== id) return;
+      activity = [...new Map([...activity, ...events].map((event) => [event.id, event])).values()];
+    } catch {
+      // Keep the current timeline when the background refresh fails.
+    }
+  }
+  function mergeActivity(existing: Activity[], incoming: Activity[]) {
+    return [...new Map([...existing, ...incoming].map((event) => [event.id, event])).values()];
+  }
+  async function loadAllActivity(id: string, generation: number) {
+    let page = activityNextPage;
+    let merged = activity;
+    let failed = false;
+    for (let count = 0; page !== null && count < 50; count++) {
+      try {
+        const events = await api<Activity[]>(`/platform/items/${id}/activity?page=${page}`);
+        if (generation !== detailGeneration) return;
+        merged = mergeActivity(merged, events);
+        page = events.length === 20 ? page + 1 : null;
+      } catch {
+        failed = true;
+        break;
+      }
+    }
+    if (generation !== detailGeneration) return;
+    activity = merged;
+    activityNextPage = page;
+    activityError = failed;
+  }
   async function loadComments(id: string) {
     const generation = ++detailGeneration;
+    const alreadyLoaded = activity.length > 0 && activityNextPage === null;
     commentsLoading = true;
     activityLoading = false;
     activityError = false;
@@ -672,8 +782,11 @@
     if (result.status === 'fulfilled') comments = result.value;
     else discussionError = true;
     if (events.status === 'fulfilled') {
-      activity = events.value;
-      activityNextPage = events.value.length === 20 ? 1 : null;
+      activity = mergeActivity(activity, events.value);
+      if (!alreadyLoaded) {
+        activityNextPage = events.value.length === 20 ? 1 : null;
+        if (activityNextPage !== null) await loadAllActivity(id, generation);
+      }
     } else {
       activityError = true;
       activityNextPage = 0;
@@ -690,7 +803,7 @@
     try {
       const events = await api<Activity[]>(`/platform/items/${id}/activity?page=${page}`);
       if (generation !== detailGeneration) return;
-      activity = [...new Map([...activity, ...events].map((event) => [event.id, event])).values()];
+      activity = mergeActivity(activity, events);
       activityNextPage = events.length === 20 ? page + 1 : null;
     } catch {
       if (generation === detailGeneration) activityError = true;
@@ -698,17 +811,41 @@
       if (generation === detailGeneration) activityLoading = false;
     }
   }
+  async function revealTimeline() {
+    if (activityError && activityNextPage !== null) {
+      await loadOlderActivity();
+      return;
+    }
+    if (hiddenTimelineItems > 0) {
+      timelineHead = Math.min(timeline.length - TIMELINE_TAIL, timelineHead + TIMELINE_CHUNK);
+      return;
+    }
+    if (activityNextPage === null || activityLoading) return;
+    await loadOlderActivity();
+    timelineHead = Math.min(
+      Math.max(timeline.length - TIMELINE_TAIL, 1),
+      timelineHead + TIMELINE_CHUNK
+    );
+  }
   async function openItem(item: Item, event: MouseEvent) {
     lastTrigger = event.currentTarget as HTMLElement;
     selected = { ...item };
-    editing = false;
-    confirmingDelete = false;
+    resetItemEditing(item);
     reply = '';
     comments = [];
     activity = [];
     await tick();
     dialog?.showModal();
     void loadComments(item.id);
+  }
+
+  function resetItemEditing(item: Item) {
+    editingTitle = false;
+    descriptionEditing = false;
+    deadlineValue = localDate(item.dueAt);
+    timelineHead = 1;
+    activityNextPage = null;
+    activityError = false;
   }
 
   let openedItemId = $state<string | null>(null);
@@ -719,8 +856,7 @@
       if (target) {
         openedItemId = activeItemId;
         selected = { ...target };
-        editing = false;
-        confirmingDelete = false;
+        resetItemEditing(target);
         reply = '';
         comments = [];
         activity = [];
@@ -734,30 +870,110 @@
 
   function closeItem() {
     detailGeneration++;
+    clearTimeout(deadlineTimer);
+    timelineHead = 1;
     dialog?.close();
     selected = null;
     lastTrigger?.focus();
   }
-  async function saveItem() {
-    if (!selected) return;
+  let deadlineTimer: ReturnType<typeof setTimeout> | undefined;
+  $effect(() => {
+    if (!selected || deadlineSuppressed) return;
+    const value = deadlineValue;
+    if (value === localDate(selected.dueAt)) return;
+    clearTimeout(deadlineTimer);
+    deadlineTimer = setTimeout(() => {
+      if (!selected) return;
+      void patchItem({ dueAt: value ? new Date(value).toISOString() : null });
+    }, 500);
+  });
+  onDestroy(() => clearTimeout(deadlineTimer));
+  async function clearDeadline() {
+    if (!selected || busy) return;
+    clearTimeout(deadlineTimer);
+    deadlineSuppressed = true;
+    deadlineValue = '';
+    try {
+      await patchItem({ dueAt: null });
+    } finally {
+      deadlineSuppressed = false;
+      if (selected) deadlineValue = localDate(selected.dueAt);
+    }
+  }
+  async function patchItem(
+    values: Partial<Pick<Item, 'title' | 'markdown' | 'labels' | 'assigneeIds' | 'dueAt'>>
+  ) {
+    if (!selected || busy) return;
+    const id = selected.id;
     await run(async () => {
-      selected = await api<Item>(`/platform/items/${selected!.id}`, 'PATCH', {
+      const updated = await api<Item>(`/platform/items/${id}`, 'PATCH', {
         version: selected!.version,
-        title: editTitle,
-        markdown: editMarkdown,
-        labels: editLabels,
-        assigneeIds: editAssignees,
-        dueAt: editDueAt ? new Date(editDueAt).toISOString() : null
+        ...values
       });
-      editing = false;
-      await loadComments(selected!.id);
+      if (selected?.id === id) {
+        selected = updated;
+        if (values.dueAt !== undefined) deadlineValue = localDate(updated.dueAt);
+      }
+      await refresh();
+      if (selected?.id === id) await refreshActivity(id);
     });
   }
-  async function removeItem() {
+  function startTitleEdit() {
+    if (!selected || busy) return;
+    titleDraft = selected.title;
+    editingTitle = true;
+    void tick().then(() => {
+      titleInput?.focus();
+      titleInput?.select();
+    });
+  }
+  async function commitTitle() {
+    if (!selected || !editingTitle) return;
+    const next = titleDraft.trim();
+    editingTitle = false;
+    if (!next || next === selected.title) return;
+    await patchItem({ title: next });
+  }
+  function titleKeys(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      void commitTitle();
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      editingTitle = false;
+    }
+  }
+  async function addLabel(name: string) {
+    if (!selected || busy || selected.labels.includes(name)) return;
+    await patchItem({ labels: [...selected.labels, name] });
+  }
+  async function removeLabel(name: string) {
+    if (!selected || busy) return;
+    await patchItem({ labels: selected.labels.filter((label) => label !== name) });
+  }
+  function changeAssignees(ids: string[]) {
+    void patchItem({ assigneeIds: ids });
+  }
+  function startDescriptionEdit() {
+    if (!selected || busy) return;
+    descriptionDraft = selected.markdown;
+    descriptionEditing = true;
+  }
+  async function saveDescription() {
+    if (!selected || !descriptionEditing) return;
+    const next = descriptionDraft;
+    descriptionEditing = false;
+    if (next === selected.markdown) return;
+    await patchItem({ markdown: next });
+  }
+  async function archiveItem() {
     if (!selected) return;
     await run(async () => {
-      await api(`/platform/items/${selected!.id}`, 'DELETE', { version: selected!.version });
+      await api(`/platform/items/${selected!.id}/archive`, 'POST', {
+        version: selected!.version
+      });
       closeItem();
+      await refresh();
     });
   }
   async function postReply() {
@@ -1023,12 +1239,12 @@
               openItem(item, event);
             }}
           >
-            <span class="task-title"
-              ><strong>{item.title}</strong><GripVertical size={14} aria-hidden="true" /></span
+            <span class="task-title">
+              <strong>{item.title}</strong>
+              {#if item.referenceNumber}<span class="task-reference">#{item.referenceNumber}</span
+                >{/if}
+              <GripVertical size={14} aria-hidden="true" /></span
             >
-            {#if item.markdown}<div class="kanban-markdown-preview">
-                <MarkdownContent value={item.markdown} {language} />
-              </div>{/if}
             {#if item.labels.length}<div class="task-labels">
                 {#each item.labels as labelName}
                   {@const label = labelMap.get(labelName)}
@@ -1042,20 +1258,27 @@
                   </span>
                 {/each}
               </div>{/if}
-            {#if item.dueAt}<time
-                class:overdue={new Date(item.dueAt).getTime() < Date.now() &&
-                  item.column !== 'done'}
-                datetime={item.dueAt}
-                >{language === 'pl' ? 'Termin: ' : 'Due: '}{new Date(item.dueAt).toLocaleString(
-                  language === 'pl' ? 'pl-PL' : 'en-GB'
-                )}</time
-              >{/if}
-            {#if item.assigneeIds?.length}<Assignees
-                value={item.assigneeIds}
-                {members}
-                {language}
-                readonly
-              />{/if}
+            {#if item.dueAt || item.assigneeIds?.length}<div class="task-meta">
+                {#if item.dueAt}<div
+                    class="task-meta-row"
+                    class:overdue={new Date(item.dueAt).getTime() < Date.now() &&
+                      item.column !== 'done'}
+                    title={'Due'}
+                  >
+                    <CalendarClock size={13} aria-hidden="true" />
+                    <time datetime={item.dueAt}>{formatDateTime(item.dueAt)}</time>
+                  </div>{/if}
+                {#if item.assigneeIds?.length}<div class="task-meta-row" title={'Assigned to'}>
+                    <Users size={13} aria-hidden="true" />
+                    <Assignees
+                      value={item.assigneeIds}
+                      {members}
+                      {language}
+                      readonly
+                      showLabel={false}
+                    />
+                  </div>{/if}
+              </div>{/if}
           </button>
         {/each}
       </div>
@@ -1164,7 +1387,7 @@
       {/if}
       <Assignees bind:value={taskAssignees} {members} {language} disabled={busy} />
       <DeadlinePicker bind:value={taskDueAt} {language} disabled={busy} />
-      <Editor {language} bind:value={markdown} rows={10} />
+      <Editor {language} bind:value={markdown} rows={10} allowReferences />
       <div class="row">
         <button class="btn" disabled={busy || !title.trim()}>{'Add task'}</button><button
           type="button"
@@ -1370,23 +1593,32 @@
       <div>
         <div class="issue-heading-meta">
           <span class="tag">{options.find((s) => s.value === selected?.column)?.label}</span>
-          {#if selected.labels.length}
-            <div class="task-detail-labels">
-              {#each selected.labels as labelName}
-                {@const label = labelMap.get(labelName)}
-                <span
-                  class="label-badge"
-                  style:--label-color={label?.color || '#6b7280'}
-                  title={label?.description || labelName}
-                >
-                  <span class="label-dot"></span>
-                  <span class="label-name">{labelName}</span>
-                </span>
-              {/each}
-            </div>
-          {/if}
         </div>
-        <h2 id="issue-title">{selected.title}</h2>
+        {#if editingTitle}
+          <input
+            bind:this={titleInput}
+            class="issue-title-input"
+            bind:value={titleDraft}
+            maxlength="200"
+            aria-label={'Title'}
+            disabled={busy}
+            onkeydown={titleKeys}
+            onblur={commitTitle}
+          />
+        {:else}
+          <h2 id="issue-title">
+            {selected.title}{#if selected.referenceNumber}
+              <span class="task-reference">&nbsp;#{selected.referenceNumber}</span>{/if}
+            <button
+              type="button"
+              class="icon-button title-edit"
+              aria-label={'Edit title'}
+              title={'Edit title'}
+              disabled={busy}
+              onclick={startTitleEdit}><Pencil size={14} aria-hidden="true" /></button
+            >
+          </h2>
+        {/if}
       </div>
       <div class="issue-heading-actions">
         <ContentHistory kind="task" targetId={selected.id} {language} />
@@ -1395,172 +1627,114 @@
         >
       </div>
     </div>
-    {#if selected.dueAt}<p>
-        {language === 'pl' ? 'Termin: ' : 'Due: '}<time datetime={selected.dueAt}
-          >{new Date(selected.dueAt).toLocaleString(language === 'pl' ? 'pl-PL' : 'en-GB')}</time
-        >
-      </p>{/if}
-    {#key (selected.assigneeIds ?? []).join(',')}<WatchButton
-        type="item"
-        id={selected.id}
-        {language}
-      />{/key}
-    <div class="issue-tools">
-      <Dropdown
-        label={'Task status'}
-        value={selected.column}
-        {options}
-        disabled={busy}
-        onselect={(column) => void move(selected!, column)}
-      /><button
-        type="button"
-        class="btn btn-outline"
-        disabled={busy}
-        onclick={() => {
-          editing = !editing;
-          editTitle = selected!.title;
-          editMarkdown = selected!.markdown;
-          editLabels = [...selected!.labels];
-          editAssignees = [...(selected!.assigneeIds ?? [])];
-          editDueAt = localDate(selected!.dueAt);
-        }}><Pencil size={14} aria-hidden="true" />{'Edit'}</button
-      ><button
-        type="button"
-        class="btn btn-outline danger-button"
-        disabled={busy}
-        onclick={() => (confirmingDelete = true)}
-        ><Trash2 size={14} aria-hidden="true" />{'Remove'}</button
-      >
-    </div>
-    <Assignees value={selected.assigneeIds ?? []} {members} {language} readonly />
-    {#if confirmingDelete}<section
-        class="delete-confirmation"
-        role="alert"
-        aria-label={'Confirm deletion'}
-      >
-        <h3>{'Remove this task?'}</h3>
-        <p>
-          {'The task will move to the graveyard. A leader can restore it.'}
-        </p>
-        <div class="row">
-          <button class="btn danger-button" disabled={busy} onclick={removeItem}
-            >{'Confirm removal'}</button
-          ><button class="btn btn-outline" onclick={() => (confirmingDelete = false)}
-            >{'Cancel'}</button
-          >
+    <div class="issue-meta">
+      <div class="issue-meta-row">
+        <span class="issue-meta-label">{'Assigned to'}</span>
+        <div class="issue-meta-value">
+          <Assignees
+            value={selected.assigneeIds ?? []}
+            {members}
+            {language}
+            disabled={busy}
+            showLabel={false}
+            onchange={changeAssignees}
+          />
         </div>
-      </section>{/if}
-    {#if editing}<form
-        class="issue-editor"
-        onsubmit={(event) => {
-          event.preventDefault();
-          void saveItem();
-        }}
-      >
-        <label for="issue-edit-title">{'Title'}</label><input
-          id="issue-edit-title"
-          bind:value={editTitle}
-          required
-          maxlength="200"
-        /><Editor {language} bind:value={editMarkdown} />
-        {#if normalizedLabels.length}
-          <div class="task-label-picker">
-            <span class="label-picker-label">{'Labels'}</span>
-            <div class="label-chips">
-              {#each normalizedLabels as label}
-                {@const isSelected = editLabels.includes(label.name)}
+      </div>
+      <div class="issue-meta-row">
+        <span class="issue-meta-label">{'Labels'}</span>
+        <div class="issue-meta-value">
+          {#if selected.labels.length}
+            {#each selected.labels as labelName}
+              {@const label = labelMap.get(labelName)}
+              <span
+                class="label-badge"
+                style:--label-color={label?.color || '#6b7280'}
+                title={label?.description || labelName}
+              >
+                <span class="label-dot"></span>
+                <span class="label-name">{labelName}</span>
                 <button
                   type="button"
-                  class="label-chip"
-                  class:selected={isSelected}
-                  aria-pressed={isSelected}
-                  style:--label-color={label.color || '#6b7280'}
-                  onclick={() => {
-                    editLabels = isSelected
-                      ? editLabels.filter((t) => t !== label.name)
-                      : [...editLabels, label.name];
-                  }}
-                  title={label.description || label.name}
+                  class="label-remove"
+                  aria-label={`Remove label ${labelName}`}
+                  title={`Remove label ${labelName}`}
+                  disabled={busy}
+                  onclick={() => void removeLabel(labelName)}
                 >
-                  <span class="label-dot"></span>
-                  <span>{label.name}</span>
-                  {#if isSelected}
-                    <Check size={12} aria-hidden="true" />
-                  {/if}
+                  <X size={11} aria-hidden="true" />
                 </button>
-              {/each}
-            </div>
-          </div>
-        {/if}
-        <Assignees bind:value={editAssignees} {members} {language} disabled={busy} />
-        <DeadlinePicker bind:value={editDueAt} {language} disabled={busy} />
-        <div class="row">
-          <button class="btn" disabled={busy || !editTitle.trim()}
-            ><Save size={14} aria-hidden="true" />{'Save'}</button
-          ><button type="button" class="btn btn-outline" onclick={() => (editing = false)}
-            >{'Cancel'}</button
-          >
+              </span>
+            {/each}
+          {:else}
+            <span class="issue-meta-empty">{'None yet'}</span>
+          {/if}
+          {#if unassignedLabels.length}
+            <Dropdown
+              label={'Add label'}
+              placeholder={'Add label'}
+              options={unassignedLabels.map((label) => ({
+                value: label.name,
+                label: label.name,
+                color: label.color || '#6b7280'
+              }))}
+              variant="compact"
+              disabled={busy}
+              onselect={(name) => void addLabel(name)}
+            >
+              {#snippet leading()}<Plus size={13} aria-hidden="true" />{/snippet}
+            </Dropdown>
+          {/if}
         </div>
-      </form>
-    {:else}<div class="issue-description">
-        <MarkdownContent value={selected.markdown} {language} />
-      </div>{/if}
-    <section class="issue-discussion" aria-labelledby="discussion-title">
-      <h3 id="discussion-title">
-        <MessagesSquare size={18} aria-hidden="true" />{'Discussion'}<span class="muted"
-          >{comments.length}</span
-        >
-      </h3>
+      </div>
+      <div class="issue-meta-row">
+        <span class="issue-meta-label">{'Due'}</span>
+        <div class="issue-meta-value">
+          <DeadlinePicker bind:value={deadlineValue} {language} disabled={busy} />
+          {#if selected.dueAt}
+            <button
+              type="button"
+              class="icon-action-btn"
+              title={'Remove deadline'}
+              aria-label={'Remove deadline'}
+              disabled={busy}
+              onclick={() => void clearDeadline()}
+            >
+              <X size={14} aria-hidden="true" />
+            </button>
+          {/if}
+        </div>
+      </div>
+      <div class="issue-meta-row">
+        <span class="issue-meta-label">{'Notifications'}</span>
+        <div class="issue-meta-value">
+          {#key (selected.assigneeIds ?? []).join(',')}<WatchButton
+              type="item"
+              id={selected.id}
+              {language}
+              showLabel
+            />{/key}
+        </div>
+      </div>
+    </div>
+    <section class="issue-discussion" aria-label={'Discussion'}>
       {#if commentsLoading}<div
           class="discussion-skeleton"
           aria-label={'Loading discussion'}
         ></div>{:else}
         {#if discussionError}
           <p class="timeline-error" role="alert">
-            {language === 'pl' ? 'Nie udało się wczytać komentarzy.' : 'Could not load comments.'}
+            {'Could not load comments.'}
             <button
               type="button"
               class="timeline-load"
               onclick={() => selected && loadComments(selected.id)}
-              ><RotateCcw size={13} aria-hidden="true" />{language === 'pl'
-                ? 'Spróbuj ponownie'
-                : 'Try again'}</button
+              ><RotateCcw size={13} aria-hidden="true" />{'Try again'}</button
             >
           </p>
         {/if}
-        {#if activityNextPage !== null}
-          <div class="timeline-pagination">
-            {#if activityError}<p role="alert">
-                {language === 'pl'
-                  ? 'Nie udało się wczytać aktywności.'
-                  : 'Could not load activity.'}
-              </p>{/if}
-            <button
-              type="button"
-              class="timeline-load"
-              disabled={activityLoading}
-              onclick={loadOlderActivity}
-            >
-              {#if activityError}<RotateCcw size={13} aria-hidden="true" />{:else}<ArrowUp
-                  size={13}
-                  aria-hidden="true"
-                />{/if}
-              {activityLoading
-                ? language === 'pl'
-                  ? 'Wczytywanie…'
-                  : 'Loading…'
-                : activityError
-                  ? language === 'pl'
-                    ? 'Spróbuj ponownie'
-                    : 'Try again'
-                  : language === 'pl'
-                    ? 'Pokaż wcześniejszą aktywność'
-                    : 'Load earlier activity'}
-            </button>
-          </div>
-        {/if}
         <div class="discussion-timeline">
-          {#each timeline as entry (`${entry.kind}-${entry.id}`)}
+          {#each visibleTimeline as entry (`${entry.kind}-${entry.id}`)}
             {#if entry.kind === 'event'}
               <TaskActivity
                 event={entry.event}
@@ -1570,69 +1744,179 @@
                 {language}
                 now={activityNow}
               />
-            {:else}
-              {@const comment = entry.comment}
-              <article class="discussion-post timeline-comment">
-                <span class="comment-marker"><MessagesSquare size={14} aria-hidden="true" /></span>
-                <div class="post-meta">
-                  <strong>{comment.authorName || 'Association member'}</strong><time
-                    datetime={comment.createdAt}
-                    >{new Date(comment.createdAt).toLocaleString(
-                      language === 'pl' ? 'pl-PL' : 'en-GB'
-                    )}</time
-                  >
-                  <div class="comment-actions">
-                    {#if comment.edited}
-                      <ContentHistory kind="comment" targetId={comment.id} {language} />
-                    {/if}
-                    {#if comment.authorId === userId || canManage}
+            {:else if entry.kind === 'gap'}
+              <div class="timeline-gap">
+                {#if hiddenTimelineItems > 0}<p class="timeline-gap-count">
+                    {remainingTimelineLabel}
+                  </p>{/if}
+                {#if activityError}<p class="timeline-gap-error" role="alert">
+                    {'Could not load activity.'}
+                  </p>{/if}
+                <button
+                  type="button"
+                  class="timeline-load"
+                  disabled={activityLoading}
+                  onclick={() => void revealTimeline()}
+                >
+                  {#if activityError}<RotateCcw size={13} aria-hidden="true" />{/if}
+                  {#if activityLoading}{'Loading…'}{:else if activityError}{'Try again'}{:else}{'Load more'}{/if}
+                </button>
+              </div>
+            {:else if entry.kind === 'description'}
+              {@const author = memberFor(entry.item.authorId, creatorName)}
+              <article class="timeline-comment timeline-description">
+                <div class="comment-avatar">
+                  <MemberPreview
+                    member={author}
+                    href={`/members/${encodeURIComponent(author.id)}`}
+                    avatarOnly
+                    size={32}
+                    {language}
+                  />
+                </div>
+                <div class="comment-card">
+                  <header class="comment-header">
+                    <a class="comment-author" href={`/members/${encodeURIComponent(author.id)}`}
+                      >{#if memberName(author)}{memberName(
+                          author
+                        )}{:else}{'Association member'}{/if}</a
+                    >
+                    <span class="comment-verb">opened this task</span>
+                    {#if entry.createdAt}<time
+                        datetime={entry.createdAt}
+                        title={formatDateTime(entry.createdAt)}
+                        aria-label={formatDateTime(entry.createdAt)}
+                        >{relativeDateTime(entry.createdAt)}</time
+                      >{/if}
+                    <div class="comment-actions">
                       <button
                         type="button"
                         class="icon-action-btn"
-                        title="Edit"
-                        onclick={() => {
-                          editingCommentId = comment.id;
-                          editingCommentMarkdown = comment.markdown;
-                        }}
+                        title={'Edit description'}
+                        aria-label={'Edit description'}
+                        disabled={busy}
+                        onclick={startDescriptionEdit}
                       >
                         <Pencil size={13} aria-hidden="true" />
                       </button>
-                      <button
-                        type="button"
-                        class="icon-action-btn danger"
-                        title="Delete"
-                        onclick={() => (pendingCommentDelete = comment.id)}
+                    </div>
+                  </header>
+                  <div class="comment-body">
+                    {#if descriptionEditing}
+                      <form
+                        class="issue-reply"
+                        onsubmit={(event) => {
+                          event.preventDefault();
+                          void saveDescription();
+                        }}
                       >
-                        <Trash2 size={13} aria-hidden="true" />
-                      </button>
+                        <Editor {language} bind:value={descriptionDraft} rows={6} allowReferences />
+                        <div class="comment-composer-actions">
+                          <button class="btn" disabled={busy || !descriptionDraft.trim()}
+                            >{'Save'}</button
+                          >
+                          <button
+                            type="button"
+                            class="btn btn-outline"
+                            onclick={() => (descriptionEditing = false)}>{'Cancel'}</button
+                          >
+                        </div>
+                      </form>
+                    {:else if entry.item.markdown.trim()}
+                      <MarkdownContent value={entry.item.markdown} {language} allowReferences />
+                    {:else}
+                      <p class="issue-empty">{'No description.'}</p>
                     {/if}
                   </div>
                 </div>
-                {#if editingCommentId === comment.id}
-                  <form
-                    class="issue-reply"
-                    onsubmit={(event) => {
-                      event.preventDefault();
-                      void saveCommentEdit(comment.id);
-                    }}
-                  >
-                    <Editor {language} bind:value={editingCommentMarkdown} rows={4} />
-                    <div style="display: flex; gap: 8px;">
-                      <button class="btn" disabled={busy || !editingCommentMarkdown.trim()}
-                        >{'Save'}</button
-                      >
-                      <button
-                        type="button"
-                        class="btn ghost"
-                        onclick={() => {
-                          editingCommentId = null;
-                        }}>{'Cancel'}</button
-                      >
+              </article>
+            {:else}
+              {@const comment = entry.comment}
+              {@const author = memberFor(comment.authorId, comment.authorName)}
+              <article class="timeline-comment">
+                <div class="comment-avatar">
+                  <MemberPreview
+                    member={author}
+                    href={`/members/${encodeURIComponent(author.id)}`}
+                    avatarOnly
+                    size={32}
+                    {language}
+                  />
+                </div>
+                <div class="comment-card">
+                  <header class="comment-header">
+                    <a class="comment-author" href={`/members/${encodeURIComponent(author.id)}`}
+                      >{#if memberName(author)}{memberName(
+                          author
+                        )}{:else}{'Association member'}{/if}</a
+                    >
+                    <span class="comment-verb">commented</span>
+                    <time
+                      datetime={comment.createdAt}
+                      title={formatDateTime(comment.createdAt)}
+                      aria-label={formatDateTime(comment.createdAt)}
+                      >{relativeDateTime(comment.createdAt)}</time
+                    >
+                    <div class="comment-actions">
+                      {#if comment.edited}
+                        <ContentHistory kind="comment" targetId={comment.id} {language} />
+                      {/if}
+                      {#if comment.authorId === userId || canManage}
+                        <button
+                          type="button"
+                          class="icon-action-btn"
+                          title="Edit"
+                          onclick={() => {
+                            editingCommentId = comment.id;
+                            editingCommentMarkdown = comment.markdown;
+                          }}
+                        >
+                          <Pencil size={13} aria-hidden="true" />
+                        </button>
+                        <button
+                          type="button"
+                          class="icon-action-btn danger"
+                          title="Delete"
+                          onclick={() => (pendingCommentDelete = comment.id)}
+                        >
+                          <Trash2 size={13} aria-hidden="true" />
+                        </button>
+                      {/if}
                     </div>
-                  </form>
-                {:else}
-                  <MarkdownContent value={comment.markdown} {language} />
-                {/if}
+                  </header>
+                  <div class="comment-body">
+                    {#if editingCommentId === comment.id}
+                      <form
+                        class="issue-reply"
+                        onsubmit={(event) => {
+                          event.preventDefault();
+                          void saveCommentEdit(comment.id);
+                        }}
+                      >
+                        <Editor
+                          {language}
+                          bind:value={editingCommentMarkdown}
+                          rows={4}
+                          allowReferences
+                        />
+                        <div style="display: flex; gap: 8px;">
+                          <button class="btn" disabled={busy || !editingCommentMarkdown.trim()}
+                            >{'Save'}</button
+                          >
+                          <button
+                            type="button"
+                            class="btn ghost"
+                            onclick={() => {
+                              editingCommentId = null;
+                            }}>{'Cancel'}</button
+                          >
+                        </div>
+                      </form>
+                    {:else}
+                      <MarkdownContent value={comment.markdown} {language} allowReferences />
+                    {/if}
+                  </div>
+                </div>
               </article>{/if}{/each}
         </div>
         {#if !comments.length && !discussionError}<p class="muted">
@@ -1645,20 +1929,30 @@
           void postReply();
         }}
       >
-        <Editor {language} bind:value={reply} rows={4} /><button
+        <Editor {language} bind:value={reply} rows={4} allowReferences /><button
           class="btn"
           disabled={busy || !reply.trim()}>{'Reply'}</button
         >
       </form>
+      <div class="task-archive">
+        <button
+          type="button"
+          class="btn btn-outline"
+          disabled={busy}
+          onclick={() => void archiveItem()}
+        >
+          <Archive size={14} aria-hidden="true" />{'Archive task'}
+        </button>
+      </div>
     </section>
   </dialog>{/if}
 
 <ConfirmDialog
   open={pendingCommentDelete !== null}
-  title={language === 'pl' ? 'Usunąć komentarz?' : 'Delete comment?'}
-  message={language === 'pl' ? 'Tej operacji nie można cofnąć.' : 'This action cannot be undone.'}
-  confirmLabel={language === 'pl' ? 'Usuń' : 'Delete'}
-  cancelLabel={language === 'pl' ? 'Anuluj' : 'Cancel'}
+  title={'Delete comment?'}
+  message={'This action cannot be undone.'}
+  confirmLabel={'Delete'}
+  cancelLabel={'Cancel'}
   {busy}
   onconfirm={() => void confirmDeleteComment()}
   onclose={() => (pendingCommentDelete = null)}
@@ -1671,52 +1965,92 @@
   .discussion-timeline::before {
     content: '';
     position: absolute;
-    left: 14px;
-    top: 12px;
-    bottom: 12px;
+    left: 15px;
+    top: 18px;
+    bottom: 18px;
     width: 2px;
     background: var(--line);
   }
-  .discussion-post.timeline-comment {
+  .timeline-comment {
     position: relative;
-    margin: 14px 0 14px 44px;
-    padding: 14px;
-    border: 1px solid var(--line);
-    border-radius: 7px;
-    background: var(--surface);
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+    margin: 16px 0;
   }
-  .comment-marker {
-    position: absolute;
-    left: -45px;
-    top: 9px;
+  .comment-avatar {
+    position: relative;
+    z-index: 1;
     display: grid;
     place-items: center;
-    width: 30px;
-    height: 30px;
-    border: 3px solid var(--surface);
-    border-radius: 50%;
-    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .comment-card {
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .comment-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--line);
     background: var(--surface-muted);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .comment-header time {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .comment-author {
+    color: var(--ink);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .comment-author:hover {
+    text-decoration: underline;
+  }
+  .comment-body {
+    padding: 12px 14px;
+  }
+  .comment-body .issue-reply {
+    margin-top: 0;
   }
   @media (max-width: 600px) {
-    .discussion-timeline::before {
-      left: 11px;
+    .timeline-comment {
+      gap: 10px;
     }
-    .discussion-post.timeline-comment {
-      margin-left: 36px;
-      padding: 12px;
+    .comment-header {
+      padding: 8px 10px;
     }
-    .comment-marker {
-      left: -40px;
+    .comment-body {
+      padding: 10px 12px;
     }
   }
-  .timeline-pagination {
-    display: grid;
-    justify-items: center;
+  .timeline-gap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: 8px;
     padding: 12px 0;
     color: var(--muted);
     font-size: 12px;
+  }
+  .timeline-gap-count {
+    margin: 0;
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .timeline-gap-error {
+    margin: 0;
+    color: var(--muted);
   }
   .timeline-load {
     display: inline-flex;
@@ -1838,16 +2172,10 @@
     flex-shrink: 0;
   }
   .label-name {
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-  .task-detail-labels {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-left: 8px;
   }
   .issue-heading-meta {
     display: flex;
@@ -2053,23 +2381,6 @@
   .column-header {
     gap: 8px;
   }
-  .delete-confirmation {
-    border: 1px solid var(--danger);
-    padding: 16px;
-    margin-bottom: 20px;
-    display: grid;
-    gap: 12px;
-  }
-  .issue-tools :global(.dropdown-trigger) {
-    min-height: 36px;
-    height: 36px;
-    line-height: 1.2;
-    padding: 8px 12px;
-  }
-  .issue-tools > .btn {
-    height: 36px;
-    line-height: 1.2;
-  }
   .board {
     overflow-x: auto;
     padding: 3px 3px 12px;
@@ -2129,51 +2440,66 @@
   }
   .task-title {
     display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    align-items: start;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .task-title strong {
+    flex: 1 1 auto;
+    min-width: 0;
+    line-height: 1.35;
+  }
+  .task-reference {
+    flex: 0 0 auto;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.4;
+  }
+  .issue-heading .task-reference {
+    font-size: 0.72em;
+    font-weight: 400;
+    margin-left: 0.35em;
   }
   .task-title :global(svg) {
     color: var(--muted);
     opacity: 0;
     flex-shrink: 0;
+    align-self: start;
+    margin-top: 3px;
   }
   .task-card:hover .task-title :global(svg) {
     opacity: 1;
-  }
-  .kanban-markdown-preview {
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.5;
-    max-height: 100px;
-    overflow: hidden;
-    mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-  }
-  .kanban-markdown-preview :global(h1),
-  .kanban-markdown-preview :global(h2),
-  .kanban-markdown-preview :global(h3),
-  .kanban-markdown-preview :global(h4),
-  .kanban-markdown-preview :global(h5),
-  .kanban-markdown-preview :global(h6) {
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    margin: 4px 0 !important;
-    line-height: 1.4 !important;
-  }
-  .kanban-markdown-preview :global(p) {
-    margin: 2px 0 !important;
-  }
-  .kanban-markdown-preview :global(img) {
-    max-height: 60px;
-    width: auto;
-    border-radius: 4px;
-    margin: 4px 0;
   }
   .task-labels {
     display: flex;
     gap: 5px;
     flex-wrap: wrap;
+  }
+  .task-meta {
+    display: grid;
+    gap: 6px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .task-meta-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+  }
+  .task-meta-row :global(svg) {
+    flex-shrink: 0;
+    color: currentColor;
+    opacity: 0.75;
+  }
+  .task-meta-row time {
+    color: inherit;
+  }
+  .task-meta-row :global(.assigned) {
+    gap: 4px;
   }
   .drop-target {
     border-color: var(--accent) !important;
@@ -2218,6 +2544,10 @@
     gap: 16px;
     margin-bottom: 20px;
   }
+  .issue-heading > div:first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
   .issue-heading-actions {
     display: flex;
     align-items: center;
@@ -2229,19 +2559,117 @@
     margin-top: 10px;
     overflow-wrap: anywhere;
   }
-  .issue-tools {
+  .issue-heading h2 .title-edit {
+    margin-left: 4px;
+    vertical-align: middle;
+    opacity: 0.55;
+  }
+  .issue-heading h2:hover .title-edit,
+  .issue-heading h2 .title-edit:focus-visible {
+    opacity: 1;
+  }
+  .issue-title-input {
+    width: 100%;
+    margin-top: 10px;
+    padding: 4px 8px;
+    border: 1px solid var(--control-border-hover);
+    border-radius: 4px;
+    background: var(--surface-muted);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .issue-title-input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  .issue-meta {
+    display: grid;
+    margin-bottom: 20px;
+  }
+  .issue-meta-row {
+    display: grid;
+    gap: 6px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .issue-meta-row:first-child {
+    padding-top: 0;
+  }
+  .issue-meta-row:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+  .issue-meta-label {
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .issue-meta-value {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
-    margin-bottom: 24px;
+    min-width: 0;
+    font-size: 13px;
   }
-  .issue-tools :global(.dropdown) {
-    flex: 1;
-    min-width: 160px;
+  .issue-meta-empty {
+    color: var(--muted);
+    font-size: 13px;
   }
-  .issue-description {
-    padding-bottom: 24px;
+  .issue-meta-value :global(.dropdown) {
+    width: max-content;
+    max-width: 100%;
+    margin-left: 8px;
+  }
+  .issue-meta-value :global(.dropdown-trigger) {
+    min-height: 28px;
+    padding: 3px 9px;
+    font-size: 12px;
+  }
+  .label-remove {
+    display: grid;
+    place-items: center;
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    margin-left: 1px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: inherit;
+    opacity: 0.65;
+    cursor: pointer;
+  }
+  .label-remove:hover {
+    opacity: 1;
+    background: color-mix(in srgb, currentColor 18%, transparent);
+  }
+  .label-remove:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .issue-meta-value :global(.trigger) {
+    width: auto;
+    min-height: 30px;
+    padding: 5px 9px;
+    font-size: 12px;
+  }
+  .issue-meta-value :global(.picker-name) {
+    display: none;
+  }
+  .issue-meta-value :global(.picker-trigger) {
+    width: auto;
+    min-height: 32px;
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+  .issue-empty {
+    color: var(--muted);
+    font-size: 13px;
   }
   .issue-editor {
     display: grid;
@@ -2252,28 +2680,6 @@
     border-top: 1px solid var(--line);
     padding-top: 24px;
   }
-  .issue-discussion h3 {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 16px;
-    margin-bottom: 20px;
-  }
-  .discussion-post {
-    border-bottom: 1px solid var(--line);
-    padding: 16px 0;
-  }
-  .post-meta {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 12px;
-    font-size: 12px;
-    color: var(--muted);
-  }
-  .post-meta time {
-    font-size: 11px;
-  }
   .issue-reply {
     display: grid;
     gap: 16px;
@@ -2281,6 +2687,17 @@
   }
   .issue-reply > .btn {
     justify-self: start;
+  }
+  .comment-composer-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .task-archive {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
   }
   .discussion-skeleton {
     height: 80px;
@@ -2351,9 +2768,6 @@
     }
     .issue-heading h2 {
       font-size: 20px;
-    }
-    .post-meta {
-      flex-wrap: wrap;
     }
   }
   .comment-actions {

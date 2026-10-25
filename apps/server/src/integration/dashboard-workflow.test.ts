@@ -969,6 +969,89 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
     await db.delete(outbox).where(inArray(outbox.eventId, eventIds));
     await db.delete(auditEvents).where(inArray(auditEvents.id, eventIds));
   });
+  test('numeric references share a workspace sequence, resist concurrent allocation, and enforce thread visibility', async () => {
+    const [task, thread] = await Promise.all([
+      request('member', `/platform/boards/${boardId}/items`, 'POST', {
+        title: 'Numbered task',
+        markdown: '',
+        column: 'todo',
+        labels: [],
+        position: 0
+      }),
+      request('member', '/platform/threads', 'POST', {
+        projectId,
+        title: 'Numbered thread',
+        markdown: 'Post',
+        visibility: 'members',
+        invitedIds: []
+      })
+    ]);
+    expect(task.status).toBe(200);
+    expect(thread.status).toBe(200);
+    expect(Math.abs(task.body.referenceNumber - thread.body.referenceNumber)).toBe(1);
+    const taskLink = await request(
+      'member',
+      `/platform/references/${projectId}/${task.body.referenceNumber}`
+    );
+    expect(taskLink.body.href).toBe(`/projects/${projectId}/kanban?item=${task.body.id}`);
+    const threadLink = await request(
+      'member',
+      `/platform/references/${projectId}/${thread.body.referenceNumber}`
+    );
+    expect(threadLink.body.href).toBe(`/projects/${projectId}/forum/${thread.body.id}`);
+    expect(
+      (
+        await request(
+          'outsider',
+          `/platform/references/${projectId}/${thread.body.referenceNumber}`
+        )
+      ).status
+    ).toBe(404);
+    const restricted = await request('admin', '/platform/threads', 'POST', {
+      title: 'Numbered restricted thread',
+      markdown: 'Post',
+      visibility: 'leaders',
+      invitedIds: []
+    });
+    expect(
+      (
+        await request(
+          'member',
+          `/platform/references/~association/${restricted.body.referenceNumber}`
+        )
+      ).status
+    ).toBe(404);
+    expect(
+      (
+        await request(
+          'admin',
+          `/platform/references/~association/${restricted.body.referenceNumber}`
+        )
+      ).status
+    ).toBe(200);
+    const oldNumber = task.body.referenceNumber;
+    await db.delete(kanbanItems).where(eq(kanbanItems.id, task.body.id));
+    const next = await request('member', `/platform/boards/${boardId}/items`, 'POST', {
+      title: 'Next task',
+      markdown: '',
+      column: 'todo',
+      labels: [],
+      position: 0
+    });
+    expect(next.body.referenceNumber).toBeGreaterThan(oldNumber);
+    expect((await request('member', `/platform/references/${projectId}/${oldNumber}`)).status).toBe(
+      404
+    );
+    expect(
+      (await request('pending', `/platform/references/${projectId}/${next.body.referenceNumber}`))
+        .status
+    ).toBe(403);
+    for (const record of [thread, restricted]) {
+      await db.delete(comments).where(eq(comments.threadId, record.body.id));
+      await db.delete(threads).where(eq(threads.id, record.body.id));
+    }
+    await db.delete(kanbanItems).where(eq(kanbanItems.id, next.body.id));
+  });
   test('administrator email changes revoke access and require verification; recovery stays private', async () => {
     const id = createId(),
       email = `${id}@example.test`,
@@ -1262,8 +1345,11 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
     expect((await request('member', path, 'PATCH', { deleted: true })).status).toBe(409);
     const current = (await db.select().from(kanbanItems).where(eq(kanbanItems.id, itemId)))[0]!;
     expect(
-      (await request('member', `/platform/items/${itemId}`, 'DELETE', { version: current.version }))
-        .status
+      (
+        await request('member', `/platform/items/${itemId}/archive`, 'POST', {
+          version: current.version
+        })
+      ).status
     ).toBe(200);
     expect((await request('member', path, 'DELETE')).status).toBe(200);
     const deleted = (

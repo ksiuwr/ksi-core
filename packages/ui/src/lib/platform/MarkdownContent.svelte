@@ -4,10 +4,12 @@
   let {
     value,
     language = 'pl',
+    allowReferences = false,
     onresize
   }: {
     value: string;
     language?: 'pl' | 'en';
+    allowReferences?: boolean;
     onresize?: (index: number, width: number) => void;
   } = $props();
   let blocks = $state<MarkdownBlock[]>([]);
@@ -15,13 +17,23 @@
   let failed = $state(false);
   $effect(() => {
     const markdown = value;
+    const references = allowReferences;
     const controller = new AbortController();
     loading = true;
     failed = false;
     fetch('/api/markdown', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ markdown }),
+      body: JSON.stringify({
+        markdown,
+        ...(references
+          ? {
+              referenceScope: decodeURIComponent(
+                window.location.pathname.match(/^\/projects\/([^/]+)/)?.[1] ?? '~association'
+              )
+            }
+          : {})
+      }),
       signal: controller.signal
     })
       .then(async (response) => {

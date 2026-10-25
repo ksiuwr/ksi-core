@@ -260,6 +260,12 @@
     display: grid;
     place-items: center;
     background: var(--surface-muted);
+    font-size: calc(var(--avatar-size, 36px) * 0.36);
+    font-weight: 600;
+    line-height: 1;
+  }
+  .card-identity .initials {
+    font-size: 15px;
   }
   .identity-text {
     overflow-wrap: anywhere;

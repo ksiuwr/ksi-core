@@ -3,8 +3,14 @@
   let {
     type,
     id,
-    language = 'en'
-  }: { type: 'item' | 'thread'; id: string; language?: 'pl' | 'en' } = $props();
+    language = 'en',
+    showLabel = false
+  }: {
+    type: 'item' | 'thread';
+    id: string;
+    language?: 'pl' | 'en';
+    showLabel?: boolean;
+  } = $props();
   let watching = $state(false),
     busy = $state(true),
     error = $state('');
@@ -49,20 +55,20 @@
 <button
   type="button"
   class="watch-button"
+  class:with-label={showLabel}
   aria-pressed={watching}
-  aria-label={watching
-    ? language === 'pl'
-      ? 'Przestań obserwować'
-      : 'Unwatch'
-    : language === 'pl'
-      ? 'Obserwuj'
-      : 'Watch'}
+  aria-label={watching ? 'Unwatch' : 'Watch'}
   disabled={busy}
   onclick={toggle}
 >
-  {#if busy}<span class="sr-only">{language === 'pl' ? 'Ładowanie…' : 'Loading…'}</span>
-  {:else if watching}<Bell size={14} aria-hidden="true" />
-  {:else}<BellOff size={14} aria-hidden="true" />
+  {#if busy}<span class="sr-only">{'Loading…'}</span>
+  {:else if watching}<Bell size={13} aria-hidden="true" />
+  {:else}<BellOff size={13} aria-hidden="true" />
+  {/if}
+  {#if showLabel}
+    <span class="watch-label"
+      >{#if watching}{'Unwatch'}{:else}{'Watch'}{/if}</span
+    >
   {/if}
 </button>
 {#if error}<p role="alert">{error}</p>{/if}
@@ -90,6 +96,17 @@
     border-color: var(--control-border-hover);
     color: var(--ink);
     background: var(--surface-muted);
+  }
+  .watch-button.with-label {
+    width: auto;
+    height: 26px;
+    padding: 0 9px;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .watch-label {
+    white-space: nowrap;
   }
   .watch-button[aria-pressed='true'] {
     border-color: var(--accent);
