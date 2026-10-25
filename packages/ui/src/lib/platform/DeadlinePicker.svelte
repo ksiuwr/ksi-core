@@ -19,12 +19,18 @@
   let trigger = $state<HTMLButtonElement>();
   let panel = $state<HTMLDivElement>();
   let grid = $state<HTMLDivElement>();
+  let hourWheel = $state<HTMLDivElement>();
+  let minuteWheel = $state<HTMLDivElement>();
   let open = $state(false);
   let position = $state({ left: 0, top: 0 });
   let draftDate = $state('');
   let draftTime = $state('');
   let focusDay = $state('');
   let cursor = $state(firstOfMonth(new Date()));
+  let hourActive = $state(9);
+  let minuteActive = $state(0);
+  let syncing = false;
+  let warping = false;
 
   const fieldLabel = $derived(pl ? 'Termin (czas lokalny)' : 'Deadline (local time)');
   const emptyLabel = $derived(pl ? 'Brak terminu' : 'No deadline');
@@ -35,6 +41,8 @@
   const minutesLabel = $derived(pl ? 'Minuta' : 'Minute');
   const hours = Array.from({ length: 24 }, (_, index) => pad(index));
   const minutes = Array.from({ length: 12 }, (_, index) => pad(index * 5));
+  const hourUnits = [...hours, ...hours, ...hours];
+  const minuteUnits = [...minutes, ...minutes, ...minutes];
   const today = $derived(hourless(new Date()));
   const title = $derived(
     new Intl.DateTimeFormat(intl, { month: 'long', year: 'numeric' }).format(cursor)
@@ -112,6 +120,7 @@
     await tick();
     place();
     grid?.querySelector<HTMLButtonElement>(`button[data-day="${focusDay}"]`)?.focus();
+    wheelReset();
   }
   function close(focus = false) {
     if (panel?.matches(':popover-open')) panel.hidePopover();
@@ -123,6 +132,86 @@
   }
   function setMinute(minute: string) {
     draftTime = `${draftTime.slice(0, 2) || '00'}:${minute}`;
+  }
+  function wheelSelect(zone: 'hour' | 'minute', k: number) {
+    if (zone === 'hour') {
+      hourActive = k;
+      setHour(pad(k));
+    } else {
+      minuteActive = k;
+      setMinute(pad(k * 5));
+    }
+  }
+  function wheelSync(
+    el: HTMLDivElement,
+    count: number,
+    k: number,
+    motion: 'auto' | 'smooth' = 'auto'
+  ) {
+    const target = el.querySelector<HTMLLIElement>(`li[data-copy="1"][data-index="${k}"]`);
+    const first = el.querySelector('li');
+    if (!target || !first) return;
+    const smooth =
+      motion === 'smooth' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollTo({
+      top: target.offsetTop - (el.clientHeight - first.offsetHeight) / 2,
+      behavior: smooth ? 'smooth' : 'auto'
+    });
+  }
+  function draftSlot(part: string) {
+    const value = Number(part);
+    return Number.isFinite(value) ? value : 0;
+  }
+  function wheelReset() {
+    if (!hourWheel || !minuteWheel) return;
+    warping = false;
+    syncing = true;
+    const hour = draftSlot(draftTime.slice(0, 2));
+    const minute = draftSlot(draftTime.slice(3, 5));
+    const minuteK = Math.min(minutes.length - 1, Math.floor(minute / 5));
+    hourActive = ((hour % hours.length) + hours.length) % hours.length;
+    minuteActive = minuteK;
+    wheelSync(hourWheel, hours.length, hourActive);
+    wheelSync(minuteWheel, minutes.length, minuteK);
+    requestAnimationFrame(() => (syncing = false));
+  }
+  function wheelScroll(zone: 'hour' | 'minute', el: HTMLDivElement) {
+    if (syncing || warping) return;
+    const first = el.querySelector('li');
+    const step = first?.offsetHeight;
+    if (!step) return;
+    const count = zone === 'hour' ? hours.length : minutes.length;
+    const pos = Math.round(el.scrollTop / step);
+    if (pos < count || pos >= count * 2) {
+      warping = true;
+      el.scrollTop += pos < count ? step * count : -step * count;
+      requestAnimationFrame(() => (warping = false));
+      return;
+    }
+    const k = ((pos % count) + count) % count;
+    const active = zone === 'hour' ? hourActive : minuteActive;
+    if (active === k) return;
+    wheelSelect(zone, k);
+  }
+  function wheelPick(zone: 'hour' | 'minute', index: number) {
+    const count = zone === 'hour' ? hours.length : minutes.length;
+    const k = ((index % count) + count) % count;
+    wheelSelect(zone, k);
+    const el = zone === 'hour' ? hourWheel : minuteWheel;
+    if (el) wheelSync(el, count, k, 'smooth');
+  }
+  function wheelKeys(zone: 'hour' | 'minute', event: KeyboardEvent) {
+    const steps: Record<string, number> = { ArrowUp: -1, ArrowDown: 1, PageUp: -4, PageDown: 4 };
+    const offset = steps[event.key];
+    if (offset === undefined) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const count = zone === 'hour' ? hours.length : minutes.length;
+    const active = zone === 'hour' ? hourActive : minuteActive;
+    const k = (((active + offset) % count) + count) % count;
+    wheelSelect(zone, k);
+    const el = zone === 'hour' ? hourWheel : minuteWheel;
+    if (el) wheelSync(el, count, k, 'smooth');
   }
   function pick(day: string) {
     draftDate = day;
@@ -274,31 +363,67 @@
           <span>{timeLabel}</span>
           <output class:unset={!draftTime}>{draftTime || '--:--'}</output>
         </div>
-        <div class="picker-cells picker-hours" role="group" aria-label={hoursLabel}>
-          {#each hours as hour (hour)}
-            <button
-              type="button"
-              {disabled}
-              class:selected={draftTime.slice(0, 2) === hour}
-              aria-pressed={draftTime.slice(0, 2) === hour}
-              onclick={() => setHour(hour)}
+        <div class="picker-wheel-row">
+          <div class="picker-wheel-box">
+            <div
+              class="picker-wheel"
+              bind:this={hourWheel}
+              role="listbox"
+              aria-label={hoursLabel}
+              aria-orientation="vertical"
+              aria-activedescendant={`${uid}-hour-${hourActive + hours.length}`}
+              tabindex="0"
+              onscroll={(event) => wheelScroll('hour', event.currentTarget as HTMLDivElement)}
+              onkeydown={(event) => wheelKeys('hour', event)}
             >
-              {hour}
-            </button>
-          {/each}
-        </div>
-        <div class="picker-cells picker-minutes" role="group" aria-label={minutesLabel}>
-          {#each minutes as minute (minute)}
-            <button
-              type="button"
-              {disabled}
-              class:selected={draftTime.slice(3) === minute}
-              aria-pressed={draftTime.slice(3) === minute}
-              onclick={() => setMinute(minute)}
+              <ul>
+                {#each hourUnits as unit, index (index)}
+                  <li
+                    id={`${uid}-hour-${index}`}
+                    role="option"
+                    aria-selected={index === hourActive + hours.length}
+                    data-index={index % hours.length}
+                    data-copy={Math.floor(index / hours.length)}
+                    class:selected={index === hourActive + hours.length}
+                    onclick={() => wheelPick('hour', index)}
+                  >
+                    {unit}
+                  </li>
+                {/each}
+              </ul>
+            </div>
+            <span class="picker-wheel-band" aria-hidden="true"></span>
+          </div>
+          <div class="picker-wheel-box">
+            <div
+              class="picker-wheel"
+              bind:this={minuteWheel}
+              role="listbox"
+              aria-label={minutesLabel}
+              aria-orientation="vertical"
+              aria-activedescendant={`${uid}-minute-${minuteActive + minutes.length}`}
+              tabindex="0"
+              onscroll={(event) => wheelScroll('minute', event.currentTarget as HTMLDivElement)}
+              onkeydown={(event) => wheelKeys('minute', event)}
             >
-              {minute}
-            </button>
-          {/each}
+              <ul>
+                {#each minuteUnits as unit, index (index)}
+                  <li
+                    id={`${uid}-minute-${index}`}
+                    role="option"
+                    aria-selected={index === minuteActive + minutes.length}
+                    data-index={index % minutes.length}
+                    data-copy={Math.floor(index / minutes.length)}
+                    class:selected={index === minuteActive + minutes.length}
+                    onclick={() => wheelPick('minute', index)}
+                  >
+                    {unit}
+                  </li>
+                {/each}
+              </ul>
+            </div>
+            <span class="picker-wheel-band" aria-hidden="true"></span>
+          </div>
         </div>
       </div>
       <div class="picker-presets">
@@ -491,39 +616,73 @@
   output.unset {
     color: var(--muted);
   }
-  .picker-cells {
-    display: grid;
-    gap: 3px;
+  .picker-wheel-row {
+    --wheel-item: 32px;
+    display: flex;
+    gap: 10px;
   }
-  .picker-hours {
-    grid-template-columns: repeat(8, 1fr);
+  .picker-wheel-box {
+    position: relative;
+    flex: 1;
+    min-width: 0;
   }
-  .picker-minutes {
-    grid-template-columns: repeat(6, 1fr);
+  .picker-wheel {
+    height: calc(5 * var(--wheel-item));
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(
+      180deg,
+      transparent 5%,
+      #000 24%,
+      #000 76%,
+      transparent 95%
+    );
+    mask-image: linear-gradient(180deg, transparent 5%, #000 24%, #000 76%, transparent 95%);
   }
-  .picker-cells button {
-    display: grid;
-    place-items: center;
-    height: 26px;
-    padding: 0;
-    border: 1px solid transparent;
-    border-radius: 3px;
-    background: transparent;
-    color: var(--ink);
-    font-size: 11px;
+  .picker-wheel::-webkit-scrollbar {
+    display: none;
+  }
+  .picker-wheel:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .picker-wheel ul {
+    margin: 0;
+    padding: calc(2 * var(--wheel-item)) 0;
+    list-style: none;
+  }
+  .picker-wheel li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--wheel-item);
+    font-size: 12px;
     font-variant-numeric: tabular-nums;
+    color: var(--muted);
+    scroll-snap-align: center;
     cursor: pointer;
+    user-select: none;
   }
-  .picker-cells button:hover {
-    background: var(--surface-muted, #f0ede4);
+  .picker-wheel li:hover {
+    color: var(--ink);
   }
-  .picker-cells button.selected {
-    background: var(--accent);
-    color: #fff;
+  .picker-wheel li.selected {
+    color: var(--ink);
+    font-weight: 600;
   }
-  .picker-cells button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  .picker-wheel-band {
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    top: 50%;
+    height: var(--wheel-item);
+    transform: translateY(-50%);
+    background: color-mix(in srgb, var(--surface-muted, #f0ede4) 72%, transparent);
+    border-block: 1px solid var(--line);
+    border-radius: 4px;
+    pointer-events: none;
   }
   .picker-presets {
     display: flex;
@@ -632,9 +791,12 @@
     .picker-grid span {
       height: 42px;
     }
-    .picker-cells button {
-      height: 38px;
-      font-size: 13px;
+    .picker-wheel-row {
+      --wheel-item: 40px;
+      gap: 12px;
+    }
+    .picker-wheel li {
+      font-size: 15px;
     }
     .picker-foot button {
       min-height: 48px;
