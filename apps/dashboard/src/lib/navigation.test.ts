@@ -114,3 +114,15 @@ test('article slugs persist in standalone routes and reject malformed segments',
   expect(parseDashboardPath('/articles/a%2Fb')).toBeNull();
   expect(parseDashboardPath('/articles/a/extra')).toBeNull();
 });
+
+test('notification settings are a global page with a persistent URL', () => {
+  const path = dashboardPath('project', 'roboty', 'notification-settings');
+  expect(path).toBe('/settings/notifications');
+  expect(parseDashboardPath(path)).toEqual({
+    workspace: 'directory',
+    projectSlug: '',
+    tab: 'notification-settings'
+  });
+  expect(parseDashboardPath('/settings/notifications/extra')).toBeNull();
+  expect(parseDashboardPath('/settings/unknown')).toBeNull();
+});

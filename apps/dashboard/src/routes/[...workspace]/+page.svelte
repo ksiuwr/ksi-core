@@ -7,6 +7,7 @@
   import ChangeDetails from '@ksi-core/ui/platform/ChangeDetails.svelte';
   import Assignees, { type AssignmentMember } from '$lib/Assignees.svelte';
   import NotificationInbox from '$lib/NotificationInbox.svelte';
+  import NotificationSettings from '$lib/NotificationSettings.svelte';
   import WatchButton from '$lib/WatchButton.svelte';
   import ContentTranslations from '$lib/ContentTranslations.svelte';
   import type { ContentTranslations as TranslationData } from 'shared/content-locales';
@@ -21,7 +22,7 @@
     type ThemePreference
   } from '$lib/preferences.svelte';
   import KanbanBoard, { type BoardStatus, type BoardLabel } from '$lib/KanbanBoard.svelte';
-  import ApprovalInbox, { type InboxData } from '$lib/ApprovalInbox.svelte';
+  import type { InboxData } from '$lib/ApprovalInbox.svelte';
   import AvatarUpload, { type AvatarRequest } from '$lib/AvatarUpload.svelte';
   import { validProfileLink } from 'shared/profile-links';
   import Skeleton from '$lib/Skeleton.svelte';
@@ -60,7 +61,6 @@
     Github,
     Linkedin,
     Check,
-    Inbox,
     Archive,
     Settings,
     Laptop
@@ -251,16 +251,6 @@
     workspace === 'project' ? projectAccess.canPublishArticles : boardLeader
   );
   let inbox = $state<InboxData>({ memberships: [], avatars: [] });
-  let notifications = $state<
-    {
-      id: string;
-      title: string;
-      href: string;
-      reason: string;
-      createdAt: string;
-      readAt: string | null;
-    }[]
-  >([]);
   let avatarRequest = $state<AvatarRequest | null>(null);
   let profileSaved = $state(false);
   let archived = $state(false);
@@ -346,21 +336,6 @@
         } catch {
           /* Permission denials must not block unrelated workspace pages. */
         }
-      }
-      try {
-        const result = await api<
-          {
-            id: string;
-            title: string;
-            href: string;
-            reason: string;
-            createdAt: string;
-            readAt: string | null;
-          }[]
-        >('/api/notifications');
-        if (generation === loadGeneration) notifications = result;
-      } catch {
-        /* Notification failures must not block the workspace page. */
       }
       if (currentTab === 'profile') {
         const request = await api<AvatarRequest | null>('/users/me/avatar-request');
@@ -546,19 +521,6 @@
     }
   }
 
-  async function markRead(id: string) {
-    try {
-      await api(`/api/notifications/${encodeURIComponent(id)}/read`, 'POST');
-      await load();
-    } catch (cause) {
-      error = cause instanceof Error ? cause.message : 'Request failed';
-    }
-  }
-  function notificationReason(reason: string) {
-    if (reason === 'mention') return language === 'pl' ? 'Wzmianka' : 'Mention';
-    if (reason === 'assignment') return language === 'pl' ? 'Przypisanie' : 'Assignment';
-    return language === 'pl' ? 'Aktualizacja' : 'Update';
-  }
   async function action(work: () => Promise<unknown>) {
     if (workspace === 'project' && !scope) return;
     busy = true;
@@ -832,19 +794,21 @@
   const viewName = $derived(
     graveyard && tab === 'board'
       ? 'Removed tasks'
-      : tab === 'inbox'
-        ? 'Notifications'
-        : tab === 'projects'
-          ? 'Projects'
-          : tab === 'profile'
-            ? 'My profile'
-            : tab === 'person'
-              ? 'Member profile'
-              : tab === 'users'
-                ? 'Members'
-                : tab === '__create_project__'
-                  ? 'New project'
-                  : (tabs.find(([key]) => key === tab)?.[1] ?? '')
+      : tab === 'notification-settings'
+        ? 'Notification settings'
+        : tab === 'inbox'
+          ? 'Notifications'
+          : tab === 'projects'
+            ? 'Projects'
+            : tab === 'profile'
+              ? 'My profile'
+              : tab === 'person'
+                ? 'Member profile'
+                : tab === 'users'
+                  ? 'Members'
+                  : tab === '__create_project__'
+                    ? 'New project'
+                    : (tabs.find(([key]) => key === tab)?.[1] ?? '')
   );
 
   const navigationIcons: Record<string, typeof LayoutDashboard> = {
@@ -1927,91 +1891,30 @@
                   {/if}
 
                   <!-- ── PROFILE ────────────────────────────────────────────────────── -->
+                {:else if tab === 'notification-settings'}
+                  <NotificationSettings {language} />
                 {:else if tab === 'inbox'}
                   <div class="workspace-header">
                     <div>
                       <h1>{'Notifications'}</h1>
                       <p class="workspace-description">
                         {language === 'pl'
-                          ? 'Wzmianki, przypisania i aktualizacje na obserwowanych zadaniach i wątkach.'
-                          : 'Mentions, assignments, and updates on watched tasks and threads.'}
+                          ? 'Wzmianki, przypisania, aktualizacje i prośby o zatwierdzenie w jednym miejscu.'
+                          : 'Mentions, assignments, updates, and approval requests in one place.'}
                       </p>
                     </div>
-                    <button
-                      class="btn"
-                      disabled={busy}
-                      onclick={async () => {
-                        try {
-                          await api('/api/notifications/read-all', 'POST');
-                          await load();
-                        } catch (cause) {
-                          error = cause instanceof Error ? cause.message : 'Request failed';
-                        }
-                      }}
-                    >
-                      {language === 'pl' ? 'Oznacz wszystkie jako przeczytane' : 'Mark all as read'}
-                    </button>
                   </div>
-                  {#if notifications.length}
-                    <section class="notification-list-page">
-                      {#each notifications as notification (notification.id)}
-                        <article class="notification-item-page" class:unread={!notification.readAt}>
-                          <a
-                            href={notification.href}
-                            onclick={() => {
-                              if (!notification.readAt) void markRead(notification.id);
-                            }}>{notification.title}</a
-                          >
-                          <div class="item-meta-page">
-                            <span class="reason-page"
-                              >{notificationReason(notification.reason)}</span
-                            >
-                            <time datetime={notification.createdAt}
-                              >{new Date(notification.createdAt).toLocaleString(
-                                language === 'pl' ? 'pl-PL' : 'en-GB'
-                              )}</time
-                            >
-                          </div>
-                        </article>
-                      {/each}
-                    </section>
-                  {:else}
-                    <div class="empty-state">
-                      <Inbox size={30} aria-hidden="true" />
-                      <h2>{language === 'pl' ? 'Brak powiadomień.' : 'No notifications.'}</h2>
-                      <p>
-                        {language === 'pl'
-                          ? 'Nowe powiadomienia pojawią się tutaj.'
-                          : 'New notifications will appear here.'}
-                      </p>
-                    </div>
-                  {/if}
-                  {#if data.user.role !== 'member'}
-                    <div class="inbox-section">
-                      <div class="workspace-header">
-                        <div>
-                          <h2>
-                            {language === 'pl' ? 'Prośby o zatwierdzenie' : 'Approval requests'}
-                          </h2>
-                          <p class="workspace-description">
-                            {language === 'pl'
-                              ? 'Nowe konta i zdjęcia profilowe oczekujące na zatwierdzenie.'
-                              : 'New accounts and profile pictures awaiting approval.'}
-                          </p>
-                        </div>
-                      </div>
-                      <ApprovalInbox
-                        {inbox}
-                        {language}
-                        administrator={data.user.role === 'administrator'}
-                        refresh={async () => {
-                          await load();
-                          await invalidateAll();
-                        }}
-                        reportError={(message) => (error = message)}
-                      />
-                    </div>
-                  {/if}
+                  <NotificationInbox
+                    fullPage
+                    {language}
+                    admin={inbox}
+                    administrator={data.user.role === 'administrator'}
+                    refresh={async () => {
+                      await load();
+                      await invalidateAll();
+                    }}
+                    reportError={(message) => (error = message)}
+                  />
                 {:else if tab === 'profile'}
                   <form
                     class="profile-form"
@@ -2598,61 +2501,6 @@
   }
   .icon-action-btn.danger:hover {
     color: var(--red);
-  }
-  .notification-list-page {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    margin-top: 10px;
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    background: var(--surface);
-    overflow: hidden;
-  }
-  .notification-item-page {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--line);
-    transition: background 0.13s;
-  }
-  .notification-item-page:last-child {
-    border-bottom: 0;
-  }
-  .notification-item-page:hover {
-    background: var(--surface-muted);
-  }
-  .notification-item-page.unread a {
-    font-weight: 600;
-  }
-  .notification-item-page a {
-    color: var(--ink);
-    text-decoration: none;
-  }
-  .notification-item-page a:hover {
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-  .item-meta-page {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  .reason-page {
-    font-size: 10px;
-    font-family: var(--mono);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--accent);
-  }
-  .item-meta-page time {
-    font-size: 11px;
-    color: var(--muted);
-  }
-  .inbox-section {
-    margin-top: 28px;
   }
   @media (max-width: 600px) {
     .thread-timeline::before {

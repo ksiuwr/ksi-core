@@ -33,6 +33,8 @@ export function parseDashboardPath(pathname: string): {
     !slug.includes('\\')
   )
     return { workspace: 'directory', projectSlug: '', tab: 'articles', articleSlug: slug };
+  if (root === 'settings' && slug === 'notifications' && segments.length === 2)
+    return { workspace: 'directory', projectSlug: '', tab: 'notification-settings' };
   const removed = root === 'association' ? segments[2] : segments[3];
   if (
     removed &&
@@ -78,6 +80,7 @@ export function parseDashboardPath(pathname: string): {
   };
 }
 export function dashboardPath(workspace: Workspace, projectSlug: string, tab: string): string {
+  if (tab === 'notification-settings') return '/settings/notifications';
   if (tab === 'profile') return '/profile';
   if (tab === 'inbox') return '/inbox';
   if (tab === 'users') return '/members';
