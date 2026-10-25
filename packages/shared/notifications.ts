@@ -4,7 +4,26 @@ export type NotificationContext = {
   ownerType: string;
   projectName: string | null;
   changedFields: string[];
+  assignedNames: (string | null)[];
+  unassignedNames: (string | null)[];
 };
+
+/** Read assignment differences from the event rather than the task's current state. */
+export function assignmentChanges(changes: unknown): { added: string[]; removed: string[] } {
+  const change = Array.isArray(changes)
+    ? changes.find((entry) => entry && entry.field === 'assigneeIds')
+    : undefined;
+  const ids = (value: unknown): string[] =>
+    Array.isArray(value)
+      ? [...new Set(value.filter((id): id is string => typeof id === 'string'))]
+      : [];
+  const before = ids(change?.before),
+    after = ids(change?.after);
+  return {
+    added: after.filter((id) => !before.includes(id)),
+    removed: before.filter((id) => !after.includes(id))
+  };
+}
 
 /** Describe the event separately from why its recipient was notified. */
 export function notificationAction(
@@ -15,6 +34,37 @@ export function notificationAction(
   const actor = notification.actorName || (pl ? 'Ktoś' : 'Someone');
   const action = notification.action ?? '';
   const fields = notification.changedFields ?? [];
+  const names = (values: (string | null)[] = []) =>
+    values.map((name) => name || (pl ? 'Nieznany użytkownik' : 'Unknown user')).join(', ');
+  const assignments: string[] = [];
+  if (notification.assignedNames?.length)
+    assignments.push(`${pl ? 'przypisał:' : 'assigned'} ${names(notification.assignedNames)}`);
+  if (notification.unassignedNames?.length)
+    assignments.push(
+      `${pl ? 'cofnął przypisanie:' : 'unassigned'} ${names(notification.unassignedNames)}`
+    );
+  if (
+    assignments.length &&
+    [
+      'kanban.created',
+      'kanban.updated',
+      'threads.created',
+      'threads.updated',
+      'threads.assignees.updated'
+    ].includes(action)
+  ) {
+    const created =
+      action === 'kanban.created'
+        ? pl
+          ? 'utworzył zadanie; '
+          : 'created a task and '
+        : action === 'threads.created'
+          ? pl
+            ? 'rozpoczął dyskusję; '
+            : 'started a discussion and '
+          : '';
+    return `${actor} ${created}${assignments.join(pl ? '; ' : ' and ')}`;
+  }
   let description: string;
   switch (action) {
     case 'kanban.comment.created':

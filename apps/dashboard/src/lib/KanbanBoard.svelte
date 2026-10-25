@@ -1374,7 +1374,11 @@
         >
       </div>
     </div>
-    <WatchButton type="item" id={selected.id} {language} />
+    {#key (selected.assigneeIds ?? []).join(',')}<WatchButton
+        type="item"
+        id={selected.id}
+        {language}
+      />{/key}
     <div class="issue-tools">
       <Dropdown
         label={'Task status'}

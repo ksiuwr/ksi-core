@@ -1,3 +1,4 @@
+import { assignmentChanges } from 'shared/notifications';
 import { mentionedUserIds } from 'shared/mentions';
 import { and, eq, inArray, isNull, desc, sql } from 'drizzle-orm';
 import { status } from 'elysia';
@@ -103,18 +104,22 @@ export async function notifyCollaboration(
   for (const userId of options.assigneeIds ?? []) recipients.set(userId, 'assignment');
   for (const userId of mentionedUserIds(options.markdown ?? '')) recipients.set(userId, 'mention');
   recipients.delete(actorId);
-  if (!recipients.size) return;
-  const candidates = await tx
-    .select()
-    .from(users)
-    .where(inArray(users.id, [...recipients.keys()]));
-  const values = candidates.filter(target.canRead).map((user) => ({
-    userId: user.id,
-    eventId,
-    ownerType: type,
-    ownerId: id,
-    reason: recipients.get(user.id)!
-  }));
+  const candidateIds = [...new Set([...recipients.keys(), ...(options.assigneeIds ?? [])])];
+  if (!candidateIds.length) return;
+  const candidates = await tx.select().from(users).where(inArray(users.id, candidateIds));
+  const readable = candidates.filter(target.canRead);
+  for (const user of readable) {
+    if (options.assigneeIds?.includes(user.id)) await subscribe(tx, type, id, user.id);
+  }
+  const values = readable
+    .filter((user) => recipients.has(user.id))
+    .map((user) => ({
+      userId: user.id,
+      eventId,
+      ownerType: type,
+      ownerId: id,
+      reason: recipients.get(user.id)!
+    }));
   if (values.length) await tx.insert(notifications).values(values).onConflictDoNothing();
 }
 export async function listNotifications(
@@ -135,6 +140,21 @@ export async function listNotifications(
     .where(eq(notifications.userId, user.id))
     .orderBy(desc(notifications.createdAt))
     .limit(limit);
+  const assigneeIds = [
+    ...new Set(
+      rows.flatMap(({ metadata }) => {
+        const { added, removed } = assignmentChanges(metadata.changes);
+        return [...added, ...removed];
+      })
+    )
+  ];
+  const assignees = assigneeIds.length
+    ? await executor
+        .select({ id: users.id, name: users.name })
+        .from(users)
+        .where(inArray(users.id, assigneeIds))
+    : [];
+  const assigneeNames = new Map(assignees.map((user) => [user.id, user.name]));
   const visible = [];
   for (const { notification, action, actorName, metadata } of rows) {
     const target = await notificationTarget(executor, notification.ownerType, notification.ownerId);
@@ -144,6 +164,7 @@ export async function listNotifications(
             change && typeof change.field === 'string' ? [change.field] : []
           )
         : [];
+      const assignments = assignmentChanges(metadata.changes);
       visible.push({
         ...notification,
         title: target.title,
@@ -151,7 +172,9 @@ export async function listNotifications(
         projectName: target.projectName,
         actorName,
         action,
-        changedFields
+        changedFields,
+        assignedNames: assignments.added.map((id) => assigneeNames.get(id) ?? null),
+        unassignedNames: assignments.removed.map((id) => assigneeNames.get(id) ?? null)
       });
     }
   }

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { notificationAction } from './notifications';
+import { notificationAction, assignmentChanges } from './notifications';
 
 describe('notification action descriptions', () => {
   test('comments describe the actor and actual event, including when a mention triggered delivery', () => {
@@ -47,4 +47,39 @@ describe('notification action descriptions', () => {
       'Someone updated the discussion'
     );
   });
+});
+
+test('assignment changes distinguish additions and removals without treating reorder as reassignment', () => {
+  expect(
+    assignmentChanges([{ field: 'assigneeIds', before: ['a', 'b'], after: ['b', 'c'] }])
+  ).toEqual({ added: ['c'], removed: ['a'] });
+  expect(
+    assignmentChanges([{ field: 'assigneeIds', before: ['a', 'b'], after: ['b', 'a'] }])
+  ).toEqual({ added: [], removed: [] });
+  expect(assignmentChanges([{ field: 'assigneeIds', before: null, after: ['a', 'a'] }])).toEqual({
+    added: ['a'],
+    removed: []
+  });
+  expect(assignmentChanges(undefined)).toEqual({ added: [], removed: [] });
+});
+
+test('assignment descriptions name assigned and unassigned people in both languages', () => {
+  const context = {
+    actorName: 'Jan',
+    action: 'kanban.updated',
+    changedFields: ['assigneeIds'],
+    assignedNames: ['Alicja', 'Piotr'],
+    unassignedNames: ['Marek']
+  };
+  expect(notificationAction(context, 'en')).toBe('Jan assigned Alicja, Piotr and unassigned Marek');
+  expect(notificationAction(context, 'pl')).toBe(
+    'Jan przypisał: Alicja, Piotr; cofnął przypisanie: Marek'
+  );
+  expect(notificationAction({ ...context, assignedNames: [] }, 'en')).toBe('Jan unassigned Marek');
+  expect(notificationAction({ ...context, assignedNames: [], unassignedNames: [null] }, 'pl')).toBe(
+    'Jan cofnął przypisanie: Nieznany użytkownik'
+  );
+  expect(
+    notificationAction({ ...context, action: 'kanban.created', unassignedNames: [] }, 'en')
+  ).toBe('Jan created a task and assigned Alicja, Piotr');
 });

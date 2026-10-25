@@ -816,6 +816,95 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
     await db.delete(kanbanItems).where(eq(kanbanItems.id, task.body.id));
     await db.delete(mailJobs).where(eq(mailJobs.to, `${ids.outsider}@example.test`));
   });
+  test('assignment notifications name changes and automatically watch new assignees', async () => {
+    await db
+      .insert(projectMembers)
+      .values({ projectId, userId: ids.outsider, leader: false })
+      .onConflictDoNothing();
+    let task = await request('admin', `/platform/boards/${boardId}/items`, 'POST', {
+      title: 'Automatic assignment watch',
+      markdown: '',
+      column: 'todo',
+      labels: [],
+      position: 0,
+      assigneeIds: [ids.member]
+    });
+    expect(task.status).toBe(200);
+    const watching = async (actor: Actor) =>
+      (await request(actor, `/notifications/subscriptions/item/${task.body.id}`)).body.watching;
+    const change = async (actor: Actor, values: Record<string, unknown>) => {
+      task = await request(actor, `/platform/items/${task.body.id}`, 'PATCH', {
+        version: task.body.version,
+        ...values
+      });
+      expect(task.status).toBe(200);
+    };
+    expect(await watching('member')).toBe(true);
+    const created = (await request('member', '/notifications')).body.find(
+      (n: any) => n.ownerId === task.body.id
+    );
+    expect(created.assignedNames).toEqual(['member Workflow']);
+    expect(created.unassignedNames).toEqual([]);
+    await change('admin', { title: 'Watched update' });
+    expect(
+      (await request('member', '/notifications')).body.some(
+        (n: any) =>
+          n.ownerId === task.body.id && n.action === 'kanban.updated' && n.reason === 'update'
+      )
+    ).toBe(true);
+    await request('member', `/notifications/subscriptions/item/${task.body.id}`, 'PUT', {
+      watching: false
+    });
+    await change('admin', { title: 'Keep manual unwatch' });
+    expect(await watching('member')).toBe(false);
+    await change('member', { assigneeIds: [] });
+    const removal = (await request('admin', '/notifications')).body.find(
+      (n: any) => n.ownerId === task.body.id && n.unassignedNames?.includes('member Workflow')
+    );
+    expect(removal.assignedNames).toEqual([]);
+    expect(removal.unassignedNames).toEqual(['member Workflow']);
+    await change('member', { assigneeIds: [ids.member, ids.outsider] });
+    expect(await watching('member')).toBe(true);
+    expect(await watching('outsider')).toBe(true);
+    const assignment = (await request('outsider', '/notifications')).body.find(
+      (n: any) => n.ownerId === task.body.id
+    );
+    expect(assignment.assignedNames).toEqual(['member Workflow', 'outsider Workflow']);
+    expect(assignment.reason).toBe('assignment');
+    expect(
+      (await request('member', '/notifications')).body.some(
+        (n: any) => n.ownerId === task.body.id && n.eventId === assignment.eventId
+      )
+    ).toBe(false);
+    await change('admin', { assigneeIds: [ids.outsider] });
+    const unassigned = (await request('member', '/notifications')).body.find(
+      (n: any) => n.ownerId === task.body.id && n.unassignedNames?.includes('member Workflow')
+    );
+    expect(unassigned.assignedNames).toEqual([]);
+    expect(unassigned.unassignedNames).toEqual(['member Workflow']);
+    expect(await watching('member')).toBe(true);
+    // Historical assignment details come from each event, even after later assignments change.
+    expect(
+      (await request('outsider', '/notifications')).body.find((n: any) => n.id === assignment.id)
+        .assignedNames
+    ).toEqual(['member Workflow', 'outsider Workflow']);
+    const thread = await request('admin', '/platform/threads', 'POST', {
+      title: 'Assigned discussion',
+      markdown: 'Discussion with an assignee',
+      projectId,
+      visibility: 'association',
+      invitedIds: [],
+      assigneeIds: [ids.outsider]
+    });
+    expect(thread.status).toBe(200);
+    expect(
+      (await request('outsider', `/notifications/subscriptions/thread/${thread.body.id}`)).body
+        .watching
+    ).toBe(true);
+    await db.delete(comments).where(eq(comments.threadId, thread.body.id));
+    await db.delete(threads).where(eq(threads.id, thread.body.id));
+    await db.delete(kanbanItems).where(eq(kanbanItems.id, task.body.id));
+  });
   test('administrator email changes revoke access and require verification; recovery stays private', async () => {
     const id = createId(),
       email = `${id}@example.test`,

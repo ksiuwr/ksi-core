@@ -1606,7 +1606,11 @@
                       <h1 style="font-size:clamp(24px,3vw,36px);margin-bottom:24px">
                         {selectedThread.title}
                       </h1>
-                      <WatchButton type="thread" id={selectedThread.id} {language} />
+                      {#key (selectedThread.assigneeIds ?? []).join(',')}<WatchButton
+                          type="thread"
+                          id={selectedThread.id}
+                          {language}
+                        />{/key}
                       <Assignees
                         projectId={scope}
                         value={selectedThread.assigneeIds ?? []}
