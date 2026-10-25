@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount, tick } from 'svelte';
+  import { fly } from 'svelte/transition';
   import { CalendarClock, ChevronLeft, ChevronRight, X } from '@lucide/svelte';
 
   let {
@@ -27,23 +28,34 @@
   let draftTime = $state('');
   let focusDay = $state('');
   let cursor = $state(firstOfMonth(new Date()));
-  let hourActive = $state(9);
-  let minuteActive = $state(0);
-  let syncing = false;
+  let hourActive = $state(23);
+  let minuteActive = $state(59);
+  let clockHour = $state('');
+  let clockMinute = $state('');
+  let clockFocused = $state<'hour' | 'minute' | null>(null);
+  let step = $state<'date' | 'time'>('date');
+  let monthDirection = 1;
+  let modeDirection = 1;
+  let dragged = false;
+  let dragging = $state(false);
+  let glideToken = 0;
   let warping = false;
+  let syncing = false;
 
   const fieldLabel = $derived(pl ? 'Termin (czas lokalny)' : 'Deadline (local time)');
   const emptyLabel = $derived(pl ? 'Brak terminu' : 'No deadline');
-  const clearLabel = $derived(pl ? 'Wyczyść' : 'Clear');
   const doneLabel = $derived(pl ? 'Gotowe' : 'Done');
+  const nextLabel = $derived(pl ? 'Dalej' : 'Next');
+  const closeLabel = $derived(pl ? 'Zamknij' : 'Close');
   const timeLabel = $derived(pl ? 'Godzina' : 'Time');
   const hoursLabel = $derived(pl ? 'Godzina' : 'Hour');
   const minutesLabel = $derived(pl ? 'Minuta' : 'Minute');
   const hours = Array.from({ length: 24 }, (_, index) => pad(index));
-  const minutes = Array.from({ length: 12 }, (_, index) => pad(index * 5));
+  const minutes = Array.from({ length: 60 }, (_, index) => pad(index));
   const hourUnits = [...hours, ...hours, ...hours];
   const minuteUnits = [...minutes, ...minutes, ...minutes];
   const today = $derived(hourless(new Date()));
+  const monthKey = $derived(`${cursor.getFullYear()}-${cursor.getMonth()}`);
   const title = $derived(
     new Intl.DateTimeFormat(intl, { month: 'long', year: 'numeric' }).format(cursor)
   );
@@ -101,26 +113,29 @@
     }
     const rect = trigger.getBoundingClientRect();
     const width = Math.min(312, window.innerWidth - 24);
+    const height = panel?.offsetHeight || 340;
     const below = window.innerHeight - rect.bottom - 16;
-    const upward = below < 340 && rect.top > 340;
+    const upward = below < height + 8 && rect.top > height + 8;
     position = {
       left: Math.max(12, Math.min(rect.left, window.innerWidth - width - 12)),
-      top: upward ? Math.max(12, rect.top - 428) : rect.bottom + 6
+      top: upward ? Math.max(12, rect.top - height - 14) : rect.bottom + 6
     };
   }
   async function show() {
     if (disabled || !panel || panel.matches(':popover-open')) return;
     const parts = partsOf(value);
     draftDate = parts.date;
-    draftTime = parts.time;
+    draftTime = parts.time || (parts.date ? '23:59' : '');
     focusDay = parts.date || today;
+    monthDirection = 1;
+    modeDirection = -1;
     cursor = firstOfMonth(new Date(`${parts.date || today}T12:00`));
+    step = 'date';
     panel.showPopover();
     open = true;
     await tick();
     place();
     grid?.querySelector<HTMLButtonElement>(`button[data-day="${focusDay}"]`)?.focus();
-    wheelReset();
   }
   function close(focus = false) {
     if (panel?.matches(':popover-open')) panel.hidePopover();
@@ -139,7 +154,7 @@
       setHour(pad(k));
     } else {
       minuteActive = k;
-      setMinute(pad(k * 5));
+      setMinute(pad(k));
     }
   }
   function wheelSync(
@@ -166,13 +181,12 @@
     if (!hourWheel || !minuteWheel) return;
     warping = false;
     syncing = true;
-    const hour = draftTime.slice(0, 2) ? draftSlot(draftTime.slice(0, 2)) : 9;
-    const minute = draftTime.slice(3, 5) ? draftSlot(draftTime.slice(3, 5)) : 0;
-    const minuteK = Math.min(minutes.length - 1, Math.floor(minute / 5));
+    const hour = draftTime.slice(0, 2) ? draftSlot(draftTime.slice(0, 2)) : 23;
+    const minute = draftTime.slice(3, 5) ? draftSlot(draftTime.slice(3, 5)) : 59;
     hourActive = ((hour % hours.length) + hours.length) % hours.length;
-    minuteActive = minuteK;
+    minuteActive = Math.min(minutes.length - 1, Math.max(0, minute));
     wheelSync(hourWheel, hours.length, hourActive);
-    wheelSync(minuteWheel, minutes.length, minuteK);
+    wheelSync(minuteWheel, minutes.length, minuteActive);
     requestAnimationFrame(() => (syncing = false));
   }
   function wheelScroll(zone: 'hour' | 'minute', el: HTMLDivElement) {
@@ -193,7 +207,75 @@
     if (active === k) return;
     wheelSelect(zone, k);
   }
+  function wheelDrag(zone: 'hour' | 'minute', event: PointerEvent) {
+    if (event.pointerType !== 'mouse' || event.button !== 0) return;
+    const el = event.currentTarget as HTMLDivElement;
+    if (!el) return;
+    event.preventDefault();
+    dragged = false;
+    dragging = true;
+    glideToken += 1;
+    const token = glideToken;
+    const step = el.querySelector('li')?.offsetHeight || 32;
+    const count = zone === 'hour' ? hours.length : minutes.length;
+    let lastY = event.clientY;
+    let lastT = performance.now();
+    let velocity = 0;
+    let travelled = 0;
+    el.setPointerCapture(event.pointerId);
+    const move = (dragEvent: PointerEvent) => {
+      const now = performance.now();
+      const dt = Math.max(1, now - lastT);
+      const dy = lastY - dragEvent.clientY;
+      lastY = dragEvent.clientY;
+      lastT = now;
+      travelled += Math.abs(dy);
+      dragged = travelled > step / 4;
+      velocity = velocity * 0.7 + (dy / dt) * 0.3;
+      el.scrollTop += dy;
+    };
+    const finish = () => {
+      if (!dragging) return;
+      dragging = false;
+      el.removeEventListener('pointermove', move);
+      el.removeEventListener('pointerup', finish);
+      el.removeEventListener('pointercancel', finish);
+      el.removeEventListener('lostpointercapture', finish);
+      const glide =
+        Math.abs(velocity) >= 0.05 &&
+        !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!glide) settle();
+      else {
+        let last = performance.now();
+        const tick = () => {
+          if (token !== glideToken) return;
+          const now = performance.now();
+          const dt = now - last;
+          last = now;
+          el.scrollTop += velocity * dt;
+          velocity *= Math.pow(0.996, dt);
+          if (token !== glideToken) return;
+          if (Math.abs(velocity) >= 0.05) requestAnimationFrame(tick);
+          else settle();
+        };
+        requestAnimationFrame(tick);
+      }
+    };
+    const settle = () => {
+      const k = ((Math.round(el.scrollTop / step) % count) + count) % count;
+      wheelSelect(zone, k);
+      wheelSync(el, count, k, 'auto');
+    };
+    el.addEventListener('pointermove', move);
+    el.addEventListener('pointerup', finish);
+    el.addEventListener('pointercancel', finish);
+    el.addEventListener('lostpointercapture', finish);
+  }
   function wheelPick(zone: 'hour' | 'minute', index: number) {
+    if (dragged) {
+      dragged = false;
+      return;
+    }
     const count = zone === 'hour' ? hours.length : minutes.length;
     const k = ((index % count) + count) % count;
     wheelSelect(zone, k);
@@ -215,31 +297,114 @@
   }
   function pick(day: string) {
     draftDate = day;
-    draftTime ||= '09:00';
+    draftTime ||= '23:59';
     focusDay = day;
   }
   function preset(offset: number) {
     const date = addDays(today, offset);
     draftDate = hourless(date);
-    draftTime ||= '09:00';
+    draftTime ||= '23:59';
     focusDay = draftDate;
-    cursor = firstOfMonth(date);
+    const next = firstOfMonth(date);
+    monthDirection = next.getTime() >= cursor.getTime() ? 1 : -1;
+    cursor = next;
   }
-  function clearAll() {
-    draftDate = '';
-    draftTime = '';
-    value = '';
+  function presetDate(offset: number) {
+    return hourless(addDays(today, offset));
+  }
+  function monthIn(node: Element) {
+    return fly(node, { x: 22 * monthDirection, duration: 170 });
+  }
+  function monthOut(node: Element) {
+    (node as HTMLElement).style.pointerEvents = 'none';
+    return fly(node, { x: -22 * monthDirection, duration: 130 });
+  }
+  function stepIn(node: Element) {
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 760px)').matches) {
+      return fly(node, { x: 28 * modeDirection, duration: 180 });
+    }
+    return fly(node, { y: 10, duration: 180 });
+  }
+  function stepOut(node: Element) {
+    (node as HTMLElement).style.pointerEvents = 'none';
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 760px)').matches) {
+      return fly(node, { x: -28 * modeDirection, duration: 140 });
+    }
+    return fly(node, { y: -10, duration: 130 });
+  }
+  async function showTime() {
+    modeDirection = 1;
+    step = 'time';
+    draftTime ||= '23:59';
+    await tick();
+    wheelReset();
+    place();
+  }
+  function showDate() {
+    modeDirection = -1;
+    step = 'date';
+    place();
+  }
+  function timePreset(time: string) {
+    draftTime = time;
+    hourActive = Number(time.slice(0, 2)) % hours.length;
+    minuteActive = Math.min(minutes.length - 1, Number(time.slice(3, 5)));
+    if (hourWheel) wheelSync(hourWheel, hours.length, hourActive);
+    if (minuteWheel) wheelSync(minuteWheel, minutes.length, minuteActive);
+  }
+  $effect(() => {
+    if (clockFocused !== 'hour') clockHour = draftTime.slice(0, 2);
+  });
+  $effect(() => {
+    if (clockFocused !== 'minute') clockMinute = draftTime.slice(3, 5);
+  });
+  function clockInput(zone: 'hour' | 'minute', raw: string) {
+    const digits = raw.replace(/\D/g, '').slice(0, 2);
+    if (zone === 'hour') clockHour = digits;
+    else clockMinute = digits;
+    if (!digits) {
+      zone === 'hour' ? setHour('00') : setMinute('00');
+      return;
+    }
+    const value = Number(digits);
+    const cap = zone === 'hour' ? 23 : 59;
+    if (value <= cap) zone === 'hour' ? setHour(pad(value)) : setMinute(pad(value));
+  }
+  function clockBlur(zone: 'hour' | 'minute') {
+    clockFocused = null;
+    const digits = (zone === 'hour' ? clockHour : clockMinute).replace(/\D/g, '');
+    if (zone === 'hour') {
+      const value = Math.min(23, Math.max(0, Number(digits) || 0));
+      hourActive = value;
+      clockHour = pad(value);
+      setHour(clockHour);
+      if (hourWheel) wheelSync(hourWheel, hours.length, value);
+    } else {
+      const value = Math.min(59, Math.max(0, Number(digits) || 0));
+      minuteActive = value;
+      clockMinute = pad(value);
+      setMinute(clockMinute);
+      if (minuteWheel) wheelSync(minuteWheel, minutes.length, value);
+    }
+  }
+  function clockEnter(event: KeyboardEvent) {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    event.stopPropagation();
+    (event.currentTarget as HTMLInputElement).blur();
   }
   function move(offset: number) {
     const stamp = addDays(focusDay, offset);
     if (stamp.getMonth() !== cursor.getMonth() || stamp.getFullYear() !== cursor.getFullYear()) {
+      monthDirection = offset > 0 ? 1 : -1;
       cursor = firstOfMonth(stamp);
     }
     focusDay = hourless(stamp);
     grid?.querySelector<HTMLButtonElement>(`button[data-day="${focusDay}"]`)?.focus();
   }
-  async function shiftMonth(step: number) {
-    const next = new Date(cursor.getFullYear(), cursor.getMonth() + step, 1);
+  async function shiftMonth(direction: number) {
+    monthDirection = direction > 0 ? 1 : -1;
+    const next = new Date(cursor.getFullYear(), cursor.getMonth() + direction, 1);
     cursor = next;
     await tick();
     const day = Number(focusDay.slice(8));
@@ -268,8 +433,11 @@
     }
   }
   onMount(() => {
-    const update = () => {
-      if (open) place();
+    const update = (event: Event) => {
+      if (!open) return;
+      const target = event.target;
+      if (target instanceof Node && panel?.contains(target)) return;
+      place();
     };
     window.addEventListener('resize', update);
     window.addEventListener('scroll', update, true);
@@ -314,136 +482,14 @@
     }}
     onkeydown={keys}
   >
-    <header class="picker-head">
-      <button
-        type="button"
-        class="picker-step"
-        onclick={() => void shiftMonth(-1)}
-        aria-label={pl ? 'Poprzedni miesiąc' : 'Previous month'}
-        ><ChevronLeft size={17} aria-hidden="true" /></button
-      >
-      <strong class="picker-title" aria-live="polite">{title}</strong>
-      <button
-        type="button"
-        class="picker-step"
-        onclick={() => void shiftMonth(1)}
-        aria-label={pl ? 'Następny miesiąc' : 'Next month'}
-        ><ChevronRight size={17} aria-hidden="true" /></button
-      >
-      <button type="button" class="picker-close" onclick={() => close(true)} aria-label={doneLabel}
-        ><X size={18} aria-hidden="true" /></button
-      >
-    </header>
-    <div class="picker-scroll">
-      <div class="picker-weekdays" aria-hidden="true">
-        {#each weekdays as label, index (index)}<span>{label}</span>{/each}
-      </div>
-      <div class="picker-grid" bind:this={grid}>
-        {#each Array(month.offset) as _, index (index)}<span aria-hidden="true"></span>{/each}
-        {#each Array(month.count) as _, index (index)}
-          {@const day = `${cursor.getFullYear()}-${pad(cursor.getMonth() + 1)}-${pad(index + 1)}`}
-          <button
-            type="button"
-            tabindex={focusDay === day ? 0 : -1}
-            data-day={day}
-            class:today={day === today}
-            class:selected={day === draftDate}
-            aria-pressed={day === draftDate}
-            aria-label={new Intl.DateTimeFormat(intl, { dateStyle: 'full' }).format(
-              new Date(`${day}T12:00`)
-            )}
-            onclick={() => pick(day)}
-          >
-            {index + 1}
-          </button>
-        {/each}
-      </div>
-      <div class="picker-time">
-        <div class="picker-time-head">
-          <span>{timeLabel}</span>
-          <output class:unset={!draftTime}>{draftTime || '--:--'}</output>
-        </div>
-        <div class="picker-wheel-row">
-          <div class="picker-wheel-box">
-            <div
-              class="picker-wheel"
-              bind:this={hourWheel}
-              role="listbox"
-              aria-label={hoursLabel}
-              aria-orientation="vertical"
-              aria-activedescendant={`${uid}-hour-${hourActive + hours.length}`}
-              tabindex="0"
-              onscroll={(event) => wheelScroll('hour', event.currentTarget as HTMLDivElement)}
-              onkeydown={(event) => wheelKeys('hour', event)}
-            >
-              <ul>
-                {#each hourUnits as unit, index (index)}
-                  <li
-                    id={`${uid}-hour-${index}`}
-                    role="option"
-                    aria-selected={index === hourActive + hours.length}
-                    data-index={index % hours.length}
-                    data-copy={Math.floor(index / hours.length)}
-                    class:selected={index === hourActive + hours.length}
-                    onclick={() => wheelPick('hour', index)}
-                  >
-                    {unit}
-                  </li>
-                {/each}
-              </ul>
-            </div>
-            <span class="picker-wheel-band" aria-hidden="true"></span>
-          </div>
-          <div class="picker-wheel-box">
-            <div
-              class="picker-wheel"
-              bind:this={minuteWheel}
-              role="listbox"
-              aria-label={minutesLabel}
-              aria-orientation="vertical"
-              aria-activedescendant={`${uid}-minute-${minuteActive + minutes.length}`}
-              tabindex="0"
-              onscroll={(event) => wheelScroll('minute', event.currentTarget as HTMLDivElement)}
-              onkeydown={(event) => wheelKeys('minute', event)}
-            >
-              <ul>
-                {#each minuteUnits as unit, index (index)}
-                  <li
-                    id={`${uid}-minute-${index}`}
-                    role="option"
-                    aria-selected={index === minuteActive + minutes.length}
-                    data-index={index % minutes.length}
-                    data-copy={Math.floor(index / minutes.length)}
-                    class:selected={index === minuteActive + minutes.length}
-                    onclick={() => wheelPick('minute', index)}
-                  >
-                    {unit}
-                  </li>
-                {/each}
-              </ul>
-            </div>
-            <span class="picker-wheel-band" aria-hidden="true"></span>
-          </div>
-        </div>
-      </div>
-      <div class="picker-presets">
-        <button type="button" onclick={() => preset(0)}>
-          {pl ? 'Dziś' : 'Today'}
-        </button>
-        <button type="button" onclick={() => preset(1)}>
-          {pl ? 'Jutro' : 'Tomorrow'}
-        </button>
-        <button type="button" onclick={() => preset(7)}>{pl ? 'Za tydzień' : 'In a week'}</button>
-      </div>
-    </div>
-    <footer class="picker-foot">
-      <div class="picker-navstrip">
+    <header class="picker-head" class:picker-time-head={step === 'time'}>
+      {#if step === 'date'}
         <button
           type="button"
           class="picker-step"
           onclick={() => void shiftMonth(-1)}
           aria-label={pl ? 'Poprzedni miesiąc' : 'Previous month'}
-          ><ChevronLeft size={19} aria-hidden="true" /></button
+          ><ChevronLeft size={17} aria-hidden="true" /></button
         >
         <strong class="picker-title" aria-live="polite">{title}</strong>
         <button
@@ -451,16 +497,233 @@
           class="picker-step"
           onclick={() => void shiftMonth(1)}
           aria-label={pl ? 'Następny miesiąc' : 'Next month'}
-          ><ChevronRight size={19} aria-hidden="true" /></button
+          ><ChevronRight size={17} aria-hidden="true" /></button
         >
-      </div>
+      {:else}
+        <button
+          type="button"
+          class="picker-step"
+          onclick={showDate}
+          aria-label={pl ? 'Wstecz do daty' : 'Back to date'}
+          ><ChevronLeft size={17} aria-hidden="true" /></button
+        >
+        <strong class="picker-title" aria-live="polite">{timeLabel}</strong>
+      {/if}
+      <button type="button" class="picker-close" onclick={() => close(true)} aria-label={closeLabel}
+        ><X size={18} aria-hidden="true" /></button
+      >
+    </header>
+    <div class="picker-body">
+      {#if step === 'date'}
+        <div class="picker-scroll picker-date-step" in:stepIn out:stepOut>
+          <button
+            type="button"
+            class="picker-mobile-close"
+            onclick={() => close(true)}
+            aria-label={closeLabel}
+          >
+            <X size={20} aria-hidden="true" />
+          </button>
+          <div class="picker-presets">
+            <button
+              type="button"
+              class:selected={draftDate === presetDate(0)}
+              aria-pressed={draftDate === presetDate(0)}
+              onclick={() => preset(0)}>{pl ? 'Dziś' : 'Today'}</button
+            >
+            <button
+              type="button"
+              class:selected={draftDate === presetDate(1)}
+              aria-pressed={draftDate === presetDate(1)}
+              onclick={() => preset(1)}>{pl ? 'Jutro' : 'Tomorrow'}</button
+            >
+            <button
+              type="button"
+              class:selected={draftDate === presetDate(7)}
+              aria-pressed={draftDate === presetDate(7)}
+              onclick={() => preset(7)}>{pl ? 'Za tydzień' : 'In a week'}</button
+            >
+            <button
+              type="button"
+              class:selected={draftDate === presetDate(28)}
+              aria-pressed={draftDate === presetDate(28)}
+              onclick={() => preset(28)}>{pl ? 'Za miesiąc' : 'In a month'}</button
+            >
+          </div>
+          <div class="picker-cal-wrap">
+            {#key monthKey}
+              <div class="picker-cal" in:monthIn out:monthOut>
+                <div class="picker-weekdays" aria-hidden="true">
+                  {#each weekdays as label, index (index)}<span>{label}</span>{/each}
+                </div>
+                <div class="picker-grid" bind:this={grid}>
+                  {#each Array(month.offset) as _, index (index)}<span aria-hidden="true"
+                    ></span>{/each}
+                  {#each Array(month.count) as _, index (index)}
+                    {@const day = `${cursor.getFullYear()}-${pad(cursor.getMonth() + 1)}-${pad(index + 1)}`}
+                    <button
+                      type="button"
+                      tabindex={focusDay === day ? 0 : -1}
+                      data-day={day}
+                      class:today={day === today}
+                      class:selected={day === draftDate}
+                      aria-pressed={day === draftDate}
+                      aria-label={new Intl.DateTimeFormat(intl, { dateStyle: 'full' }).format(
+                        new Date(`${day}T12:00`)
+                      )}
+                      onclick={() => pick(day)}
+                    >
+                      {index + 1}
+                    </button>
+                  {/each}
+                </div>
+              </div>
+            {/key}
+          </div>
+        </div>
+      {:else}
+        <div class="picker-scroll picker-time-step" in:stepIn out:stepOut>
+          <div class="picker-clock" role="group" aria-label={timeLabel}>
+            <label class="picker-clock-field">
+              <input
+                id={`${uid}-clock-hour`}
+                type="text"
+                inputmode="numeric"
+                enterkeyhint="done"
+                maxlength="2"
+                autocomplete="off"
+                value={clockHour}
+                class="picker-clock-part"
+                aria-label={hoursLabel}
+                onfocus={() => (clockFocused = 'hour')}
+                onblur={() => clockBlur('hour')}
+                oninput={(event) =>
+                  clockInput('hour', (event.currentTarget as HTMLInputElement).value)}
+                onkeydown={clockEnter}
+              />
+            </label>
+            <span class="picker-clock-sep" aria-hidden="true"></span>
+            <label class="picker-clock-field">
+              <input
+                id={`${uid}-clock-minute`}
+                type="text"
+                inputmode="numeric"
+                enterkeyhint="done"
+                maxlength="2"
+                autocomplete="off"
+                value={clockMinute}
+                class="picker-clock-part"
+                aria-label={minutesLabel}
+                onfocus={() => (clockFocused = 'minute')}
+                onblur={() => clockBlur('minute')}
+                oninput={(event) =>
+                  clockInput('minute', (event.currentTarget as HTMLInputElement).value)}
+                onkeydown={clockEnter}
+              />
+            </label>
+          </div>
+          <div class="picker-wheel-row">
+            <div class="picker-wheel-box">
+              <div
+                class="picker-wheel"
+                class:dragging
+                bind:this={hourWheel}
+                role="listbox"
+                aria-label={hoursLabel}
+                aria-orientation="vertical"
+                aria-activedescendant={`${uid}-hour-${hourActive + hours.length}`}
+                tabindex="0"
+                onscroll={(event) => wheelScroll('hour', event.currentTarget as HTMLDivElement)}
+                onkeydown={(event) => wheelKeys('hour', event)}
+                onpointerdown={(event) => wheelDrag('hour', event)}
+              >
+                <ul>
+                  {#each hourUnits as unit, index (index)}
+                    <li
+                      id={`${uid}-hour-${index}`}
+                      role="option"
+                      aria-selected={index === hourActive + hours.length}
+                      data-index={index % hours.length}
+                      data-copy={Math.floor(index / hours.length)}
+                      class:selected={index === hourActive + hours.length}
+                      onclick={() => wheelPick('hour', index)}
+                    >
+                      {unit}
+                    </li>
+                  {/each}
+                </ul>
+              </div>
+              <span class="picker-wheel-band" aria-hidden="true"></span>
+            </div>
+            <div class="picker-wheel-box">
+              <div
+                class="picker-wheel"
+                class:dragging
+                bind:this={minuteWheel}
+                role="listbox"
+                aria-label={minutesLabel}
+                aria-orientation="vertical"
+                aria-activedescendant={`${uid}-minute-${minuteActive + minutes.length}`}
+                tabindex="0"
+                onscroll={(event) => wheelScroll('minute', event.currentTarget as HTMLDivElement)}
+                onkeydown={(event) => wheelKeys('minute', event)}
+                onpointerdown={(event) => wheelDrag('minute', event)}
+              >
+                <ul>
+                  {#each minuteUnits as unit, index (index)}
+                    <li
+                      id={`${uid}-minute-${index}`}
+                      role="option"
+                      aria-selected={index === minuteActive + minutes.length}
+                      data-index={index % minutes.length}
+                      data-copy={Math.floor(index / minutes.length)}
+                      class:selected={index === minuteActive + minutes.length}
+                      onclick={() => wheelPick('minute', index)}
+                    >
+                      {unit}
+                    </li>
+                  {/each}
+                </ul>
+              </div>
+              <span class="picker-wheel-band" aria-hidden="true"></span>
+            </div>
+          </div>
+          <div class="picker-presets picker-time-presets">
+            <button type="button" onclick={() => timePreset('23:59')}>23:59</button>
+            <button type="button" onclick={() => timePreset('12:00')}>12:00</button>
+          </div>
+        </div>
+      {/if}
+    </div>
+    <footer class="picker-foot">
+      {#if step === 'date'}
+        <div class="picker-navstrip">
+          <button
+            type="button"
+            class="picker-step"
+            onclick={() => void shiftMonth(-1)}
+            aria-label={pl ? 'Poprzedni miesiąc' : 'Previous month'}
+            ><ChevronLeft size={19} aria-hidden="true" /></button
+          >
+          <strong class="picker-title" aria-live="polite">{title}</strong>
+          <button
+            type="button"
+            class="picker-step"
+            onclick={() => void shiftMonth(1)}
+            aria-label={pl ? 'Następny miesiąc' : 'Next month'}
+            ><ChevronRight size={19} aria-hidden="true" /></button
+          >
+        </div>
+      {/if}
       <div class="picker-actions">
-        <button type="button" class="picker-clear" disabled={!value || disabled} onclick={clearAll}
-          >{clearLabel}</button
+        <button
+          type="button"
+          class="picker-done"
+          disabled={disabled || (step === 'date' && !draftDate)}
+          onclick={() => (step === 'date' ? void showTime() : close(true))}
         >
-        <button type="button" class="picker-done" {disabled} onclick={() => close(true)}
-          >{doneLabel}</button
-        >
+          {step === 'date' ? nextLabel : doneLabel}
+        </button>
       </div>
     </footer>
   </div>
@@ -484,7 +747,7 @@
     padding: 10px 12px;
     border: 1px solid var(--line);
     border-radius: 3px;
-    background: #fffefa;
+    background: var(--surface, #fffefa);
     color: var(--ink);
     font-size: 13px;
     text-align: left;
@@ -514,7 +777,10 @@
     margin: 0;
     width: 312px;
     max-width: calc(100vw - 24px);
+    height: 384px;
+    max-height: calc(100dvh - 24px);
     padding: 12px;
+    overflow: hidden;
     background: var(--surface, #fffefa);
     color: var(--ink);
     border: 1px solid var(--line);
@@ -523,6 +789,15 @@
   }
   .picker-panel:popover-open {
     display: flex;
+  }
+  .picker-panel:not(:popover-open) {
+    display: none;
+  }
+  .picker-body {
+    display: grid;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
   }
   .picker-head {
     display: flex;
@@ -551,14 +826,100 @@
     color: var(--ink);
   }
   .picker-close {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .picker-close:hover {
+    background: var(--surface-muted, #f0ede4);
+    color: var(--ink);
+  }
+  .picker-mobile-close {
     display: none;
-    margin-left: 4px;
+  }
+  .picker-clock {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 2px 0;
+  }
+  .picker-clock-field {
+    display: flex;
+    align-items: center;
+  }
+  .picker-clock-part {
+    width: 54px;
+    margin: 0;
+    padding: 5px 4px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--surface-muted, #f0ede4);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 18px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.25;
+    text-align: center;
+  }
+  .picker-clock-part:focus-visible {
+    border-color: var(--accent);
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  .picker-clock-sep {
+    position: relative;
+    flex: 0 0 4px;
+    width: 4px;
+    height: 20px;
+    color: var(--muted);
+  }
+  .picker-clock-sep::before,
+  .picker-clock-sep::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: currentColor;
+    transform: translateX(-50%);
+  }
+  .picker-clock-sep::before {
+    top: calc(50% - 6px);
+  }
+  .picker-clock-sep::after {
+    top: calc(50% + 3px);
+  }
+  .picker-wheel.dragging {
+    scroll-snap-type: none;
+    cursor: grabbing;
   }
   .picker-weekdays,
   .picker-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 3px;
+  }
+  .picker-grid {
+    min-height: calc(6 * 32px + 5 * 3px);
+  }
+  .picker-cal-wrap {
+    display: grid;
+    overflow: hidden;
+  }
+  .picker-cal {
+    grid-area: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    background: var(--surface, #fffefa);
   }
   .picker-weekdays span {
     text-align: center;
@@ -591,46 +952,25 @@
   .picker-grid span {
     height: 32px;
   }
-  .picker-time {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-    border-top: 1px solid var(--line);
-    padding-top: 9px;
-  }
-  .picker-time-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-  }
-  .picker-time-head span {
-    color: var(--muted);
-    font-size: 12px;
-  }
-  output {
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--ink);
-  }
-  output.unset {
-    color: var(--muted);
-  }
   .picker-wheel-row {
-    --wheel-item: 32px;
+    --wheel-item: 30px;
     display: flex;
     gap: 10px;
   }
   .picker-wheel-box {
     position: relative;
+    isolation: isolate;
     flex: 1;
     min-width: 0;
   }
   .picker-wheel {
+    position: relative;
+    z-index: 1;
     height: calc(5 * var(--wheel-item));
     overflow-y: auto;
-    scroll-snap-type: y mandatory;
     overscroll-behavior: contain;
+    touch-action: pan-y;
+    scroll-snap-type: y mandatory;
     scrollbar-width: none;
     -webkit-mask-image: linear-gradient(
       180deg,
@@ -677,6 +1017,7 @@
     left: 4px;
     right: 4px;
     top: 50%;
+    z-index: 0;
     height: var(--wheel-item);
     transform: translateY(-50%);
     background: color-mix(in srgb, var(--surface-muted, #f0ede4) 72%, transparent);
@@ -687,28 +1028,48 @@
   .picker-presets {
     display: flex;
     gap: 6px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .picker-presets::-webkit-scrollbar {
+    display: none;
   }
   .picker-presets button {
-    padding: 4px 10px;
+    flex: 0 0 auto;
+    padding: 4px 8px;
     border: 1px solid var(--line);
     border-radius: 99px;
     background: transparent;
     color: var(--muted);
-    font-size: 12px;
+    font-size: 11px;
     cursor: pointer;
   }
   .picker-presets button:hover {
     background: var(--surface-muted, #f0ede4);
     color: var(--ink);
   }
+  .picker-presets button.selected {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--ink);
+  }
   .picker-scroll {
+    grid-area: 1 / 1;
     display: flex;
     flex-direction: column;
     gap: 9px;
     min-height: 0;
+    overflow-x: hidden;
     overflow-y: auto;
-    max-height: 352px;
+    overscroll-behavior: contain;
+    background: var(--surface, #fffefa);
+  }
+  .picker-time-step {
+    justify-content: center;
+    overflow: visible;
   }
   .picker-foot {
     display: flex;
@@ -750,8 +1111,18 @@
   .picker-foot button:hover:not(:disabled) {
     background: var(--surface-muted, #f0ede4);
   }
-  .picker-done {
-    margin-left: auto;
+  .picker-foot button.picker-done {
+    width: 100%;
+    border-color: #c74b0a;
+    background: #e8590c;
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    box-shadow: inset 0 -2px 0 #0002;
+  }
+  .picker-foot button.picker-done:hover:not(:disabled) {
+    border-color: #b84208;
+    background: #d9480f;
   }
   @media (max-width: 760px) {
     .picker-panel {
@@ -762,59 +1133,110 @@
       max-height: none;
       border: none;
       border-radius: 0;
-      padding: calc(12px + env(safe-area-inset-top)) 16px env(safe-area-inset-bottom);
+      padding: calc(14px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom));
     }
     .picker-head {
-      display: none;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .picker-head.picker-time-head {
+      visibility: visible;
+      pointer-events: auto;
+    }
+    .picker-mobile-close {
+      position: absolute;
+      top: calc(10px + env(safe-area-inset-top));
+      right: 14px;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+    }
+    .picker-mobile-close:hover {
+      background: var(--surface-muted, #f0ede4);
+      color: var(--ink);
     }
     .picker-scroll {
       flex: 1;
       max-height: none;
-      padding-bottom: 12px;
+      padding-bottom: 4px;
+    }
+    .picker-date-step {
+      justify-content: flex-end;
+      padding-bottom: 0;
+    }
+    .picker-time-step {
+      justify-content: center;
+      overflow: visible;
+      padding-bottom: 8px;
     }
     .picker-navstrip {
       display: flex;
     }
+    .picker-foot {
+      justify-content: flex-end;
+      min-height: calc(44px + 10px + 48px);
+    }
     .picker-step {
       width: 44px;
       height: 44px;
+    }
+    .picker-presets {
+      gap: 8px;
     }
     .picker-presets button {
       min-height: 40px;
       padding: 6px 14px;
       font-size: 13px;
     }
+    .picker-cal {
+      gap: 4px;
+    }
+    .picker-grid {
+      gap: 4px;
+      min-height: calc(6 * 46px + 5 * 4px);
+    }
     .picker-grid button {
-      height: 42px;
-      font-size: 14px;
+      height: 46px;
+      font-size: 15px;
     }
     .picker-grid span {
-      height: 42px;
+      height: 46px;
+    }
+    .picker-clock {
+      gap: 10px;
+    }
+    .picker-clock-part {
+      width: 68px;
+      min-height: 46px;
+      font-size: 20px;
     }
     .picker-wheel-row {
-      --wheel-item: 40px;
+      --wheel-item: 34px;
       gap: 12px;
     }
     .picker-wheel li {
       font-size: 15px;
     }
+    .picker-foot {
+      gap: 10px;
+    }
     .picker-foot button {
       min-height: 48px;
-      padding: 10px 16px;
+      padding: 10px 14px;
       font-size: 15px;
     }
     .picker-actions {
-      padding-bottom: env(safe-area-inset-bottom);
+      gap: 8px;
     }
     .picker-done {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
       flex: 1;
       letter-spacing: 0.04em;
-    }
-    .picker-done:hover:not(:disabled) {
-      background: color-mix(in srgb, var(--accent) 88%, #fff);
     }
   }
 </style>
