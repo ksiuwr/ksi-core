@@ -8,6 +8,8 @@ ALTER TABLE "threads" ADD COLUMN "reference_number" integer;--> statement-breakp
 CREATE UNIQUE INDEX "kanban_board_reference_unique" ON "kanban_items" ("board_id","reference_number");--> statement-breakpoint
 CREATE UNIQUE INDEX "thread_project_reference_unique" ON "threads" ("project_id","reference_number");
 --> statement-breakpoint
+CREATE UNIQUE INDEX "thread_association_reference_unique" ON "threads" ("reference_number") WHERE "project_id" IS NULL;
+--> statement-breakpoint
 WITH resources AS (
   SELECT k.id, 'item' AS kind, coalesce('project:' || b.project_id, 'association') AS scope_key, k.created_at
   FROM kanban_items k JOIN boards b ON b.id = k.board_id

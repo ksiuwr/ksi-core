@@ -1743,7 +1743,12 @@
                                     });
                                   }}
                                 >
-                                  <Editor {language} bind:value={editingCommentMarkdown} rows={4} />
+                                  <Editor
+                                    {language}
+                                    bind:value={editingCommentMarkdown}
+                                    rows={4}
+                                    allowReferences
+                                  />
                                   <div style="display: flex; gap: 8px;">
                                     <button
                                       class="btn"
@@ -1760,7 +1765,11 @@
                                   </div>
                                 </form>
                               {:else}
-                                <MarkdownContent value={comment.markdown} {language} />
+                                <MarkdownContent
+                                  value={comment.markdown}
+                                  {language}
+                                  allowReferences
+                                />
                               {/if}
                             </article>
                           {/if}
@@ -1780,7 +1789,7 @@
                         }}
                       >
                         {#if !archived}<h3>{'Reply'}</h3>
-                          <Editor {language} bind:value={markdown} />{/if}
+                          <Editor {language} bind:value={markdown} allowReferences />{/if}
                         <div class="row" style="gap: 8px;">
                           {#if !archived}<button class="btn" disabled={busy || !markdown.trim()}
                               >{'Reply'}</button
@@ -1847,7 +1856,7 @@
                       />
 
                       <div class="forum-editor-gap">
-                        <Editor {language} bind:value={markdown} />
+                        <Editor {language} bind:value={markdown} allowReferences />
                       </div>
                       <button
                         class="btn"

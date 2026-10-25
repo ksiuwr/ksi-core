@@ -6,12 +6,33 @@ import {
 } from 'shared/activity';
 import { allocateReferenceNumber } from '../../services/references';
 import { notificationTarget, notifyCollaboration, subscribe } from '../../services/notifications';
-import { and, eq, desc, exists, inArray, isNull, isNotNull, sql, or, type SQL } from 'drizzle-orm';
+import {
+  and,
+  eq,
+  desc,
+  exists,
+  inArray,
+  isNull,
+  isNotNull,
+  sql,
+  or,
+  ilike,
+  type SQL
+} from 'drizzle-orm';
 import { status, t } from 'elysia';
 import { syncFileReferences } from './files';
 import { createElysia, requirePermission } from '../../lib/createElysia';
 import { recordEvent, type Executor, type Transaction } from '../../lib/audit';
-import { boards, kanbanItems, threads, comments, users, auditEvents, projects } from '../../db';
+import {
+  boards,
+  kanbanItems,
+  threads,
+  comments,
+  users,
+  auditEvents,
+  projects,
+  projectMembers
+} from '../../db';
 import { canContribute, canReadThread } from '../../domain/permissions';
 import { validBoardStatuses, statusExists, type BoardStatus } from '../../domain/board-statuses';
 import { validBoardLabels, normalizeBoardLabel } from '../../domain/board-labels';
@@ -285,6 +306,209 @@ async function validateAssignees(
 }
 
 export default createElysia({ prefix: '/platform' })
+  .get(
+    '/references/search',
+    async ({ db, user, query }) => {
+      const actor = active(user);
+      const currentScope = query.scope ?? '~association';
+      const currentProject =
+        currentScope === '~association'
+          ? undefined
+          : (
+              await db
+                .select({ id: projects.id, slug: projects.slug })
+                .from(projects)
+                .where(eq(projects.slug, currentScope))
+            )[0];
+      if (currentScope !== '~association' && !currentProject)
+        throw status(404, { code: 'REFERENCE_SCOPE_NOT_FOUND' });
+
+      const raw = (query.q ?? '').trim();
+      const associationOnly = raw.startsWith('##');
+      const withoutHashes = raw.replace(/^#+/, '');
+      const slash = withoutHashes.indexOf('/');
+      let explicitSlug: string | null = null;
+      let term = withoutHashes;
+      if (slash >= 0) {
+        const candidate = withoutHashes.slice(0, slash);
+        term = withoutHashes.slice(slash + 1);
+        if (/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(candidate)) explicitSlug = candidate;
+      }
+      term = term.trim();
+
+      let focusProjectId: string | null | undefined;
+      if (associationOnly) {
+        focusProjectId = null;
+      } else if (explicitSlug) {
+        const [explicitProject] = await db
+          .select({ id: projects.id })
+          .from(projects)
+          .where(eq(projects.slug, explicitSlug));
+        if (!explicitProject) return [];
+        focusProjectId = explicitProject.id;
+      }
+
+      const numeric = /^\d{1,9}$/.test(term) ? Number(term) : null;
+      if (focusProjectId === undefined && (!term || numeric !== null))
+        focusProjectId = currentProject?.id ?? null;
+      const scopeFilter =
+        focusProjectId === undefined
+          ? null
+          : { projectId: focusProjectId, key: scopeKey(focusProjectId) };
+      const like = `%${term}%`;
+      const titleMatch = term
+        ? numeric !== null
+          ? or(eq(kanbanItems.referenceNumber, numeric), ilike(kanbanItems.title, like))
+          : ilike(kanbanItems.title, like)
+        : undefined;
+      const threadTitleMatch = term
+        ? numeric !== null
+          ? or(eq(threads.referenceNumber, numeric), ilike(threads.title, like))
+          : ilike(threads.title, like)
+        : undefined;
+
+      const [itemRows, threadRows] = await Promise.all([
+        db
+          .select({
+            number: kanbanItems.referenceNumber,
+            title: kanbanItems.title,
+            createdAt: kanbanItems.createdAt,
+            projectId: boards.projectId,
+            projectSlug: projects.slug,
+            projectName: projects.name
+          })
+          .from(kanbanItems)
+          .innerJoin(boards, eq(kanbanItems.boardId, boards.id))
+          .leftJoin(projects, eq(boards.projectId, projects.id))
+          .where(
+            and(
+              isNull(kanbanItems.deletedAt),
+              ...(titleMatch ? [titleMatch] : []),
+              ...(scopeFilter ? [eq(boards.scopeKey, scopeFilter.key)] : [])
+            )
+          )
+          .orderBy(desc(kanbanItems.createdAt))
+          .limit(30),
+        db
+          .select({
+            number: threads.referenceNumber,
+            title: threads.title,
+            createdAt: threads.createdAt,
+            archivedAt: threads.archivedAt,
+            projectId: threads.projectId,
+            projectSlug: projects.slug,
+            projectName: projects.name,
+            visibility: threads.visibility,
+            invitedIds: threads.invitedIds
+          })
+          .from(threads)
+          .leftJoin(projects, eq(threads.projectId, projects.id))
+          .where(
+            and(
+              ...(threadTitleMatch ? [threadTitleMatch] : []),
+              ...(scopeFilter
+                ? [
+                    scopeFilter.projectId === null
+                      ? isNull(threads.projectId)
+                      : eq(threads.projectId, scopeFilter.projectId)
+                  ]
+                : [])
+            )
+          )
+          .orderBy(desc(threads.createdAt))
+          .limit(30)
+      ]);
+
+      const threadProjectIds = [
+        ...new Set(threadRows.map((row) => row.projectId).filter((id): id is string => !!id))
+      ];
+      const memberships = threadProjectIds.length
+        ? await db
+            .select({ projectId: projectMembers.projectId, leader: projectMembers.leader })
+            .from(projectMembers)
+            .where(
+              and(
+                inArray(projectMembers.projectId, threadProjectIds),
+                eq(projectMembers.userId, actor.id)
+              )
+            )
+        : [];
+      const memberOf = new Set(memberships.map((membership) => membership.projectId));
+      const leaderOf = new Set(
+        memberships
+          .filter((membership) => membership.leader)
+          .map((membership) => membership.projectId)
+      );
+      const currentRefScope = currentProject?.slug ?? '~association';
+      const reference = (scope: string, number: number) =>
+        scope === '~association'
+          ? `##${number}`
+          : scope === currentRefScope
+            ? `#${number}`
+            : `#${scope}/${number}`;
+
+      const results = [
+        ...itemRows.flatMap((row) =>
+          row.number === null
+            ? []
+            : [
+                {
+                  reference: reference(row.projectSlug ?? '~association', row.number),
+                  number: row.number,
+                  title: row.title,
+                  type: 'item' as const,
+                  scope: row.projectSlug ?? '~association',
+                  scopeLabel: row.projectName ?? null,
+                  archived: false,
+                  createdAt: row.createdAt
+                }
+              ]
+        ),
+        ...threadRows
+          .filter((row) => row.number !== null)
+          .filter((row) => {
+            const scope = row.projectId
+              ? {
+                  memberIds: memberOf.has(row.projectId) ? [actor.id] : [],
+                  leaderIds: leaderOf.has(row.projectId) ? [actor.id] : []
+                }
+              : { association: true, memberIds: [], leaderIds: [] };
+            return canReadThread(
+              actor,
+              scope,
+              row.visibility as 'association' | 'members' | 'leaders',
+              row.invitedIds
+            );
+          })
+          .map((row) => ({
+            reference: reference(row.projectSlug ?? '~association', row.number!),
+            number: row.number!,
+            title: row.title,
+            type: 'thread' as const,
+            scope: row.projectSlug ?? '~association',
+            scopeLabel: row.projectName ?? null,
+            archived: Boolean(row.archivedAt),
+            createdAt: row.createdAt
+          }))
+      ];
+
+      results.sort(
+        (a, b) =>
+          Number(a.scope === currentRefScope ? 0 : 1) -
+            Number(b.scope === currentRefScope ? 0 : 1) ||
+          b.createdAt.getTime() - a.createdAt.getTime()
+      );
+      return results.slice(0, 12).map(({ createdAt: _createdAt, ...result }) => result);
+    },
+    {
+      query: t.Object({
+        q: t.Optional(t.String({ maxLength: 200 })),
+        scope: t.Optional(
+          t.String({ maxLength: 100, pattern: '^(~association|[a-z0-9]+(?:-[a-z0-9]+)*)$' })
+        )
+      })
+    }
+  )
   .get(
     '/references/:scope/:number',
     async ({ db, user, params }) => {

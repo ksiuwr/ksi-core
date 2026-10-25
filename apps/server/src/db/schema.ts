@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import type { ContentTranslations } from 'shared/content-locales';
 import { defaultBoardStatuses, type BoardStatus } from '../domain/board-statuses';
 import type { BoardLabel } from '../domain/board-labels';
@@ -339,7 +340,12 @@ export const threads = snakeCase.table(
     version: integer().notNull().default(1),
     createdAt: timestamp().notNull().defaultNow()
   },
-  (t) => [uniqueIndex('thread_project_reference_unique').on(t.projectId, t.referenceNumber)]
+  (t) => [
+    uniqueIndex('thread_project_reference_unique').on(t.projectId, t.referenceNumber),
+    uniqueIndex('thread_association_reference_unique')
+      .on(t.referenceNumber)
+      .where(sql`${t.projectId} is null`)
+  ]
 );
 export const comments = snakeCase.table('comments', {
   id: text().primaryKey().$defaultFn(createId),

@@ -53,3 +53,17 @@ test('numeric references link current, explicit and association scopes without r
   expect(html).not.toContain('/references/current-project/90');
   expect(html).not.toContain('/references/current-project/123');
 });
+
+test('numeric references stay literal without a dashboard scope and require a word boundary', () => {
+  const plain = renderMarkdown('#12 and (#34)')
+    .map((block) => (block.type === 'html' ? block.html : ''))
+    .join('');
+  expect(plain).not.toContain('/references/');
+  expect(plain).toContain('#12');
+
+  const scoped = renderMarkdown('issue#12 (#34)', 'current-project')
+    .map((block) => (block.type === 'html' ? block.html : ''))
+    .join('');
+  expect(scoped).not.toContain('/references/current-project/12');
+  expect(scoped).toContain('href="/references/current-project/34"');
+});

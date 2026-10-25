@@ -4,10 +4,12 @@
   let {
     value,
     language = 'pl',
+    allowReferences = false,
     onresize
   }: {
     value: string;
     language?: 'pl' | 'en';
+    allowReferences?: boolean;
     onresize?: (index: number, width: number) => void;
   } = $props();
   let blocks = $state<MarkdownBlock[]>([]);
@@ -15,6 +17,7 @@
   let failed = $state(false);
   $effect(() => {
     const markdown = value;
+    const references = allowReferences;
     const controller = new AbortController();
     loading = true;
     failed = false;
@@ -23,9 +26,13 @@
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         markdown,
-        referenceScope: decodeURIComponent(
-          window.location.pathname.match(/^\/projects\/([^/]+)/)?.[1] ?? '~association'
-        )
+        ...(references
+          ? {
+              referenceScope: decodeURIComponent(
+                window.location.pathname.match(/^\/projects\/([^/]+)/)?.[1] ?? '~association'
+              )
+            }
+          : {})
       }),
       signal: controller.signal
     })

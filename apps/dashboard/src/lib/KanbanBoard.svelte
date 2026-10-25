@@ -1031,7 +1031,7 @@
               ><GripVertical size={14} aria-hidden="true" /></span
             >
             {#if item.markdown}<div class="kanban-markdown-preview">
-                <MarkdownContent value={item.markdown} {language} />
+                <MarkdownContent value={item.markdown} {language} allowReferences />
               </div>{/if}
             {#if item.labels.length}<div class="task-labels">
                 {#each item.labels as labelName}
@@ -1168,7 +1168,7 @@
       {/if}
       <Assignees bind:value={taskAssignees} {members} {language} disabled={busy} />
       <DeadlinePicker bind:value={taskDueAt} {language} disabled={busy} />
-      <Editor {language} bind:value={markdown} rows={10} />
+      <Editor {language} bind:value={markdown} rows={10} allowReferences />
       <div class="row">
         <button class="btn" disabled={busy || !title.trim()}>{'Add task'}</button><button
           type="button"
@@ -1469,7 +1469,7 @@
           bind:value={editTitle}
           required
           maxlength="200"
-        /><Editor {language} bind:value={editMarkdown} />
+        /><Editor {language} bind:value={editMarkdown} allowReferences />
         {#if normalizedLabels.length}
           <div class="task-label-picker">
             <span class="label-picker-label">{'Labels'}</span>
@@ -1510,7 +1510,7 @@
         </div>
       </form>
     {:else}<div class="issue-description">
-        <MarkdownContent value={selected.markdown} {language} />
+        <MarkdownContent value={selected.markdown} {language} allowReferences />
       </div>{/if}
     <section class="issue-discussion" aria-labelledby="discussion-title">
       <h3 id="discussion-title">
@@ -1623,7 +1623,12 @@
                       void saveCommentEdit(comment.id);
                     }}
                   >
-                    <Editor {language} bind:value={editingCommentMarkdown} rows={4} />
+                    <Editor
+                      {language}
+                      bind:value={editingCommentMarkdown}
+                      rows={4}
+                      allowReferences
+                    />
                     <div style="display: flex; gap: 8px;">
                       <button class="btn" disabled={busy || !editingCommentMarkdown.trim()}
                         >{'Save'}</button
@@ -1638,7 +1643,7 @@
                     </div>
                   </form>
                 {:else}
-                  <MarkdownContent value={comment.markdown} {language} />
+                  <MarkdownContent value={comment.markdown} {language} allowReferences />
                 {/if}
               </article>{/if}{/each}
         </div>
@@ -1652,7 +1657,7 @@
           void postReply();
         }}
       >
-        <Editor {language} bind:value={reply} rows={4} /><button
+        <Editor {language} bind:value={reply} rows={4} allowReferences /><button
           class="btn"
           disabled={busy || !reply.trim()}>{'Reply'}</button
         >

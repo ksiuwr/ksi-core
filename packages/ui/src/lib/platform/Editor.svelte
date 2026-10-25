@@ -14,8 +14,17 @@
     value = $bindable(''),
     language = 'pl',
     rows = 10,
-    allowGallery = false
-  }: { value?: string; language?: 'pl' | 'en'; rows?: number; allowGallery?: boolean } = $props();
+    allowGallery = false,
+    allowReferences = false,
+    referenceScope
+  }: {
+    value?: string;
+    language?: 'pl' | 'en';
+    rows?: number;
+    allowGallery?: boolean;
+    allowReferences?: boolean;
+    referenceScope?: string;
+  } = $props();
   const uid = $props.id();
   const labels = $derived(
     language === 'pl'
@@ -32,7 +41,13 @@
           insert: 'Wstaw galerię',
           imagesOnly: 'Do galerii można dodać tylko obrazy JPEG, PNG, WebP, AVIF lub GIF.',
           placeholder: 'Napisz treść w Markdown…',
-          attachments: 'Załącz pliki'
+          attachments: 'Załącz pliki',
+          referenceHint: 'Wpisz #, aby odwołać się do zadania lub wątku.',
+          referenceTask: 'Zadanie',
+          referenceThread: 'Wątek',
+          referenceAssociation: 'Ogólne',
+          referenceArchived: 'Zarchiwizowane',
+          referenceEmpty: 'Brak pasujących zadań lub wątków.'
         }
       : {
           uploading: 'Uploading…',
@@ -47,7 +62,13 @@
           insert: 'Insert gallery',
           imagesOnly: 'Galleries accept JPEG, PNG, WebP, AVIF or GIF images only.',
           placeholder: 'Write a Markdown description…',
-          attachments: 'Attach files'
+          attachments: 'Attach files',
+          referenceHint: 'Type # to reference a task or thread.',
+          referenceTask: 'Task',
+          referenceThread: 'Thread',
+          referenceAssociation: 'Association',
+          referenceArchived: 'Archived',
+          referenceEmpty: 'No matching tasks or threads.'
         }
   );
 
@@ -148,24 +169,68 @@
   }
 
   type User = { id: string; name: string; nickname: string | null; image: string | null };
+  type Reference = {
+    reference: string;
+    number: number;
+    title: string;
+    type: 'item' | 'thread';
+    scope: string;
+    scopeLabel: string | null;
+    archived: boolean;
+  };
   let textarea: HTMLTextAreaElement | undefined = $state();
-  let showAutocomplete = $state(false);
+  let autocompleteKind = $state<'user' | 'reference' | null>(null);
   let autocompleteQuery = $state('');
   let autocompleteResults = $state<User[]>([]);
+  let referenceResults = $state<Reference[]>([]);
   let autocompleteIndex = $state(0);
   let mentionStart = $state(0);
+  let referenceStart = $state(0);
+  let userRequest = 0;
+  let referenceRequest = 0;
+
+  function currentReferenceScope() {
+    if (referenceScope) return referenceScope;
+    if (typeof window === 'undefined') return '~association';
+    return decodeURIComponent(
+      window.location.pathname.match(/^\/projects\/([^/]+)/)?.[1] ?? '~association'
+    );
+  }
 
   async function searchUsers(q: string) {
+    const request = ++userRequest;
     if (!q) {
       autocompleteResults = [];
       return;
     }
     try {
       const response = await fetch(`/api/users/search?q=${encodeURIComponent(q)}`);
-      if (response.ok) autocompleteResults = await response.json();
-      else autocompleteResults = [];
+      const results = response.ok ? await response.json() : [];
+      if (request !== userRequest) return;
+      autocompleteResults = Array.isArray(results) ? results : [];
+      autocompleteIndex = 0;
     } catch {
-      autocompleteResults = [];
+      if (request === userRequest) {
+        autocompleteResults = [];
+        autocompleteIndex = 0;
+      }
+    }
+  }
+
+  async function searchReferences(q: string) {
+    const request = ++referenceRequest;
+    const params = new URLSearchParams({ q, scope: currentReferenceScope() });
+    try {
+      const response = await fetch(`/api/platform/references/search?${params}`);
+      const results = response.ok ? await response.json() : [];
+      if (request !== referenceRequest) return;
+      referenceResults = Array.isArray(results) ? results : [];
+      autocompleteIndex = 0;
+    } catch {
+      if (request === referenceRequest) {
+        referenceResults = [];
+        autocompleteIndex = 0;
+      }
     }
   }
 
@@ -174,15 +239,24 @@
     const val = textarea.value;
     const pos = textarea.selectionStart;
     const textBeforeCursor = val.slice(0, pos);
-    const match = textBeforeCursor.match(/(?:\s|^)@([a-zA-Z0-9_]*)$/);
-    if (match) {
-      showAutocomplete = true;
-      autocompleteQuery = match[1];
-      mentionStart = pos - match[1].length - 1;
+    const mention = textBeforeCursor.match(/(?:\s|^)@([a-zA-Z0-9_]*)$/);
+    if (mention) {
+      autocompleteKind = 'user';
+      autocompleteQuery = mention[1];
+      mentionStart = pos - mention[1].length - 1;
       void searchUsers(autocompleteQuery);
-    } else {
-      showAutocomplete = false;
+      return;
     }
+    if (allowReferences) {
+      const reference = textBeforeCursor.match(/(?:^|\s)(#{1,2}[a-z0-9-]*(?:\/\d*)?)$/);
+      if (reference) {
+        autocompleteKind = 'reference';
+        referenceStart = pos - reference[1].length;
+        void searchReferences(reference[1]);
+        return;
+      }
+    }
+    autocompleteKind = null;
   }
 
   // @wc-ignore
@@ -206,21 +280,24 @@
       }
       return;
     }
-    if (!showAutocomplete) return;
+    if (!autocompleteKind) return;
+    const results = autocompleteKind === 'user' ? autocompleteResults : referenceResults;
+    if (!results.length) {
+      if (e.key === KEYS.ESCAPE) autocompleteKind = null;
+      return;
+    }
     if (e.key === KEYS.ARROW_DOWN) {
       e.preventDefault();
-      autocompleteIndex = (autocompleteIndex + 1) % autocompleteResults.length;
+      autocompleteIndex = (autocompleteIndex + 1) % results.length;
     } else if (e.key === KEYS.ARROW_UP) {
       e.preventDefault();
-      autocompleteIndex =
-        (autocompleteIndex - 1 + autocompleteResults.length) % autocompleteResults.length;
+      autocompleteIndex = (autocompleteIndex - 1 + results.length) % results.length;
     } else if (e.key === KEYS.ENTER || e.key === KEYS.TAB) {
       e.preventDefault();
-      if (autocompleteResults.length > 0) {
-        insertMention(autocompleteResults[autocompleteIndex]);
-      }
+      if (autocompleteKind === 'user') insertMention(autocompleteResults[autocompleteIndex]!);
+      else insertReference(referenceResults[autocompleteIndex]!);
     } else if (e.key === KEYS.ESCAPE) {
-      showAutocomplete = false;
+      autocompleteKind = null;
     }
   }
 
@@ -233,10 +310,27 @@
     const displayName = user.nickname ? `@${user.nickname}` : `@${user.name}`;
     const mention = `[${displayName}](/members/${user.id})`;
     value = before + mention + ' ' + after;
-    showAutocomplete = false;
+    autocompleteKind = null;
     setTimeout(() => {
       if (textarea) {
         textarea.selectionStart = textarea.selectionEnd = mentionStart + mention.length + 1;
+        textarea.focus();
+      }
+    }, 0);
+  }
+
+  function insertReference(reference: Reference) {
+    if (!textarea) return;
+    const val = textarea.value;
+    const pos = textarea.selectionStart;
+    const before = val.slice(0, referenceStart);
+    const after = val.slice(pos);
+    const inserted = `${reference.reference} `;
+    value = before + inserted + after;
+    autocompleteKind = null;
+    setTimeout(() => {
+      if (textarea) {
+        textarea.selectionStart = textarea.selectionEnd = referenceStart + inserted.length;
         textarea.focus();
       }
     }, 0);
@@ -278,6 +372,7 @@
       <MarkdownContent
         {value}
         {language}
+        {allowReferences}
         onresize={(index, width) => (value = resizeMarkdownImage(value, index, width))}
       />
     </div>
@@ -304,9 +399,9 @@
         }}
         oninput={handleInput}
         onkeydown={handleKeyDown}
-        onclick={() => (showAutocomplete = false)}
+        onclick={() => (autocompleteKind = null)}
       ></textarea>
-      {#if showAutocomplete && autocompleteResults.length > 0}
+      {#if autocompleteKind === 'user' && autocompleteResults.length > 0}
         <div class="autocomplete-dropdown">
           {#each autocompleteResults as user, i}
             <button
@@ -328,6 +423,28 @@
             </button>
           {/each}
         </div>
+      {:else if autocompleteKind === 'reference' && referenceResults.length > 0}
+        <div class="autocomplete-dropdown reference-dropdown">
+          {#each referenceResults as result, i}
+            <button
+              type="button"
+              class="autocomplete-item reference-item"
+              class:selected={i === autocompleteIndex}
+              onclick={() => insertReference(result)}
+              onmouseenter={() => (autocompleteIndex = i)}
+            >
+              <span class="reference-number">{result.reference}</span>
+              <span class="reference-info">
+                <span class="reference-title">{result.title}</span>
+                <span class="reference-meta">
+                  {result.type === 'item' ? labels.referenceTask : labels.referenceThread} ·
+                  {result.scopeLabel ?? labels.referenceAssociation}{#if result.archived}
+                    · {labels.referenceArchived}{/if}
+                </span>
+              </span>
+            </button>
+          {/each}
+        </div>
       {/if}
     </div>{/if}
   <input
@@ -340,7 +457,10 @@
     tabindex="-1"
     aria-hidden="true"
   />
-  <p class="upload-hint" id={`${uid}-drop`}>{busy ? labels.uploading : labels.drop}</p>
+  <p class="upload-hint" id={`${uid}-drop`}>
+    {busy ? labels.uploading : labels.drop}{#if allowReferences}
+      <span class="hint-separator">·</span> {labels.referenceHint}{/if}
+  </p>
   {#if uploadTarget === 'content' && pendingUploads.length}
     <ul class="pending-uploads" aria-live="polite">
       {#each pendingUploads as upload (upload.key)}<li>
@@ -628,6 +748,9 @@
     flex-direction: column;
     width: 250px;
   }
+  .autocomplete-dropdown.reference-dropdown {
+    width: min(360px, calc(100vw - 48px));
+  }
   .autocomplete-item {
     display: flex;
     align-items: center;
@@ -646,6 +769,9 @@
   .autocomplete-item.selected,
   .autocomplete-item:hover {
     background: var(--surface-muted);
+  }
+  .autocomplete-item.reference-item {
+    align-items: flex-start;
   }
   .autocomplete-item .avatar {
     width: 24px;
@@ -666,5 +792,40 @@
   .autocomplete-item .nickname {
     font-size: 11px;
     color: var(--muted);
+  }
+  .autocomplete-item .reference-number {
+    flex: 0 0 auto;
+    padding: 2px 6px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--surface-muted);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.4;
+  }
+  .autocomplete-item .reference-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .autocomplete-item .reference-title {
+    overflow: hidden;
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .autocomplete-item .reference-meta {
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .hint-separator {
+    color: var(--line);
   }
 </style>
