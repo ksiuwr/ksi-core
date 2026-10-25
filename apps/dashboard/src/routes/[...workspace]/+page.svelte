@@ -1857,8 +1857,8 @@
                       <h1>{'Notifications'}</h1>
                       <p class="workspace-description">
                         {language === 'pl'
-                          ? 'Wzmianki, przypisania, aktualizacje i prośby o zatwierdzenie w jednym miejscu.'
-                          : 'Mentions, assignments, updates, and approval requests in one place.'}
+                          ? 'Zobacz, co Cię ominęło.'
+                          : 'Catch up on what you missed.'}
                       </p>
                     </div>
                   </div>

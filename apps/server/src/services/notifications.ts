@@ -10,6 +10,7 @@ import {
   kanbanItems,
   threads,
   notifications,
+  auditEvents,
   subscriptions,
   notificationPreferences,
   mailJobs
@@ -48,6 +49,7 @@ export async function notificationTarget(executor: Executor, type: string, id: s
     title,
     href,
     projectId,
+    projectName: project?.name ?? null,
     canRead: (user: typeof users.$inferSelect) =>
       user.membershipStatus === 'active' &&
       (!thread ||
@@ -121,15 +123,37 @@ export async function listNotifications(
   limit = 100
 ) {
   const rows = await executor
-    .select()
+    .select({
+      notification: notifications,
+      action: auditEvents.action,
+      actorName: users.name,
+      metadata: auditEvents.metadata
+    })
     .from(notifications)
+    .innerJoin(auditEvents, eq(notifications.eventId, auditEvents.id))
+    .leftJoin(users, eq(auditEvents.actorId, users.id))
     .where(eq(notifications.userId, user.id))
     .orderBy(desc(notifications.createdAt))
     .limit(limit);
   const visible = [];
-  for (const row of rows) {
-    const target = await notificationTarget(executor, row.ownerType, row.ownerId);
-    if (target?.canRead(user)) visible.push({ ...row, title: target.title, href: target.href });
+  for (const { notification, action, actorName, metadata } of rows) {
+    const target = await notificationTarget(executor, notification.ownerType, notification.ownerId);
+    if (target?.canRead(user)) {
+      const changedFields = Array.isArray(metadata.changes)
+        ? metadata.changes.flatMap((change) =>
+            change && typeof change.field === 'string' ? [change.field] : []
+          )
+        : [];
+      visible.push({
+        ...notification,
+        title: target.title,
+        href: target.href,
+        projectName: target.projectName,
+        actorName,
+        action,
+        changedFields
+      });
+    }
   }
   return visible;
 }

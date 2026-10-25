@@ -693,7 +693,7 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       title: 'Notification task',
       markdown: `Hello [@outsider](/members/${ids.outsider})`,
       column: 'todo',
-      tags: [],
+      labels: [],
       position: 0,
       assigneeIds: [ids.member]
     });
@@ -704,6 +704,9 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       (n: any) => n.ownerId === task.body.id
     );
     expect(mention.reason).toBe('mention');
+    expect(mention.actorName).toBe('admin Workflow');
+    expect(mention.action).toBe('kanban.created');
+    expect(mention.projectName).toBe('Workflow project');
     expect(mention.href).toBe(`/projects/${projectId}/kanban?item=${task.body.id}`);
     expect(
       (await request('admin', '/notifications')).body.some((n: any) => n.ownerId === task.body.id)
@@ -727,6 +730,8 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       (n: any) => n.ownerId === task.body.id && !n.readAt
     );
     expect(unread.reason).toBe('update');
+    expect(unread.action).toBe('kanban.updated');
+    expect(unread.changedFields).toEqual(['title']);
     expect(
       (
         await request('outsider', '/notifications/preferences', 'PUT', {
@@ -758,6 +763,37 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
     expect(
       (await request('outsider', `/notifications/subscriptions/item/${task.body.id}`)).body.watching
     ).toBe(false);
+    const comment = await request('admin', `/platform/items/${task.body.id}/comments`, 'POST', {
+      markdown: `A comment for [@outsider](/members/${ids.outsider})`
+    });
+    expect(comment.status).toBe(200);
+    const commentNotification = (await request('outsider', '/notifications')).body.find(
+      (n: any) => n.ownerId === task.body.id && n.action === 'kanban.comment.created'
+    );
+    expect(commentNotification).toMatchObject({
+      actorName: 'admin Workflow',
+      projectName: 'Workflow project',
+      reason: 'mention',
+      title: 'Notification task updated'
+    });
+    expect(commentNotification.metadata).toBeUndefined();
+    const organizationThread = await request('admin', '/platform/threads', 'POST', {
+      title: 'Organization context',
+      markdown: `Hello [@outsider](/members/${ids.outsider})`,
+      visibility: 'association',
+      invitedIds: []
+    });
+    expect(organizationThread.status).toBe(200);
+    const organizationNotification = (await request('outsider', '/notifications')).body.find(
+      (n: any) => n.ownerId === organizationThread.body.id
+    );
+    expect(organizationNotification).toMatchObject({
+      projectName: null,
+      actorName: 'admin Workflow',
+      action: 'threads.created'
+    });
+    await db.delete(comments).where(eq(comments.threadId, organizationThread.body.id));
+    await db.delete(threads).where(eq(threads.id, organizationThread.body.id));
     const thread = await request('admin', '/platform/threads', 'POST', {
       title: 'Restricted notification',
       markdown: `Hello [@outsider](/members/${ids.outsider})`,
@@ -776,6 +812,7 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
     expect((await request('pending', '/notifications')).status).toBe(403);
     await db.delete(comments).where(eq(comments.threadId, thread.body.id));
     await db.delete(threads).where(eq(threads.id, thread.body.id));
+    await db.delete(comments).where(eq(comments.itemId, task.body.id));
     await db.delete(kanbanItems).where(eq(kanbanItems.id, task.body.id));
     await db.delete(mailJobs).where(eq(mailJobs.to, `${ids.outsider}@example.test`));
   });

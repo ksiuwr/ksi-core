@@ -255,9 +255,6 @@ msgstr "Bieżąca przestrzeń"
 msgid "Language and appearance"
 msgstr "Język i wygląd"
 
-#~ msgid "Preferences"
-#~ msgstr "Preferencje"
-
 #: src/lib/UserSettings.svelte
 #: src/lib/UserSettings.svelte
 msgid "Language"
@@ -2189,12 +2186,6 @@ msgstr "Oznacz jako przeczytane"
 msgid "E-mail o nieprzeczytanych powiadomieniach"
 msgstr "E-mail o nieprzeczytanych powiadomieniach"
 
-#~ msgid "Opóźnienie (minuty)"
-#~ msgstr ""
-
-#~ msgid "Delay (minutes)"
-#~ msgstr ""
-
 #: src/lib/NotificationSettings.svelte
 msgid "Zapisz ustawienia"
 msgstr "Zapisz ustawienia"
@@ -2296,14 +2287,6 @@ msgid "Unread"
 msgstr "Nieprzeczytane"
 
 #: src/lib/NotificationInbox.svelte
-msgid "Wymaga zatwierdzenia"
-msgstr "Wymaga zatwierdzenia"
-
-#: src/lib/NotificationInbox.svelte
-msgid "Needs approval"
-msgstr "Wymaga zatwierdzenia"
-
-#: src/lib/NotificationInbox.svelte
 msgid "Prośba o aktywację konta"
 msgstr "Prośba o aktywację konta"
 
@@ -2361,26 +2344,6 @@ msgstr "Zobacz wszystkie powiadomienia"
 msgid "View all notifications"
 msgstr "Zobacz wszystkie powiadomienia"
 
-#: src/routes/[...workspace]/+page.svelte
-msgid "Wzmianki, przypisania, aktualizacje i prośby o zatwierdzenie w jednym miejscu."
-msgstr "Wzmianki, przypisania, aktualizacje i prośby o zatwierdzenie w jednym miejscu."
-
-#: src/routes/[...workspace]/+page.svelte
-msgid "Mentions, assignments, updates, and approval requests in one place."
-msgstr "Wzmianki, przypisania, aktualizacje i prośby o zatwierdzenie w jednym miejscu."
-
-#~ msgid "Wybierz, kiedy otrzymywać przypomnienia e-mail."
-#~ msgstr ""
-
-#~ msgid "Choose when to receive email reminders."
-#~ msgstr ""
-
-#~ msgid "Powiadomienia e-mail"
-#~ msgstr ""
-
-#~ msgid "Email notifications"
-#~ msgstr ""
-
 #: src/lib/NotificationSettings.svelte
 msgid "Ładowanie ustawień…"
 msgstr "Ładowanie ustawień…"
@@ -2412,3 +2375,11 @@ msgstr "Zarządzaj językiem, wyglądem i powiadomieniami."
 #: src/lib/UserSettings.svelte
 msgid "Language and appearance changes are saved automatically on this device."
 msgstr "Zmiany języka i wyglądu są zapisywane automatycznie na tym urządzeniu."
+
+#: src/routes/[...workspace]/+page.svelte
+msgid "Zobacz, co Cię ominęło."
+msgstr "Zobacz, co Cię ominęło."
+
+#: src/routes/[...workspace]/+page.svelte
+msgid "Catch up on what you missed."
+msgstr "Zobacz, co Cię ominęło."

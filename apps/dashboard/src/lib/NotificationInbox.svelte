@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { notificationAction, type NotificationContext } from 'shared/notifications';
   import {
     Bell,
     Inbox,
@@ -30,7 +31,7 @@
     refresh?: () => Promise<void>;
     reportError?: (message: string) => void;
   } = $props();
-  type Notification = {
+  type Notification = NotificationContext & {
     id: string;
     title: string;
     href: string;
@@ -350,10 +351,8 @@
               >
                 <span class="entry-meta"
                   >{entry.kind === 'activity'
-                    ? reasonLabel(entry.notification.reason)
-                    : language === 'pl'
-                      ? 'Wymaga zatwierdzenia'
-                      : 'Needs approval'}<span aria-hidden="true"> · </span><time
+                    ? entry.notification.projectName || 'KSI'
+                    : 'KSI'}<span aria-hidden="true"> · </span><time
                     datetime={entry.createdAt}
                     title={new Date(entry.createdAt).toLocaleString(
                       language === 'pl' ? 'pl-PL' : 'en-GB'
@@ -361,7 +360,18 @@
                   ></span
                 >
                 <span class="entry-title">{entry.title}</span>
-                {#if entry.kind !== 'activity'}<span class="entry-description"
+                {#if entry.kind === 'activity'}
+                  <span class="entry-description"
+                    >{notificationAction(
+                      entry.notification,
+                      language
+                    )}{#if entry.notification.reason === 'mention' || entry.notification.reason === 'assignment'}<span
+                        aria-hidden="true"
+                      >
+                        ·
+                      </span>{reasonLabel(entry.notification.reason)}{/if}</span
+                  >
+                {:else}<span class="entry-description"
                     >{entry.kind === 'members'
                       ? language === 'pl'
                         ? 'Prośba o aktywację konta'
@@ -640,6 +650,7 @@
     color: inherit;
   }
   .entry-meta {
+    overflow-wrap: anywhere;
     color: var(--muted);
     font-size: 11px;
   }
@@ -667,8 +678,12 @@
     text-underline-offset: 2px;
   }
   .entry-description {
+    overflow-wrap: anywhere;
     color: var(--muted);
     font-size: 12px;
+  }
+  .entry-description > span {
+    margin-inline: 4px;
   }
   .entry-actions {
     display: flex;

@@ -652,7 +652,7 @@ a[aria-disabled='true'] {
     max-width: 140px;
   }
   .topbar-controls {
-    gap: 0;
+    gap: 10px;
   }
   .menu-panel {
     position: fixed;
