@@ -10,7 +10,7 @@ describe('notification action descriptions', () => {
       ownerType: 'thread'
     };
     expect(notificationAction(notification, 'en')).toBe('Alicja Nowak commented');
-    expect(notificationAction(notification, 'pl')).toBe('Dodano komentarz · Alicja Nowak');
+    expect(notificationAction(notification, 'pl')).toBe('Alicja Nowak dodał komentarz');
     expect(notificationAction({ ...notification, action: 'comments.edited' }, 'en')).toBe(
       'Alicja Nowak edited a comment'
     );
@@ -24,10 +24,10 @@ describe('notification action descriptions', () => {
       notificationAction({ ...notification, changedFields: ['column', 'position'] }, 'en')
     ).toBe('Jan changed the task status');
     expect(notificationAction({ ...notification, changedFields: ['markdown'] }, 'pl')).toBe(
-      'Edytowano opis · Jan'
+      'Jan edytował opis'
     );
     expect(notificationAction({ ...notification, changedFields: ['assigneeIds'] }, 'pl')).toBe(
-      'Zmieniono przypisane osoby · Jan'
+      'Jan zmienił przypisane osoby'
     );
     expect(
       notificationAction({ ...notification, changedFields: ['title', 'markdown'] }, 'en')
@@ -38,10 +38,10 @@ describe('notification action descriptions', () => {
       'Jan archived the discussion'
     );
     expect(notificationAction({ action: 'threads.access.updated', actorName: 'Jan' }, 'pl')).toBe(
-      'Zmieniono dostęp do dyskusji · Jan'
+      'Jan zmienił dostęp do dyskusji'
     );
     expect(notificationAction({ action: 'threads.created', actorName: null }, 'pl')).toBe(
-      'Rozpoczęto dyskusję · Ktoś'
+      'Ktoś rozpoczął dyskusję'
     );
     expect(notificationAction({ action: 'unknown', ownerType: 'thread' }, 'en')).toBe(
       'Someone updated the discussion'
