@@ -31,6 +31,10 @@
   const clearLabel = $derived(pl ? 'Wyczyść' : 'Clear');
   const doneLabel = $derived(pl ? 'Gotowe' : 'Done');
   const timeLabel = $derived(pl ? 'Godzina' : 'Time');
+  const hoursLabel = $derived(pl ? 'Godzina' : 'Hour');
+  const minutesLabel = $derived(pl ? 'Minuta' : 'Minute');
+  const hours = Array.from({ length: 24 }, (_, index) => pad(index));
+  const minutes = Array.from({ length: 12 }, (_, index) => pad(index * 5));
   const today = $derived(hourless(new Date()));
   const title = $derived(
     new Intl.DateTimeFormat(intl, { month: 'long', year: 'numeric' }).format(cursor)
@@ -114,8 +118,11 @@
     open = false;
     if (focus) trigger?.focus();
   }
-  function settle() {
-    draftTime ||= '09:00';
+  function setHour(hour: string) {
+    draftTime = `${hour}:${draftTime.slice(3) || '00'}`;
+  }
+  function setMinute(minute: string) {
+    draftTime = `${draftTime.slice(0, 2) || '00'}:${minute}`;
   }
   function pick(day: string) {
     draftDate = day;
@@ -210,7 +217,7 @@
     class="picker-panel"
     role="dialog"
     id={`${uid}-panel`}
-    aria-labelledby={`${uid}-title`}
+    aria-label={fieldLabel}
     style:left="{position.left}px"
     style:top="{position.top}px"
     ontoggle={(event) => {
@@ -226,7 +233,7 @@
         aria-label={pl ? 'Poprzedni miesiąc' : 'Previous month'}
         ><ChevronLeft size={17} aria-hidden="true" /></button
       >
-      <strong class="picker-title" id={`${uid}-title`} aria-live="polite">{title}</strong>
+      <strong class="picker-title" aria-live="polite">{title}</strong>
       <button
         type="button"
         class="picker-step"
@@ -238,49 +245,98 @@
         ><X size={18} aria-hidden="true" /></button
       >
     </header>
-    <div class="picker-weekdays" aria-hidden="true">
-      {#each weekdays as label, index (index)}<span>{label}</span>{/each}
-    </div>
-    <div class="picker-grid" bind:this={grid}>
-      {#each Array(month.offset) as _, index (index)}<span aria-hidden="true"></span>{/each}
-      {#each Array(month.count) as _, index (index)}
-        {@const day = `${cursor.getFullYear()}-${pad(cursor.getMonth() + 1)}-${pad(index + 1)}`}
-        <button
-          type="button"
-          tabindex={focusDay === day ? 0 : -1}
-          data-day={day}
-          class:today={day === today}
-          class:selected={day === draftDate}
-          aria-pressed={day === draftDate}
-          aria-label={new Intl.DateTimeFormat(intl, { dateStyle: 'full' }).format(
-            new Date(`${day}T12:00`)
-          )}
-          onclick={() => pick(day)}
-        >
-          {index + 1}
+    <div class="picker-scroll">
+      <div class="picker-weekdays" aria-hidden="true">
+        {#each weekdays as label, index (index)}<span>{label}</span>{/each}
+      </div>
+      <div class="picker-grid" bind:this={grid}>
+        {#each Array(month.offset) as _, index (index)}<span aria-hidden="true"></span>{/each}
+        {#each Array(month.count) as _, index (index)}
+          {@const day = `${cursor.getFullYear()}-${pad(cursor.getMonth() + 1)}-${pad(index + 1)}`}
+          <button
+            type="button"
+            tabindex={focusDay === day ? 0 : -1}
+            data-day={day}
+            class:today={day === today}
+            class:selected={day === draftDate}
+            aria-pressed={day === draftDate}
+            aria-label={new Intl.DateTimeFormat(intl, { dateStyle: 'full' }).format(
+              new Date(`${day}T12:00`)
+            )}
+            onclick={() => pick(day)}
+          >
+            {index + 1}
+          </button>
+        {/each}
+      </div>
+      <div class="picker-time">
+        <div class="picker-time-head">
+          <span>{timeLabel}</span>
+          <output class:unset={!draftTime}>{draftTime || '--:--'}</output>
+        </div>
+        <div class="picker-cells picker-hours" role="group" aria-label={hoursLabel}>
+          {#each hours as hour (hour)}
+            <button
+              type="button"
+              {disabled}
+              class:selected={draftTime.slice(0, 2) === hour}
+              aria-pressed={draftTime.slice(0, 2) === hour}
+              onclick={() => setHour(hour)}
+            >
+              {hour}
+            </button>
+          {/each}
+        </div>
+        <div class="picker-cells picker-minutes" role="group" aria-label={minutesLabel}>
+          {#each minutes as minute (minute)}
+            <button
+              type="button"
+              {disabled}
+              class:selected={draftTime.slice(3) === minute}
+              aria-pressed={draftTime.slice(3) === minute}
+              onclick={() => setMinute(minute)}
+            >
+              {minute}
+            </button>
+          {/each}
+        </div>
+      </div>
+      <div class="picker-presets">
+        <button type="button" onclick={() => preset(0)}>
+          {pl ? 'Dziś' : 'Today'}
         </button>
-      {/each}
-    </div>
-    <div class="picker-presets">
-      <button type="button" onclick={() => preset(0)}>
-        {pl ? 'Dziś' : 'Today'}
-      </button>
-      <button type="button" onclick={() => preset(1)}>
-        {pl ? 'Jutro' : 'Tomorrow'}
-      </button>
-      <button type="button" onclick={() => preset(7)}>{pl ? 'Za tydzień' : 'In a week'}</button>
-    </div>
-    <div class="picker-time">
-      <label for={`${uid}-time`}>{timeLabel}</label>
-      <input id={`${uid}-time`} type="time" bind:value={draftTime} onblur={settle} {disabled} />
+        <button type="button" onclick={() => preset(1)}>
+          {pl ? 'Jutro' : 'Tomorrow'}
+        </button>
+        <button type="button" onclick={() => preset(7)}>{pl ? 'Za tydzień' : 'In a week'}</button>
+      </div>
     </div>
     <footer class="picker-foot">
-      <button type="button" class="picker-clear" disabled={!value || disabled} onclick={clearAll}
-        >{clearLabel}</button
-      >
-      <button type="button" class="picker-done" {disabled} onclick={() => close(true)}
-        >{doneLabel}</button
-      >
+      <div class="picker-navstrip">
+        <button
+          type="button"
+          class="picker-step"
+          onclick={() => void shiftMonth(-1)}
+          aria-label={pl ? 'Poprzedni miesiąc' : 'Previous month'}
+          ><ChevronLeft size={19} aria-hidden="true" /></button
+        >
+        <strong class="picker-title" aria-live="polite">{title}</strong>
+        <button
+          type="button"
+          class="picker-step"
+          onclick={() => void shiftMonth(1)}
+          aria-label={pl ? 'Następny miesiąc' : 'Next month'}
+          ><ChevronRight size={19} aria-hidden="true" /></button
+        >
+      </div>
+      <div class="picker-actions">
+        <button type="button" class="picker-clear" disabled={!value || disabled} onclick={clearAll}
+          >{clearLabel}</button
+        >
+        <button type="button" class="picker-done" {disabled} onclick={() => close(true)}
+          >{doneLabel}</button
+        >
+      </div>
     </footer>
   </div>
 </div>
@@ -412,10 +468,62 @@
   }
   .picker-time {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
     border-top: 1px solid var(--line);
     padding-top: 9px;
+  }
+  .picker-time-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .picker-time-head span {
+    color: var(--muted);
+    font-size: 12px;
+  }
+  output {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink);
+  }
+  output.unset {
+    color: var(--muted);
+  }
+  .picker-cells {
+    display: grid;
+    gap: 3px;
+  }
+  .picker-hours {
+    grid-template-columns: repeat(8, 1fr);
+  }
+  .picker-minutes {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  .picker-cells button {
+    display: grid;
+    place-items: center;
+    height: 26px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    background: transparent;
+    color: var(--ink);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+  }
+  .picker-cells button:hover {
+    background: var(--surface-muted, #f0ede4);
+  }
+  .picker-cells button.selected {
+    background: var(--accent);
+    color: #fff;
+  }
+  .picker-cells button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
   .picker-presets {
     display: flex;
@@ -435,14 +543,33 @@
     background: var(--surface-muted, #f0ede4);
     color: var(--ink);
   }
-  .picker-time label {
-    margin: 0 0 0 2px;
-  }
-  .picker-time input {
-    margin: 0;
-    width: auto;
+  .picker-scroll {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    min-height: 0;
+    overflow-y: auto;
+    max-height: 352px;
   }
   .picker-foot {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .picker-navstrip {
+    display: none;
+    align-items: center;
+    gap: 4px;
+  }
+  .picker-navstrip .picker-title {
+    font-size: 14px;
+  }
+  .picker-navstrip .picker-step {
+    width: 44px;
+    height: 44px;
+  }
+  .picker-actions {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -468,7 +595,7 @@
     margin-left: auto;
   }
   @media (max-width: 760px) {
-    .picker-panel:popover-open {
+    .picker-panel {
       inset: 0;
       width: 100vw;
       height: 100dvh;
@@ -476,10 +603,22 @@
       max-height: none;
       border: none;
       border-radius: 0;
-      padding: 12px env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      padding: calc(12px + env(safe-area-inset-top)) 16px env(safe-area-inset-bottom);
     }
-    .picker-close {
-      display: grid;
+    .picker-head {
+      display: none;
+    }
+    .picker-scroll {
+      flex: 1;
+      max-height: none;
+      padding-bottom: 12px;
+    }
+    .picker-navstrip {
+      display: flex;
+    }
+    .picker-step {
+      width: 44px;
+      height: 44px;
     }
     .picker-presets button {
       min-height: 40px;
@@ -493,13 +632,27 @@
     .picker-grid span {
       height: 42px;
     }
-    .picker-foot button {
-      min-height: 44px;
-      padding: 10px 16px;
-      font-size: 14px;
+    .picker-cells button {
+      height: 38px;
+      font-size: 13px;
     }
-    .picker-foot {
-      margin-top: auto;
+    .picker-foot button {
+      min-height: 48px;
+      padding: 10px 16px;
+      font-size: 15px;
+    }
+    .picker-actions {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .picker-done {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      flex: 1;
+      letter-spacing: 0.04em;
+    }
+    .picker-done:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--accent) 88%, #fff);
     }
   }
 </style>
