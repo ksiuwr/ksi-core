@@ -30,6 +30,17 @@ test('access changes name the visibility and count invitation changes', () => {
   ).toEqual([{ kind: 'access' }]);
 });
 
+test('assignee changes name who was added and removed', () => {
+  expect(
+    threadActivitySummary('threads.assignees.updated', [
+      { field: 'assigneeIds', before: ['a'], after: ['b', 'c'] }
+    ])
+  ).toEqual([
+    { kind: 'assignee-added', ids: ['b', 'c'] },
+    { kind: 'assignee-removed', ids: ['a'] }
+  ]);
+});
+
 test('comment events stay short and never expose their text', () => {
   expect(threadActivitySummary('threads.comment.created', null)).toEqual([
     { kind: 'comment-added' }

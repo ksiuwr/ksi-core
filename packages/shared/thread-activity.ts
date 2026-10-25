@@ -14,7 +14,8 @@ export type ThreadActivitySummary =
     }
   | { kind: 'visibility'; before: string; after: string }
   | { kind: 'invited'; count: number }
-  | { kind: 'uninvited'; count: number };
+  | { kind: 'uninvited'; count: number }
+  | { kind: 'assignee-added' | 'assignee-removed'; ids: string[] };
 
 /** Summarize forum events without putting comment bodies into the timeline. */
 export function threadActivitySummary(
@@ -48,6 +49,18 @@ export function threadActivitySummary(
       const uninvited = [...before].filter((id) => !after.has(id)).length;
       if (invited) result.push({ kind: 'invited', count: invited });
       if (uninvited) result.push({ kind: 'uninvited', count: uninvited });
+    }
+    if (change.field === 'assigneeIds') {
+      const ids = (value: unknown) =>
+        new Set(
+          Array.isArray(value) ? value.filter((id): id is string => typeof id === 'string') : []
+        );
+      const before = ids(change.before),
+        after = ids(change.after);
+      const added = [...after].filter((id) => !before.has(id));
+      const removed = [...before].filter((id) => !after.has(id));
+      if (added.length) result.push({ kind: 'assignee-added', ids: added });
+      if (removed.length) result.push({ kind: 'assignee-removed', ids: removed });
     }
   }
   if (action === 'threads.access.updated') return result.length ? result : [{ kind: 'access' }];

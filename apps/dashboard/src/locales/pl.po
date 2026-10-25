@@ -67,10 +67,12 @@ msgstr "Nie znaleziono projektu."
 msgid "Request failed"
 msgstr "Żądanie nie powiodło się"
 
+#: src/lib/Assignees.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Tab"
 msgstr "Tab"
 
+#: src/lib/Assignees.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Escape"
@@ -432,6 +434,7 @@ msgstr "Archiwum"
 msgid "Leaders"
 msgstr "Liderzy"
 
+#: src/lib/Assignees.svelte
 #: src/lib/ProjectPermissions.svelte
 #: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
@@ -989,6 +992,7 @@ msgstr "Email"
 msgid "Status"
 msgstr "Status"
 
+#: src/lib/Assignees.svelte
 #: src/lib/Members.svelte
 #: src/lib/WorkspaceMembers.svelte
 msgid "No matching members."
@@ -1762,11 +1766,16 @@ msgstr "Utwórz nową etykietę"
 msgid "Create label"
 msgstr "Utwórz etykietę"
 
+#: src/lib/Assignees.svelte
+#: src/lib/Assignees.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 msgid "ArrowUp"
 msgstr ""
 
+#: src/lib/Assignees.svelte
+#: src/lib/Assignees.svelte
+#: src/lib/Assignees.svelte
 #: src/lib/KanbanBoard.svelte
 msgid "ArrowDown"
 msgstr ""
@@ -2036,4 +2045,113 @@ msgstr ""
 #: src/lib/KanbanBoard.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Anuluj"
+msgstr ""
+
+#~ msgid "Przypisane osoby"
+#~ msgstr ""
+
+#~ msgid "Assignees"
+#~ msgstr ""
+
+#. 0: fullName(person)
+#: src/lib/Assignees.svelte
+msgid "Przypisz {0}"
+msgstr ""
+
+#. 0: fullName(person)
+#: src/lib/Assignees.svelte
+msgid "Assign {0}"
+msgstr ""
+
+#. 0: fullName(person)
+#: src/lib/Assignees.svelte
+msgid "Usuń {0}"
+msgstr ""
+
+#. 0: fullName(person)
+#: src/lib/Assignees.svelte
+msgid "Remove {0}"
+msgstr ""
+
+#: src/lib/Assignees.svelte
+msgid "Backspace"
+msgstr ""
+
+#: src/lib/Assignees.svelte
+#: src/lib/Assignees.svelte
+msgid "Home"
+msgstr ""
+
+#: src/lib/Assignees.svelte
+msgid "End"
+msgstr ""
+
+#: src/lib/Assignees.svelte
+msgid "Enter"
+msgstr ""
+
+#: src/lib/Assignees.svelte
+msgid "Nie udało się wczytać osób"
+msgstr ""
+
+#: src/lib/Assignees.svelte
+msgid "Unable to load members"
+msgstr ""
+
+#: src/lib/Assignees.svelte
+msgid "Dodaj osoby"
+msgstr ""
+
+#: src/lib/Assignees.svelte
+msgid "Add assignees"
+msgstr ""
+
+#: src/lib/Assignees.svelte
+msgid "Szukaj osób"
+msgstr ""
+
+#: src/lib/Assignees.svelte
+msgid "Search people"
+msgstr ""
+
+#: src/lib/Assignees.svelte
+msgid "Szukaj osób…"
+msgstr ""
+
+#: src/lib/Assignees.svelte
+msgid "Search people…"
+msgstr ""
+
+#: src/lib/Assignees.svelte
+msgid "Osoby w projekcie"
+msgstr ""
+
+#: src/lib/Assignees.svelte
+msgid "Wczytywanie osób…"
+msgstr ""
+
+#: src/lib/Assignees.svelte
+msgid "Loading members…"
+msgstr ""
+
+#: src/lib/Assignees.svelte
+msgid "Brak pasujących osób."
+msgstr ""
+
+#: src/lib/Assignees.svelte
+msgid "Wybierz osoby"
+msgstr ""
+
+#: src/lib/Assignees.svelte
+msgid "Choose assignees"
+msgstr ""
+
+#: src/lib/Assignees.svelte
+#: src/lib/Assignees.svelte
+msgid "Przypisane do"
+msgstr ""
+
+#: src/lib/Assignees.svelte
+#: src/lib/Assignees.svelte
+msgid "Assigned to"
 msgstr ""

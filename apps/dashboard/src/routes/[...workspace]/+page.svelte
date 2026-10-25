@@ -5,7 +5,7 @@
   import type { ContentChange } from 'shared/activity';
   import ArticleThumbnail from '$lib/ArticleThumbnail.svelte';
   import ChangeDetails from '@ksi-core/ui/platform/ChangeDetails.svelte';
-  import Assignees from '$lib/Assignees.svelte';
+  import Assignees, { type AssignmentMember } from '$lib/Assignees.svelte';
   import ContentTranslations from '$lib/ContentTranslations.svelte';
   import type { ContentTranslations as TranslationData } from 'shared/content-locales';
   import { onMount, untrack, tick } from 'svelte';
@@ -144,6 +144,7 @@
   let items = $state<Item[]>([]);
   let threads = $state<Thread[]>([]);
   let threadAssignees = $state<string[]>([]);
+  let threadMembers = $state<AssignmentMember[]>([]);
 
   let events = $state<
     {
@@ -441,9 +442,20 @@
           } catch {
             history = null;
           }
+          let members: AssignmentMember[] = [];
+          try {
+            members = await api<AssignmentMember[]>(
+              detail.projectId
+                ? `/platform/projects/${encodeURIComponent(detail.projectId)}/members`
+                : '/platform/members'
+            );
+          } catch {
+            members = [];
+          }
           if (generation === loadGeneration) {
             selectedThread = detail;
             archived = !!detail.archivedAt;
+            threadMembers = members;
             threadEvents = history ?? [];
             threadEventsNextPage = history ? (history.length === 20 ? 1 : null) : 0;
             threadEventsError = history === null;
@@ -455,6 +467,7 @@
           if (generation === loadGeneration) {
             threads = result;
             selectedThread = null;
+            threadMembers = [];
             threadEvents = [];
             threadEventsNextPage = null;
             threadEventsError = false;
@@ -1677,7 +1690,12 @@
                       <div class="thread-timeline">
                         {#each threadTimeline as entry (`${entry.kind}-${entry.id}`)}
                           {#if entry.kind === 'event'}
-                            <ThreadActivity event={entry.event} {language} now={threadNow} />
+                            <ThreadActivity
+                              event={entry.event}
+                              members={threadMembers}
+                              {language}
+                              now={threadNow}
+                            />
                           {:else}
                             {@const comment = entry.comment}
                             <article class="discussion-post timeline-comment">

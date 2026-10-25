@@ -4,6 +4,7 @@ export type TaskActivitySummary =
   | { kind: 'created' | 'description' | 'deleted' | 'restored' | 'updated' }
   | { kind: 'renamed' | 'moved'; before: string; after: string }
   | { kind: 'label-added' | 'label-removed'; labels: string[] }
+  | { kind: 'assignee-added' | 'assignee-removed'; ids: string[] }
   | { kind: 'label-renamed'; before: string; after: string }
   | { kind: 'label-color'; label: string; before: string; after: string }
   | { kind: 'label-description'; label: string; operation: 'added' | 'changed' | 'removed' };
@@ -74,6 +75,18 @@ export function taskActivitySummary(
       const removed = [...before].filter((name) => !after.has(name));
       if (added.length) result.push({ kind: 'label-added', labels: added });
       if (removed.length) result.push({ kind: 'label-removed', labels: removed });
+    }
+    if (change.field === 'assigneeIds') {
+      const ids = (value: unknown) =>
+        new Set(
+          Array.isArray(value) ? value.filter((id): id is string => typeof id === 'string') : []
+        );
+      const before = ids(change.before),
+        after = ids(change.after);
+      const added = [...after].filter((id) => !before.has(id));
+      const removed = [...before].filter((id) => !after.has(id));
+      if (added.length) result.push({ kind: 'assignee-added', ids: added });
+      if (removed.length) result.push({ kind: 'assignee-removed', ids: removed });
     }
   }
   return result.length ? result : [{ kind: 'updated' }];

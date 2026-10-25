@@ -1532,6 +1532,7 @@
                 event={entry.event}
                 {statuses}
                 labels={normalizedLabels}
+                {members}
                 {language}
                 now={activityNow}
               />

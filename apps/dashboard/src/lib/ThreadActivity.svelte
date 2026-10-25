@@ -6,12 +6,17 @@
     Pencil,
     RotateCcw,
     Trash2,
+    UserMinus,
+    UserPlus,
     Users
   } from '@lucide/svelte';
   import type { ContentChange } from 'shared/activity';
   import { threadActivitySummary } from 'shared/thread-activity';
+  import type { AssignmentMember } from './Assignees.svelte';
+  import MemberPreview from '@ksi-core/ui/platform/MemberPreview.svelte';
   let {
     event,
+    members = [],
     language,
     now
   }: {
@@ -23,12 +28,22 @@
       authorId: string | null;
       metadata: { changes: ContentChange[] | null };
     };
+    members?: AssignmentMember[];
     language: 'pl' | 'en';
     now: number;
   } = $props();
   const pl = $derived(language === 'pl');
   const summaries = $derived(threadActivitySummary(event.action, event.metadata.changes));
   const kind = $derived(summaries[0].kind);
+  const person = (id: string): AssignmentMember =>
+    members.find((member) => member.id === id) ?? {
+      id,
+      firstName: id,
+      lastName: '',
+      nickname: null,
+      image: null,
+      bio: null
+    };
   const Icon = $derived(
     kind === 'created'
       ? CircleDot
@@ -44,7 +59,11 @@
                 ? MessageSquare
                 : kind === 'visibility' || kind === 'invited' || kind === 'uninvited'
                   ? Users
-                  : Pencil
+                  : kind === 'assignee-added'
+                    ? UserPlus
+                    : kind === 'assignee-removed'
+                      ? UserMinus
+                      : Pencil
   );
   const visibilityName = (value: string) =>
     value === 'leaders'
@@ -101,7 +120,7 @@
     class:restored={kind === 'restored'}
     class:removed={kind === 'comment-removed'}><Icon size={15} aria-hidden="true" /></span
   >
-  <p>
+  <div class="activity-text">
     {#if event.authorId}<a
         class="activity-author"
         href={`/members/${encodeURIComponent(event.authorId)}`}
@@ -123,6 +142,21 @@
         {pl ? 'zmienił widoczność z' : 'changed visibility from'}
         <span class="thread-value">{visibilityName(summary.before)}</span>
         {pl ? 'na' : 'to'} <span class="thread-value">{visibilityName(summary.after)}</span>
+      {:else if summary.kind === 'assignee-added' || summary.kind === 'assignee-removed'}
+        {summary.kind === 'assignee-added'
+          ? pl
+            ? 'przypisał'
+            : 'assigned'
+          : pl
+            ? 'usunął przypisanie'
+            : 'unassigned'}
+        {' '}{#each summary.ids as id, personIndex}{#if personIndex > 0}{', '}{/if}<MemberPreview
+            member={person(id)}
+            href={`/members/${encodeURIComponent(id)}`}
+            inline
+            size={18}
+            {language}
+          />{/each}
       {:else if summary.kind === 'invited'}
         {pl
           ? `zaprosił ${summary.count} ${personPlural(summary.count)}`
@@ -136,7 +170,7 @@
     {' '}<time datetime={event.createdAt} title={absoluteTime} aria-label={absoluteTime}
       >{relativeTime}</time
     >
-  </p>
+  </div>
 </div>
 
 <style>
@@ -167,7 +201,7 @@
   .activity-marker.removed {
     color: var(--danger, #b42318);
   }
-  p {
+  .activity-text {
     margin: 0;
     overflow-wrap: anywhere;
   }
