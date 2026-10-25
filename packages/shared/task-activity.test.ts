@@ -23,6 +23,16 @@ test('summaries describe renamed tasks, status changes and actual label addition
     { kind: 'label-removed', labels: ['Bug'] }
   ]);
 });
+test('assignee changes name who was added and removed', () => {
+  expect(
+    taskActivitySummary('kanban.updated', [
+      { field: 'assigneeIds', before: ['a', 'b'], after: ['b', 'c', 'd'] }
+    ])
+  ).toEqual([
+    { kind: 'assignee-added', ids: ['c', 'd'] },
+    { kind: 'assignee-removed', ids: ['a'] }
+  ]);
+});
 test('lifecycle and older events have concise summaries without inventing changes', () => {
   expect(
     taskActivitySummary('kanban.created', [

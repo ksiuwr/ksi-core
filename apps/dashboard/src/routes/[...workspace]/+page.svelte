@@ -5,6 +5,7 @@
   import type { ContentChange } from 'shared/activity';
   import ArticleThumbnail from '$lib/ArticleThumbnail.svelte';
   import ChangeDetails from '@ksi-core/ui/platform/ChangeDetails.svelte';
+  import Assignees, { type AssignmentMember } from '$lib/Assignees.svelte';
   import ContentTranslations from '$lib/ContentTranslations.svelte';
   import type { ContentTranslations as TranslationData } from 'shared/content-locales';
   import { onMount, untrack, tick } from 'svelte';
@@ -120,6 +121,7 @@
     deletedAt?: string;
   };
   type Thread = {
+    assigneeIds?: string[];
     id: string;
     title: string;
     visibility: string;
@@ -141,6 +143,8 @@
   let articles = $state<Article[]>([]);
   let items = $state<Item[]>([]);
   let threads = $state<Thread[]>([]);
+  let threadAssignees = $state<string[]>([]);
+  let threadMembers = $state<AssignmentMember[]>([]);
 
   let events = $state<
     {
@@ -438,9 +442,20 @@
           } catch {
             history = null;
           }
+          let members: AssignmentMember[] = [];
+          try {
+            members = await api<AssignmentMember[]>(
+              detail.projectId
+                ? `/platform/projects/${encodeURIComponent(detail.projectId)}/members`
+                : '/platform/members'
+            );
+          } catch {
+            members = [];
+          }
           if (generation === loadGeneration) {
             selectedThread = detail;
             archived = !!detail.archivedAt;
+            threadMembers = members;
             threadEvents = history ?? [];
             threadEventsNextPage = history ? (history.length === 20 ? 1 : null) : 0;
             threadEventsError = history === null;
@@ -452,6 +467,7 @@
           if (generation === loadGeneration) {
             threads = result;
             selectedThread = null;
+            threadMembers = [];
             threadEvents = [];
             threadEventsNextPage = null;
             threadEventsError = false;
@@ -690,6 +706,7 @@
     }
     if (tab === 'forum') {
       const result = await api<Thread>('/platform/threads', 'POST', {
+        assigneeIds: threadAssignees,
         title,
         markdown,
         visibility,
@@ -699,6 +716,7 @@
       composer = false;
       title = '';
       markdown = '';
+      threadAssignees = [];
       await goto(
         `${dashboardPath(workspace, projectSlug, 'forum')}/${encodeURIComponent(result.id)}`
       );
@@ -1626,6 +1644,21 @@
                       <h1 style="font-size:clamp(24px,3vw,36px);margin-bottom:24px">
                         {selectedThread.title}
                       </h1>
+                      <Assignees
+                        projectId={scope}
+                        value={selectedThread.assigneeIds ?? []}
+                        {language}
+                        disabled={busy || archived}
+                        onchange={(assigneeIds) =>
+                          action(async () => {
+                            const updated = await api<Thread>(
+                              `/platform/threads/${selectedThread!.id}/assignees`,
+                              'PATCH',
+                              { version: selectedThread!.version, assigneeIds }
+                            );
+                            selectedThread = { ...selectedThread!, ...updated };
+                          })}
+                      />
                       {#if archived}<p class="notice">{'This thread is archived.'}</p>{/if}
                       {#if threadEventsNextPage !== null}
                         <div class="thread-timeline-more">
@@ -1657,7 +1690,12 @@
                       <div class="thread-timeline">
                         {#each threadTimeline as entry (`${entry.kind}-${entry.id}`)}
                           {#if entry.kind === 'event'}
-                            <ThreadActivity event={entry.event} {language} now={threadNow} />
+                            <ThreadActivity
+                              event={entry.event}
+                              members={threadMembers}
+                              {language}
+                              now={threadNow}
+                            />
                           {:else}
                             {@const comment = entry.comment}
                             <article class="discussion-post timeline-comment">
@@ -1805,6 +1843,12 @@
                       </h2>
                       <label for="thread-title">{'Subject'}</label>
                       <input id="thread-title" bind:value={title} required />
+                      <Assignees
+                        projectId={scope}
+                        bind:value={threadAssignees}
+                        {language}
+                        disabled={busy}
+                      />
                       <label for="thread-vis">{'Visibility'}</label>
                       <Dropdown
                         id="thread-vis"

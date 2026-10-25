@@ -11,6 +11,7 @@ import {
   frontendSessions,
   boards,
   kanbanItems,
+  threads,
   comments,
   files,
   fileReferences,
@@ -625,6 +626,65 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
     } finally {
       await db.delete(alerts).where(eq(alerts.id, alert!.id));
     }
+  });
+  test('assignments accept active project members and reject outsiders and stale writes', async () => {
+    const create = (assigneeIds: string[]) =>
+      request('member', `/platform/boards/${boardId}/items`, 'POST', {
+        title: 'Assigned task',
+        markdown: '',
+        column: 'todo',
+        labels: [],
+        position: 0,
+        assigneeIds
+      });
+    expect((await create([ids.outsider])).status).toBe(422);
+    expect((await create([ids.pending])).status).toBe(422);
+    const task = await create([ids.member]);
+    expect(task.status).toBe(200);
+    expect(task.body.assigneeIds).toEqual([ids.member]);
+    const cleared = await request('member', `/platform/items/${task.body.id}`, 'PATCH', {
+      version: 1,
+      assigneeIds: []
+    });
+    expect(cleared.status).toBe(200);
+    expect(cleared.body.assigneeIds).toEqual([]);
+    expect(
+      (
+        await request('member', `/platform/items/${task.body.id}`, 'PATCH', {
+          version: 1,
+          assigneeIds: [ids.member]
+        })
+      ).status
+    ).toBe(409);
+    const thread = await request('member', '/platform/threads', 'POST', {
+      projectId,
+      title: 'Assigned thread',
+      markdown: 'Post',
+      visibility: 'members',
+      invitedIds: [],
+      assigneeIds: [ids.member]
+    });
+    expect(thread.status).toBe(200);
+    expect(thread.body.assigneeIds).toEqual([ids.member]);
+    expect(
+      (
+        await request('member', `/platform/threads/${thread.body.id}/assignees`, 'PATCH', {
+          version: 1,
+          assigneeIds: [ids.outsider]
+        })
+      ).status
+    ).toBe(422);
+    const updated = await request(
+      'member',
+      `/platform/threads/${thread.body.id}/assignees`,
+      'PATCH',
+      { version: 1, assigneeIds: [] }
+    );
+    expect(updated.status).toBe(200);
+    expect(updated.body.assigneeIds).toEqual([]);
+    await db.delete(comments).where(eq(comments.threadId, thread.body.id));
+    await db.delete(threads).where(eq(threads.id, thread.body.id));
+    await db.delete(kanbanItems).where(eq(kanbanItems.id, task.body.id));
   });
   test('administrator email changes revoke access and require verification; recovery stays private', async () => {
     const id = createId(),

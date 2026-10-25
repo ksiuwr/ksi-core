@@ -67,10 +67,12 @@ msgstr "Project not found."
 msgid "Request failed"
 msgstr "Request failed"
 
+#: src/lib/Assignees.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Tab"
 msgstr "Tab"
 
+#: src/lib/Assignees.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Escape"
@@ -432,6 +434,7 @@ msgstr "Archive"
 msgid "Leaders"
 msgstr "Leaders"
 
+#: src/lib/Assignees.svelte
 #: src/lib/ProjectPermissions.svelte
 #: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
@@ -989,6 +992,7 @@ msgstr "Email"
 msgid "Status"
 msgstr "Status"
 
+#: src/lib/Assignees.svelte
 #: src/lib/Members.svelte
 #: src/lib/WorkspaceMembers.svelte
 msgid "No matching members."
@@ -1762,11 +1766,16 @@ msgstr "Create new label"
 msgid "Create label"
 msgstr "Create label"
 
+#: src/lib/Assignees.svelte
+#: src/lib/Assignees.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 msgid "ArrowUp"
 msgstr "ArrowUp"
 
+#: src/lib/Assignees.svelte
+#: src/lib/Assignees.svelte
+#: src/lib/Assignees.svelte
 #: src/lib/KanbanBoard.svelte
 msgid "ArrowDown"
 msgstr "ArrowDown"
@@ -2037,3 +2046,112 @@ msgstr "Usuń"
 #: src/routes/[...workspace]/+page.svelte
 msgid "Anuluj"
 msgstr "Anuluj"
+
+#~ msgid "Przypisane osoby"
+#~ msgstr "Przypisane osoby"
+
+#~ msgid "Assignees"
+#~ msgstr "Assignees"
+
+#. 0: fullName(person)
+#: src/lib/Assignees.svelte
+msgid "Przypisz {0}"
+msgstr "Przypisz {0}"
+
+#. 0: fullName(person)
+#: src/lib/Assignees.svelte
+msgid "Assign {0}"
+msgstr "Assign {0}"
+
+#. 0: fullName(person)
+#: src/lib/Assignees.svelte
+msgid "Usuń {0}"
+msgstr "Usuń {0}"
+
+#. 0: fullName(person)
+#: src/lib/Assignees.svelte
+msgid "Remove {0}"
+msgstr "Remove {0}"
+
+#: src/lib/Assignees.svelte
+msgid "Backspace"
+msgstr "Backspace"
+
+#: src/lib/Assignees.svelte
+#: src/lib/Assignees.svelte
+msgid "Home"
+msgstr "Home"
+
+#: src/lib/Assignees.svelte
+msgid "End"
+msgstr "End"
+
+#: src/lib/Assignees.svelte
+msgid "Enter"
+msgstr "Enter"
+
+#: src/lib/Assignees.svelte
+msgid "Nie udało się wczytać osób"
+msgstr "Nie udało się wczytać osób"
+
+#: src/lib/Assignees.svelte
+msgid "Unable to load members"
+msgstr "Unable to load members"
+
+#: src/lib/Assignees.svelte
+msgid "Dodaj osoby"
+msgstr "Dodaj osoby"
+
+#: src/lib/Assignees.svelte
+msgid "Add assignees"
+msgstr "Add assignees"
+
+#: src/lib/Assignees.svelte
+msgid "Szukaj osób"
+msgstr "Szukaj osób"
+
+#: src/lib/Assignees.svelte
+msgid "Search people"
+msgstr "Search people"
+
+#: src/lib/Assignees.svelte
+msgid "Szukaj osób…"
+msgstr "Szukaj osób…"
+
+#: src/lib/Assignees.svelte
+msgid "Search people…"
+msgstr "Search people…"
+
+#: src/lib/Assignees.svelte
+msgid "Osoby w projekcie"
+msgstr "Osoby w projekcie"
+
+#: src/lib/Assignees.svelte
+msgid "Wczytywanie osób…"
+msgstr "Wczytywanie osób…"
+
+#: src/lib/Assignees.svelte
+msgid "Loading members…"
+msgstr "Loading members…"
+
+#: src/lib/Assignees.svelte
+msgid "Brak pasujących osób."
+msgstr "Brak pasujących osób."
+
+#: src/lib/Assignees.svelte
+msgid "Wybierz osoby"
+msgstr "Wybierz osoby"
+
+#: src/lib/Assignees.svelte
+msgid "Choose assignees"
+msgstr "Choose assignees"
+
+#: src/lib/Assignees.svelte
+#: src/lib/Assignees.svelte
+msgid "Przypisane do"
+msgstr "Przypisane do"
+
+#: src/lib/Assignees.svelte
+#: src/lib/Assignees.svelte
+msgid "Assigned to"
+msgstr "Assigned to"

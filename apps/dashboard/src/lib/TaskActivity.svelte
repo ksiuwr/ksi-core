@@ -1,11 +1,23 @@
 <script lang="ts">
-  import { CircleDot, Pencil, ArrowRightLeft, Tag, Trash2, RotateCcw } from '@lucide/svelte';
+  import {
+    CircleDot,
+    Pencil,
+    ArrowRightLeft,
+    Tag,
+    Trash2,
+    RotateCcw,
+    UserMinus,
+    UserPlus
+  } from '@lucide/svelte';
   import type { ContentChange } from 'shared/activity';
   import { taskActivitySummary } from 'shared/task-activity';
+  import type { AssignmentMember } from './Assignees.svelte';
+  import MemberPreview from '@ksi-core/ui/platform/MemberPreview.svelte';
   let {
     event,
     statuses,
     labels,
+    members = [],
     language,
     now
   }: {
@@ -19,12 +31,22 @@
     };
     statuses: { id: string; name: string; color?: string }[];
     labels: { name: string; color?: string; description?: string }[];
+    members?: AssignmentMember[];
     language: 'pl' | 'en';
     now: number;
   } = $props();
   const pl = $derived(language === 'pl');
   const summaries = $derived(taskActivitySummary(event.action, event.metadata.changes));
   const kind = $derived(summaries[0].kind);
+  const person = (id: string): AssignmentMember =>
+    members.find((member) => member.id === id) ?? {
+      id,
+      firstName: id,
+      lastName: '',
+      nickname: null,
+      image: null,
+      bio: null
+    };
   const Icon = $derived(
     kind === 'created'
       ? CircleDot
@@ -36,7 +58,11 @@
             ? ArrowRightLeft
             : kind.startsWith('label-')
               ? Tag
-              : Pencil
+              : kind === 'assignee-added'
+                ? UserPlus
+                : kind === 'assignee-removed'
+                  ? UserMinus
+                  : Pencil
   );
   const absoluteTime = $derived(new Date(event.createdAt).toLocaleString(pl ? 'pl-PL' : 'en-GB'));
   const relativeTime = $derived.by(() => {
@@ -69,7 +95,7 @@
   <span class="activity-marker" class:restored={kind === 'restored'}
     ><Icon size={15} aria-hidden="true" /></span
   >
-  <p>
+  <div class="activity-text">
     {#if event.authorId}<a
         class="activity-author"
         href={`/members/${encodeURIComponent(event.authorId)}`}
@@ -129,6 +155,21 @@
           style:--label-color={labelInfo(summary.label)?.color || '#6b7280'}>{summary.label}</span
         >{#if !pl}
           label{/if}
+      {:else if summary.kind === 'assignee-added' || summary.kind === 'assignee-removed'}
+        {summary.kind === 'assignee-added'
+          ? pl
+            ? 'przypisał'
+            : 'assigned'
+          : pl
+            ? 'usunął przypisanie'
+            : 'unassigned'}
+        {' '}{#each summary.ids as id, personIndex}{#if personIndex > 0}{', '}{/if}<MemberPreview
+            member={person(id)}
+            href={`/members/${encodeURIComponent(id)}`}
+            inline
+            size={18}
+            {language}
+          />{/each}
       {:else if summary.kind === 'label-added' || summary.kind === 'label-removed'}
         {summary.kind === 'label-added' ? (pl ? 'dodał' : 'added') : pl ? 'usunął' : 'removed'}
         {' '}{pl
@@ -146,7 +187,7 @@
     {' '}<time datetime={event.createdAt} title={absoluteTime} aria-label={absoluteTime}
       >{relativeTime}</time
     >
-  </p>
+  </div>
 </div>
 
 <style>
@@ -174,7 +215,7 @@
   .activity-marker.restored {
     color: var(--diff-added, #328152);
   }
-  p {
+  .activity-text {
     margin: 0;
     overflow-wrap: anywhere;
   }

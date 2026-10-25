@@ -5,7 +5,9 @@
     href,
     role = '',
     avatarOnly = false,
-    language = 'pl'
+    language = 'pl',
+    size = 36,
+    inline = false
   }: {
     member: {
       id: string;
@@ -20,6 +22,8 @@
     role?: string;
     avatarOnly?: boolean;
     language?: 'pl' | 'en';
+    size?: number;
+    inline?: boolean;
   } = $props();
   const uid = $props.id();
   let touch = false;
@@ -101,8 +105,10 @@
 
 <div
   class="identity"
+  class:inline
   role="group"
   aria-label={name}
+  style:--avatar-size={`${size}px`}
   onpointerenter={(event) => {
     if (event.pointerType === 'mouse') void show();
   }}
@@ -116,6 +122,7 @@
     bind:this={anchor}
     class="person-link"
     class:avatar-only={avatarOnly}
+    class:inline
     aria-label={avatarOnly ? name : undefined}
     {href}
     aria-expanded={open}
@@ -173,6 +180,9 @@
 </div>
 
 <style>
+  .identity.inline {
+    display: inline;
+  }
   .person-link {
     display: flex;
     align-items: center;
@@ -180,6 +190,18 @@
     color: var(--ink);
     text-decoration: none;
     width: fit-content;
+  }
+  .person-link.inline {
+    display: inline-flex;
+    gap: 6px;
+    margin-inline-start: 4px;
+    vertical-align: middle;
+  }
+  .person-link.inline .identity-text {
+    display: inline;
+  }
+  .person-link.inline .identity-text small {
+    display: none;
   }
   .avatar-only {
     border-radius: 50%;
@@ -212,11 +234,27 @@
   }
   .person-link img,
   .initials {
-    width: 36px;
-    height: 36px;
+    width: var(--avatar-size, 36px);
+    height: var(--avatar-size, 36px);
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
+  }
+  .person-link.inline img,
+  .person-link.inline .initials {
+    outline: 1px solid transparent;
+    outline-offset: 2px;
+  }
+  .person-link.inline .initials {
+    font-size: 8px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .person-link.inline:hover img,
+  .person-link.inline:focus-visible img,
+  .person-link.inline:hover .initials,
+  .person-link.inline:focus-visible .initials {
+    outline-color: var(--control-border-hover, var(--line));
   }
   .initials {
     display: grid;

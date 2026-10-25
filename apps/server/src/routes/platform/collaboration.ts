@@ -146,7 +146,14 @@ const revisionQuery = {
   query: t.Object({ page: t.Optional(t.Numeric({ minimum: 0, maximum: 100000, multipleOf: 1 })) })
 };
 
-const itemRevisionFields = ['title', 'markdown', 'labels', 'column', 'label'] as const;
+const itemRevisionFields = [
+  'title',
+  'markdown',
+  'labels',
+  'assigneeIds',
+  'column',
+  'label'
+] as const;
 function itemHistoryCondition(id: string, includeLifecycle = false) {
   return or(
     and(
@@ -166,6 +173,7 @@ const threadRevisionFields = [
   'markdown',
   'visibility',
   'invitedIds',
+  'assigneeIds',
   'archivedAt'
 ] as const;
 function threadHistoryCondition(executor: Executor, id: string) {
@@ -181,6 +189,7 @@ function threadHistoryCondition(executor: Executor, id: string) {
       inArray(auditEvents.action, [
         'threads.created',
         'threads.access.updated',
+        'threads.assignees.updated',
         'threads.archived',
         'threads.restored'
       ])
@@ -252,6 +261,23 @@ async function contentRevisions(
     })),
     nextPage: records.length > 20 ? page + 1 : null
   };
+}
+const assigneeIds = t.Array(t.String(), { maxItems: 50, uniqueItems: true });
+async function validateAssignees(
+  executor: Executor,
+  ids: string[],
+  scope: Awaited<ReturnType<typeof scopeFor>>
+) {
+  if (!ids.length) return;
+  const members = await executor
+    .select({ id: users.id })
+    .from(users)
+    .where(and(inArray(users.id, ids), eq(users.membershipStatus, 'active')));
+  if (
+    members.length !== ids.length ||
+    (!scope.association && ids.some((id) => !scope.memberIds.includes(id)))
+  )
+    throw status(422, { code: 'INVALID_ASSIGNEE' });
 }
 
 export default createElysia({ prefix: '/platform' })
@@ -695,6 +721,7 @@ export default createElysia({ prefix: '/platform' })
       return db.transaction(async (tx) => {
         const { board, scope } = await boardScope(tx, params.id);
         assertContribute(actor, scope);
+        await validateAssignees(tx, body.assigneeIds ?? [], scope);
         const [lockedBoard] = await tx
           .select()
           .from(boards)
@@ -728,6 +755,7 @@ export default createElysia({ prefix: '/platform' })
     {
       body: t.Object({
         title,
+        assigneeIds: t.Optional(assigneeIds),
         markdown: t.String({ maxLength: 500000, pattern: internalMarkdownPattern }),
         labels,
         column: t.String({ minLength: 1, maxLength: 40 }),
@@ -742,6 +770,7 @@ export default createElysia({ prefix: '/platform' })
       return db.transaction(async (tx) => {
         const { item, board, scope } = await itemScope(tx, params.id);
         assertContribute(actor, scope);
+        await validateAssignees(tx, body.assigneeIds ?? [], scope);
         const [lockedBoard] = await tx
           .select()
           .from(boards)
@@ -783,6 +812,7 @@ export default createElysia({ prefix: '/platform' })
     {
       body: t.Object({
         version: t.Integer({ minimum: 1 }),
+        assigneeIds: t.Optional(assigneeIds),
         title: t.Optional(title),
         markdown: t.Optional(t.String({ maxLength: 500000, pattern: internalMarkdownPattern })),
         labels: t.Optional(labels),
@@ -1026,6 +1056,7 @@ export default createElysia({ prefix: '/platform' })
       return db.transaction(async (tx) => {
         const scope = await scopeFor(tx, body.projectId ?? null);
         assertContribute(actor, scope);
+        await validateAssignees(tx, body.assigneeIds ?? [], scope);
         if (body.visibility === 'leaders' || body.invitedIds.length)
           requireLeader(actor, scope, 'collaboration.threads.restrict');
         if (body.invitedIds.length && body.visibility !== 'leaders')
@@ -1036,6 +1067,7 @@ export default createElysia({ prefix: '/platform' })
           .values({
             projectId: body.projectId ?? null,
             title: body.title,
+            assigneeIds: body.assigneeIds ?? [],
             visibility: body.visibility,
             invitedIds: body.invitedIds,
             authorId: actor.id
@@ -1059,7 +1091,8 @@ export default createElysia({ prefix: '/platform' })
               'title',
               'markdown',
               'visibility',
-              'invitedIds'
+              'invitedIds',
+              'assigneeIds'
             ])
           }
         });
@@ -1070,6 +1103,7 @@ export default createElysia({ prefix: '/platform' })
       body: t.Object({
         projectId: t.Optional(t.String()),
         title,
+        assigneeIds: t.Optional(assigneeIds),
         markdown,
         visibility,
         invitedIds: t.Array(t.String(), { maxItems: 100, uniqueItems: true })
@@ -1123,6 +1157,38 @@ export default createElysia({ prefix: '/platform' })
       }));
     },
     revisionQuery
+  )
+  .patch(
+    '/threads/:id/assignees',
+    async ({ db, user, params, body }) => {
+      const actor = requirePermission(user, 'collaboration.items.contribute');
+      return db.transaction(async (tx) => {
+        const { thread, scope } = await threadScope(tx, params.id);
+        assertThreadRead(actor, thread, scope);
+        assertContribute(actor, scope);
+        if (thread.archivedAt) throw status(409, { code: 'THREAD_ARCHIVED' });
+        await validateAssignees(tx, body.assigneeIds, scope);
+        const [updated] = await tx
+          .update(threads)
+          .set({ assigneeIds: body.assigneeIds, version: sql`${threads.version} + 1` })
+          .where(and(eq(threads.id, thread.id), eq(threads.version, body.version)))
+          .returning();
+        if (!updated) throw status(409, { code: 'REVISION_CONFLICT' });
+        await recordEvent(tx, {
+          actorId: actor.id,
+          projectId: thread.projectId,
+          action: 'threads.assignees.updated',
+          targetId: thread.id,
+          metadata: {
+            threadId: thread.id,
+            version: updated.version,
+            changes: contentChanges(thread, updated, ['assigneeIds'])
+          }
+        });
+        return updated;
+      });
+    },
+    { body: t.Object({ version: t.Integer({ minimum: 1 }), assigneeIds }) }
   )
   .put(
     '/threads/:id/access',
