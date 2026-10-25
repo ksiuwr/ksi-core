@@ -975,7 +975,7 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
         title: 'Numbered task',
         markdown: '',
         column: 'todo',
-        tags: [],
+        labels: [],
         position: 0
       }),
       request('member', '/platform/threads', 'POST', {
@@ -1035,7 +1035,7 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       title: 'Next task',
       markdown: '',
       column: 'todo',
-      tags: [],
+      labels: [],
       position: 0
     });
     expect(next.body.referenceNumber).toBeGreaterThan(oldNumber);
