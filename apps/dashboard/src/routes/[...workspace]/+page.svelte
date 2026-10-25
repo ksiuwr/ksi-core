@@ -1070,7 +1070,6 @@
           />
           <a
             class="topbar-control"
-            class:active={tab === 'user-settings'}
             href="/settings"
             aria-label={'Settings'}
             title={'Settings'}

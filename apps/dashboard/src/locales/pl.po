@@ -702,7 +702,6 @@ msgstr "Usunięte statusy"
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
-#: src/lib/NotificationInbox.svelte
 msgid "Close"
 msgstr "Zamknij"
 
@@ -2231,10 +2230,6 @@ msgstr "Ustawienia powiadomień"
 #: src/lib/NotificationInbox.svelte
 msgid "Notification settings"
 msgstr "Ustawienia powiadomień"
-
-#: src/lib/NotificationInbox.svelte
-msgid "Zamknij"
-msgstr "Zamknij"
 
 #: src/lib/NotificationSettings.svelte
 msgid "Email me about unread notifications"

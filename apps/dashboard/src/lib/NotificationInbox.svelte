@@ -1,5 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { flip } from 'svelte/animate';
+  import { fade, fly, scale } from 'svelte/transition';
+  import { backOut } from 'svelte/easing';
+  import { prefersReducedMotion } from 'svelte/motion';
   import { notificationAction, type NotificationContext } from 'shared/notifications';
   import {
     Bell,
@@ -11,8 +15,7 @@
     X,
     Settings,
     ArrowRight,
-    AtSign,
-    CircleUserRound,
+    CircleDot,
     MessageSquare
   } from '@lucide/svelte';
   import type { InboxData } from './ApprovalInbox.svelte';
@@ -101,6 +104,73 @@
   );
   const filtered = $derived(entries.filter((entry) => filter === 'all' || entry.unread));
   const preview = $derived(fullPage ? filtered : filtered.slice(0, 8));
+
+  function filterIndicator(node: HTMLDivElement, selected: 'all' | 'unread') {
+    let selection = selected;
+    const measure = () => {
+      const button = node.querySelector<HTMLButtonElement>(`[data-filter="${selection}"]`);
+      if (!button) return;
+      node.style.setProperty('--filter-left', `${button.offsetLeft}px`);
+      node.style.setProperty('--filter-width', `${button.offsetWidth}px`);
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    for (const button of node.querySelectorAll('button')) observer.observe(button);
+    measure();
+    return {
+      update(next: 'all' | 'unread') {
+        selection = next;
+        measure();
+      },
+      destroy() {
+        observer.disconnect();
+      }
+    };
+  }
+
+  function resizePanel(node: HTMLDivElement) {
+    if (fullPage) return;
+    const measure = () => {
+      const content = node.querySelector<HTMLElement>('.notification-content');
+      if (!content) return;
+      const contentHeight = Array.from(content.children).reduce(
+        (height, child) => height + (child as HTMLElement).offsetHeight,
+        0
+      );
+      const fixedHeight = Array.from(node.children).reduce(
+        (height, child) => height + (child === content ? 0 : (child as HTMLElement).offsetHeight),
+        0
+      );
+      const style = getComputedStyle(node);
+      const naturalHeight =
+        contentHeight +
+        fixedHeight +
+        parseFloat(style.borderTopWidth) +
+        parseFloat(style.borderBottomWidth);
+      node.style.height = `${Math.min(naturalHeight, parseFloat(style.maxHeight) || naturalHeight)}px`;
+    };
+    const observer = new ResizeObserver(measure);
+    const observe = () => {
+      observer.disconnect();
+      for (const child of node.children) {
+        if (child.classList.contains('notification-content')) {
+          for (const body of child.children) observer.observe(body);
+        } else observer.observe(child);
+      }
+      measure();
+    };
+    const mutations = new MutationObserver(observe);
+    mutations.observe(node, { childList: true, subtree: true });
+    observe();
+    window.addEventListener('resize', measure);
+    return {
+      destroy() {
+        observer.disconnect();
+        mutations.disconnect();
+        window.removeEventListener('resize', measure);
+      }
+    };
+  }
 
   function close(restoreFocus = false) {
     open = false;
@@ -270,6 +340,12 @@
   <div
     bind:this={panel}
     use:positionPanel
+    use:resizePanel
+    transition:scale={{
+      start: 0.98,
+      duration: fullPage || prefersReducedMotion.current ? 0 : 180,
+      easing: backOut
+    }}
     id={`${uid}-panel`}
     class="notification-panel"
     class:full-page={fullPage}
@@ -279,7 +355,6 @@
   >
     <header class="panel-header">
       <h2>{language === 'pl' ? 'Powiadomienia' : 'Notifications'}</h2>
-      {#if totalUnread}<span class="count">{totalUnread}</span>{/if}
       <div class="header-actions">
         <button
           class="menu-icon"
@@ -298,24 +373,18 @@
           title={language === 'pl' ? 'Ustawienia powiadomień' : 'Notification settings'}
           ><Settings size={16} /></a
         >
-        {#if !fullPage}
-          <button
-            class="menu-icon"
-            type="button"
-            onclick={() => close(true)}
-            aria-label={language === 'pl' ? 'Zamknij' : 'Close'}><X size={17} /></button
-          >
-        {/if}
       </div>
     </header>
     {#if error}<p role="alert" class="notification-error">{error}</p>{/if}
     <div
       class="filter-bar"
+      use:filterIndicator={filter}
       role="group"
       aria-label={language === 'pl' ? 'Filtr powiadomień' : 'Filter notifications'}
     >
       <button
         type="button"
+        data-filter="unread"
         class:selected={filter === 'unread'}
         aria-pressed={filter === 'unread'}
         onclick={() => (filter = 'unread')}
@@ -324,21 +393,26 @@
       >
       <button
         type="button"
+        data-filter="all"
         class:selected={filter === 'all'}
         aria-pressed={filter === 'all'}
         onclick={() => (filter = 'all')}>{language === 'pl' ? 'Wszystkie' : 'All'}</button
       >
+      <span class="filter-indicator" aria-hidden="true"></span>
     </div>
     <div class="notification-content" aria-busy={busy}>
       {#if preview.length}
         <ul class="notification-list">
           {#each preview as entry (`${entry.kind}-${entry.id}`)}
-            <li class:unread={entry.unread}>
+            <li
+              class:unread={entry.unread}
+              animate:flip={{ duration: prefersReducedMotion.current ? 0 : 180 }}
+              transition:fly|global={{ y: 6, duration: prefersReducedMotion.current ? 0 : 180 }}
+            >
               <span class="entry-icon" aria-hidden="true">
                 {#if entry.kind === 'members'}<UserPlus size={18} />
                 {:else if entry.kind === 'avatars'}<Image size={18} />
-                {:else if entry.notification.reason === 'mention'}<AtSign size={18} />
-                {:else if entry.notification.reason === 'assignment'}<CircleUserRound size={18} />
+                {:else if entry.notification.ownerType === 'item'}<CircleDot size={18} />
                 {:else}<MessageSquare size={18} />{/if}
               </span>
               <a
@@ -365,9 +439,7 @@
                     >{notificationAction(
                       entry.notification,
                       language
-                    )}{#if entry.notification.reason === 'mention' || entry.notification.reason === 'assignment'}<span
-                        aria-hidden="true"
-                      >
+                    )}{#if entry.notification.reason === 'mention'}<span aria-hidden="true">
                         ·
                       </span>{reasonLabel(entry.notification.reason)}{/if}</span
                   >
@@ -445,7 +517,10 @@
           {language === 'pl' ? 'Ładowanie powiadomień…' : 'Loading notifications…'}
         </p>
       {:else if !error}
-        <div class="inbox-empty">
+        <div
+          class="inbox-empty"
+          transition:fly|global={{ y: 6, duration: prefersReducedMotion.current ? 0 : 180 }}
+        >
           <Inbox size={32} strokeWidth={1.5} aria-hidden="true" />
           <h3>{language === 'pl' ? 'Wszystko na bieżąco' : 'You’re all caught up'}</h3>
           <p>
@@ -484,6 +559,8 @@
     box-sizing: content-box;
   }
   .notification-panel {
+    transition: height 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    transform-origin: top right;
     position: fixed;
     z-index: 100;
     display: flex;
@@ -502,6 +579,7 @@
     outline: none;
   }
   .notification-panel.full-page {
+    transition: none;
     position: static;
     z-index: auto;
     width: 100%;
@@ -572,6 +650,7 @@
     outline-offset: 3px;
   }
   .filter-bar {
+    position: relative;
     display: flex;
     gap: 16px;
     padding: 0 16px;
@@ -598,12 +677,16 @@
   .filter-bar button.selected {
     font-weight: 600;
   }
-  .filter-bar button.selected::after {
-    content: '';
+  .filter-indicator {
     position: absolute;
     bottom: -1px;
     left: 0;
-    right: 0;
+    width: var(--filter-width, 0px);
+    transform: translateX(var(--filter-left, 16px));
+    transition:
+      transform 180ms ease,
+      width 180ms ease;
+    pointer-events: none;
     height: 2px;
     background: var(--accent);
     border-radius: 2px;
@@ -773,6 +856,12 @@
     padding: 32px 16px;
     text-align: center;
     color: var(--muted);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .filter-indicator,
+    .notification-panel {
+      transition: none;
+    }
   }
   @media (hover: none) {
     .read-action {
