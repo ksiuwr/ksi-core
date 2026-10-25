@@ -2369,10 +2369,6 @@ msgid "For example, 60 means an email reminder can be sent if a notification sta
 msgstr "Na przykład: 60 oznacza, że przypomnienie e-mail może zostać wysłane, jeśli powiadomienie pozostaje nieprzeczytane przez godzinę. Powiadomienia w aplikacji pojawiają się od razu."
 
 #: src/lib/UserSettings.svelte
-msgid "Manage your language, appearance, and notifications."
-msgstr "Zarządzaj językiem, wyglądem i powiadomieniami."
-
-#: src/lib/UserSettings.svelte
 msgid "Language and appearance changes are saved automatically on this device."
 msgstr "Zmiany języka i wyglądu są zapisywane automatycznie na tym urządzeniu."
 
@@ -2383,3 +2379,7 @@ msgstr "Zobacz, co Cię ominęło."
 #: src/routes/[...workspace]/+page.svelte
 msgid "Catch up on what you missed."
 msgstr "Zobacz, co Cię ominęło."
+
+#: src/lib/UserSettings.svelte
+msgid "Personalize how the app works for you."
+msgstr "Dostosuj działanie aplikacji do siebie."

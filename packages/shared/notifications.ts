@@ -19,49 +19,49 @@ export function notificationAction(
   switch (action) {
     case 'kanban.comment.created':
     case 'threads.comment.created':
-      description = pl ? 'dodaje komentarz' : 'commented';
+      description = pl ? 'Dodano komentarz' : 'commented';
       break;
     case 'comments.edited':
-      description = pl ? 'edytuje komentarz' : 'edited a comment';
+      description = pl ? 'Edytowano komentarz' : 'edited a comment';
       break;
     case 'kanban.created':
-      description = pl ? 'tworzy zadanie' : 'created a task';
+      description = pl ? 'Utworzono zadanie' : 'created a task';
       break;
     case 'threads.created':
-      description = pl ? 'rozpoczyna dyskusję' : 'started a discussion';
+      description = pl ? 'Rozpoczęto dyskusję' : 'started a discussion';
       break;
     case 'threads.archived':
-      description = pl ? 'archiwizuje dyskusję' : 'archived the discussion';
+      description = pl ? 'Zarchiwizowano dyskusję' : 'archived the discussion';
       break;
     case 'threads.restored':
-      description = pl ? 'przywraca dyskusję' : 'reopened the discussion';
+      description = pl ? 'Przywrócono dyskusję' : 'reopened the discussion';
       break;
     case 'threads.assignees.updated':
-      description = pl ? 'zmienia przypisane osoby' : 'changed the assignees';
+      description = pl ? 'Zmieniono przypisane osoby' : 'changed the assignees';
       break;
     case 'threads.access.updated':
-      description = pl ? 'zmienia dostęp do dyskusji' : 'changed who can access the discussion';
+      description = pl ? 'Zmieniono dostęp do dyskusji' : 'changed who can access the discussion';
       break;
     default:
       if (action === 'kanban.updated' || action === 'threads.updated') {
         if (fields.length === 1 && fields[0] === 'title') {
-          description = pl ? 'zmienia tytuł' : 'changed the title';
+          description = pl ? 'Zmieniono tytuł' : 'changed the title';
         } else if (fields.includes('column')) {
-          description = pl ? 'zmienia status zadania' : 'changed the task status';
+          description = pl ? 'Zmieniono status zadania' : 'changed the task status';
         } else if (fields.length === 1 && fields[0] === 'assigneeIds') {
-          description = pl ? 'zmienia przypisane osoby' : 'changed the assignees';
+          description = pl ? 'Zmieniono przypisane osoby' : 'changed the assignees';
         } else if (fields.length === 1 && fields[0] === 'markdown') {
-          description = pl ? 'edytuje opis' : 'edited the description';
+          description = pl ? 'Edytowano opis' : 'edited the description';
         }
       }
       description ??=
         notification.ownerType === 'thread'
           ? pl
-            ? 'aktualizuje dyskusję'
+            ? 'Zaktualizowano dyskusję'
             : 'updated the discussion'
           : pl
-            ? 'aktualizuje zadanie'
+            ? 'Zaktualizowano zadanie'
             : 'updated the task';
   }
-  return `${actor} ${description}`;
+  return pl ? `${description} · ${actor}` : `${actor} ${description}`;
 }

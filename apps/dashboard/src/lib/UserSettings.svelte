@@ -9,7 +9,7 @@
 <div class="workspace-header">
   <div>
     <h1>{'Settings'}</h1>
-    <p class="workspace-description">{'Manage your language, appearance, and notifications.'}</p>
+    <p class="workspace-description">{'Personalize how the app works for you.'}</p>
   </div>
 </div>
 <div class="settings-sections">

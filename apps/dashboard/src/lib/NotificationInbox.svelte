@@ -41,7 +41,7 @@
   };
   const uid = $props.id();
   let open = $state(false);
-  let filter = $state<'all' | 'unread'>('all');
+  let filter = $state<'all' | 'unread'>('unread');
   let trigger = $state<HTMLButtonElement>();
   let panel = $state<HTMLDivElement>();
   let loaded = $state(false);
@@ -316,17 +316,17 @@
     >
       <button
         type="button"
-        class:selected={filter === 'all'}
-        aria-pressed={filter === 'all'}
-        onclick={() => (filter = 'all')}>{language === 'pl' ? 'Wszystkie' : 'All'}</button
-      >
-      <button
-        type="button"
         class:selected={filter === 'unread'}
         aria-pressed={filter === 'unread'}
         onclick={() => (filter = 'unread')}
         >{language === 'pl' ? 'Nieprzeczytane' : 'Unread'}<span class="count">{totalUnread}</span
         ></button
+      >
+      <button
+        type="button"
+        class:selected={filter === 'all'}
+        aria-pressed={filter === 'all'}
+        onclick={() => (filter = 'all')}>{language === 'pl' ? 'Wszystkie' : 'All'}</button
       >
     </div>
     <div class="notification-content" aria-busy={busy}>
