@@ -2186,14 +2186,6 @@ msgstr "Oznacz jako przeczytane"
 msgid "E-mail o nieprzeczytanych powiadomieniach"
 msgstr "E-mail o nieprzeczytanych powiadomieniach"
 
-#: src/lib/NotificationSettings.svelte
-msgid "Zapisz ustawienia"
-msgstr "Zapisz ustawienia"
-
-#: src/lib/NotificationSettings.svelte
-msgid "Save preferences"
-msgstr "Zapisz ustawienia"
-
 #: src/lib/WatchButton.svelte
 msgid "Przestań obserwować"
 msgstr "Przestań obserwować"
@@ -2383,3 +2375,11 @@ msgstr "Zobacz, co Cię ominęło."
 #: src/lib/UserSettings.svelte
 msgid "Personalize how the app works for you."
 msgstr "Dostosuj działanie aplikacji do siebie."
+
+#: src/lib/NotificationSettings.svelte
+msgid "Zapisywanie…"
+msgstr ""
+
+#: src/lib/NotificationSettings.svelte
+msgid "Saving…"
+msgstr ""

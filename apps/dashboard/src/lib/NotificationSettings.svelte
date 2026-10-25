@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Bell, Check, Save } from '@lucide/svelte';
+  import { Bell, Check } from '@lucide/svelte';
 
   let { language }: { language: 'pl' | 'en' } = $props();
   const uid = $props.id();
@@ -11,6 +11,9 @@
   let saving = $state(false);
   let saved = $state(false);
   let error = $state('');
+  let lastSaved = $state<string>('');
+  let debounce: ReturnType<typeof setTimeout> | undefined;
+  let savedFlash: ReturnType<typeof setTimeout> | undefined;
 
   async function request(method = 'GET') {
     const response = await fetch('/api/notifications/preferences', {
@@ -26,6 +29,9 @@
       );
     return response.json();
   }
+  function snapshot() {
+    return JSON.stringify({ emailEnabled, emailDelayMinutes });
+  }
   async function load() {
     loading = true;
     error = '';
@@ -33,6 +39,7 @@
       const preferences = await request();
       emailEnabled = preferences.emailEnabled;
       emailDelayMinutes = preferences.emailDelayMinutes;
+      lastSaved = snapshot();
       loaded = true;
     } catch (cause) {
       error = (cause as Error).message;
@@ -44,33 +51,47 @@
     saving = true;
     saved = false;
     error = '';
+    clearTimeout(savedFlash);
     try {
       await request('PUT');
+      lastSaved = snapshot();
       saved = true;
+      savedFlash = setTimeout(() => (saved = false), 2000);
     } catch (cause) {
       error = (cause as Error).message;
     } finally {
       saving = false;
     }
   }
+  $effect(() => {
+    const current = snapshot();
+    lastSaved;
+    clearTimeout(debounce);
+    if (!loaded || loading) return;
+    if (!Number.isFinite(emailDelayMinutes) || emailDelayMinutes < 1 || emailDelayMinutes > 10080)
+      return;
+    if (current === lastSaved) return;
+    debounce = setTimeout(() => void save(), 800);
+    return () => clearTimeout(debounce);
+  });
   onMount(() => {
     void load();
+    return () => {
+      clearTimeout(savedFlash);
+    };
   });
 </script>
 
-<form
-  id="notifications"
-  class="card settings-card"
-  onsubmit={(event) => {
-    event.preventDefault();
-    void save();
-  }}
-  oninput={() => (saved = false)}
->
+<form id="notifications" class="card settings-card">
   <div class="section-heading">
     <Bell size={18} aria-hidden="true" />
     <h2>{language === 'pl' ? 'Powiadomienia' : 'Notifications'}</h2>
   </div>
+  {#if saving}<span role="status" class="save-state"
+      >{language === 'pl' ? 'Zapisywanie…' : 'Saving…'}</span
+    >{:else if saved}<span role="status" class="save-state"
+      ><Check size={14} aria-hidden="true" />{language === 'pl' ? 'Zapisano' : 'Saved'}</span
+    >{/if}
   {#if error}<p role="alert" class="error">{error}</p>{/if}
   {#if loading}<p role="status">
       {language === 'pl' ? 'Ładowanie ustawień…' : 'Loading settings…'}
@@ -100,7 +121,8 @@
           id={`${uid}-delay`}
           aria-describedby={`${uid}-delay-help`}
           type="number"
-          bind:value={emailDelayMinutes}
+          value={emailDelayMinutes}
+          onchange={(event) => (emailDelayMinutes = event.currentTarget.valueAsNumber)}
           min="1"
           max="10080"
           step="1"
@@ -112,15 +134,6 @@
             : 'For example, 60 means an email reminder can be sent if a notification stays unread for an hour. In-app notifications appear immediately.'}
         </p>
       </div>
-      <div class="save-row">
-        <button class="btn" type="submit"
-          ><Save size={16} aria-hidden="true" />{language === 'pl'
-            ? 'Zapisz ustawienia'
-            : 'Save preferences'}</button
-        >{#if saved}<span role="status"
-            ><Check size={16} aria-hidden="true" />{language === 'pl' ? 'Zapisano' : 'Saved'}</span
-          >{/if}
-      </div>
     </fieldset>
   {/if}
 </form>
@@ -128,6 +141,7 @@
 <style>
   .settings-card {
     padding: 24px;
+    position: relative;
   }
   fieldset {
     border: 0;
@@ -159,18 +173,16 @@
     max-width: 140px;
     margin-bottom: 0;
   }
-  .save-row {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
-    margin-top: 24px;
-  }
-  .save-row span {
+  .save-state {
+    position: absolute;
+    top: 24px;
+    right: 24px;
     display: flex;
     align-items: center;
     gap: 6px;
     color: var(--muted);
     font-size: 13px;
+    text-transform: none;
+    letter-spacing: normal;
   }
 </style>
