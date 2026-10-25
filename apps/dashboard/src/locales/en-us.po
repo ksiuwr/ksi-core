@@ -2398,15 +2398,11 @@ msgstr "Termin: "
 msgid "Due: "
 msgstr "Due: "
 
-#: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
-msgid "Termin (czas lokalny)"
-msgstr "Termin (czas lokalny)"
+#~ msgid "Termin (czas lokalny)"
+#~ msgstr "Termin (czas lokalny)"
 
-#: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
-msgid "Deadline (local time)"
-msgstr "Deadline (local time)"
+#~ msgid "Deadline (local time)"
+#~ msgstr "Deadline (local time)"
 
 #~ msgid "All statuses"
 #~ msgstr "All statuses"

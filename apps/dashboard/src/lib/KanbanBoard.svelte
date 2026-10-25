@@ -22,6 +22,7 @@
     ArrowUp
   } from '@lucide/svelte';
   import Dropdown, { type DropdownOption } from '@ksi-core/ui/platform/Dropdown.svelte';
+  import DeadlinePicker from '@ksi-core/ui/platform/DeadlinePicker.svelte';
   import Editor from '@ksi-core/ui/platform/Editor.svelte';
   import MarkdownContent from '@ksi-core/ui/platform/MarkdownContent.svelte';
   export type BoardStatus = { id: string; name: string; color?: string; deleted?: boolean };
@@ -1162,12 +1163,7 @@
         </div>
       {/if}
       <Assignees bind:value={taskAssignees} {members} {language} disabled={busy} />
-      <label
-        >{language === 'pl' ? 'Termin (czas lokalny)' : 'Deadline (local time)'}<input
-          type="datetime-local"
-          bind:value={taskDueAt}
-        /></label
-      >
+      <DeadlinePicker bind:value={taskDueAt} {language} disabled={busy} />
       <Editor {language} bind:value={markdown} rows={10} />
       <div class="row">
         <button class="btn" disabled={busy || !title.trim()}>{'Add task'}</button><button
@@ -1497,12 +1493,7 @@
           </div>
         {/if}
         <Assignees bind:value={editAssignees} {members} {language} disabled={busy} />
-        <label
-          >{language === 'pl' ? 'Termin (czas lokalny)' : 'Deadline (local time)'}<input
-            type="datetime-local"
-            bind:value={editDueAt}
-          /></label
-        >
+        <DeadlinePicker bind:value={editDueAt} {language} disabled={busy} />
         <div class="row">
           <button class="btn" disabled={busy || !editTitle.trim()}
             ><Save size={14} aria-hidden="true" />{'Save'}</button
