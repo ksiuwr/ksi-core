@@ -61,7 +61,10 @@ msgstr "Project not found."
 #: src/lib/AvatarUpload.svelte
 #: src/lib/ContentTranslations.svelte
 #: src/lib/KanbanBoard.svelte
+#: src/lib/NotificationInbox.svelte
 #: src/lib/ProjectSettings.svelte
+#: src/routes/[...workspace]/+page.svelte
+#: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Request failed"
@@ -74,6 +77,7 @@ msgstr "Tab"
 
 #: src/lib/Assignees.svelte
 #: src/lib/KanbanBoard.svelte
+#: src/lib/NotificationInbox.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Escape"
 msgstr "Escape"
@@ -130,8 +134,6 @@ msgid "Removed tasks"
 msgstr "Removed tasks"
 
 #: src/lib/ApprovalInbox.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
 msgid "Approval inbox"
 msgstr "Approval inbox"
 
@@ -489,6 +491,7 @@ msgstr "Profile"
 msgid "Introduce yourself to the association and choose what to share publicly."
 msgstr "Introduce yourself to the association and choose what to share publicly."
 
+#: src/lib/NotificationInbox.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Saved"
 msgstr "Saved"
@@ -598,6 +601,7 @@ msgstr "Confirm account deletion"
 msgid "No activity yet."
 msgstr "No activity yet."
 
+#: src/lib/NotificationInbox.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Back"
 msgstr "Back"
@@ -705,6 +709,7 @@ msgstr "Deleted statuses"
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
+#: src/lib/NotificationInbox.svelte
 msgid "Close"
 msgstr "Close"
 
@@ -795,6 +800,8 @@ msgstr "Activate"
 
 #: src/lib/ApprovalInbox.svelte
 #: src/lib/ApprovalInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
 #: src/lib/ProjectSettings.svelte
 msgid "Decline"
 msgstr "Decline"
@@ -813,6 +820,8 @@ msgid "The new picture becomes public after approval."
 msgstr "The new picture becomes public after approval."
 
 #: src/lib/ApprovalInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
 msgid "Approve"
 msgstr "Approve"
 
@@ -1983,6 +1992,7 @@ msgid "Wczytywanie…"
 msgstr "Wczytywanie…"
 
 #: src/lib/KanbanBoard.svelte
+#: src/lib/WatchButton.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Loading…"
 msgstr "Loading…"
@@ -2155,3 +2165,298 @@ msgstr "Przypisane do"
 #: src/lib/Assignees.svelte
 msgid "Assigned to"
 msgstr "Assigned to"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Powiadomienia"
+msgstr "Powiadomienia"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/routes/[...workspace]/+page.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "Notifications"
+msgstr "Notifications"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "Oznacz wszystkie jako przeczytane"
+msgstr "Oznacz wszystkie jako przeczytane"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "Mark all as read"
+msgstr "Mark all as read"
+
+#: src/lib/NotificationInbox.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "Wzmianka"
+msgstr "Wzmianka"
+
+#: src/lib/NotificationInbox.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "Mention"
+msgstr "Mention"
+
+#: src/lib/NotificationInbox.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "Przypisanie"
+msgstr "Przypisanie"
+
+#: src/lib/NotificationInbox.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "Assignment"
+msgstr "Assignment"
+
+#: src/lib/NotificationInbox.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "Aktualizacja"
+msgstr "Aktualizacja"
+
+#: src/lib/NotificationInbox.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "Update"
+msgstr "Update"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Oznacz jako przeczytane"
+msgstr "Oznacz jako przeczytane"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Mark as read"
+msgstr "Mark as read"
+
+#: src/routes/[...workspace]/+page.svelte
+msgid "Brak powiadomień."
+msgstr "Brak powiadomień."
+
+#: src/routes/[...workspace]/+page.svelte
+msgid "No notifications."
+msgstr "No notifications."
+
+#: src/lib/NotificationInbox.svelte
+msgid "E-mail o nieprzeczytanych powiadomieniach"
+msgstr "E-mail o nieprzeczytanych powiadomieniach"
+
+#~ msgid "Email unread notifications"
+#~ msgstr "Email unread notifications"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Opóźnienie (minuty)"
+msgstr "Opóźnienie (minuty)"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Delay (minutes)"
+msgstr "Delay (minutes)"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Zapisz ustawienia"
+msgstr "Zapisz ustawienia"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Save preferences"
+msgstr "Save preferences"
+
+#: src/lib/WatchButton.svelte
+msgid "Przestań obserwować"
+msgstr "Przestań obserwować"
+
+#: src/lib/WatchButton.svelte
+msgid "Unwatch"
+msgstr "Unwatch"
+
+#: src/lib/WatchButton.svelte
+msgid "Obserwuj"
+msgstr "Obserwuj"
+
+#: src/lib/WatchButton.svelte
+msgid "Watch"
+msgstr "Watch"
+
+#: src/lib/WatchButton.svelte
+msgid "Ładowanie…"
+msgstr "Ładowanie…"
+
+#: src/routes/[...workspace]/+page.svelte
+msgid "Nowe powiadomienia pojawią się tutaj."
+msgstr "Nowe powiadomienia pojawią się tutaj."
+
+#: src/routes/[...workspace]/+page.svelte
+msgid "New notifications will appear here."
+msgstr "New notifications will appear here."
+
+#: src/routes/[...workspace]/+page.svelte
+msgid "Prośby o zatwierdzenie"
+msgstr "Prośby o zatwierdzenie"
+
+#: src/routes/[...workspace]/+page.svelte
+msgid "Approval requests"
+msgstr "Approval requests"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Nowe zdjęcie profilowe"
+msgstr "Nowe zdjęcie profilowe"
+
+#: src/lib/NotificationInbox.svelte
+msgid "New profile picture"
+msgstr "New profile picture"
+
+#: src/routes/[...workspace]/+page.svelte
+msgid "Wzmianki, przypisania i aktualizacje na obserwowanych zadaniach i wątkach."
+msgstr "Wzmianki, przypisania i aktualizacje na obserwowanych zadaniach i wątkach."
+
+#: src/routes/[...workspace]/+page.svelte
+msgid "Mentions, assignments, and updates on watched tasks and threads."
+msgstr "Mentions, assignments, and updates on watched tasks and threads."
+
+#: src/routes/[...workspace]/+page.svelte
+msgid "Nowe konta i zdjęcia profilowe oczekujące na zatwierdzenie."
+msgstr "Nowe konta i zdjęcia profilowe oczekujące na zatwierdzenie."
+
+#: src/routes/[...workspace]/+page.svelte
+msgid "New accounts and profile pictures awaiting approval."
+msgstr "New accounts and profile pictures awaiting approval."
+
+#: src/lib/NotificationInbox.svelte
+msgid "Teraz"
+msgstr "Teraz"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Just now"
+msgstr "Just now"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Wstecz"
+msgstr "Wstecz"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Ustawienia powiadomień"
+msgstr "Ustawienia powiadomień"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Notification settings"
+msgstr "Notification settings"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Zamknij"
+msgstr "Zamknij"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Email me about unread notifications"
+msgstr "Email me about unread notifications"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Otrzymuj przypomnienia o powiadomieniach, których jeszcze nie przeczytano."
+msgstr "Otrzymuj przypomnienia o powiadomieniach, których jeszcze nie przeczytano."
+
+#: src/lib/NotificationInbox.svelte
+msgid "Get a reminder for notifications you haven’t read yet."
+msgstr "Get a reminder for notifications you haven’t read yet."
+
+#: src/lib/NotificationInbox.svelte
+msgid "Zapisano"
+msgstr "Zapisano"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Filtr powiadomień"
+msgstr "Filtr powiadomień"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Filter notifications"
+msgstr "Filter notifications"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Wszystkie"
+msgstr "Wszystkie"
+
+#: src/lib/NotificationInbox.svelte
+msgid "All"
+msgstr "All"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Nieprzeczytane"
+msgstr "Nieprzeczytane"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Unread"
+msgstr "Unread"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Wymaga zatwierdzenia"
+msgstr "Wymaga zatwierdzenia"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Needs approval"
+msgstr "Needs approval"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Prośba o aktywację konta"
+msgstr "Prośba o aktywację konta"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Account activation request"
+msgstr "Account activation request"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Proponowane zdjęcie profilowe"
+msgstr "Proponowane zdjęcie profilowe"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Proposed profile picture"
+msgstr "Proposed profile picture"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Zatwierdź"
+msgstr "Zatwierdź"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Odrzuć"
+msgstr "Odrzuć"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Ładowanie powiadomień…"
+msgstr "Ładowanie powiadomień…"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Loading notifications…"
+msgstr "Loading notifications…"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Wszystko na bieżąco"
+msgstr "Wszystko na bieżąco"
+
+#: src/lib/NotificationInbox.svelte
+msgid "You’re all caught up"
+msgstr "You’re all caught up"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Nowe wzmianki, przypisania i prośby pojawią się tutaj."
+msgstr "Nowe wzmianki, przypisania i prośby pojawią się tutaj."
+
+#: src/lib/NotificationInbox.svelte
+msgid "New mentions, assignments, and requests will appear here."
+msgstr "New mentions, assignments, and requests will appear here."
+
+#: src/lib/NotificationInbox.svelte
+msgid "Zobacz wszystkie powiadomienia"
+msgstr "Zobacz wszystkie powiadomienia"
+
+#: src/lib/NotificationInbox.svelte
+msgid "View all notifications"
+msgstr "View all notifications"

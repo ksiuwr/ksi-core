@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Bell, BellOff } from '@lucide/svelte';
   let {
     type,
     id,
@@ -47,16 +48,62 @@
 
 <button
   type="button"
-  class="btn btn-outline"
+  class="watch-button"
   aria-pressed={watching}
-  disabled={busy}
-  onclick={toggle}
-  >{watching
+  aria-label={watching
     ? language === 'pl'
       ? 'Przestań obserwować'
       : 'Unwatch'
     : language === 'pl'
       ? 'Obserwuj'
-      : 'Watch'}</button
+      : 'Watch'}
+  disabled={busy}
+  onclick={toggle}
 >
+  {#if busy}<span class="sr-only">{language === 'pl' ? 'Ładowanie…' : 'Loading…'}</span>
+  {:else if watching}<Bell size={14} aria-hidden="true" />
+  {:else}<BellOff size={14} aria-hidden="true" />
+  {/if}
+</button>
 {#if error}<p role="alert">{error}</p>{/if}
+
+<style>
+  .watch-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition:
+      background 0.13s,
+      border-color 0.13s,
+      color 0.13s;
+  }
+  .watch-button:hover {
+    border-color: var(--control-border-hover);
+    color: var(--ink);
+    background: var(--surface-muted);
+  }
+  .watch-button[aria-pressed='true'] {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--surface-muted);
+  }
+  .watch-button[aria-pressed='true']:hover {
+    background: var(--accent);
+    color: var(--primary-text);
+    border-color: var(--accent);
+  }
+  .watch-button:disabled {
+    opacity: 0.5;
+    cursor: wait;
+    pointer-events: none;
+  }
+</style>
