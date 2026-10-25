@@ -31,6 +31,7 @@
   let previewVisible = $state(false);
   let previewLoading = $state(false);
   let previewError = $state(false);
+  let previewNotFound = $state(false);
   let previewData = $state<PreviewData | null>(null);
   let previewPos = $state({ left: 0, top: 0 });
   let previewEl = $state<HTMLDivElement>();
@@ -43,6 +44,7 @@
       ? {
           loading: 'Ładowanie…',
           unavailable: 'Podgląd niedostępny',
+          notFound: 'Nie znaleziono odwołania',
           open: 'Otwórz',
           task: 'Zadanie',
           thread: 'Wątek'
@@ -50,6 +52,7 @@
       : {
           loading: 'Loading…',
           unavailable: 'Preview unavailable',
+          notFound: 'Reference not found',
           open: 'Open',
           task: 'Task',
           thread: 'Thread'
@@ -78,6 +81,7 @@
     currentLink = link;
     previewData = null;
     previewError = false;
+    previewNotFound = false;
     previewLoading = true;
     previewVisible = true;
     positionPreview(link);
@@ -87,7 +91,10 @@
         const response = await fetch(
           `/api/platform/references/${encodeURIComponent(scope)}/${number}`
         );
-        if (!response.ok) throw new Error();
+        if (!response.ok) {
+          if (response.status === 404) throw new Error('not-found');
+          throw new Error('preview-failed');
+        }
         const data = await response.json();
         if (token !== previewToken) return;
         previewData = {
@@ -96,8 +103,11 @@
           number: data.number,
           href: data.href
         };
-      } catch {
-        if (token === previewToken) previewError = true;
+      } catch (error) {
+        if (token === previewToken) {
+          if (error instanceof Error && error.message === 'not-found') previewNotFound = true;
+          else previewError = true;
+        }
       } finally {
         if (token === previewToken) previewLoading = false;
       }
@@ -110,6 +120,7 @@
       previewVisible = false;
       previewData = null;
       previewError = false;
+      previewNotFound = false;
       previewLoading = false;
       currentLink = null;
     }, 120);
@@ -194,6 +205,8 @@
   >
     {#if previewLoading && !previewData}
       <p class="reference-preview-loading">{labels.loading}</p>
+    {:else if previewNotFound}
+      <p class="reference-preview-error">{labels.notFound}</p>
     {:else if previewError}
       <p class="reference-preview-error">{labels.unavailable}</p>
     {:else if previewData}

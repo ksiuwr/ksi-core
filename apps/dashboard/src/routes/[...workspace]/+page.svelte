@@ -1576,10 +1576,8 @@
                       >
                         <div class="list-strip-info">
                           <h3>
-                            {#if thread.referenceNumber}<span class="muted"
-                                >#{thread.referenceNumber}</span
-                              >
-                            {/if}{thread.title}
+                            {thread.title}{#if thread.referenceNumber}
+                              <span class="muted">&nbsp;#{thread.referenceNumber}</span>{/if}
                           </h3>
                           {#if thread.createdAt}<time
                               class="list-strip-meta"
@@ -1609,10 +1607,8 @@
                         ><ArrowLeft size={15} aria-hidden="true" />{'All threads'}</a
                       >
                       <h1 style="font-size:clamp(24px,3vw,36px);margin-bottom:24px">
-                        {#if selectedThread.referenceNumber}<span class="muted"
-                            >#{selectedThread.referenceNumber}</span
-                          >
-                        {/if}{selectedThread.title}
+                        {selectedThread.title}{#if selectedThread.referenceNumber}
+                          <span class="muted">&nbsp;#{selectedThread.referenceNumber}</span>{/if}
                       </h1>
                       {#key (selectedThread.assigneeIds ?? []).join(',')}<WatchButton
                           type="thread"

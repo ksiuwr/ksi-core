@@ -1025,7 +1025,9 @@
             }}
           >
             <span class="task-title">
-              {#if item.referenceNumber}<span class="task-reference">#{item.referenceNumber}</span>
+              {#if item.referenceNumber}<span class="task-reference"
+                  >#{item.referenceNumber}&nbsp;</span
+                >
               {/if}<strong>{item.title}</strong><GripVertical size={14} aria-hidden="true" /></span
             >
             {#if item.labels.length}<div class="task-labels">
@@ -1388,8 +1390,8 @@
           {/if}
         </div>
         <h2 id="issue-title">
-          {#if selected.referenceNumber}<span class="muted">#{selected.referenceNumber}</span>
-          {/if}{selected.title}
+          {selected.title}{#if selected.referenceNumber}
+            <span class="task-reference">&nbsp;#{selected.referenceNumber}</span>{/if}
         </h2>
       </div>
       <div class="issue-heading-actions">
@@ -2143,7 +2145,7 @@
     align-items: start;
   }
   .task-reference {
-    margin-right: 6px;
+    margin: 0 0.5em;
     color: var(--muted);
     font-family: var(--mono);
     font-size: 12px;
