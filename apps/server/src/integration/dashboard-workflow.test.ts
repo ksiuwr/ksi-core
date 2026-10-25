@@ -1,6 +1,6 @@
 import { queueNotificationMailBatch } from '../services/notifications';
 import { beforeAll, afterAll, describe, expect, test } from 'bun:test';
-import { eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
 import { getUrls } from 'shared';
 import { digest } from '../domain/sso';
@@ -904,6 +904,9 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
     await db.delete(comments).where(eq(comments.threadId, thread.body.id));
     await db.delete(threads).where(eq(threads.id, thread.body.id));
     await db.delete(kanbanItems).where(eq(kanbanItems.id, task.body.id));
+    await db
+      .delete(projectMembers)
+      .where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, ids.outsider)));
   });
   test('administrator email changes revoke access and require verification; recovery stays private', async () => {
     const id = createId(),

@@ -78,9 +78,11 @@ export const userRoutes = createElysia({ prefix: '/users', protectedRoute: true 
           .set({
             ...body,
             name:
-              [body.firstName ?? previous.firstName, body.lastName ?? previous.lastName]
-                .filter(Boolean)
-                .join(' ') || previous.name
+              body.firstName === undefined && body.lastName === undefined
+                ? previous.name
+                : [body.firstName ?? previous.firstName, body.lastName ?? previous.lastName]
+                    .filter(Boolean)
+                    .join(' ') || previous.name
           })
           .where(eq(users.id, user.id))
           .returning();
@@ -267,9 +269,11 @@ export const userRoutes = createElysia({ prefix: '/users', protectedRoute: true 
           .set({
             ...body,
             name:
-              [body.firstName ?? member.firstName, body.lastName ?? member.lastName]
-                .filter(Boolean)
-                .join(' ') || member.name
+              body.firstName === undefined && body.lastName === undefined
+                ? member.name
+                : [body.firstName ?? member.firstName, body.lastName ?? member.lastName]
+                    .filter(Boolean)
+                    .join(' ') || member.name
           })
           .where(eq(users.id, params.id))
           .returning();
