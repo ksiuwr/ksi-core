@@ -61,6 +61,7 @@ msgstr "Project not found."
 #: src/lib/AvatarUpload.svelte
 #: src/lib/ContentTranslations.svelte
 #: src/lib/KanbanBoard.svelte
+#: src/lib/NotificationInbox.svelte
 #: src/lib/ProjectSettings.svelte
 #: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
@@ -74,6 +75,7 @@ msgstr "Tab"
 
 #: src/lib/Assignees.svelte
 #: src/lib/KanbanBoard.svelte
+#: src/lib/NotificationInbox.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Escape"
 msgstr "Escape"
@@ -130,8 +132,6 @@ msgid "Removed tasks"
 msgstr "Removed tasks"
 
 #: src/lib/ApprovalInbox.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
 msgid "Approval inbox"
 msgstr "Approval inbox"
 
@@ -251,46 +251,42 @@ msgstr "KSI · {0} <0>v{0} · <0/></0>"
 msgid "Current workspace"
 msgstr "Current workspace"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
 msgid "Language and appearance"
 msgstr "Language and appearance"
 
-#: src/routes/[...workspace]/+page.svelte
-msgid "Preferences"
-msgstr "Preferences"
-
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
+#: src/lib/UserSettings.svelte
 msgid "Language"
 msgstr "Language"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
 msgid "Polski"
 msgstr "Polski"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
 msgid "English"
 msgstr "English"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
+#: src/lib/UserSettings.svelte
 msgid "Appearance"
 msgstr "Appearance"
 
 #: src/lib/ContentHistory.svelte
 #: src/lib/TaskActivity.svelte
 #: src/lib/ThreadActivity.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
 #: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "System"
 msgstr "System"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
 msgid "Light"
 msgstr "Light"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
 msgid "Dark"
 msgstr "Dark"
 
@@ -489,6 +485,7 @@ msgstr "Profile"
 msgid "Introduce yourself to the association and choose what to share publicly."
 msgstr "Introduce yourself to the association and choose what to share publicly."
 
+#: src/lib/NotificationSettings.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Saved"
 msgstr "Saved"
@@ -795,6 +792,8 @@ msgstr "Activate"
 
 #: src/lib/ApprovalInbox.svelte
 #: src/lib/ApprovalInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
 #: src/lib/ProjectSettings.svelte
 msgid "Decline"
 msgstr "Decline"
@@ -813,6 +812,8 @@ msgid "The new picture becomes public after approval."
 msgstr "The new picture becomes public after approval."
 
 #: src/lib/ApprovalInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
 msgid "Approve"
 msgstr "Approve"
 
@@ -1023,6 +1024,10 @@ msgstr "Delete"
 msgid "Search users..."
 msgstr "Search users..."
 
+#: src/lib/UserSettings.svelte
+#: src/routes/[...workspace]/+page.svelte
+#: src/routes/[...workspace]/+page.svelte
+#: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Settings"
 msgstr "Settings"
@@ -1780,15 +1785,6 @@ msgstr "ArrowUp"
 msgid "ArrowDown"
 msgstr "ArrowDown"
 
-#~ msgid "Move up"
-#~ msgstr "Move up"
-
-#~ msgid "Move down"
-#~ msgstr "Move down"
-
-#~ msgid "All statuses"
-#~ msgstr "All statuses"
-
 #: src/lib/ContentHistory.svelte
 msgid "Historia zadania"
 msgstr "Historia zadania"
@@ -1888,6 +1884,7 @@ msgstr "Could not load history."
 #: src/lib/ContentHistory.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
+#: src/lib/NotificationSettings.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Spróbuj ponownie"
 msgstr "Spróbuj ponownie"
@@ -1895,6 +1892,7 @@ msgstr "Spróbuj ponownie"
 #: src/lib/ContentHistory.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
+#: src/lib/NotificationSettings.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Try again"
 msgstr "Try again"
@@ -1931,36 +1929,6 @@ msgstr "Historia jest widoczna dla osób z dostępem do tej treści."
 msgid "History is visible to everyone with access to this content."
 msgstr "History is visible to everyone with access to this content."
 
-#~ msgid "Utworzono zadanie"
-#~ msgstr "Utworzono zadanie"
-
-#~ msgid "Created task"
-#~ msgstr "Created task"
-
-#~ msgid "Zaktualizowano zadanie"
-#~ msgstr "Zaktualizowano zadanie"
-
-#~ msgid "Updated task"
-#~ msgstr "Updated task"
-
-#~ msgid "Zmieniono status zadania"
-#~ msgstr "Zmieniono status zadania"
-
-#~ msgid "Changed task status"
-#~ msgstr "Changed task status"
-
-#~ msgid "Usunięto zadanie"
-#~ msgstr "Usunięto zadanie"
-
-#~ msgid "Deleted task"
-#~ msgstr "Deleted task"
-
-#~ msgid "Przywrócono zadanie"
-#~ msgstr "Przywrócono zadanie"
-
-#~ msgid "Restored task"
-#~ msgstr "Restored task"
-
 #: src/lib/KanbanBoard.svelte
 msgid "Nie udało się wczytać komentarzy."
 msgstr "Nie udało się wczytać komentarzy."
@@ -1983,6 +1951,7 @@ msgid "Wczytywanie…"
 msgstr "Wczytywanie…"
 
 #: src/lib/KanbanBoard.svelte
+#: src/lib/WatchButton.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Loading…"
 msgstr "Loading…"
@@ -2046,12 +2015,6 @@ msgstr "Usuń"
 #: src/routes/[...workspace]/+page.svelte
 msgid "Anuluj"
 msgstr "Anuluj"
-
-#~ msgid "Przypisane osoby"
-#~ msgstr "Przypisane osoby"
-
-#~ msgid "Assignees"
-#~ msgstr "Assignees"
 
 #. 0: fullName(person)
 #: src/lib/Assignees.svelte
@@ -2155,3 +2118,263 @@ msgstr "Przypisane do"
 #: src/lib/Assignees.svelte
 msgid "Assigned to"
 msgstr "Assigned to"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationSettings.svelte
+msgid "Powiadomienia"
+msgstr "Powiadomienia"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationSettings.svelte
+#: src/routes/[...workspace]/+page.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "Notifications"
+msgstr "Notifications"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Oznacz wszystkie jako przeczytane"
+msgstr "Oznacz wszystkie jako przeczytane"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Mark all as read"
+msgstr "Mark all as read"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Wzmianka"
+msgstr "Wzmianka"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Mention"
+msgstr "Mention"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Przypisanie"
+msgstr "Przypisanie"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Assignment"
+msgstr "Assignment"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Aktualizacja"
+msgstr "Aktualizacja"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Update"
+msgstr "Update"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Oznacz jako przeczytane"
+msgstr "Oznacz jako przeczytane"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Mark as read"
+msgstr "Mark as read"
+
+#: src/lib/NotificationSettings.svelte
+msgid "E-mail o nieprzeczytanych powiadomieniach"
+msgstr "E-mail o nieprzeczytanych powiadomieniach"
+
+#: src/lib/WatchButton.svelte
+msgid "Przestań obserwować"
+msgstr "Przestań obserwować"
+
+#: src/lib/WatchButton.svelte
+msgid "Unwatch"
+msgstr "Unwatch"
+
+#: src/lib/WatchButton.svelte
+msgid "Obserwuj"
+msgstr "Obserwuj"
+
+#: src/lib/WatchButton.svelte
+msgid "Watch"
+msgstr "Watch"
+
+#: src/lib/WatchButton.svelte
+msgid "Ładowanie…"
+msgstr "Ładowanie…"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Nowe zdjęcie profilowe"
+msgstr "Nowe zdjęcie profilowe"
+
+#: src/lib/NotificationInbox.svelte
+msgid "New profile picture"
+msgstr "New profile picture"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Teraz"
+msgstr "Teraz"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Just now"
+msgstr "Just now"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Ustawienia powiadomień"
+msgstr "Ustawienia powiadomień"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Notification settings"
+msgstr "Notification settings"
+
+#: src/lib/NotificationSettings.svelte
+msgid "Email me about unread notifications"
+msgstr "Email me about unread notifications"
+
+#: src/lib/NotificationSettings.svelte
+msgid "Otrzymuj przypomnienia o powiadomieniach, których jeszcze nie przeczytano."
+msgstr "Otrzymuj przypomnienia o powiadomieniach, których jeszcze nie przeczytano."
+
+#: src/lib/NotificationSettings.svelte
+msgid "Get a reminder for notifications you haven’t read yet."
+msgstr "Get a reminder for notifications you haven’t read yet."
+
+#: src/lib/NotificationSettings.svelte
+msgid "Zapisano"
+msgstr "Zapisano"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Filtr powiadomień"
+msgstr "Filtr powiadomień"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Filter notifications"
+msgstr "Filter notifications"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Wszystkie"
+msgstr "Wszystkie"
+
+#: src/lib/NotificationInbox.svelte
+msgid "All"
+msgstr "All"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Nieprzeczytane"
+msgstr "Nieprzeczytane"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Unread"
+msgstr "Unread"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Prośba o aktywację konta"
+msgstr "Prośba o aktywację konta"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Account activation request"
+msgstr "Account activation request"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Proponowane zdjęcie profilowe"
+msgstr "Proponowane zdjęcie profilowe"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Proposed profile picture"
+msgstr "Proposed profile picture"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Zatwierdź"
+msgstr "Zatwierdź"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Odrzuć"
+msgstr "Odrzuć"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Ładowanie powiadomień…"
+msgstr "Ładowanie powiadomień…"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Loading notifications…"
+msgstr "Loading notifications…"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Wszystko na bieżąco"
+msgstr "Wszystko na bieżąco"
+
+#: src/lib/NotificationInbox.svelte
+msgid "You’re all caught up"
+msgstr "You’re all caught up"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Nowe wzmianki, przypisania i prośby pojawią się tutaj."
+msgstr "Nowe wzmianki, przypisania i prośby pojawią się tutaj."
+
+#: src/lib/NotificationInbox.svelte
+msgid "New mentions, assignments, and requests will appear here."
+msgstr "New mentions, assignments, and requests will appear here."
+
+#: src/lib/NotificationInbox.svelte
+msgid "Zobacz wszystkie powiadomienia"
+msgstr "Zobacz wszystkie powiadomienia"
+
+#: src/lib/NotificationInbox.svelte
+msgid "View all notifications"
+msgstr "View all notifications"
+
+#: src/lib/NotificationSettings.svelte
+msgid "Ładowanie ustawień…"
+msgstr "Ładowanie ustawień…"
+
+#: src/lib/NotificationSettings.svelte
+msgid "Loading settings…"
+msgstr "Loading settings…"
+
+#: src/lib/NotificationSettings.svelte
+msgid "Przypomnienie e-mail po (minuty)"
+msgstr "Przypomnienie e-mail po (minuty)"
+
+#: src/lib/NotificationSettings.svelte
+msgid "Email reminder after (minutes)"
+msgstr "Email reminder after (minutes)"
+
+#: src/lib/NotificationSettings.svelte
+msgid "Na przykład: 60 oznacza, że przypomnienie e-mail może zostać wysłane, jeśli powiadomienie pozostaje nieprzeczytane przez godzinę. Powiadomienia w aplikacji pojawiają się od razu."
+msgstr "Na przykład: 60 oznacza, że przypomnienie e-mail może zostać wysłane, jeśli powiadomienie pozostaje nieprzeczytane przez godzinę. Powiadomienia w aplikacji pojawiają się od razu."
+
+#: src/lib/NotificationSettings.svelte
+msgid "For example, 60 means an email reminder can be sent if a notification stays unread for an hour. In-app notifications appear immediately."
+msgstr "For example, 60 means an email reminder can be sent if a notification stays unread for an hour. In-app notifications appear immediately."
+
+#: src/lib/UserSettings.svelte
+msgid "Language and appearance changes are saved automatically on this device."
+msgstr "Language and appearance changes are saved automatically on this device."
+
+#: src/routes/[...workspace]/+page.svelte
+msgid "Zobacz, co Cię ominęło."
+msgstr "Zobacz, co Cię ominęło."
+
+#: src/routes/[...workspace]/+page.svelte
+msgid "Catch up on what you missed."
+msgstr "Catch up on what you missed."
+
+#: src/lib/UserSettings.svelte
+msgid "Personalize how the app works for you."
+msgstr "Personalize how the app works for you."
+
+#: src/lib/NotificationSettings.svelte
+msgid "Zapisywanie…"
+msgstr "Zapisywanie…"
+
+#: src/lib/NotificationSettings.svelte
+msgid "Saving…"
+msgstr "Saving…"

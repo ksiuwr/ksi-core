@@ -4,6 +4,7 @@ import {
   hasContentChange,
   type ContentChange
 } from 'shared/activity';
+import { notifyCollaboration, subscribe } from '../../services/notifications';
 import { and, eq, desc, exists, inArray, isNull, isNotNull, sql, or, type SQL } from 'drizzle-orm';
 import { status, t } from 'elysia';
 import { syncFileReferences } from './files';
@@ -737,7 +738,7 @@ export default createElysia({ prefix: '/platform' })
           .returning();
         if (!item) throw new Error('Item creation failed');
         await syncFileReferences(tx, 'item', item.id, item.markdown, actor);
-        await recordEvent(tx, {
+        const notificationEvent = await recordEvent(tx, {
           actorId: actor.id,
           projectId: board.projectId,
           action: 'kanban.created',
@@ -749,6 +750,11 @@ export default createElysia({ prefix: '/platform' })
             changes: contentChanges({}, item, taskChangeFields)
           }
         });
+        await notifyCollaboration(tx, notificationEvent.id, 'item', item.id, actor.id, {
+          markdown: item.markdown,
+          assigneeIds: item.assigneeIds
+        });
+        await subscribe(tx, 'item', item.id, actor.id);
         return item;
       });
     },
@@ -794,7 +800,7 @@ export default createElysia({ prefix: '/platform' })
           .returning();
         if (!updated) throw status(409, { code: 'REVISION_CONFLICT_OR_DELETED' });
         await syncFileReferences(tx, 'item', updated.id, updated.markdown, actor);
-        await recordEvent(tx, {
+        const notificationEvent = await recordEvent(tx, {
           actorId: actor.id,
           projectId: board.projectId,
           action: 'kanban.updated',
@@ -805,6 +811,11 @@ export default createElysia({ prefix: '/platform' })
             version: updated.version,
             changes: contentChanges(item, updated, taskChangeFields)
           }
+        });
+        await notifyCollaboration(tx, notificationEvent.id, 'item', item.id, actor.id, {
+          markdown: body.markdown,
+          assigneeIds: updated.assigneeIds.filter((id) => !item.assigneeIds.includes(id)),
+          watch: Object.keys(values).some((key) => key !== 'position')
         });
         return updated;
       });
@@ -1002,7 +1013,7 @@ export default createElysia({ prefix: '/platform' })
           .returning();
         if (!comment) throw new Error('Comment creation failed');
         await syncFileReferences(tx, 'comment', comment.id, comment.markdown, actor);
-        await recordEvent(tx, {
+        const notificationEvent = await recordEvent(tx, {
           actorId: actor.id,
           projectId: board.projectId,
           action: 'kanban.comment.created',
@@ -1013,6 +1024,10 @@ export default createElysia({ prefix: '/platform' })
             changes: contentChanges({}, comment, ['markdown'])
           }
         });
+        await notifyCollaboration(tx, notificationEvent.id, 'item', item.id, actor.id, {
+          markdown: comment.markdown
+        });
+        await subscribe(tx, 'item', item.id, actor.id);
         return comment;
       });
     },
@@ -1079,7 +1094,7 @@ export default createElysia({ prefix: '/platform' })
           .values({ threadId: thread.id, authorId: actor.id, markdown: body.markdown })
           .returning();
         if (post) await syncFileReferences(tx, 'comment', post.id, post.markdown, actor);
-        await recordEvent(tx, {
+        const notificationEvent = await recordEvent(tx, {
           actorId: actor.id,
           projectId: thread.projectId,
           action: 'threads.created',
@@ -1096,6 +1111,11 @@ export default createElysia({ prefix: '/platform' })
             ])
           }
         });
+        await notifyCollaboration(tx, notificationEvent.id, 'thread', thread.id, actor.id, {
+          markdown: body.markdown,
+          assigneeIds: thread.assigneeIds
+        });
+        await subscribe(tx, 'thread', thread.id, actor.id);
         return thread;
       });
     },
@@ -1174,7 +1194,7 @@ export default createElysia({ prefix: '/platform' })
           .where(and(eq(threads.id, thread.id), eq(threads.version, body.version)))
           .returning();
         if (!updated) throw status(409, { code: 'REVISION_CONFLICT' });
-        await recordEvent(tx, {
+        const notificationEvent = await recordEvent(tx, {
           actorId: actor.id,
           projectId: thread.projectId,
           action: 'threads.assignees.updated',
@@ -1184,6 +1204,9 @@ export default createElysia({ prefix: '/platform' })
             version: updated.version,
             changes: contentChanges(thread, updated, ['assigneeIds'])
           }
+        });
+        await notifyCollaboration(tx, notificationEvent.id, 'thread', thread.id, actor.id, {
+          assigneeIds: updated.assigneeIds.filter((id) => !thread.assigneeIds.includes(id))
         });
         return updated;
       });
@@ -1217,7 +1240,7 @@ export default createElysia({ prefix: '/platform' })
           .where(and(eq(threads.id, thread.id), eq(threads.version, body.version)))
           .returning();
         if (!updated) throw status(409, { code: 'REVISION_CONFLICT' });
-        await recordEvent(tx, {
+        const notificationEvent = await recordEvent(tx, {
           actorId: actor.id,
           projectId: thread.projectId,
           action: 'threads.access.updated',
@@ -1228,6 +1251,7 @@ export default createElysia({ prefix: '/platform' })
             changes: contentChanges(thread, updated, ['visibility', 'invitedIds', 'archivedAt'])
           }
         });
+        await notifyCollaboration(tx, notificationEvent.id, 'thread', thread.id, actor.id);
         return updated;
       });
     },
@@ -1255,7 +1279,7 @@ export default createElysia({ prefix: '/platform' })
           .where(and(eq(threads.id, thread.id), eq(threads.version, body.version)))
           .returning();
         if (!updated) throw status(409, { code: 'REVISION_CONFLICT' });
-        await recordEvent(tx, {
+        const notificationEvent = await recordEvent(tx, {
           actorId: actor.id,
           projectId: thread.projectId,
           action: body.archived ? 'threads.archived' : 'threads.restored',
@@ -1266,6 +1290,7 @@ export default createElysia({ prefix: '/platform' })
             changes: contentChanges(thread, updated, ['visibility', 'invitedIds', 'archivedAt'])
           }
         });
+        await notifyCollaboration(tx, notificationEvent.id, 'thread', thread.id, actor.id);
         return updated;
       });
     },
@@ -1297,13 +1322,17 @@ export default createElysia({ prefix: '/platform' })
           .returning();
         if (!comment) throw new Error('Comment creation failed');
         await syncFileReferences(tx, 'comment', comment.id, comment.markdown, actor);
-        await recordEvent(tx, {
+        const notificationEvent = await recordEvent(tx, {
           actorId: actor.id,
           projectId: thread.projectId,
           action: 'threads.comment.created',
           targetId: comment.id,
           metadata: { threadId: thread.id, changes: contentChanges({}, comment, ['markdown']) }
         });
+        await notifyCollaboration(tx, notificationEvent.id, 'thread', thread.id, actor.id, {
+          markdown: comment.markdown
+        });
+        await subscribe(tx, 'thread', thread.id, actor.id);
         return comment;
       });
     },
@@ -1352,13 +1381,22 @@ export default createElysia({ prefix: '/platform' })
           .returning();
         await syncFileReferences(tx, 'comment', comment.id, body.markdown, actor);
 
-        await recordEvent(tx, {
+        const notificationEvent = await recordEvent(tx, {
           actorId: actor.id,
           projectId,
           action: 'comments.edited',
           targetId: comment.id,
           metadata
         });
+        if (comment.itemId || comment.threadId)
+          await notifyCollaboration(
+            tx,
+            notificationEvent.id,
+            comment.itemId ? 'item' : 'thread',
+            (comment.itemId ?? comment.threadId)!,
+            actor.id,
+            { markdown: body.markdown }
+          );
         return updated;
       });
     },

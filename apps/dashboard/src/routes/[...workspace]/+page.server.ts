@@ -7,10 +7,8 @@ export const load: PageServerLoad = ({ locals, params, url }) => {
   const navigation = parseDashboardPath(`/${params.workspace}`);
   if (!navigation) error(404, 'Page not found');
   if (!locals.user) redirect(303, `/login?returnTo=${encodeURIComponent(url.pathname)}`);
-  if (
-    ['users', 'inbox', '__create_project__'].includes(navigation.tab) &&
-    locals.user.role === 'member'
-  )
+  if (url.pathname === '/settings/notifications') redirect(303, '/settings#notifications');
+  if (['users', '__create_project__'].includes(navigation.tab) && locals.user.role === 'member')
     error(403, 'Access denied');
   return {
     user: locals.user,

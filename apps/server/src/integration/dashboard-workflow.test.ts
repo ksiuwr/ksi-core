@@ -1,3 +1,4 @@
+import { queueNotificationMailBatch } from '../services/notifications';
 import { beforeAll, afterAll, describe, expect, test } from 'bun:test';
 import { eq, inArray } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
@@ -11,6 +12,7 @@ import {
   frontendSessions,
   boards,
   kanbanItems,
+  notifications,
   threads,
   comments,
   files,
@@ -682,6 +684,223 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
     );
     expect(updated.status).toBe(200);
     expect(updated.body.assigneeIds).toEqual([]);
+    await db.delete(comments).where(eq(comments.threadId, thread.body.id));
+    await db.delete(threads).where(eq(threads.id, thread.body.id));
+    await db.delete(kanbanItems).where(eq(kanbanItems.id, task.body.id));
+  });
+  test('notifications persist mentions, assignments, watches, read state and delayed email without restricted-thread leaks', async () => {
+    const task = await request('admin', `/platform/boards/${boardId}/items`, 'POST', {
+      title: 'Notification task',
+      markdown: `Hello [@outsider](/members/${ids.outsider})`,
+      column: 'todo',
+      labels: [],
+      position: 0,
+      assigneeIds: [ids.member]
+    });
+    expect(task.status).toBe(200);
+    const memberInbox = await request('member', '/notifications');
+    expect(memberInbox.body.find((n: any) => n.ownerId === task.body.id).reason).toBe('assignment');
+    const mention = (await request('outsider', '/notifications')).body.find(
+      (n: any) => n.ownerId === task.body.id
+    );
+    expect(mention.reason).toBe('mention');
+    expect(mention.actorName).toBe('admin Workflow');
+    expect(mention.action).toBe('kanban.created');
+    expect(mention.projectName).toBe('Workflow project');
+    expect(mention.href).toBe(`/projects/${projectId}/kanban?item=${task.body.id}`);
+    expect(
+      (await request('admin', '/notifications')).body.some((n: any) => n.ownerId === task.body.id)
+    ).toBe(false);
+    expect((await request('member', `/notifications/${mention.id}/read`, 'POST')).status).toBe(404);
+    expect((await request('outsider', `/notifications/${mention.id}/read`, 'POST')).status).toBe(
+      200
+    );
+    expect(
+      (await request('outsider', '/notifications')).body.find((n: any) => n.id === mention.id)
+        .readAt
+    ).not.toBeNull();
+    await request('outsider', `/notifications/subscriptions/item/${task.body.id}`, 'PUT', {
+      watching: true
+    });
+    await request('admin', `/platform/items/${task.body.id}`, 'PATCH', {
+      version: 1,
+      title: 'Notification task updated'
+    });
+    const unread = (await request('outsider', '/notifications')).body.find(
+      (n: any) => n.ownerId === task.body.id && !n.readAt
+    );
+    expect(unread.reason).toBe('update');
+    expect(unread.action).toBe('kanban.updated');
+    expect(unread.changedFields).toEqual(['title']);
+    expect(
+      (
+        await request('outsider', '/notifications/preferences', 'PUT', {
+          emailEnabled: true,
+          emailDelayMinutes: 60
+        })
+      ).status
+    ).toBe(200);
+    await db.update(users).set({ emailVerified: true }).where(eq(users.id, ids.outsider));
+    expect(await queueNotificationMailBatch()).toBe(0);
+    await db
+      .update(notifications)
+      .set({ createdAt: new Date(Date.now() - 7200000) })
+      .where(eq(notifications.id, unread.id));
+    expect(await queueNotificationMailBatch()).toBe(1);
+    expect(await queueNotificationMailBatch()).toBe(0);
+    const mail = await db
+      .select()
+      .from(mailJobs)
+      .where(eq(mailJobs.to, `${ids.outsider}@example.test`));
+    expect(mail.some((job) => job.subject === 'KSI: Notification task updated')).toBe(true);
+    await request('outsider', '/notifications/read-all', 'POST');
+    expect((await request('outsider', '/notifications')).body.every((n: any) => !!n.readAt)).toBe(
+      true
+    );
+    await request('outsider', `/notifications/subscriptions/item/${task.body.id}`, 'PUT', {
+      watching: false
+    });
+    expect(
+      (await request('outsider', `/notifications/subscriptions/item/${task.body.id}`)).body.watching
+    ).toBe(false);
+    const comment = await request('admin', `/platform/items/${task.body.id}/comments`, 'POST', {
+      markdown: `A comment for [@outsider](/members/${ids.outsider})`
+    });
+    expect(comment.status).toBe(200);
+    const commentNotification = (await request('outsider', '/notifications')).body.find(
+      (n: any) => n.ownerId === task.body.id && n.action === 'kanban.comment.created'
+    );
+    expect(commentNotification).toMatchObject({
+      actorName: 'admin Workflow',
+      projectName: 'Workflow project',
+      reason: 'mention',
+      title: 'Notification task updated'
+    });
+    expect(commentNotification.metadata).toBeUndefined();
+    const organizationThread = await request('admin', '/platform/threads', 'POST', {
+      title: 'Organization context',
+      markdown: `Hello [@outsider](/members/${ids.outsider})`,
+      visibility: 'association',
+      invitedIds: []
+    });
+    expect(organizationThread.status).toBe(200);
+    const organizationNotification = (await request('outsider', '/notifications')).body.find(
+      (n: any) => n.ownerId === organizationThread.body.id
+    );
+    expect(organizationNotification).toMatchObject({
+      projectName: null,
+      actorName: 'admin Workflow',
+      action: 'threads.created'
+    });
+    await db.delete(comments).where(eq(comments.threadId, organizationThread.body.id));
+    await db.delete(threads).where(eq(threads.id, organizationThread.body.id));
+    const thread = await request('admin', '/platform/threads', 'POST', {
+      title: 'Restricted notification',
+      markdown: `Hello [@outsider](/members/${ids.outsider})`,
+      visibility: 'leaders',
+      invitedIds: []
+    });
+    expect(thread.status).toBe(200);
+    expect(
+      (await request('outsider', '/notifications')).body.some(
+        (n: any) => n.ownerId === thread.body.id
+      )
+    ).toBe(false);
+    expect(
+      (await request('outsider', `/notifications/subscriptions/thread/${thread.body.id}`)).status
+    ).toBe(404);
+    expect((await request('pending', '/notifications')).status).toBe(403);
+    await db.delete(comments).where(eq(comments.threadId, thread.body.id));
+    await db.delete(threads).where(eq(threads.id, thread.body.id));
+    await db.delete(comments).where(eq(comments.itemId, task.body.id));
+    await db.delete(kanbanItems).where(eq(kanbanItems.id, task.body.id));
+    await db.delete(mailJobs).where(eq(mailJobs.to, `${ids.outsider}@example.test`));
+  });
+  test('assignment notifications name changes and automatically watch new assignees', async () => {
+    await db
+      .insert(projectMembers)
+      .values({ projectId, userId: ids.outsider, leader: false })
+      .onConflictDoNothing();
+    let task = await request('admin', `/platform/boards/${boardId}/items`, 'POST', {
+      title: 'Automatic assignment watch',
+      markdown: '',
+      column: 'todo',
+      labels: [],
+      position: 0,
+      assigneeIds: [ids.member]
+    });
+    expect(task.status).toBe(200);
+    const watching = async (actor: Actor) =>
+      (await request(actor, `/notifications/subscriptions/item/${task.body.id}`)).body.watching;
+    const change = async (actor: Actor, values: Record<string, unknown>) => {
+      task = await request(actor, `/platform/items/${task.body.id}`, 'PATCH', {
+        version: task.body.version,
+        ...values
+      });
+      expect(task.status).toBe(200);
+    };
+    expect(await watching('member')).toBe(true);
+    const created = (await request('member', '/notifications')).body.find(
+      (n: any) => n.ownerId === task.body.id
+    );
+    expect(created.assignedNames).toEqual(['member Workflow']);
+    expect(created.unassignedNames).toEqual([]);
+    await change('admin', { title: 'Watched update' });
+    expect(
+      (await request('member', '/notifications')).body.some(
+        (n: any) =>
+          n.ownerId === task.body.id && n.action === 'kanban.updated' && n.reason === 'update'
+      )
+    ).toBe(true);
+    await request('member', `/notifications/subscriptions/item/${task.body.id}`, 'PUT', {
+      watching: false
+    });
+    await change('admin', { title: 'Keep manual unwatch' });
+    expect(await watching('member')).toBe(false);
+    await change('member', { assigneeIds: [] });
+    const removal = (await request('admin', '/notifications')).body.find(
+      (n: any) => n.ownerId === task.body.id && n.unassignedNames?.includes('member Workflow')
+    );
+    expect(removal.assignedNames).toEqual([]);
+    expect(removal.unassignedNames).toEqual(['member Workflow']);
+    await change('member', { assigneeIds: [ids.member, ids.outsider] });
+    expect(await watching('member')).toBe(true);
+    expect(await watching('outsider')).toBe(true);
+    const assignment = (await request('outsider', '/notifications')).body.find(
+      (n: any) => n.ownerId === task.body.id
+    );
+    expect(assignment.assignedNames).toEqual(['member Workflow', 'outsider Workflow']);
+    expect(assignment.reason).toBe('assignment');
+    expect(
+      (await request('member', '/notifications')).body.some(
+        (n: any) => n.ownerId === task.body.id && n.eventId === assignment.eventId
+      )
+    ).toBe(false);
+    await change('admin', { assigneeIds: [ids.outsider] });
+    const unassigned = (await request('member', '/notifications')).body.find(
+      (n: any) => n.ownerId === task.body.id && n.unassignedNames?.includes('member Workflow')
+    );
+    expect(unassigned.assignedNames).toEqual([]);
+    expect(unassigned.unassignedNames).toEqual(['member Workflow']);
+    expect(await watching('member')).toBe(true);
+    // Historical assignment details come from each event, even after later assignments change.
+    expect(
+      (await request('outsider', '/notifications')).body.find((n: any) => n.id === assignment.id)
+        .assignedNames
+    ).toEqual(['member Workflow', 'outsider Workflow']);
+    const thread = await request('admin', '/platform/threads', 'POST', {
+      title: 'Assigned discussion',
+      markdown: 'Discussion with an assignee',
+      projectId,
+      visibility: 'association',
+      invitedIds: [],
+      assigneeIds: [ids.outsider]
+    });
+    expect(thread.status).toBe(200);
+    expect(
+      (await request('outsider', `/notifications/subscriptions/thread/${thread.body.id}`)).body
+        .watching
+    ).toBe(true);
     await db.delete(comments).where(eq(comments.threadId, thread.body.id));
     await db.delete(threads).where(eq(threads.id, thread.body.id));
     await db.delete(kanbanItems).where(eq(kanbanItems.id, task.body.id));

@@ -4,6 +4,7 @@
   import { tick, onMount } from 'svelte';
   import ContentHistory from './ContentHistory.svelte';
   import ConfirmDialog from './ConfirmDialog.svelte';
+  import WatchButton from './WatchButton.svelte';
   import Assignees, { type AssignmentMember } from './Assignees.svelte';
   import { flip } from 'svelte/animate';
   import { prefersReducedMotion } from 'svelte/motion';
@@ -1373,6 +1374,11 @@
         >
       </div>
     </div>
+    {#key (selected.assigneeIds ?? []).join(',')}<WatchButton
+        type="item"
+        id={selected.id}
+        {language}
+      />{/key}
     <div class="issue-tools">
       <Dropdown
         label={'Task status'}

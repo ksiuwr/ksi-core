@@ -61,6 +61,7 @@ msgstr "Nie znaleziono projektu."
 #: src/lib/AvatarUpload.svelte
 #: src/lib/ContentTranslations.svelte
 #: src/lib/KanbanBoard.svelte
+#: src/lib/NotificationInbox.svelte
 #: src/lib/ProjectSettings.svelte
 #: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
@@ -74,6 +75,7 @@ msgstr "Tab"
 
 #: src/lib/Assignees.svelte
 #: src/lib/KanbanBoard.svelte
+#: src/lib/NotificationInbox.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Escape"
 msgstr "Escape"
@@ -130,8 +132,6 @@ msgid "Removed tasks"
 msgstr "Usunięte zadania"
 
 #: src/lib/ApprovalInbox.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
 msgid "Approval inbox"
 msgstr "Skrzynka akceptacji"
 
@@ -251,46 +251,42 @@ msgstr "KSI · {0} <0>v{0} · <0/></0>"
 msgid "Current workspace"
 msgstr "Bieżąca przestrzeń"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
 msgid "Language and appearance"
 msgstr "Język i wygląd"
 
-#: src/routes/[...workspace]/+page.svelte
-msgid "Preferences"
-msgstr "Preferencje"
-
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
+#: src/lib/UserSettings.svelte
 msgid "Language"
 msgstr "Język"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
 msgid "Polski"
 msgstr "Polski"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
 msgid "English"
 msgstr "English"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
+#: src/lib/UserSettings.svelte
 msgid "Appearance"
 msgstr "Wygląd"
 
 #: src/lib/ContentHistory.svelte
 #: src/lib/TaskActivity.svelte
 #: src/lib/ThreadActivity.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
 #: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "System"
 msgstr "Systemowy"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
 msgid "Light"
 msgstr "Jasny"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/UserSettings.svelte
 msgid "Dark"
 msgstr "Ciemny"
 
@@ -489,6 +485,7 @@ msgstr "Profil"
 msgid "Introduce yourself to the association and choose what to share publicly."
 msgstr "Przedstaw się kołu i wybierz, czym chcesz się podzielić publicznie."
 
+#: src/lib/NotificationSettings.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Saved"
 msgstr "Zapisano"
@@ -795,6 +792,8 @@ msgstr "Aktywuj"
 
 #: src/lib/ApprovalInbox.svelte
 #: src/lib/ApprovalInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
 #: src/lib/ProjectSettings.svelte
 msgid "Decline"
 msgstr "Odrzuć"
@@ -813,6 +812,8 @@ msgid "The new picture becomes public after approval."
 msgstr "Nowe zdjęcie staje się publiczne po zatwierdzeniu."
 
 #: src/lib/ApprovalInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
 msgid "Approve"
 msgstr "Zatwierdź"
 
@@ -1023,6 +1024,10 @@ msgstr "Usuń"
 msgid "Search users..."
 msgstr "Szukaj użytkowników…"
 
+#: src/lib/UserSettings.svelte
+#: src/routes/[...workspace]/+page.svelte
+#: src/routes/[...workspace]/+page.svelte
+#: src/routes/[...workspace]/+page.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Settings"
 msgstr "Ustawienia"
@@ -1771,387 +1776,605 @@ msgstr "Utwórz etykietę"
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 msgid "ArrowUp"
-msgstr ""
+msgstr "ArrowUp"
 
 #: src/lib/Assignees.svelte
 #: src/lib/Assignees.svelte
 #: src/lib/Assignees.svelte
 #: src/lib/KanbanBoard.svelte
 msgid "ArrowDown"
-msgstr ""
-
-#~ msgid "Move up"
-#~ msgstr ""
-
-#~ msgid "Move down"
-#~ msgstr ""
-
-#~ msgid "All statuses"
-#~ msgstr "Wszystkie statusy"
+msgstr "ArrowDown"
 
 #: src/lib/ContentHistory.svelte
 msgid "Historia zadania"
-msgstr ""
+msgstr "Historia zadania"
 
 #: src/lib/ContentHistory.svelte
 msgid "Task history"
-msgstr ""
+msgstr "Historia zadania"
 
 #: src/lib/ContentHistory.svelte
 msgid "Historia komentarza"
-msgstr ""
+msgstr "Historia komentarza"
 
 #: src/lib/ContentHistory.svelte
 msgid "Comment history"
-msgstr ""
+msgstr "Historia komentarza"
 
 #: src/lib/ContentHistory.svelte
 msgid "Utworzono"
-msgstr ""
+msgstr "Utworzono"
 
 #: src/lib/ContentHistory.svelte
 msgid "Created"
-msgstr ""
+msgstr "Utworzono"
 
 #: src/lib/ContentHistory.svelte
 msgid "Zmieniono status"
-msgstr ""
+msgstr "Zmieniono status"
 
 #: src/lib/ContentHistory.svelte
 msgid "Status changed"
-msgstr ""
+msgstr "Zmieniono status"
 
 #: src/lib/ContentHistory.svelte
 msgid "Edytowano"
-msgstr ""
+msgstr "Edytowano"
 
 #: src/lib/ContentHistory.svelte
 msgid "Edited"
-msgstr ""
+msgstr "Edytowano"
 
 #: src/lib/ContentHistory.svelte
 msgid "Sprawdź, co zmieniono i kto wprowadził zmiany."
-msgstr ""
+msgstr "Sprawdź, co zmieniono i kto wprowadził zmiany."
 
 #: src/lib/ContentHistory.svelte
 msgid "See what changed and who changed it."
-msgstr ""
+msgstr "Sprawdź, co zmieniono i kto wprowadził zmiany."
 
 #: src/lib/ContentHistory.svelte
 msgid "Zamknij historię"
-msgstr ""
+msgstr "Zamknij historię"
 
 #: src/lib/ContentHistory.svelte
 msgid "Close history"
-msgstr ""
+msgstr "Zamknij historię"
 
 #: src/lib/ContentHistory.svelte
 msgid "Od najnowszych"
-msgstr ""
+msgstr "Od najnowszych"
 
 #: src/lib/ContentHistory.svelte
 msgid "Newest first"
-msgstr ""
+msgstr "Od najnowszych"
 
 #: src/lib/ContentHistory.svelte
 msgid "Dla tej starszej wersji nie zapisano szczegółów zmian."
-msgstr ""
+msgstr "Dla tej starszej wersji nie zapisano szczegółów zmian."
 
 #: src/lib/ContentHistory.svelte
 msgid "Detailed changes were not recorded for this older revision."
-msgstr ""
+msgstr "Dla tej starszej wersji nie zapisano szczegółów zmian."
 
 #: src/lib/ContentHistory.svelte
 msgid "Bez zmian w treści."
-msgstr ""
+msgstr "Bez zmian w treści."
 
 #: src/lib/ContentHistory.svelte
 msgid "No content changes."
-msgstr ""
+msgstr "Bez zmian w treści."
 
 #: src/lib/ContentHistory.svelte
 msgid "Wczytywanie historii…"
-msgstr ""
+msgstr "Wczytywanie historii…"
 
 #: src/lib/ContentHistory.svelte
 msgid "Loading history…"
-msgstr ""
+msgstr "Wczytywanie historii…"
 
 #: src/lib/ContentHistory.svelte
 msgid "Nie udało się wczytać historii."
-msgstr ""
+msgstr "Nie udało się wczytać historii."
 
 #: src/lib/ContentHistory.svelte
 msgid "Could not load history."
-msgstr ""
+msgstr "Nie udało się wczytać historii."
 
 #: src/lib/ContentHistory.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
+#: src/lib/NotificationSettings.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Spróbuj ponownie"
-msgstr ""
+msgstr "Spróbuj ponownie"
 
 #: src/lib/ContentHistory.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
+#: src/lib/NotificationSettings.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Try again"
-msgstr ""
+msgstr "Spróbuj ponownie"
 
 #: src/lib/ContentHistory.svelte
 msgid "Brak zapisanych wersji"
-msgstr ""
+msgstr "Brak zapisanych wersji"
 
 #: src/lib/ContentHistory.svelte
 msgid "No revisions recorded"
-msgstr ""
+msgstr "Brak zapisanych wersji"
 
 #: src/lib/ContentHistory.svelte
 msgid "Nowe zmiany pojawią się tutaj po zapisaniu."
-msgstr ""
+msgstr "Nowe zmiany pojawią się tutaj po zapisaniu."
 
 #: src/lib/ContentHistory.svelte
 msgid "New changes will appear here when saved."
-msgstr ""
+msgstr "Nowe zmiany pojawią się tutaj po zapisaniu."
 
 #: src/lib/ContentHistory.svelte
 msgid "Pokaż starsze wersje"
-msgstr ""
+msgstr "Pokaż starsze wersje"
 
 #: src/lib/ContentHistory.svelte
 msgid "Load older revisions"
-msgstr ""
+msgstr "Pokaż starsze wersje"
 
 #: src/lib/ContentHistory.svelte
 msgid "Historia jest widoczna dla osób z dostępem do tej treści."
-msgstr ""
+msgstr "Historia jest widoczna dla osób z dostępem do tej treści."
 
 #: src/lib/ContentHistory.svelte
 msgid "History is visible to everyone with access to this content."
-msgstr ""
-
-#~ msgid "Utworzono zadanie"
-#~ msgstr ""
-
-#~ msgid "Created task"
-#~ msgstr ""
-
-#~ msgid "Zaktualizowano zadanie"
-#~ msgstr ""
-
-#~ msgid "Updated task"
-#~ msgstr ""
-
-#~ msgid "Zmieniono status zadania"
-#~ msgstr ""
-
-#~ msgid "Changed task status"
-#~ msgstr ""
-
-#~ msgid "Usunięto zadanie"
-#~ msgstr ""
-
-#~ msgid "Deleted task"
-#~ msgstr ""
-
-#~ msgid "Przywrócono zadanie"
-#~ msgstr ""
-
-#~ msgid "Restored task"
-#~ msgstr ""
+msgstr "Historia jest widoczna dla osób z dostępem do tej treści."
 
 #: src/lib/KanbanBoard.svelte
 msgid "Nie udało się wczytać komentarzy."
-msgstr ""
+msgstr "Nie udało się wczytać komentarzy."
 
 #: src/lib/KanbanBoard.svelte
 msgid "Could not load comments."
-msgstr ""
+msgstr "Nie udało się wczytać komentarzy."
 
 #: src/lib/KanbanBoard.svelte
 msgid "Nie udało się wczytać aktywności."
-msgstr ""
+msgstr "Nie udało się wczytać aktywności."
 
 #: src/lib/KanbanBoard.svelte
 msgid "Could not load activity."
-msgstr ""
+msgstr "Nie udało się wczytać aktywności."
 
 #: src/lib/KanbanBoard.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Wczytywanie…"
-msgstr ""
+msgstr "Wczytywanie…"
 
 #: src/lib/KanbanBoard.svelte
+#: src/lib/WatchButton.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Loading…"
-msgstr ""
+msgstr "Wczytywanie…"
 
 #: src/lib/KanbanBoard.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Pokaż wcześniejszą aktywność"
-msgstr ""
+msgstr "Pokaż wcześniejszą aktywność"
 
 #: src/lib/KanbanBoard.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Load earlier activity"
-msgstr ""
+msgstr "Pokaż wcześniejszą aktywność"
 
 #: src/lib/TaskActivity.svelte
 #: src/lib/ThreadActivity.svelte
 msgid "Członek stowarzyszenia"
-msgstr ""
+msgstr "Członek stowarzyszenia"
 
 #: src/lib/TaskActivity.svelte
 msgid "label"
-msgstr ""
+msgstr "etykieta"
 
 #: src/routes/[...workspace]/+page.svelte
 msgid "Nie udało się wczytać aktywności wątku."
-msgstr ""
+msgstr "Nie udało się wczytać aktywności wątku."
 
 #: src/routes/[...workspace]/+page.svelte
 msgid "Could not load thread activity."
-msgstr ""
+msgstr "Nie udało się wczytać aktywności wątku."
 
 #: src/routes/[...workspace]/+page.svelte
 msgid "Ten komentarz był edytowany"
-msgstr ""
+msgstr "Ten komentarz był edytowany"
 
 #: src/routes/[...workspace]/+page.svelte
 msgid "This comment was edited"
-msgstr ""
+msgstr "Ten komentarz był edytowany"
 
 #: src/lib/KanbanBoard.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Usunąć komentarz?"
-msgstr ""
+msgstr "Usunąć komentarz?"
 
 #: src/lib/KanbanBoard.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Tej operacji nie można cofnąć."
-msgstr ""
+msgstr "Tej operacji nie można cofnąć."
 
 #: src/lib/KanbanBoard.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "This action cannot be undone."
-msgstr ""
+msgstr "Tej operacji nie można cofnąć."
 
 #: src/lib/KanbanBoard.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Usuń"
-msgstr ""
+msgstr "Usuń"
 
 #: src/lib/KanbanBoard.svelte
 #: src/routes/[...workspace]/+page.svelte
 msgid "Anuluj"
-msgstr ""
-
-#~ msgid "Przypisane osoby"
-#~ msgstr ""
-
-#~ msgid "Assignees"
-#~ msgstr ""
+msgstr "Anuluj"
 
 #. 0: fullName(person)
 #: src/lib/Assignees.svelte
 msgid "Przypisz {0}"
-msgstr ""
+msgstr "Przypisz {0}"
 
 #. 0: fullName(person)
 #: src/lib/Assignees.svelte
 msgid "Assign {0}"
-msgstr ""
+msgstr "Przypisz {0}"
 
 #. 0: fullName(person)
 #: src/lib/Assignees.svelte
 msgid "Usuń {0}"
-msgstr ""
+msgstr "Usuń {0}"
 
 #. 0: fullName(person)
 #: src/lib/Assignees.svelte
 msgid "Remove {0}"
-msgstr ""
+msgstr "Usuń {0}"
 
 #: src/lib/Assignees.svelte
 msgid "Backspace"
-msgstr ""
+msgstr "Backspace"
 
 #: src/lib/Assignees.svelte
 #: src/lib/Assignees.svelte
 msgid "Home"
-msgstr ""
+msgstr "Home"
 
 #: src/lib/Assignees.svelte
 msgid "End"
-msgstr ""
+msgstr "End"
 
 #: src/lib/Assignees.svelte
 msgid "Enter"
-msgstr ""
+msgstr "Enter"
 
 #: src/lib/Assignees.svelte
 msgid "Nie udało się wczytać osób"
-msgstr ""
+msgstr "Nie udało się wczytać osób"
 
 #: src/lib/Assignees.svelte
 msgid "Unable to load members"
-msgstr ""
+msgstr "Nie udało się wczytać osób"
 
 #: src/lib/Assignees.svelte
 msgid "Dodaj osoby"
-msgstr ""
+msgstr "Dodaj osoby"
 
 #: src/lib/Assignees.svelte
 msgid "Add assignees"
-msgstr ""
+msgstr "Dodaj osoby"
 
 #: src/lib/Assignees.svelte
 msgid "Szukaj osób"
-msgstr ""
+msgstr "Szukaj osób"
 
 #: src/lib/Assignees.svelte
 msgid "Search people"
-msgstr ""
+msgstr "Szukaj osób"
 
 #: src/lib/Assignees.svelte
 msgid "Szukaj osób…"
-msgstr ""
+msgstr "Szukaj osób…"
 
 #: src/lib/Assignees.svelte
 msgid "Search people…"
-msgstr ""
+msgstr "Szukaj osób…"
 
 #: src/lib/Assignees.svelte
 msgid "Osoby w projekcie"
-msgstr ""
+msgstr "Osoby w projekcie"
 
 #: src/lib/Assignees.svelte
 msgid "Wczytywanie osób…"
-msgstr ""
+msgstr "Wczytywanie osób…"
 
 #: src/lib/Assignees.svelte
 msgid "Loading members…"
-msgstr ""
+msgstr "Wczytywanie osób…"
 
 #: src/lib/Assignees.svelte
 msgid "Brak pasujących osób."
-msgstr ""
+msgstr "Brak pasujących osób."
 
 #: src/lib/Assignees.svelte
 msgid "Wybierz osoby"
-msgstr ""
+msgstr "Wybierz osoby"
 
 #: src/lib/Assignees.svelte
 msgid "Choose assignees"
-msgstr ""
+msgstr "Wybierz osoby"
 
 #: src/lib/Assignees.svelte
 #: src/lib/Assignees.svelte
 msgid "Przypisane do"
-msgstr ""
+msgstr "Przypisane do"
 
 #: src/lib/Assignees.svelte
 #: src/lib/Assignees.svelte
 msgid "Assigned to"
+msgstr "Przypisane do"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationSettings.svelte
+msgid "Powiadomienia"
+msgstr "Powiadomienia"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationSettings.svelte
+#: src/routes/[...workspace]/+page.svelte
+#: src/routes/[...workspace]/+page.svelte
+msgid "Notifications"
+msgstr "Powiadomienia"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Oznacz wszystkie jako przeczytane"
+msgstr "Oznacz wszystkie jako przeczytane"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Mark all as read"
+msgstr "Oznacz wszystkie jako przeczytane"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Wzmianka"
+msgstr "Wzmianka"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Mention"
+msgstr "Wzmianka"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Przypisanie"
+msgstr "Przypisanie"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Assignment"
+msgstr "Przypisanie"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Aktualizacja"
+msgstr "Aktualizacja"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Update"
+msgstr "Aktualizacja"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Oznacz jako przeczytane"
+msgstr "Oznacz jako przeczytane"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Mark as read"
+msgstr "Oznacz jako przeczytane"
+
+#: src/lib/NotificationSettings.svelte
+msgid "E-mail o nieprzeczytanych powiadomieniach"
+msgstr "E-mail o nieprzeczytanych powiadomieniach"
+
+#: src/lib/WatchButton.svelte
+msgid "Przestań obserwować"
+msgstr "Przestań obserwować"
+
+#: src/lib/WatchButton.svelte
+msgid "Unwatch"
+msgstr "Przestań obserwować"
+
+#: src/lib/WatchButton.svelte
+msgid "Obserwuj"
+msgstr "Obserwuj"
+
+#: src/lib/WatchButton.svelte
+msgid "Watch"
+msgstr "Obserwuj"
+
+#: src/lib/WatchButton.svelte
+msgid "Ładowanie…"
+msgstr "Ładowanie…"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Nowe zdjęcie profilowe"
+msgstr "Nowe zdjęcie profilowe"
+
+#: src/lib/NotificationInbox.svelte
+msgid "New profile picture"
+msgstr "Nowe zdjęcie profilowe"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Teraz"
+msgstr "Teraz"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Just now"
+msgstr "Teraz"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Ustawienia powiadomień"
+msgstr "Ustawienia powiadomień"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Notification settings"
+msgstr "Ustawienia powiadomień"
+
+#: src/lib/NotificationSettings.svelte
+msgid "Email me about unread notifications"
+msgstr "E-mail o nieprzeczytanych powiadomieniach"
+
+#: src/lib/NotificationSettings.svelte
+msgid "Otrzymuj przypomnienia o powiadomieniach, których jeszcze nie przeczytano."
+msgstr "Otrzymuj przypomnienia o powiadomieniach, których jeszcze nie przeczytano."
+
+#: src/lib/NotificationSettings.svelte
+msgid "Get a reminder for notifications you haven’t read yet."
+msgstr "Otrzymuj przypomnienia o powiadomieniach, których jeszcze nie przeczytano."
+
+#: src/lib/NotificationSettings.svelte
+msgid "Zapisano"
+msgstr "Zapisano"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Filtr powiadomień"
+msgstr "Filtr powiadomień"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Filter notifications"
+msgstr "Filtr powiadomień"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Wszystkie"
+msgstr "Wszystkie"
+
+#: src/lib/NotificationInbox.svelte
+msgid "All"
+msgstr "Wszystkie"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Nieprzeczytane"
+msgstr "Nieprzeczytane"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Unread"
+msgstr "Nieprzeczytane"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Prośba o aktywację konta"
+msgstr "Prośba o aktywację konta"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Account activation request"
+msgstr "Prośba o aktywację konta"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Proponowane zdjęcie profilowe"
+msgstr "Proponowane zdjęcie profilowe"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Proposed profile picture"
+msgstr "Proponowane zdjęcie profilowe"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Zatwierdź"
+msgstr "Zatwierdź"
+
+#: src/lib/NotificationInbox.svelte
+#: src/lib/NotificationInbox.svelte
+msgid "Odrzuć"
+msgstr "Odrzuć"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Ładowanie powiadomień…"
+msgstr "Ładowanie powiadomień…"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Loading notifications…"
+msgstr "Wczytywanie powiadomień…"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Wszystko na bieżąco"
+msgstr "Wszystko na bieżąco"
+
+#: src/lib/NotificationInbox.svelte
+msgid "You’re all caught up"
+msgstr "Wszystko na bieżąco"
+
+#: src/lib/NotificationInbox.svelte
+msgid "Nowe wzmianki, przypisania i prośby pojawią się tutaj."
+msgstr "Nowe wzmianki, przypisania i prośby pojawią się tutaj."
+
+#: src/lib/NotificationInbox.svelte
+msgid "New mentions, assignments, and requests will appear here."
+msgstr "Nowe wzmianki, przypisania i prośby pojawią się tutaj."
+
+#: src/lib/NotificationInbox.svelte
+msgid "Zobacz wszystkie powiadomienia"
+msgstr "Zobacz wszystkie powiadomienia"
+
+#: src/lib/NotificationInbox.svelte
+msgid "View all notifications"
+msgstr "Zobacz wszystkie powiadomienia"
+
+#: src/lib/NotificationSettings.svelte
+msgid "Ładowanie ustawień…"
+msgstr "Ładowanie ustawień…"
+
+#: src/lib/NotificationSettings.svelte
+msgid "Loading settings…"
+msgstr "Wczytywanie ustawień…"
+
+#: src/lib/NotificationSettings.svelte
+msgid "Przypomnienie e-mail po (minuty)"
+msgstr "Przypomnienie e-mail po (minuty)"
+
+#: src/lib/NotificationSettings.svelte
+msgid "Email reminder after (minutes)"
+msgstr "Przypomnienie e-mail po (minuty)"
+
+#: src/lib/NotificationSettings.svelte
+msgid "Na przykład: 60 oznacza, że przypomnienie e-mail może zostać wysłane, jeśli powiadomienie pozostaje nieprzeczytane przez godzinę. Powiadomienia w aplikacji pojawiają się od razu."
+msgstr "Na przykład: 60 oznacza, że przypomnienie e-mail może zostać wysłane, jeśli powiadomienie pozostaje nieprzeczytane przez godzinę. Powiadomienia w aplikacji pojawiają się od razu."
+
+#: src/lib/NotificationSettings.svelte
+msgid "For example, 60 means an email reminder can be sent if a notification stays unread for an hour. In-app notifications appear immediately."
+msgstr "Na przykład: 60 oznacza, że przypomnienie e-mail może zostać wysłane, jeśli powiadomienie pozostaje nieprzeczytane przez godzinę. Powiadomienia w aplikacji pojawiają się od razu."
+
+#: src/lib/UserSettings.svelte
+msgid "Language and appearance changes are saved automatically on this device."
+msgstr "Zmiany języka i wyglądu są zapisywane automatycznie na tym urządzeniu."
+
+#: src/routes/[...workspace]/+page.svelte
+msgid "Zobacz, co Cię ominęło."
+msgstr "Zobacz, co Cię ominęło."
+
+#: src/routes/[...workspace]/+page.svelte
+msgid "Catch up on what you missed."
+msgstr "Zobacz, co Cię ominęło."
+
+#: src/lib/UserSettings.svelte
+msgid "Personalize how the app works for you."
+msgstr "Dostosuj działanie aplikacji do siebie."
+
+#: src/lib/NotificationSettings.svelte
+msgid "Zapisywanie…"
+msgstr ""
+
+#: src/lib/NotificationSettings.svelte
+msgid "Saving…"
 msgstr ""
