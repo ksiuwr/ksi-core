@@ -1289,10 +1289,6 @@ msgstr "Treść została zmieniona. Odśwież przed zapisaniem."
 msgid "Translate every tag in the same order as the English tags."
 msgstr "Przetłumacz wszystkie tagi w kolejności tagów angielskich."
 
-#: src/lib/ProjectSettings.svelte
-msgid "Public translations"
-msgstr "Tłumaczenia publiczne"
-
 #: src/lib/ContentTranslations.svelte
 msgid "No content"
 msgstr "Brak treści"
@@ -2516,71 +2512,14 @@ msgstr "Dodano"
 msgid "Add at least one translated field before saving."
 msgstr "Przed zapisaniem przetłumacz co najmniej jedno pole."
 
-#~ msgid "{0} was removed. Visitors will now see English."
-#~ msgstr "Usunięto język {0}. Odwiedzający zobaczą teraz wersję angielską."
-
-#~ msgid "{0} translation saved."
-#~ msgstr "Zapisano tłumaczenie: {0}."
-
-#~ msgid "Public content language"
-#~ msgstr "Język treści publicznej"
-
-#~ msgid "Choose the language you want to review or edit."
-#~ msgstr "Wybierz język, który chcesz przejrzeć lub edytować."
-
 #: src/lib/ContentTranslations.svelte
 #: src/lib/ContentTranslations.svelte
 msgid "Content language"
 msgstr "Język treści"
 
-#~ msgid "English is the primary language"
-#~ msgstr "Angielski jest językiem głównym"
-
-#~ msgid "Edit these values in the main fields above. English cannot be removed."
-#~ msgstr "Edytuj te wartości w głównych polach powyżej. Języka angielskiego nie można usunąć."
-
-#~ msgid "{0} has not been added yet"
-#~ msgstr "Język {0} nie został jeszcze dodany"
-
-#~ msgid "Add it when the English content is ready. Empty fields will fall back to English."
-#~ msgstr "Dodaj go, gdy angielska treść będzie gotowa. Puste pola użyją wersji angielskiej."
-
-#~ msgid "Add {0}"
-#~ msgstr "Dodaj: {0}"
-
-#~ msgid "{0} translation"
-#~ msgstr "Tłumaczenie: {0}"
-
-#~ msgid "Only translate fields that should differ from English. Blank fields use English."
-#~ msgstr "Tłumacz tylko pola, które mają różnić się od angielskich. Puste pola użyją wersji angielskiej."
-
 #: src/lib/ContentTranslations.svelte
 msgid "New"
 msgstr "Nowe"
-
-#~ msgid "View English"
-#~ msgstr "Pokaż angielski"
-
-#~ msgid "Uses English when left blank"
-#~ msgstr "Puste pole użyje wersji angielskiej"
-
-#~ msgid "Unsaved translation changes"
-#~ msgstr "Niezapisane zmiany tłumaczenia"
-
-#~ msgid "Remove this language?"
-#~ msgstr "Usunąć ten język?"
-
-#~ msgid "Remove"
-#~ msgstr "Usuń"
-
-#~ msgid "Remove language"
-#~ msgstr "Usuń język"
-
-#~ msgid "Translations"
-#~ msgstr "Tłumaczenia"
-
-#~ msgid "Close translations"
-#~ msgstr "Zamknij tłumaczenia"
 
 #: src/lib/views/ArticleView.svelte
 msgid "Save the translation from the language bar above."
@@ -2593,12 +2532,6 @@ msgstr "Usunięto język polski. Odwiedzający zobaczą teraz wersję angielską
 #: src/lib/ContentTranslations.svelte
 msgid "Polish translation saved."
 msgstr "Zapisano polskie tłumaczenie."
-
-#~ msgid "Editing the primary content"
-#~ msgstr "Edycja treści głównej"
-
-#~ msgid "Editing the Polish translation"
-#~ msgstr "Edycja polskiego tłumaczenia"
 
 #: src/lib/ContentTranslations.svelte
 #: src/lib/ContentTranslations.svelte

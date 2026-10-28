@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tick } from 'svelte';
   import Assignees, { type AssignmentMember } from './Assignees.svelte';
+  import { statusColor as colorForStatus } from './status-color';
   import { flip } from 'svelte/animate';
   import { prefersReducedMotion } from 'svelte/motion';
   import {
@@ -220,8 +221,7 @@
         : s.id === 'done' && s.name === 'Done'
           ? 'Done'
           : s.name;
-  const color = (s: BoardStatus) =>
-    s.color ?? { todo: '#8b8b8b', progress: '#d58a32', done: '#449a78' }[s.id] ?? '#8777b5';
+  const color = (s: BoardStatus) => colorForStatus(s);
   const activeStatuses = $derived(statuses.filter((s) => !s.deleted));
   let editingStatus = $state<BoardStatus | null>(null),
     statusDialog = $state<HTMLDialogElement>(),
@@ -780,9 +780,9 @@
           >
             <span class="task-title">
               <strong>{item.title}</strong>
+              <GripVertical size={14} aria-hidden="true" />
               {#if item.referenceNumber}<span class="task-reference">#{item.referenceNumber}</span
-                >{/if}
-              <GripVertical size={14} aria-hidden="true" /></span
+                >{/if}</span
             >
             {#if item.markdown}<div class="kanban-markdown-preview">
                 <MarkdownContent value={item.markdown} {language} />
@@ -1356,11 +1356,12 @@
   }
   .task-title {
     display: flex;
-    justify-content: space-between;
     gap: 10px;
     align-items: start;
   }
   .task-title :global(strong) {
+    flex: 1;
+    min-width: 0;
     margin: 0;
     font-size: 13.5px;
     font-weight: 500;

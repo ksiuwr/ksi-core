@@ -4,6 +4,7 @@
   import { invalidateAll } from '$app/navigation';
   import { api, errorMessage } from '$lib/api';
   import { dashboardPath, taskPath, threadPath, type Workspace } from '$lib/navigation';
+  import { statusColor } from '$lib/status-color';
   import type {
     AssignmentMember,
     BoardData,
@@ -121,10 +122,7 @@
             {@const status = statusFor(item.column)}
             <li>
               <a class="list-row" href={taskPath(workspace, projectSlug, item.id)}>
-                <span
-                  class="status-dot"
-                  style:--dot={status?.color ?? 'var(--muted)'}
-                  aria-hidden="true"
+                <span class="status-dot" style:--dot={statusColor(status)} aria-hidden="true"
                 ></span>
                 <span class="list-row-title">{item.title}</span>
                 {#if item.referenceNumber}<span class="list-row-ref">#{item.referenceNumber}</span

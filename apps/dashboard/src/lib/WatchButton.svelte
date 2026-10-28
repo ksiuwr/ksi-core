@@ -62,8 +62,8 @@
   onclick={toggle}
 >
   {#if busy}<span class="sr-only">{'Loading…'}</span>
-  {:else if watching}<Bell size={13} aria-hidden="true" />
-  {:else}<BellOff size={13} aria-hidden="true" />
+  {:else if watching}<BellOff size={13} aria-hidden="true" />
+  {:else}<Bell size={13} aria-hidden="true" />
   {/if}
   {#if showLabel}
     <span class="watch-label"

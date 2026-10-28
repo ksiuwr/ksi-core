@@ -1289,10 +1289,6 @@ msgstr "This content changed. Reload before saving."
 msgid "Translate every tag in the same order as the English tags."
 msgstr "Translate every tag in the same order as the English tags."
 
-#: src/lib/ProjectSettings.svelte
-msgid "Public translations"
-msgstr "Public translations"
-
 #: src/lib/ContentTranslations.svelte
 msgid "No content"
 msgstr "No content"
@@ -2516,71 +2512,14 @@ msgstr "Added"
 msgid "Add at least one translated field before saving."
 msgstr "Add at least one translated field before saving."
 
-#~ msgid "{0} was removed. Visitors will now see English."
-#~ msgstr "{0} was removed. Visitors will now see English."
-
-#~ msgid "{0} translation saved."
-#~ msgstr "{0} translation saved."
-
-#~ msgid "Public content language"
-#~ msgstr "Public content language"
-
-#~ msgid "Choose the language you want to review or edit."
-#~ msgstr "Choose the language you want to review or edit."
-
 #: src/lib/ContentTranslations.svelte
 #: src/lib/ContentTranslations.svelte
 msgid "Content language"
 msgstr "Content language"
 
-#~ msgid "English is the primary language"
-#~ msgstr "English is the primary language"
-
-#~ msgid "Edit these values in the main fields above. English cannot be removed."
-#~ msgstr "Edit these values in the main fields above. English cannot be removed."
-
-#~ msgid "{0} has not been added yet"
-#~ msgstr "{0} has not been added yet"
-
-#~ msgid "Add it when the English content is ready. Empty fields will fall back to English."
-#~ msgstr "Add it when the English content is ready. Empty fields will fall back to English."
-
-#~ msgid "Add {0}"
-#~ msgstr "Add {0}"
-
-#~ msgid "{0} translation"
-#~ msgstr "{0} translation"
-
-#~ msgid "Only translate fields that should differ from English. Blank fields use English."
-#~ msgstr "Only translate fields that should differ from English. Blank fields use English."
-
 #: src/lib/ContentTranslations.svelte
 msgid "New"
 msgstr "New"
-
-#~ msgid "View English"
-#~ msgstr "View English"
-
-#~ msgid "Uses English when left blank"
-#~ msgstr "Uses English when left blank"
-
-#~ msgid "Unsaved translation changes"
-#~ msgstr "Unsaved translation changes"
-
-#~ msgid "Remove this language?"
-#~ msgstr "Remove this language?"
-
-#~ msgid "Remove"
-#~ msgstr "Remove"
-
-#~ msgid "Remove language"
-#~ msgstr "Remove language"
-
-#~ msgid "Translations"
-#~ msgstr "Translations"
-
-#~ msgid "Close translations"
-#~ msgstr "Close translations"
 
 #: src/lib/views/ArticleView.svelte
 msgid "Save the translation from the language bar above."
@@ -2593,12 +2532,6 @@ msgstr "Polish was removed. Visitors will now see English."
 #: src/lib/ContentTranslations.svelte
 msgid "Polish translation saved."
 msgstr "Polish translation saved."
-
-#~ msgid "Editing the primary content"
-#~ msgstr "Editing the primary content"
-
-#~ msgid "Editing the Polish translation"
-#~ msgstr "Editing the Polish translation"
 
 #: src/lib/ContentTranslations.svelte
 #: src/lib/ContentTranslations.svelte

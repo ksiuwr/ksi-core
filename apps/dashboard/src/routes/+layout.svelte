@@ -189,6 +189,48 @@
     if (accountMenu?.open && !accountMenu.contains(event.target)) accountMenu.open = false;
   }
 
+  // Press, drag to a menu item and release to pick it, like the shared Dropdown.
+  const ACCOUNT_HOLD_MS = 220;
+  let suppressAccountClick = false;
+
+  function pressAccountMenu(event: PointerEvent) {
+    if (event.button !== 0 || event.pointerType === 'touch' || accountMenu?.open) return;
+    let held = false;
+    const holdTimer = window.setTimeout(() => {
+      held = true;
+      suppressAccountClick = true;
+      if (accountMenu) accountMenu.open = true;
+    }, ACCOUNT_HOLD_MS);
+    const cleanup = () => {
+      window.clearTimeout(holdTimer);
+      window.removeEventListener('pointerup', release, true);
+      window.removeEventListener('pointercancel', cancel, true);
+    };
+    const release = (up: PointerEvent) => {
+      cleanup();
+      if (!held) return;
+      const target = document.elementFromPoint(up.clientX, up.clientY);
+      const action = target?.closest<HTMLElement>('.account-action');
+      if (action && accountMenu?.contains(action)) {
+        accountMenu.open = false;
+        action.click();
+      }
+      window.setTimeout(() => (suppressAccountClick = false), 0);
+    };
+    const cancel = () => {
+      cleanup();
+      suppressAccountClick = false;
+    };
+    window.addEventListener('pointerup', release, true);
+    window.addEventListener('pointercancel', cancel, true);
+  }
+
+  function ignoreHoldClick(event: MouseEvent) {
+    if (!suppressAccountClick) return;
+    event.preventDefault();
+    suppressAccountClick = false;
+  }
+
   onMount(() => {
     if (data.user?.membershipStatus !== 'active') return;
     const viewport = window.matchMedia('(max-width: 760px)');
@@ -440,7 +482,10 @@
             ><SunMoon size={18} aria-hidden="true" /></a
           >
           <details class="topbar-menu" bind:this={accountMenu}>
-            <summary aria-label={'My account'}
+            <summary
+              aria-label={'My account'}
+              onpointerdown={pressAccountMenu}
+              onclick={ignoreHoldClick}
               ><span class="account-avatar"
                 >{#if user.image}<img src={user.image} alt="" />{:else}{initials}{/if}</span
               ><span class="account-name">{user.firstName || user.name}</span><ChevronDown
@@ -451,10 +496,20 @@
             <div class="menu-panel account-panel">
               <strong>{user.firstName || user.name} {user.lastName}</strong>
               <span class="muted">{'Account settings'}</span>
-              <button class="account-action" onclick={() => changeTab('profile')}
-                ><UserRound size={16} aria-hidden="true" />{'My profile'}</button
+              <button
+                class="account-action"
+                onclick={() => {
+                  if (accountMenu) accountMenu.open = false;
+                  changeTab('profile');
+                }}><UserRound size={16} aria-hidden="true" />{'My profile'}</button
               >
-              <form method="POST" action="/logout">
+              <form
+                method="POST"
+                action="/logout"
+                onsubmit={() => {
+                  if (accountMenu) accountMenu.open = false;
+                }}
+              >
                 <button class="account-action sign-out"
                   ><LogOut size={16} aria-hidden="true" />{'Sign out'}</button
                 >
