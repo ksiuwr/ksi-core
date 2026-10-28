@@ -11,6 +11,7 @@
 .sidebar-brand {
   display: flex;
   align-items: center;
+  min-height: 30px;
   margin-bottom: 12px;
 }
 .sidebar-logo {
@@ -1045,19 +1046,23 @@ summary,
 .sidebar-collapse {
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
+  margin-left: auto;
   flex-shrink: 0;
   border: 1px solid transparent;
-  border-radius: 3px;
+  border-radius: 6px;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
 }
 .sidebar-collapse:hover {
-  border-color: var(--control-border-hover);
-  outline: 1px solid var(--control-border-hover);
-  outline-offset: 2px;
+  border-color: transparent;
+  outline: none;
+  background: var(--surface-muted);
   color: var(--ink);
 }
 @media (min-width: 761px) {
@@ -1069,7 +1074,6 @@ summary,
     overflow-x: hidden;
   }
   .dash-shell.sidebar-collapsed .sidebar-brand {
-    justify-content: center;
     margin-bottom: 6px;
   }
   .dash-shell.sidebar-collapsed .sidebar-logo {
@@ -1458,28 +1462,133 @@ summary,
   }
 }
 
-/* Compact dashboard controls */
+/* Compact, quiet controls. Primary actions are solid; secondary actions use a
+   filled surface instead of the previous double outlined treatment. */
+:root {
+  --button-primary: #1d1d1f;
+  --button-primary-hover: #000;
+  --button-primary-text: #fff;
+  --button-secondary: #e9e9e6;
+  --button-secondary-hover: #deded9;
+}
+:root[data-theme='dark'] {
+  --button-primary: #ededed;
+  --button-primary-hover: #fff;
+  --button-primary-text: #111;
+  --button-secondary: #25292d;
+  --button-secondary-hover: #30353a;
+}
 .btn {
-  min-height: 28px;
-  padding: 5px 9px;
-  gap: 5px;
-  font-size: 10px;
-  line-height: 1.4;
+  min-height: 30px;
+  padding: 0 11px;
+  gap: 6px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: var(--button-primary);
+  color: var(--button-primary-text);
+  box-shadow: 0 1px 2px #0000001f;
+  font-family: var(--display);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease,
+    box-shadow 120ms ease,
+    transform 80ms ease;
+}
+.btn:hover {
+  border-color: transparent;
+  outline: none;
+  background: var(--button-primary-hover);
+  color: var(--button-primary-text);
+  box-shadow: 0 2px 5px #00000024;
+}
+.btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px #0000001a;
+}
+.btn-outline,
+.btn.ghost {
+  border-color: transparent;
+  background: var(--button-secondary);
+  color: var(--ink);
+  box-shadow: none;
+}
+.btn-outline:hover,
+.btn.ghost:hover {
+  border-color: transparent;
+  outline: none;
+  background: var(--button-secondary-hover);
+  color: var(--ink);
+  box-shadow: none;
+}
+.btn.danger-button {
+  background: var(--danger);
+  color: var(--paper);
+}
+.btn.btn-outline.danger-button,
+.btn.ghost.danger-button {
+  background: color-mix(in srgb, var(--danger) 12%, var(--surface));
+  color: var(--danger);
+}
+.btn.btn-outline.danger-button:hover,
+.btn.ghost.danger-button:hover {
+  background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+}
+.btn:focus-visible,
+.icon-button:focus-visible,
+.topbar-control:focus-visible,
+.sidebar-collapse:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 .btn svg {
   width: 14px;
   height: 14px;
 }
 .icon-button {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
+  border-color: transparent;
+  border-radius: 6px;
+}
+.icon-button:hover {
+  border-color: transparent;
+  outline: none;
+  background: var(--button-secondary);
 }
 .topbar-control {
   width: 30px;
   height: 30px;
   padding: 5px 6px;
+  border-color: transparent;
+  border-radius: 6px;
+}
+.topbar-control:hover,
+.topbar-control.active {
+  border-color: transparent;
+  outline: none;
+  background: var(--button-secondary);
+}
+.sidebar-btn:hover,
+.sidebar-btn.active,
+.topbar-menu summary:hover,
+.topbar-menu[open] summary,
+.navigation-toggle:hover {
+  border-color: transparent;
+  outline: none;
+}
+.segmented-control {
+  border: 0;
+  border-radius: 7px;
+  background: var(--button-secondary);
 }
 .segmented-control button {
+  min-height: 26px;
   padding: 5px 8px;
+  border: 0;
+  border-radius: 5px;
   font-size: 11px;
 }
