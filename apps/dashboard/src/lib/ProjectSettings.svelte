@@ -2,8 +2,11 @@
   import Editor from '@ksi-core/ui/platform/Editor.svelte';
   import ContentTranslations from './ContentTranslations.svelte';
   import SettingsNav from './SettingsNav.svelte';
-  import type { ContentTranslations as TranslationData } from 'shared/content-locales';
-  import { Save, ArrowUpRight, Plus, Trash2, Info, Users, Languages, Link2 } from '@lucide/svelte';
+  import type {
+    ContentLocale,
+    ContentTranslations as TranslationData
+  } from 'shared/content-locales';
+  import { Save, ArrowUpRight, Plus, Trash2, Info, Users, Link2 } from '@lucide/svelte';
   import Skeleton from './Skeleton.svelte';
 
   let {
@@ -50,6 +53,20 @@
     notice = $state('');
 
   let generation = 0;
+  let contentLocale = $state<ContentLocale>('en');
+  let translationDraft = $state<Record<string, string>>({});
+
+  type LocalizedProjectField = 'name' | 'description' | 'tags';
+  function localized(key: LocalizedProjectField) {
+    const english = key === 'name' ? name : key === 'description' ? description : tags;
+    return contentLocale === 'en' ? english : (translationDraft[key] ?? '');
+  }
+  function setLocalized(key: LocalizedProjectField, value: string) {
+    if (contentLocale !== 'en') translationDraft[key] = value;
+    else if (key === 'name') name = value;
+    else if (key === 'description') description = value;
+    else tags = value;
+  }
 
   async function api(path: string, method = 'GET', body?: unknown) {
     const response = await fetch(
@@ -154,12 +171,7 @@
       items={[
         ...(canEdit ? [{ id: 'details', label: 'Project details', icon: Info }] : []),
         ...(canManageMembers ? [{ id: 'members', label: 'Members', icon: Users }] : []),
-        ...(canEdit
-          ? [
-              { id: 'translations', label: 'Public translations', icon: Languages },
-              { id: 'links', label: 'Public links', icon: Link2 }
-            ]
-          : [])
+        ...(canEdit ? [{ id: 'links', label: 'Public links', icon: Link2 }] : [])
       ]}
     />
 
@@ -171,6 +183,7 @@
             class="card settings-card"
             onsubmit={(e) => {
               e.preventDefault();
+              if (contentLocale !== 'en') return;
               void action(() =>
                 api('', 'PATCH', {
                   version: project.version,
@@ -186,39 +199,71 @@
               );
             }}
           >
+            <ContentTranslations
+              kind="project"
+              id={project.id}
+              version={project.version}
+              translations={project.translations}
+              baseline={{
+                name,
+                description,
+                tags: tags
+                  .split(',')
+                  .map((tag) => tag.trim())
+                  .filter(Boolean)
+              }}
+              bind:selected={contentLocale}
+              bind:draft={translationDraft}
+              onsaved={onrefresh}
+            />
             <div>
               <label for="project-name">{'Name'}</label>
-              <input id="project-name" bind:value={name} required maxlength="200" />
+              <input
+                id="project-name"
+                bind:value={() => localized('name'), (value) => setLocalized('name', value)}
+                required={contentLocale === 'en'}
+                maxlength="200"
+              />
             </div>
             <div>
               <label for="project-description">{'Description'}</label>
-              <Editor {language} bind:value={description} rows={6} />
+              <Editor
+                {language}
+                bind:value={
+                  () => localized('description'), (value) => setLocalized('description', value)
+                }
+                rows={6}
+              />
             </div>
             <div>
               <label for="project-tags">{'Tags (comma separated)'}</label>
-              <input id="project-tags" bind:value={tags} />
+              <input
+                id="project-tags"
+                bind:value={() => localized('tags'), (value) => setLocalized('tags', value)}
+              />
             </div>
-            <fieldset>
-              <legend>{'Fields'}</legend>
-              <div class="check-row">
-                {#each ['research', 'community', 'engineering'] as field}<label class="check"
-                    ><input type="checkbox" value={field} bind:group={fields} />{field ===
-                    'research'
-                      ? 'Research'
-                      : field === 'community'
-                        ? 'Community'
-                        : 'Engineering'}</label
-                  >{/each}
-              </div>
-            </fieldset>
-            <label class="check"
-              ><input type="checkbox" bind:checked={locked} />{'Require approval to join'}</label
-            >
-            <div class="card-footer">
-              <button class="btn" disabled={busy || !fields.length}
-                ><Save size={15} aria-hidden="true" />{'Save project'}</button
+            {#if contentLocale === 'en'}<fieldset>
+                <legend>{'Fields'}</legend>
+                <div class="check-row">
+                  {#each ['research', 'community', 'engineering'] as field}<label class="check"
+                      ><input type="checkbox" value={field} bind:group={fields} />{field ===
+                      'research'
+                        ? 'Research'
+                        : field === 'community'
+                          ? 'Community'
+                          : 'Engineering'}</label
+                    >{/each}
+                </div>
+              </fieldset>
+              <label class="check"
+                ><input type="checkbox" bind:checked={locked} />{'Require approval to join'}</label
               >
-            </div>
+              <div class="card-footer">
+                <button class="btn" disabled={busy || !fields.length}
+                  ><Save size={15} aria-hidden="true" />{'Save project'}</button
+                >
+              </div>
+            {/if}
           </form>
         </section>
       {/if}
@@ -312,18 +357,6 @@
       {/if}
 
       {#if canEdit}
-        <section id="translations" class="settings-section">
-          <ContentTranslations
-            kind="project"
-            id={project.id}
-            version={project.version}
-            translations={project.translations}
-            baseline={{ name: project.name, description: project.description, tags: project.tags }}
-            {language}
-            onsaved={onrefresh}
-          />
-        </section>
-
         <section id="links" class="settings-section" aria-labelledby="links-heading">
           <header>
             <h2 id="links-heading">{'Public links'}</h2>

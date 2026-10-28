@@ -5,11 +5,12 @@
   import Skeleton from './Skeleton.svelte';
   import ContentTranslations from './ContentTranslations.svelte';
   import SettingsNav from './SettingsNav.svelte';
-  import { ArrowUpRight, Languages, KeyRound, Shield, UserRound } from '@lucide/svelte';
+  import { ArrowUpRight, KeyRound, Shield, UserRound } from '@lucide/svelte';
   import PermissionFlags from './PermissionFlags.svelte';
   import MemberPreview from './MemberPreview.svelte';
   import { Search, ArrowLeft, Trash2, Save, ChevronLeft, ChevronRight } from '@lucide/svelte';
   import type { Profile } from 'shared/types';
+  import type { ContentLocale } from 'shared/content-locales';
   let {
     language,
     administrator,
@@ -41,6 +42,16 @@
     search = $state('');
   let emailDraft = $state('');
   let resetConfirmation = $state(false);
+  let contentLocale = $state<ContentLocale>('en');
+  let translationDraft = $state<Record<string, string>>({});
+  type LocalizedMemberField = 'firstName' | 'lastName' | 'nickname' | 'bio';
+  function localizedMember(key: LocalizedMemberField) {
+    return contentLocale === 'en' ? (member?.[key] ?? '') : (translationDraft[key] ?? '');
+  }
+  function setLocalizedMember(key: LocalizedMemberField, value: string) {
+    if (contentLocale !== 'en') translationDraft[key] = value;
+    else if (member) member[key] = value;
+  }
   async function resetPassword() {
     if (!member) return;
     busy = true;
@@ -108,6 +119,8 @@
     records = [];
     total = 0;
     confirmDelete = false;
+    contentLocale = 'en';
+    translationDraft = {};
     try {
       const result = await api(id ? `/${encodeURIComponent(id)}` : `?${query}`);
       if (current !== generation) return;
@@ -208,7 +221,6 @@
         { id: 'access', label: 'Access', icon: Shield },
         ...(administrator && editable
           ? [
-              { id: 'translations', label: 'Public translations', icon: Languages },
               { id: 'authentication', label: 'Authentication', icon: KeyRound },
               { id: 'danger', label: 'Delete account', icon: Trash2, danger: true }
             ]
@@ -224,6 +236,7 @@
             class="card settings-card"
             onsubmit={(event) => {
               event.preventDefault();
+              if (contentLocale !== 'en') return;
               void mutate(`/${member!.id}/profile`, 'PATCH', {
                 firstName: member!.firstName,
                 lastName: member!.lastName,
@@ -234,59 +247,86 @@
               });
             }}
           >
+            <ContentTranslations
+              kind="profile"
+              id={member.id}
+              translations={member.translations}
+              baseline={{
+                firstName: member.firstName,
+                lastName: member.lastName,
+                nickname: member.nickname,
+                bio: member.bio
+              }}
+              bind:selected={contentLocale}
+              bind:draft={translationDraft}
+              onsaved={(result) => {
+                if (member) member.translations = result.translations;
+              }}
+            />
             <div class="field-grid">
               <div>
                 <label for="m-first">{'First name'}</label><input
                   id="m-first"
-                  bind:value={member.firstName}
-                  required
+                  bind:value={
+                    () => localizedMember('firstName'),
+                    (value) => setLocalizedMember('firstName', value)
+                  }
+                  required={contentLocale === 'en'}
                   maxlength="100"
                 />
               </div>
               <div>
                 <label for="m-last">{'Last name'}</label><input
                   id="m-last"
-                  bind:value={member.lastName}
+                  bind:value={
+                    () => localizedMember('lastName'),
+                    (value) => setLocalizedMember('lastName', value)
+                  }
                   maxlength="100"
                 />
               </div>
               <div class="field-wide">
                 <label for="m-nick">{'Nickname'}</label><input
                   id="m-nick"
-                  bind:value={member.nickname}
+                  bind:value={
+                    () => localizedMember('nickname'),
+                    (value) => setLocalizedMember('nickname', value)
+                  }
                   maxlength="100"
                 />
               </div>
               <div class="field-wide">
                 <label for="m-bio">Bio</label><textarea
                   id="m-bio"
-                  bind:value={member.bio}
+                  bind:value={
+                    () => localizedMember('bio'), (value) => setLocalizedMember('bio', value)
+                  }
                   rows="5"
                   maxlength="5000"
                 ></textarea>
               </div>
-              <div>
-                <label for="m-gh">GitHub</label><input
-                  id="m-gh"
-                  type="url"
-                  bind:value={member.github}
-                  placeholder="https://github.com/username"
-                />
-              </div>
-              <div>
-                <label for="m-li">LinkedIn</label><input
-                  id="m-li"
-                  type="url"
-                  bind:value={member.linkedin}
-                  placeholder="https://linkedin.com/in/username"
-                />
-              </div>
+              {#if contentLocale === 'en'}<div>
+                  <label for="m-gh">GitHub</label><input
+                    id="m-gh"
+                    type="url"
+                    bind:value={member.github}
+                    placeholder="https://github.com/username"
+                  />
+                </div>
+                <div>
+                  <label for="m-li">LinkedIn</label><input
+                    id="m-li"
+                    type="url"
+                    bind:value={member.linkedin}
+                    placeholder="https://linkedin.com/in/username"
+                  />
+                </div>{/if}
             </div>
-            <div class="card-footer">
-              <button class="btn" disabled={busy}
-                ><Save size={15} aria-hidden="true" />{'Save profile'}</button
-              >
-            </div>
+            {#if contentLocale === 'en'}<div class="card-footer">
+                <button class="btn" disabled={busy}
+                  ><Save size={15} aria-hidden="true" />{'Save profile'}</button
+                >
+              </div>{/if}
           </form>
         {:else}
           <div class="card settings-card"><p>{member.bio}</p></div>
@@ -356,24 +396,6 @@
       </section>
 
       {#if administrator && editable}
-        <section id="translations" class="settings-section">
-          <ContentTranslations
-            kind="profile"
-            id={member.id}
-            translations={member.translations}
-            baseline={{
-              firstName: member.firstName,
-              lastName: member.lastName,
-              nickname: member.nickname,
-              bio: member.bio
-            }}
-            {language}
-            onsaved={(result) => {
-              if (member) member.translations = result.translations;
-            }}
-          />
-        </section>
-
         <section id="authentication" class="settings-section" aria-labelledby="auth-heading">
           <header><h2 id="auth-heading">{'Authentication'}</h2></header>
           <form

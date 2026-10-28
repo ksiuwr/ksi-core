@@ -13,6 +13,17 @@ import {
   type ContentTranslations
 } from 'shared/content-locales';
 
+function setTranslation(
+  current: ContentTranslations,
+  locale: 'pl',
+  fields: Record<string, string | string[]>
+) {
+  const translations = { ...current };
+  if (Object.keys(fields).length) translations[locale] = fields;
+  else delete translations[locale];
+  return translations;
+}
+
 export const translationRoutes = createElysia({
   prefix: '/platform/translations',
   protectedRoute: true,
@@ -88,10 +99,7 @@ export const translationRoutes = createElysia({
           throw status(422, { code: 'ENGLISH_CONTENT_REQUIRED' });
         if (!hasEnglishSources(profile, translatedFields))
           throw status(422, { code: 'ENGLISH_CONTENT_REQUIRED' });
-        const translations = {
-          ...profile.translations,
-          [locale]: body.fields
-        } as ContentTranslations;
+        const translations = setTranslation(profile.translations, locale, translatedFields);
         await tx.update(users).set({ translations }).where(eq(users.id, params.id));
         await recordEvent(tx, {
           actorId: principal.id,
@@ -123,10 +131,7 @@ export const translationRoutes = createElysia({
           throw status(422, { code: 'TRANSLATED_TAG_COUNT' });
         if (!hasEnglishSources(project, translatedFields))
           throw status(422, { code: 'ENGLISH_CONTENT_REQUIRED' });
-        const translations = {
-          ...project.translations,
-          [locale]: body.fields
-        } as ContentTranslations;
+        const translations = setTranslation(project.translations, locale, translatedFields);
         const [updated] = await tx
           .update(projects)
           .set({ translations, version: sql`${projects.version} + 1` })
@@ -157,10 +162,7 @@ export const translationRoutes = createElysia({
         throw status(422, { code: 'ENGLISH_CONTENT_REQUIRED' });
       if (!hasEnglishSources(article, translatedFields))
         throw status(422, { code: 'ENGLISH_CONTENT_REQUIRED' });
-      const translations = {
-        ...article.translations,
-        [locale]: body.fields
-      } as ContentTranslations;
+      const translations = setTranslation(article.translations, locale, translatedFields);
       const [updated] = await tx
         .update(articles)
         .set({ translations, version: sql`${articles.version} + 1`, updatedAt: new Date() })

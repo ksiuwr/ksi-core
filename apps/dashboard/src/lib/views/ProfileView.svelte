@@ -6,13 +6,13 @@
   import { api, errorMessage } from '$lib/api';
   import { untrack } from 'svelte';
   import { validProfileLink } from 'shared/profile-links';
+  import type { ContentLocale } from 'shared/content-locales';
   import type { Profile } from 'shared/types';
   import {
     ArrowUpRight,
     Check,
     Github,
     Image as ImageIcon,
-    Languages,
     Laptop,
     Link2,
     Linkedin,
@@ -52,6 +52,17 @@
   let saved = $state(false);
   let dirty = $state(false);
   let error = $state('');
+  let contentLocale = $state<ContentLocale>('en');
+  let translationDraft = $state<Record<string, string>>({});
+
+  type LocalizedProfileField = 'firstName' | 'lastName' | 'nickname' | 'bio';
+  function localized(key: LocalizedProfileField) {
+    return contentLocale === 'en' ? (draft[key] ?? '') : (translationDraft[key] ?? '');
+  }
+  function setLocalized(key: LocalizedProfileField, value: string) {
+    if (contentLocale === 'en') draft[key] = value;
+    else translationDraft[key] = value;
+  }
 
   const privacyOptions = $derived([
     { value: 'full-name', label: 'Full name' },
@@ -138,7 +149,6 @@
       { id: 'about', label: 'About you', icon: UserRound },
       { id: 'photo', label: 'Profile picture', icon: ImageIcon },
       { id: 'links', label: 'Find me online', icon: Link2 },
-      { id: 'translations', label: 'Public translations', icon: Languages },
       { id: 'sessions', label: 'Active sessions', icon: Laptop },
       { id: 'danger', label: 'Delete account', icon: Trash2, danger: true }
     ]}
@@ -149,9 +159,16 @@
       class="settings-main"
       onsubmit={(event) => {
         event.preventDefault();
+        if (contentLocale !== 'en') return;
         saveProfile();
       }}
-      oninput={() => {
+      oninput={(event) => {
+        if (
+          contentLocale !== 'en' &&
+          event.target instanceof Element &&
+          event.target.closest('.localized-profile-fields')
+        )
+          return;
         saved = false;
         dirty = true;
       }}
@@ -188,53 +205,71 @@
 
       <section id="about" class="settings-section" aria-labelledby="identity-heading">
         <header><h2 id="identity-heading">{'About you'}</h2></header>
+        <ContentTranslations
+          kind="profile"
+          id={draft.id}
+          translations={draft.translations}
+          baseline={{
+            firstName: draft.firstName,
+            lastName: draft.lastName,
+            nickname: draft.nickname,
+            bio: draft.bio
+          }}
+          bind:selected={contentLocale}
+          bind:draft={translationDraft}
+          onsaved={(result) => {
+            draft.translations = result.translations;
+          }}
+        />
         <div class="card settings-card">
-          <div class="field-grid">
+          <div class="field-grid localized-profile-fields">
             <div>
               <label for="p-first">{'First name'}</label><input
                 id="p-first"
-                bind:value={draft.firstName}
-                required
+                bind:value={
+                  () => localized('firstName'), (value) => setLocalized('firstName', value)
+                }
+                required={contentLocale === 'en'}
               />
             </div>
             <div>
               <label for="p-last">{'Last name'}</label><input
                 id="p-last"
-                bind:value={draft.lastName}
+                bind:value={() => localized('lastName'), (value) => setLocalized('lastName', value)}
               />
             </div>
             <div class="field-wide">
               <label for="p-nick">{'Nickname'}</label><input
                 id="p-nick"
-                bind:value={draft.nickname}
+                bind:value={() => localized('nickname'), (value) => setLocalized('nickname', value)}
                 placeholder={'What should we call you?'}
               />
             </div>
             <div class="field-wide">
               <label for="p-bio">{'A little about you'}</label><textarea
                 id="p-bio"
-                bind:value={draft.bio}
+                bind:value={() => localized('bio'), (value) => setLocalized('bio', value)}
                 rows="4"
                 placeholder={'Interests, projects, and things you enjoy…'}
               ></textarea>
             </div>
-            <div class="field-wide">
-              <label for="p-priv">{'Name visibility'}</label>
-              <Dropdown
-                id="p-priv"
-                label={'Name visibility'}
-                value={draft.publicPrivacy}
-                options={privacyOptions}
-                onselect={(value) => {
-                  draft.publicPrivacy = value as Profile['publicPrivacy'];
-                  saved = false;
-                  dirty = true;
-                }}
-              />
-              <p class="field-help">
-                {'Applies to the public website. Members see your full name in the dashboard.'}
-              </p>
-            </div>
+            {#if contentLocale === 'en'}<div class="field-wide">
+                <label for="p-priv">{'Name visibility'}</label>
+                <Dropdown
+                  id="p-priv"
+                  label={'Name visibility'}
+                  value={draft.publicPrivacy}
+                  options={privacyOptions}
+                  onselect={(value) => {
+                    draft.publicPrivacy = value as Profile['publicPrivacy'];
+                    saved = false;
+                    dirty = true;
+                  }}
+                />
+                <p class="field-help">
+                  {'Applies to the public website. Members see your full name in the dashboard.'}
+                </p>
+              </div>{/if}
           </div>
         </div>
       </section>
@@ -284,7 +319,7 @@
         </div>
       </section>
 
-      {#if dirty || saved}
+      {#if contentLocale === 'en' && (dirty || saved)}
         <div class="save-bar">
           <span role="status"
             >{#if saved}<Check
@@ -298,24 +333,6 @@
         </div>
       {/if}
     </form>
-
-    <section id="translations" class="settings-section">
-      <ContentTranslations
-        kind="profile"
-        id={draft.id}
-        translations={draft.translations}
-        baseline={{
-          firstName: draft.firstName,
-          lastName: draft.lastName,
-          nickname: draft.nickname,
-          bio: draft.bio
-        }}
-        {language}
-        onsaved={(result) => {
-          draft.translations = result.translations;
-        }}
-      />
-    </section>
 
     <section id="sessions" class="settings-section" aria-labelledby="sessions-heading">
       <header>
@@ -414,9 +431,6 @@
   }
   .photo-section :global(.avatar-upload h3) {
     display: none;
-  }
-  #translations :global(.translations) {
-    margin: 0;
   }
   .session-row {
     display: flex;

@@ -6,6 +6,7 @@
   import { api, errorMessage } from '$lib/api';
   import { dashboardPath, type Workspace } from '$lib/navigation';
   import type { Article } from '$lib/types';
+  import type { ContentLocale } from 'shared/content-locales';
   import { untrack } from 'svelte';
   import { ArrowLeft, ArrowUpRight, Save } from '@lucide/svelte';
 
@@ -43,6 +44,19 @@
   let busy = $state(false);
   let error = $state('');
   let notice = $state('');
+  let contentLocale = $state<ContentLocale>('en');
+  let translationDraft = $state<Record<string, string>>({});
+
+  function localized(key: 'title' | 'markdown', english: string) {
+    return contentLocale === 'en' ? english : (translationDraft[key] ?? '');
+  }
+
+  function setLocalized(key: 'title' | 'markdown', value: string) {
+    if (contentLocale === 'en') {
+      if (key === 'title') title = value;
+      else markdown = value;
+    } else translationDraft[key] = value;
+  }
 
   $effect(() => {
     draft = { ...article };
@@ -118,6 +132,19 @@
   ><ArrowLeft size={15} aria-hidden="true" />{'All articles'}</a
 >
 
+{#if permissions.canManage}
+  <ContentTranslations
+    kind="article"
+    id={draft.id}
+    version={draft.version}
+    translations={draft.translations}
+    baseline={{ title, markdown }}
+    bind:selected={contentLocale}
+    bind:draft={translationDraft}
+    onsaved={refresh}
+  />
+{/if}
+
 <div class="detail-layout article-layout">
   <div class="detail-main">
     {#if permissions.canEdit}
@@ -125,15 +152,22 @@
         class="article-title-input"
         aria-label={'Title'}
         placeholder={'Title'}
-        bind:value={title}
-        required
+        bind:value={() => localized('title', title), (value) => setLocalized('title', value)}
+        required={contentLocale === 'en'}
       />
     {:else}
       <h1 class="detail-title">{draft.title}</h1>
     {/if}
     <div class="article-editor">
       {#if permissions.canEdit}
-        <Editor {language} allowGallery rows={24} bind:value={markdown} />
+        <Editor
+          {language}
+          allowGallery
+          rows={24}
+          bind:value={
+            () => localized('markdown', markdown), (value) => setLocalized('markdown', value)
+          }
+        />
       {:else}
         <MarkdownContent value={markdown} {language} />
       {/if}
@@ -158,52 +192,54 @@
           >
         {/if}
       </div>
-      <div class="action-stack">
-        {#if permissions.canPublish}
-          <button
-            class="btn btn-coral"
-            disabled={busy || thumbnailUploading}
-            onclick={() => save(true)}>{'Publish'}</button
-          >
-        {/if}
-        {#if permissions.canSave}
-          <button
-            class="btn btn-outline"
-            disabled={busy || thumbnailUploading}
-            onclick={() => save(false)}
-          >
-            <Save size={15} aria-hidden="true" />
-            {draft.state === 'published' && !permissions.canPublish ? 'Save changes' : 'Save draft'}
-          </button>
-        {/if}
-        {#if permissions.canPropose}
-          <button class="btn btn-outline" disabled={busy || thumbnailUploading} onclick={propose}
-            >{'Propose edit'}</button
-          >
-        {/if}
-      </div>
+      {#if contentLocale === 'en'}<div class="action-stack">
+          {#if permissions.canPublish}
+            <button
+              class="btn btn-coral"
+              disabled={busy || thumbnailUploading}
+              onclick={() => save(true)}>{'Publish'}</button
+            >
+          {/if}
+          {#if permissions.canSave}
+            <button
+              class="btn btn-outline"
+              disabled={busy || thumbnailUploading}
+              onclick={() => save(false)}
+            >
+              <Save size={15} aria-hidden="true" />
+              {draft.state === 'published' && !permissions.canPublish
+                ? 'Save changes'
+                : 'Save draft'}
+            </button>
+          {/if}
+          {#if permissions.canPropose}
+            <button class="btn btn-outline" disabled={busy || thumbnailUploading} onclick={propose}
+              >{'Propose edit'}</button
+            >
+          {/if}
+        </div>{:else}<p class="muted">{'Save the translation from the language bar above.'}</p>{/if}
     </section>
 
-    <section class="aside-section">
-      <dl class="metadata-list">
-        <div>
-          <dt>Slug</dt>
-          <dd><code>{draft.slug}</code></dd>
-        </div>
-      </dl>
-    </section>
+    {#if contentLocale === 'en'}<section class="aside-section">
+        <dl class="metadata-list">
+          <div>
+            <dt>Slug</dt>
+            <dd><code>{draft.slug}</code></dd>
+          </div>
+        </dl>
+      </section>{/if}
 
-    <section class="aside-section">
-      {#key draft.id}
-        <ArticleThumbnail
-          bind:fileId={thumbnailFileId}
-          bind:uploading={thumbnailUploading}
-          disabled={busy || !permissions.canSave}
-        />
-      {/key}
-    </section>
+    {#if contentLocale === 'en'}<section class="aside-section">
+        {#key draft.id}
+          <ArticleThumbnail
+            bind:fileId={thumbnailFileId}
+            bind:uploading={thumbnailUploading}
+            disabled={busy || !permissions.canSave}
+          />
+        {/key}
+      </section>{/if}
 
-    {#if permissions.canManage}
+    {#if permissions.canManage && contentLocale === 'en'}
       <section class="aside-section">
         <h2>{'Publishing'}</h2>
         {#if workspace === 'project'}
@@ -235,7 +271,7 @@
       </section>
     {/if}
 
-    {#if draft.canManageCredit}
+    {#if draft.canManageCredit && contentLocale === 'en'}
       <section class="aside-section">
         <label class="check">
           <input
@@ -249,20 +285,6 @@
     {/if}
   </aside>
 </div>
-
-{#if permissions.canManage}
-  <div class="article-translations">
-    <ContentTranslations
-      kind="article"
-      id={draft.id}
-      version={draft.version}
-      translations={draft.translations}
-      baseline={{ title: draft.title, markdown: draft.markdown }}
-      {language}
-      onsaved={refresh}
-    />
-  </div>
-{/if}
 
 <style>
   .article-layout {
@@ -335,9 +357,5 @@
     font-family: var(--mono);
     font-size: 12px;
     overflow-wrap: anywhere;
-  }
-  .article-translations {
-    margin-top: 32px;
-    max-width: 760px;
   }
 </style>
