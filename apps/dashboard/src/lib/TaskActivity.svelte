@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { preferences } from '$lib/preferences.svelte';
+  import { formatDateTime, formatRelativeTime } from 'shared/format';
   import {
     CircleDot,
     Pencil,
@@ -20,7 +22,6 @@
     statuses,
     labels,
     members = [],
-    language,
     now
   }: {
     event: {
@@ -34,9 +35,9 @@
     statuses: { id: string; name: string; color?: string }[];
     labels: { name: string; color?: string; description?: string }[];
     members?: AssignmentMember[];
-    language: 'pl' | 'en';
     now: number;
   } = $props();
+  const language = $derived(preferences.language);
   const pl = $derived(language === 'pl');
   const summaries = $derived(taskActivitySummary(event.action, event.metadata.changes));
   const kind = $derived(summaries[0].kind);
@@ -70,36 +71,12 @@
                       ? CalendarClock
                       : Pencil
   );
-  const absoluteTime = $derived(new Date(event.createdAt).toLocaleString(pl ? 'pl-PL' : 'en-GB'));
-  const relativeTime = $derived.by(() => {
-    const seconds = (new Date(event.createdAt).getTime() - now) / 1000;
-    const abs = Math.abs(seconds);
-    const [divisor, unit]: [number, Intl.RelativeTimeFormatUnit] =
-      abs < 60
-        ? [1, 'second']
-        : abs < 3600
-          ? [60, 'minute']
-          : abs < 86400
-            ? [3600, 'hour']
-            : abs < 604800
-              ? [86400, 'day']
-              : abs < 2592000
-                ? [604800, 'week']
-                : abs < 31536000
-                  ? [2592000, 'month']
-                  : [31536000, 'year'];
-    return new Intl.RelativeTimeFormat(pl ? 'pl' : 'en', { numeric: 'auto' }).format(
-      abs < 60 ? 0 : Math.trunc(seconds / divisor),
-      unit
-    );
-  });
+  const absoluteTime = $derived(formatDateTime(event.createdAt, language));
+  const relativeTime = $derived(formatRelativeTime(event.createdAt, language, now));
   const statusName = (id: string) => statuses.find((status) => status.id === id)?.name ?? id;
   const labelInfo = (name: string) => labels.find((label) => label.name === name);
   const deadlineText = (iso: string) =>
-    new Intl.DateTimeFormat(pl ? 'pl-PL' : 'en-GB', {
-      dateStyle: 'medium',
-      timeStyle: 'short'
-    }).format(new Date(iso));
+    formatDateTime(iso, language, { dateStyle: 'medium', timeStyle: 'short' });
 </script>
 
 <div class="task-activity" id={`activity-${event.id}`}>
@@ -192,7 +169,6 @@
             href={`/members/${encodeURIComponent(id)}`}
             inline
             size={18}
-            {language}
           />{/each}
       {:else if summary.kind === 'label-added' || summary.kind === 'label-removed'}
         {summary.kind === 'label-added'

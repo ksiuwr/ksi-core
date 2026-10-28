@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { preferences } from '$lib/preferences.svelte';
+  import { formatDateTime, formatRelativeTime } from 'shared/format';
   import {
     Archive,
     CircleDot,
@@ -17,7 +19,6 @@
   let {
     event,
     members = [],
-    language,
     now
   }: {
     event: {
@@ -29,9 +30,9 @@
       metadata: { changes: ContentChange[] | null };
     };
     members?: AssignmentMember[];
-    language: 'pl' | 'en';
     now: number;
   } = $props();
+  const language = $derived(preferences.language);
   const pl = $derived(language === 'pl');
   const summaries = $derived(threadActivitySummary(event.action, event.metadata.changes));
   const kind = $derived(summaries[0].kind);
@@ -89,29 +90,8 @@
       : count % 10 >= 2 && count % 10 <= 4 && !(count % 100 >= 12 && count % 100 <= 14)
         ? 'zaproszenia'
         : 'zaproszeń';
-  const absoluteTime = $derived(new Date(event.createdAt).toLocaleString(pl ? 'pl-PL' : 'en-GB'));
-  const relativeTime = $derived.by(() => {
-    const seconds = (new Date(event.createdAt).getTime() - now) / 1000;
-    const abs = Math.abs(seconds);
-    const [divisor, unit]: [number, Intl.RelativeTimeFormatUnit] =
-      abs < 60
-        ? [1, 'second']
-        : abs < 3600
-          ? [60, 'minute']
-          : abs < 86400
-            ? [3600, 'hour']
-            : abs < 604800
-              ? [86400, 'day']
-              : abs < 2592000
-                ? [604800, 'week']
-                : abs < 31536000
-                  ? [2592000, 'month']
-                  : [31536000, 'year'];
-    return new Intl.RelativeTimeFormat(pl ? 'pl' : 'en', { numeric: 'auto' }).format(
-      abs < 60 ? 0 : Math.trunc(seconds / divisor),
-      unit
-    );
-  });
+  const absoluteTime = $derived(formatDateTime(event.createdAt, language));
+  const relativeTime = $derived(formatRelativeTime(event.createdAt, language, now));
 </script>
 
 <div class="thread-activity" id={`activity-${event.id}`}>
@@ -163,7 +143,6 @@
             href={`/members/${encodeURIComponent(id)}`}
             inline
             size={18}
-            {language}
           />{/each}
       {:else if summary.kind === 'invited'}
         {pl

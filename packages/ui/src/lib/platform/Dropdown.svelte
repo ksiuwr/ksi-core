@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { tick, onMount } from 'svelte';
+  import { flushSync, onMount } from 'svelte';
   import { Check, ChevronsUpDown, Search } from '@lucide/svelte';
   import type { Snippet } from 'svelte';
 
@@ -38,7 +38,7 @@
     searchPlaceholder?: string;
     emptyLabel?: string;
     disabled?: boolean;
-    variant?: 'default' | 'workspace' | 'compact';
+    variant?: 'default' | 'workspace' | 'compact' | 'bar';
     onselect?: (value: string) => void;
     leading?: Snippet;
     panelContent?: Snippet<[close: () => void]>;
@@ -76,7 +76,7 @@
         rect.width,
         panelContent
           ? 360
-          : variant === 'workspace'
+          : variant === 'workspace' || variant === 'bar'
             ? 290
             : options.some((option) => option.description)
               ? 320
@@ -97,15 +97,20 @@
       height
     };
   }
-  async function show(direction = 1) {
+  function show(direction = 1) {
     if (disabled || !panel) return;
-    query = '';
     const selectedIndex = options.findIndex((option) => option.value === value && !option.disabled);
-    active = selectedIndex >= 0 ? selectedIndex : direction === -1 ? options.length - 1 : 0;
+    flushSync(() => {
+      query = '';
+      active = selectedIndex >= 0 ? selectedIndex : direction === -1 ? options.length - 1 : 0;
+    });
     panel.showPopover();
-    open = true;
-    await tick();
-    place();
+    // Measure the displayed panel and commit its final geometry before the
+    // browser gets an opportunity to paint the newly opened top layer.
+    flushSync(() => {
+      open = true;
+      place();
+    });
     (panelContent
       ? panel?.querySelector<HTMLElement>('button, input, [tabindex]')
       : searchable
@@ -127,6 +132,43 @@
     if (!onselect) value = option.value;
     close(!option.href);
     onselect?.(option.value);
+  }
+  // Press, drag to an option and release to pick it (native-select style).
+  // Wait for the hold threshold before opening so a quick click cannot
+  // light-dismiss the popover it just opened.
+  const HOLD_MS = 220;
+  let suppressClick = false;
+  // Light-dismiss closes an open popup before `click` fires; remember it was open.
+  let pressedWhileOpen = false;
+  function pressTrigger(event: PointerEvent) {
+    pressedWhileOpen = open;
+    if (event.button !== 0 || event.pointerType === 'touch' || panelContent || disabled || open)
+      return;
+    let held = false;
+    const holdTimer = window.setTimeout(() => {
+      held = true;
+      suppressClick = true;
+      void show();
+    }, HOLD_MS);
+    const cleanup = () => {
+      window.clearTimeout(holdTimer);
+      window.removeEventListener('pointerup', release, true);
+      window.removeEventListener('pointercancel', cancel, true);
+    };
+    const release = (up: PointerEvent) => {
+      cleanup();
+      if (!held) return;
+      const target = document.elementFromPoint(up.clientX, up.clientY);
+      const option = target?.closest<HTMLElement>('.dropdown-option');
+      if (option && panel?.contains(option)) option.click();
+      window.setTimeout(() => (suppressClick = false), 0);
+    };
+    const cancel = () => {
+      cleanup();
+      suppressClick = false;
+    };
+    window.addEventListener('pointerup', release, true);
+    window.addEventListener('pointercancel', cancel, true);
   }
   function reveal() {
     document.getElementById(`${uid}-option-${active}`)?.scrollIntoView({ block: 'nearest' });
@@ -161,19 +203,6 @@
         document.getElementById(`${uid}-option-${active}`)?.click();
     }
   }
-  $effect(() => {
-    void panelContent;
-    if (open)
-      void tick().then(() => {
-        place();
-        (panelContent
-          ? panel?.querySelector<HTMLElement>('button, input, [tabindex]')
-          : searchable
-            ? search
-            : list
-        )?.focus();
-      });
-  });
   onMount(() => {
     const update = () => {
       if (open) place();
@@ -191,6 +220,7 @@
   class="dropdown"
   class:dropdown-workspace={variant === 'workspace'}
   class:dropdown-compact={variant === 'compact'}
+  class:dropdown-bar={variant === 'bar'}
 >
   <button
     {id}
@@ -202,7 +232,14 @@
     aria-haspopup={panelContent ? 'dialog' : 'listbox'}
     aria-controls={panelContent ? `${uid}-content` : listId}
     aria-expanded={open}
-    onclick={() => (open ? close(true) : void show())}
+    onpointerdown={pressTrigger}
+    onclick={() => {
+      if (suppressClick) return;
+      if (pressedWhileOpen || open) {
+        pressedWhileOpen = false;
+        close(true);
+      } else void show();
+    }}
     onkeydown={(event) => {
       if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
         event.preventDefault();
@@ -361,23 +398,35 @@
     align-items: center;
     gap: 10px;
     width: 100%;
-    min-height: 42px;
-    padding: 10px 12px;
-    border: 1px solid var(--line, #dcd8d0);
-    border-radius: 3px;
+    min-height: 34px;
+    padding: 6px 10px;
+    border: 1px solid var(--input, var(--line, #dcd8d0));
+    border-radius: var(--radius-md, 6px);
     background: var(--surface, #fffefa);
     color: var(--ink, #272638);
     font-size: 13px;
     text-align: left;
     cursor: pointer;
-    box-shadow: inset 0 -1px 0 #0001;
+    box-shadow: var(--shadow-xs, 0 1px 2px #0000000d);
+    transition:
+      border-color var(--dur-fast, 120ms) ease,
+      box-shadow var(--dur-fast, 120ms) ease,
+      background-color var(--dur-fast, 120ms) ease;
   }
-  .dropdown-trigger:hover,
-  .dropdown-trigger[aria-expanded='true'] {
+  .dropdown-trigger:hover {
     border-color: var(--control-border-hover, var(--muted));
-    outline: 1px solid var(--control-border-hover, var(--muted));
-    outline-offset: 2px;
-    background: var(--surface-muted, #f0ede4);
+  }
+  .dropdown-trigger[aria-expanded='true'],
+  .dropdown-trigger:focus-visible {
+    outline: none;
+    border-color: var(--ring-strong, var(--accent));
+    box-shadow:
+      var(--shadow-xs, 0 1px 2px #0000000d),
+      0 0 0 3px var(--ring, color-mix(in srgb, var(--accent) 24%, transparent));
+  }
+  .dropdown-trigger :global(svg:last-child) {
+    color: var(--muted);
+    flex-shrink: 0;
   }
   .dropdown-value {
     flex: 1;
@@ -391,27 +440,48 @@
     color: var(--muted);
   }
   .dropdown-compact .dropdown-trigger {
-    min-height: 30px;
-    padding: 5px 9px;
-    font-size: 11px;
+    min-height: 28px;
+    padding: 4px 8px;
+    font-size: 11.5px;
+  }
+  /* Quiet trigger for navigation bars: no chrome until hovered. */
+  .dropdown-bar .dropdown-trigger {
+    min-height: 32px;
+    padding: 4px 8px;
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+    font-weight: 500;
+  }
+  .dropdown-bar .dropdown-trigger:hover {
+    border-color: transparent;
+    background: var(--surface-muted);
+  }
+  .dropdown-bar .dropdown-trigger[aria-expanded='true'] {
+    background: var(--surface-muted);
   }
   .dropdown-workspace .dropdown-trigger {
-    min-height: 54px;
+    min-height: 44px;
+    padding: 6px 10px;
+    border-radius: var(--radius-lg, 8px);
     font-weight: 500;
   }
   .dropdown-panel {
     position: fixed;
     inset: auto;
     margin: 0;
-    padding: 5px;
+    padding: 4px;
+    /* Dropdown contents must remain full-size and opaque while opening. */
+    opacity: 1;
+    scale: 1;
+    translate: 0 0;
     background: var(--surface, #fffefa);
     color: var(--ink, #272638);
     border: 1px solid var(--line, #dcd8d0);
-    border-radius: 4px;
-    box-shadow:
-      0 8px 24px #0003,
-      inset 0 1px 0 #ffffff08;
+    border-radius: var(--radius-lg, 8px);
+    box-shadow: var(--shadow-md, 0 8px 24px #0003);
     overflow: hidden;
+    transition: none;
   }
   .dropdown-panel:popover-open {
     display: flex;
@@ -420,9 +490,10 @@
   .dropdown-search {
     display: flex;
     align-items: center;
-    gap: 9px;
-    padding: 7px 9px 12px;
-    margin-bottom: 4px;
+    gap: 8px;
+    padding: 4px 8px 8px;
+    margin: 0 -4px 4px;
+    padding-inline: 12px;
     border-bottom: 1px solid var(--line, #dcd8d0);
     color: var(--muted);
   }
@@ -440,11 +511,11 @@
     font-size: 13px;
     box-shadow: none;
   }
+  .dropdown-search input:hover,
   .dropdown-search input:focus {
     outline: none;
-  }
-  .dropdown-search:focus-within {
-    border-color: var(--accent);
+    border: 0;
+    box-shadow: none;
   }
   .dropdown-content {
     min-height: 0;
@@ -453,8 +524,8 @@
   .dropdown-footer {
     flex-shrink: 0;
     border-top: 1px solid var(--line, #dcd8d0);
-    margin-top: 5px;
-    padding: 5px 0 0;
+    margin: 4px -4px 0;
+    padding: 4px 4px 0;
   }
   .dropdown-options {
     min-height: 0;
@@ -467,9 +538,9 @@
     justify-content: space-between;
     gap: 12px;
     width: 100%;
-    padding: 9px 10px;
+    padding: 7px 8px;
     border: 0;
-    border-radius: 2px;
+    border-radius: var(--radius-sm, 4px);
     background: transparent;
     color: var(--ink, #272638);
     font-size: 13px;
@@ -491,7 +562,11 @@
     background: var(--surface-muted, #f0ede4);
   }
   .dropdown-option[aria-selected='true'] {
+    font-weight: 500;
+  }
+  .dropdown-option[aria-selected='true'] > :global(svg) {
     color: var(--accent);
+    flex-shrink: 0;
   }
   .dropdown-empty {
     padding: 18px 10px;

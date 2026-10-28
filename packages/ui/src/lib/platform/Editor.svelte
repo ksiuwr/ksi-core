@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { preferences } from './preferences.svelte.js';
+  import { slider } from './slider.js';
   import {
     insertMarkdownGallery,
     markdownGalleries,
@@ -12,19 +14,18 @@
   import { Eye, Pencil, Images, Paperclip, LoaderCircle, ChevronDown } from '@lucide/svelte';
   let {
     value = $bindable(''),
-    language = 'pl',
     rows = 10,
     allowGallery = false,
     allowReferences = false,
     referenceScope
   }: {
     value?: string;
-    language?: 'pl' | 'en';
     rows?: number;
     allowGallery?: boolean;
     allowReferences?: boolean;
     referenceScope?: string;
   } = $props();
+  const language = $derived(preferences.language);
   const uid = $props.id();
   const labels = $derived(
     language === 'pl'
@@ -339,7 +340,7 @@
 
 <div class="editor">
   <div class="editor-toolbar">
-    <div class="editor-tabs" role="group" aria-label={'Editor mode'}>
+    <div class="editor-tabs" role="group" aria-label={'Editor mode'} use:slider>
       <button
         type="button"
         class:active={!preview}
@@ -371,7 +372,6 @@
   {#if preview}<div class="editor-preview">
       <MarkdownContent
         {value}
-        {language}
         {allowReferences}
         onresize={(index, width) => (value = resizeMarkdownImage(value, index, width))}
       />
@@ -496,7 +496,6 @@
           {#if activeGallery === index}
             <GalleryEditor
               {gallery}
-              {language}
               {busy}
               names={imageNames}
               uploads={uploadTarget === index ? pendingUploads : []}
@@ -531,7 +530,6 @@
           {#if activeGallery === 'draft'}
             <GalleryEditor
               gallery={galleryDraft}
-              {language}
               {busy}
               names={imageNames}
               uploads={uploadTarget === 'draft' ? pendingUploads : []}
@@ -567,7 +565,7 @@
     gap: 10px;
     padding: 12px;
     border: 1px solid var(--line);
-    border-radius: 4px;
+    border-radius: var(--radius-lg, 8px);
     background: var(--surface);
     text-align: left;
     color: var(--ink);
@@ -658,27 +656,42 @@
   .editor-tabs {
     display: flex;
     gap: 2px;
+    padding: 3px;
+    border-radius: var(--radius-lg, 8px);
+    background: var(--surface-muted);
   }
   .editor button {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     border: 1px solid transparent;
-    border-radius: 3px;
+    border-radius: var(--radius-md, 6px);
     background: transparent;
     color: var(--muted);
-    padding: 7px 9px;
+    padding: 6px 9px;
     font-size: 12px;
+    font-weight: 500;
     cursor: pointer;
+    transition:
+      background-color var(--dur-fast, 120ms) ease,
+      color var(--dur-fast, 120ms) ease,
+      box-shadow var(--dur-fast, 120ms) ease;
   }
   .editor button:hover {
-    border-color: var(--control-border-hover, var(--line));
+    background: var(--surface-muted);
     color: var(--ink);
   }
+  .editor-tabs button {
+    padding: 4px 10px;
+  }
+  .editor-tabs button:hover {
+    background: transparent;
+  }
   .editor button.active {
-    background: var(--surface-muted);
-    border-color: var(--line);
     color: var(--ink);
+  }
+  .editor-tabs button.active {
+    background: transparent;
   }
   .editor textarea {
     width: 100%;
@@ -690,7 +703,7 @@
     min-height: 160px;
     padding: 14px;
     border: 1px solid var(--line);
-    border-radius: 3px;
+    border-radius: var(--radius-md, 6px);
     overflow-wrap: anywhere;
   }
   .file-input {
@@ -715,8 +728,10 @@
   }
   .editor .insert-gallery {
     justify-self: start;
-    border-color: var(--line);
-    padding: 9px 12px;
+    border-color: var(--input, var(--line));
+    padding: 7px 12px;
+    background: var(--surface);
+    box-shadow: var(--shadow-xs, none);
   }
   .editor button:disabled {
     opacity: 0.5;
@@ -740,10 +755,11 @@
     max-height: 200px;
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: var(--radius-lg, 8px);
+    padding: 4px;
     overflow-y: auto;
     z-index: 50;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.1));
     display: flex;
     flex-direction: column;
     width: 250px;
@@ -755,8 +771,9 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 10px;
+    padding: 6px 8px;
     border: none;
+    border-radius: var(--radius-sm, 4px);
     background: transparent;
     cursor: pointer;
     text-align: left;
@@ -797,7 +814,7 @@
     flex: 0 0 auto;
     padding: 1px 5px;
     border: 1px solid var(--line);
-    border-radius: 3px;
+    border-radius: var(--radius-sm, 4px);
     background: var(--surface-muted);
     color: var(--accent);
     font-family: var(--mono);

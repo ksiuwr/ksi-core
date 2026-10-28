@@ -4,18 +4,18 @@
   import Dropdown from '@ksi-core/ui/platform/Dropdown.svelte';
   import Skeleton from './Skeleton.svelte';
   import ContentTranslations from './ContentTranslations.svelte';
-  import { ArrowUpRight } from '@lucide/svelte';
+  import SettingsNav from './SettingsNav.svelte';
+  import { ArrowUpRight, KeyRound, Shield, UserRound } from '@lucide/svelte';
   import PermissionFlags from './PermissionFlags.svelte';
   import MemberPreview from './MemberPreview.svelte';
   import { Search, ArrowLeft, Trash2, Save, ChevronLeft, ChevronRight } from '@lucide/svelte';
   import type { Profile } from 'shared/types';
+  import type { ContentLocale } from 'shared/content-locales';
   let {
-    language,
     administrator,
     memberId,
     websiteOrigin
-  }: { language: 'pl' | 'en'; administrator: boolean; memberId?: string; websiteOrigin: string } =
-    $props();
+  }: { administrator: boolean; memberId?: string; websiteOrigin: string } = $props();
 
   const roles = $derived([
     { value: 'member', label: 'Member' },
@@ -40,6 +40,16 @@
     search = $state('');
   let emailDraft = $state('');
   let resetConfirmation = $state(false);
+  let contentLocale = $state<ContentLocale>('en');
+  let translationDraft = $state<Record<string, string>>({});
+  type LocalizedMemberField = 'firstName' | 'lastName' | 'nickname' | 'bio';
+  function localizedMember(key: LocalizedMemberField) {
+    return contentLocale === 'en' ? (member?.[key] ?? '') : (translationDraft[key] ?? '');
+  }
+  function setLocalizedMember(key: LocalizedMemberField, value: string) {
+    if (contentLocale !== 'en') translationDraft[key] = value;
+    else if (member) member[key] = value;
+  }
   async function resetPassword() {
     if (!member) return;
     busy = true;
@@ -107,6 +117,8 @@
     records = [];
     total = 0;
     confirmDelete = false;
+    contentLocale = 'en';
+    translationDraft = {};
     try {
       const result = await api(id ? `/${encodeURIComponent(id)}` : `?${query}`);
       if (current !== generation) return;
@@ -177,214 +189,306 @@
   }
 </script>
 
-{#if notice}<p role="status">{notice}</p>{/if}
+{#if notice}<p class="notice" role="status">{notice}</p>{/if}
 {#if error}<p class="error" role="alert">{error}</p>{/if}
 {#if loading}<Skeleton label={'Loading members'} />{:else if member}
-  <a class="btn btn-outline" href="/members"
+  {@const editable = member.membershipStatus !== 'deleted'}
+  <a class="btn btn-outline detail-back" href="/members"
     ><ArrowLeft size={15} aria-hidden="true" />{'All members'}</a
   >
-  <div class="member-layout">
-    <section class="card">
-      <h1>{member.firstName || member.name} {member.lastName}</h1>
-      <p class="muted">{member.email}</p>
+  <div class="workspace-header">
+    <div class="member-heading">
       {#if member.image}<img class="member-avatar" src={member.image} alt="" />{/if}
-      {#if administrator && member.membershipStatus !== 'deleted'}
+      <div>
+        <h1>{member.firstName || member.name} {member.lastName}</h1>
+        <p>{member.email}</p>
+      </div>
+    </div>
+    {#if member.membershipStatus === 'active'}<a
+        class="btn btn-outline"
+        href={`${websiteOrigin}/members/${encodeURIComponent(member.id)}`}
+        ><ArrowUpRight size={15} aria-hidden="true" />{'View public profile'}</a
+      >{/if}
+  </div>
+
+  <div class="settings-layout">
+    <SettingsNav
+      label={'Member sections'}
+      items={[
+        { id: 'profile', label: 'Profile', icon: UserRound },
+        { id: 'access', label: 'Access', icon: Shield },
+        ...(administrator && editable
+          ? [
+              { id: 'authentication', label: 'Authentication', icon: KeyRound },
+              { id: 'danger', label: 'Delete account', icon: Trash2, danger: true }
+            ]
+          : [])
+      ]}
+    />
+
+    <div class="settings-main">
+      <section id="profile" class="settings-section" aria-labelledby="profile-heading">
+        <header><h2 id="profile-heading">Profile</h2></header>
+        {#if administrator && editable}
+          <form
+            class="card settings-card"
+            onsubmit={(event) => {
+              event.preventDefault();
+              if (contentLocale !== 'en') return;
+              void mutate(`/${member!.id}/profile`, 'PATCH', {
+                firstName: member!.firstName,
+                lastName: member!.lastName,
+                nickname: member!.nickname ?? '',
+                bio: member!.bio ?? '',
+                github: member!.github || null,
+                linkedin: member!.linkedin || null
+              });
+            }}
+          >
+            <ContentTranslations
+              kind="profile"
+              id={member.id}
+              translations={member.translations}
+              baseline={{
+                firstName: member.firstName,
+                lastName: member.lastName,
+                nickname: member.nickname,
+                bio: member.bio
+              }}
+              bind:selected={contentLocale}
+              bind:draft={translationDraft}
+              onsaved={(result) => {
+                if (member) member.translations = result.translations;
+              }}
+            />
+            <div class="field-grid">
+              <div>
+                <label for="m-first">First name</label><input
+                  id="m-first"
+                  bind:value={
+                    () => localizedMember('firstName'),
+                    (value) => setLocalizedMember('firstName', value)
+                  }
+                  required={contentLocale === 'en'}
+                  maxlength="100"
+                />
+              </div>
+              <div>
+                <label for="m-last">Last name</label><input
+                  id="m-last"
+                  bind:value={
+                    () => localizedMember('lastName'),
+                    (value) => setLocalizedMember('lastName', value)
+                  }
+                  maxlength="100"
+                />
+              </div>
+              <div class="field-wide">
+                <label for="m-nick">Nickname</label><input
+                  id="m-nick"
+                  bind:value={
+                    () => localizedMember('nickname'),
+                    (value) => setLocalizedMember('nickname', value)
+                  }
+                  maxlength="100"
+                />
+              </div>
+              <div class="field-wide">
+                <label for="m-bio">Bio</label><textarea
+                  id="m-bio"
+                  bind:value={
+                    () => localizedMember('bio'), (value) => setLocalizedMember('bio', value)
+                  }
+                  rows="5"
+                  maxlength="5000"
+                ></textarea>
+              </div>
+              {#if contentLocale === 'en'}<div>
+                  <label for="m-gh">GitHub</label><input
+                    id="m-gh"
+                    type="url"
+                    bind:value={member.github}
+                    placeholder="https://github.com/username"
+                  />
+                </div>
+                <div>
+                  <label for="m-li">LinkedIn</label><input
+                    id="m-li"
+                    type="url"
+                    bind:value={member.linkedin}
+                    placeholder="https://linkedin.com/in/username"
+                  />
+                </div>{/if}
+            </div>
+            {#if contentLocale === 'en'}<div class="card-footer">
+                <button class="btn" disabled={busy}
+                  ><Save size={15} aria-hidden="true" />{'Save profile'}</button
+                >
+              </div>{/if}
+          </form>
+        {:else}
+          <div class="card settings-card"><p>{member.bio}</p></div>
+        {/if}
+      </section>
+
+      <section id="access" class="settings-section" aria-labelledby="access-heading">
+        <header>
+          <h2 id="access-heading">Access</h2>
+          <p>Access changes take effect when you save them.</p>
+        </header>
         <form
-          id="member-profile"
-          class="profile-fields"
+          class="card settings-card"
           onsubmit={(event) => {
             event.preventDefault();
-            void mutate(`/${member!.id}/profile`, 'PATCH', {
-              firstName: member!.firstName,
-              lastName: member!.lastName,
-              nickname: member!.nickname ?? '',
-              bio: member!.bio ?? '',
-              github: member!.github || null,
-              linkedin: member!.linkedin || null
-            });
+            if (!canSaveAccess) return;
+            void mutate(
+              `/${member!.id}/access`,
+              'PATCH',
+              administrator
+                ? { role: accessRole, membershipStatus: accessStatus, flags: accessFlags }
+                : { membershipStatus: accessStatus }
+            );
           }}
         >
-          <label
-            >{'First name'}<input bind:value={member.firstName} required maxlength="100" /></label
-          >
-          <label>{'Last name'}<input bind:value={member.lastName} maxlength="100" /></label>
-          <label>{'Nickname'}<input bind:value={member.nickname} maxlength="100" /></label>
-          <label class="wide"
-            >Bio<textarea bind:value={member.bio} rows="5" maxlength="5000"></textarea></label
-          >
-          <label
-            >GitHub<input
-              type="url"
-              bind:value={member.github}
-              placeholder="https://github.com/username"
-            /></label
-          >
-          <label
-            >LinkedIn<input
-              type="url"
-              bind:value={member.linkedin}
-              placeholder="https://linkedin.com/in/username"
-            /></label
-          >
+          <div class="field-grid">
+            <div>
+              <label for="member-status">Account status</label>
+              <Dropdown
+                id="member-status"
+                label={'Account status'}
+                value={accessStatus}
+                options={statuses.filter(
+                  (s) =>
+                    s.value !== 'deleted' &&
+                    (administrator || s.value === 'active' || s.value === 'pending')
+                )}
+                disabled={busy || !canSaveAccess}
+                onselect={(value) => (accessStatus = value as Profile['membershipStatus'])}
+              />
+            </div>
+            <div>
+              <label for="member-role">Role</label>
+              <Dropdown
+                id="member-role"
+                label={'Role'}
+                value={accessRole}
+                options={roles}
+                disabled={busy || !administrator || !editable}
+                onselect={(value) => (accessRole = value as Profile['role'])}
+              />
+            </div>
+          </div>
+          {#if administrator && editable}<PermissionFlags
+              bind:flags={accessFlags}
+              disabled={busy}
+            />{/if}
+          {#if canSaveAccess}
+            <div class="card-footer">
+              <button class="btn" disabled={busy}
+                ><Save size={15} aria-hidden="true" />{'Save access'}</button
+              >
+            </div>
+          {/if}
         </form>
-      {:else}<p>{member.bio}</p>{/if}
-    </section>
-    <form
-      id="member-access"
-      class="card access"
-      onsubmit={(event) => {
-        event.preventDefault();
-        if (!canSaveAccess) return;
-        void mutate(
-          `/${member!.id}/access`,
-          'PATCH',
-          administrator
-            ? { role: accessRole, membershipStatus: accessStatus, flags: accessFlags }
-            : { membershipStatus: accessStatus }
-        );
-      }}
-    >
-      <h2>{'Access'}</h2>
-      <label for="member-status">{'Account status'}</label>
-      <Dropdown
-        id="member-status"
-        label={'Account status'}
-        value={accessStatus}
-        options={statuses.filter(
-          (s) =>
-            s.value !== 'deleted' &&
-            (administrator || s.value === 'active' || s.value === 'pending')
-        )}
-        disabled={busy || !canSaveAccess}
-        onselect={(value) => (accessStatus = value as Profile['membershipStatus'])}
-      />
-      <label for="member-role">{'Role'}</label>
-      <Dropdown
-        id="member-role"
-        label={'Role'}
-        value={accessRole}
-        options={roles}
-        disabled={busy || !administrator || member.membershipStatus === 'deleted'}
-        onselect={(value) => (accessRole = value as Profile['role'])}
-      />
-      <p class="muted access-help">{'Access changes take effect when you save them.'}</p>
-      {#if administrator && member.membershipStatus !== 'deleted'}<PermissionFlags
-          bind:flags={accessFlags}
-          {language}
-          disabled={busy}
-        />{/if}
-    </form>
-  </div>
-  {#if member.membershipStatus === 'active'}<a
-      class="btn btn-outline"
-      href={`${websiteOrigin}/members/${encodeURIComponent(member.id)}`}
-      ><ArrowUpRight size={15} />{'View public profile'}</a
-    >{/if}
-  {#if administrator && member.membershipStatus !== 'deleted'}
-    <ContentTranslations
-      kind="profile"
-      id={member.id}
-      translations={member.translations}
-      baseline={{
-        firstName: member.firstName,
-        lastName: member.lastName,
-        nickname: member.nickname,
-        bio: member.bio
-      }}
-      {language}
-      onsaved={(result) => {
-        if (member) member.translations = result.translations;
-      }}
-    />
-  {/if}
-  {#if administrator && member.membershipStatus !== 'deleted'}
-    <section class="card account-authentication">
-      <h2>{'Authentication'}</h2>
-      <form
-        id="member-email"
-        onsubmit={(event) => {
-          event.preventDefault();
-          void mutate(`/${member!.id}/email`, 'PATCH', { email: emailDraft.trim() });
-        }}
-      >
-        <label
-          >{'Email address'}<input
-            type="email"
-            bind:value={emailDraft}
-            required
-            maxlength="254"
-          /></label
-        >
-        <p class="muted">
-          {'Changing the email revokes sessions and sends a verification link to the new address.'}
-        </p>
-      </form>
-      <p class="muted">
-        {'Send a recovery link to the saved email address. Passwords are never displayed here.'}
-      </p>
-      {#if resetConfirmation}
-        <p>{'Send a password recovery email to this member?'}</p>
-        <div class="row">
-          <button class="btn" disabled={busy} onclick={resetPassword}>{'Send recovery link'}</button
-          ><button
-            class="btn btn-outline"
-            disabled={busy}
-            onclick={() => (resetConfirmation = false)}>{'Cancel'}</button
+      </section>
+
+      {#if administrator && editable}
+        <section id="authentication" class="settings-section" aria-labelledby="auth-heading">
+          <header><h2 id="auth-heading">Authentication</h2></header>
+          <form
+            class="card settings-card"
+            onsubmit={(event) => {
+              event.preventDefault();
+              void mutate(`/${member!.id}/email`, 'PATCH', { email: emailDraft.trim() });
+            }}
           >
-        </div>
-      {:else}
-        <button class="btn btn-outline" disabled={busy} onclick={() => (resetConfirmation = true)}
-          >{'Reset password'}</button
-        >
-      {/if}
-    </section>
-  {/if}
-  {#if member.membershipStatus !== 'deleted'}
-    <div class="member-actions">
-      {#if administrator}<button class="btn" form="member-profile" disabled={busy}
-          ><Save size={15} aria-hidden="true" />{'Save profile'}</button
-        >{/if}
-      {#if administrator}<button
-          class="btn btn-outline"
-          form="member-email"
-          disabled={busy || emailDraft.trim().toLowerCase() === member.email.toLowerCase()}
-          ><Save size={15} aria-hidden="true" />{'Save email'}</button
-        >{/if}
-      {#if canSaveAccess}<button class="btn btn-outline" form="member-access" disabled={busy}
-          ><Save size={15} aria-hidden="true" />{'Save access'}</button
-        >{/if}
-    </div>
-    {#if administrator}<section class="card account-danger">
-        <details>
-          <summary><Trash2 size={15} aria-hidden="true" />{'Delete account'}</summary>
-          <p>{'Personal data will be anonymized. Association content will remain.'}</p>
-          {#if confirmDelete}<div role="alert">
-              <p>{'Delete account? Personal data will be anonymized. Content will remain.'}</p>
+            <div>
+              <label for="m-email">Email address</label><input
+                id="m-email"
+                type="email"
+                bind:value={emailDraft}
+                required
+                maxlength="254"
+              />
+              <p class="field-help">
+                Changing the email revokes sessions and sends a verification link to the new
+                address.
+              </p>
+            </div>
+            <div class="card-footer">
+              <button
+                class="btn"
+                disabled={busy || emailDraft.trim().toLowerCase() === member.email.toLowerCase()}
+                ><Save size={15} aria-hidden="true" />{'Save email'}</button
+              >
+            </div>
+          </form>
+          <div class="card settings-card">
+            <p class="muted">
+              Send a recovery link to the saved email address. Passwords are never displayed here.
+            </p>
+            {#if resetConfirmation}
+              <p>Send a password recovery email to this member?</p>
               <div class="row">
-                <button
-                  type="button"
-                  class="btn danger-button"
-                  disabled={busy}
-                  onclick={() => mutate(`/${member!.id}`, 'DELETE')}>{'Confirm deletion'}</button
-                >
-                <button
-                  type="button"
+                <button class="btn" disabled={busy} onclick={resetPassword}
+                  >Send recovery link</button
+                ><button
                   class="btn btn-outline"
                   disabled={busy}
-                  onclick={() => (confirmDelete = false)}>{'Cancel'}</button
+                  onclick={() => (resetConfirmation = false)}>Cancel</button
                 >
               </div>
-            </div>{:else}<button
-              type="button"
-              class="btn btn-outline danger-button"
-              disabled={busy}
-              onclick={() => (confirmDelete = true)}>{'Delete account'}</button
-            >{/if}
-        </details>
-      </section>{/if}
-  {/if}
+            {:else}
+              <div>
+                <button
+                  class="btn btn-outline"
+                  disabled={busy}
+                  onclick={() => (resetConfirmation = true)}>Reset password</button
+                >
+              </div>
+            {/if}
+          </div>
+        </section>
+
+        <section id="danger" class="settings-section" aria-labelledby="danger-heading">
+          <header><h2 id="danger-heading">Delete account</h2></header>
+          <div class="card settings-card danger">
+            <p class="muted">Personal data will be anonymized. Association content will remain.</p>
+            {#if confirmDelete}
+              <div role="alert" class="settings-card">
+                <p>Delete account? Personal data will be anonymized. Content will remain.</p>
+                <div class="row">
+                  <button
+                    type="button"
+                    class="btn danger-button"
+                    disabled={busy}
+                    onclick={() => mutate(`/${member!.id}`, 'DELETE')}>Confirm deletion</button
+                  >
+                  <button
+                    type="button"
+                    class="btn btn-outline"
+                    disabled={busy}
+                    onclick={() => (confirmDelete = false)}>Cancel</button
+                  >
+                </div>
+              </div>
+            {:else}
+              <div>
+                <button
+                  type="button"
+                  class="btn btn-outline danger-button"
+                  disabled={busy}
+                  onclick={() => (confirmDelete = true)}>Delete account</button
+                >
+              </div>
+            {/if}
+          </div>
+        </section>
+      {/if}
+    </div>
+  </div>
 {:else if memberId}
-  <a class="btn btn-outline" href="/members">{'All members'}</a>
+  <a class="btn btn-outline" href="/members">All members</a>
 {:else}
   <form
     class="member-filters"
@@ -394,14 +498,14 @@
     }}
   >
     <div class="search">
-      <label for="member-search" class="sr-only">{'Search members'}</label><Search
+      <label for="member-search" class="sr-only">Search members</label><Search
         size={16}
         aria-hidden="true"
       /><input
         id="member-search"
         bind:value={search}
         placeholder={'Name, nickname or email…'}
-      /><button class="btn btn-outline">{'Search'}</button>
+      /><button class="btn btn-outline">Search</button>
     </div>
     <Dropdown
       label={'Filter status'}
@@ -429,8 +533,7 @@
   <section class="member-directory" aria-label="Member directory">
     <div class="table-wrap">
       <table>
-        <thead><tr><th>{'Person'}</th><th>Email</th><th>Status</th><th>{'Role'}</th></tr></thead
-        ><tbody
+        <thead><tr><th>Person</th><th>Email</th><th>Status</th><th>Role</th></tr></thead><tbody
           >{#each records as record}<tr
               ><td
                 ><MemberPreview
@@ -445,7 +548,7 @@
         >
       </table>
     </div>
-    {#if !records.length}<p>{'No matching members.'}</p>{/if}
+    {#if !records.length}<p>No matching members.</p>{/if}
     <footer class="directory-footer">
       <p class="muted">
         {firstResult}
@@ -459,7 +562,7 @@
           disabled={currentPage === 0 || loading}
           onclick={() => paginate(-1)}
           aria-label="Previous page"
-          ><ChevronLeft size={16} aria-hidden="true" /><span>{'Previous'}</span></button
+          ><ChevronLeft size={16} aria-hidden="true" /><span>Previous</span></button
         >
         <span class="page-number">{currentPage + 1} / {Math.max(1, Math.ceil(total / 50))}</span>
         <button
@@ -468,7 +571,7 @@
           disabled={(currentPage + 1) * 50 >= total || loading}
           onclick={() => paginate(1)}
           aria-label="Next page"
-          ><span>{'Next'}</span><ChevronRight size={16} aria-hidden="true" /></button
+          ><span>Next</span><ChevronRight size={16} aria-hidden="true" /></button
         >
       </nav>
     </footer>
@@ -476,19 +579,9 @@
 {/if}
 
 <style>
-  .account-authentication {
-    margin-top: 20px;
-  }
-  .account-authentication form {
-    max-width: 560px;
-    margin-top: 16px;
-  }
-  .account-authentication p {
-    margin: 12px 0;
-  }
   .member-directory {
     border: 1px solid var(--line);
-    border-radius: 4px;
+    border-radius: var(--radius-xl);
     background: var(--surface);
   }
   .member-directory table {
@@ -549,61 +642,6 @@
       display: none;
     }
   }
-  .member-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
-    gap: 24px;
-    margin-top: 24px;
-  }
-  .profile-fields {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-top: 24px;
-  }
-  .profile-fields label {
-    display: grid;
-    gap: 8px;
-  }
-  .profile-fields input,
-  .profile-fields textarea {
-    margin: 0;
-  }
-  .wide {
-    grid-column: 1/-1;
-  }
-  .access {
-    display: grid;
-    gap: 14px;
-    align-content: start;
-    min-width: 0;
-  }
-  .member-actions {
-    display: flex;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin: 24px 0;
-    padding: 18px;
-    border: 1px solid var(--line);
-    background: var(--surface);
-    position: sticky;
-    bottom: 12px;
-    z-index: 10;
-  }
-  .account-danger summary {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-  }
-  .account-danger p {
-    margin: 18px 0;
-  }
-  .access-help {
-    font-size: 12px;
-    margin: 0;
-  }
   .member-avatar {
     width: 80px;
     height: 80px;
@@ -632,31 +670,10 @@
     color: var(--ink);
   }
   @media (max-width: 900px) {
-    .member-layout,
     .member-filters {
       grid-template-columns: 1fr;
     }
   }
-  @media (max-width: 540px) {
-    .profile-fields {
-      grid-template-columns: 1fr;
-    }
-  }
   @media (max-width: 600px) {
-    .member-actions {
-      position: static;
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      padding: 12px;
-      gap: 8px;
-    }
-    .member-actions > :first-child {
-      grid-column: 1 / -1;
-    }
-    .member-actions button {
-      min-width: 0;
-      padding: 10px 8px;
-      font-size: 12px;
-    }
   }
 </style>

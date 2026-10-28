@@ -44,10 +44,8 @@
 </script>
 
 <div class="article-thumbnail">
-  <label for={uid}>{'Thumbnail (optional)'}</label>
-  <p class="muted">
-    {'Shown in article lists. Choose an image separately from the article content.'}
-  </p>
+  <label for={uid}>Thumbnail (optional)</label>
+  <p class="muted">Shown in article lists. Choose an image separately from the article content.</p>
   {#if fileId}<img src={`/media/${encodeURIComponent(fileId)}`} alt={'Thumbnail preview'} />{/if}
   {#if !disabled}
     <div class="controls">
@@ -88,7 +86,7 @@
     max-height: 240px;
     aspect-ratio: 16 / 9;
     object-fit: cover;
-    border-radius: 3px;
+    border-radius: var(--radius-md);
     margin-bottom: 12px;
   }
   .controls {

@@ -1,4 +1,4 @@
-import { markdownImages } from './markdown-images';
+import { markdownImages } from './markdown-images.js';
 
 export type GalleryState = { ids: string[]; preview: number };
 const validId = /^[A-Za-z0-9_-]{8,64}$/;

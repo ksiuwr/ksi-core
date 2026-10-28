@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { imageResize } from './image-resize';
+  import type { FrontendLocale } from 'shared/content-locales';
+  import { formatDate as formatLocaleDate } from 'shared/format';
+  import { imageResize } from './image-resize.js';
   import { tick, onDestroy } from 'svelte';
   import { X, ChevronLeft, ChevronRight, ArrowUpRight, CalendarClock } from '@lucide/svelte';
   import type { MarkdownBlock } from 'shared/markdown';
@@ -9,7 +11,7 @@
     onresize
   }: {
     blocks: MarkdownBlock[];
-    language?: 'pl' | 'en';
+    language?: FrontendLocale;
     onresize?: (index: number, width: number) => void;
   } = $props();
 
@@ -55,16 +57,13 @@
   let previewToken = 0;
   let hideTimer: ReturnType<typeof setTimeout> | undefined;
 
-  const DATE_LOCALES = { pl: 'pl-PL', en: 'en-US' } as const;
-  const dateLocale = $derived(DATE_LOCALES[language]);
-
   const initials = (name?: string | null) => {
     const words = (name ?? '').trim().split(/\s+/).filter(Boolean);
     const value = `${words[0]?.[0] ?? ''}${words.length > 1 ? words[words.length - 1]![0] : ''}`;
     return value.toUpperCase() || '?';
   };
   const formatDate = (iso: string) =>
-    new Date(iso).toLocaleDateString(dateLocale, {
+    formatLocaleDate(iso, language, {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
@@ -241,20 +240,20 @@
       role="tooltip"
     >
       {#if previewLoading && !previewData}
-        <p class="reference-preview-loading">{'Loading…'}</p>
+        <p class="reference-preview-loading">Loading…</p>
       {:else if previewNotFound}
-        <p class="reference-preview-error">{'Reference not found'}</p>
+        <p class="reference-preview-error">Reference not found</p>
       {:else if previewError}
-        <p class="reference-preview-error">{'Preview unavailable'}</p>
+        <p class="reference-preview-error">Preview unavailable</p>
       {:else if previewData}
         <div class="reference-preview-header">
           <p class="reference-preview-context">
             <span
-              >{#if previewData.workspace}{previewData.workspace}{:else}{'Association'}{/if}</span
+              >{#if previewData.workspace}{previewData.workspace}{:else}Association{/if}</span
             >
             <span class="reference-preview-separator" aria-hidden="true">·</span>
             <span
-              >{#if previewData.type === 'item'}{'Task'}{:else}{'Thread'}{/if}</span
+              >{#if previewData.type === 'item'}Task{:else}Thread{/if}</span
             >
             <span class="reference-preview-separator" aria-hidden="true">·</span>
             <time datetime={previewData.createdAt}>{formatDate(previewData.createdAt)}</time>
@@ -274,7 +273,7 @@
         </div>
         {#if previewData.type === 'item'}
           <p class="reference-preview-excerpt" class:empty={!previewData.excerpt}>
-            {#if previewData.excerpt}{previewData.excerpt}{:else}{'No description.'}{/if}
+            {#if previewData.excerpt}{previewData.excerpt}{:else}No description.{/if}
           </p>
         {/if}
         {#if previewData.labels.length}
@@ -291,7 +290,7 @@
             >
             <span>
               <strong
-                >{#if previewData.author}{previewData.author}{:else}{'Association member'}{/if}</strong
+                >{#if previewData.author}{previewData.author}{:else}Association member{/if}</strong
               >
               <span class="reference-preview-muted"
                 >{#if previewData.type === 'item'}opened this task{:else}opened this thread{/if}</span
@@ -319,7 +318,7 @@
           {/if}
         </div>
         <a class="reference-preview-link" href={previewData.href}>
-          <span>{'Open'}</span>
+          <span>Open</span>
           <ArrowUpRight size={13} aria-hidden="true" />
         </a>
       {/if}
@@ -454,7 +453,7 @@
     border-radius: 8px;
     background: var(--surface, #fffefa);
     color: var(--ink, #272638);
-    box-shadow: 0 12px 32px #0004;
+    box-shadow: var(--shadow-lg, 0 12px 32px #0004);
     font-size: 12px;
     overflow: hidden;
   }

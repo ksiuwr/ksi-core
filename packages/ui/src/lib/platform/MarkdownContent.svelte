@@ -1,17 +1,17 @@
 <script lang="ts">
   import Markdown from './Markdown.svelte';
+  import { preferences } from './preferences.svelte.js';
   import type { MarkdownBlock } from 'shared/markdown';
   let {
     value,
-    language = 'pl',
     allowReferences = false,
     onresize
   }: {
     value: string;
-    language?: 'pl' | 'en';
     allowReferences?: boolean;
     onresize?: (index: number, width: number) => void;
   } = $props();
+  const language = $derived(preferences.language);
   let blocks = $state<MarkdownBlock[]>([]);
   let loading = $state(true);
   let failed = $state(false);
@@ -74,7 +74,7 @@
   .markdown-skeleton span {
     height: 12px;
     background: var(--surface-muted);
-    border-radius: 3px;
+    border-radius: var(--radius-sm, 4px);
   }
   .markdown-skeleton span:last-child {
     width: 65%;

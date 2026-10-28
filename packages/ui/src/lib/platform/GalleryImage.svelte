@@ -1,10 +1,8 @@
 <script lang="ts">
   import { ImageOff, LoaderCircle } from '@lucide/svelte';
-  let {
-    src,
-    alt = '',
-    language = 'pl'
-  }: { src: string; alt?: string; language?: 'pl' | 'en' } = $props();
+  import { preferences } from './preferences.svelte.js';
+  let { src, alt = '' }: { src: string; alt?: string } = $props();
+  const language = $derived(preferences.language);
   let ready = $state(false);
   let failed = $state(false);
   $effect(() => {

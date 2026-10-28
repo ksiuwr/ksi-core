@@ -1,22 +1,21 @@
 <script lang="ts">
+  import { preferences } from '$lib/preferences.svelte';
+  import { formatDate } from 'shared/format';
   import { Check, X, UserPlus, Image, Inbox } from '@lucide/svelte';
-  export type InboxData = {
-    memberships: { id: string; name: string; email: string; createdAt: string }[];
-    avatars: { userId: string; name: string; fileId: string; version: number; createdAt: string }[];
-  };
+  import type { InboxData } from './types';
+  export type { InboxData } from './types';
   let {
     inbox,
-    language,
     administrator,
     refresh,
     reportError
   }: {
     inbox: InboxData;
-    language: 'pl' | 'en';
     administrator: boolean;
     refresh: () => Promise<void>;
     reportError: (message: string) => void;
   } = $props();
+  const language = $derived(preferences.language);
 
   let busy = $state(false);
   async function review(
@@ -51,10 +50,8 @@
 
 <div class="workspace-header">
   <div>
-    <h1>{'Approval inbox'}</h1>
-    <p class="workspace-description">
-      {'New accounts and profile pictures awaiting a decision.'}
-    </p>
+    <h1>Approval inbox</h1>
+    <p class="workspace-description">New accounts and profile pictures awaiting a decision.</p>
   </div>
 </div>
 {#if inbox.memberships.length}<section class="approval-section">
@@ -67,11 +64,7 @@
         <div>
           <h3>{member.name || member.email}</h3>
           <p>{member.email}</p>
-          <time datetime={member.createdAt}
-            >{new Date(member.createdAt).toLocaleDateString(
-              language === 'pl' ? 'pl-PL' : 'en-GB'
-            )}</time
-          >
+          <time datetime={member.createdAt}>{formatDate(member.createdAt, language)}</time>
         </div>
         <div class="approval-actions">
           <button class="btn" disabled={busy} onclick={() => review('members', member.id, true)}
@@ -99,9 +92,7 @@
         />
         <div class="approval-info">
           <h3>{avatar.name}</h3>
-          <p>
-            {'The new picture becomes public after approval.'}
-          </p>
+          <p>The new picture becomes public after approval.</p>
         </div>
         <div class="approval-actions">
           <button
@@ -120,10 +111,8 @@
   </section>{/if}
 {#if !inbox.memberships.length && !inbox.avatars.length}<div class="empty-state">
     <Inbox size={30} aria-hidden="true" />
-    <h2>{'All caught up'}</h2>
-    <p>
-      {'New requests will appear here automatically.'}
-    </p>
+    <h2>All caught up</h2>
+    <p>New requests will appear here automatically.</p>
   </div>{/if}
 
 <style>
@@ -143,7 +132,7 @@
     gap: 20px;
     padding: 20px;
     border: 1px solid var(--line);
-    border-radius: 4px;
+    border-radius: var(--radius-xl);
     background: var(--surface);
     margin-bottom: 12px;
   }
@@ -175,7 +164,7 @@
     height: 80px;
     object-fit: cover;
     border: 1px solid var(--line);
-    border-radius: 5px;
+    border-radius: var(--radius-md);
   }
   @media (max-width: 760px) {
     .approval-card {

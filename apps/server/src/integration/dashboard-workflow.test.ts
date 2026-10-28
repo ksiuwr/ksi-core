@@ -669,10 +669,24 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
     });
     expect(thread.status).toBe(200);
     expect(thread.body.assigneeIds).toEqual([ids.member]);
+    const retitled = await request('member', `/platform/threads/${thread.body.id}`, 'PATCH', {
+      version: 1,
+      title: 'Renamed thread'
+    });
+    expect(retitled.status).toBe(200);
+    expect(retitled.body.title).toBe('Renamed thread');
+    expect(
+      (
+        await request('member', `/platform/threads/${thread.body.id}`, 'PATCH', {
+          version: 1,
+          title: 'Stale rename'
+        })
+      ).status
+    ).toBe(409);
     expect(
       (
         await request('member', `/platform/threads/${thread.body.id}/assignees`, 'PATCH', {
-          version: 1,
+          version: 2,
           assigneeIds: [ids.outsider]
         })
       ).status
@@ -681,7 +695,7 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       'member',
       `/platform/threads/${thread.body.id}/assignees`,
       'PATCH',
-      { version: 1, assigneeIds: [] }
+      { version: 2, assigneeIds: [] }
     );
     expect(updated.status).toBe(200);
     expect(updated.body.assigneeIds).toEqual([]);
@@ -708,7 +722,7 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
     expect(mention.actorName).toBe('admin Workflow');
     expect(mention.action).toBe('kanban.created');
     expect(mention.projectName).toBe('Workflow project');
-    expect(mention.href).toBe(`/projects/${projectId}/kanban?item=${task.body.id}`);
+    expect(mention.href).toBe(`/projects/${projectId}/tasks/${task.body.id}`);
     expect(
       (await request('admin', '/notifications')).body.some((n: any) => n.ownerId === task.body.id)
     ).toBe(false);
@@ -993,7 +1007,7 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       'member',
       `/platform/references/${projectId}/${task.body.referenceNumber}`
     );
-    expect(taskLink.body.href).toBe(`/projects/${projectId}/kanban?item=${task.body.id}`);
+    expect(taskLink.body.href).toBe(`/projects/${projectId}/tasks/${task.body.id}`);
     const threadLink = await request(
       'member',
       `/platform/references/${projectId}/${thread.body.referenceNumber}`

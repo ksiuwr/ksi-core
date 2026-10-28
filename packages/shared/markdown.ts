@@ -1,5 +1,5 @@
-import { prepareMarkdownImages, clampImageWidth } from './markdown-images';
-import { markdownGalleries } from './markdown-gallery';
+import { prepareMarkdownImages, clampImageWidth } from './markdown-images.js';
+import { markdownGalleries } from './markdown-gallery.js';
 import { Marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
 export type MarkdownBlock =

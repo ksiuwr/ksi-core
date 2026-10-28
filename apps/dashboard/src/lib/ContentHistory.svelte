@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { preferences } from '$lib/preferences.svelte';
+  import { formatDateTime } from 'shared/format';
   import { tick, onDestroy } from 'svelte';
   import {
     History,
@@ -16,12 +18,13 @@
   let {
     kind,
     targetId,
-    language = 'pl'
+    labeled = false
   }: {
+    labeled?: boolean;
     kind: 'comment' | 'task';
     targetId: string;
-    language?: 'pl' | 'en';
   } = $props();
+  const language = $derived(preferences.language);
   const uid = $props.id();
   const pl = $derived(language === 'pl');
   const title = $derived(
@@ -88,13 +91,13 @@
 
 <button
   type="button"
-  class="history-trigger"
+  class={labeled ? 'btn btn-outline' : 'history-trigger'}
   {title}
   aria-label={title}
   aria-haspopup="dialog"
   onclick={show}
 >
-  <History size={15} aria-hidden="true" />
+  <History size={15} aria-hidden="true" />{#if labeled}{title}{/if}
 </button>
 
 {#if open}
@@ -153,18 +156,14 @@
                     >
                   </div>
                   <time datetime={revision.createdAt}
-                    >{new Date(revision.createdAt).toLocaleString(pl ? 'pl-PL' : 'en-GB', {
+                    >{formatDateTime(revision.createdAt, language, {
                       dateStyle: 'medium',
                       timeStyle: 'short'
                     })}</time
                   >
                 </div>
                 {#if revision.changes?.length}
-                  <ChangeDetails
-                    changes={revision.changes}
-                    {language}
-                    initiallyExpanded={index === 0}
-                  />
+                  <ChangeDetails changes={revision.changes} initiallyExpanded={index === 0} />
                 {:else}
                   <p class="revision-note">
                     {revision.changes === null
@@ -231,7 +230,7 @@
     background: transparent;
     color: var(--muted);
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     width: 30px;
     height: 30px;
     transition:
@@ -251,13 +250,13 @@
     color: var(--ink);
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 14px;
+    border-radius: var(--radius-xl);
     padding: 0;
     width: min(920px, calc(100vw - 32px));
     max-width: none;
     max-height: 86dvh;
     overflow: auto;
-    box-shadow: 0 24px 90px #0003;
+    box-shadow: var(--shadow-lg);
     white-space: normal;
   }
   .history-dialog::backdrop {
@@ -351,7 +350,7 @@
   .revision {
     min-width: 0;
     border: 1px solid var(--line);
-    border-radius: 9px;
+    border-radius: var(--radius-lg);
     padding: 14px;
   }
   .revision-heading {
@@ -374,7 +373,7 @@
     font-weight: 500;
     color: var(--muted);
     padding: 2px 6px;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     background: var(--surface-muted);
   }
   time {
@@ -431,7 +430,7 @@
     border: 1px solid var(--line);
     background: var(--surface);
     color: var(--ink);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     padding: 8px 12px;
     font-size: 12px;
     cursor: pointer;

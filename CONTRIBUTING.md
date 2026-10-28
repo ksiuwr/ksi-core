@@ -178,6 +178,22 @@ Write plain English string literals directly in Svelte markup or attributes:
 <button title="Logout">...</button>
 ```
 
+Text inside an element is extracted directly by Wuchale, so do not wrap it in a JavaScript string expression:
+
+```svelte
+<!-- Bad -->
+<p>{'No articles yet.'}</p>
+
+<!-- Good -->
+<p>No articles yet.</p>
+```
+
+Keep an explicit expression when the text shares its element with icons or other dynamic content, so it remains a separate catalog entry:
+
+```svelte
+<button><Icon />{'Save'}</button>
+```
+
 Mixed text and expressions are supported and become placeholders:
 
 ```svelte
@@ -187,11 +203,21 @@ Mixed text and expressions are supported and become placeholders:
 Do not use ternary operators to choose translatable strings:
 
 ```svelte
-<!-- Bad: compiles to a single catalog entry and loses the condition/branch -->
+<!-- Bad: both branches become catalog entries and bypass locale selection -->
 {editingId ? 'Edit alert' : 'Create alert'}
 ```
 
-Use plain text in separate template branches instead:
+In particular, never select copy based on the active UI locale. Write only the English source string; Wuchale supplies the selected locale at runtime:
+
+```svelte
+<!-- Bad -->
+{language === 'pl' ? 'Zapisano.' : 'Saved.'}
+
+<!-- Good -->
+Saved.
+```
+
+For genuinely conditional UI, use plain text in separate template branches instead:
 
 ```svelte
 {#if editingId}

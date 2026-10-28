@@ -22,7 +22,7 @@
       }[];
     }[];
   } = $props();
-  const language = $derived(locale.current === 'pl' ? 'pl' : 'en');
+  const language = $derived(locale.current);
   const formatter = $derived(
     new Intl.DateTimeFormat(locale.current, { day: 'numeric', month: 'long', year: 'numeric' })
   );

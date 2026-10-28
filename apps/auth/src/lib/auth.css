@@ -51,14 +51,14 @@
   padding: 32px;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 4px;
-  box-shadow: inset 0 1px 0 #ffffff05;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
 }
 .auth-symbol {
   width: 44px;
   height: 44px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--radius-lg);
   display: grid;
   place-items: center;
   color: var(--accent);
@@ -78,25 +78,31 @@
 }
 .auth-mode {
   display: flex;
-  gap: 4px;
-  padding: 4px;
-  border: 1px solid var(--line);
-  border-radius: 3px;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-lg);
   margin-bottom: 20px;
-  background: var(--paper);
+  background: var(--surface-muted);
 }
 .auth-mode button {
   flex: 1;
-  border: 1px solid transparent;
-  border-radius: 2px;
+  border: 0;
+  border-radius: var(--radius-md);
   background: transparent;
-  padding: 8px;
-  font-size: 12px;
+  padding: 6px 8px;
+  font-size: 12.5px;
+  font-weight: 500;
   color: var(--muted);
+  box-shadow: none;
+  transition:
+    background-color var(--dur-fast) ease,
+    color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease;
+}
+.auth-mode button:hover {
+  color: var(--ink);
 }
 .auth-mode button.active {
-  background: var(--surface-muted);
-  border-color: var(--line);
   color: var(--ink);
 }
 .oauth-providers {
@@ -109,13 +115,20 @@
   gap: 12px;
   width: 100%;
   margin: 0;
-  min-height: 42px;
-  font-size: 12px;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: var(--radius-md) !important;
+  font-size: 13px !important;
   font-family: var(--font);
   text-align: left;
-  background: transparent !important;
+  background: var(--surface) !important;
   color: var(--ink) !important;
-  border-color: var(--line) !important;
+  border-color: var(--input) !important;
+  transition: background-color var(--dur-fast) ease !important;
+}
+.oauth-btn:hover {
+  background: var(--surface-muted) !important;
 }
 .oauth-btn span:nth-child(2) {
   flex: 1;
@@ -142,12 +155,10 @@
 }
 .auth-field label {
   margin: 0;
-  font-size: 12px;
 }
 .auth-field input {
   margin: 0;
-  padding: 10px 12px;
-  min-height: 42px;
+  min-height: 38px;
 }
 .password-label {
   display: flex;
@@ -158,10 +169,12 @@
 .text-button {
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   padding: 3px 5px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 11.5px;
+  font-weight: 400;
+  box-shadow: none;
 }
 .text-button:hover {
   color: var(--ink);
@@ -179,15 +192,22 @@
 .remember input {
   margin: 0;
   flex-shrink: 0;
-  accent-color: var(--primary);
 }
+/* Signing in is the one terracotta moment in the auth flow. */
 .submit-button {
   width: 100%;
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
-  min-height: 42px;
+  height: 40px;
+  min-height: 40px;
+  background: var(--primary);
+  color: var(--primary-text);
+}
+.submit-button:hover {
+  background: var(--primary-hover);
+  color: var(--primary-text);
 }
 .auth-back {
   width: 100%;
@@ -204,7 +224,7 @@
 .auth-message {
   padding: 12px;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--radius-lg);
   margin-top: 16px;
   font-size: 12px;
   overflow-wrap: anywhere;
@@ -246,9 +266,9 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px;
+  padding: 6px;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--radius-lg);
   background: var(--surface);
 }
 .hint-name {
@@ -279,12 +299,7 @@
   border: 1px solid transparent;
   color: var(--muted);
   background: none;
-  border-radius: 3px;
-}
-.auth-card button:not(.hint-name):not(.hint-forget):hover,
-.auth-preferences button:hover {
-  outline: 1px solid var(--control-border-hover);
-  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
 .auth-card button:disabled {
   opacity: 0.55;
@@ -292,10 +307,6 @@
 }
 .auth-preferences .dropdown-trigger {
   background: var(--surface);
-}
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
 }
 @media (max-width: 480px) {
   .auth-shell {

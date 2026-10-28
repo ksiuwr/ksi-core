@@ -2,20 +2,20 @@
   import { onMount, tick } from 'svelte';
   import { fly } from 'svelte/transition';
   import { CalendarClock, ChevronLeft, ChevronRight, X } from '@lucide/svelte';
+  import { preferences } from './preferences.svelte.js';
 
   let {
     value = $bindable(''),
-    language = 'en',
     disabled = false
   }: {
     value?: string;
-    language?: 'pl' | 'en';
     disabled?: boolean;
   } = $props();
 
+  const language = $derived(preferences.language);
   const uid = $props.id();
   const pl = $derived(language === 'pl');
-  const intl = $derived(pl ? 'pl-PL' : 'en-GB');
+  const intl = $derived(language);
 
   let trigger = $state<HTMLButtonElement>();
   let panel = $state<HTMLDivElement>();
@@ -71,10 +71,10 @@
     };
   });
 
-  $effect(() => {
-    if (!open || !draftDate) return;
-    value = `${draftDate}T${draftTime}`;
-  });
+  /** The draft stays local until the user confirms with "Done"; closing discards it. */
+  function commit() {
+    if (draftDate) value = `${draftDate}T${draftTime || '23:59'}`;
+  }
 
   function pad(n: number) {
     return String(n).padStart(2, '0');
@@ -299,6 +299,8 @@
     draftDate = day;
     draftTime ||= '23:59';
     focusDay = day;
+    // The date is the only thing left to decide in the first step; move on.
+    void showTime();
   }
   function preset(offset: number) {
     const date = addDays(today, offset);
@@ -720,7 +722,11 @@
           type="button"
           class="picker-done"
           disabled={disabled || (step === 'date' && !draftDate)}
-          onclick={() => (step === 'date' ? void showTime() : close(true))}
+          onclick={() => {
+            if (step === 'date') return void showTime();
+            commit();
+            close(true);
+          }}
         >
           {step === 'date' ? nextLabel : doneLabel}
         </button>
@@ -743,19 +749,30 @@
     align-items: center;
     gap: 10px;
     width: 100%;
-    min-height: 42px;
-    padding: 10px 12px;
-    border: 1px solid var(--line);
-    border-radius: 3px;
+    min-height: 34px;
+    padding: 6px 10px;
+    border: 1px solid var(--input, var(--line));
+    border-radius: var(--radius-md, 6px);
     background: var(--surface, #fffefa);
     color: var(--ink);
     font-size: 13px;
     text-align: left;
     cursor: pointer;
+    box-shadow: var(--shadow-xs, none);
+    transition:
+      border-color var(--dur-fast, 120ms) ease,
+      box-shadow var(--dur-fast, 120ms) ease;
   }
-  .picker-trigger:hover,
-  .picker-trigger[aria-expanded='true'] {
-    border-color: var(--accent);
+  .picker-trigger:hover {
+    border-color: var(--control-border-hover, var(--accent));
+  }
+  .picker-trigger[aria-expanded='true'],
+  .picker-trigger:focus-visible {
+    outline: none;
+    border-color: var(--ring-strong, var(--accent));
+    box-shadow:
+      var(--shadow-xs, 0 0 #0000),
+      0 0 0 3px var(--ring, transparent);
   }
   .picker-trigger:disabled {
     opacity: 0.55;
@@ -784,8 +801,8 @@
     background: var(--surface, #fffefa);
     color: var(--ink);
     border: 1px solid var(--line);
-    border-radius: 6px;
-    box-shadow: 0 8px 24px #0003;
+    border-radius: var(--radius-lg, 8px);
+    box-shadow: var(--shadow-md, 0 8px 24px #0003);
   }
   .picker-panel:popover-open {
     display: flex;
@@ -816,7 +833,7 @@
     width: 30px;
     height: 30px;
     border: 1px solid transparent;
-    border-radius: 4px;
+    border-radius: var(--radius-md, 6px);
     background: transparent;
     color: var(--muted);
     cursor: pointer;
@@ -831,7 +848,7 @@
     width: 30px;
     height: 30px;
     border: 0;
-    border-radius: 4px;
+    border-radius: var(--radius-md, 6px);
     background: transparent;
     color: var(--muted);
     cursor: pointer;
@@ -859,7 +876,7 @@
     margin: 0;
     padding: 5px 4px;
     border: 1px solid var(--line);
-    border-radius: 4px;
+    border-radius: var(--radius-md, 6px);
     background: var(--surface-muted, #f0ede4);
     color: var(--ink);
     font-family: var(--mono);
@@ -932,7 +949,7 @@
     height: 32px;
     padding: 0;
     border: 1px solid transparent;
-    border-radius: 4px;
+    border-radius: var(--radius-md, 6px);
     background: transparent;
     color: var(--ink);
     font-size: 12px;
@@ -1022,7 +1039,7 @@
     transform: translateY(-50%);
     background: color-mix(in srgb, var(--surface-muted, #f0ede4) 72%, transparent);
     border-block: 1px solid var(--line);
-    border-radius: 4px;
+    border-radius: var(--radius-md, 6px);
     pointer-events: none;
   }
   .picker-presets {
@@ -1098,7 +1115,7 @@
   .picker-foot button {
     padding: 7px 12px;
     border: 1px solid var(--line);
-    border-radius: 3px;
+    border-radius: var(--radius-md, 6px);
     background: transparent;
     color: var(--ink);
     font-size: 13px;
@@ -1118,7 +1135,7 @@
     color: #fff;
     font-weight: 600;
     letter-spacing: 0.02em;
-    box-shadow: inset 0 -2px 0 #0002;
+    box-shadow: var(--shadow-xs, inset 0 -2px 0 #0002);
   }
   .picker-foot button.picker-done:hover:not(:disabled) {
     border-color: #b84208;

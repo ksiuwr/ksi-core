@@ -1,4 +1,5 @@
 export type Workspace = 'directory' | 'project' | 'association';
+
 const viewPaths: Record<string, string> = {
   board: 'kanban',
   forum: 'forum',
@@ -9,6 +10,92 @@ const viewPaths: Record<string, string> = {
   permissions: 'permissions',
   previews: 'previews'
 };
+
+const pathViews: Record<string, string> = Object.fromEntries(
+  Object.entries(viewPaths).map(([tab, path]) => [path, tab])
+);
+
+export function projectPath(slug: string): string {
+  return `/projects/${encodeURIComponent(slug)}`;
+}
+
+export function workspacePath(workspace: Workspace, projectSlug: string): string {
+  if (workspace === 'project') return projectPath(projectSlug);
+  if (workspace === 'association') return '/association';
+  return '/projects';
+}
+
+export function dashboardPath(workspace: Workspace, projectSlug: string, tab: string): string {
+  if (tab === 'profile') return '/profile';
+  if (tab === 'inbox') return '/inbox';
+  if (tab === 'users') return '/members';
+  if (tab === 'person') return '/people';
+  if (tab === '__create_project__') return '/projects/new';
+  if (tab === 'projects' || workspace === 'directory') return '/projects';
+  const base = workspacePath(workspace, projectSlug);
+  const segment = viewPaths[tab];
+  return !segment || tab === 'overview' ? base : `${base}/${segment}`;
+}
+
+export function taskPath(workspace: Workspace, projectSlug: string, id: string): string {
+  return `${workspacePath(workspace, projectSlug)}/tasks/${encodeURIComponent(id)}`;
+}
+
+export function newTaskPath(workspace: Workspace, projectSlug: string, status?: string): string {
+  const path = `${workspacePath(workspace, projectSlug)}/tasks/new`;
+  return status ? `${path}?status=${encodeURIComponent(status)}` : path;
+}
+
+export function threadPath(workspace: Workspace, projectSlug: string, id: string): string {
+  return `${dashboardPath(workspace, projectSlug, 'forum')}/${encodeURIComponent(id)}`;
+}
+
+export function newThreadPath(workspace: Workspace, projectSlug: string): string {
+  return `${dashboardPath(workspace, projectSlug, 'forum')}/new`;
+}
+
+export function newArticlePath(workspace: Workspace, projectSlug: string): string {
+  return `${dashboardPath(workspace, projectSlug, 'articles')}/new`;
+}
+
+export function articlePath(slug: string): string {
+  return `/articles/${encodeURIComponent(slug)}`;
+}
+
+/**
+ * Resolve the active sidebar tab from a real route pathname. Route params are
+ * the source of truth for slugs and ids; this helper only classifies the page.
+ */
+export function tabFromPath(pathname: string): string {
+  const segments = pathname.split('/').filter(Boolean);
+  const [root, second, third, fourth] = segments;
+  if (root === 'projects') {
+    if (!second) return 'projects';
+    if (second === 'new') return '__create_project__';
+    return tabFromSegments(third, fourth);
+  }
+  if (root === 'association') return tabFromSegments(second, third);
+  if (root === 'members') return 'users';
+  if (root === 'people') return 'person';
+  if (root === 'profile') return 'profile';
+  if (root === 'inbox') return 'inbox';
+  if (root === 'articles') return 'articles';
+  return 'projects';
+}
+
+function tabFromSegments(section: string | undefined, detail: string | undefined): string {
+  if (!section) return 'overview';
+  if (section === 'kanban') return 'board';
+  if (section === 'tasks') return 'board';
+  if (section === 'forum') return 'forum';
+  if (detail && section === 'members') return 'person';
+  return pathViews[section] ?? 'overview';
+}
+
+/**
+ * Legacy parser retained for old bookmarks, redirects, and navigation tests.
+ * Application pages read route params directly.
+ */
 export function parseDashboardPath(pathname: string): {
   workspace: Workspace;
   projectSlug: string;
@@ -17,79 +104,78 @@ export function parseDashboardPath(pathname: string): {
   memberId?: string;
   threadId?: string;
   articleSlug?: string;
+  taskId?: string;
 } | null {
   let segments: string[];
   try {
-    segments = pathname.split('/').filter(Boolean).map(decodeURIComponent);
+    segments = pathname
+      .split('?')[0]
+      .split('/')
+      .filter(Boolean)
+      .map((segment) => decodeURIComponent(segment));
   } catch {
     return null;
   }
-  const [root, slug, view] = segments;
   if (
-    root === 'articles' &&
-    slug &&
-    segments.length === 2 &&
-    !slug.includes('/') &&
-    !slug.includes('\\')
-  )
-    return { workspace: 'directory', projectSlug: '', tab: 'articles', articleSlug: slug };
-  if (
-    root === 'settings' &&
-    (segments.length === 1 || (slug === 'notifications' && segments.length === 2))
-  )
-    return { workspace: 'directory', projectSlug: '', tab: 'user-settings' };
-  const removed = root === 'association' ? segments[2] : segments[3];
-  if (
-    removed &&
-    !(
-      (removed === 'graveyard' && (root === 'association' ? slug : view) === 'kanban') ||
-      (root === 'association' ? slug : view) === 'forum'
-    )
+    !segments.length ||
+    segments.some((part) => part.includes('/') || part.includes('\\')) ||
+    segments.length > 4
   )
     return null;
-  if (segments.some((part) => part.includes('/') || part.includes('\\')) || segments.length > 4)
+  const [root, slug, view, detail] = segments;
+
+  if (root === 'projects') {
+    if (segments.length === 1) return { workspace: 'directory', projectSlug: '', tab: 'projects' };
+    if (slug === 'new' && segments.length === 2)
+      return { workspace: 'directory', projectSlug: '', tab: '__create_project__' };
+    if (!slug || slug === 'new') return null;
+    if (segments.length === 2) return { workspace: 'project', projectSlug: slug, tab: 'overview' };
+    if (view === 'tasks' && segments.length === 4 && detail)
+      return { workspace: 'project', projectSlug: slug, tab: 'board', taskId: detail };
+    if (view === 'kanban' && segments.length === 4 && detail === 'graveyard')
+      return { workspace: 'project', projectSlug: slug, tab: 'board', graveyard: true };
+    if (view === 'forum' && segments.length === 4 && detail)
+      return { workspace: 'project', projectSlug: slug, tab: 'forum', threadId: detail };
+    if (segments.length === 3) {
+      const tab = pathViews[view];
+      return tab ? { workspace: 'project', projectSlug: slug, tab } : null;
+    }
     return null;
-  if (root === 'people' && slug && segments.length === 2)
-    return { workspace: 'directory', projectSlug: '', tab: 'person', memberId: slug };
-  if (root === 'members' && slug && segments.length === 2)
-    return { workspace: 'directory', projectSlug: '', tab: 'users', memberId: slug };
-  if ((root === 'profile' || root === 'members' || root === 'inbox') && segments.length === 1)
+  }
+
+  if (root === 'association') {
+    if (segments.length === 1)
+      return { workspace: 'association', projectSlug: '', tab: 'overview' };
+    if (segments.length === 2) {
+      if (slug === 'tasks') return { workspace: 'association', projectSlug: '', tab: 'board' };
+      const tab = pathViews[slug];
+      return tab && !['settings', 'permissions', 'previews'].includes(tab)
+        ? { workspace: 'association', projectSlug: '', tab }
+        : null;
+    }
+    if (segments.length === 3 && slug === 'tasks' && view)
+      return { workspace: 'association', projectSlug: '', tab: 'board', taskId: view };
+    if (segments.length === 3 && slug === 'kanban' && view === 'graveyard')
+      return { workspace: 'association', projectSlug: '', tab: 'board', graveyard: true };
+    if (segments.length === 3 && slug === 'forum' && view)
+      return { workspace: 'association', projectSlug: '', tab: 'forum', threadId: view };
+    return null;
+  }
+
+  if (root === 'members' && segments.length <= 2)
     return {
       workspace: 'directory',
       projectSlug: '',
-      tab: root === 'members' ? 'users' : root
+      tab: 'users',
+      ...(slug ? { memberId: slug } : {})
     };
-  if (root === 'projects' && segments.length === 1)
-    return { workspace: 'directory', projectSlug: '', tab: 'projects' };
-  if (root === 'projects' && slug === 'new' && segments.length === 2)
-    return { workspace: 'directory', projectSlug: '', tab: '__create_project__' };
-  const section = root === 'association' ? slug : view;
-  const tab = section
-    ? Object.entries(viewPaths).find(([, path]) => path === section)?.[0]
-    : 'overview';
-  if (
-    !tab ||
-    (root === 'association' && (tab === 'settings' || tab === 'permissions')) ||
-    (root === 'association' && segments.length > 3) ||
-    (root !== 'association' && (root !== 'projects' || !slug || slug === 'new'))
-  )
-    return null;
-  return {
-    workspace: root === 'association' ? 'association' : 'project',
-    projectSlug: root === 'association' ? '' : slug,
-    tab,
-    ...(removed && section === 'kanban' ? { graveyard: true } : {}),
-    ...(removed && section === 'forum' ? { threadId: removed } : {})
-  };
-}
-export function dashboardPath(workspace: Workspace, projectSlug: string, tab: string): string {
-  if (tab === 'user-settings') return '/settings';
-  if (tab === 'profile') return '/profile';
-  if (tab === 'inbox') return '/inbox';
-  if (tab === 'users') return '/members';
-  if (tab === '__create_project__') return '/projects/new';
-  if (tab === 'projects' || workspace === 'directory') return '/projects';
-  const base =
-    workspace === 'project' ? `/projects/${encodeURIComponent(projectSlug)}` : '/association';
-  return tab === 'overview' ? base : `${base}/${viewPaths[tab]}`;
+  if (root === 'people' && segments.length === 2)
+    return { workspace: 'directory', projectSlug: '', tab: 'person', memberId: slug };
+  if (root === 'profile' && segments.length === 1)
+    return { workspace: 'directory', projectSlug: '', tab: 'profile' };
+  if (root === 'inbox' && segments.length === 1)
+    return { workspace: 'directory', projectSlug: '', tab: 'inbox' };
+  if (root === 'articles' && segments.length === 2 && slug)
+    return { workspace: 'directory', projectSlug: '', tab: 'articles', articleSlug: slug };
+  return null;
 }

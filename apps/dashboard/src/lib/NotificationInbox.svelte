@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { preferences } from '$lib/preferences.svelte';
+  import { formatDateTime, formatRelativeTime } from 'shared/format';
   import { onMount } from 'svelte';
   import { flip } from 'svelte/animate';
   import { fade, fly, scale } from 'svelte/transition';
@@ -13,27 +15,25 @@
     Check,
     CheckCheck,
     X,
-    Settings,
     ArrowRight,
     CircleDot,
     MessageSquare
   } from '@lucide/svelte';
-  import type { InboxData } from './ApprovalInbox.svelte';
+  import type { InboxData } from './types';
   let {
-    language = 'en',
     fullPage = false,
     admin,
     administrator,
     refresh,
     reportError
   }: {
-    language?: 'pl' | 'en';
     fullPage?: boolean;
     admin?: InboxData;
     administrator?: boolean;
     refresh?: () => Promise<void>;
     reportError?: (message: string) => void;
   } = $props();
+  const language = $derived(preferences.language);
   type Notification = NotificationContext & {
     id: string;
     title: string;
@@ -208,15 +208,7 @@
       close();
   }
   function relativeTime(date: string) {
-    const seconds = Math.max(0, Math.floor((now - Date.parse(date)) / 1000));
-    const formatter = new Intl.RelativeTimeFormat(language === 'pl' ? 'pl' : 'en', {
-      numeric: 'auto',
-      style: 'short'
-    });
-    if (seconds < 60) return language === 'pl' ? 'Teraz' : 'Just now';
-    if (seconds < 3600) return formatter.format(-Math.floor(seconds / 60), 'minute');
-    if (seconds < 86400) return formatter.format(-Math.floor(seconds / 3600), 'hour');
-    return formatter.format(-Math.floor(seconds / 86400), 'day');
+    return formatRelativeTime(date, language, now, 'short');
   }
   async function request(path: string, method = 'GET', body?: unknown) {
     const response = await fetch(`/api/notifications${path}`, {
@@ -295,8 +287,6 @@
     };
   });
   function reasonLabel(reason: string) {
-    if (reason === 'deadline')
-      return language === 'pl' ? 'Przypomnienie o terminie' : 'Deadline reminder';
     if (reason === 'mention') return language === 'pl' ? 'Wzmianka' : 'Mention';
     if (reason === 'assignment') return language === 'pl' ? 'Przypisanie' : 'Assignment';
     return language === 'pl' ? 'Aktualizacja' : 'Update';
@@ -367,14 +357,6 @@
           title={language === 'pl' ? 'Oznacz wszystkie jako przeczytane' : 'Mark all as read'}
           ><CheckCheck size={17} /></button
         >
-        <a
-          class="menu-icon"
-          href="/settings#notifications"
-          onclick={() => close()}
-          aria-label={language === 'pl' ? 'Ustawienia powiadomień' : 'Notification settings'}
-          title={language === 'pl' ? 'Ustawienia powiadomień' : 'Notification settings'}
-          ><Settings size={16} /></a
-        >
       </div>
     </header>
     {#if error}<p role="alert" class="notification-error">{error}</p>{/if}
@@ -430,9 +412,8 @@
                     ? entry.notification.projectName || 'KSI'
                     : 'KSI'}<span aria-hidden="true"> · </span><time
                     datetime={entry.createdAt}
-                    title={new Date(entry.createdAt).toLocaleString(
-                      language === 'pl' ? 'pl-PL' : 'en-GB'
-                    )}>{relativeTime(entry.createdAt)}</time
+                    title={formatDateTime(entry.createdAt, language)}
+                    >{relativeTime(entry.createdAt)}</time
                   ></span
                 >
                 <span class="entry-title">{entry.title}</span>
@@ -571,10 +552,8 @@
     color: var(--ink);
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 10px;
-    box-shadow:
-      0 8px 28px #0002,
-      0 0 0 1px #00000004;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
     font-family: var(--font);
     font-size: 13px;
     line-height: 1.5;
@@ -585,8 +564,8 @@
     position: static;
     z-index: auto;
     width: 100%;
-    border-radius: 4px;
-    box-shadow: none;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xs);
   }
   .full-page .entry-title {
     display: block;
@@ -633,7 +612,7 @@
     height: 30px;
     padding: 0;
     border: 0;
-    border-radius: 5px;
+    border-radius: var(--radius-md);
     color: var(--muted);
     background: transparent;
     cursor: pointer;
@@ -806,7 +785,7 @@
   .approval-avatar {
     width: 28px;
     height: 28px;
-    border-radius: 5px;
+    border-radius: var(--radius-md);
     object-fit: cover;
     margin-bottom: 4px;
   }

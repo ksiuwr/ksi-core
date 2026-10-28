@@ -4,7 +4,7 @@
   import { ArrowLeft, ArrowUpRight, Folder, CalendarDays } from '@lucide/svelte';
   import { locale } from '$lib/locale.svelte';
   let { data } = $props<{ data: import('./$types').PageData }>();
-  const language = $derived(locale.current === 'pl' ? 'pl' : 'en');
+  const language = $derived(locale.current);
   const formatter = $derived(
     new Intl.DateTimeFormat(locale.current, { day: 'numeric', month: 'long', year: 'numeric' })
   );

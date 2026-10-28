@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Check, GripVertical, UploadCloud, LoaderCircle, X } from '@lucide/svelte';
+  import { preferences } from './preferences.svelte.js';
   import GalleryImage from './GalleryImage.svelte';
   import {
     moveGalleryImage,
@@ -10,7 +11,6 @@
 
   let {
     gallery,
-    language = 'pl',
     busy = false,
     names = {},
     uploads = [],
@@ -19,7 +19,6 @@
     onremove
   }: {
     gallery: GalleryState;
-    language?: 'pl' | 'en';
     busy?: boolean;
     names?: Record<string, string>;
     uploads?: { key: number; name: string; status: 'queued' | 'uploading' }[];
@@ -27,6 +26,7 @@
     onupload: (files: FileList | null) => void;
     onremove: () => void;
   } = $props();
+  const language = $derived(preferences.language);
   const uid = $props.id();
   let input = $state<HTMLInputElement>();
   let dropping = $state(false);
@@ -146,7 +146,7 @@
             disabled={busy || (index >= gallery.preview && gallery.preview >= 30)}
             onclick={() => onchange(toggleGalleryImage(gallery, id))}
           >
-            <GalleryImage src={`/media/${id}`} alt={names[id] ?? ''} {language} />
+            <GalleryImage src={`/media/${id}`} alt={names[id] ?? ''} />
             <span class="selection" aria-hidden="true"
               >{#if index < gallery.preview}<Check size={14} />{index + 1}{/if}</span
             >
@@ -232,7 +232,7 @@
     margin: 8px 0 0;
     padding: 16px;
     border: 1px solid var(--line, #ddd);
-    border-radius: 4px;
+    border-radius: var(--radius-lg, 8px);
   }
   .gallery-editor.dropping {
     border-color: var(--accent, #6750a4);
@@ -286,7 +286,7 @@
     position: relative;
     min-width: 0;
     border: 2px solid var(--line, #ddd);
-    border-radius: 4px;
+    border-radius: var(--radius-md, 6px);
     overflow: hidden;
   }
   li.selected {
@@ -378,7 +378,7 @@
     color: #fff;
     background: #000a;
     border: 1px solid #fff4;
-    border-radius: 3px;
+    border-radius: var(--radius-md, 6px);
   }
   .drag-handle {
     touch-action: none;
@@ -392,7 +392,7 @@
     min-height: 86px;
     padding: 16px;
     border: 1px dashed var(--line, #aaa);
-    border-radius: 3px;
+    border-radius: var(--radius-lg, 8px);
     background: transparent;
     color: var(--muted);
     font-size: 12px;

@@ -20,7 +20,7 @@
     height: 30px;
     margin-bottom: 32px;
     background: var(--surface-muted);
-    border-radius: 3px;
+    border-radius: var(--radius-md);
   }
   .skeleton-grid {
     display: grid;
@@ -32,7 +32,7 @@
   .skeleton-panel {
     height: 110px;
     border: 1px solid var(--line);
-    border-radius: 4px;
+    border-radius: var(--radius-xl);
     padding: 22px;
     display: flex;
     flex-direction: column;
@@ -45,7 +45,7 @@
     height: 12px;
     max-width: 400px;
     background: var(--surface-muted);
-    border-radius: 3px;
+    border-radius: var(--radius-sm);
   }
   .skeleton-panel span:last-child {
     width: 60%;

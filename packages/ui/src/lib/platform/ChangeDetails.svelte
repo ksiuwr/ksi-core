@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { formatDateTime } from 'shared/format';
+  import { preferences } from './preferences.svelte.js';
   import { untrack } from 'svelte';
   import { ChevronDown, ArrowRight, FileDiff, Minus, Plus } from '@lucide/svelte';
   import Dropdown from './Dropdown.svelte';
@@ -6,9 +8,12 @@
   import { activityDiffRows } from 'shared/activity-diff';
   let {
     changes,
-    language = 'pl',
     initiallyExpanded = false
-  }: { changes: ContentChange[]; language?: 'pl' | 'en'; initiallyExpanded?: boolean } = $props();
+  }: {
+    changes: ContentChange[];
+    initiallyExpanded?: boolean;
+  } = $props();
+  const language = $derived(preferences.language);
   const uid = $props.id();
   let expanded = $state<number[]>(untrack(() => (initiallyExpanded ? [0] : [])));
   let visibleLines = $state<Record<number, number>>({});
@@ -98,10 +103,7 @@
       return value ? (language === 'pl' ? 'Tak' : 'Yes') : language === 'pl' ? 'Nie' : 'No';
     if (typeof value === 'string') {
       if (/^\d{4}-\d{2}-\d{2}T/.test(value) && !Number.isNaN(new Date(value).getTime()))
-        return new Intl.DateTimeFormat(language === 'pl' ? 'pl-PL' : 'en-GB', {
-          dateStyle: 'medium',
-          timeStyle: 'short'
-        }).format(new Date(value));
+        return formatDateTime(value, language, { dateStyle: 'medium', timeStyle: 'short' });
       return value;
     }
     if (Array.isArray(value) && value.every((item) => typeof item === 'string'))
@@ -265,7 +267,7 @@
   }
   .change-field {
     border: 1px solid var(--line);
-    border-radius: 4px;
+    border-radius: var(--radius-md, 6px);
     margin-top: 6px;
     overflow: hidden;
   }

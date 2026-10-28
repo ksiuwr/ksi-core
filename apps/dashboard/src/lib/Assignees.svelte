@@ -17,7 +17,6 @@
     value = $bindable([]),
     projectId = '',
     members,
-    language = 'en',
     readonly = false,
     disabled = false,
     showLabel = true,
@@ -26,7 +25,6 @@
     value?: string[];
     projectId?: string;
     members?: AssignmentMember[];
-    language?: 'pl' | 'en';
     readonly?: boolean;
     disabled?: boolean;
     showLabel?: boolean;
@@ -239,7 +237,7 @@
 
 {#if readonly}
   <span class="assigned">
-    {#if selected.length && showLabel}<span class="readonly-label">{'Assigned to'}</span>{/if}
+    {#if selected.length && showLabel}<span class="readonly-label">Assigned to</span>{/if}
     {#each selected as person (person.id)}
       <span class="person-chip compact" title={fullName(person)}
         >{@render avatar(person)}<span class="person-name">{fullName(person)}</span></span
@@ -248,7 +246,7 @@
   </span>
 {:else}
   <div class="assignees">
-    {#if showLabel}<span class="label" id={`${uid}-label`}>{'Assigned to'}</span>{/if}
+    {#if showLabel}<span class="label" id={`${uid}-label`}>Assigned to</span>{/if}
     {#if selected.length}
       <span class="selected-chips">
         {#each selected as person (person.id)}
@@ -288,7 +286,7 @@
         }}
       >
         <UserRoundPlus size={15} aria-hidden="true" />
-        <span class="trigger-label">{'Add assignees'}</span>
+        <span class="trigger-label">Add assignees</span>
         <ChevronsUpDown size={14} aria-hidden="true" />
       </button>
       <div
@@ -348,13 +346,14 @@
             </button>
           {:else}
             <p class="empty" role="status">
-              {#if loading}{'Loading members…'}{:else if error}{'Unable to load members'}{:else}{'No matching members.'}{/if}
+              {#if loading}Loading members…{:else if error}Unable to load members{:else}No matching
+                members.{/if}
             </p>
           {/each}
         </div>
       </div>
     {/if}
-    {#if error && !open}<p class="error" role="alert">{'Unable to load members'}</p>{/if}
+    {#if error && !open}<p class="error" role="alert">Unable to load members</p>{/if}
   </div>
 {/if}
 
@@ -464,19 +463,29 @@
     width: 100%;
     min-height: 36px;
     padding: 7px 10px;
-    border: 1px dashed var(--line, #dcd8d0);
-    border-radius: 3px;
+    border: 1px dashed var(--input, var(--line));
+    border-radius: var(--radius-md);
     background: transparent;
     color: var(--muted);
     font: inherit;
     font-size: 13px;
     text-align: left;
     cursor: pointer;
+    transition:
+      border-color var(--dur-fast) ease,
+      background-color var(--dur-fast) ease,
+      color var(--dur-fast) ease;
   }
   .trigger:hover,
-  .trigger:focus-visible,
   .trigger[aria-expanded='true'] {
     border-color: var(--control-border-hover, var(--muted));
+    background: var(--surface);
+    color: var(--ink);
+  }
+  .trigger:focus-visible {
+    outline: none;
+    border-color: var(--ring-strong);
+    box-shadow: 0 0 0 3px var(--ring);
     color: var(--ink);
   }
   .trigger:disabled {
@@ -493,15 +502,13 @@
     display: none;
     flex-direction: column;
     margin: 0;
-    padding: 6px;
+    padding: 4px;
     overflow: hidden;
     border: 1px solid var(--line, #dcd8d0);
-    border-radius: 4px;
+    border-radius: var(--radius-lg);
     background: var(--surface, #fffefa);
     color: var(--ink, #272638);
-    box-shadow:
-      0 8px 24px #0003,
-      inset 0 1px 0 #ffffff08;
+    box-shadow: var(--shadow-md);
   }
   .panel:popover-open {
     display: flex;
@@ -526,6 +533,11 @@
     font-size: 13px;
     outline: none;
   }
+  .panel-search input:hover,
+  .panel-search input:focus {
+    border: 0;
+    box-shadow: none;
+  }
   .options {
     display: flex;
     flex-direction: column;
@@ -539,10 +551,10 @@
     align-items: center;
     gap: 9px;
     width: 100%;
-    min-height: 38px;
+    min-height: 36px;
     padding: 6px 8px;
     border: 0;
-    border-radius: 3px;
+    border-radius: var(--radius-sm);
     background: transparent;
     color: var(--ink, #272638);
     font: inherit;

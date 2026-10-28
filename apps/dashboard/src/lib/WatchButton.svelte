@@ -3,12 +3,10 @@
   let {
     type,
     id,
-    language = 'en',
     showLabel = false
   }: {
     type: 'item' | 'thread';
     id: string;
-    language?: 'pl' | 'en';
     showLabel?: boolean;
   } = $props();
   let watching = $state(false),
@@ -61,13 +59,13 @@
   disabled={busy}
   onclick={toggle}
 >
-  {#if busy}<span class="sr-only">{'Loading…'}</span>
-  {:else if watching}<Bell size={13} aria-hidden="true" />
-  {:else}<BellOff size={13} aria-hidden="true" />
+  {#if busy}<span class="sr-only">Loading…</span>
+  {:else if watching}<BellOff size={13} aria-hidden="true" />
+  {:else}<Bell size={13} aria-hidden="true" />
   {/if}
   {#if showLabel}
     <span class="watch-label"
-      >{#if watching}{'Unwatch'}{:else}{'Watch'}{/if}</span
+      >{#if watching}Unwatch{:else}Watch{/if}</span
     >
   {/if}
 </button>
@@ -81,42 +79,34 @@
     width: 30px;
     height: 30px;
     padding: 0;
-    border: 1px solid var(--line);
-    border-radius: 3px;
+    border: 1px solid var(--input);
+    border-radius: var(--radius-md);
     background: var(--surface);
+    box-shadow: var(--shadow-xs);
     color: var(--muted);
     cursor: pointer;
     flex-shrink: 0;
     transition:
-      background 0.13s,
-      border-color 0.13s,
-      color 0.13s;
+      background-color var(--dur-fast) ease,
+      color var(--dur-fast) ease;
   }
   .watch-button:hover {
-    border-color: var(--control-border-hover);
     color: var(--ink);
     background: var(--surface-muted);
   }
   .watch-button.with-label {
     width: auto;
-    height: 26px;
-    padding: 0 9px;
+    height: 32px;
+    padding: 0 12px;
     gap: 6px;
-    font-size: 11px;
+    font-size: 12.5px;
     font-weight: 500;
   }
   .watch-label {
     white-space: nowrap;
   }
   .watch-button[aria-pressed='true'] {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--surface-muted);
-  }
-  .watch-button[aria-pressed='true']:hover {
-    background: var(--accent);
-    color: var(--primary-text);
-    border-color: var(--accent);
+    color: var(--ink);
   }
   .watch-button:disabled {
     opacity: 0.5;

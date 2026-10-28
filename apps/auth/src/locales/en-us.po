@@ -202,3 +202,7 @@ msgstr "Go to Dashboard"
 #: src/routes/+page.svelte
 msgid "Sign out"
 msgstr "Sign out"
+
+#: src/routes/+page.svelte
+msgid "or use email"
+msgstr "or use email"

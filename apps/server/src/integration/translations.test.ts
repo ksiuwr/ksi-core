@@ -213,6 +213,8 @@ describe.skipIf(!safe)('public content translations', () => {
       (await request(outsider, `/platform/public/articles/${articleId}?locale=pl`)).body.title
     ).toBe('Poradnik');
     expect((await request(leader, path, 'PUT', { version: 3, fields: {} })).status).toBe(200);
+    const [removed] = await db.select().from(articles).where(eq(articles.id, articleId));
+    expect(removed!.translations).not.toHaveProperty('pl');
     expect(
       (await request(outsider, `/platform/public/articles/${articleId}?locale=pl`)).body.title
     ).toBe('Project guide');

@@ -1,8 +1,9 @@
+import type { FrontendLocale } from 'shared/content-locales';
 import { clampImageWidth, minimumImageWidth } from 'shared/markdown-images';
 
 type ResizeOptions = {
   blocks?: unknown;
-  language: 'pl' | 'en';
+  language: FrontendLocale;
   onresize?: (index: number, width: number) => void;
 };
 /** Enhance only editable previews. Published Markdown has no editing controls. */
