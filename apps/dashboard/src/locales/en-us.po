@@ -64,6 +64,7 @@ msgstr "Tab"
 #: src/lib/Assignees.svelte
 #: src/lib/DetailLayout.svelte
 #: src/lib/KanbanBoard.svelte
+#: src/lib/NestedMenu.svelte
 #: src/lib/NotificationInbox.svelte
 #: src/routes/+layout.svelte
 msgid "Escape"
@@ -250,25 +251,30 @@ msgstr "KSI · {0} <0>v{0} · <0/></0>"
 msgid "Language and appearance"
 msgstr "Language and appearance"
 
+#: src/lib/AppearanceMenu.svelte
 #: src/lib/UserSettings.svelte
 #: src/lib/UserSettings.svelte
 msgid "Language"
 msgstr "Language"
 
+#: src/lib/AppearanceMenu.svelte
 #: src/lib/UserSettings.svelte
 msgid "Polski"
 msgstr "Polski"
 
+#: src/lib/AppearanceMenu.svelte
 #: src/lib/ContentTranslations.svelte
 #: src/lib/UserSettings.svelte
 msgid "English"
 msgstr "English"
 
+#: src/lib/AppearanceMenu.svelte
 #: src/lib/UserSettings.svelte
 #: src/lib/UserSettings.svelte
 msgid "Appearance"
 msgstr "Appearance"
 
+#: src/lib/AppearanceMenu.svelte
 #: src/lib/ContentHistory.svelte
 #: src/lib/TaskActivity.svelte
 #: src/lib/ThreadActivity.svelte
@@ -278,10 +284,12 @@ msgstr "Appearance"
 msgid "System"
 msgstr "System"
 
+#: src/lib/AppearanceMenu.svelte
 #: src/lib/UserSettings.svelte
 msgid "Light"
 msgstr "Light"
 
+#: src/lib/AppearanceMenu.svelte
 #: src/lib/UserSettings.svelte
 msgid "Dark"
 msgstr "Dark"
@@ -981,8 +989,6 @@ msgstr "Search users..."
 
 #: src/lib/UserSettings.svelte
 #: src/lib/views/ArticleView.svelte
-#: src/routes/+layout.svelte
-#: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 msgid "Settings"
@@ -2005,15 +2011,11 @@ msgstr "Teraz"
 msgid "Just now"
 msgstr "Just now"
 
-#: src/lib/NotificationInbox.svelte
-#: src/lib/NotificationInbox.svelte
-msgid "Ustawienia powiadomień"
-msgstr "Ustawienia powiadomień"
+#~ msgid "Ustawienia powiadomień"
+#~ msgstr "Ustawienia powiadomień"
 
-#: src/lib/NotificationInbox.svelte
-#: src/lib/NotificationInbox.svelte
-msgid "Notification settings"
-msgstr "Notification settings"
+#~ msgid "Notification settings"
+#~ msgstr "Notification settings"
 
 #: src/lib/NotificationSettings.svelte
 msgid "Email me about unread notifications"
@@ -2558,3 +2560,7 @@ msgstr "Read only"
 #: src/lib/ContentTranslations.svelte
 msgid "Use this as context while writing the translation."
 msgstr "Use this as context while writing the translation."
+
+#: src/lib/AppearanceMenu.svelte
+msgid "Theme"
+msgstr "Theme"

@@ -13,7 +13,6 @@
     Check,
     CheckCheck,
     X,
-    Settings,
     ArrowRight,
     CircleDot,
     MessageSquare
@@ -364,14 +363,6 @@
           aria-label={language === 'pl' ? 'Oznacz wszystkie jako przeczytane' : 'Mark all as read'}
           title={language === 'pl' ? 'Oznacz wszystkie jako przeczytane' : 'Mark all as read'}
           ><CheckCheck size={17} /></button
-        >
-        <a
-          class="menu-icon"
-          href="/settings#notifications"
-          onclick={() => close()}
-          aria-label={language === 'pl' ? 'Ustawienia powiadomień' : 'Notification settings'}
-          title={language === 'pl' ? 'Ustawienia powiadomień' : 'Notification settings'}
-          ><Settings size={16} /></a
         >
       </div>
     </header>

@@ -168,19 +168,6 @@ test('article slugs persist in standalone routes and reject malformed segments',
   expect(parseDashboardPath('/articles/a/extra')).toBeNull();
 });
 
-test('personal settings share one persistent global page', () => {
-  const path = dashboardPath('project', 'roboty', 'user-settings');
-  expect(path).toBe('/settings');
-  expect(parseDashboardPath(path)).toEqual({
-    workspace: 'directory',
-    projectSlug: '',
-    tab: 'user-settings'
-  });
-  expect(parseDashboardPath('/settings/notifications')).toEqual(parseDashboardPath(path));
-  expect(parseDashboardPath('/settings/notifications/extra')).toBeNull();
-  expect(parseDashboardPath('/settings/unknown')).toBeNull();
-});
-
 test('the layout resolves the active tab from the route', () => {
   expect(tabFromPath('/projects')).toBe('projects');
   expect(tabFromPath('/projects/new')).toBe('__create_project__');

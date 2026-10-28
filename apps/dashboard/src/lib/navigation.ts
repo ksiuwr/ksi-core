@@ -26,7 +26,6 @@ export function workspacePath(workspace: Workspace, projectSlug: string): string
 }
 
 export function dashboardPath(workspace: Workspace, projectSlug: string, tab: string): string {
-  if (tab === 'user-settings') return '/settings';
   if (tab === 'profile') return '/profile';
   if (tab === 'inbox') return '/inbox';
   if (tab === 'users') return '/members';
@@ -80,7 +79,6 @@ export function tabFromPath(pathname: string): string {
   if (root === 'people') return 'person';
   if (root === 'profile') return 'profile';
   if (root === 'inbox') return 'inbox';
-  if (root === 'settings') return 'user-settings';
   if (root === 'articles') return 'articles';
   return 'projects';
 }
@@ -177,11 +175,6 @@ export function parseDashboardPath(pathname: string): {
     return { workspace: 'directory', projectSlug: '', tab: 'profile' };
   if (root === 'inbox' && segments.length === 1)
     return { workspace: 'directory', projectSlug: '', tab: 'inbox' };
-  if (
-    root === 'settings' &&
-    (segments.length === 1 || (segments.length === 2 && slug === 'notifications'))
-  )
-    return { workspace: 'directory', projectSlug: '', tab: 'user-settings' };
   if (root === 'articles' && segments.length === 2 && slug)
     return { workspace: 'directory', projectSlug: '', tab: 'articles', articleSlug: slug };
   return null;

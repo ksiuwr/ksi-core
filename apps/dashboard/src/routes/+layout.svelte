@@ -9,6 +9,7 @@
   import { onMount, tick, untrack } from 'svelte';
   import { initializePreferences, preferences } from '$lib/preferences.svelte';
   import { loadLocale } from 'wuchale/load-utils';
+  import AppearanceMenu from '$lib/AppearanceMenu.svelte';
   import NotificationInbox from '$lib/NotificationInbox.svelte';
   import Dropdown from '@ksi-core/ui/platform/Dropdown.svelte';
   import { dashboardPath, tabFromPath, type Workspace } from '$lib/navigation';
@@ -25,7 +26,6 @@
     Users,
     UserRound,
     LogOut,
-    SunMoon,
     ArrowUpRight,
     ChevronDown,
     Settings,
@@ -473,14 +473,7 @@
             refresh={invalidateAll}
             reportError={(message) => (error = message)}
           />
-          <a
-            class="topbar-control"
-            href="/settings"
-            aria-label={'Settings'}
-            title={'Settings'}
-            aria-current={tab === 'user-settings' ? 'page' : undefined}
-            ><SunMoon size={18} aria-hidden="true" /></a
-          >
+          <AppearanceMenu />
           <details class="topbar-menu" bind:this={accountMenu}>
             <summary
               aria-label={'My account'}
