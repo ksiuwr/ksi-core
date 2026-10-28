@@ -1,0 +1,10 @@
+import { error } from '@sveltejs/kit';
+import { workspacePageContext } from '$lib/server/pages';
+import type { PageServerLoad } from './$types';
+
+export const load: PageServerLoad = async (event) => {
+  const context = await workspacePageContext(event);
+  if (!context.projectAccess.canEdit && !context.projectAccess.canManageMembers)
+    error(403, 'Access denied');
+  return { ...context, title: 'Settings', tab: 'settings' };
+};

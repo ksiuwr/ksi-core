@@ -14,7 +14,7 @@ export const GET: RequestHandler = async (event) => {
   const { href } = await response.json();
   if (
     typeof href !== 'string' ||
-    !/^\/(?:projects\/[^/]+|association)\/(?:kanban|forum)(?:[/?]|$)/.test(href)
+    !/^\/(?:projects\/[^/]+|association)\/(?:tasks|forum)(?:\/|$)/.test(href)
   )
     error(502, 'Invalid reference');
   redirect(303, href);

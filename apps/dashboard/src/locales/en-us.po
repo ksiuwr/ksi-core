@@ -31,31 +31,24 @@ msgstr "Return to Dashboard"
 
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/GraveyardView.svelte
 msgid "To do"
 msgstr "To do"
 
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/GraveyardView.svelte
 msgid "In progress"
 msgstr "In progress"
 
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/GraveyardView.svelte
 msgid "Done"
 msgstr "Done"
 
-#: src/routes/[...workspace]/+page.svelte
-msgid "Project not found."
-msgstr "Project not found."
+#~ msgid "Project not found."
+#~ msgstr "Project not found."
 
 #: src/lib/ApprovalInbox.svelte
 #: src/lib/AvatarUpload.svelte
@@ -63,67 +56,67 @@ msgstr "Project not found."
 #: src/lib/KanbanBoard.svelte
 #: src/lib/NotificationInbox.svelte
 #: src/lib/ProjectSettings.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
 msgid "Request failed"
 msgstr "Request failed"
 
 #: src/lib/Assignees.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "Tab"
 msgstr "Tab"
 
 #: src/lib/Assignees.svelte
-#: src/lib/KanbanBoard.svelte
+#: src/lib/DetailLayout.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/NotificationInbox.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "Escape"
 msgstr "Escape"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Enter a https://github.com/username profile link."
 msgstr "Enter a https://github.com/username profile link."
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Enter a https://linkedin.com/in/username profile link."
 msgstr "Enter a https://linkedin.com/in/username profile link."
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "Overview"
 msgstr "Overview"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/WorkspaceOverview.svelte
+#: src/routes/+layout.svelte
 msgid "Kanban"
 msgstr "Kanban"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ForumView.svelte
+#: src/lib/views/WorkspaceOverview.svelte
+#: src/routes/+layout.svelte
 msgid "Forum"
 msgstr "Forum"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ArticlesView.svelte
+#: src/lib/views/WorkspaceOverview.svelte
+#: src/routes/+layout.svelte
 msgid "Articles"
 msgstr "Articles"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/EventsView.svelte
+#: src/routes/+layout.svelte
 msgid "Activity"
 msgstr "Activity"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/WorkspaceOverview.svelte
+#: src/routes/+layout.svelte
 msgid "Project"
 msgstr "Project"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/WorkspaceOverview.svelte
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
 msgid "Association"
 msgstr "Association"
 
@@ -131,119 +124,115 @@ msgstr "Association"
 msgid "Approval inbox"
 msgstr "Approval inbox"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProjectDirectory.svelte
+#: src/routes/+layout.svelte
 msgid "Projects"
 msgstr "Projects"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "My profile"
 msgstr "My profile"
 
 #: src/lib/ProjectPermissions.svelte
 #: src/lib/WorkspaceMembers.svelte
 #: src/lib/WorkspaceMembers.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
+#: src/routes/members/+page.svelte
 msgid "Members"
 msgstr "Members"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProjectCreate.svelte
+#: src/lib/views/ProjectDirectory.svelte
 msgid "New project"
 msgstr "New project"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "All projects"
 msgstr "All projects"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Full name"
 msgstr "Full name"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "First name + last initial"
 msgstr "First name + last initial"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Initials only"
 msgstr "Initials only"
 
 #. 0: viewName
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "{0} · KSI"
 msgstr "{0} · KSI"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "Account activation required"
 msgstr "Account activation required"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "Your account first needs to be activated by an administrator. Ask directly:"
 msgstr "Your account first needs to be activated by an administrator. Ask directly:"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
 msgid "Sign out"
 msgstr "Sign out"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
 msgid "Close navigation"
 msgstr "Close navigation"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
 msgid "Navigation"
 msgstr "Navigation"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "KSI<0>/ core</0>"
 msgstr "KSI<0>/ core</0>"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "Choose workspace"
 msgstr "Choose workspace"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "Search projects…"
 msgstr "Search projects…"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "No projects found."
 msgstr "No projects found."
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "Choose a project to open its board, forum, and articles."
 msgstr "Choose a project to open its board, forum, and articles."
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "Association management"
 msgstr "Association management"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "KSI website ↗"
 msgstr "KSI website ↗"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "University of Wrocław"
 msgstr "University of Wrocław"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "Source"
 msgstr "Source"
 
 #. 0: 'University of Wrocław'; 0.0: import.meta.env.PUBLIC_APP_VERSION
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "KSI · {0} <0>v{0} · <0/></0>"
 msgstr "KSI · {0} <0>v{0} · <0/></0>"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "Current workspace"
 msgstr "Current workspace"
 
@@ -273,8 +262,8 @@ msgstr "Appearance"
 #: src/lib/TaskActivity.svelte
 #: src/lib/ThreadActivity.svelte
 #: src/lib/UserSettings.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/EventsView.svelte
+#: src/lib/views/EventsView.svelte
 msgid "System"
 msgstr "System"
 
@@ -286,317 +275,323 @@ msgstr "Light"
 msgid "Dark"
 msgstr "Dark"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "My account"
 msgstr "My account"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "Account settings"
 msgstr "Account settings"
 
-#: src/routes/[...workspace]/+page.svelte
-msgid "Loading workspace"
-msgstr "Loading workspace"
+#~ msgid "Loading workspace"
+#~ msgstr "Loading workspace"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProjectDirectory.svelte
 msgid "Choose a project and start collaborating."
 msgstr "Choose a project and start collaborating."
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProjectDirectory.svelte
 msgid "Locked"
 msgstr "Locked"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProjectDirectory.svelte
 msgid "Open project"
 msgstr "Open project"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProjectDirectory.svelte
 msgid "No projects yet"
 msgstr "No projects yet"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProjectDirectory.svelte
 msgid "New projects will appear here."
 msgstr "New projects will appear here."
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/WorkspaceOverview.svelte
 msgid "Shared tasks, conversations, and publications in one place."
 msgstr "Shared tasks, conversations, and publications in one place."
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/WorkspaceOverview.svelte
 msgid "Join project"
 msgstr "Join project"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/WorkspaceOverview.svelte
 msgid "Plan and track shared tasks."
 msgstr "Plan and track shared tasks."
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/WorkspaceOverview.svelte
 msgid "Discuss, ask questions, and share ideas."
 msgstr "Discuss, ask questions, and share ideas."
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ArticlesView.svelte
+#: src/lib/views/WorkspaceOverview.svelte
 msgid "Write publications and propose changes."
 msgstr "Write publications and propose changes."
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ArticlesView.svelte
+#: src/lib/views/ArticlesView.svelte
 msgid "New article"
 msgstr "New article"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ArticlesView.svelte
 msgid "No articles yet. Create the first article in this workspace."
 msgstr "No articles yet. Create the first article in this workspace."
 
 #: src/lib/ContentTranslations.svelte
-#: src/lib/KanbanBoard.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/DetailLayout.svelte
+#: src/lib/views/ArticleView.svelte
+#: src/lib/views/ArticlesView.svelte
 msgid "Title"
 msgstr "Title"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ArticleView.svelte
 msgid "Save draft"
 msgstr "Save draft"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ArticleView.svelte
 msgid "Publish"
 msgstr "Publish"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ArticleView.svelte
 msgid "Propose edit"
 msgstr "Propose edit"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ArticleView.svelte
 msgid "Show my author credit"
 msgstr "Show my author credit"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ArticlesView.svelte
 msgid "Create"
 msgstr "Create"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ArticleView.svelte
+#: src/lib/views/ArticlesView.svelte
+#: src/lib/views/ProjectCreate.svelte
 msgid "Slug"
 msgstr "Slug"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/KanbanView.svelte
 msgid "Task board"
 msgstr "Task board"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/GraveyardView.svelte
+#: src/lib/views/TaskView.svelte
 msgid "Back to board"
 msgstr "Back to board"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/GraveyardView.svelte
 msgid "Restore"
 msgstr "Restore"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ForumView.svelte
+#: src/lib/views/ForumView.svelte
 msgid "New thread"
 msgstr "New thread"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ForumView.svelte
 msgid "Forum view"
 msgstr "Forum view"
 
 #: src/lib/Members.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ForumView.svelte
 msgid "Active"
 msgstr "Active"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ForumView.svelte
 msgid "Archive"
 msgstr "Archive"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/ThreadAside.svelte
+#: src/lib/views/ForumView.svelte
+#: src/lib/views/ForumView.svelte
+#: src/lib/views/ProjectCreate.svelte
 msgid "Leaders"
 msgstr "Leaders"
 
 #: src/lib/Assignees.svelte
 #: src/lib/ProjectPermissions.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/ThreadAside.svelte
+#: src/lib/views/ForumView.svelte
+#: src/lib/views/ForumView.svelte
 msgid "Project members"
 msgstr "Project members"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/ThreadAside.svelte
+#: src/lib/views/ForumView.svelte
+#: src/lib/views/ForumView.svelte
 msgid "Association members"
 msgstr "Association members"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ThreadView.svelte
 msgid "All threads"
 msgstr "All threads"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ThreadView.svelte
 msgid "This thread is archived."
 msgstr "This thread is archived."
 
-#: src/lib/KanbanBoard.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ThreadView.svelte
+#: src/lib/views/ThreadView.svelte
 msgid "Reply"
 msgstr "Reply"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/ThreadAside.svelte
 msgid "Restore thread"
 msgstr "Restore thread"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/ThreadAside.svelte
 msgid "Archive thread"
 msgstr "Archive thread"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ForumView.svelte
 msgid "Subject"
 msgstr "Subject"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/ThreadAside.svelte
+#: src/lib/views/ForumView.svelte
+#: src/lib/views/ForumView.svelte
 msgid "Visibility"
 msgstr "Visibility"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ForumView.svelte
 msgid "Create thread"
 msgstr "Create thread"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Profile"
 msgstr "Profile"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Introduce yourself to the association and choose what to share publicly."
 msgstr "Introduce yourself to the association and choose what to share publicly."
 
 #: src/lib/NotificationSettings.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Saved"
 msgstr "Saved"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ArticleView.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Save changes"
 msgstr "Save changes"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "About you"
 msgstr "About you"
 
 #: src/lib/ContentTranslations.svelte
 #: src/lib/Members.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "First name"
 msgstr "First name"
 
 #: src/lib/ContentTranslations.svelte
 #: src/lib/Members.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Last name"
 msgstr "Last name"
 
 #: src/lib/ContentTranslations.svelte
 #: src/lib/Members.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Nickname"
 msgstr "Nickname"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "What should we call you?"
 msgstr "What should we call you?"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "A little about you"
 msgstr "A little about you"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Interests, projects, and things you enjoy…"
 msgstr "Interests, projects, and things you enjoy…"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Public profile"
 msgstr "Public profile"
 
 #. 0: person.nickname
-#. 0: profile.nickname
+#. 0: draft.nickname
 #: src/lib/WorkspaceMembers.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "aka. {0}"
 msgstr "aka. {0}"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Your public profile on the KSI website."
 msgstr "Your public profile on the KSI website."
 
 #: src/lib/WorkspaceMembers.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "<0/>GitHub"
 msgstr "<0/>GitHub"
 
 #: src/lib/WorkspaceMembers.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "<0/>LinkedIn"
 msgstr "<0/>LinkedIn"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Name visibility"
 msgstr "Name visibility"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Applies to the public website. Members see your full name in the dashboard."
 msgstr "Applies to the public website. Members see your full name in the dashboard."
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Find me online"
 msgstr "Find me online"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Use a https://github.com/username link."
 msgstr "Use a https://github.com/username link."
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Use a https://linkedin.com/in/username link."
 msgstr "Use a https://linkedin.com/in/username link."
 
 #: src/lib/Members.svelte
 #: src/lib/Members.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Delete account"
 msgstr "Delete account"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Your profile will be anonymized. Association content remains."
 msgstr "Your profile will be anonymized. Association content remains."
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Confirm account deletion"
 msgstr "Confirm account deletion"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/EventsView.svelte
 msgid "No activity yet."
 msgstr "No activity yet."
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProjectCreate.svelte
 msgid "Back"
 msgstr "Back"
 
 #: src/lib/ContentTranslations.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/ProjectSettings.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProjectCreate.svelte
 msgid "Name"
 msgstr "Name"
 
 #: src/lib/ContentTranslations.svelte
 #: src/lib/ProjectSettings.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProjectCreate.svelte
 msgid "Description"
 msgstr "Description"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProjectCreate.svelte
 msgid "Create project"
 msgstr "Create project"
 
@@ -651,14 +646,16 @@ msgstr "Task status"
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
 #: src/lib/Members.svelte
 #: src/lib/Members.svelte
 #: src/lib/ProjectSettings.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ArticlesView.svelte
+#: src/lib/views/ForumView.svelte
+#: src/lib/views/TaskView.svelte
+#: src/lib/views/TaskView.svelte
+#: src/lib/views/TaskView.svelte
+#: src/lib/views/ThreadView.svelte
+#: src/lib/views/ThreadView.svelte
 msgid "Cancel"
 msgstr "Cancel"
 
@@ -700,9 +697,9 @@ msgstr "Deleted"
 
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/TaskView.svelte
+#: src/lib/views/TaskView.svelte
+#: src/lib/views/ThreadView.svelte
 msgid "Save"
 msgstr "Save"
 
@@ -710,12 +707,11 @@ msgstr "Save"
 msgid "Delete status"
 msgstr "Delete status"
 
-#: src/lib/KanbanBoard.svelte
-msgid "Close task"
-msgstr "Close task"
+#~ msgid "Close task"
+#~ msgstr "Close task"
 
-#: src/lib/KanbanBoard.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/TaskView.svelte
+#: src/lib/views/ThreadView.svelte
 msgid "Edit"
 msgstr "Edit"
 
@@ -727,26 +723,25 @@ msgstr "Confirm deletion"
 msgid "Confirm removal"
 msgstr "Confirm removal"
 
-#: src/lib/KanbanBoard.svelte
+#: src/lib/views/TaskView.svelte
+#: src/lib/views/ThreadView.svelte
 msgid "Discussion"
 msgstr "Discussion"
 
-#: src/lib/KanbanBoard.svelte
-msgid "Loading discussion"
-msgstr "Loading discussion"
+#~ msgid "Loading discussion"
+#~ msgstr "Loading discussion"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
-#: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
 #: src/lib/TaskActivity.svelte
 #: src/lib/ThreadActivity.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/TaskView.svelte
+#: src/lib/views/TaskView.svelte
+#: src/lib/views/ThreadView.svelte
 msgid "Association member"
 msgstr "Association member"
 
-#: src/lib/KanbanBoard.svelte
-msgid "Start a discussion about this task."
-msgstr "Start a discussion about this task."
+#~ msgid "Start a discussion about this task."
+#~ msgstr "Start a discussion about this task."
 
 #: src/lib/ApprovalInbox.svelte
 msgid "New accounts and profile pictures awaiting a decision."
@@ -977,16 +972,16 @@ msgstr "Previous"
 msgid "Next"
 msgstr "Next"
 
-#: src/lib/KanbanBoard.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/TaskView.svelte
+#: src/lib/views/ThreadView.svelte
 msgid "Delete comment?"
 msgstr "Delete comment?"
 
 #: src/lib/ConfirmDialog.svelte
-#: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/TaskView.svelte
+#: src/lib/views/TaskView.svelte
+#: src/lib/views/ThreadView.svelte
+#: src/lib/views/ThreadView.svelte
 msgid "Delete"
 msgstr "Delete"
 
@@ -995,15 +990,14 @@ msgid "Search users..."
 msgstr "Search users..."
 
 #: src/lib/UserSettings.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
 msgid "Settings"
 msgstr "Settings"
 
 #: src/lib/ProjectSettings.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/WorkspaceOverview.svelte
 msgid "Project settings"
 msgstr "Project settings"
 
@@ -1112,9 +1106,8 @@ msgstr "Membership"
 msgid "Remove from project"
 msgstr "Remove from project"
 
-#: src/routes/[...workspace]/+page.svelte
-msgid "Member profile"
-msgstr "Member profile"
+#~ msgid "Member profile"
+#~ msgstr "Member profile"
 
 #: src/lib/Members.svelte
 msgid "Access changes take effect when you save them."
@@ -1184,37 +1177,36 @@ msgstr "Previous page"
 msgid "Next page"
 msgstr "Next page"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/WorkspaceOverview.svelte
 msgid "To choose the article displayed on the public project home page, open an article, enable “Main project article”, and publish it."
 msgstr "To choose the article displayed on the public project home page, open an article, enable “Main project article”, and publish it."
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/WorkspaceOverview.svelte
 msgid "Manage articles"
 msgstr "Manage articles"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ArticleView.svelte
 msgid "All articles"
 msgstr "All articles"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ArticleView.svelte
+#: src/lib/views/ArticlesView.svelte
 msgid "Main project article"
 msgstr "Main project article"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ArticlesView.svelte
 msgid "Published"
 msgstr "Published"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ArticlesView.svelte
 msgid "Draft"
 msgstr "Draft"
 
 #: src/lib/ContentTranslations.svelte
-#: src/routes/[...workspace]/+page.svelte
 msgid "Article content"
 msgstr "Article content"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ArticleView.svelte
 msgid "When published, this article appears on the public project home page. It replaces the previous main article. Save or publish to apply this setting."
 msgstr "When published, this article appears on the public project home page. It replaces the previous main article. Save or publish to apply this setting."
 
@@ -1267,17 +1259,17 @@ msgid "Save email"
 msgstr "Save email"
 
 #: src/lib/ProjectSettings.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/WorkspaceOverview.svelte
 msgid "View public project"
 msgstr "View public project"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ArticleView.svelte
 msgid "View public article"
 msgstr "View public article"
 
 #: src/lib/Members.svelte
 #: src/lib/WorkspaceMembers.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "View public profile"
 msgstr "View public profile"
 
@@ -1382,47 +1374,47 @@ msgstr "Pending"
 msgid "Suspended"
 msgstr "Suspended"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ArticleView.svelte
 msgid "Show in project articles"
 msgstr "Show in project articles"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ArticleView.svelte
 msgid "Show in website articles"
 msgstr "Show in website articles"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ArticleView.svelte
 msgid "These settings apply when the article is published. The main article is displayed separately from the project articles list."
 msgstr "These settings apply when the article is published. The main article is displayed separately from the project articles list."
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Active sessions"
 msgstr "Active sessions"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Devices and browsers currently logged into your KSI account."
 msgstr "Devices and browsers currently logged into your KSI account."
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "No active sessions."
 msgstr "No active sessions."
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Current device"
 msgstr "Current device"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Other device"
 msgstr "Other device"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Current"
 msgstr "Current"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Unknown browser"
 msgstr "Unknown browser"
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/ProfileView.svelte
 msgid "Revoke"
 msgstr "Revoke"
 
@@ -1432,7 +1424,7 @@ msgid "{0} to {1} / {2} <0>members</0>"
 msgstr "{0} to {1} / {2} <0>members</0>"
 
 #: src/lib/PreviewCredentials.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "Preview credentials"
 msgstr "Preview credentials"
 
@@ -1454,7 +1446,7 @@ msgid "Group name"
 msgstr "Group name"
 
 #: src/lib/ProjectPermissions.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/+layout.svelte
 msgid "Permissions"
 msgstr "Permissions"
 
@@ -1729,7 +1721,7 @@ msgid "Delete label"
 msgstr "Delete label"
 
 #: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
+#: src/lib/TaskAside.svelte
 msgid "Labels"
 msgstr "Labels"
 
@@ -1776,6 +1768,8 @@ msgid "Utworzono"
 msgstr "Utworzono"
 
 #: src/lib/ContentHistory.svelte
+#: src/lib/TaskAside.svelte
+#: src/lib/ThreadAside.svelte
 msgid "Created"
 msgstr "Created"
 
@@ -1795,9 +1789,8 @@ msgstr "Edytowano"
 msgid "Edited"
 msgstr "Edited"
 
-#: src/lib/ContentHistory.svelte
-msgid "Sprawdź, co zmieniono i kto wprowadził zmiany."
-msgstr "Sprawdź, co zmieniono i kto wprowadził zmiany."
+#~ msgid "Sprawdź, co zmieniono i kto wprowadził zmiany."
+#~ msgstr "Sprawdź, co zmieniono i kto wprowadził zmiany."
 
 #: src/lib/ContentHistory.svelte
 msgid "See what changed and who changed it."
@@ -1853,15 +1846,13 @@ msgstr "Could not load history."
 
 #: src/lib/ContentHistory.svelte
 #: src/lib/NotificationSettings.svelte
-#: src/routes/[...workspace]/+page.svelte
 msgid "Spróbuj ponownie"
 msgstr "Spróbuj ponownie"
 
 #: src/lib/ContentHistory.svelte
-#: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
 #: src/lib/NotificationSettings.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/TaskView.svelte
+#: src/lib/views/ThreadView.svelte
 msgid "Try again"
 msgstr "Try again"
 
@@ -1897,32 +1888,29 @@ msgstr "Historia jest widoczna dla osób z dostępem do tej treści."
 msgid "History is visible to everyone with access to this content."
 msgstr "History is visible to everyone with access to this content."
 
-#: src/lib/KanbanBoard.svelte
-msgid "Could not load comments."
-msgstr "Could not load comments."
+#~ msgid "Could not load comments."
+#~ msgstr "Could not load comments."
 
-#: src/lib/KanbanBoard.svelte
+#: src/lib/views/TaskView.svelte
+#: src/lib/views/ThreadView.svelte
 msgid "Could not load activity."
 msgstr "Could not load activity."
 
-#: src/routes/[...workspace]/+page.svelte
-msgid "Wczytywanie…"
-msgstr "Wczytywanie…"
+#~ msgid "Wczytywanie…"
+#~ msgstr "Wczytywanie…"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
-#: src/lib/KanbanBoard.svelte
 #: src/lib/WatchButton.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/TaskView.svelte
+#: src/lib/views/ThreadView.svelte
 msgid "Loading…"
 msgstr "Loading…"
 
-#: src/routes/[...workspace]/+page.svelte
-msgid "Pokaż wcześniejszą aktywność"
-msgstr "Pokaż wcześniejszą aktywność"
+#~ msgid "Pokaż wcześniejszą aktywność"
+#~ msgstr "Pokaż wcześniejszą aktywność"
 
-#: src/routes/[...workspace]/+page.svelte
-msgid "Load earlier activity"
-msgstr "Load earlier activity"
+#~ msgid "Load earlier activity"
+#~ msgstr "Load earlier activity"
 
 #: src/lib/TaskActivity.svelte
 #: src/lib/ThreadActivity.svelte
@@ -1933,42 +1921,34 @@ msgstr "Członek stowarzyszenia"
 msgid "label"
 msgstr "label"
 
-#: src/routes/[...workspace]/+page.svelte
-msgid "Nie udało się wczytać aktywności wątku."
-msgstr "Nie udało się wczytać aktywności wątku."
+#~ msgid "Nie udało się wczytać aktywności wątku."
+#~ msgstr "Nie udało się wczytać aktywności wątku."
 
-#: src/routes/[...workspace]/+page.svelte
-msgid "Could not load thread activity."
-msgstr "Could not load thread activity."
+#~ msgid "Could not load thread activity."
+#~ msgstr "Could not load thread activity."
 
-#: src/routes/[...workspace]/+page.svelte
-msgid "Ten komentarz był edytowany"
-msgstr "Ten komentarz był edytowany"
+#~ msgid "Ten komentarz był edytowany"
+#~ msgstr "Ten komentarz był edytowany"
 
-#: src/routes/[...workspace]/+page.svelte
-msgid "This comment was edited"
-msgstr "This comment was edited"
+#~ msgid "This comment was edited"
+#~ msgstr "This comment was edited"
 
-#: src/routes/[...workspace]/+page.svelte
-msgid "Usunąć komentarz?"
-msgstr "Usunąć komentarz?"
+#~ msgid "Usunąć komentarz?"
+#~ msgstr "Usunąć komentarz?"
 
-#: src/routes/[...workspace]/+page.svelte
-msgid "Tej operacji nie można cofnąć."
-msgstr "Tej operacji nie można cofnąć."
+#~ msgid "Tej operacji nie można cofnąć."
+#~ msgstr "Tej operacji nie można cofnąć."
 
-#: src/lib/KanbanBoard.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/views/TaskView.svelte
+#: src/lib/views/ThreadView.svelte
 msgid "This action cannot be undone."
 msgstr "This action cannot be undone."
 
-#: src/routes/[...workspace]/+page.svelte
-msgid "Usuń"
-msgstr "Usuń"
+#~ msgid "Usuń"
+#~ msgstr "Usuń"
 
-#: src/routes/[...workspace]/+page.svelte
-msgid "Anuluj"
-msgstr "Anuluj"
+#~ msgid "Anuluj"
+#~ msgstr "Anuluj"
 
 #. 0: fullName(person)
 #: src/lib/Assignees.svelte
@@ -1994,7 +1974,7 @@ msgid "End"
 msgstr "End"
 
 #: src/lib/Assignees.svelte
-#: src/lib/KanbanBoard.svelte
+#: src/lib/DetailLayout.svelte
 msgid "Enter"
 msgstr "Enter"
 
@@ -2027,7 +2007,6 @@ msgstr "Choose assignees"
 #: src/lib/Assignees.svelte
 #: src/lib/Assignees.svelte
 #: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
 msgid "Assigned to"
 msgstr "Assigned to"
 
@@ -2039,14 +2018,14 @@ msgstr "Assigned to"
 msgid "Powiadomienia"
 msgstr "Powiadomienia"
 
-#: src/lib/KanbanBoard.svelte
 #: src/lib/NotificationInbox.svelte
 #: src/lib/NotificationInbox.svelte
 #: src/lib/NotificationInbox.svelte
 #: src/lib/NotificationInbox.svelte
 #: src/lib/NotificationSettings.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
+#: src/lib/TaskAside.svelte
+#: src/lib/ThreadAside.svelte
+#: src/routes/inbox/+page.svelte
 msgid "Notifications"
 msgstr "Notifications"
 
@@ -2262,11 +2241,11 @@ msgstr "For example, 60 means an email reminder can be sent if a notification st
 msgid "Language and appearance changes are saved automatically on this device."
 msgstr "Language and appearance changes are saved automatically on this device."
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/inbox/+page.svelte
 msgid "Zobacz, co Cię ominęło."
 msgstr "Zobacz, co Cię ominęło."
 
-#: src/routes/[...workspace]/+page.svelte
+#: src/routes/inbox/+page.svelte
 msgid "Catch up on what you missed."
 msgstr "Catch up on what you missed."
 
@@ -2282,84 +2261,79 @@ msgstr "Zapisywanie…"
 msgid "Saving…"
 msgstr "Saving…"
 
-#: src/lib/NotificationInbox.svelte
-msgid "Przypomnienie o terminie"
-msgstr "Przypomnienie o terminie"
+#~ msgid "Przypomnienie o terminie"
+#~ msgstr "Przypomnienie o terminie"
 
-#: src/lib/NotificationInbox.svelte
-msgid "Deadline reminder"
-msgstr "Deadline reminder"
+#~ msgid "Deadline reminder"
+#~ msgstr "Deadline reminder"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
 #: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
+#: src/lib/TaskAside.svelte
 msgid "Due"
 msgstr "Due"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
-#: src/lib/KanbanBoard.svelte
+#: src/lib/views/TaskView.svelte
 msgid "No description."
 msgstr "No description."
 
-#: src/lib/KanbanBoard.svelte
+#: src/lib/TaskAside.svelte
 msgid "None yet"
 msgstr "None yet"
 
-#: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
+#: src/lib/DetailLayout.svelte
+#: src/lib/DetailLayout.svelte
 msgid "Edit title"
 msgstr "Edit title"
 
-#: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
+#: src/lib/views/TaskView.svelte
+#: src/lib/views/TaskView.svelte
 msgid "Edit description"
 msgstr "Edit description"
 
-#: src/lib/KanbanBoard.svelte
+#: src/lib/TaskAside.svelte
 msgid "Archive task"
 msgstr "Archive task"
 
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
-#: src/routes/[...workspace]/+page.svelte
-msgid "Archived tasks"
-msgstr "Archived tasks"
+#~ msgid "Archived tasks"
+#~ msgstr "Archived tasks"
 
-#: src/routes/[...workspace]/+page.svelte
-msgid "Archived tasks are kept here. Leaders can restore them to their previous column."
-msgstr "Archived tasks are kept here. Leaders can restore them to their previous column."
+#~ msgid "Archived tasks are kept here. Leaders can restore them to their previous column."
+#~ msgstr "Archived tasks are kept here. Leaders can restore them to their previous column."
 
-#: src/routes/[...workspace]/+page.svelte
-msgid "No archived tasks"
-msgstr "No archived tasks"
+#~ msgid "No archived tasks"
+#~ msgstr "No archived tasks"
 
-#: src/routes/[...workspace]/+page.svelte
-msgid "Archived tasks will appear here."
-msgstr "Archived tasks will appear here."
+#~ msgid "Archived tasks will appear here."
+#~ msgstr "Archived tasks will appear here."
 
-#: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
+#: src/lib/TaskAside.svelte
+#: src/lib/TaskAside.svelte
 msgid "Add label"
 msgstr "Add label"
 
-#: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
+#: src/lib/TaskAside.svelte
+#: src/lib/TaskAside.svelte
 msgid "Remove deadline"
 msgstr "Remove deadline"
 
 #. 0: labelName
 #. 0: labelName
-#: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
+#: src/lib/TaskAside.svelte
+#: src/lib/TaskAside.svelte
 msgid "Remove label {0}"
 msgstr "Remove label {0}"
 
 #. 0: hiddenTimelineItems
-#: src/lib/KanbanBoard.svelte
+#. 0: hiddenTimelineItems
+#: src/lib/views/TaskView.svelte
+#: src/lib/views/ThreadView.svelte
 msgid "{0} remaining items"
 msgstr "{0} remaining items"
 
-#: src/lib/KanbanBoard.svelte
+#: src/lib/views/TaskView.svelte
+#: src/lib/views/ThreadView.svelte
 msgid "Load more"
 msgstr "Load more"
 
@@ -2409,14 +2383,99 @@ msgid "archived this task"
 msgstr "archived this task"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
-#: src/lib/KanbanBoard.svelte
+#: src/lib/views/TaskView.svelte
 msgid "opened this task"
 msgstr "opened this task"
 
-#: src/lib/KanbanBoard.svelte
+#: src/lib/views/TaskView.svelte
 msgid "commented"
 msgstr "commented"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
 msgid "opened this thread"
 msgstr "opened this thread"
+
+#: src/lib/ContentHistory.svelte
+msgid "Sprawdź, co zmieniono i kto wprowadził(a) zmiany."
+msgstr "Sprawdź, co zmieniono i kto wprowadził(a) zmiany."
+
+#: src/lib/TaskAside.svelte
+msgid "Task details"
+msgstr "Task details"
+
+#: src/lib/TaskAside.svelte
+#: src/lib/ThreadAside.svelte
+msgid "Metadata"
+msgstr "Metadata"
+
+#: src/lib/TaskAside.svelte
+#: src/lib/ThreadAside.svelte
+msgid "Assignees"
+msgstr "Assignees"
+
+#: src/lib/ThreadAside.svelte
+msgid "Thread details"
+msgstr "Thread details"
+
+#: src/lib/views/ArticleView.svelte
+msgid "Zapisano."
+msgstr "Zapisano."
+
+#: src/lib/views/ArticleView.svelte
+msgid "Saved."
+msgstr "Saved."
+
+#: src/lib/views/ArticleView.svelte
+msgid "Propozycja została wysłana."
+msgstr "Propozycja została wysłana."
+
+#: src/lib/views/ArticleView.svelte
+msgid "Your proposed edit was submitted."
+msgstr "Your proposed edit was submitted."
+
+#: src/lib/views/ArticlesView.svelte
+msgid "Pisz publikacje i proponuj zmiany."
+msgstr "Pisz publikacje i proponuj zmiany."
+
+#: src/routes/+layout.svelte
+msgid "Dashboard"
+msgstr "Dashboard"
+
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
+msgid "Show sidebar"
+msgstr "Show sidebar"
+
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
+msgid "Hide sidebar"
+msgstr "Hide sidebar"
+
+#: src/lib/views/GraveyardView.svelte
+#: src/lib/views/KanbanView.svelte
+msgid "Removed tasks"
+msgstr "Removed tasks"
+
+#: src/lib/views/GraveyardView.svelte
+msgid "Removed tasks are kept here. Leaders can restore them to their previous column."
+msgstr "Removed tasks are kept here. Leaders can restore them to their previous column."
+
+#: src/lib/views/GraveyardView.svelte
+msgid "No removed tasks"
+msgstr "No removed tasks"
+
+#: src/lib/views/GraveyardView.svelte
+msgid "Tasks removed from the board will appear here."
+msgstr "Tasks removed from the board will appear here."
+
+#: src/lib/views/ForumView.svelte
+msgid "No threads yet."
+msgstr "No threads yet."
+
+#: src/lib/views/TaskView.svelte
+msgid "Add to discussion"
+msgstr "Add to discussion"
+
+#: src/lib/views/TaskView.svelte
+msgid "Comment"
+msgstr "Comment"

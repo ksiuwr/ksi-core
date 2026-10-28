@@ -224,6 +224,7 @@ function threadHistoryCondition(executor: Executor, id: string) {
       eq(auditEvents.targetId, id),
       inArray(auditEvents.action, [
         'threads.created',
+        'threads.updated',
         'threads.access.updated',
         'threads.assignees.updated',
         'threads.archived',
@@ -1573,6 +1574,38 @@ export default createElysia({ prefix: '/platform' })
       });
     },
     { body: t.Object({ version: t.Integer({ minimum: 1 }), assigneeIds }) }
+  )
+  .patch(
+    '/threads/:id',
+    async ({ db, user, params, body }) => {
+      const actor = requirePermission(user, 'collaboration.items.contribute');
+      return db.transaction(async (tx) => {
+        const { thread, scope } = await threadScope(tx, params.id);
+        assertThreadRead(actor, thread, scope);
+        if (thread.authorId === actor.id) assertContribute(actor, scope);
+        else requireLeader(actor, scope, 'collaboration.threads.restrict');
+        if (thread.archivedAt) throw status(409, { code: 'THREAD_ARCHIVED' });
+        const [updated] = await tx
+          .update(threads)
+          .set({ title: body.title, version: sql`${threads.version} + 1` })
+          .where(and(eq(threads.id, thread.id), eq(threads.version, body.version)))
+          .returning();
+        if (!updated) throw status(409, { code: 'REVISION_CONFLICT' });
+        await recordEvent(tx, {
+          actorId: actor.id,
+          projectId: thread.projectId,
+          action: 'threads.updated',
+          targetId: thread.id,
+          metadata: {
+            threadId: thread.id,
+            version: updated.version,
+            changes: contentChanges(thread, updated, ['title'])
+          }
+        });
+        return updated;
+      });
+    },
+    { body: t.Object({ version: t.Integer({ minimum: 1 }), title }) }
   )
   .put(
     '/threads/:id/access',

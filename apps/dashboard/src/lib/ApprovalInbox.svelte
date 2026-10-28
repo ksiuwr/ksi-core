@@ -1,9 +1,7 @@
 <script lang="ts">
   import { Check, X, UserPlus, Image, Inbox } from '@lucide/svelte';
-  export type InboxData = {
-    memberships: { id: string; name: string; email: string; createdAt: string }[];
-    avatars: { userId: string; name: string; fileId: string; version: number; createdAt: string }[];
-  };
+  import type { InboxData } from './types';
+  export type { InboxData } from './types';
   let {
     inbox,
     language,

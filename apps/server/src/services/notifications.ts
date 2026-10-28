@@ -44,7 +44,7 @@ export async function notificationTarget(executor: Executor, type: string, id: s
   const base = project ? `/projects/${encodeURIComponent(project.slug)}` : '/association';
   const href =
     type === 'item'
-      ? `${base}/kanban?item=${encodeURIComponent(id)}`
+      ? `${base}/tasks/${encodeURIComponent(id)}`
       : `${base}/forum/${encodeURIComponent(id)}`;
   return {
     title,
