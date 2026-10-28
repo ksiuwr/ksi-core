@@ -117,6 +117,8 @@ msgstr "Projekt"
 #: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
 msgid "Association"
 msgstr "Całe koło"
 
@@ -125,6 +127,7 @@ msgid "Approval inbox"
 msgstr "Skrzynka akceptacji"
 
 #: src/lib/views/ProjectDirectory.svelte
+#: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 msgid "Projects"
 msgstr "Projekty"
@@ -136,6 +139,7 @@ msgstr "Mój profil"
 #: src/lib/ProjectPermissions.svelte
 #: src/lib/WorkspaceMembers.svelte
 #: src/lib/WorkspaceMembers.svelte
+#: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 #: src/routes/members/+page.svelte
@@ -215,9 +219,8 @@ msgstr "Wybierz projekt, aby otworzyć jego tablicę, forum i artykuły."
 msgid "Association management"
 msgstr "Administracja koła"
 
-#: src/routes/+layout.svelte
-msgid "KSI website ↗"
-msgstr "Strona KSI ↗"
+#~ msgid "KSI website ↗"
+#~ msgstr "Strona KSI ↗"
 
 #: src/routes/+layout.svelte
 msgid "University of Wrocław"
@@ -2479,3 +2482,8 @@ msgstr "Dodaj do dyskusji"
 #: src/lib/views/TaskView.svelte
 msgid "Comment"
 msgstr "Komentarz"
+
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
+msgid "KSI website"
+msgstr "Strona KSI"

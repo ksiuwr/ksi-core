@@ -117,6 +117,8 @@ msgstr "Project"
 #: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
 msgid "Association"
 msgstr "Association"
 
@@ -125,6 +127,7 @@ msgid "Approval inbox"
 msgstr "Approval inbox"
 
 #: src/lib/views/ProjectDirectory.svelte
+#: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 msgid "Projects"
 msgstr "Projects"
@@ -136,6 +139,7 @@ msgstr "My profile"
 #: src/lib/ProjectPermissions.svelte
 #: src/lib/WorkspaceMembers.svelte
 #: src/lib/WorkspaceMembers.svelte
+#: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 #: src/routes/members/+page.svelte
@@ -215,9 +219,8 @@ msgstr "Choose a project to open its board, forum, and articles."
 msgid "Association management"
 msgstr "Association management"
 
-#: src/routes/+layout.svelte
-msgid "KSI website ↗"
-msgstr "KSI website ↗"
+#~ msgid "KSI website ↗"
+#~ msgstr "KSI website ↗"
 
 #: src/routes/+layout.svelte
 msgid "University of Wrocław"
@@ -2479,3 +2482,8 @@ msgstr "Add to discussion"
 #: src/lib/views/TaskView.svelte
 msgid "Comment"
 msgstr "Comment"
+
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
+msgid "KSI website"
+msgstr "KSI website"

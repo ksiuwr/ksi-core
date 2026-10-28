@@ -256,7 +256,7 @@
       aria-label={'Navigation'}
     >
       <div class="sidebar-brand">
-        <span class="sidebar-logo">KSI<span> / core</span></span>
+        <span class="sidebar-logo">KSI<span class="sidebar-brand-suffix"> / core</span></span>
         <button
           class="mobile-close"
           onclick={() => {
@@ -293,9 +293,12 @@
               class:active={tab === key}
               aria-current={tab === key ? 'page' : undefined}
               href={dashboardPath(workspace, projectSlug, key)}
+              title={label}
             >
               <span class="navigation-label"
-                ><Icon size={16} strokeWidth={1.7} aria-hidden="true" />{label}</span
+                ><Icon size={16} strokeWidth={1.7} aria-hidden="true" /><span
+                  class="navigation-text">{label}</span
+                ></span
               >
             </a>
           {/each}
@@ -306,11 +309,17 @@
           class:active={tab === 'projects' || tab === '__create_project__'}
           href="/projects"
           aria-current={tab === 'projects' ? 'page' : undefined}
-          ><span class="navigation-label"><Folder size={16} aria-hidden="true" />{'Projects'}</span
+          title={'Projects'}
+          ><span class="navigation-label"
+            ><Folder size={16} aria-hidden="true" /><span class="navigation-text">{'Projects'}</span
+            ></span
           ></a
         >
-        <a class="sidebar-btn" href="/association">
-          <span class="navigation-label"><Users size={16} aria-hidden="true" />{'Association'}</span
+        <a class="sidebar-btn" href="/association" title={'Association'}>
+          <span class="navigation-label"
+            ><Users size={16} aria-hidden="true" /><span class="navigation-text"
+              >{'Association'}</span
+            ></span
           ><ArrowUpRight size={14} aria-hidden="true" />
         </a>
         <p class="sidebar-hint">
@@ -319,9 +328,11 @@
       {/if}
       <div class="sidebar-global">
         {#if workspace === 'project'}
-          <a class="sidebar-btn" href="/association"
+          <a class="sidebar-btn" href="/association" title={'Association'}
             ><span class="navigation-label"
-              ><Users size={16} aria-hidden="true" />{'Association'}</span
+              ><Users size={16} aria-hidden="true" /><span class="navigation-text"
+                >{'Association'}</span
+              ></span
             ><ArrowUpRight size={14} aria-hidden="true" /></a
           >
         {/if}
@@ -331,10 +342,22 @@
             class="sidebar-btn"
             class:active={tab === 'users'}
             aria-current={tab === 'users' ? 'page' : undefined}
-            href="/members">{'Members'}</a
+            href="/members"
+            title={'Members'}
+            ><span class="navigation-label"
+              ><UserRound size={16} aria-hidden="true" /><span class="navigation-text"
+                >{'Members'}</span
+              ></span
+            ></a
           >
         {/if}
-        <a class="sidebar-btn" href={data.websiteOrigin}>{'KSI website ↗'}</a>
+        <a class="sidebar-btn" href={data.websiteOrigin} title={'KSI website'}
+          ><span class="navigation-label"
+            ><ArrowUpRight size={16} aria-hidden="true" /><span class="navigation-text"
+              >{'KSI website'}</span
+            ></span
+          ></a
+        >
         <div class="sidebar-footnote">
           KSI · {'University of Wrocław'}
           <div class="build-details">

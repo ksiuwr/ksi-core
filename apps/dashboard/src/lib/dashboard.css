@@ -1,10 +1,12 @@
 .dash-shell {
   grid-template-columns: 244px minmax(0, 1fr);
+  transition: grid-template-columns 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .dash-sidebar {
   padding: 20px 14px;
   gap: 5px;
   background: var(--paper);
+  transition: padding 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .sidebar-brand {
   display: flex;
@@ -72,6 +74,7 @@
 }
 .dash-body {
   min-width: 0;
+  grid-column: 2;
 }
 .dash-topbar {
   min-height: 66px;
@@ -1059,9 +1062,39 @@ summary,
 }
 @media (min-width: 761px) {
   .dash-shell.sidebar-collapsed {
-    grid-template-columns: 0 minmax(0, 1fr);
+    grid-template-columns: 64px minmax(0, 1fr);
   }
   .dash-shell.sidebar-collapsed .dash-sidebar {
+    padding-inline: 8px;
+    overflow-x: hidden;
+  }
+  .dash-shell.sidebar-collapsed .sidebar-brand {
+    justify-content: center;
+  }
+  .dash-shell.sidebar-collapsed .sidebar-logo {
+    padding-inline: 0;
+    font-size: 16px;
+    text-align: center;
+  }
+  .dash-shell.sidebar-collapsed .sidebar-brand-suffix,
+  .dash-shell.sidebar-collapsed .sidebar-context,
+  .dash-shell.sidebar-collapsed .sidebar-hint,
+  .dash-shell.sidebar-collapsed .sidebar-section,
+  .dash-shell.sidebar-collapsed .sidebar-footnote {
+    display: none;
+  }
+  .dash-shell.sidebar-collapsed .navigation-label {
+    justify-content: center;
+    gap: 0;
+  }
+  .dash-shell.sidebar-collapsed .navigation-text {
+    display: none;
+  }
+  .dash-shell.sidebar-collapsed .sidebar-btn {
+    justify-content: center;
+    padding: 10px 0;
+  }
+  .dash-shell.sidebar-collapsed .sidebar-btn > svg:last-child {
     display: none;
   }
 }
