@@ -39,7 +39,7 @@
         type="button"
         class:active={!archived}
         aria-pressed={!archived}
-        onclick={() => setArchived(false)}>{'Active'}</button
+        onclick={() => setArchived(false)}>Active</button
       >
       <button
         type="button"
@@ -77,5 +77,5 @@
     {/each}
   </ul>
 {:else}
-  <p class="list-empty">{'No threads yet.'}</p>
+  <p class="list-empty">No threads yet.</p>
 {/if}

@@ -152,7 +152,7 @@
 
 <div class="workspace-header">
   <div>
-    <h1>{'Project settings'}</h1>
+    <h1>Project settings</h1>
     <p>{project.name}</p>
   </div>
   <a class="btn btn-outline" href={`${websiteOrigin}/projects/${encodeURIComponent(project.slug)}`}
@@ -163,7 +163,7 @@
     {notice}
   </p>{/if}
 {#if !canEdit && !canManageMembers}<p role="alert">
-    {'You do not have permission to manage this project.'}
+    You do not have permission to manage this project.
   </p>{:else}
   <div class="settings-layout">
     <SettingsNav
@@ -178,7 +178,7 @@
     <div class="settings-main">
       {#if canEdit}
         <section id="details" class="settings-section" aria-labelledby="details-heading">
-          <header><h2 id="details-heading">{'Project details'}</h2></header>
+          <header><h2 id="details-heading">Project details</h2></header>
           <form
             class="card settings-card"
             onsubmit={(e) => {
@@ -217,7 +217,7 @@
               onsaved={onrefresh}
             />
             <div>
-              <label for="project-name">{'Name'}</label>
+              <label for="project-name">Name</label>
               <input
                 id="project-name"
                 bind:value={() => localized('name'), (value) => setLocalized('name', value)}
@@ -226,7 +226,7 @@
               />
             </div>
             <div>
-              <label for="project-description">{'Description'}</label>
+              <label for="project-description">Description</label>
               <Editor
                 {language}
                 bind:value={
@@ -236,14 +236,14 @@
               />
             </div>
             <div>
-              <label for="project-tags">{'Tags (comma separated)'}</label>
+              <label for="project-tags">Tags (comma separated)</label>
               <input
                 id="project-tags"
                 bind:value={() => localized('tags'), (value) => setLocalized('tags', value)}
               />
             </div>
             {#if contentLocale === 'en'}<fieldset>
-                <legend>{'Fields'}</legend>
+                <legend>Fields</legend>
                 <div class="check-row">
                   {#each ['research', 'community', 'engineering'] as field}<label class="check"
                       ><input type="checkbox" value={field} bind:group={fields} />{field ===
@@ -270,7 +270,7 @@
 
       {#if canManageMembers}
         <section id="members" class="settings-section" aria-labelledby="members-heading">
-          <header><h2 id="members-heading">{'Members'}</h2></header>
+          <header><h2 id="members-heading">Members</h2></header>
           {#if loading}<Skeleton label="Loading project members" />{:else}
             <form
               class="card settings-card"
@@ -280,8 +280,8 @@
               }}
             >
               <div>
-                <h3>{'Project leaders'}</h3>
-                <p class="muted">{'Select at least one leader from the project members.'}</p>
+                <h3>Project leaders</h3>
+                <p class="muted">Select at least one leader from the project members.</p>
               </div>
               <div class="check-list">
                 {#each members as member}<label class="check"
@@ -295,13 +295,13 @@
               </div>
               <div class="card-footer">
                 <button class="btn btn-outline" disabled={busy || !leaders.length}
-                  >{'Save leaders'}</button
+                  >Save leaders</button
                 >
               </div>
             </form>
 
             <section class="card settings-card">
-              <h3>{'Join requests'}</h3>
+              <h3>Join requests</h3>
               {#each requests as request}<div class="request">
                   <a href={`/people/${encodeURIComponent(request.request.userId)}`}
                     >{request.firstName} {request.lastName}</a
@@ -313,21 +313,21 @@
                       onclick={() =>
                         action(() =>
                           api(`/join-requests/${request.request.id}`, 'POST', { accept: true })
-                        )}>{'Accept'}</button
+                        )}>Accept</button
                     ><button
                       class="btn btn-outline btn-sm"
                       disabled={busy}
                       onclick={() =>
                         action(() =>
                           api(`/join-requests/${request.request.id}`, 'POST', { accept: false })
-                        )}>{'Decline'}</button
+                        )}>Decline</button
                     >
                   </div>
-                </div>{:else}<p class="muted">{'No pending requests.'}</p>{/each}
+                </div>{:else}<p class="muted">No pending requests.</p>{/each}
             </section>
 
             <section class="card settings-card">
-              <h3>{'Membership'}</h3>
+              <h3>Membership</h3>
               <div class="request-list">
                 {#each members as member}<div class="request">
                     <a href={`/people/${encodeURIComponent(member.id)}`}
@@ -340,14 +340,14 @@
                             action(async () => {
                               await api(`/members/${member.id}`, 'DELETE');
                               removing = null;
-                            })}>{'Confirm removal'}</button
+                            })}>Confirm removal</button
                         ><button class="btn btn-outline btn-sm" onclick={() => (removing = null)}
-                          >{'Cancel'}</button
+                          >Cancel</button
                         >
                       </div>{:else}<button
                         class="btn btn-outline btn-sm"
                         disabled={busy}
-                        onclick={() => (removing = member.id)}>{'Remove from project'}</button
+                        onclick={() => (removing = member.id)}>Remove from project</button
                       >{/if}
                   </div>{/each}
               </div>
@@ -359,8 +359,8 @@
       {#if canEdit}
         <section id="links" class="settings-section" aria-labelledby="links-heading">
           <header>
-            <h2 id="links-heading">{'Public links'}</h2>
-            <p>{'English labels are required. Polish labels are optional.'}</p>
+            <h2 id="links-heading">Public links</h2>
+            <p>English labels are required. Polish labels are optional.</p>
           </header>
           <form
             class="card settings-card"
@@ -379,7 +379,7 @@
           >
             {#each links as link, index}<div class="link-fields">
                 <div>
-                  <label for={`link-label-${index}`}>{'Label · English'}</label><input
+                  <label for={`link-label-${index}`}>Label · English</label><input
                     id={`link-label-${index}`}
                     bind:value={link.label}
                     required
@@ -387,7 +387,7 @@
                   />
                 </div>
                 <div>
-                  <label for={`link-url-${index}`}>{'URL'}</label><input
+                  <label for={`link-url-${index}`}>URL</label><input
                     id={`link-url-${index}`}
                     type="url"
                     bind:value={link.url}
@@ -396,7 +396,7 @@
                   />
                 </div>
                 <div>
-                  <label for={`link-pl-${index}`}>{'Label · Polish'}</label><input
+                  <label for={`link-pl-${index}`}>Label · Polish</label><input
                     id={`link-pl-${index}`}
                     value={link.translations?.pl?.label ?? ''}
                     maxlength="200"

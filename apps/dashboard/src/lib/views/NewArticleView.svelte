@@ -70,8 +70,8 @@
   ><ArrowLeft size={15} aria-hidden="true" />{'Articles'}</a
 >
 <header class="create-heading">
-  <h1>{'New article'}</h1>
-  <p>{'Create a draft. Publishing and feed placement can be configured after it is saved.'}</p>
+  <h1>New article</h1>
+  <p>Create a draft. Publishing and feed placement can be configured after it is saved.</p>
 </header>
 
 {#if error}<p class="error" role="alert">{error}</p>{/if}
@@ -84,7 +84,7 @@
 >
   <section class="card create-main">
     <div>
-      <label for="new-article-title">{'Title'}</label>
+      <label for="new-article-title">Title</label>
       <input
         id="new-article-title"
         value={title}
@@ -94,7 +94,7 @@
       />
     </div>
     <div>
-      <span class="create-label">{'Content'}</span>
+      <span class="create-label">Content</span>
       <Editor {language} allowGallery rows={24} bind:value={markdown} />
     </div>
   </section>
@@ -111,7 +111,7 @@
         placeholder="article-url"
         oninput={() => (slugEdited = true)}
       />
-      <p class="muted">{'Used in the public article URL.'}</p>
+      <p class="muted">Used in the public article URL.</p>
     </section>
     <section class="create-section">
       <ArticleThumbnail
@@ -124,9 +124,7 @@
       <button class="btn" disabled={busy || thumbnailUploading || !title.trim() || !slug.trim()}
         ><FilePlus2 size={15} aria-hidden="true" />{busy ? 'Creating…' : 'Create draft'}</button
       >
-      <a class="btn btn-outline" href={dashboardPath(workspace, projectSlug, 'articles')}
-        >{'Cancel'}</a
-      >
+      <a class="btn btn-outline" href={dashboardPath(workspace, projectSlug, 'articles')}>Cancel</a>
     </div>
   </aside>
 </form>

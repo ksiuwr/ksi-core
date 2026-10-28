@@ -9,8 +9,8 @@
 
 <div class="workspace-header">
   <div>
-    <h1>{'Projects'}</h1>
-    <p class="workspace-description">{'Choose a project and start collaborating.'}</p>
+    <h1>Projects</h1>
+    <p class="workspace-description">Choose a project and start collaborating.</p>
   </div>
   {#if role !== 'member'}
     <a class="btn" href="/projects/new">
@@ -27,7 +27,7 @@
           <span class="tag" style="background: var(--mint);">{field}</span>
         {/each}
         {#if project.locked}
-          <span class="tag">{'Locked'}</span>
+          <span class="tag">Locked</span>
         {/if}
       </div>
       <h2>{project.name}</h2>
@@ -44,7 +44,7 @@
 
 {#if !projects.length}
   <div class="empty-state">
-    <h2>{'No projects yet'}</h2>
-    <p>{'New projects will appear here.'}</p>
+    <h2>No projects yet</h2>
+    <p>New projects will appear here.</p>
   </div>
 {/if}

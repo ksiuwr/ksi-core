@@ -127,7 +127,7 @@
     <dl class="metadata-list">
       {#if created}
         <div>
-          <dt>{'Created'}</dt>
+          <dt>Created</dt>
           <dd><time datetime={item.createdAt}>{created}</time></dd>
         </div>
       {/if}
@@ -135,7 +135,7 @@
   </section>
 
   <section class="aside-section">
-    <h2>{'Assignees'}</h2>
+    <h2>Assignees</h2>
     <Assignees
       value={item.assigneeIds ?? []}
       {members}
@@ -147,7 +147,7 @@
   </section>
 
   <section class="aside-section">
-    <h2>{'Labels'}</h2>
+    <h2>Labels</h2>
     <div class="task-label-list">
       {#each item.labels as labelName}
         {@const label = labels.find((candidate) => candidate.name === labelName)}
@@ -166,7 +166,7 @@
           </button>
         </span>
       {:else}
-        <span class="muted">{'None yet'}</span>
+        <span class="muted">None yet</span>
       {/each}
       {#if unassignedLabels.length}
         <Dropdown
@@ -206,7 +206,7 @@
   </section>
 
   <section class="aside-section">
-    <h2>{'Notifications'}</h2>
+    <h2>Notifications</h2>
     {#key (item.assigneeIds ?? []).join(',')}
       <WatchButton type="item" id={item.id} {language} showLabel />
     {/key}

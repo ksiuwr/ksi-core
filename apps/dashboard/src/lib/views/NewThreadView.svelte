@@ -54,8 +54,8 @@
   ><ArrowLeft size={15} aria-hidden="true" />{'Forum'}</a
 >
 <header class="create-heading">
-  <h1>{'New thread'}</h1>
-  <p>{'Start a focused discussion and choose who can see it.'}</p>
+  <h1>New thread</h1>
+  <p>Start a focused discussion and choose who can see it.</p>
 </header>
 
 {#if error}<p class="error" role="alert">{error}</p>{/if}
@@ -68,18 +68,18 @@
 >
   <section class="card create-main">
     <div>
-      <label for="new-thread-title">{'Subject'}</label>
+      <label for="new-thread-title">Subject</label>
       <input id="new-thread-title" bind:value={title} required maxlength="200" />
     </div>
     <div>
-      <span class="create-label">{'First post'}</span>
+      <span class="create-label">First post</span>
       <Editor {language} bind:value={markdown} rows={18} allowReferences />
     </div>
   </section>
 
   <aside class="card create-aside">
     <section class="create-section">
-      <label for="new-thread-visibility">{'Visibility'}</label>
+      <label for="new-thread-visibility">Visibility</label>
       <Dropdown
         id="new-thread-visibility"
         label={'Visibility'}
@@ -100,8 +100,7 @@
           ? 'Creating…'
           : 'Create thread'}</button
       >
-      <a class="btn btn-outline" href={dashboardPath(workspace, projectSlug, 'forum')}>{'Cancel'}</a
-      >
+      <a class="btn btn-outline" href={dashboardPath(workspace, projectSlug, 'forum')}>Cancel</a>
     </div>
   </aside>
 </form>

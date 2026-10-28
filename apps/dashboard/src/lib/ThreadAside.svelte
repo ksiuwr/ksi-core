@@ -68,7 +68,7 @@
   <section class="aside-section">
     <dl class="metadata-list">
       <div>
-        <dt>{'Visibility'}</dt>
+        <dt>Visibility</dt>
         <dd>
           {thread.visibility === 'leaders'
             ? 'Leaders'
@@ -79,7 +79,7 @@
       </div>
       {#if created}
         <div>
-          <dt>{'Created'}</dt>
+          <dt>Created</dt>
           <dd><time datetime={thread.createdAt}>{created}</time></dd>
         </div>
       {/if}
@@ -87,7 +87,7 @@
   </section>
 
   <section class="aside-section">
-    <h2>{'Assignees'}</h2>
+    <h2>Assignees</h2>
     <Assignees
       value={thread.assigneeIds ?? []}
       {members}
@@ -99,7 +99,7 @@
   </section>
 
   <section class="aside-section">
-    <h2>{'Notifications'}</h2>
+    <h2>Notifications</h2>
     {#key (thread.assigneeIds ?? []).join(',')}
       <WatchButton type="thread" id={thread.id} {language} showLabel />
     {/key}

@@ -282,13 +282,13 @@
 {:else if user.membershipStatus !== 'active'}
   <div class="pending-screen">
     <div class="pending-card">
-      <h1>{'Account activation required'}</h1>
+      <h1>Account activation required</h1>
       <p>
         {'Your account first needs to be activated by an administrator. Ask directly:'}
         {data.activationContact}.
       </p>
       <form method="POST" action="/logout">
-        <button class="btn" style="margin: 0 auto;">{'Sign out'}</button>
+        <button class="btn" style="margin: 0 auto;">Sign out</button>
       </form>
     </div>
   </div>
@@ -367,33 +367,29 @@
           aria-current={tab === 'projects' ? 'page' : undefined}
           title={'Projects'}
           ><span class="navigation-label"
-            ><Folder size={16} aria-hidden="true" /><span class="navigation-text">{'Projects'}</span
+            ><Folder size={16} aria-hidden="true" /><span class="navigation-text">Projects</span
             ></span
           ></a
         >
         <a class="sidebar-btn" href="/association" title={'Association'}>
           <span class="navigation-label"
-            ><Users size={16} aria-hidden="true" /><span class="navigation-text"
-              >{'Association'}</span
+            ><Users size={16} aria-hidden="true" /><span class="navigation-text">Association</span
             ></span
           ><ArrowUpRight size={14} aria-hidden="true" />
         </a>
-        <p class="sidebar-hint">
-          {'Choose a project to open its board, forum, and articles.'}
-        </p>
+        <p class="sidebar-hint">Choose a project to open its board, forum, and articles.</p>
       {/if}
       <div class="sidebar-global">
         {#if workspace === 'project'}
           <a class="sidebar-btn" href="/association" title={'Association'}
             ><span class="navigation-label"
-              ><Users size={16} aria-hidden="true" /><span class="navigation-text"
-                >{'Association'}</span
+              ><Users size={16} aria-hidden="true" /><span class="navigation-text">Association</span
               ></span
             ><ArrowUpRight size={14} aria-hidden="true" /></a
           >
         {/if}
         {#if role !== 'member'}
-          <span class="sidebar-section">{'Association management'}</span>
+          <span class="sidebar-section">Association management</span>
           <a
             class="sidebar-btn"
             class:active={tab === 'users'}
@@ -401,8 +397,7 @@
             href="/members"
             title={'Members'}
             ><span class="navigation-label"
-              ><UserRound size={16} aria-hidden="true" /><span class="navigation-text"
-                >{'Members'}</span
+              ><UserRound size={16} aria-hidden="true" /><span class="navigation-text">Members</span
               ></span
             ></a
           >
@@ -410,7 +405,7 @@
         <a class="sidebar-btn" href={data.websiteOrigin} title={'KSI website'}
           ><span class="navigation-label"
             ><ArrowUpRight size={16} aria-hidden="true" /><span class="navigation-text"
-              >{'KSI website'}</span
+              >KSI website</span
             ></span
           ></a
         >
@@ -441,7 +436,7 @@
           onclick={openNavigation}
         >
           <Menu size={20} strokeWidth={1.7} aria-hidden="true" /><span class="sr-only"
-            >{'Navigation'}</span
+            >Navigation</span
           >
         </button>
         <div class="workspace-picker">
@@ -488,7 +483,7 @@
             >
             <div class="menu-panel account-panel">
               <strong>{user.firstName || user.name} {user.lastName}</strong>
-              <span class="muted">{'Account settings'}</span>
+              <span class="muted">Account settings</span>
               <button
                 class="account-action"
                 onclick={() => {

@@ -202,3 +202,7 @@ msgstr "Przejdź do Panelu"
 #: src/routes/+page.svelte
 msgid "Sign out"
 msgstr "Wyloguj się"
+
+#: src/routes/+page.svelte
+msgid "or use email"
+msgstr "lub użyj adresu e-mail"

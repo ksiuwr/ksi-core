@@ -7,25 +7,19 @@
     workspace,
     projectSlug,
     articles,
-    language,
     canCreate
   }: {
     workspace: Workspace;
     projectSlug: string;
     articles: Article[];
-    language: 'pl' | 'en';
     canCreate: boolean;
   } = $props();
 </script>
 
 <div class="workspace-header">
   <div>
-    <h1>{'Articles'}</h1>
-    <p class="workspace-description">
-      {language === 'pl'
-        ? 'Pisz publikacje i proponuj zmiany.'
-        : 'Write publications and propose changes.'}
-    </p>
+    <h1>Articles</h1>
+    <p class="workspace-description">Write publications and propose changes.</p>
   </div>
   {#if canCreate}
     <a class="btn" href={newArticlePath(workspace, projectSlug)}
@@ -44,14 +38,14 @@
             <span class="list-row-title">{article.title}</span>
             <span class="list-row-meta">{article.slug}</span>
           </span>
-          {#if article.mainArticle}<span class="tag tag-mint">{'Main project article'}</span>{/if}
+          {#if article.mainArticle}<span class="tag tag-mint">Main project article</span>{/if}
           <span class="tag">{article.state === 'published' ? 'Published' : 'Draft'}</span>
         </a>
       </li>
     {/each}
   </ul>
 {:else}
-  <p class="list-empty">{'No articles yet. Create the first article in this workspace.'}</p>
+  <p class="list-empty">No articles yet. Create the first article in this workspace.</p>
 {/if}
 
 <style>

@@ -230,7 +230,7 @@
 
     <div class="settings-main">
       <section id="profile" class="settings-section" aria-labelledby="profile-heading">
-        <header><h2 id="profile-heading">{'Profile'}</h2></header>
+        <header><h2 id="profile-heading">Profile</h2></header>
         {#if administrator && editable}
           <form
             class="card settings-card"
@@ -265,7 +265,7 @@
             />
             <div class="field-grid">
               <div>
-                <label for="m-first">{'First name'}</label><input
+                <label for="m-first">First name</label><input
                   id="m-first"
                   bind:value={
                     () => localizedMember('firstName'),
@@ -276,7 +276,7 @@
                 />
               </div>
               <div>
-                <label for="m-last">{'Last name'}</label><input
+                <label for="m-last">Last name</label><input
                   id="m-last"
                   bind:value={
                     () => localizedMember('lastName'),
@@ -286,7 +286,7 @@
                 />
               </div>
               <div class="field-wide">
-                <label for="m-nick">{'Nickname'}</label><input
+                <label for="m-nick">Nickname</label><input
                   id="m-nick"
                   bind:value={
                     () => localizedMember('nickname'),
@@ -335,8 +335,8 @@
 
       <section id="access" class="settings-section" aria-labelledby="access-heading">
         <header>
-          <h2 id="access-heading">{'Access'}</h2>
-          <p>{'Access changes take effect when you save them.'}</p>
+          <h2 id="access-heading">Access</h2>
+          <p>Access changes take effect when you save them.</p>
         </header>
         <form
           class="card settings-card"
@@ -354,7 +354,7 @@
         >
           <div class="field-grid">
             <div>
-              <label for="member-status">{'Account status'}</label>
+              <label for="member-status">Account status</label>
               <Dropdown
                 id="member-status"
                 label={'Account status'}
@@ -369,7 +369,7 @@
               />
             </div>
             <div>
-              <label for="member-role">{'Role'}</label>
+              <label for="member-role">Role</label>
               <Dropdown
                 id="member-role"
                 label={'Role'}
@@ -397,7 +397,7 @@
 
       {#if administrator && editable}
         <section id="authentication" class="settings-section" aria-labelledby="auth-heading">
-          <header><h2 id="auth-heading">{'Authentication'}</h2></header>
+          <header><h2 id="auth-heading">Authentication</h2></header>
           <form
             class="card settings-card"
             onsubmit={(event) => {
@@ -406,7 +406,7 @@
             }}
           >
             <div>
-              <label for="m-email">{'Email address'}</label><input
+              <label for="m-email">Email address</label><input
                 id="m-email"
                 type="email"
                 bind:value={emailDraft}
@@ -414,7 +414,8 @@
                 maxlength="254"
               />
               <p class="field-help">
-                {'Changing the email revokes sessions and sends a verification link to the new address.'}
+                Changing the email revokes sessions and sends a verification link to the new
+                address.
               </p>
             </div>
             <div class="card-footer">
@@ -427,17 +428,17 @@
           </form>
           <div class="card settings-card">
             <p class="muted">
-              {'Send a recovery link to the saved email address. Passwords are never displayed here.'}
+              Send a recovery link to the saved email address. Passwords are never displayed here.
             </p>
             {#if resetConfirmation}
-              <p>{'Send a password recovery email to this member?'}</p>
+              <p>Send a password recovery email to this member?</p>
               <div class="row">
                 <button class="btn" disabled={busy} onclick={resetPassword}
-                  >{'Send recovery link'}</button
+                  >Send recovery link</button
                 ><button
                   class="btn btn-outline"
                   disabled={busy}
-                  onclick={() => (resetConfirmation = false)}>{'Cancel'}</button
+                  onclick={() => (resetConfirmation = false)}>Cancel</button
                 >
               </div>
             {:else}
@@ -445,7 +446,7 @@
                 <button
                   class="btn btn-outline"
                   disabled={busy}
-                  onclick={() => (resetConfirmation = true)}>{'Reset password'}</button
+                  onclick={() => (resetConfirmation = true)}>Reset password</button
                 >
               </div>
             {/if}
@@ -453,26 +454,24 @@
         </section>
 
         <section id="danger" class="settings-section" aria-labelledby="danger-heading">
-          <header><h2 id="danger-heading">{'Delete account'}</h2></header>
+          <header><h2 id="danger-heading">Delete account</h2></header>
           <div class="card settings-card danger">
-            <p class="muted">
-              {'Personal data will be anonymized. Association content will remain.'}
-            </p>
+            <p class="muted">Personal data will be anonymized. Association content will remain.</p>
             {#if confirmDelete}
               <div role="alert" class="settings-card">
-                <p>{'Delete account? Personal data will be anonymized. Content will remain.'}</p>
+                <p>Delete account? Personal data will be anonymized. Content will remain.</p>
                 <div class="row">
                   <button
                     type="button"
                     class="btn danger-button"
                     disabled={busy}
-                    onclick={() => mutate(`/${member!.id}`, 'DELETE')}>{'Confirm deletion'}</button
+                    onclick={() => mutate(`/${member!.id}`, 'DELETE')}>Confirm deletion</button
                   >
                   <button
                     type="button"
                     class="btn btn-outline"
                     disabled={busy}
-                    onclick={() => (confirmDelete = false)}>{'Cancel'}</button
+                    onclick={() => (confirmDelete = false)}>Cancel</button
                   >
                 </div>
               </div>
@@ -482,7 +481,7 @@
                   type="button"
                   class="btn btn-outline danger-button"
                   disabled={busy}
-                  onclick={() => (confirmDelete = true)}>{'Delete account'}</button
+                  onclick={() => (confirmDelete = true)}>Delete account</button
                 >
               </div>
             {/if}
@@ -492,7 +491,7 @@
     </div>
   </div>
 {:else if memberId}
-  <a class="btn btn-outline" href="/members">{'All members'}</a>
+  <a class="btn btn-outline" href="/members">All members</a>
 {:else}
   <form
     class="member-filters"
@@ -502,14 +501,14 @@
     }}
   >
     <div class="search">
-      <label for="member-search" class="sr-only">{'Search members'}</label><Search
+      <label for="member-search" class="sr-only">Search members</label><Search
         size={16}
         aria-hidden="true"
       /><input
         id="member-search"
         bind:value={search}
         placeholder={'Name, nickname or email…'}
-      /><button class="btn btn-outline">{'Search'}</button>
+      /><button class="btn btn-outline">Search</button>
     </div>
     <Dropdown
       label={'Filter status'}
@@ -537,8 +536,7 @@
   <section class="member-directory" aria-label="Member directory">
     <div class="table-wrap">
       <table>
-        <thead><tr><th>{'Person'}</th><th>Email</th><th>Status</th><th>{'Role'}</th></tr></thead
-        ><tbody
+        <thead><tr><th>Person</th><th>Email</th><th>Status</th><th>Role</th></tr></thead><tbody
           >{#each records as record}<tr
               ><td
                 ><MemberPreview
@@ -553,7 +551,7 @@
         >
       </table>
     </div>
-    {#if !records.length}<p>{'No matching members.'}</p>{/if}
+    {#if !records.length}<p>No matching members.</p>{/if}
     <footer class="directory-footer">
       <p class="muted">
         {firstResult}
@@ -567,7 +565,7 @@
           disabled={currentPage === 0 || loading}
           onclick={() => paginate(-1)}
           aria-label="Previous page"
-          ><ChevronLeft size={16} aria-hidden="true" /><span>{'Previous'}</span></button
+          ><ChevronLeft size={16} aria-hidden="true" /><span>Previous</span></button
         >
         <span class="page-number">{currentPage + 1} / {Math.max(1, Math.ceil(total / 50))}</span>
         <button
@@ -576,7 +574,7 @@
           disabled={(currentPage + 1) * 50 >= total || loading}
           onclick={() => paginate(1)}
           aria-label="Next page"
-          ><span>{'Next'}</span><ChevronRight size={16} aria-hidden="true" /></button
+          ><span>Next</span><ChevronRight size={16} aria-hidden="true" /></button
         >
       </nav>
     </footer>

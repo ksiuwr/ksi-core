@@ -49,10 +49,8 @@
 
 <div class="workspace-header">
   <div>
-    <h1>{'Approval inbox'}</h1>
-    <p class="workspace-description">
-      {'New accounts and profile pictures awaiting a decision.'}
-    </p>
+    <h1>Approval inbox</h1>
+    <p class="workspace-description">New accounts and profile pictures awaiting a decision.</p>
   </div>
 </div>
 {#if inbox.memberships.length}<section class="approval-section">
@@ -97,9 +95,7 @@
         />
         <div class="approval-info">
           <h3>{avatar.name}</h3>
-          <p>
-            {'The new picture becomes public after approval.'}
-          </p>
+          <p>The new picture becomes public after approval.</p>
         </div>
         <div class="approval-actions">
           <button
@@ -118,10 +114,8 @@
   </section>{/if}
 {#if !inbox.memberships.length && !inbox.avatars.length}<div class="empty-state">
     <Inbox size={30} aria-hidden="true" />
-    <h2>{'All caught up'}</h2>
-    <p>
-      {'New requests will appear here automatically.'}
-    </p>
+    <h2>All caught up</h2>
+    <p>New requests will appear here automatically.</p>
   </div>{/if}
 
 <style>

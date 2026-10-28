@@ -239,7 +239,7 @@
 
 {#if readonly}
   <span class="assigned">
-    {#if selected.length && showLabel}<span class="readonly-label">{'Assigned to'}</span>{/if}
+    {#if selected.length && showLabel}<span class="readonly-label">Assigned to</span>{/if}
     {#each selected as person (person.id)}
       <span class="person-chip compact" title={fullName(person)}
         >{@render avatar(person)}<span class="person-name">{fullName(person)}</span></span
@@ -248,7 +248,7 @@
   </span>
 {:else}
   <div class="assignees">
-    {#if showLabel}<span class="label" id={`${uid}-label`}>{'Assigned to'}</span>{/if}
+    {#if showLabel}<span class="label" id={`${uid}-label`}>Assigned to</span>{/if}
     {#if selected.length}
       <span class="selected-chips">
         {#each selected as person (person.id)}
@@ -288,7 +288,7 @@
         }}
       >
         <UserRoundPlus size={15} aria-hidden="true" />
-        <span class="trigger-label">{'Add assignees'}</span>
+        <span class="trigger-label">Add assignees</span>
         <ChevronsUpDown size={14} aria-hidden="true" />
       </button>
       <div
@@ -348,13 +348,14 @@
             </button>
           {:else}
             <p class="empty" role="status">
-              {#if loading}{'Loading members…'}{:else if error}{'Unable to load members'}{:else}{'No matching members.'}{/if}
+              {#if loading}Loading members…{:else if error}Unable to load members{:else}No matching
+                members.{/if}
             </p>
           {/each}
         </div>
       </div>
     {/if}
-    {#if error && !open}<p class="error" role="alert">{'Unable to load members'}</p>{/if}
+    {#if error && !open}<p class="error" role="alert">Unable to load members</p>{/if}
   </div>
 {/if}
 

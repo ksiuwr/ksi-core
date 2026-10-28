@@ -96,8 +96,8 @@
   ><ArrowLeft size={15} aria-hidden="true" />{'Task board'}</a
 >
 <header class="create-heading">
-  <h1>{'New task'}</h1>
-  <p>{'Add the details now; you can continue the discussion after creating the task.'}</p>
+  <h1>New task</h1>
+  <p>Add the details now; you can continue the discussion after creating the task.</p>
 </header>
 
 {#if error}<p class="error" role="alert">{error}</p>{/if}
@@ -110,7 +110,7 @@
 >
   <section class="card create-main">
     <div>
-      <label for="new-task-title">{'Task title'}</label>
+      <label for="new-task-title">Task title</label>
       <input
         id="new-task-title"
         bind:value={title}
@@ -120,14 +120,14 @@
       />
     </div>
     <div>
-      <span class="create-label">{'Description'}</span>
+      <span class="create-label">Description</span>
       <Editor {language} bind:value={markdown} rows={18} allowReferences />
     </div>
   </section>
 
   <aside class="card create-aside">
     <section class="create-section">
-      <label for="new-task-status">{'Status'}</label>
+      <label for="new-task-status">Status</label>
       <Dropdown
         id="new-task-status"
         label={'Task status'}
@@ -137,7 +137,7 @@
     </section>
     {#if labels.length}
       <section class="create-section">
-        <span class="create-label">{'Labels'}</span>
+        <span class="create-label">Labels</span>
         <div class="label-chips">
           {#each labels as label (label.name)}
             {@const selected = selectedLabels.includes(label.name)}
@@ -172,8 +172,7 @@
       <button class="btn" disabled={busy || !title.trim() || !status}
         ><Plus size={15} aria-hidden="true" />{busy ? 'Creating…' : 'Create task'}</button
       >
-      <a class="btn btn-outline" href={dashboardPath(workspace, projectSlug, 'board')}>{'Cancel'}</a
-      >
+      <a class="btn btn-outline" href={dashboardPath(workspace, projectSlug, 'board')}>Cancel</a>
     </div>
   </aside>
 </form>

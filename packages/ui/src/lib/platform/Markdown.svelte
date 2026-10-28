@@ -241,20 +241,20 @@
       role="tooltip"
     >
       {#if previewLoading && !previewData}
-        <p class="reference-preview-loading">{'Loading…'}</p>
+        <p class="reference-preview-loading">Loading…</p>
       {:else if previewNotFound}
-        <p class="reference-preview-error">{'Reference not found'}</p>
+        <p class="reference-preview-error">Reference not found</p>
       {:else if previewError}
-        <p class="reference-preview-error">{'Preview unavailable'}</p>
+        <p class="reference-preview-error">Preview unavailable</p>
       {:else if previewData}
         <div class="reference-preview-header">
           <p class="reference-preview-context">
             <span
-              >{#if previewData.workspace}{previewData.workspace}{:else}{'Association'}{/if}</span
+              >{#if previewData.workspace}{previewData.workspace}{:else}Association{/if}</span
             >
             <span class="reference-preview-separator" aria-hidden="true">·</span>
             <span
-              >{#if previewData.type === 'item'}{'Task'}{:else}{'Thread'}{/if}</span
+              >{#if previewData.type === 'item'}Task{:else}Thread{/if}</span
             >
             <span class="reference-preview-separator" aria-hidden="true">·</span>
             <time datetime={previewData.createdAt}>{formatDate(previewData.createdAt)}</time>
@@ -274,7 +274,7 @@
         </div>
         {#if previewData.type === 'item'}
           <p class="reference-preview-excerpt" class:empty={!previewData.excerpt}>
-            {#if previewData.excerpt}{previewData.excerpt}{:else}{'No description.'}{/if}
+            {#if previewData.excerpt}{previewData.excerpt}{:else}No description.{/if}
           </p>
         {/if}
         {#if previewData.labels.length}
@@ -291,7 +291,7 @@
             >
             <span>
               <strong
-                >{#if previewData.author}{previewData.author}{:else}{'Association member'}{/if}</strong
+                >{#if previewData.author}{previewData.author}{:else}Association member{/if}</strong
               >
               <span class="reference-preview-muted"
                 >{#if previewData.type === 'item'}opened this task{:else}opened this thread{/if}</span
@@ -319,7 +319,7 @@
           {/if}
         </div>
         <a class="reference-preview-link" href={previewData.href}>
-          <span>{'Open'}</span>
+          <span>Open</span>
           <ArrowUpRight size={13} aria-hidden="true" />
         </a>
       {/if}

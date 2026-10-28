@@ -8,7 +8,7 @@
 
 <div class="workspace-header">
   <div>
-    <h1>{'Members'}</h1>
+    <h1>Members</h1>
   </div>
 </div>
 <Members

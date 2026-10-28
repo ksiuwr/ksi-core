@@ -73,21 +73,19 @@
 </script>
 
 <div class="avatar-upload">
-  <h3>{'Profile picture'}</h3>
+  <h3>Profile picture</h3>
   {#if request?.state === 'pending' && request.fileId}<div class="avatar-pending">
       <img src={`/media/${request.fileId}`} alt={'Picture awaiting approval'} />
       <div>
-        <strong>{'Awaiting approval'}</strong>
-        <p>
-          {'Your current picture remains visible until an administrator decides.'}
-        </p>
+        <strong>Awaiting approval</strong>
+        <p>Your current picture remains visible until an administrator decides.</p>
         <button type="button" class="btn btn-outline" disabled={busy} onclick={cancel}
           ><X size={14} aria-hidden="true" />{'Withdraw request'}</button
         >
       </div>
     </div>
   {:else if request?.state === 'declined'}<p class="avatar-feedback" role="status">
-      {'The picture was declined. You can submit another.'}
+      The picture was declined. You can submit another.
     </p>{/if}
   <input
     bind:this={input}
@@ -120,9 +118,7 @@
       ></span
     ></button
   >
-  <p class="avatar-help">
-    {'Every new picture requires administrator approval.'}
-  </p>
+  <p class="avatar-help">Every new picture requires administrator approval.</p>
 </div>
 
 <style>

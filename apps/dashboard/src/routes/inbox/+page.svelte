@@ -9,10 +9,8 @@
 
 <div class="workspace-header">
   <div>
-    <h1>{'Notifications'}</h1>
-    <p class="workspace-description">
-      {language === 'pl' ? 'Zobacz, co Cię ominęło.' : 'Catch up on what you missed.'}
-    </p>
+    <h1>Notifications</h1>
+    <p class="workspace-description">Catch up on what you missed.</p>
   </div>
 </div>
 <NotificationInbox

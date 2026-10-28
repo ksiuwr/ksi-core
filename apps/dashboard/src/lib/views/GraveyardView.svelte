@@ -46,7 +46,7 @@
 </script>
 
 <div class="workspace-header">
-  <h1>{'Removed tasks'}</h1>
+  <h1>Removed tasks</h1>
   <a class="btn btn-outline" href={dashboardPath(workspace, projectSlug, 'board')}
     ><ArrowLeft size={15} aria-hidden="true" />{'Back to board'}</a
   >
@@ -54,7 +54,7 @@
 {#if error}<p class="error" role="alert">{error}</p>{/if}
 <div class="graveyard-notice">
   <Archive size={18} aria-hidden="true" />
-  <p>{'Removed tasks are kept here. Leaders can restore them to their previous column.'}</p>
+  <p>Removed tasks are kept here. Leaders can restore them to their previous column.</p>
 </div>
 <div class="graveyard-list">
   {#each items as item (item.id)}
@@ -77,8 +77,8 @@
   {#if !items.length}
     <div class="empty-state">
       <Trash2 size={28} strokeWidth={1.4} aria-hidden="true" />
-      <h2>{'No removed tasks'}</h2>
-      <p>{'Tasks removed from the board will appear here.'}</p>
+      <h2>No removed tasks</h2>
+      <p>Tasks removed from the board will appear here.</p>
     </div>
   {/if}
 </div>

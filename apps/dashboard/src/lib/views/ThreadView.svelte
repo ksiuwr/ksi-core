@@ -262,7 +262,7 @@
   {/snippet}
 
   {#if error}<p class="error" role="alert">{error}</p>{/if}
-  {#if archived}<p class="notice">{'This thread is archived.'}</p>{/if}
+  {#if archived}<p class="notice">This thread is archived.</p>{/if}
 
   <section class="issue-discussion" aria-label={'Discussion'}>
     <div class="discussion-timeline">
@@ -275,7 +275,7 @@
                 {remainingTimelineLabel}
               </p>{/if}
             {#if loadActivityError}<p class="timeline-gap-error" role="alert">
-                {'Could not load activity.'}
+                Could not load activity.
               </p>{/if}
             <button
               type="button"
@@ -284,7 +284,7 @@
               onclick={() => void revealTimeline()}
             >
               {#if loadActivityError}<RotateCcw size={13} aria-hidden="true" />{/if}
-              {#if activityLoading}{'Loading…'}{:else if loadActivityError}{'Try again'}{:else}{'Load more'}{/if}
+              {#if activityLoading}Loading…{:else if loadActivityError}Try again{:else}Load more{/if}
             </button>
           </div>
         {:else}
@@ -303,10 +303,10 @@
             <div class="comment-card">
               <header class="comment-header">
                 <a class="comment-author" href={`/members/${encodeURIComponent(author.id)}`}
-                  >{#if memberName(author)}{memberName(author)}{:else}{'Association member'}{/if}</a
+                  >{#if memberName(author)}{memberName(author)}{:else}Association member{/if}</a
                 >
                 <span class="comment-verb"
-                  >{#if entry.first}{'opened this thread'}{:else}{'commented'}{/if}</span
+                  >{#if entry.first}opened this thread{:else}commented{/if}</span
                 >
                 <time
                   datetime={comment.createdAt}
@@ -358,12 +358,12 @@
                     />
                     <div class="comment-composer-actions">
                       <button class="btn" disabled={busy || !editingCommentMarkdown.trim()}
-                        >{'Save'}</button
+                        >Save</button
                       >
                       <button
                         type="button"
                         class="btn ghost"
-                        onclick={() => (editingCommentId = null)}>{'Cancel'}</button
+                        onclick={() => (editingCommentId = null)}>Cancel</button
                       >
                     </div>
                   </form>
@@ -387,7 +387,7 @@
       >
         <h2><MessagesSquare size={17} aria-hidden="true" />{'Reply'}</h2>
         <Editor {language} bind:value={reply} rows={4} allowReferences />
-        <button class="btn" disabled={busy || !reply.trim()}>{'Reply'}</button>
+        <button class="btn" disabled={busy || !reply.trim()}>Reply</button>
       </form>
     {/if}
   </section>

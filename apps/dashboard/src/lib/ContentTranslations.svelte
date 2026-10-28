@@ -160,7 +160,7 @@
   <div class="language-bar">
     <div class="language-title">
       <Languages size={17} aria-hidden="true" />
-      <strong>{'Content language'}</strong>
+      <strong>Content language</strong>
     </div>
 
     <div class="language-actions">
@@ -238,9 +238,7 @@
     <div>
       <div class="translation-context">
         <span class="tag">{translationExists ? 'Added' : 'New'}</span>
-        <p>
-          {'You are editing Polish. Blank fields use the English value shown in the reference.'}
-        </p>
+        <p>You are editing Polish. Blank fields use the English value shown in the reference.</p>
         {#if dirty}<span class="dirty"><span></span>{'Unsaved changes'}</span>{/if}
       </div>
     </div>
@@ -258,8 +256,8 @@
     <div>
       <div class="reference-panel">
         <header>
-          <div><strong>{'English reference'}</strong><span>{'Read only'}</span></div>
-          <p>{'Use this as context while writing the translation.'}</p>
+          <div><strong>English reference</strong><span>Read only</span></div>
+          <p>Use this as context while writing the translation.</p>
         </header>
         <div class="reference-grid">
           {#each Object.keys(baseline) as key}

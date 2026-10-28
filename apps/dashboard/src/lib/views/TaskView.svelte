@@ -322,7 +322,7 @@
                 {remainingTimelineLabel}
               </p>{/if}
             {#if loadActivityError}<p class="timeline-gap-error" role="alert">
-                {'Could not load activity.'}
+                Could not load activity.
               </p>{/if}
             <button
               type="button"
@@ -331,7 +331,7 @@
               onclick={() => void revealTimeline()}
             >
               {#if loadActivityError}<RotateCcw size={13} aria-hidden="true" />{/if}
-              {#if activityLoading}{'Loading…'}{:else if loadActivityError}{'Try again'}{:else}{'Load more'}{/if}
+              {#if activityLoading}Loading…{:else if loadActivityError}Try again{:else}Load more{/if}
             </button>
           </div>
         {:else if entry.kind === 'description'}
@@ -349,7 +349,7 @@
             <div class="comment-card">
               <header class="comment-header">
                 <a class="comment-author" href={`/members/${encodeURIComponent(author.id)}`}
-                  >{#if memberName(author)}{memberName(author)}{:else}{'Association member'}{/if}</a
+                  >{#if memberName(author)}{memberName(author)}{:else}Association member{/if}</a
                 >
                 <span class="comment-verb">opened this task</span>
                 {#if entry.createdAt}<time
@@ -384,20 +384,18 @@
                   >
                     <Editor {language} bind:value={descriptionDraft} rows={6} allowReferences />
                     <div class="comment-composer-actions">
-                      <button class="btn" disabled={busy || !descriptionDraft.trim()}
-                        >{'Save'}</button
-                      >
+                      <button class="btn" disabled={busy || !descriptionDraft.trim()}>Save</button>
                       <button
                         type="button"
                         class="btn btn-outline"
-                        onclick={() => (descriptionEditing = false)}>{'Cancel'}</button
+                        onclick={() => (descriptionEditing = false)}>Cancel</button
                       >
                     </div>
                   </form>
                 {:else if entry.item.markdown.trim()}
                   <MarkdownContent value={entry.item.markdown} {language} allowReferences />
                 {:else}
-                  <p class="issue-empty">{'No description.'}</p>
+                  <p class="issue-empty">No description.</p>
                 {/if}
               </div>
             </div>
@@ -418,7 +416,7 @@
             <div class="comment-card">
               <header class="comment-header">
                 <a class="comment-author" href={`/members/${encodeURIComponent(author.id)}`}
-                  >{#if memberName(author)}{memberName(author)}{:else}{'Association member'}{/if}</a
+                  >{#if memberName(author)}{memberName(author)}{:else}Association member{/if}</a
                 >
                 <span class="comment-verb">commented</span>
                 <time
@@ -471,12 +469,12 @@
                     />
                     <div class="comment-composer-actions">
                       <button class="btn" disabled={busy || !editingCommentMarkdown.trim()}
-                        >{'Save'}</button
+                        >Save</button
                       >
                       <button
                         type="button"
                         class="btn ghost"
-                        onclick={() => (editingCommentId = null)}>{'Cancel'}</button
+                        onclick={() => (editingCommentId = null)}>Cancel</button
                       >
                     </div>
                   </form>
@@ -499,7 +497,7 @@
     >
       <h2><MessagesSquare size={17} aria-hidden="true" />{'Add to discussion'}</h2>
       <Editor {language} bind:value={reply} rows={4} allowReferences />
-      <button class="btn" disabled={busy || !reply.trim()}>{'Comment'}</button>
+      <button class="btn" disabled={busy || !reply.trim()}>Comment</button>
     </form>
   </section>
 </DetailLayout>

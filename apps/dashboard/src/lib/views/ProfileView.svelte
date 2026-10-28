@@ -134,8 +134,8 @@
 
 <div class="workspace-header">
   <div>
-    <h1>{'Profile'}</h1>
-    <p>{'Introduce yourself to the association and choose what to share publicly.'}</p>
+    <h1>Profile</h1>
+    <p>Introduce yourself to the association and choose what to share publicly.</p>
   </div>
   <a class="btn btn-outline" href={`${websiteOrigin}/members/${encodeURIComponent(draft.id)}`}
     ><ArrowUpRight size={15} aria-hidden="true" />{'View public profile'}</a
@@ -204,7 +204,7 @@
       </section>
 
       <section id="about" class="settings-section" aria-labelledby="identity-heading">
-        <header><h2 id="identity-heading">{'About you'}</h2></header>
+        <header><h2 id="identity-heading">About you</h2></header>
         <ContentTranslations
           kind="profile"
           id={draft.id}
@@ -224,7 +224,7 @@
         <div class="card settings-card">
           <div class="field-grid localized-profile-fields">
             <div>
-              <label for="p-first">{'First name'}</label><input
+              <label for="p-first">First name</label><input
                 id="p-first"
                 bind:value={
                   () => localized('firstName'), (value) => setLocalized('firstName', value)
@@ -233,20 +233,20 @@
               />
             </div>
             <div>
-              <label for="p-last">{'Last name'}</label><input
+              <label for="p-last">Last name</label><input
                 id="p-last"
                 bind:value={() => localized('lastName'), (value) => setLocalized('lastName', value)}
               />
             </div>
             <div class="field-wide">
-              <label for="p-nick">{'Nickname'}</label><input
+              <label for="p-nick">Nickname</label><input
                 id="p-nick"
                 bind:value={() => localized('nickname'), (value) => setLocalized('nickname', value)}
                 placeholder={'What should we call you?'}
               />
             </div>
             <div class="field-wide">
-              <label for="p-bio">{'A little about you'}</label><textarea
+              <label for="p-bio">A little about you</label><textarea
                 id="p-bio"
                 bind:value={() => localized('bio'), (value) => setLocalized('bio', value)}
                 rows="4"
@@ -254,7 +254,7 @@
               ></textarea>
             </div>
             {#if contentLocale === 'en'}<div class="field-wide">
-                <label for="p-priv">{'Name visibility'}</label>
+                <label for="p-priv">Name visibility</label>
                 <Dropdown
                   id="p-priv"
                   label={'Name visibility'}
@@ -267,7 +267,7 @@
                   }}
                 />
                 <p class="field-help">
-                  {'Applies to the public website. Members see your full name in the dashboard.'}
+                  Applies to the public website. Members see your full name in the dashboard.
                 </p>
               </div>{/if}
           </div>
@@ -275,7 +275,7 @@
       </section>
 
       <section id="photo" class="settings-section photo-section" aria-label={'Profile picture'}>
-        <header><h2>{'Profile picture'}</h2></header>
+        <header><h2>Profile picture</h2></header>
         <div class="card settings-card">
           <AvatarUpload
             request={avatarRequest}
@@ -287,7 +287,7 @@
       </section>
 
       <section id="links" class="settings-section" aria-labelledby="links-heading">
-        <header><h2 id="links-heading">{'Find me online'}</h2></header>
+        <header><h2 id="links-heading">Find me online</h2></header>
         <div class="card settings-card">
           <div class="field-grid">
             <div>
@@ -298,7 +298,7 @@
                 placeholder="https://github.com/…"
               />
               {#if !validProfileLink('github', draft.github)}<p class="field-error" role="status">
-                  {'Use a https://github.com/username link.'}
+                  Use a https://github.com/username link.
                 </p>{/if}
             </div>
             <div>
@@ -312,7 +312,7 @@
                   class="field-error"
                   role="status"
                 >
-                  {'Use a https://linkedin.com/in/username link.'}
+                  Use a https://linkedin.com/in/username link.
                 </p>{/if}
             </div>
           </div>
@@ -322,10 +322,7 @@
       {#if contentLocale === 'en' && (dirty || saved)}
         <div class="save-bar">
           <span role="status"
-            >{#if saved}<Check
-                size={15}
-                aria-hidden="true"
-              />{'Saved'}{:else}{'Unsaved changes'}{/if}</span
+            >{#if saved}<Check size={15} aria-hidden="true" />{'Saved'}{:else}Unsaved changes{/if}</span
           >
           <button class="btn" disabled={busy}
             ><Save size={16} aria-hidden="true" />{'Save changes'}</button
@@ -336,11 +333,11 @@
 
     <section id="sessions" class="settings-section" aria-labelledby="sessions-heading">
       <header>
-        <h2 id="sessions-heading">{'Active sessions'}</h2>
-        <p>{'Devices and browsers currently logged into your KSI account.'}</p>
+        <h2 id="sessions-heading">Active sessions</h2>
+        <p>Devices and browsers currently logged into your KSI account.</p>
       </header>
       {#if sessions.length === 0}
-        <p class="list-empty">{'No active sessions.'}</p>
+        <p class="list-empty">No active sessions.</p>
       {:else}
         <ul class="list-group">
           {#each sessions as session (session.id)}
@@ -349,7 +346,7 @@
               <div class="session-info">
                 <div class="session-title">
                   <strong>{session.isCurrent ? 'Current device' : 'Other device'}</strong>
-                  {#if session.isCurrent}<span class="session-badge">{'Current'}</span>{/if}
+                  {#if session.isCurrent}<span class="session-badge">Current</span>{/if}
                 </div>
                 <div class="muted session-detail">
                   {session.userAgent || 'Unknown browser'}
@@ -362,7 +359,7 @@
                 <button
                   class="btn btn-outline btn-sm"
                   disabled={busy}
-                  onclick={() => revokeSession(session.id)}>{'Revoke'}</button
+                  onclick={() => revokeSession(session.id)}>Revoke</button
                 >
               {/if}
             </li>
@@ -372,12 +369,12 @@
     </section>
 
     <section id="danger" class="settings-section" aria-labelledby="danger-heading">
-      <header><h2 id="danger-heading">{'Delete account'}</h2></header>
+      <header><h2 id="danger-heading">Delete account</h2></header>
       <div class="card settings-card danger">
-        <p class="muted">{'Your profile will be anonymized. Association content remains.'}</p>
+        <p class="muted">Your profile will be anonymized. Association content remains.</p>
         <div>
           <button class="btn btn-outline danger-button" disabled={busy} onclick={deleteAccount}
-            >{'Confirm account deletion'}</button
+            >Confirm account deletion</button
           >
         </div>
       </div>

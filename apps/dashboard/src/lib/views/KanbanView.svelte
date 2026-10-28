@@ -39,7 +39,7 @@
 </script>
 
 <div class="workspace-header">
-  <h1>{'Task board'}</h1>
+  <h1>Task board</h1>
   <a class="btn btn-outline" href={`${dashboardPath(workspace, projectSlug, 'board')}/graveyard`}
     ><Trash2 size={15} aria-hidden="true" />{'Removed tasks'}</a
   >

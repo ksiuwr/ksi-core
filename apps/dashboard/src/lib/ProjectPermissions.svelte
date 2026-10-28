@@ -96,9 +96,9 @@
 
 <div class="workspace-header">
   <div>
-    <h1>{'Project permissions'}</h1>
+    <h1>Project permissions</h1>
     <p class="muted">
-      {'Choose article access defaults and create named groups for additional project permissions.'}
+      Choose article access defaults and create named groups for additional project permissions.
     </p>
   </div>
   <button
@@ -109,12 +109,12 @@
 </div>
 {#if error}<p class="error" role="alert">{error}</p>{/if}
 {#if notice}<p class="notice" role="status">{notice}</p>{/if}
-{#if loading}<p class="muted">{'Loading project permissions…'}</p>
+{#if loading}<p class="muted">Loading project permissions…</p>
 {:else}
   <div class="settings-main">
     <section class="settings-section">
       <header>
-        <h2>{'Default project access'}</h2>
+        <h2>Default project access</h2>
         <p>
           {'These permissions apply to everyone in the selected category. They are additional to existing account-role permissions.'}
           {'Active KSI members who are not members of this project.'}
@@ -123,8 +123,8 @@
       <div class="card matrix">
         <div class="matrix-row matrix-head">
           <span></span>
-          <span>{'Project members'}</span>
-          <span>{'Non-members'}</span>
+          <span>Project members</span>
+          <span>Non-members</span>
         </div>
         {#each articlePermissions as permission}
           <div class="matrix-row">
@@ -156,8 +156,8 @@
     <section class="settings-section">
       <header class="group-header">
         <div>
-          <h2>{'Named groups'}</h2>
-          <p>{'Only active project members can be assigned to a group.'}</p>
+          <h2>Named groups</h2>
+          <p>Only active project members can be assigned to a group.</p>
         </div>
         <button
           type="button"
@@ -171,7 +171,7 @@
         <div class="card group-card">
           <div class="group-top">
             <div class="group-name">
-              <label for={`group-name-${index}`}>{'Group name'}</label>
+              <label for={`group-name-${index}`}>Group name</label>
               <input
                 id={`group-name-${index}`}
                 bind:value={group.name}
@@ -190,7 +190,7 @@
           </div>
           <div class="group-columns">
             <fieldset>
-              <legend>{'Members'}</legend>
+              <legend>Members</legend>
               {#each members as member}
                 <label class="check"
                   ><input
@@ -203,7 +203,7 @@
               {/each}
             </fieldset>
             <fieldset>
-              <legend>{'Permissions'}</legend>
+              <legend>Permissions</legend>
               {#each groupPermissions as permission}
                 <label class="check permission-option">
                   <input type="checkbox" value={permission} bind:group={group.permissions} />
@@ -217,7 +217,7 @@
           </div>
         </div>
       {:else}
-        <p class="list-empty">{'No groups yet.'}</p>
+        <p class="list-empty">No groups yet.</p>
       {/each}
     </section>
   </div>

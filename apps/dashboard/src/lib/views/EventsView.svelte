@@ -12,7 +12,7 @@
 
 <div class="workspace-header">
   <div>
-    <h1>{'Activity'}</h1>
+    <h1>Activity</h1>
   </div>
 </div>
 {#if events.length}<ul class="list-group">
@@ -26,7 +26,7 @@
                   >{event.firstName
                     ? `${event.firstName} ${event.lastName}`
                     : event.actorName || 'System'}</a
-                >{:else}{'System'}{/if}</strong
+                >{:else}System{/if}</strong
             >
             {#if linkForAction(event.event.action, event.event.targetId, event.projectSlug)}
               <a
@@ -72,7 +72,7 @@
   </div>
 {/if}
 {#if !events.length}
-  <p class="list-empty">{'No activity yet.'}</p>
+  <p class="list-empty">No activity yet.</p>
 {/if}
 
 <style>

@@ -61,13 +61,13 @@
   disabled={busy}
   onclick={toggle}
 >
-  {#if busy}<span class="sr-only">{'Loading…'}</span>
+  {#if busy}<span class="sr-only">Loading…</span>
   {:else if watching}<BellOff size={13} aria-hidden="true" />
   {:else}<Bell size={13} aria-hidden="true" />
   {/if}
   {#if showLabel}
     <span class="watch-label"
-      >{#if watching}{'Unwatch'}{:else}{'Watch'}{/if}</span
+      >{#if watching}Unwatch{:else}Watch{/if}</span
     >
   {/if}
 </button>

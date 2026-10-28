@@ -102,7 +102,7 @@
       );
       draft = { ...result, publicCredit: showCredit, canManageCredit: draft.canManageCredit };
       await refresh();
-      notice = language === 'pl' ? 'Zapisano.' : 'Saved.';
+      notice = 'Saved.';
     });
   }
 
@@ -113,8 +113,7 @@
         title,
         markdown
       });
-      notice =
-        language === 'pl' ? 'Propozycja została wysłana.' : 'Your proposed edit was submitted.';
+      notice = 'Your proposed edit was submitted.';
     });
   }
 
@@ -179,7 +178,7 @@
     {#if notice}<p class="notice" role="status">{notice}</p>{/if}
 
     <section class="aside-section">
-      <h2>{'Status'}</h2>
+      <h2>Status</h2>
       <div class="status-line">
         <span class="tag" class:tag-mint={draft.state === 'published'}
           >{draft.state === 'published' ? 'Published' : 'Draft'}</span
@@ -197,7 +196,7 @@
             <button
               class="btn btn-coral"
               disabled={busy || thumbnailUploading}
-              onclick={() => save(true)}>{'Publish'}</button
+              onclick={() => save(true)}>Publish</button
             >
           {/if}
           {#if permissions.canSave}
@@ -214,10 +213,10 @@
           {/if}
           {#if permissions.canPropose}
             <button class="btn btn-outline" disabled={busy || thumbnailUploading} onclick={propose}
-              >{'Propose edit'}</button
+              >Propose edit</button
             >
           {/if}
-        </div>{:else}<p class="muted">{'Save the translation from the language bar above.'}</p>{/if}
+        </div>{:else}<p class="muted">Save the translation from the language bar above.</p>{/if}
     </section>
 
     {#if contentLocale === 'en'}<section class="aside-section">
@@ -241,7 +240,7 @@
 
     {#if permissions.canManage && contentLocale === 'en'}
       <section class="aside-section">
-        <h2>{'Publishing'}</h2>
+        <h2>Publishing</h2>
         {#if workspace === 'project'}
           <label class="check"
             ><input
@@ -250,7 +249,8 @@
             />{'Main project article'}</label
           >
           <p class="muted">
-            {'When published, this article appears on the public project home page. It replaces the previous main article. Save or publish to apply this setting.'}
+            When published, this article appears on the public project home page. It replaces the
+            previous main article. Save or publish to apply this setting.
           </p>
           <label class="check"
             ><input
@@ -266,7 +266,8 @@
           />{'Show in website articles'}</label
         >
         <p class="muted">
-          {'These settings apply when the article is published. The main article is displayed separately from the project articles list.'}
+          These settings apply when the article is published. The main article is displayed
+          separately from the project articles list.
         </p>
       </section>
     {/if}

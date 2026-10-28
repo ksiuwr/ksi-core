@@ -613,7 +613,7 @@
 {#snippet labelManagement(close: () => void)}
   <section class="manage-labels-panel" aria-label={'Manage labels'}>
     <div class="manage-labels-header">
-      <h4>{'Board labels'}</h4>
+      <h4>Board labels</h4>
       <button
         type="button"
         class="icon-button"
@@ -626,14 +626,10 @@
     {#if manageLabelError}
       <p class="manage-label-error" role="alert">{manageLabelError}</p>
     {/if}
-    <p class="manage-labels-hint">
-      {'Remove a label from tasks before deleting it from the board.'}
-    </p>
+    <p class="manage-labels-hint">Remove a label from tasks before deleting it from the board.</p>
 
     {#if normalizedLabels.length === 0}
-      <p class="muted">
-        {'No labels on this board yet.'}
-      </p>
+      <p class="muted">No labels on this board yet.</p>
     {:else}
       <div class="manage-labels-list">
         {#each normalizedLabels as label}
@@ -894,7 +890,7 @@
         void submitLabel();
       }}
     >
-      <label for="label-name">{'Label name'}</label>
+      <label for="label-name">Label name</label>
       <input
         id="label-name"
         bind:value={labelDraftName}
@@ -903,7 +899,7 @@
         placeholder={'e.g. bug, docs'}
       />
 
-      <label for="label-desc">{'Description (optional)'}</label>
+      <label for="label-desc">Description (optional)</label>
       <input
         id="label-desc"
         bind:value={labelDraftDescription}
@@ -911,7 +907,7 @@
         placeholder={'Brief description'}
       />
 
-      <label for="label-color">{'Color'}</label>
+      <label for="label-color">Color</label>
       <div class="color-picker-row">
         <input id="label-color" type="color" bind:value={labelDraftColor} />
         <div class="preset-swatches">
@@ -935,7 +931,7 @@
           {editingLabelName === null ? 'Create label' : 'Save'}
         </button>
         <button type="button" class="btn btn-outline" disabled={busy} onclick={closeLabelDialog}>
-          {'Cancel'}
+          Cancel
         </button>
       </div>
     </form>
@@ -949,7 +945,7 @@
           void addStatus();
         }}
       >
-        <label for="status-name" class="sr-only">{'Status name'}</label><input
+        <label for="status-name" class="sr-only">Status name</label><input
           id="status-name"
           bind:value={statusName}
           placeholder={'Status name'}
@@ -957,7 +953,7 @@
           required
         /><input type="color" aria-label={'Status color'} bind:value={statusColor} /><button
           class="btn btn-outline"
-          disabled={busy || !statusName.trim()}>{'Add status'}</button
+          disabled={busy || !statusName.trim()}>Add status</button
         ><button
           type="button"
           class="icon-button"
@@ -977,8 +973,7 @@
       >{/if}
   </div>{/if}
 {#if canManage && statuses.some((s) => s.deleted)}<details class="deleted-statuses">
-    <summary>{'Deleted statuses'}</summary
-    >{#each statuses.filter((s) => s.deleted) as status}<button
+    <summary>Deleted statuses</summary>{#each statuses.filter((s) => s.deleted) as status}<button
         class="btn btn-outline"
         onclick={(event) => openStatus(status, event)}
         ><Pencil size={14} aria-hidden="true" />{label(status)}</button
@@ -994,7 +989,7 @@
     }}
   >
     <div class="issue-heading">
-      <h2 id="status-heading">{'Edit status'}</h2>
+      <h2 id="status-heading">Edit status</h2>
       <button class="icon-button" aria-label={'Close'} onclick={closeStatus}
         ><X size={18} aria-hidden="true" /></button
       >
@@ -1006,13 +1001,13 @@
         void saveStatus();
       }}
     >
-      <label for="edit-status-name">{'Name'}</label><input
+      <label for="edit-status-name">Name</label><input
         id="edit-status-name"
         bind:value={editingStatus.name}
         required
         maxlength="60"
       />
-      <label for="edit-status-color">{'Color'}</label><input
+      <label for="edit-status-color">Color</label><input
         id="edit-status-color"
         type="color"
         value={color(editingStatus)}
@@ -1026,7 +1021,7 @@
         <button class="btn" disabled={busy || !editingStatus.name.trim()}
           ><Save size={14} aria-hidden="true" />{'Save'}</button
         ><button type="button" class="btn btn-outline" disabled={busy} onclick={closeStatus}
-          >{'Cancel'}</button
+          >Cancel</button
         >{#if !editingStatus.deleted}<button
             type="button"
             class="btn btn-outline danger-button"

@@ -128,7 +128,7 @@
     <div>
       <h1>{person.firstName} {person.lastName}</h1>
       <a class="btn btn-outline" href={`${websiteOrigin}/members/${encodeURIComponent(person.id)}`}
-        >{'View public profile'}</a
+        >View public profile</a
       >
       {#if person.nickname}<p>aka. {person.nickname}</p>{/if}
       <p class="muted">{role(person)}</p>
@@ -146,14 +146,14 @@
             target="_blank"><Linkedin size={16} />LinkedIn</a
           >{/if}
         {#if elevated}<a class="btn btn-outline" href={`/members/${encodeURIComponent(person.id)}`}
-            >{'Manage account'}</a
+            >Manage account</a
           >{/if}
       </div>
     </div>
   </section>
 {:else}
   <div class="workspace-header">
-    <h1>{'Members'}</h1>
+    <h1>Members</h1>
     <label class="search"
       ><Search size={16} /><input
         aria-label="Search members"
@@ -164,7 +164,7 @@
   </div>
   {#if manageable && requests.length}
     <section class="card requests">
-      <h2>{'Join requests'}</h2>
+      <h2>Join requests</h2>
       {#each requests as request (request.request.id)}
         <div class="request">
           <a href={`/people/${encodeURIComponent(request.request.userId)}`}
@@ -177,14 +177,14 @@
               onclick={() =>
                 manage(() =>
                   projectApi(`/join-requests/${request.request.id}`, 'POST', { accept: true })
-                )}>{'Accept'}</button
+                )}>Accept</button
             ><button
               class="btn btn-outline btn-sm"
               disabled={busy}
               onclick={() =>
                 manage(() =>
                   projectApi(`/join-requests/${request.request.id}`, 'POST', { accept: false })
-                )}>{'Decline'}</button
+                )}>Decline</button
             >
           </div>
         </div>
@@ -195,8 +195,8 @@
     <table>
       <thead
         ><tr
-          ><th>{'Person'}</th><th>{'Role'}</th><th class="bio-cell">{'About'}</th
-          >{#if manageable}<th></th>{/if}</tr
+          ><th>Person</th><th>Role</th><th class="bio-cell">About</th>{#if manageable}<th
+            ></th>{/if}</tr
         ></thead
       ><tbody>
         {#each filtered as member}<tr
@@ -212,9 +212,9 @@
                     class="btn btn-outline btn-sm danger-button"
                     disabled={busy}
                     onclick={() => manage(() => projectApi(`/members/${member.id}`, 'DELETE'))}
-                    >{'Confirm removal'}</button
+                    >Confirm removal</button
                   ><button class="btn btn-outline btn-sm" onclick={() => (removing = null)}
-                    >{'Cancel'}</button
+                    >Cancel</button
                   >{:else}<button
                     class="btn btn-outline btn-sm"
                     disabled={busy || (member.leader && leaderIds.length <= 1)}
@@ -223,14 +223,14 @@
                   ><button
                     class="btn btn-outline btn-sm"
                     disabled={busy}
-                    onclick={() => (removing = member.id)}>{'Remove from project'}</button
+                    onclick={() => (removing = member.id)}>Remove from project</button
                   >{/if}</td
               >{/if}</tr
           >{/each}
       </tbody>
     </table>
   </div>
-  {#if !filtered.length}<p class="muted">{'No matching members.'}</p>{/if}
+  {#if !filtered.length}<p class="muted">No matching members.</p>{/if}
 {/if}
 
 <style>

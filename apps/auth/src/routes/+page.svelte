@@ -121,7 +121,7 @@
     </header>
     <section class="auth-card" aria-labelledby="auth-title">
       {#if data.user}
-        <h1 id="auth-title">{'Welcome to KSI'}</h1>
+        <h1 id="auth-title">Welcome to KSI</h1>
         <p class="auth-intro">
           {'You are signed in as'} <strong>{data.user.name || data.user.email}</strong>.
         </p>
@@ -139,14 +139,12 @@
               location.reload();
             }}
           >
-            {'Sign out'}
+            Sign out
           </button>
         </div>
       {:else}
         <h1 id="auth-title">{titleLabel}</h1>
-        <p class="auth-intro">
-          {'One account. Every KSI project and conversation.'}
-        </p>
+        <p class="auth-intro">One account. Every KSI project and conversation.</p>
         {#if mode !== 'reset'}<div
             class="auth-mode"
             role="group"
@@ -160,7 +158,7 @@
               onclick={() => {
                 mode = 'login';
                 message = '';
-              }}>{'Sign in'}</button
+              }}>Sign in</button
             ><button
               class:active={mode === 'signup'}
               aria-pressed={mode === 'signup'}
@@ -168,11 +166,11 @@
               onclick={() => {
                 mode = 'signup';
                 message = '';
-              }}>{'Create account'}</button
+              }}>Create account</button
             >
           </div>{/if}
         {#if hints.length && mode === 'login'}<div class="hint-list">
-            <p class="hint-label">{'Remembered accounts'}</p>
+            <p class="hint-label">Remembered accounts</p>
             {#each hints as hint (hint.email)}<div class="hint-item">
                 <button
                   class="hint-name"
@@ -188,7 +186,7 @@
                   class="hint-forget"
                   disabled={busy}
                   onclick={() => forget(hint.email)}
-                  aria-label={`${'Forget account'}: ${hint.email}`}>{'Forget'}</button
+                  aria-label={`${'Forget account'}: ${hint.email}`}>Forget</button
                 >
               </div>{/each}
           </div>{/if}
@@ -200,22 +198,23 @@
               class="btn btn-outline oauth-btn"
               disabled={busy}
               onclick={() => provider('github')}
-              ><Github size={18} aria-hidden="true" /><span>{'Continue with GitHub'}</span
-              ><ArrowUpRight size={15} aria-hidden="true" /></button
+              ><Github size={18} aria-hidden="true" /><span>Continue with GitHub</span><ArrowUpRight
+                size={15}
+                aria-hidden="true"
+              /></button
             ><button
               type="button"
               class="btn btn-outline oauth-btn"
               disabled={busy}
               onclick={() => provider('google')}
-              ><span class="google-icon" aria-hidden="true">G</span><span
-                >{'Continue with Google'}</span
+              ><span class="google-icon" aria-hidden="true">G</span><span>Continue with Google</span
               ><ArrowUpRight size={15} aria-hidden="true" /></button
             >
           </div>
-          <div class="separator">{'or use email'}</div>{/if}
+          <div class="separator">or use email</div>{/if}
         <form class="auth-form" onsubmit={submit}>
           {#if mode === 'signup'}<div class="auth-field">
-              <label for="auth-name">{'Full name'}</label><input
+              <label for="auth-name">Full name</label><input
                 id="auth-name"
                 autocomplete="name"
                 bind:value={name}
@@ -237,14 +236,14 @@
           </div>
           {#if mode !== 'reset'}<div class="auth-field">
               <div class="password-label">
-                <label for="auth-password">{'Password'}</label>{#if mode === 'login'}<button
+                <label for="auth-password">Password</label>{#if mode === 'login'}<button
                     type="button"
                     class="text-button"
                     disabled={busy}
                     onclick={() => {
                       mode = 'reset';
                       message = '';
-                    }}>{'Forgot password'}</button
+                    }}>Forgot password</button
                   >{/if}
               </div>
               <input
@@ -275,11 +274,9 @@
             onclick={() => {
               mode = 'login';
               message = '';
-            }}>{'Back to sign in'}</button
+            }}>Back to sign in</button
           >{/if}
-        <p class="activation-note">
-          {'New accounts require activation by the KSI board.'}
-        </p>
+        <p class="activation-note">New accounts require activation by the KSI board.</p>
       {/if}
     </section>
     <footer class="auth-footer">
