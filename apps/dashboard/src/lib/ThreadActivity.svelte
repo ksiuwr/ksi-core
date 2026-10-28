@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
+  import { formatDateTime, formatRelativeTime } from 'shared/format';
   import {
     Archive,
     CircleDot,
@@ -29,7 +31,7 @@
       metadata: { changes: ContentChange[] | null };
     };
     members?: AssignmentMember[];
-    language: 'pl' | 'en';
+    language: FrontendLocale;
     now: number;
   } = $props();
   const pl = $derived(language === 'pl');
@@ -89,29 +91,8 @@
       : count % 10 >= 2 && count % 10 <= 4 && !(count % 100 >= 12 && count % 100 <= 14)
         ? 'zaproszenia'
         : 'zaproszeń';
-  const absoluteTime = $derived(new Date(event.createdAt).toLocaleString(pl ? 'pl-PL' : 'en-GB'));
-  const relativeTime = $derived.by(() => {
-    const seconds = (new Date(event.createdAt).getTime() - now) / 1000;
-    const abs = Math.abs(seconds);
-    const [divisor, unit]: [number, Intl.RelativeTimeFormatUnit] =
-      abs < 60
-        ? [1, 'second']
-        : abs < 3600
-          ? [60, 'minute']
-          : abs < 86400
-            ? [3600, 'hour']
-            : abs < 604800
-              ? [86400, 'day']
-              : abs < 2592000
-                ? [604800, 'week']
-                : abs < 31536000
-                  ? [2592000, 'month']
-                  : [31536000, 'year'];
-    return new Intl.RelativeTimeFormat(pl ? 'pl' : 'en', { numeric: 'auto' }).format(
-      abs < 60 ? 0 : Math.trunc(seconds / divisor),
-      unit
-    );
-  });
+  const absoluteTime = $derived(formatDateTime(event.createdAt, language));
+  const relativeTime = $derived(formatRelativeTime(event.createdAt, language, now));
 </script>
 
 <div class="thread-activity" id={`activity-${event.id}`}>

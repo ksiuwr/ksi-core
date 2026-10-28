@@ -1,14 +1,15 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
   import { Bell, BellOff } from '@lucide/svelte';
   let {
     type,
     id,
-    language = 'en',
+    language = 'en-us',
     showLabel = false
   }: {
     type: 'item' | 'thread';
     id: string;
-    language?: 'pl' | 'en';
+    language?: FrontendLocale;
     showLabel?: boolean;
   } = $props();
   let watching = $state(false),

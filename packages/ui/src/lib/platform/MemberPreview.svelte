@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
   import { tick, onMount } from 'svelte';
   let {
     member,
@@ -21,7 +22,7 @@
     href: string;
     role?: string;
     avatarOnly?: boolean;
-    language?: 'pl' | 'en';
+    language?: FrontendLocale;
     size?: number;
     inline?: boolean;
   } = $props();

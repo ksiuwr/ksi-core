@@ -252,15 +252,6 @@ msgid "Language"
 msgstr "Język"
 
 #: src/lib/AppearanceMenu.svelte
-msgid "Polski"
-msgstr "Polski"
-
-#: src/lib/AppearanceMenu.svelte
-#: src/lib/ContentTranslations.svelte
-msgid "English"
-msgstr "English"
-
-#: src/lib/AppearanceMenu.svelte
 msgid "Appearance"
 msgstr "Wygląd"
 
@@ -1265,10 +1256,6 @@ msgid "Biography"
 msgstr "Opis"
 
 #: src/lib/ContentTranslations.svelte
-msgid "Polish"
-msgstr "Polski"
-
-#: src/lib/ContentTranslations.svelte
 msgid "Save the English content before adding its translation."
 msgstr "Zapisz treść angielską przed dodaniem tłumaczenia."
 
@@ -1292,18 +1279,6 @@ msgstr "Zapisz tłumaczenie"
 #: src/lib/ProjectSettings.svelte
 msgid "Public links"
 msgstr "Linki publiczne"
-
-#: src/lib/ProjectSettings.svelte
-msgid "English labels are required. Polish labels are optional."
-msgstr "Etykiety angielskie są wymagane. Polskie etykiety są opcjonalne."
-
-#: src/lib/ProjectSettings.svelte
-msgid "Label · English"
-msgstr "Etykieta · angielski"
-
-#: src/lib/ProjectSettings.svelte
-msgid "Label · Polish"
-msgstr "Etykieta · polski"
 
 #: src/lib/ProjectSettings.svelte
 msgid "Remove link"
@@ -1981,14 +1956,6 @@ msgid "New profile picture"
 msgstr "Nowe zdjęcie profilowe"
 
 #: src/lib/NotificationInbox.svelte
-msgid "Teraz"
-msgstr "Teraz"
-
-#: src/lib/NotificationInbox.svelte
-msgid "Just now"
-msgstr "Teraz"
-
-#: src/lib/NotificationInbox.svelte
 msgid "Filtr powiadomień"
 msgstr "Filtr powiadomień"
 
@@ -2429,14 +2396,6 @@ msgid "Save the translation from the language bar above."
 msgstr "Zapisz tłumaczenie na pasku języka powyżej."
 
 #: src/lib/ContentTranslations.svelte
-msgid "Polish was removed. Visitors will now see English."
-msgstr "Usunięto język polski. Odwiedzający zobaczą teraz wersję angielską."
-
-#: src/lib/ContentTranslations.svelte
-msgid "Polish translation saved."
-msgstr "Zapisano polskie tłumaczenie."
-
-#: src/lib/ContentTranslations.svelte
 #: src/lib/ContentTranslations.svelte
 msgid "English reference"
 msgstr "Angielski tekst źródłowy"
@@ -2444,15 +2403,6 @@ msgstr "Angielski tekst źródłowy"
 #: src/lib/ContentTranslations.svelte
 msgid "Confirm remove"
 msgstr "Potwierdź usunięcie"
-
-#: src/lib/ContentTranslations.svelte
-#: src/lib/ContentTranslations.svelte
-msgid "Remove Polish translation"
-msgstr "Usuń polskie tłumaczenie"
-
-#: src/lib/ContentTranslations.svelte
-msgid "You are editing Polish. Blank fields use the English value shown in the reference."
-msgstr "Edytujesz wersję polską. Puste pola użyją angielskiej wartości widocznej w podglądzie."
 
 #: src/lib/ContentTranslations.svelte
 msgid "Read only"
@@ -2469,3 +2419,36 @@ msgstr "Motyw"
 #: src/lib/ProjectSettings.svelte
 msgid "URL"
 msgstr "URL"
+
+#. 0: localeLabel(selected)
+#. 0: localeLabel(selected)
+#: src/lib/ContentTranslations.svelte
+#: src/lib/ContentTranslations.svelte
+msgid "Remove {0} translation"
+msgstr "Usuń tłumaczenie: {0}"
+
+#. 0: localeLabel(selected)
+#: src/lib/ContentTranslations.svelte
+msgid "{0} translation saved."
+msgstr "Zapisano tłumaczenie: {0}."
+
+#. 0: localeLabel( selected )
+#: src/lib/ContentTranslations.svelte
+msgid "{0} was removed. Visitors will now see English."
+msgstr "Usunięto tłumaczenie: {0}. Odwiedzający zobaczą teraz wersję angielską."
+
+#: src/lib/ProjectSettings.svelte
+msgid "English labels are required. Other language labels are optional."
+msgstr "Etykiety angielskie są wymagane. Etykiety w innych językach są opcjonalne."
+
+#. 0: contentLocaleName('en', language)
+#. 0: contentLocaleName(locale, language)
+#: src/lib/ProjectSettings.svelte
+#: src/lib/ProjectSettings.svelte
+msgid "Label · {0}"
+msgstr "Etykieta · {0}"
+
+#. 0: localeLabel(selected)
+#: src/lib/ContentTranslations.svelte
+msgid "You are editing the {0} translation. Blank fields use the English value shown in the reference."
+msgstr "Edytujesz tłumaczenie: {0}. Puste pola użyją angielskiej wartości widocznej w podglądzie."

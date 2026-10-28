@@ -10,12 +10,13 @@ import {
   contentLocales,
   articleFileContent,
   hasEnglishSources,
+  type ContentLocale,
   type ContentTranslations
 } from 'shared/content-locales';
 
 function setTranslation(
   current: ContentTranslations,
-  locale: 'pl',
+  locale: ContentLocale,
   fields: Record<string, string | string[]>
 ) {
   const translations = { ...current };
@@ -70,7 +71,7 @@ export const translationRoutes = createElysia({
         .for('share');
       active(currentActor ?? null);
       const principal = currentActor!;
-      const locale = params.locale as 'pl';
+      const locale = params.locale as ContentLocale;
       if (params.kind === 'profile') {
         const own = params.id === principal.id;
         if (!own) {

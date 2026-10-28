@@ -2,9 +2,12 @@
   import Editor from '@ksi-core/ui/platform/Editor.svelte';
   import ContentTranslations from './ContentTranslations.svelte';
   import SettingsNav from './SettingsNav.svelte';
-  import type {
-    ContentLocale,
-    ContentTranslations as TranslationData
+  import {
+    contentLocaleName,
+    contentLocales,
+    type ContentLocale,
+    type ContentTranslations as TranslationData,
+    type FrontendLocale
   } from 'shared/content-locales';
   import { Save, ArrowUpRight, Plus, Trash2, Info, Users, Link2 } from '@lucide/svelte';
   import Skeleton from './Skeleton.svelte';
@@ -17,7 +20,7 @@
     language,
     websiteOrigin
   }: {
-    language: 'pl' | 'en';
+    language: FrontendLocale;
     websiteOrigin: string;
     project: {
       slug: string;
@@ -55,6 +58,11 @@
   let generation = 0;
   let contentLocale = $state<ContentLocale>('en');
   let translationDraft = $state<Record<string, string>>({});
+  const projectFields = {
+    research: 'Research',
+    community: 'Community',
+    engineering: 'Engineering'
+  } as const;
 
   type LocalizedProjectField = 'name' | 'description' | 'tags';
   function localized(key: LocalizedProjectField) {
@@ -245,13 +253,8 @@
             {#if contentLocale === 'en'}<fieldset>
                 <legend>Fields</legend>
                 <div class="check-row">
-                  {#each ['research', 'community', 'engineering'] as field}<label class="check"
-                      ><input type="checkbox" value={field} bind:group={fields} />{field ===
-                      'research'
-                        ? 'Research'
-                        : field === 'community'
-                          ? 'Community'
-                          : 'Engineering'}</label
+                  {#each Object.entries(projectFields) as [field, label]}<label class="check"
+                      ><input type="checkbox" value={field} bind:group={fields} />{label}</label
                     >{/each}
                 </div>
               </fieldset>
@@ -360,7 +363,7 @@
         <section id="links" class="settings-section" aria-labelledby="links-heading">
           <header>
             <h2 id="links-heading">Public links</h2>
-            <p>English labels are required. Polish labels are optional.</p>
+            <p>English labels are required. Other language labels are optional.</p>
           </header>
           <form
             class="card settings-card"
@@ -379,7 +382,9 @@
           >
             {#each links as link, index}<div class="link-fields">
                 <div>
-                  <label for={`link-label-${index}`}>Label · English</label><input
+                  <label for={`link-label-${index}`}
+                    >Label · {contentLocaleName('en', language)}</label
+                  ><input
                     id={`link-label-${index}`}
                     bind:value={link.label}
                     required
@@ -395,14 +400,22 @@
                     maxlength="2000"
                   />
                 </div>
-                <div>
-                  <label for={`link-pl-${index}`}>Label · Polish</label><input
-                    id={`link-pl-${index}`}
-                    value={link.translations?.pl?.label ?? ''}
-                    maxlength="200"
-                    oninput={(e) => (link.translations = { pl: { label: e.currentTarget.value } })}
-                  />
-                </div>
+                {#each contentLocales.filter((locale) => locale !== 'en') as locale}
+                  <div>
+                    <label for={`link-${locale}-${index}`}
+                      >Label · {contentLocaleName(locale, language)}</label
+                    ><input
+                      id={`link-${locale}-${index}`}
+                      value={link.translations?.[locale]?.label ?? ''}
+                      maxlength="200"
+                      oninput={(e) =>
+                        (link.translations = {
+                          ...link.translations,
+                          [locale]: { label: e.currentTarget.value }
+                        })}
+                    />
+                  </div>
+                {/each}
                 <button
                   class="btn btn-outline"
                   type="button"

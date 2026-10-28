@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
+  import { formatDate } from 'shared/format';
   import { Check, X, UserPlus, Image, Inbox } from '@lucide/svelte';
   import type { InboxData } from './types';
   export type { InboxData } from './types';
@@ -10,7 +12,7 @@
     reportError
   }: {
     inbox: InboxData;
-    language: 'pl' | 'en';
+    language: FrontendLocale;
     administrator: boolean;
     refresh: () => Promise<void>;
     reportError: (message: string) => void;
@@ -63,11 +65,7 @@
         <div>
           <h3>{member.name || member.email}</h3>
           <p>{member.email}</p>
-          <time datetime={member.createdAt}
-            >{new Date(member.createdAt).toLocaleDateString(
-              language === 'pl' ? 'pl-PL' : 'en-GB'
-            )}</time
-          >
+          <time datetime={member.createdAt}>{formatDate(member.createdAt, language)}</time>
         </div>
         <div class="approval-actions">
           <button class="btn" disabled={busy} onclick={() => review('members', member.id, true)}

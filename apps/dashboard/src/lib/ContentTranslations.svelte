@@ -3,10 +3,12 @@
   import { Check, ChevronDown, Eye, Languages, Save, Trash2, X } from '@lucide/svelte';
   import Dropdown, { type DropdownOption } from '@ksi-core/ui/platform/Dropdown.svelte';
   import {
+    contentLocaleName,
     contentLocales,
     type ContentLocale,
     type ContentTranslations
   } from 'shared/content-locales';
+  import { preferences } from './preferences.svelte';
 
   let {
     kind,
@@ -39,7 +41,9 @@
     title: 'Title',
     markdown: 'Article content'
   };
-  const localeNames: Record<ContentLocale, string> = { en: 'English', pl: 'Polish' };
+  const uiLanguage = $derived(preferences.language);
+  const localeLabel = (locale: ContentLocale) => contentLocaleName(locale, uiLanguage);
+  const localeAutonym = (locale: ContentLocale) => contentLocaleName(locale, locale);
   const hasFields = (fields?: Record<string, string | string[]>) =>
     Boolean(fields && Object.keys(fields).length);
   const toDraft = (fields: Record<string, string | string[]> = {}) =>
@@ -51,32 +55,40 @@
     );
 
   const initial = untrack(() => ({ translations, version }));
-  const initialDraft = untrack(() => toDraft(initial.translations.pl));
-  if (!Object.keys(draft).length) draft = initialDraft;
-
+  const initialDrafts = untrack(
+    () =>
+      Object.fromEntries(
+        contentLocales.map((locale) => [locale, toDraft(initial.translations[locale])])
+      ) as Record<ContentLocale, Record<string, string>>
+  );
   let workingTranslations = $state<ContentTranslations>({ ...initial.translations });
-  let savedDraft = $state<Record<string, string>>({ ...initialDraft });
+  let drafts = $state<Record<ContentLocale, Record<string, string>>>({ ...initialDrafts });
+  let savedDrafts = $state<Record<ContentLocale, Record<string, string>>>({ ...initialDrafts });
+  let savedDraft = $state<Record<string, string>>({ ...initialDrafts[selected] });
+  if (!Object.keys(draft).length) draft = drafts[selected];
   let currentVersion = $state(initial.version);
   let busy = $state(false);
   let error = $state('');
-  let notice = $state('');
+  let notice = $state<'saved' | 'removed' | ''>('');
   let confirmingRemoval = $state(false);
   let referenceOpen = $state(false);
 
-  const translationExists = $derived(hasFields(workingTranslations.pl));
+  const hasTranslation = (locale: ContentLocale) =>
+    locale !== 'en' && hasFields(workingTranslations[locale]);
+  const translationExists = $derived(hasTranslation(selected));
   const dirty = $derived(JSON.stringify(draft) !== JSON.stringify(savedDraft));
   const hasDraftContent = $derived(Object.values(draft).some((value) => value.trim()));
   const languageOptions = $derived<DropdownOption[]>(
     contentLocales.map((locale) => ({
       value: locale,
-      label: localeNames[locale],
+      label: localeAutonym(locale),
       description:
         locale === 'en'
           ? 'Primary language'
-          : translationExists
+          : hasTranslation(locale)
             ? 'Translation added'
             : 'Not added',
-      indicator: locale === 'en' ? 'Primary' : translationExists ? 'Added' : undefined
+      indicator: locale === 'en' ? 'Primary' : hasTranslation(locale) ? 'Added' : undefined
     }))
   );
 
@@ -85,7 +97,14 @@
   });
 
   function selectLanguage(value: string) {
-    selected = value as ContentLocale;
+    const next = value as ContentLocale;
+    if (next === selected) return;
+    drafts[selected] = draft;
+    selected = next;
+    const nextDraft = drafts[selected] ?? toDraft(workingTranslations[selected]);
+    drafts[selected] = nextDraft;
+    savedDraft = savedDrafts[selected] ?? { ...nextDraft };
+    draft = nextDraft;
     confirmingRemoval = false;
     error = '';
     notice = '';
@@ -138,14 +157,18 @@
 
       workingTranslations = { ...((result.translations ?? {}) as ContentTranslations) };
       if (typeof result.version === 'number') currentVersion = result.version;
+      drafts[selected] = draft;
+      savedDraft = { ...draft };
+      savedDrafts[selected] = { ...draft };
       if (remove) {
-        draft = toDraft();
-        savedDraft = { ...draft };
+        drafts[selected] = toDraft();
+        draft = { ...drafts[selected] };
+        savedDraft = { ...drafts[selected] };
+        savedDrafts[selected] = { ...drafts[selected] };
         confirmingRemoval = false;
-        notice = 'Polish was removed. Visitors will now see English.';
+        notice = 'removed';
       } else {
-        savedDraft = { ...draft };
-        notice = 'Polish translation saved.';
+        notice = 'saved';
       }
       await onsaved(result);
     } catch (cause) {
@@ -202,8 +225,8 @@
                 type="button"
                 class="btn btn-outline remove-button"
                 disabled={busy}
-                aria-label={'Remove Polish translation'}
-                title={'Remove Polish translation'}
+                aria-label={`Remove ${localeLabel(selected)} translation`}
+                title={`Remove ${localeLabel(selected)} translation`}
                 onclick={() => (confirmingRemoval = true)}
                 ><Trash2 size={15} aria-hidden="true" /></button
               >
@@ -238,14 +261,21 @@
     <div>
       <div class="translation-context">
         <span class="tag">{translationExists ? 'Added' : 'New'}</span>
-        <p>You are editing Polish. Blank fields use the English value shown in the reference.</p>
+        <p>
+          You are editing the {localeLabel(selected)} translation. Blank fields use the English value
+          shown in the reference.
+        </p>
         {#if dirty}<span class="dirty"><span></span>{'Unsaved changes'}</span>{/if}
       </div>
     </div>
   </div>
 
   {#if error}<p class="message error" role="alert">{error}</p>{/if}
-  {#if notice}<p class="message success" role="status"><Check size={14} />{notice}</p>{/if}
+  {#if notice}<p class="message success" role="status">
+      <Check size={14} />{#if notice === 'saved'}{localeLabel(selected)} translation saved.{:else}{localeLabel(
+          selected
+        )} was removed. Visitors will now see English.{/if}
+    </p>{/if}
 
   <div
     class="reference-reveal"

@@ -1,10 +1,14 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
   import MarkdownContent from '@ksi-core/ui/platform/MarkdownContent.svelte';
   import { ArrowUpRight, Plus } from '@lucide/svelte';
   import type { Project } from '$lib/types';
 
-  let { projects, role, language }: { projects: Project[]; role: string; language: 'pl' | 'en' } =
-    $props();
+  let {
+    projects,
+    role,
+    language
+  }: { projects: Project[]; role: string; language: FrontendLocale } = $props();
 </script>
 
 <div class="workspace-header">

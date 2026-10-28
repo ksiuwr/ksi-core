@@ -1,21 +1,22 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
   import { onMount, tick } from 'svelte';
   import { fly } from 'svelte/transition';
   import { CalendarClock, ChevronLeft, ChevronRight, X } from '@lucide/svelte';
 
   let {
     value = $bindable(''),
-    language = 'en',
+    language = 'en-us',
     disabled = false
   }: {
     value?: string;
-    language?: 'pl' | 'en';
+    language?: FrontendLocale;
     disabled?: boolean;
   } = $props();
 
   const uid = $props.id();
   const pl = $derived(language === 'pl');
-  const intl = $derived(pl ? 'pl-PL' : 'en-GB');
+  const intl = $derived(language);
 
   let trigger = $state<HTMLButtonElement>();
   let panel = $state<HTMLDivElement>();

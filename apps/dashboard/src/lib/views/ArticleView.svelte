@@ -6,7 +6,7 @@
   import { api, errorMessage } from '$lib/api';
   import { dashboardPath, type Workspace } from '$lib/navigation';
   import type { Article } from '$lib/types';
-  import type { ContentLocale } from 'shared/content-locales';
+  import type { ContentLocale, FrontendLocale } from 'shared/content-locales';
   import { untrack } from 'svelte';
   import { ArrowLeft, ArrowUpRight, Save } from '@lucide/svelte';
 
@@ -31,7 +31,7 @@
       canManage: boolean;
     };
     websiteOrigin: string;
-    language: 'pl' | 'en';
+    language: FrontendLocale;
     refresh: () => Promise<void>;
   } = $props();
 

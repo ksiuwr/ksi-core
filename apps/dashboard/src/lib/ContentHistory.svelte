@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
+  import { formatDateTime } from 'shared/format';
   import { tick, onDestroy } from 'svelte';
   import {
     History,
@@ -22,7 +24,7 @@
     labeled?: boolean;
     kind: 'comment' | 'task';
     targetId: string;
-    language?: 'pl' | 'en';
+    language?: FrontendLocale;
   } = $props();
   const uid = $props.id();
   const pl = $derived(language === 'pl');
@@ -155,7 +157,7 @@
                     >
                   </div>
                   <time datetime={revision.createdAt}
-                    >{new Date(revision.createdAt).toLocaleString(pl ? 'pl-PL' : 'en-GB', {
+                    >{formatDateTime(revision.createdAt, language, {
                       dateStyle: 'medium',
                       timeStyle: 'short'
                     })}</time

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
   import { Check, GripVertical, UploadCloud, LoaderCircle, X } from '@lucide/svelte';
   import GalleryImage from './GalleryImage.svelte';
   import {
@@ -19,7 +20,7 @@
     onremove
   }: {
     gallery: GalleryState;
-    language?: 'pl' | 'en';
+    language?: FrontendLocale;
     busy?: boolean;
     names?: Record<string, string>;
     uploads?: { key: number; name: string; status: 'queued' | 'uploading' }[];

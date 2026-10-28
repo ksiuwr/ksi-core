@@ -114,7 +114,7 @@
         <ThemeSelector {language} /><button
           class="btn btn-outline language-button"
           aria-label={'Change language'}
-          onclick={() => setLanguage(language === 'pl' ? 'en' : 'pl')}
+          onclick={() => setLanguage(language === 'pl' ? 'en-us' : 'pl')}
           >{language === 'pl' ? 'EN' : 'PL'}</button
         >
       </div>

@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { slider } from './slider';
+  import type { FrontendLocale } from 'shared/content-locales';
+  import { slider } from './slider.js';
   import {
     insertMarkdownGallery,
     markdownGalleries,
@@ -20,7 +21,7 @@
     referenceScope
   }: {
     value?: string;
-    language?: 'pl' | 'en';
+    language?: FrontendLocale;
     rows?: number;
     allowGallery?: boolean;
     allowReferences?: boolean;

@@ -9,19 +9,19 @@ describe('notification action descriptions', () => {
       reason: 'mention',
       ownerType: 'thread'
     };
-    expect(notificationAction(notification, 'en')).toBe('Alicja Nowak commented');
+    expect(notificationAction(notification, 'en-us')).toBe('Alicja Nowak commented');
     expect(notificationAction(notification, 'pl')).toBe('Alicja Nowak dodał komentarz');
-    expect(notificationAction({ ...notification, action: 'comments.edited' }, 'en')).toBe(
+    expect(notificationAction({ ...notification, action: 'comments.edited' }, 'en-us')).toBe(
       'Alicja Nowak edited a comment'
     );
   });
   test('task updates distinguish titles, status, descriptions, and assignments', () => {
     const notification = { actorName: 'Jan', action: 'kanban.updated', ownerType: 'item' };
-    expect(notificationAction({ ...notification, changedFields: ['title'] }, 'en')).toBe(
+    expect(notificationAction({ ...notification, changedFields: ['title'] }, 'en-us')).toBe(
       'Jan changed the title'
     );
     expect(
-      notificationAction({ ...notification, changedFields: ['column', 'position'] }, 'en')
+      notificationAction({ ...notification, changedFields: ['column', 'position'] }, 'en-us')
     ).toBe('Jan changed the task status');
     expect(notificationAction({ ...notification, changedFields: ['markdown'] }, 'pl')).toBe(
       'Jan edytował opis'
@@ -30,11 +30,11 @@ describe('notification action descriptions', () => {
       'Jan zmienił przypisane osoby'
     );
     expect(
-      notificationAction({ ...notification, changedFields: ['title', 'markdown'] }, 'en')
+      notificationAction({ ...notification, changedFields: ['title', 'markdown'] }, 'en-us')
     ).toBe('Jan updated the task');
   });
   test('discussion events preserve the action and handle missing actors', () => {
-    expect(notificationAction({ action: 'threads.archived', actorName: 'Jan' }, 'en')).toBe(
+    expect(notificationAction({ action: 'threads.archived', actorName: 'Jan' }, 'en-us')).toBe(
       'Jan archived the discussion'
     );
     expect(notificationAction({ action: 'threads.access.updated', actorName: 'Jan' }, 'pl')).toBe(
@@ -43,7 +43,7 @@ describe('notification action descriptions', () => {
     expect(notificationAction({ action: 'threads.created', actorName: null }, 'pl')).toBe(
       'Ktoś rozpoczął dyskusję'
     );
-    expect(notificationAction({ action: 'unknown', ownerType: 'thread' }, 'en')).toBe(
+    expect(notificationAction({ action: 'unknown', ownerType: 'thread' }, 'en-us')).toBe(
       'Someone updated the discussion'
     );
   });
@@ -71,15 +71,19 @@ test('assignment descriptions name assigned and unassigned people in both langua
     assignedNames: ['Alicja', 'Piotr'],
     unassignedNames: ['Marek']
   };
-  expect(notificationAction(context, 'en')).toBe('Jan assigned Alicja, Piotr and unassigned Marek');
+  expect(notificationAction(context, 'en-us')).toBe(
+    'Jan assigned Alicja, Piotr and unassigned Marek'
+  );
   expect(notificationAction(context, 'pl')).toBe(
     'Jan przypisał: Alicja, Piotr; cofnął przypisanie: Marek'
   );
-  expect(notificationAction({ ...context, assignedNames: [] }, 'en')).toBe('Jan unassigned Marek');
+  expect(notificationAction({ ...context, assignedNames: [] }, 'en-us')).toBe(
+    'Jan unassigned Marek'
+  );
   expect(notificationAction({ ...context, assignedNames: [], unassignedNames: [null] }, 'pl')).toBe(
     'Jan cofnął przypisanie: Nieznany użytkownik'
   );
   expect(
-    notificationAction({ ...context, action: 'kanban.created', unassignedNames: [] }, 'en')
+    notificationAction({ ...context, action: 'kanban.created', unassignedNames: [] }, 'en-us')
   ).toBe('Jan created a task and assigned Alicja, Piotr');
 });

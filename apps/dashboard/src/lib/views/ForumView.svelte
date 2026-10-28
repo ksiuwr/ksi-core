@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
+  import { formatDate } from 'shared/format';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
   import { slider } from '@ksi-core/ui/platform/slider';
@@ -15,7 +17,7 @@
     workspace: Workspace;
     projectSlug: string;
     threads: Thread[];
-    language: 'pl' | 'en';
+    language: FrontendLocale;
   } = $props();
 
   const archived = $derived(page.url.searchParams.get('archived') === 'true');
@@ -68,9 +70,7 @@
                 : 'Association members'}</span
           >
           {#if thread.createdAt}<time class="list-row-meta" datetime={thread.createdAt}
-              >{new Date(thread.createdAt).toLocaleDateString(
-                language === 'pl' ? 'pl-PL' : 'en-GB'
-              )}</time
+              >{formatDate(thread.createdAt, language)}</time
             >{/if}
         </a>
       </li>

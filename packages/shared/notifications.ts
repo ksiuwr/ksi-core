@@ -1,3 +1,5 @@
+import type { FrontendLocale } from './content-locales.js';
+
 export type NotificationContext = {
   actorName: string | null;
   action: string;
@@ -28,7 +30,7 @@ export function assignmentChanges(changes: unknown): { added: string[]; removed:
 /** Describe the event separately from why its recipient was notified. */
 export function notificationAction(
   notification: Partial<NotificationContext>,
-  language: 'pl' | 'en'
+  language: FrontendLocale
 ): string {
   const pl = language === 'pl';
   const actor = notification.actorName || (pl ? 'Ktoś' : 'Someone');

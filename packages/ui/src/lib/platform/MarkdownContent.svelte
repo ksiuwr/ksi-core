@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
   import Markdown from './Markdown.svelte';
   import type { MarkdownBlock } from 'shared/markdown';
   let {
@@ -8,7 +9,7 @@
     onresize
   }: {
     value: string;
-    language?: 'pl' | 'en';
+    language?: FrontendLocale;
     allowReferences?: boolean;
     onresize?: (index: number, width: number) => void;
   } = $props();

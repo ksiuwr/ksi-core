@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
   import { goto } from '$app/navigation';
   import Editor from '@ksi-core/ui/platform/Editor.svelte';
   import UserSelect from '$lib/UserSelect.svelte';
@@ -6,7 +7,7 @@
   import { ArrowLeft } from '@lucide/svelte';
   import type { Project } from '$lib/types';
 
-  let { language }: { language: 'pl' | 'en' } = $props();
+  let { language }: { language: FrontendLocale } = $props();
 
   let title = $state('');
   let slug = $state('');

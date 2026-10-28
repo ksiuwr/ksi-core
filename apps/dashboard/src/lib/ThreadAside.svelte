@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
+  import { formatDate } from 'shared/format';
   import Assignees from './Assignees.svelte';
   import WatchButton from './WatchButton.svelte';
   import { api, errorMessage } from '$lib/api';
@@ -14,7 +16,7 @@
   }: {
     thread: Thread;
     members: AssignmentMember[];
-    language: 'pl' | 'en';
+    language: FrontendLocale;
     canManage: boolean;
     refresh: () => Promise<void>;
   } = $props();
@@ -23,11 +25,7 @@
   let error = $state('');
 
   const archived = $derived(!!thread.archivedAt);
-  const created = $derived(
-    thread.createdAt
-      ? new Date(thread.createdAt).toLocaleDateString(language === 'pl' ? 'pl-PL' : 'en-GB')
-      : null
-  );
+  const created = $derived(thread.createdAt ? formatDate(thread.createdAt, language) : null);
 
   async function run(work: () => Promise<unknown>) {
     if (busy) return;

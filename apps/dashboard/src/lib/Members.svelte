@@ -11,13 +11,14 @@
   import { Search, ArrowLeft, Trash2, Save, ChevronLeft, ChevronRight } from '@lucide/svelte';
   import type { Profile } from 'shared/types';
   import type { ContentLocale } from 'shared/content-locales';
+  import { preferences } from '$lib/preferences.svelte';
   let {
-    language,
     administrator,
     memberId,
     websiteOrigin
-  }: { language: 'pl' | 'en'; administrator: boolean; memberId?: string; websiteOrigin: string } =
-    $props();
+  }: { administrator: boolean; memberId?: string; websiteOrigin: string } = $props();
+
+  const language = $derived(preferences.language);
 
   const roles = $derived([
     { value: 'member', label: 'Member' },

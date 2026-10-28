@@ -10,7 +10,7 @@
 
   onMount(initializePreferences);
   $effect(() => {
-    loadLocale(preferences.language === 'en' ? 'en-us' : 'pl');
+    loadLocale(preferences.language);
   });
   let { children } = $props();
 </script>

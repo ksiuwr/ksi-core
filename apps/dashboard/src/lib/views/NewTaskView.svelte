@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
   import Assignees from '$lib/Assignees.svelte';
@@ -11,7 +12,7 @@
     type BoardStatus,
     type Item
   } from '$lib/types';
-  import DeadlinePicker from '@ksi-core/ui/platform/DeadlinePicker.svelte';
+  import DateTimePicker from '@ksi-core/ui/platform/DateTimePicker.svelte';
   import Dropdown from '@ksi-core/ui/platform/Dropdown.svelte';
   import Editor from '@ksi-core/ui/platform/Editor.svelte';
   import { ArrowLeft, Check, Plus } from '@lucide/svelte';
@@ -29,7 +30,7 @@
     projectId: string;
     board: BoardData | null;
     items: Item[];
-    language: 'pl' | 'en';
+    language: FrontendLocale;
   } = $props();
 
   const statuses = $derived<BoardStatus[]>(
@@ -166,7 +167,7 @@
       <Assignees {projectId} bind:value={assignees} {language} disabled={busy} />
     </section>
     <section class="create-section">
-      <DeadlinePicker bind:value={dueAt} {language} disabled={busy} />
+      <DateTimePicker bind:value={dueAt} {language} disabled={busy} />
     </section>
     <div class="create-actions">
       <button class="btn" disabled={busy || !title.trim() || !status}

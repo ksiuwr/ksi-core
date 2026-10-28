@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
+  import { formatDate } from 'shared/format';
   import { api, errorMessage } from '$lib/api';
   import { dashboardPath, taskPath, type Workspace } from '$lib/navigation';
   import type { BoardStatus, Item } from '$lib/types';
@@ -16,7 +18,7 @@
     projectSlug: string;
     items: Item[];
     statuses: BoardStatus[];
-    language: 'pl' | 'en';
+    language: FrontendLocale;
     refresh: () => Promise<void>;
   } = $props();
 
@@ -64,9 +66,7 @@
         <p>{item.markdown.slice(0, 180)}</p>
         <span class="tag">{columnLabel(item.column)}</span>
         {#if item.deletedAt}<time datetime={item.deletedAt}
-            >{new Date(item.deletedAt).toLocaleDateString(
-              language === 'pl' ? 'pl-PL' : 'en-GB'
-            )}</time
+            >{formatDate(item.deletedAt, language)}</time
           >{/if}
       </div>
       <button class="btn btn-outline" disabled={busy} onclick={() => restore(item)}

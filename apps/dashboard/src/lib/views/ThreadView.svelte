@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
+  import { formatDateTime as formatDateTimeValue, formatRelativeTime } from 'shared/format';
   import { onMount, untrack } from 'svelte';
   import Editor from '@ksi-core/ui/platform/Editor.svelte';
   import MarkdownContent from '@ksi-core/ui/platform/MarkdownContent.svelte';
@@ -34,14 +36,11 @@
     events: ThreadEvent[];
     eventsNextPage: number | null;
     eventsError: boolean;
-    language: 'pl' | 'en';
+    language: FrontendLocale;
     canManage: boolean;
     userId: string;
     refresh: () => Promise<void>;
   } = $props();
-
-  const DATE_LOCALES = { pl: 'pl-PL', en: 'en-GB' } as const;
-  const dateLocale = $derived(DATE_LOCALES[language]);
 
   let busy = $state(false);
   let error = $state('');
@@ -72,29 +71,8 @@
   };
   const memberName = (member: AssignmentMember) =>
     [member.firstName, member.lastName].filter(Boolean).join(' ') || member.nickname || '';
-  const formatDateTime = (iso: string) => new Date(iso).toLocaleString(dateLocale);
-  const relativeDateTime = (iso: string) => {
-    const seconds = (new Date(iso).getTime() - now) / 1000;
-    const abs = Math.abs(seconds);
-    const [divisor, unit]: [number, Intl.RelativeTimeFormatUnit] =
-      abs < 60
-        ? [1, 'second']
-        : abs < 3600
-          ? [60, 'minute']
-          : abs < 86400
-            ? [3600, 'hour']
-            : abs < 604800
-              ? [86400, 'day']
-              : abs < 2592000
-                ? [604800, 'week']
-                : abs < 31536000
-                  ? [2592000, 'month']
-                  : [31536000, 'year'];
-    return new Intl.RelativeTimeFormat(dateLocale, { numeric: 'auto' }).format(
-      abs < 60 ? 0 : Math.trunc(seconds / divisor),
-      unit
-    );
-  };
+  const formatDateTime = (iso: string) => formatDateTimeValue(iso, language);
+  const relativeDateTime = (iso: string) => formatRelativeTime(iso, language, now);
 
   const timeline = $derived(
     [

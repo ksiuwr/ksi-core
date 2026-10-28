@@ -1,11 +1,13 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
+  import { formatDateTime } from 'shared/format';
   import ChangeDetails from '@ksi-core/ui/platform/ChangeDetails.svelte';
   import { linkForAction, linkForMetadata } from '$lib/links';
   import type { ActivityEvent } from '$lib/types';
 
   const PAGE_SIZE = 30;
 
-  let { events, language }: { events: ActivityEvent[]; language: 'pl' | 'en' } = $props();
+  let { events, language }: { events: ActivityEvent[]; language: FrontendLocale } = $props();
   let shown = $state(PAGE_SIZE);
   const visible = $derived(events.slice(0, shown));
 </script>
@@ -38,9 +40,7 @@
               <span class="muted">{event.event.action}</span>
             {/if}
             <time class="muted" datetime={event.event.createdAt}
-              >{new Date(event.event.createdAt).toLocaleString(
-                language === 'pl' ? 'pl-PL' : 'en-GB'
-              )}</time
+              >{formatDateTime(event.event.createdAt, language)}</time
             >
           </div>
           {#if event.event.metadata && Object.keys(event.event.metadata).length > 0}

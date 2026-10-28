@@ -1,5 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { preferences } from '$lib/preferences.svelte';
+  import { formatDateTime } from 'shared/format';
   let { projectSlug }: { projectSlug: string } = $props();
   let credentials = $state<
     {
@@ -66,7 +68,7 @@
       </p>
       <p class="muted">
         {'Commit'} <code>{deployment.commit.slice(0, 12)}</code> · {'Updated'}
-        {new Date(deployment.updatedAt).toLocaleString()}
+        {formatDateTime(deployment.updatedAt, preferences.language)}
       </p>
       <div class="account-list">
         {#each deployment.accounts as account}<article class="account">

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { locales } from '../locales/data.js';
+  import type { Locale } from '../locales/data.js';
   import { SunMoon } from '@lucide/svelte';
   import NestedMenu from './NestedMenu.svelte';
   import type { MenuItem } from './menu';
@@ -9,10 +11,12 @@
     { value: 'light', label: 'Light' },
     { value: 'dark', label: 'Dark' }
   ];
-  const languageOptions: { value: 'pl' | 'en'; label: string }[] = [
-    { value: 'en', label: 'English' },
-    { value: 'pl', label: 'Polski' }
-  ];
+  function languageName(locale: Locale) {
+    const code = new Intl.Locale(locale).language;
+    const name = new Intl.DisplayNames([code], { type: 'language' }).of(code) ?? locale;
+    return name.charAt(0).toLocaleUpperCase(code) + name.slice(1);
+  }
+  const languageOptions = locales.map((locale) => ({ value: locale, label: languageName(locale) }));
   const themeLabel = $derived(
     themeOptions.find((option) => option.value === preferences.theme)?.label ?? ''
   );

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
   import { UploadCloud, X } from '@lucide/svelte';
   export type AvatarRequest = { state: string; fileId: string | null; version: number };
   let {
@@ -8,7 +9,7 @@
     reportError
   }: {
     request: AvatarRequest | null;
-    language: 'pl' | 'en';
+    language: FrontendLocale;
     onchange: () => Promise<void>;
     reportError: (error: string) => void;
   } = $props();

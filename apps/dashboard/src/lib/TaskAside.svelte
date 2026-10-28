@@ -1,11 +1,13 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
+  import { formatDate } from 'shared/format';
   import { goto } from '$app/navigation';
   import { onDestroy } from 'svelte';
   import Assignees from './Assignees.svelte';
   import WatchButton from './WatchButton.svelte';
   import ContentHistory from './ContentHistory.svelte';
   import Dropdown from '@ksi-core/ui/platform/Dropdown.svelte';
-  import DeadlinePicker from '@ksi-core/ui/platform/DeadlinePicker.svelte';
+  import DateTimePicker from '@ksi-core/ui/platform/DateTimePicker.svelte';
   import { api, errorMessage } from '$lib/api';
   import { dashboardPath, type Workspace } from '$lib/navigation';
   import type { AssignmentMember, BoardLabel, Item } from '$lib/types';
@@ -25,7 +27,7 @@
     item: Item;
     labels: BoardLabel[];
     members: AssignmentMember[];
-    language: 'pl' | 'en';
+    language: FrontendLocale;
     refresh: () => Promise<void>;
   } = $props();
 
@@ -36,11 +38,7 @@
   let deadlineSuppressed = false;
 
   const unassignedLabels = $derived(labels.filter((label) => !item.labels.includes(label.name)));
-  const created = $derived(
-    item.createdAt
-      ? new Date(item.createdAt).toLocaleDateString(language === 'pl' ? 'pl-PL' : 'en-GB')
-      : null
-  );
+  const created = $derived(item.createdAt ? formatDate(item.createdAt, language) : null);
 
   function localDate(value?: string | null) {
     if (!value) return '';
@@ -189,7 +187,7 @@
 
   <section class="aside-section">
     <div class="aside-due">
-      <DeadlinePicker bind:value={deadlineValue} {language} disabled={busy} />
+      <DateTimePicker bind:value={deadlineValue} {language} disabled={busy} />
       {#if item.dueAt}
         <button
           type="button"

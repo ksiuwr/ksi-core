@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
+  import { formatDateTime, formatRelativeTime } from 'shared/format';
   import { onMount } from 'svelte';
   import { flip } from 'svelte/animate';
   import { fade, fly, scale } from 'svelte/transition';
@@ -19,14 +21,14 @@
   } from '@lucide/svelte';
   import type { InboxData } from './types';
   let {
-    language = 'en',
+    language = 'en-us',
     fullPage = false,
     admin,
     administrator,
     refresh,
     reportError
   }: {
-    language?: 'pl' | 'en';
+    language?: FrontendLocale;
     fullPage?: boolean;
     admin?: InboxData;
     administrator?: boolean;
@@ -207,15 +209,7 @@
       close();
   }
   function relativeTime(date: string) {
-    const seconds = Math.max(0, Math.floor((now - Date.parse(date)) / 1000));
-    const formatter = new Intl.RelativeTimeFormat(language === 'pl' ? 'pl' : 'en', {
-      numeric: 'auto',
-      style: 'short'
-    });
-    if (seconds < 60) return language === 'pl' ? 'Teraz' : 'Just now';
-    if (seconds < 3600) return formatter.format(-Math.floor(seconds / 60), 'minute');
-    if (seconds < 86400) return formatter.format(-Math.floor(seconds / 3600), 'hour');
-    return formatter.format(-Math.floor(seconds / 86400), 'day');
+    return formatRelativeTime(date, language, now, 'short');
   }
   async function request(path: string, method = 'GET', body?: unknown) {
     const response = await fetch(`/api/notifications${path}`, {
@@ -419,9 +413,8 @@
                     ? entry.notification.projectName || 'KSI'
                     : 'KSI'}<span aria-hidden="true"> · </span><time
                     datetime={entry.createdAt}
-                    title={new Date(entry.createdAt).toLocaleString(
-                      language === 'pl' ? 'pl-PL' : 'en-GB'
-                    )}>{relativeTime(entry.createdAt)}</time
+                    title={formatDateTime(entry.createdAt, language)}
+                    >{relativeTime(entry.createdAt)}</time
                   ></span
                 >
                 <span class="entry-title">{entry.title}</span>

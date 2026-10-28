@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
+  import { formatDateTime } from 'shared/format';
   import { tick } from 'svelte';
   import Assignees, { type AssignmentMember } from './Assignees.svelte';
   import { statusColor as colorForStatus } from './status-color';
@@ -53,7 +55,7 @@
     boardLabels?: (string | BoardLabel)[];
     boardId: string;
     projectId: string;
-    language: 'pl' | 'en';
+    language: FrontendLocale;
     canManage?: boolean;
     userId?: string;
     taskHref: (id: string) => string;
@@ -199,8 +201,7 @@
     });
   }
   let members = $state<AssignmentMember[]>([]);
-  const formatDateTime = (iso: string) =>
-    new Date(iso).toLocaleString(language === 'pl' ? 'pl-PL' : 'en-GB');
+  const formatTaskDateTime = (iso: string) => formatDateTime(iso, language);
   $effect(() => {
     const controller = new AbortController();
     const path = projectId ? `/projects/${encodeURIComponent(projectId)}/members` : '/members';
@@ -804,7 +805,7 @@
                     title={'Due'}
                   >
                     <CalendarClock size={13} aria-hidden="true" />
-                    <time datetime={item.dueAt}>{formatDateTime(item.dueAt)}</time>
+                    <time datetime={item.dueAt}>{formatTaskDateTime(item.dueAt)}</time>
                   </div>{/if}
                 {#if item.assigneeIds?.length}<div class="task-meta-row" title={'Assigned to'}>
                     <Users size={13} aria-hidden="true" />

@@ -270,7 +270,7 @@
 
   onMount(initializePreferences);
   $effect(() => {
-    loadLocale(preferences.language === 'en' ? 'en-us' : 'pl');
+    loadLocale(preferences.language);
   });
 </script>
 

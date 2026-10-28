@@ -216,7 +216,7 @@
       </button>
     </div>
     <div class="flex h-full items-center gap-2 pr-6 not-lg:hidden">
-      <ThemeSelector language={locale.current === 'en-us' ? 'en' : 'pl'} />
+      <ThemeSelector language={locale.current} />
       <button
         class="btn btn-outline"
         style="min-height: 32px; height: 32px; padding: 0 12px; font-size: 11px;"
@@ -304,7 +304,7 @@
             </div>
             <div style="height: 1px; background: var(--line);"></div>
             <div style="display: flex; gap: 8px; align-items: center;">
-              <ThemeSelector language={locale.current === 'en-us' ? 'en' : 'pl'} />
+              <ThemeSelector language={locale.current} />
               <button
                 class="btn btn-outline"
                 style="min-height: 32px; height: 32px; padding: 0 12px; font-size: 11px;"

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
+  import { formatDate } from 'shared/format';
   import MarkdownContent from '@ksi-core/ui/platform/MarkdownContent.svelte';
   import MemberPreview from '@ksi-core/ui/platform/MemberPreview.svelte';
   import { invalidateAll } from '$app/navigation';
@@ -31,7 +33,7 @@
     workspace: Workspace;
     project: Project | null;
     access: ProjectAccess;
-    language: 'pl' | 'en';
+    language: FrontendLocale;
     websiteOrigin: string;
     board: BoardData | null;
     items: Item[];
@@ -56,7 +58,6 @@
       .sort((a, b) => (b.referenceNumber ?? 0) - (a.referenceNumber ?? 0))
       .slice(0, LATEST_TASKS)
   );
-  const dateLocale = $derived(language === 'pl' ? 'pl-PL' : 'en-GB');
   const path = (tab: string) => dashboardPath(workspace, projectSlug, tab);
 
   async function join() {
@@ -153,7 +154,7 @@
                     >#{thread.referenceNumber}</span
                   >{/if}
                 {#if thread.createdAt}<time class="list-row-meta" datetime={thread.createdAt}
-                    >{new Date(thread.createdAt).toLocaleDateString(dateLocale)}</time
+                    >{formatDate(thread.createdAt, language)}</time
                   >{/if}
               </a>
             </li>

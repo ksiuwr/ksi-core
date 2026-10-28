@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
   import { goto } from '$app/navigation';
   import Assignees from '$lib/Assignees.svelte';
   import { api, errorMessage } from '$lib/api';
@@ -18,7 +19,7 @@
     workspace: Workspace;
     projectSlug: string;
     projectId: string;
-    language: 'pl' | 'en';
+    language: FrontendLocale;
   } = $props();
 
   let title = $state('');

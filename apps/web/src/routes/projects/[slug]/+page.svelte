@@ -11,7 +11,7 @@
   }>();
   let project = $derived(data.project);
   let user = $derived(data.user);
-  const language = $derived(locale.current === 'pl' ? 'pl' : 'en');
+  const language = $derived(locale.current);
 </script>
 
 <div class="page-gutter py-12">

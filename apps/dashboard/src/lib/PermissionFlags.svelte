@@ -1,11 +1,12 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
   import Dropdown from '@ksi-core/ui/platform/Dropdown.svelte';
   import { permissions, permissionKeys, polishPermissionDescriptions } from 'shared/permissions';
   let {
     flags = $bindable([]),
     language,
     disabled = false
-  }: { flags: string[]; language: 'pl' | 'en'; disabled?: boolean } = $props();
+  }: { flags: string[]; language: FrontendLocale; disabled?: boolean } = $props();
   let mode = $state('+');
   const groups = [
     ...new Set(

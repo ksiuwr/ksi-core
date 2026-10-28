@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { FrontendLocale } from 'shared/content-locales';
   import KanbanBoard from '$lib/KanbanBoard.svelte';
   import { dashboardPath, newTaskPath, taskPath, type Workspace } from '$lib/navigation';
   import type { BoardData, BoardLabel, BoardStatus, Item } from '$lib/types';
@@ -20,7 +21,7 @@
     projectId: string;
     board: BoardData | null;
     items: Item[];
-    language: 'pl' | 'en';
+    language: FrontendLocale;
     canManage: boolean;
     userId: string;
     refresh: () => Promise<void>;

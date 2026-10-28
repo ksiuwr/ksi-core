@@ -6,7 +6,7 @@
   import { api, errorMessage } from '$lib/api';
   import { untrack } from 'svelte';
   import { validProfileLink } from 'shared/profile-links';
-  import type { ContentLocale } from 'shared/content-locales';
+  import type { ContentLocale, FrontendLocale } from 'shared/content-locales';
   import type { Profile } from 'shared/types';
   import {
     ArrowUpRight,
@@ -42,7 +42,7 @@
     avatarRequest: AvatarRequest | null;
     activeSessions: Session[];
     websiteOrigin: string;
-    language: 'pl' | 'en';
+    language: FrontendLocale;
     refresh: () => Promise<void>;
   } = $props();
 
