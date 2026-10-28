@@ -3,6 +3,7 @@
   transition: grid-template-columns 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .dash-sidebar {
+  position: relative;
   padding: 20px 14px;
   gap: 5px;
   background: var(--paper);
@@ -12,6 +13,7 @@
   display: flex;
   align-items: center;
   min-height: 30px;
+  padding-left: 40px;
   margin-bottom: 12px;
 }
 .sidebar-logo {
@@ -32,7 +34,7 @@
 }
 .sidebar-btn {
   border-radius: 3px;
-  padding: 10px 12px;
+  padding: 7px 10px;
   font-size: 13px;
   text-decoration: none;
 }
@@ -1044,11 +1046,13 @@ summary,
 
 /* Collapsible desktop sidebar */
 .sidebar-collapse {
+  position: absolute;
+  top: 20px;
+  left: 18px;
   display: grid;
   place-items: center;
   width: 28px;
   height: 28px;
-  margin-left: auto;
   flex-shrink: 0;
   border: 1px solid transparent;
   border-radius: 6px;
@@ -1095,11 +1099,47 @@ summary,
   }
   .dash-shell.sidebar-collapsed .sidebar-btn {
     justify-content: center;
-    padding: 5px 0;
+    padding: 4px 0;
     margin-block: 2px;
   }
   .dash-shell.sidebar-collapsed .sidebar-btn > svg:last-child {
     display: none;
+  }
+
+  /* A collapsed sidebar temporarily opens on hover without changing the saved
+     preference. The toggle remains pinned at x=18px throughout the transition. */
+  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover) {
+    grid-template-columns: 244px minmax(0, 1fr);
+  }
+  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover) .dash-sidebar {
+    padding-inline: 14px;
+  }
+  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover) .sidebar-logo {
+    display: inline;
+  }
+  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover) .sidebar-context,
+  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover) .sidebar-hint,
+  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover) .sidebar-section,
+  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover) .sidebar-footnote {
+    display: block;
+  }
+  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover) .sidebar-brand-suffix {
+    display: inline;
+  }
+  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover) .navigation-label {
+    justify-content: flex-start;
+    gap: 10px;
+  }
+  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover) .navigation-text {
+    display: inline;
+  }
+  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover) .sidebar-btn {
+    justify-content: space-between;
+    padding: 7px 10px;
+    margin-block: 2px;
+  }
+  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover) .sidebar-btn > svg:last-child {
+    display: block;
   }
 }
 
@@ -1451,6 +1491,9 @@ summary,
   .sidebar-collapse {
     display: none;
   }
+  .sidebar-brand {
+    padding-left: 0;
+  }
   .timeline-comment {
     gap: 10px;
   }
@@ -1459,6 +1502,12 @@ summary,
   }
   .comment-body {
     padding: 10px 12px;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1100px) {
+  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover) {
+    grid-template-columns: 218px minmax(0, 1fr);
   }
 }
 
