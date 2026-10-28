@@ -82,7 +82,6 @@
   });
   const rawTitle = $derived((merged.title as string | undefined) ?? 'Dashboard');
   const viewName = $derived(pageTitles[rawTitle] ?? rawTitle);
-  const language = $derived(preferences.language);
   const workspaceName = $derived(
     workspace === 'project' ? (project?.name ?? 'Project') : 'Association'
   );
@@ -462,7 +461,6 @@
         </nav>
         <div class="topbar-controls">
           <NotificationInbox
-            {language}
             admin={inbox}
             administrator={role === 'administrator'}
             refresh={invalidateAll}

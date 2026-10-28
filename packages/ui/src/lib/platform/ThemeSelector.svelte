@@ -1,10 +1,8 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
   import { onMount } from 'svelte';
   import { SunMoon } from '@lucide/svelte';
   import Dropdown from './Dropdown.svelte';
   import { observeTheme, setThemePreference, type ThemePreference } from './theme.js';
-  let { language = 'pl' }: { language?: FrontendLocale } = $props();
   let preference = $state<ThemePreference>('system');
 
   onMount(() => observeTheme((theme) => (preference = theme)));

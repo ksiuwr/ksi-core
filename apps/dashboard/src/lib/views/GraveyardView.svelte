@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
+  import { preferences } from '$lib/preferences.svelte';
   import { formatDate } from 'shared/format';
   import { api, errorMessage } from '$lib/api';
   import { dashboardPath, taskPath, type Workspace } from '$lib/navigation';
@@ -11,16 +11,15 @@
     projectSlug,
     items,
     statuses,
-    language,
     refresh
   }: {
     workspace: Workspace;
     projectSlug: string;
     items: Item[];
     statuses: BoardStatus[];
-    language: FrontendLocale;
     refresh: () => Promise<void>;
   } = $props();
+  const language = $derived(preferences.language);
 
   let busy = $state(false);
   let error = $state('');

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { preferences } from '$lib/preferences.svelte';
   import ArticleThumbnail from '$lib/ArticleThumbnail.svelte';
   import ContentTranslations from '$lib/ContentTranslations.svelte';
   import Editor from '@ksi-core/ui/platform/Editor.svelte';
@@ -6,7 +7,7 @@
   import { api, errorMessage } from '$lib/api';
   import { dashboardPath, type Workspace } from '$lib/navigation';
   import type { Article } from '$lib/types';
-  import type { ContentLocale, FrontendLocale } from 'shared/content-locales';
+  import type { ContentLocale } from 'shared/content-locales';
   import { untrack } from 'svelte';
   import { ArrowLeft, ArrowUpRight, Save } from '@lucide/svelte';
 
@@ -16,7 +17,6 @@
     article,
     permissions,
     websiteOrigin,
-    language,
     refresh
   }: {
     workspace: Workspace;
@@ -31,9 +31,9 @@
       canManage: boolean;
     };
     websiteOrigin: string;
-    language: FrontendLocale;
     refresh: () => Promise<void>;
   } = $props();
+  const language = $derived(preferences.language);
 
   let draft = $state<Article>(untrack(() => ({ ...article })));
   let title = $state(untrack(() => article.title));
@@ -160,7 +160,6 @@
     <div class="article-editor">
       {#if permissions.canEdit}
         <Editor
-          {language}
           allowGallery
           rows={24}
           bind:value={
@@ -168,7 +167,7 @@
           }
         />
       {:else}
-        <MarkdownContent value={markdown} {language} />
+        <MarkdownContent value={markdown} />
       {/if}
     </div>
   </div>

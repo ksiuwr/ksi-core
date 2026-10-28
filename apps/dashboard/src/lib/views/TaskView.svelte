@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
+  import { preferences } from '$lib/preferences.svelte';
   import { formatDateTime as formatDateTimeValue, formatRelativeTime } from 'shared/format';
   import { onMount, untrack } from 'svelte';
   import Editor from '@ksi-core/ui/platform/Editor.svelte';
@@ -33,7 +33,6 @@
     activity,
     activityNextPage,
     activityError,
-    language,
     canManage,
     userId,
     refresh
@@ -47,11 +46,11 @@
     activity: ThreadEvent[];
     activityNextPage: number | null;
     activityError: boolean;
-    language: FrontendLocale;
     canManage: boolean;
     userId: string;
     refresh: () => Promise<void>;
   } = $props();
+  const language = $derived(preferences.language);
 
   let busy = $state(false);
   let error = $state('');
@@ -284,7 +283,7 @@
   onSaveTitle={saveTitle}
 >
   {#snippet aside()}
-    <TaskAside {workspace} {projectSlug} {item} {labels} {members} {language} {refresh} />
+    <TaskAside {workspace} {projectSlug} {item} {labels} {members} {refresh} />
   {/snippet}
 
   {#if error}<p class="error" role="alert">{error}</p>{/if}
@@ -293,7 +292,7 @@
     <div class="discussion-timeline">
       {#each visibleTimeline as entry (`${entry.kind}-${entry.id}`)}
         {#if entry.kind === 'event'}
-          <TaskActivity event={entry.event} {statuses} {labels} {members} {language} {now} />
+          <TaskActivity event={entry.event} {statuses} {labels} {members} {now} />
         {:else if entry.kind === 'gap'}
           <div class="timeline-gap">
             {#if hiddenTimelineItems > 0}<p class="timeline-gap-count">
@@ -321,7 +320,6 @@
                 href={`/members/${encodeURIComponent(author.id)}`}
                 avatarOnly
                 size={32}
-                {language}
               />
             </div>
             <div class="comment-card">
@@ -360,7 +358,7 @@
                       saveDescription();
                     }}
                   >
-                    <Editor {language} bind:value={descriptionDraft} rows={6} allowReferences />
+                    <Editor bind:value={descriptionDraft} rows={6} allowReferences />
                     <div class="comment-composer-actions">
                       <button class="btn" disabled={busy || !descriptionDraft.trim()}>Save</button>
                       <button
@@ -371,7 +369,7 @@
                     </div>
                   </form>
                 {:else if entry.item.markdown.trim()}
-                  <MarkdownContent value={entry.item.markdown} {language} allowReferences />
+                  <MarkdownContent value={entry.item.markdown} allowReferences />
                 {:else}
                   <p class="issue-empty">No description.</p>
                 {/if}
@@ -388,7 +386,6 @@
                 href={`/members/${encodeURIComponent(author.id)}`}
                 avatarOnly
                 size={32}
-                {language}
               />
             </div>
             <div class="comment-card">
@@ -405,7 +402,7 @@
                 >
                 <div class="comment-actions">
                   {#if comment.edited}
-                    <ContentHistory kind="comment" targetId={comment.id} {language} />
+                    <ContentHistory kind="comment" targetId={comment.id} />
                   {/if}
                   {#if comment.authorId === userId || canManage}
                     <button
@@ -439,12 +436,7 @@
                       saveCommentEdit(comment.id);
                     }}
                   >
-                    <Editor
-                      {language}
-                      bind:value={editingCommentMarkdown}
-                      rows={4}
-                      allowReferences
-                    />
+                    <Editor bind:value={editingCommentMarkdown} rows={4} allowReferences />
                     <div class="comment-composer-actions">
                       <button class="btn" disabled={busy || !editingCommentMarkdown.trim()}
                         >Save</button
@@ -457,7 +449,7 @@
                     </div>
                   </form>
                 {:else}
-                  <MarkdownContent value={comment.markdown} {language} allowReferences />
+                  <MarkdownContent value={comment.markdown} allowReferences />
                 {/if}
               </div>
             </div>
@@ -474,7 +466,7 @@
       }}
     >
       <h2><MessagesSquare size={17} aria-hidden="true" />{'Add to discussion'}</h2>
-      <Editor {language} bind:value={reply} rows={4} allowReferences />
+      <Editor bind:value={reply} rows={4} allowReferences />
       <button class="btn" disabled={busy || !reply.trim()}>Comment</button>
     </form>
   </section>

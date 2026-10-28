@@ -6,7 +6,7 @@
   import { api, errorMessage } from '$lib/api';
   import { untrack } from 'svelte';
   import { validProfileLink } from 'shared/profile-links';
-  import type { ContentLocale, FrontendLocale } from 'shared/content-locales';
+  import type { ContentLocale } from 'shared/content-locales';
   import type { Profile } from 'shared/types';
   import {
     ArrowUpRight,
@@ -35,14 +35,12 @@
     avatarRequest,
     activeSessions,
     websiteOrigin,
-    language,
     refresh
   }: {
     profile: Profile;
     avatarRequest: AvatarRequest | null;
     activeSessions: Session[];
     websiteOrigin: string;
-    language: FrontendLocale;
     refresh: () => Promise<void>;
   } = $props();
 
@@ -279,7 +277,6 @@
         <div class="card settings-card">
           <AvatarUpload
             request={avatarRequest}
-            {language}
             onchange={refresh}
             reportError={(message) => (error = message)}
           />

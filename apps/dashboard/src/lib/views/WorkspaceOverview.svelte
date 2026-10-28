@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
+  import { preferences } from '$lib/preferences.svelte';
   import { formatDate } from 'shared/format';
   import MarkdownContent from '@ksi-core/ui/platform/MarkdownContent.svelte';
   import MemberPreview from '@ksi-core/ui/platform/MemberPreview.svelte';
@@ -21,7 +21,6 @@
     workspace,
     project,
     access,
-    language,
     websiteOrigin,
     board,
     items,
@@ -33,7 +32,6 @@
     workspace: Workspace;
     project: Project | null;
     access: ProjectAccess;
-    language: FrontendLocale;
     websiteOrigin: string;
     board: BoardData | null;
     items: Item[];
@@ -42,6 +40,7 @@
     members: AssignmentMember[];
     articleCount: number;
   } = $props();
+  const language = $derived(preferences.language);
 
   const MEMBER_AVATARS = 14;
   const LATEST_TASKS = 6;
@@ -108,7 +107,7 @@
   <div class="detail-main overview-main">
     {#if project?.description}
       <section class="card overview-about">
-        <MarkdownContent value={project.description} {language} />
+        <MarkdownContent value={project.description} />
       </section>
     {/if}
 
@@ -204,7 +203,6 @@
               href={`/members/${encodeURIComponent(member.id)}`}
               avatarOnly
               size={30}
-              {language}
             />
           {/each}
         </div>

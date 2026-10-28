@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
+  import { preferences } from '$lib/preferences.svelte';
   import { formatDateTime, formatRelativeTime } from 'shared/format';
   import { onMount } from 'svelte';
   import { flip } from 'svelte/animate';
@@ -21,20 +21,19 @@
   } from '@lucide/svelte';
   import type { InboxData } from './types';
   let {
-    language = 'en-us',
     fullPage = false,
     admin,
     administrator,
     refresh,
     reportError
   }: {
-    language?: FrontendLocale;
     fullPage?: boolean;
     admin?: InboxData;
     administrator?: boolean;
     refresh?: () => Promise<void>;
     reportError?: (message: string) => void;
   } = $props();
+  const language = $derived(preferences.language);
   type Notification = NotificationContext & {
     id: string;
     title: string;

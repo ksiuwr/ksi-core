@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
+  import { preferences } from '$lib/preferences.svelte';
   import { goto } from '$app/navigation';
   import Editor from '@ksi-core/ui/platform/Editor.svelte';
   import UserSelect from '$lib/UserSelect.svelte';
@@ -7,7 +7,7 @@
   import { ArrowLeft } from '@lucide/svelte';
   import type { Project } from '$lib/types';
 
-  let { language }: { language: FrontendLocale } = $props();
+  const language = $derived(preferences.language);
 
   let title = $state('');
   let slug = $state('');
@@ -53,7 +53,7 @@
   <label for="cp-leaders">Leaders</label>
   <UserSelect bind:userIds={leaderIds} {api} />
   <label for="cp-desc">Description</label>
-  <Editor {language} bind:value={markdown} />
+  <Editor bind:value={markdown} />
   <button class="btn" disabled={busy || !title.trim()} onclick={create} style="margin-top: 12px;">
     Create project
   </button>

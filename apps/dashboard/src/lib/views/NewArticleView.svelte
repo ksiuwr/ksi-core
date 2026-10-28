@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
+  import { preferences } from '$lib/preferences.svelte';
   import { goto } from '$app/navigation';
   import ArticleThumbnail from '$lib/ArticleThumbnail.svelte';
   import { api, errorMessage } from '$lib/api';
@@ -11,14 +11,13 @@
   let {
     workspace,
     projectSlug,
-    projectId,
-    language
+    projectId
   }: {
     workspace: Workspace;
     projectSlug: string;
     projectId: string;
-    language: FrontendLocale;
   } = $props();
+  const language = $derived(preferences.language);
 
   let title = $state('');
   let slug = $state('');
@@ -96,7 +95,7 @@
     </div>
     <div>
       <span class="create-label">Content</span>
-      <Editor {language} allowGallery rows={24} bind:value={markdown} />
+      <Editor allowGallery rows={24} bind:value={markdown} />
     </div>
   </section>
 

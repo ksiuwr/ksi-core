@@ -1,12 +1,13 @@
 <script lang="ts">
   import type { FrontendLocale } from 'shared/content-locales';
   import { tick, onMount } from 'svelte';
+  import { preferences } from './preferences.svelte.js';
   let {
     member,
     href,
     role = '',
     avatarOnly = false,
-    language = 'pl',
+    language: languageProp,
     size = 36,
     inline = false
   }: {
@@ -26,6 +27,7 @@
     size?: number;
     inline?: boolean;
   } = $props();
+  const language = $derived(languageProp ?? preferences.language);
   const uid = $props.id();
   let touch = false;
   let anchor = $state<HTMLAnchorElement>(),

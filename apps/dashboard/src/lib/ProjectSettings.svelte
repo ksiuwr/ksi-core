@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { preferences } from '$lib/preferences.svelte';
   import Editor from '@ksi-core/ui/platform/Editor.svelte';
   import ContentTranslations from './ContentTranslations.svelte';
   import SettingsNav from './SettingsNav.svelte';
@@ -6,8 +7,7 @@
     contentLocaleName,
     contentLocales,
     type ContentLocale,
-    type ContentTranslations as TranslationData,
-    type FrontendLocale
+    type ContentTranslations as TranslationData
   } from 'shared/content-locales';
   import { Save, ArrowUpRight, Plus, Trash2, Info, Users, Link2 } from '@lucide/svelte';
   import Skeleton from './Skeleton.svelte';
@@ -17,10 +17,8 @@
     canEdit,
     canManageMembers,
     onrefresh,
-    language,
     websiteOrigin
   }: {
-    language: FrontendLocale;
     websiteOrigin: string;
     project: {
       slug: string;
@@ -37,6 +35,7 @@
     canManageMembers: boolean;
     onrefresh: () => Promise<void>;
   } = $props();
+  const language = $derived(preferences.language);
 
   let name = $state(''),
     description = $state(''),
@@ -236,7 +235,6 @@
             <div>
               <label for="project-description">Description</label>
               <Editor
-                {language}
                 bind:value={
                   () => localized('description'), (value) => setLocalized('description', value)
                 }

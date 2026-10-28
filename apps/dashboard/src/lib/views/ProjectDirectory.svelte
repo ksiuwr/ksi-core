@@ -1,14 +1,11 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
+  import { preferences } from '$lib/preferences.svelte';
   import MarkdownContent from '@ksi-core/ui/platform/MarkdownContent.svelte';
   import { ArrowUpRight, Plus } from '@lucide/svelte';
   import type { Project } from '$lib/types';
 
-  let {
-    projects,
-    role,
-    language
-  }: { projects: Project[]; role: string; language: FrontendLocale } = $props();
+  let { projects, role }: { projects: Project[]; role: string } = $props();
+  const language = $derived(preferences.language);
 </script>
 
 <div class="workspace-header">
@@ -35,7 +32,7 @@
         {/if}
       </div>
       <h2>{project.name}</h2>
-      <MarkdownContent value={project.description} {language} />
+      <MarkdownContent value={project.description} />
       <div class="project-card-actions">
         <a class="btn" href={`/projects/${encodeURIComponent(project.slug)}`}>
           {'Open project'}

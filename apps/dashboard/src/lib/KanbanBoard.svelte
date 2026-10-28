@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
+  import { preferences } from '$lib/preferences.svelte';
   import { formatDateTime } from 'shared/format';
   import { tick } from 'svelte';
   import Assignees, { type AssignmentMember } from './Assignees.svelte';
@@ -42,7 +42,6 @@
     boardLabels = [],
     boardId,
     projectId,
-    language,
     canManage = false,
     userId,
     taskHref,
@@ -55,7 +54,6 @@
     boardLabels?: (string | BoardLabel)[];
     boardId: string;
     projectId: string;
-    language: FrontendLocale;
     canManage?: boolean;
     userId?: string;
     taskHref: (id: string) => string;
@@ -63,6 +61,7 @@
     refresh: () => Promise<void>;
     reportError: (error: string) => void;
   } = $props();
+  const language = $derived(preferences.language);
 
   const PRESET_LABEL_COLORS = [
     '#6b7280', // Default Gray
@@ -782,7 +781,7 @@
                 >{/if}</span
             >
             {#if item.markdown}<div class="kanban-markdown-preview">
-                <MarkdownContent value={item.markdown} {language} />
+                <MarkdownContent value={item.markdown} />
               </div>{/if}
             {#if item.labels.length}<div class="task-labels">
                 {#each item.labels as labelName}
@@ -809,13 +808,7 @@
                   </div>{/if}
                 {#if item.assigneeIds?.length}<div class="task-meta-row" title={'Assigned to'}>
                     <Users size={13} aria-hidden="true" />
-                    <Assignees
-                      value={item.assigneeIds}
-                      {members}
-                      {language}
-                      readonly
-                      showLabel={false}
-                    />
+                    <Assignees value={item.assigneeIds} {members} readonly showLabel={false} />
                   </div>{/if}
               </div>{/if}
           </a>

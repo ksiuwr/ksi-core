@@ -1,22 +1,21 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
+  import { preferences } from '$lib/preferences.svelte';
   import { formatDate } from 'shared/format';
   import { Check, X, UserPlus, Image, Inbox } from '@lucide/svelte';
   import type { InboxData } from './types';
   export type { InboxData } from './types';
   let {
     inbox,
-    language,
     administrator,
     refresh,
     reportError
   }: {
     inbox: InboxData;
-    language: FrontendLocale;
     administrator: boolean;
     refresh: () => Promise<void>;
     reportError: (message: string) => void;
   } = $props();
+  const language = $derived(preferences.language);
 
   let busy = $state(false);
   async function review(

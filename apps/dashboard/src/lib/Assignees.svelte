@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
   import { onMount, tick } from 'svelte';
   import { ChevronsUpDown, Search, UserRoundPlus, X } from '@lucide/svelte';
 
@@ -18,7 +17,6 @@
     value = $bindable([]),
     projectId = '',
     members,
-    language = 'en-us',
     readonly = false,
     disabled = false,
     showLabel = true,
@@ -27,7 +25,6 @@
     value?: string[];
     projectId?: string;
     members?: AssignmentMember[];
-    language?: FrontendLocale;
     readonly?: boolean;
     disabled?: boolean;
     showLabel?: boolean;

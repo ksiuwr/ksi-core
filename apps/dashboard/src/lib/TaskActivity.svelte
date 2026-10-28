@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
+  import { preferences } from '$lib/preferences.svelte';
   import { formatDateTime, formatRelativeTime } from 'shared/format';
   import {
     CircleDot,
@@ -22,7 +22,6 @@
     statuses,
     labels,
     members = [],
-    language,
     now
   }: {
     event: {
@@ -36,9 +35,9 @@
     statuses: { id: string; name: string; color?: string }[];
     labels: { name: string; color?: string; description?: string }[];
     members?: AssignmentMember[];
-    language: FrontendLocale;
     now: number;
   } = $props();
+  const language = $derived(preferences.language);
   const pl = $derived(language === 'pl');
   const summaries = $derived(taskActivitySummary(event.action, event.metadata.changes));
   const kind = $derived(summaries[0].kind);
@@ -170,7 +169,6 @@
             href={`/members/${encodeURIComponent(id)}`}
             inline
             size={18}
-            {language}
           />{/each}
       {:else if summary.kind === 'label-added' || summary.kind === 'label-removed'}
         {summary.kind === 'label-added'

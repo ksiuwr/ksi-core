@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
   import { formatDateTime } from 'shared/format';
+  import { preferences } from './preferences.svelte.js';
   import { untrack } from 'svelte';
   import { ChevronDown, ArrowRight, FileDiff, Minus, Plus } from '@lucide/svelte';
   import Dropdown from './Dropdown.svelte';
@@ -8,13 +8,12 @@
   import { activityDiffRows } from 'shared/activity-diff';
   let {
     changes,
-    language = 'pl',
     initiallyExpanded = false
   }: {
     changes: ContentChange[];
-    language?: FrontendLocale;
     initiallyExpanded?: boolean;
   } = $props();
+  const language = $derived(preferences.language);
   const uid = $props.id();
   let expanded = $state<number[]>(untrack(() => (initiallyExpanded ? [0] : [])));
   let visibleLines = $state<Record<number, number>>({});

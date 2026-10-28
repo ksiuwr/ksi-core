@@ -1,6 +1,5 @@
 <script lang="ts">
   import MemberPreview from '@ksi-core/ui/platform/MemberPreview.svelte';
-  import { preferences } from '$lib/preferences.svelte';
   let {
     member,
     href,
@@ -20,4 +19,4 @@
   } = $props();
 </script>
 
-<MemberPreview {member} {href} {role} language={preferences.language} />
+<MemberPreview {member} {href} {role} />

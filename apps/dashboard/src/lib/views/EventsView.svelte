@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
+  import { preferences } from '$lib/preferences.svelte';
   import { formatDateTime } from 'shared/format';
   import ChangeDetails from '@ksi-core/ui/platform/ChangeDetails.svelte';
   import { linkForAction, linkForMetadata } from '$lib/links';
@@ -7,7 +7,8 @@
 
   const PAGE_SIZE = 30;
 
-  let { events, language }: { events: ActivityEvent[]; language: FrontendLocale } = $props();
+  let { events }: { events: ActivityEvent[] } = $props();
+  const language = $derived(preferences.language);
   let shown = $state(PAGE_SIZE);
   const visible = $derived(events.slice(0, shown));
 </script>
@@ -57,7 +58,6 @@
             </div>
             {#if Array.isArray(event.event.metadata.changes)}<ChangeDetails
                 changes={event.event.metadata.changes}
-                {language}
               />{/if}
           {/if}
         </div>

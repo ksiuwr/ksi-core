@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
+  import { preferences } from '$lib/preferences.svelte';
   import { formatDateTime as formatDateTimeValue, formatRelativeTime } from 'shared/format';
   import { onMount, untrack } from 'svelte';
   import Editor from '@ksi-core/ui/platform/Editor.svelte';
@@ -24,7 +24,6 @@
     events,
     eventsNextPage,
     eventsError,
-    language,
     canManage,
     userId,
     refresh
@@ -36,11 +35,11 @@
     events: ThreadEvent[];
     eventsNextPage: number | null;
     eventsError: boolean;
-    language: FrontendLocale;
     canManage: boolean;
     userId: string;
     refresh: () => Promise<void>;
   } = $props();
+  const language = $derived(preferences.language);
 
   let busy = $state(false);
   let error = $state('');
@@ -236,7 +235,7 @@
   onSaveTitle={saveTitle}
 >
   {#snippet aside()}
-    <ThreadAside {thread} {members} {language} {canManage} {refresh} />
+    <ThreadAside {thread} {members} {canManage} {refresh} />
   {/snippet}
 
   {#if error}<p class="error" role="alert">{error}</p>{/if}
@@ -246,7 +245,7 @@
     <div class="discussion-timeline">
       {#each visibleTimeline as entry (`${entry.kind}-${entry.id}`)}
         {#if entry.kind === 'event'}
-          <ThreadActivity event={entry.event} {members} {language} {now} />
+          <ThreadActivity event={entry.event} {members} {now} />
         {:else if entry.kind === 'gap'}
           <div class="timeline-gap">
             {#if hiddenTimelineItems > 0}<p class="timeline-gap-count">
@@ -275,7 +274,6 @@
                 href={`/members/${encodeURIComponent(author.id)}`}
                 avatarOnly
                 size={32}
-                {language}
               />
             </div>
             <div class="comment-card">
@@ -294,7 +292,7 @@
                 >
                 <div class="comment-actions">
                   {#if comment.edited}
-                    <ContentHistory kind="comment" targetId={comment.id} {language} />
+                    <ContentHistory kind="comment" targetId={comment.id} />
                   {/if}
                   {#if !archived && (comment.authorId === userId || canManage)}
                     <button
@@ -328,12 +326,7 @@
                       saveCommentEdit(comment.id);
                     }}
                   >
-                    <Editor
-                      {language}
-                      bind:value={editingCommentMarkdown}
-                      rows={4}
-                      allowReferences
-                    />
+                    <Editor bind:value={editingCommentMarkdown} rows={4} allowReferences />
                     <div class="comment-composer-actions">
                       <button class="btn" disabled={busy || !editingCommentMarkdown.trim()}
                         >Save</button
@@ -346,7 +339,7 @@
                     </div>
                   </form>
                 {:else}
-                  <MarkdownContent value={comment.markdown} {language} allowReferences />
+                  <MarkdownContent value={comment.markdown} allowReferences />
                 {/if}
               </div>
             </div>
@@ -364,7 +357,7 @@
         }}
       >
         <h2><MessagesSquare size={17} aria-hidden="true" />{'Reply'}</h2>
-        <Editor {language} bind:value={reply} rows={4} allowReferences />
+        <Editor bind:value={reply} rows={4} allowReferences />
         <button class="btn" disabled={busy || !reply.trim()}>Reply</button>
       </form>
     {/if}

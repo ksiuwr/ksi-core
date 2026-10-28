@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
+  import { preferences } from './preferences.svelte.js';
   import { slider } from './slider.js';
   import {
     insertMarkdownGallery,
@@ -14,19 +14,18 @@
   import { Eye, Pencil, Images, Paperclip, LoaderCircle, ChevronDown } from '@lucide/svelte';
   let {
     value = $bindable(''),
-    language = 'pl',
     rows = 10,
     allowGallery = false,
     allowReferences = false,
     referenceScope
   }: {
     value?: string;
-    language?: FrontendLocale;
     rows?: number;
     allowGallery?: boolean;
     allowReferences?: boolean;
     referenceScope?: string;
   } = $props();
+  const language = $derived(preferences.language);
   const uid = $props.id();
   const labels = $derived(
     language === 'pl'
@@ -373,7 +372,6 @@
   {#if preview}<div class="editor-preview">
       <MarkdownContent
         {value}
-        {language}
         {allowReferences}
         onresize={(index, width) => (value = resizeMarkdownImage(value, index, width))}
       />
@@ -498,7 +496,6 @@
           {#if activeGallery === index}
             <GalleryEditor
               {gallery}
-              {language}
               {busy}
               names={imageNames}
               uploads={uploadTarget === index ? pendingUploads : []}
@@ -533,7 +530,6 @@
           {#if activeGallery === 'draft'}
             <GalleryEditor
               gallery={galleryDraft}
-              {language}
               {busy}
               names={imageNames}
               uploads={uploadTarget === 'draft' ? pendingUploads : []}

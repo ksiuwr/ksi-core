@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
+  import { preferences } from '$lib/preferences.svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
   import Assignees from '$lib/Assignees.svelte';
@@ -22,16 +22,15 @@
     projectSlug,
     projectId,
     board,
-    items,
-    language
+    items
   }: {
     workspace: Workspace;
     projectSlug: string;
     projectId: string;
     board: BoardData | null;
     items: Item[];
-    language: FrontendLocale;
   } = $props();
+  const language = $derived(preferences.language);
 
   const statuses = $derived<BoardStatus[]>(
     (board?.statuses?.length ? board.statuses : defaultStatuses).filter((status) => !status.deleted)
@@ -122,7 +121,7 @@
     </div>
     <div>
       <span class="create-label">Description</span>
-      <Editor {language} bind:value={markdown} rows={18} allowReferences />
+      <Editor bind:value={markdown} rows={18} allowReferences />
     </div>
   </section>
 
@@ -164,10 +163,10 @@
       </section>
     {/if}
     <section class="create-section">
-      <Assignees {projectId} bind:value={assignees} {language} disabled={busy} />
+      <Assignees {projectId} bind:value={assignees} disabled={busy} />
     </section>
     <section class="create-section">
-      <DateTimePicker bind:value={dueAt} {language} disabled={busy} />
+      <DateTimePicker bind:value={dueAt} disabled={busy} />
     </section>
     <div class="create-actions">
       <button class="btn" disabled={busy || !title.trim() || !status}

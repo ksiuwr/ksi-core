@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
+  import { preferences } from '$lib/preferences.svelte';
   import { formatDate } from 'shared/format';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
@@ -11,14 +11,13 @@
   let {
     workspace,
     projectSlug,
-    threads,
-    language
+    threads
   }: {
     workspace: Workspace;
     projectSlug: string;
     threads: Thread[];
-    language: FrontendLocale;
   } = $props();
+  const language = $derived(preferences.language);
 
   const archived = $derived(page.url.searchParams.get('archived') === 'true');
 

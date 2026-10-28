@@ -111,7 +111,7 @@
     <header class="auth-topbar">
       <a class="auth-brand" href={data.websiteOrigin}>KSI<span>/ core</span></a>
       <div class="auth-preferences">
-        <ThemeSelector {language} /><button
+        <ThemeSelector /><button
           class="btn btn-outline language-button"
           aria-label={'Change language'}
           onclick={() => setLanguage(language === 'pl' ? 'en-us' : 'pl')}

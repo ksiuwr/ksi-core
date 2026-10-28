@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
+  import { preferences } from '$lib/preferences.svelte';
   import { formatDate } from 'shared/format';
   import { goto } from '$app/navigation';
   import { onDestroy } from 'svelte';
@@ -19,7 +19,6 @@
     item,
     labels,
     members,
-    language,
     refresh
   }: {
     workspace: Workspace;
@@ -27,9 +26,9 @@
     item: Item;
     labels: BoardLabel[];
     members: AssignmentMember[];
-    language: FrontendLocale;
     refresh: () => Promise<void>;
   } = $props();
+  const language = $derived(preferences.language);
 
   let busy = $state(false);
   let error = $state('');
@@ -137,7 +136,6 @@
     <Assignees
       value={item.assigneeIds ?? []}
       {members}
-      {language}
       showLabel={false}
       disabled={busy}
       onchange={changeAssignees}
@@ -187,7 +185,7 @@
 
   <section class="aside-section">
     <div class="aside-due">
-      <DateTimePicker bind:value={deadlineValue} {language} disabled={busy} />
+      <DateTimePicker bind:value={deadlineValue} disabled={busy} />
       {#if item.dueAt}
         <button
           type="button"
@@ -206,12 +204,12 @@
   <section class="aside-section">
     <h2>Notifications</h2>
     {#key (item.assigneeIds ?? []).join(',')}
-      <WatchButton type="item" id={item.id} {language} showLabel />
+      <WatchButton type="item" id={item.id} showLabel />
     {/key}
   </section>
 
   <section class="aside-section aside-actions">
-    <ContentHistory kind="task" targetId={item.id} {language} labeled />
+    <ContentHistory kind="task" targetId={item.id} labeled />
     <button class="btn btn-outline" disabled={busy} onclick={archive}>
       <Archive size={15} aria-hidden="true" />{'Archive task'}
     </button>

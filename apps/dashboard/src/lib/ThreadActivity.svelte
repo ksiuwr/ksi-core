@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
+  import { preferences } from '$lib/preferences.svelte';
   import { formatDateTime, formatRelativeTime } from 'shared/format';
   import {
     Archive,
@@ -19,7 +19,6 @@
   let {
     event,
     members = [],
-    language,
     now
   }: {
     event: {
@@ -31,9 +30,9 @@
       metadata: { changes: ContentChange[] | null };
     };
     members?: AssignmentMember[];
-    language: FrontendLocale;
     now: number;
   } = $props();
+  const language = $derived(preferences.language);
   const pl = $derived(language === 'pl');
   const summaries = $derived(threadActivitySummary(event.action, event.metadata.changes));
   const kind = $derived(summaries[0].kind);
@@ -144,7 +143,6 @@
             href={`/members/${encodeURIComponent(id)}`}
             inline
             size={18}
-            {language}
           />{/each}
       {:else if summary.kind === 'invited'}
         {pl

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
   import KanbanBoard from '$lib/KanbanBoard.svelte';
   import { dashboardPath, newTaskPath, taskPath, type Workspace } from '$lib/navigation';
   import type { BoardData, BoardLabel, BoardStatus, Item } from '$lib/types';
@@ -11,7 +10,6 @@
     projectId,
     board,
     items,
-    language,
     canManage,
     userId,
     refresh
@@ -21,7 +19,6 @@
     projectId: string;
     board: BoardData | null;
     items: Item[];
-    language: FrontendLocale;
     canManage: boolean;
     userId: string;
     refresh: () => Promise<void>;
@@ -52,7 +49,6 @@
   boardLabels={labels}
   boardId={board?.id ?? ''}
   {projectId}
-  {language}
   {canManage}
   {userId}
   taskHref={(id) => taskPath(workspace, projectSlug, id)}

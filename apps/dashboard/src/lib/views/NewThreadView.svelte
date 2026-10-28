@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
+  import { preferences } from '$lib/preferences.svelte';
   import { goto } from '$app/navigation';
   import Assignees from '$lib/Assignees.svelte';
   import { api, errorMessage } from '$lib/api';
@@ -13,14 +13,13 @@
   let {
     workspace,
     projectSlug,
-    projectId,
-    language
+    projectId
   }: {
     workspace: Workspace;
     projectSlug: string;
     projectId: string;
-    language: FrontendLocale;
   } = $props();
+  const language = $derived(preferences.language);
 
   let title = $state('');
   let markdown = $state('');
@@ -74,7 +73,7 @@
     </div>
     <div>
       <span class="create-label">First post</span>
-      <Editor {language} bind:value={markdown} rows={18} allowReferences />
+      <Editor bind:value={markdown} rows={18} allowReferences />
     </div>
   </section>
 
@@ -93,7 +92,7 @@
       />
     </section>
     <section class="create-section">
-      <Assignees {projectId} bind:value={assignees} {language} disabled={busy} />
+      <Assignees {projectId} bind:value={assignees} disabled={busy} />
     </section>
     <div class="create-actions">
       <button class="btn" disabled={busy || !title.trim()}

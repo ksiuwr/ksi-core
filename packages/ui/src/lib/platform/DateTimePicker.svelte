@@ -1,19 +1,18 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
   import { onMount, tick } from 'svelte';
   import { fly } from 'svelte/transition';
   import { CalendarClock, ChevronLeft, ChevronRight, X } from '@lucide/svelte';
+  import { preferences } from './preferences.svelte.js';
 
   let {
     value = $bindable(''),
-    language = 'en-us',
     disabled = false
   }: {
     value?: string;
-    language?: FrontendLocale;
     disabled?: boolean;
   } = $props();
 
+  const language = $derived(preferences.language);
   const uid = $props.id();
   const pl = $derived(language === 'pl');
   const intl = $derived(language);

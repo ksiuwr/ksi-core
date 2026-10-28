@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
+  import { preferences } from '$lib/preferences.svelte';
   import { formatDate } from 'shared/format';
   import Assignees from './Assignees.svelte';
   import WatchButton from './WatchButton.svelte';
@@ -10,16 +10,15 @@
   let {
     thread,
     members,
-    language,
     canManage,
     refresh
   }: {
     thread: Thread;
     members: AssignmentMember[];
-    language: FrontendLocale;
     canManage: boolean;
     refresh: () => Promise<void>;
   } = $props();
+  const language = $derived(preferences.language);
 
   let busy = $state(false);
   let error = $state('');
@@ -89,7 +88,6 @@
     <Assignees
       value={thread.assigneeIds ?? []}
       {members}
-      {language}
       showLabel={false}
       disabled={busy || archived}
       onchange={updateAssignees}
@@ -99,7 +97,7 @@
   <section class="aside-section">
     <h2>Notifications</h2>
     {#key (thread.assigneeIds ?? []).join(',')}
-      <WatchButton type="thread" id={thread.id} {language} showLabel />
+      <WatchButton type="thread" id={thread.id} showLabel />
     {/key}
   </section>
 

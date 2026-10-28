@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
+  import { preferences } from '$lib/preferences.svelte';
   import { formatDateTime } from 'shared/format';
   import { tick, onDestroy } from 'svelte';
   import {
@@ -18,14 +18,13 @@
   let {
     kind,
     targetId,
-    language = 'pl',
     labeled = false
   }: {
     labeled?: boolean;
     kind: 'comment' | 'task';
     targetId: string;
-    language?: FrontendLocale;
   } = $props();
+  const language = $derived(preferences.language);
   const uid = $props.id();
   const pl = $derived(language === 'pl');
   const title = $derived(
@@ -164,11 +163,7 @@
                   >
                 </div>
                 {#if revision.changes?.length}
-                  <ChangeDetails
-                    changes={revision.changes}
-                    {language}
-                    initiallyExpanded={index === 0}
-                  />
+                  <ChangeDetails changes={revision.changes} initiallyExpanded={index === 0} />
                 {:else}
                   <p class="revision-note">
                     {revision.changes === null

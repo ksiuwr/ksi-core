@@ -11,14 +11,11 @@
   import { Search, ArrowLeft, Trash2, Save, ChevronLeft, ChevronRight } from '@lucide/svelte';
   import type { Profile } from 'shared/types';
   import type { ContentLocale } from 'shared/content-locales';
-  import { preferences } from '$lib/preferences.svelte';
   let {
     administrator,
     memberId,
     websiteOrigin
   }: { administrator: boolean; memberId?: string; websiteOrigin: string } = $props();
-
-  const language = $derived(preferences.language);
 
   const roles = $derived([
     { value: 'member', label: 'Member' },
@@ -383,7 +380,6 @@
           </div>
           {#if administrator && editable}<PermissionFlags
               bind:flags={accessFlags}
-              {language}
               disabled={busy}
             />{/if}
           {#if canSaveAccess}

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
   import { Check, GripVertical, UploadCloud, LoaderCircle, X } from '@lucide/svelte';
+  import { preferences } from './preferences.svelte.js';
   import GalleryImage from './GalleryImage.svelte';
   import {
     moveGalleryImage,
@@ -11,7 +11,6 @@
 
   let {
     gallery,
-    language = 'pl',
     busy = false,
     names = {},
     uploads = [],
@@ -20,7 +19,6 @@
     onremove
   }: {
     gallery: GalleryState;
-    language?: FrontendLocale;
     busy?: boolean;
     names?: Record<string, string>;
     uploads?: { key: number; name: string; status: 'queued' | 'uploading' }[];
@@ -28,6 +26,7 @@
     onupload: (files: FileList | null) => void;
     onremove: () => void;
   } = $props();
+  const language = $derived(preferences.language);
   const uid = $props.id();
   let input = $state<HTMLInputElement>();
   let dropping = $state(false);
@@ -147,7 +146,7 @@
             disabled={busy || (index >= gallery.preview && gallery.preview >= 30)}
             onclick={() => onchange(toggleGalleryImage(gallery, id))}
           >
-            <GalleryImage src={`/media/${id}`} alt={names[id] ?? ''} {language} />
+            <GalleryImage src={`/media/${id}`} alt={names[id] ?? ''} />
             <span class="selection" aria-hidden="true"
               >{#if index < gallery.preview}<Check size={14} />{index + 1}{/if}</span
             >

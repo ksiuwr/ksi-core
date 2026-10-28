@@ -1,18 +1,17 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
   import Markdown from './Markdown.svelte';
+  import { preferences } from './preferences.svelte.js';
   import type { MarkdownBlock } from 'shared/markdown';
   let {
     value,
-    language = 'pl',
     allowReferences = false,
     onresize
   }: {
     value: string;
-    language?: FrontendLocale;
     allowReferences?: boolean;
     onresize?: (index: number, width: number) => void;
   } = $props();
+  const language = $derived(preferences.language);
   let blocks = $state<MarkdownBlock[]>([]);
   let loading = $state(true);
   let failed = $state(false);
