@@ -5,7 +5,7 @@
   import '../locales/main.loader.svelte.js';
   import { goto, invalidateAll } from '$app/navigation';
   import { page } from '$app/state';
-  import { onMount, tick } from 'svelte';
+  import { onMount, tick, untrack } from 'svelte';
   import { initializePreferences, preferences } from '$lib/preferences.svelte';
   import { loadLocale } from 'wuchale/load-utils';
   import NotificationInbox from '$lib/NotificationInbox.svelte';
@@ -36,7 +36,7 @@
   let { data, children } = $props();
 
   let mobileNavigation = $state(false);
-  let sidebarCollapsed = $state(false);
+  let sidebarCollapsed = $state(untrack(() => data.sidebarCollapsed ?? false));
   let accountMenu = $state<HTMLDetailsElement>();
   let error = $state('');
 
@@ -120,7 +120,7 @@
 
   function toggleSidebar() {
     sidebarCollapsed = !sidebarCollapsed;
-    localStorage.setItem('ksi-sidebar-collapsed', sidebarCollapsed ? '1' : '0');
+    document.cookie = `ksi-sidebar=${sidebarCollapsed ? '1' : '0'}; Path=/; Max-Age=31536000; SameSite=Lax`;
   }
 
   async function openNavigation() {
@@ -207,9 +207,6 @@
   });
 
   onMount(initializePreferences);
-  onMount(() => {
-    sidebarCollapsed = localStorage.getItem('ksi-sidebar-collapsed') === '1';
-  });
   $effect(() => {
     loadLocale(preferences.language === 'en' ? 'en-us' : 'pl');
   });
@@ -257,6 +254,19 @@
     >
       <div class="sidebar-brand">
         <span class="sidebar-logo">KSI<span class="sidebar-brand-suffix"> / core</span></span>
+        <button
+          class="sidebar-collapse"
+          aria-controls="dashboard-navigation"
+          aria-expanded={!sidebarCollapsed}
+          aria-label={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
+          title={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
+          onclick={toggleSidebar}
+        >
+          {#if sidebarCollapsed}<PanelLeftOpen size={16} aria-hidden="true" />{:else}<PanelLeftClose
+              size={16}
+              aria-hidden="true"
+            />{/if}
+        </button>
         <button
           class="mobile-close"
           onclick={() => {
@@ -387,19 +397,6 @@
           <Menu size={20} strokeWidth={1.7} aria-hidden="true" /><span class="sr-only"
             >{'Navigation'}</span
           >
-        </button>
-        <button
-          class="sidebar-toggle"
-          aria-controls="dashboard-navigation"
-          aria-expanded={!sidebarCollapsed}
-          aria-label={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
-          title={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
-          onclick={toggleSidebar}
-        >
-          {#if sidebarCollapsed}<PanelLeftOpen size={18} aria-hidden="true" />{:else}<PanelLeftClose
-              size={18}
-              aria-hidden="true"
-            />{/if}
         </button>
         <div class="workspace-breadcrumb" aria-label={'Current workspace'}>
           <a

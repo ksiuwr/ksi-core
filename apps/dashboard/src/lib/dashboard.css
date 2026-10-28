@@ -1042,11 +1042,11 @@ summary,
 }
 
 /* Collapsible desktop sidebar */
-.sidebar-toggle {
+.sidebar-collapse {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 26px;
+  height: 26px;
   flex-shrink: 0;
   border: 1px solid transparent;
   border-radius: 3px;
@@ -1054,7 +1054,7 @@ summary,
   color: var(--muted);
   cursor: pointer;
 }
-.sidebar-toggle:hover {
+.sidebar-collapse:hover {
   border-color: var(--control-border-hover);
   outline: 1px solid var(--control-border-hover);
   outline-offset: 2px;
@@ -1070,11 +1070,10 @@ summary,
   }
   .dash-shell.sidebar-collapsed .sidebar-brand {
     justify-content: center;
+    margin-bottom: 6px;
   }
   .dash-shell.sidebar-collapsed .sidebar-logo {
-    padding-inline: 0;
-    font-size: 16px;
-    text-align: center;
+    display: none;
   }
   .dash-shell.sidebar-collapsed .sidebar-brand-suffix,
   .dash-shell.sidebar-collapsed .sidebar-context,
@@ -1092,7 +1091,8 @@ summary,
   }
   .dash-shell.sidebar-collapsed .sidebar-btn {
     justify-content: center;
-    padding: 10px 0;
+    padding: 5px 0;
+    margin-block: 2px;
   }
   .dash-shell.sidebar-collapsed .sidebar-btn > svg:last-child {
     display: none;
@@ -1444,7 +1444,7 @@ summary,
   }
 }
 @media (max-width: 760px) {
-  .sidebar-toggle {
+  .sidebar-collapse {
     display: none;
   }
   .timeline-comment {
@@ -1456,4 +1456,30 @@ summary,
   .comment-body {
     padding: 10px 12px;
   }
+}
+
+/* Compact dashboard controls */
+.btn {
+  min-height: 28px;
+  padding: 5px 9px;
+  gap: 5px;
+  font-size: 10px;
+  line-height: 1.4;
+}
+.btn svg {
+  width: 14px;
+  height: 14px;
+}
+.icon-button {
+  width: 26px;
+  height: 26px;
+}
+.topbar-control {
+  width: 30px;
+  height: 30px;
+  padding: 5px 6px;
+}
+.segmented-control button {
+  padding: 5px 8px;
+  font-size: 11px;
 }

@@ -9,6 +9,7 @@ const emptyInbox: PageInbox = { memberships: [], avatars: [] };
 
 export const load: LayoutServerLoad = async (event) => {
   const { locals, url } = event;
+  const sidebarCollapsed = event.cookies.get('ksi-sidebar') === '1';
   if (!locals.user) {
     if (url.pathname.startsWith('/sso/'))
       return {
@@ -17,6 +18,7 @@ export const load: LayoutServerLoad = async (event) => {
         inbox: emptyInbox,
         project: null,
         projectAccess: emptyProjectAccess,
+        sidebarCollapsed,
         activationContact: env.ACTIVATION_CONTACT ?? 'KSI board',
         websocketOrigin: getUrls(env).websocket,
         websiteOrigin: getUrls(env).frontend.landing
@@ -39,6 +41,7 @@ export const load: LayoutServerLoad = async (event) => {
     inbox,
     project: null,
     projectAccess: emptyProjectAccess,
+    sidebarCollapsed,
     activationContact: env.ACTIVATION_CONTACT ?? 'KSI board',
     websocketOrigin: getUrls(env).websocket,
     websiteOrigin: getUrls(env).frontend.landing
