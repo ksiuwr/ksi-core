@@ -252,8 +252,7 @@
       aria-modal={mobileNavigation ? true : undefined}
       aria-label={'Navigation'}
     >
-      <div class="sidebar-brand">
-        <span class="sidebar-logo">KSI<span class="sidebar-brand-suffix"> / core</span></span>
+      <div class="sidebar-controls">
         <button
           class="sidebar-collapse"
           aria-controls="dashboard-navigation"
@@ -275,6 +274,9 @@
           }}
           aria-label={'Close navigation'}><X size={20} aria-hidden="true" /></button
         >
+      </div>
+      <div class="sidebar-brand">
+        <span class="sidebar-logo">KSI<span class="sidebar-brand-suffix"> / core</span></span>
       </div>
       <div class="sidebar-context">
         <Dropdown

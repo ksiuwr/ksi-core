@@ -5,16 +5,24 @@
 }
 .dash-sidebar {
   position: relative;
-  padding: 20px 14px;
+  padding: 0 14px 20px;
   gap: 5px;
   background: var(--paper);
   transition: padding 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.sidebar-controls {
+  position: absolute;
+  inset: 0 0 auto;
+  display: flex;
+  align-items: center;
+  height: 66px;
+  flex-shrink: 0;
 }
 .sidebar-brand {
   display: flex;
   align-items: center;
   min-height: 30px;
-  padding-left: 40px;
+  margin-top: 71px;
   margin-bottom: 12px;
 }
 .sidebar-logo {
@@ -1071,7 +1079,7 @@ summary,
 /* Collapsible desktop sidebar */
 .sidebar-collapse {
   position: absolute;
-  top: 20px;
+  top: 19px;
   left: 18px;
   display: grid;
   place-items: center;
@@ -1133,20 +1141,20 @@ summary,
   }
 
   /* A collapsed sidebar temporarily opens on hover without changing the saved
-     preference. Hovering the toggle itself deliberately does not open it. */
-  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover):not(:has(.sidebar-collapse:hover)) {
+     preference. Its full-height control row is excluded from the hover target. */
+  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover):not(:has(.sidebar-controls:hover)) {
     grid-template-columns: 244px minmax(0, 1fr);
   }
-  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover):not(:has(.sidebar-collapse:hover))
+  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover):not(:has(.sidebar-controls:hover))
     .dash-sidebar {
     padding-inline: 14px;
   }
-  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover):not(:has(.sidebar-collapse:hover))
+  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover):not(:has(.sidebar-controls:hover))
     .sidebar-btn {
     padding: 5px 10px;
     margin-block: 2px;
   }
-  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover):not(:has(.sidebar-collapse:hover))
+  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover):not(:has(.sidebar-controls:hover))
     :is(
       .sidebar-logo,
       .sidebar-context,
@@ -1514,6 +1522,12 @@ summary,
   }
   .sidebar-brand {
     padding-left: 0;
+    margin-top: 0;
+  }
+  .sidebar-controls {
+    position: relative;
+    inset: auto;
+    height: 30px;
   }
   .timeline-comment {
     gap: 10px;
@@ -1527,7 +1541,7 @@ summary,
 }
 
 @media (min-width: 761px) and (max-width: 1100px) {
-  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover):not(:has(.sidebar-collapse:hover)) {
+  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover):not(:has(.sidebar-controls:hover)) {
     grid-template-columns: 218px minmax(0, 1fr);
   }
 }
