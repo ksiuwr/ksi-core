@@ -66,7 +66,6 @@
   {#if error}<p class="error" role="alert">{error}</p>{/if}
 
   <section class="aside-section">
-    <h2>{'Metadata'}</h2>
     <dl class="metadata-list">
       <div>
         <dt>{'Visibility'}</dt>

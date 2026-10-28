@@ -141,7 +141,7 @@
     gap: 20px;
     padding: 20px;
     border: 1px solid var(--line);
-    border-radius: 4px;
+    border-radius: var(--radius-xl);
     background: var(--surface);
     margin-bottom: 12px;
   }
@@ -173,7 +173,7 @@
     height: 80px;
     object-fit: cover;
     border: 1px solid var(--line);
-    border-radius: 5px;
+    border-radius: var(--radius-md);
   }
   @media (max-width: 760px) {
     .approval-card {

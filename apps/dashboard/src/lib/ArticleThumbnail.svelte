@@ -88,7 +88,7 @@
     max-height: 240px;
     aspect-ratio: 16 / 9;
     object-fit: cover;
-    border-radius: 3px;
+    border-radius: var(--radius-md);
     margin-bottom: 12px;
   }
   .controls {

@@ -265,7 +265,7 @@
   }
   .change-field {
     border: 1px solid var(--line);
-    border-radius: 4px;
+    border-radius: var(--radius-md, 6px);
     margin-top: 6px;
     overflow: hidden;
   }

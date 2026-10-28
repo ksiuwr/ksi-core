@@ -74,7 +74,7 @@
   .markdown-skeleton span {
     height: 12px;
     background: var(--surface-muted);
-    border-radius: 3px;
+    border-radius: var(--radius-sm, 4px);
   }
   .markdown-skeleton span:last-child {
     width: 65%;

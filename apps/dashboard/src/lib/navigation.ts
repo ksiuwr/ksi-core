@@ -42,8 +42,21 @@ export function taskPath(workspace: Workspace, projectSlug: string, id: string):
   return `${workspacePath(workspace, projectSlug)}/tasks/${encodeURIComponent(id)}`;
 }
 
+export function newTaskPath(workspace: Workspace, projectSlug: string, status?: string): string {
+  const path = `${workspacePath(workspace, projectSlug)}/tasks/new`;
+  return status ? `${path}?status=${encodeURIComponent(status)}` : path;
+}
+
 export function threadPath(workspace: Workspace, projectSlug: string, id: string): string {
   return `${dashboardPath(workspace, projectSlug, 'forum')}/${encodeURIComponent(id)}`;
+}
+
+export function newThreadPath(workspace: Workspace, projectSlug: string): string {
+  return `${dashboardPath(workspace, projectSlug, 'forum')}/new`;
+}
+
+export function newArticlePath(workspace: Workspace, projectSlug: string): string {
+  return `${dashboardPath(workspace, projectSlug, 'articles')}/new`;
 }
 
 export function articlePath(slug: string): string {

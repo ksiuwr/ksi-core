@@ -1,6 +1,6 @@
 <script lang="ts">
   import KanbanBoard from '$lib/KanbanBoard.svelte';
-  import { dashboardPath, taskPath, type Workspace } from '$lib/navigation';
+  import { dashboardPath, newTaskPath, taskPath, type Workspace } from '$lib/navigation';
   import type { BoardData, BoardLabel, BoardStatus, Item } from '$lib/types';
   import { Trash2 } from '@lucide/svelte';
 
@@ -55,6 +55,7 @@
   {canManage}
   {userId}
   taskHref={(id) => taskPath(workspace, projectSlug, id)}
+  newTaskHref={(status) => newTaskPath(workspace, projectSlug, status)}
   {refresh}
   reportError={(message) => (error = message)}
 />

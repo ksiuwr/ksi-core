@@ -284,8 +284,8 @@
     color: var(--ink);
     background: var(--surface);
     border: 1px solid var(--line);
-    box-shadow: 0 8px 24px #0002;
-    border-radius: 4px;
+    box-shadow: var(--shadow-md, 0 8px 24px #0002);
+    border-radius: var(--radius-lg, 8px);
     max-height: calc(100vh - 24px);
     overflow: auto;
   }

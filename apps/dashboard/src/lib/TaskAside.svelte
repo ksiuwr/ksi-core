@@ -124,7 +124,6 @@
   {#if error}<p class="error" role="alert">{error}</p>{/if}
 
   <section class="aside-section">
-    <h2>{'Metadata'}</h2>
     <dl class="metadata-list">
       {#if created}
         <div>
@@ -189,7 +188,6 @@
   </section>
 
   <section class="aside-section">
-    <h2>{'Due'}</h2>
     <div class="aside-due">
       <DeadlinePicker bind:value={deadlineValue} {language} disabled={busy} />
       {#if item.dueAt}
@@ -215,7 +213,7 @@
   </section>
 
   <section class="aside-section aside-actions">
-    <ContentHistory kind="task" targetId={item.id} {language} />
+    <ContentHistory kind="task" targetId={item.id} {language} labeled />
     <button class="btn btn-outline" disabled={busy} onclick={archive}>
       <Archive size={15} aria-hidden="true" />{'Archive task'}
     </button>
@@ -225,8 +223,17 @@
 <style>
   .aside-due {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     gap: 6px;
-    flex-wrap: wrap;
+  }
+  .aside-due :global(.picker) {
+    flex: 1;
+    min-width: 0;
+  }
+  /* Same height as the picker trigger, aligned to its bottom edge. */
+  .aside-due :global(.icon-action-btn) {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
   }
 </style>

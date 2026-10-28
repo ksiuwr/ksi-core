@@ -1,6 +1,7 @@
 <script lang="ts">
   import '@ksi-core/ui/platform.css';
   import '@ksi-core/ui/platform-theme.css';
+  import '@ksi-core/ui/platform-kit.css';
   import '$lib/dashboard.css';
   import '../locales/main.loader.svelte.js';
   import { goto, invalidateAll } from '$app/navigation';
@@ -61,7 +62,26 @@
   const projectSlug = $derived(workspace === 'project' ? (project?.slug ?? '') : '');
   const scope = $derived(project?.id ?? '');
   const tab = $derived(tabFromPath(pathname));
-  const viewName = $derived((merged.title as string | undefined) ?? 'Dashboard');
+  // Loaders send English page names; map the static ones through the catalog.
+  const pageTitles = $derived<Record<string, string>>({
+    Activity: 'Activity',
+    Articles: 'Articles',
+    Forum: 'Forum',
+    Kanban: 'Kanban',
+    'Member profile': 'Member profile',
+    Members: 'Members',
+    'My profile': 'My profile',
+    'New project': 'New project',
+    Notifications: 'Notifications',
+    Overview: 'Overview',
+    Permissions: 'Permissions',
+    'Preview credentials': 'Preview credentials',
+    Projects: 'Projects',
+    'Removed tasks': 'Removed tasks',
+    Settings: 'Settings'
+  });
+  const rawTitle = $derived((merged.title as string | undefined) ?? 'Dashboard');
+  const viewName = $derived(pageTitles[rawTitle] ?? rawTitle);
   const language = $derived(preferences.language);
   const workspaceName = $derived(
     workspace === 'project' ? (project?.name ?? 'Project') : 'Association'
@@ -278,24 +298,6 @@
       <div class="sidebar-brand">
         <span class="sidebar-logo">KSI<span class="sidebar-brand-suffix"> / core</span></span>
       </div>
-      <div class="sidebar-context">
-        <Dropdown
-          label={'Choose workspace'}
-          value={workspace === 'project'
-            ? scope
-            : workspace === 'association'
-              ? 'association'
-              : 'directory'}
-          options={pickerOptions}
-          placeholder={workspaceName}
-          searchable
-          variant="workspace"
-          searchPlaceholder={'Search projects…'}
-          emptyLabel={'No projects found.'}
-        >
-          {#snippet leading()}<Folder size={18} strokeWidth={1.7} aria-hidden="true" />{/snippet}
-        </Dropdown>
-      </div>
       {#if workspace !== 'directory'}
         <nav aria-label={workspaceName}>
           {#each tabs as [key, label] (key)}
@@ -400,14 +402,27 @@
             >{'Navigation'}</span
           >
         </button>
-        <div class="workspace-breadcrumb" aria-label={'Current workspace'}>
-          <a
-            href={workspace === 'directory'
-              ? '/projects'
-              : dashboardPath(workspace, projectSlug, 'overview')}
-            >{workspace === 'directory' ? 'KSI' : workspaceName}</a
-          ><span aria-hidden="true">/</span><strong>{viewName}</strong>
+        <div class="workspace-picker">
+          <Dropdown
+            label={'Choose workspace'}
+            value={workspace === 'project'
+              ? scope
+              : workspace === 'association'
+                ? 'association'
+                : 'directory'}
+            options={pickerOptions}
+            placeholder={workspaceName}
+            searchable
+            variant="bar"
+            searchPlaceholder={'Search projects…'}
+            emptyLabel={'No projects found.'}
+          >
+            {#snippet leading()}<Folder size={16} strokeWidth={1.7} aria-hidden="true" />{/snippet}
+          </Dropdown>
         </div>
+        <nav class="workspace-breadcrumb" aria-label={'Current page'}>
+          <span aria-hidden="true">/</span><strong>{viewName}</strong>
+        </nav>
         <div class="topbar-controls">
           <NotificationInbox
             {language}

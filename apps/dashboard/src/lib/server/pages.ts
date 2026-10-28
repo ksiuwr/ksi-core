@@ -39,6 +39,30 @@ export async function workspacePageContext(event: ServerLoadEvent): Promise<Work
   return associationContext();
 }
 
+/** Everything the overview needs; each source degrades to empty instead of failing the page. */
+export async function overviewPageLoad(event: ServerLoadEvent) {
+  const context = await workspacePageContext(event);
+  const projectId = context.project?.id ?? null;
+  const [board, threads, members, articles] = await Promise.all([
+    getBoard(event, projectId),
+    getThreads(event, projectId).catch(() => []),
+    getMembers(event, projectId),
+    getArticles(event, projectId).catch(() => [])
+  ]);
+  const items = board ? await getBoardItems(event, board.id).catch(() => []) : [];
+  return {
+    ...context,
+    board,
+    items,
+    threads: threads.slice(0, 5),
+    threadCount: threads.length,
+    members,
+    articleCount: articles.length,
+    title: 'Overview',
+    tab: 'overview'
+  };
+}
+
 export async function kanbanPageLoad(event: ServerLoadEvent) {
   const context = await workspacePageContext(event);
   const itemId = event.url.searchParams.get('item');
@@ -54,6 +78,14 @@ export async function kanbanPageLoad(event: ServerLoadEvent) {
     tab: 'board',
     canManage: canManageWorkspace(context, event.locals.user as Profile)
   };
+}
+
+export async function newTaskPageLoad(event: ServerLoadEvent) {
+  const context = await workspacePageContext(event);
+  const projectId = context.project?.id ?? null;
+  const board = await getBoard(event, projectId);
+  const items = board ? await getBoardItems(event, board.id) : [];
+  return { ...context, board, items, title: 'New task', tab: 'board' };
 }
 
 export async function graveyardPageLoad(event: ServerLoadEvent) {
@@ -76,6 +108,11 @@ export async function forumPageLoad(event: ServerLoadEvent) {
   const archived = event.url.searchParams.get('archived') === 'true';
   const threads = await getThreads(event, context.project?.id ?? null, archived);
   return { ...context, threads, archived, title: 'Forum', tab: 'forum' };
+}
+
+export async function newThreadPageLoad(event: ServerLoadEvent) {
+  const context = await workspacePageContext(event);
+  return { ...context, title: 'New thread', tab: 'forum' };
 }
 
 export async function threadPageLoad(event: ServerLoadEvent) {
@@ -112,6 +149,12 @@ export async function articlesPageLoad(event: ServerLoadEvent) {
     tab: 'articles',
     canCreate: canCreateArticle(context)
   };
+}
+
+export async function newArticlePageLoad(event: ServerLoadEvent) {
+  const context = await workspacePageContext(event);
+  if (!canCreateArticle(context)) error(403, 'Access denied');
+  return { ...context, title: 'New article', tab: 'articles' };
 }
 
 export async function articlePageLoad(event: ServerLoadEvent) {

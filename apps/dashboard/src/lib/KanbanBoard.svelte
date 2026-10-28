@@ -10,14 +10,11 @@
     Pencil,
     Save,
     GripVertical,
-    Check,
     Settings2,
     CalendarClock,
     Users
   } from '@lucide/svelte';
   import Dropdown, { type DropdownOption } from '@ksi-core/ui/platform/Dropdown.svelte';
-  import Editor from '@ksi-core/ui/platform/Editor.svelte';
-  import DeadlinePicker from '@ksi-core/ui/platform/DeadlinePicker.svelte';
   import MarkdownContent from '@ksi-core/ui/platform/MarkdownContent.svelte';
   export type BoardStatus = { id: string; name: string; color?: string; deleted?: boolean };
   export type BoardLabel = { name: string; color?: string; description?: string };
@@ -46,6 +43,7 @@
     canManage = false,
     userId,
     taskHref,
+    newTaskHref,
     refresh,
     reportError
   }: {
@@ -58,6 +56,7 @@
     canManage?: boolean;
     userId?: string;
     taskHref: (id: string) => string;
+    newTaskHref: (status: string) => string;
     refresh: () => Promise<void>;
     reportError: (error: string) => void;
   } = $props();
@@ -87,8 +86,6 @@
   );
 
   let selectedLabel = $state<string>('');
-  let taskLabels = $state<string[]>([]);
-
   let labelDialog = $state<HTMLDialogElement>();
   let labelDraftName = $state('');
   let labelDraftColor = $state('#6b7280');
@@ -200,9 +197,7 @@
       }
     });
   }
-  let members = $state<AssignmentMember[]>([]),
-    taskAssignees = $state<string[]>([]),
-    taskDueAt = $state('');
+  let members = $state<AssignmentMember[]>([]);
   const formatDateTime = (iso: string) =>
     new Date(iso).toLocaleString(language === 'pl' ? 'pl-PL' : 'en-GB');
   $effect(() => {
@@ -231,9 +226,6 @@
   let editingStatus = $state<BoardStatus | null>(null),
     statusDialog = $state<HTMLDialogElement>(),
     statusError = $state('');
-  const options = $derived(
-    activeStatuses.map((s) => ({ value: s.id, label: label(s), color: color(s) }))
-  );
   let busy = $state(false),
     dragged = $state<string | null>(null),
     over = $state<string | null>(null);
@@ -353,13 +345,9 @@
   let touchPress: { item: Item; x: number; y: number } | null = null;
   let holdTimer: ReturnType<typeof setTimeout> | null = null;
   let suppressTaskClick: string | null = null;
-  let composer = $state<string | null>(null),
-    title = $state(''),
-    markdown = $state(''),
-    statusName = $state(''),
+  let statusName = $state(''),
     addingStatus = $state(false),
-    statusColor = $state('#8777b5'),
-    composerDialog = $state<HTMLDialogElement>();
+    statusColor = $state('#8777b5');
   async function api<T>(path: string, method = 'GET', body?: unknown): Promise<T> {
     const response = await fetch(`/api${path}`, {
       method,
@@ -392,23 +380,6 @@
     if (boardId) return boardId;
     return (await api<{ id: string }>('/platform/boards', 'POST', projectId ? { projectId } : {}))
       .id;
-  }
-  async function openComposer(column: string) {
-    composer = column;
-    title = '';
-    markdown = '';
-    taskLabels = [];
-    taskAssignees = [];
-    taskDueAt = '';
-    await tick();
-    composerDialog?.showModal();
-    document.getElementById('task-title')?.focus();
-  }
-  function closeComposer() {
-    const column = composer;
-    composerDialog?.close();
-    composer = null;
-    document.getElementById(`add-${column}`)?.focus();
   }
   let lastTrigger: HTMLElement | null = null;
   async function openStatus(status: BoardStatus, event: MouseEvent) {
@@ -453,23 +424,6 @@
     } finally {
       busy = false;
     }
-  }
-  async function create() {
-    if (busy || !title.trim()) return;
-    await run(async () => {
-      const id = await ensureBoard();
-      await api(`/platform/boards/${id}/items`, 'POST', {
-        title,
-        markdown,
-        labels: taskLabels,
-        assigneeIds: taskAssignees,
-        dueAt: taskDueAt ? new Date(taskDueAt).toISOString() : null,
-        column: composer,
-        position:
-          Math.max(-1, ...items.filter((i) => i.column === composer).map((i) => i.position)) + 1
-      });
-      closeComposer();
-    });
   }
   async function move(item: Item, column: string) {
     if (item.column === column || busy) return;
@@ -767,13 +721,11 @@
             onclick={(event) => openStatus(status, event)}
             ><Pencil size={15} aria-hidden="true" /></button
           >{/if}
-        <button
+        <a
           id={`add-${status.id}`}
-          type="button"
           class="icon-button"
           aria-label={`${'Add task to'} ${label(status)}`}
-          disabled={busy}
-          onclick={() => openComposer(status.id)}><Plus size={17} aria-hidden="true" /></button
+          href={newTaskHref(status.id)}><Plus size={17} aria-hidden="true" /></a
         >
       </div>
       <div
@@ -872,12 +824,8 @@
           </a>
         {/each}
       </div>
-      <button
-        type="button"
-        class="column-add"
-        disabled={busy}
-        onclick={() => openComposer(status.id)}
-        ><Plus size={16} aria-hidden="true" />{'Add task'}</button
+      <a class="column-add" href={newTaskHref(status.id)}
+        ><Plus size={16} aria-hidden="true" />{'Add task'}</a
       >
     </section>
   {/each}
@@ -907,87 +855,6 @@
     </div>
   </div>
 {/if}
-{#if composer}<dialog
-    bind:this={composerDialog}
-    class="issue-dialog"
-    aria-labelledby="new-task-heading"
-    oncancel={(event) => {
-      event.preventDefault();
-      closeComposer();
-    }}
-  >
-    <div class="issue-heading">
-      <h2 id="new-task-heading">{'New task'}</h2>
-    </div>
-    <form
-      class="issue-editor"
-      onsubmit={(event) => {
-        event.preventDefault();
-        void create();
-      }}
-    >
-      <label for="task-title">{'Task title'}</label><input
-        onkeydown={(event) => {
-          if (
-            !event.defaultPrevented &&
-            !event.isComposing &&
-            (event.ctrlKey || event.metaKey) &&
-            // @wc-ignore
-            event.key === 'Enter'
-          ) {
-            event.preventDefault();
-            if (!busy) event.currentTarget.form?.requestSubmit();
-          }
-        }}
-        id="task-title"
-        bind:value={title}
-        required
-        maxlength="200"
-        placeholder={'What needs to be done?'}
-      />
-      <Dropdown label={'Task status'} bind:value={composer} {options} />
-      {#if normalizedLabels.length}
-        <div class="task-label-picker">
-          <span class="label-picker-label">{'Labels'}</span>
-          <div class="label-chips">
-            {#each normalizedLabels as label}
-              {@const isSelected = taskLabels.includes(label.name)}
-              <button
-                type="button"
-                class="label-chip"
-                class:selected={isSelected}
-                aria-pressed={isSelected}
-                style:--label-color={label.color || '#6b7280'}
-                onclick={() => {
-                  taskLabels = isSelected
-                    ? taskLabels.filter((t) => t !== label.name)
-                    : [...taskLabels, label.name];
-                }}
-                title={label.description || label.name}
-              >
-                <span class="label-dot"></span>
-                <span>{label.name}</span>
-                {#if isSelected}
-                  <Check size={12} aria-hidden="true" />
-                {/if}
-              </button>
-            {/each}
-          </div>
-        </div>
-      {/if}
-      <Assignees bind:value={taskAssignees} {members} {language} disabled={busy} />
-      <DeadlinePicker bind:value={taskDueAt} {language} disabled={busy} />
-      <Editor {language} bind:value={markdown} rows={10} allowReferences />
-      <div class="row">
-        <button class="btn" disabled={busy || !title.trim()}>{'Add task'}</button><button
-          type="button"
-          class="btn btn-outline"
-          disabled={busy}
-          onclick={closeComposer}>{'Cancel'}</button
-        >
-      </div>
-    </form>
-  </dialog>{/if}
 {#if canManage}
   <dialog
     bind:this={labelDialog}
@@ -1202,7 +1069,7 @@
     color: var(--muted);
     cursor: pointer;
     padding: 6px;
-    border-radius: 4px;
+    border-radius: var(--radius-md);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1223,7 +1090,7 @@
     min-height: 36px;
     padding: 8px 10px;
     border: 0;
-    border-radius: 2px;
+    border-radius: var(--radius-sm);
     background: transparent;
     color: var(--ink);
     font-size: 13px;
@@ -1249,8 +1116,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .label-badge,
-  .label-chip {
+  .label-badge {
     /* Keep neutral colors grey while lifting dark colors and enriching colored labels. */
     color: hsl(
       from var(--label-color, #6b7280) h min(100, calc(s * 1.25)) clamp(30, calc(l + 18), 65)
@@ -1268,43 +1134,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .task-label-picker {
-    display: grid;
-    gap: 6px;
-    margin: 8px 0;
-  }
-  .label-picker-label {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--muted);
-  }
-  .label-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .label-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    font-weight: 500;
-    padding: 4px 10px;
-    border-radius: 14px;
-    background: var(--surface);
-    border: 1px solid var(--control-border, var(--line));
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-  .label-chip:hover {
-    border-color: var(--label-color, #6b7280);
-    background: color-mix(in srgb, var(--label-color, #6b7280) 10%, var(--surface));
-  }
-  .label-chip.selected {
-    background: color-mix(in srgb, var(--label-color, #6b7280) 22%, var(--surface));
-    border-color: var(--label-color, #6b7280);
-    font-weight: 600;
-  }
   .label-dialog {
     width: min(540px, calc(100vw - 32px));
   }
@@ -1313,7 +1142,7 @@
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    border-radius: 6px;
+    border-radius: var(--radius-lg);
     background: var(--surface-muted);
     border: 1px solid var(--line);
     margin-bottom: 16px;
@@ -1402,7 +1231,7 @@
     margin: 0;
     padding: 8px 12px;
     border: 1px solid var(--danger, var(--red));
-    border-radius: 4px;
+    border-radius: var(--radius-lg);
     background: color-mix(in srgb, var(--danger, var(--red)) 10%, transparent);
   }
   .manage-labels-list {
@@ -1417,7 +1246,7 @@
     padding: 8px;
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 3px;
+    border-radius: var(--radius-lg);
   }
   .manage-label-info {
     display: flex;
@@ -1471,7 +1300,7 @@
     transition: padding-bottom 180ms ease;
   }
   .board-column {
-    padding: 0 20px 20px;
+    padding: 0 12px 12px;
     transition:
       background-color 180ms ease,
       border-color 180ms ease;
@@ -1481,7 +1310,7 @@
     left: 0;
     right: 0;
     border: 1px dashed var(--accent);
-    border-radius: 4px;
+    border-radius: var(--radius-lg);
     background: color-mix(in srgb, var(--accent) 8%, transparent);
     pointer-events: none;
     transition:
@@ -1492,15 +1321,21 @@
   .task-card {
     width: 100%;
     text-align: left;
+    text-decoration: none;
     color: var(--ink);
     border: 1px solid var(--line);
     cursor: grab;
     display: grid;
     gap: 9px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     transition:
       translate 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
-      opacity 120ms ease;
+      opacity 120ms ease,
+      border-color var(--dur-fast) ease,
+      box-shadow var(--dur) ease;
+  }
+  .task-card:hover {
+    border-color: var(--control-border-hover);
   }
   .task-card:active {
     cursor: grabbing;
@@ -1522,8 +1357,14 @@
   .task-title {
     display: flex;
     justify-content: space-between;
-    gap: 12px;
+    gap: 10px;
     align-items: start;
+  }
+  .task-title :global(strong) {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.4;
   }
   .task-title :global(svg) {
     color: var(--muted);
@@ -1555,6 +1396,14 @@
   }
   .kanban-markdown-preview :global(p) {
     margin: 2px 0 !important;
+  }
+  /* `.kanban-card strong` (card titles) must not turn inline bold into a block. */
+  .kanban-markdown-preview :global(strong) {
+    display: inline;
+    margin: 0;
+    font-size: inherit;
+    font-weight: 600;
+    line-height: inherit;
   }
   .kanban-markdown-preview :global(img) {
     max-height: 60px;
@@ -1592,16 +1441,17 @@
     width: min(760px, calc(100vw - 32px));
     max-height: calc(100dvh - 48px);
     margin: auto;
-    border: 1px solid var(--control-border-hover);
-    border-radius: 5px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xl);
     background: var(--surface);
     color: var(--ink);
     padding: 28px;
     overflow: auto;
+    box-shadow: var(--shadow-lg);
   }
   .issue-dialog::backdrop {
-    background: #0009;
-    backdrop-filter: blur(3px);
+    background: rgb(12 13 15 / 0.42);
+    backdrop-filter: blur(2px);
   }
   .issue-heading {
     display: flex;
@@ -1630,9 +1480,9 @@
       gap: 10px;
       padding: 12px;
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: var(--radius-xl);
       background: var(--surface);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      box-shadow: var(--shadow-lg);
     }
     .mobile-move-heading {
       display: flex;
@@ -1664,7 +1514,7 @@
       gap: 8px;
       padding: 8px 12px;
       border: 1px solid var(--line);
-      border-radius: 4px;
+      border-radius: var(--radius-lg);
       background: var(--surface);
       color: var(--ink);
       font: inherit;
@@ -1718,7 +1568,7 @@
     color: inherit;
   }
   .overdue {
-    color: var(--red, #b32c49);
+    color: var(--danger);
     font-weight: 600;
   }
 </style>

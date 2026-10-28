@@ -114,149 +114,230 @@
   }
 </script>
 
-<div class="workspace-header">
-  <div>
-    <a
-      class="btn btn-outline"
-      href={dashboardPath(workspace, projectSlug, 'articles')}
-      style="margin-bottom: 14px;"><ArrowLeft size={15} aria-hidden="true" />{'All articles'}</a
-    >
-    <h1>{draft.title}</h1>
-  </div>
-  {#if draft.state === 'published'}
-    <a class="btn btn-outline" href={`${websiteOrigin}/articles/${encodeURIComponent(draft.slug)}`}
-      ><ArrowUpRight size={15} />{'View public article'}</a
-    >
-  {/if}
-</div>
-{#if error}<p class="error" role="alert">{error}</p>{/if}
-{#if notice}<p class="notice" role="status">{notice}</p>{/if}
+<a class="btn btn-outline detail-back" href={dashboardPath(workspace, projectSlug, 'articles')}
+  ><ArrowLeft size={15} aria-hidden="true" />{'All articles'}</a
+>
 
-<div class="card">
-  <label for="article-title">{'Title'}</label>
-  <input id="article-title" bind:value={title} readonly={!permissions.canEdit} required />
-  <label for="article-slug">Slug</label>
-  <input id="article-slug" value={draft.slug} readonly required />
-  {#key draft.id}
-    <ArticleThumbnail
-      bind:fileId={thumbnailFileId}
-      bind:uploading={thumbnailUploading}
-      disabled={busy || !permissions.canSave}
-    />
-  {/key}
-  <div class="article-editor">
+<div class="detail-layout article-layout">
+  <div class="detail-main">
     {#if permissions.canEdit}
-      <Editor {language} allowGallery bind:value={markdown} />
+      <input
+        class="article-title-input"
+        aria-label={'Title'}
+        placeholder={'Title'}
+        bind:value={title}
+        required
+      />
     {:else}
-      <MarkdownContent value={markdown} {language} />
+      <h1 class="detail-title">{draft.title}</h1>
     {/if}
+    <div class="article-editor">
+      {#if permissions.canEdit}
+        <Editor {language} allowGallery rows={24} bind:value={markdown} />
+      {:else}
+        <MarkdownContent value={markdown} {language} />
+      {/if}
+    </div>
   </div>
 
-  {#if draft && workspace === 'project' && permissions.canManage}
-    <div class="main-article-setting">
-      <label
-        ><input type="checkbox" bind:checked={draft.mainArticle} />{'Main project article'}</label
-      >
-      <p class="muted">
-        {'When published, this article appears on the public project home page. It replaces the previous main article. Save or publish to apply this setting.'}
-      </p>
-    </div>
-  {/if}
-  {#if permissions.canManage}
-    <div class="main-article-setting">
-      {#if workspace === 'project'}
-        <label
+  <aside class="detail-aside" aria-label={'Settings'}>
+    {#if error}<p class="error" role="alert">{error}</p>{/if}
+    {#if notice}<p class="notice" role="status">{notice}</p>{/if}
+
+    <section class="aside-section">
+      <h2>{'Status'}</h2>
+      <div class="status-line">
+        <span class="tag" class:tag-mint={draft.state === 'published'}
+          >{draft.state === 'published' ? 'Published' : 'Draft'}</span
+        >
+        {#if draft.state === 'published'}
+          <a
+            class="status-link"
+            href={`${websiteOrigin}/articles/${encodeURIComponent(draft.slug)}`}
+            >{'View public article'}<ArrowUpRight size={13} aria-hidden="true" /></a
+          >
+        {/if}
+      </div>
+      <div class="action-stack">
+        {#if permissions.canPublish}
+          <button
+            class="btn btn-coral"
+            disabled={busy || thumbnailUploading}
+            onclick={() => save(true)}>{'Publish'}</button
+          >
+        {/if}
+        {#if permissions.canSave}
+          <button
+            class="btn btn-outline"
+            disabled={busy || thumbnailUploading}
+            onclick={() => save(false)}
+          >
+            <Save size={15} aria-hidden="true" />
+            {draft.state === 'published' && !permissions.canPublish ? 'Save changes' : 'Save draft'}
+          </button>
+        {/if}
+        {#if permissions.canPropose}
+          <button class="btn btn-outline" disabled={busy || thumbnailUploading} onclick={propose}
+            >{'Propose edit'}</button
+          >
+        {/if}
+      </div>
+    </section>
+
+    <section class="aside-section">
+      <dl class="metadata-list">
+        <div>
+          <dt>Slug</dt>
+          <dd><code>{draft.slug}</code></dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="aside-section">
+      {#key draft.id}
+        <ArticleThumbnail
+          bind:fileId={thumbnailFileId}
+          bind:uploading={thumbnailUploading}
+          disabled={busy || !permissions.canSave}
+        />
+      {/key}
+    </section>
+
+    {#if permissions.canManage}
+      <section class="aside-section">
+        <h2>{'Publishing'}</h2>
+        {#if workspace === 'project'}
+          <label class="check"
+            ><input
+              type="checkbox"
+              bind:checked={draft.mainArticle}
+            />{'Main project article'}</label
+          >
+          <p class="muted">
+            {'When published, this article appears on the public project home page. It replaces the previous main article. Save or publish to apply this setting.'}
+          </p>
+          <label class="check"
+            ><input
+              type="checkbox"
+              bind:checked={draft.projectFeed}
+            />{'Show in project articles'}</label
+          >
+        {/if}
+        <label class="check"
           ><input
             type="checkbox"
-            bind:checked={draft.projectFeed}
-          />{'Show in project articles'}</label
+            bind:checked={draft.websiteFeed}
+          />{'Show in website articles'}</label
         >
-      {/if}
-      <label
-        ><input
-          type="checkbox"
-          bind:checked={draft.websiteFeed}
-        />{'Show in website articles'}</label
-      >
-      <p class="muted">
-        {'These settings apply when the article is published. The main article is displayed separately from the project articles list.'}
-      </p>
-    </div>
-  {/if}
+        <p class="muted">
+          {'These settings apply when the article is published. The main article is displayed separately from the project articles list.'}
+        </p>
+      </section>
+    {/if}
 
-  <div class="row" style="margin-top: 16px; gap: 8px; flex-wrap: wrap;">
-    {#if permissions.canSave}
-      <button class="btn" disabled={busy || thumbnailUploading} onclick={() => save(false)}>
-        <Save size={15} aria-hidden="true" />
-        {draft.state === 'published' && !permissions.canPublish ? 'Save changes' : 'Save draft'}
-      </button>
-    {/if}
-    {#if permissions.canPublish}
-      <button
-        class="btn btn-coral"
-        disabled={busy || thumbnailUploading}
-        onclick={() => save(true)}
-      >
-        {'Publish'}
-      </button>
-    {/if}
-    {#if permissions.canPropose}
-      <button class="btn btn-outline" disabled={busy || thumbnailUploading} onclick={propose}>
-        {'Propose edit'}
-      </button>
-    {/if}
     {#if draft.canManageCredit}
-      <label class="credit-toggle">
-        <input
-          type="checkbox"
-          checked={showCredit}
-          onchange={(event) => updateCredit(event.currentTarget.checked)}
-        />
-        {'Show my author credit'}
-      </label>
+      <section class="aside-section">
+        <label class="check">
+          <input
+            type="checkbox"
+            checked={showCredit}
+            onchange={(event) => updateCredit(event.currentTarget.checked)}
+          />
+          {'Show my author credit'}
+        </label>
+      </section>
     {/if}
-  </div>
+  </aside>
 </div>
 
 {#if permissions.canManage}
-  <ContentTranslations
-    kind="article"
-    id={draft.id}
-    version={draft.version}
-    translations={draft.translations}
-    baseline={{ title: draft.title, markdown: draft.markdown }}
-    {language}
-    onsaved={refresh}
-  />
+  <div class="article-translations">
+    <ContentTranslations
+      kind="article"
+      id={draft.id}
+      version={draft.version}
+      translations={draft.translations}
+      baseline={{ title: draft.title, markdown: draft.markdown }}
+      {language}
+      onsaved={refresh}
+    />
+  </div>
 {/if}
 
 <style>
-  .article-editor {
+  .article-layout {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+  .article-title-input {
     width: 100%;
-    min-width: min(100%, 36rem);
+    margin: 0 0 14px;
+    padding: 6px 10px;
+    margin-inline: -10px;
+    width: calc(100% + 20px);
+    border: 1px solid transparent;
+    background: transparent !important;
+    box-shadow: none;
+    font-family: var(--display);
+    font-size: clamp(24px, 2.6vw, 32px);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
   }
-  .main-article-setting {
-    margin-top: 20px;
-    padding: 16px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
+  .article-title-input:hover {
+    border-color: var(--line);
   }
-  .main-article-setting label {
+  .article-title-input:focus {
+    background: var(--surface) !important;
+  }
+  .article-editor {
+    min-width: 0;
+  }
+  .article-editor :global(textarea) {
+    min-height: 60vh;
+  }
+  .status-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .status-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: var(--muted);
+    font-size: 12px;
+    text-decoration: none;
+  }
+  .status-link:hover {
+    color: var(--ink);
+  }
+  .action-stack {
+    display: grid;
+    gap: 8px;
+  }
+  .action-stack .btn {
+    width: 100%;
+  }
+  .check {
     display: flex;
     align-items: center;
     gap: 10px;
+    margin: 0;
+    color: var(--ink);
+    font-size: 13px;
   }
-  .main-article-setting p {
-    margin: 8px 0 0;
-  }
-  .credit-toggle {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+  .aside-section p {
+    margin: 0;
     font-size: 12px;
-    text-transform: none;
-    letter-spacing: 0;
-    color: var(--muted);
-    cursor: pointer;
+  }
+  code {
+    font-family: var(--mono);
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+  .article-translations {
+    margin-top: 32px;
+    max-width: 760px;
   }
 </style>

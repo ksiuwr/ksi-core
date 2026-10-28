@@ -105,9 +105,9 @@
     align-items: center;
     gap: 6px;
     padding: 4px 8px;
-    background: var(--bg-hover);
+    background: var(--surface-muted);
     border: 1px solid var(--line);
-    border-radius: 4px;
+    border-radius: var(--radius-full);
     font-size: 13px;
   }
   .remove-btn {
@@ -116,7 +116,7 @@
     justify-content: center;
     background: transparent;
     border: none;
-    color: var(--text-muted);
+    color: var(--muted);
     cursor: pointer;
     padding: 0;
   }
@@ -137,8 +137,9 @@
     margin-top: 4px;
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 4px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: var(--radius-lg);
+    padding: 4px;
+    box-shadow: var(--shadow-md);
     max-height: 200px;
     overflow-y: auto;
     z-index: 10;
@@ -149,16 +150,16 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 12px;
+    padding: 6px 8px;
     background: transparent;
     border: none;
-    border-bottom: 1px solid var(--line);
+    border-radius: var(--radius-sm);
     cursor: pointer;
     text-align: left;
     width: 100%;
   }
   .result-item:hover {
-    background: var(--bg-hover);
+    background: var(--surface-muted);
   }
   .result-item:last-child {
     border-bottom: none;
@@ -179,6 +180,6 @@
   }
   .nickname {
     font-size: 11px;
-    color: var(--text-muted);
+    color: var(--muted);
   }
 </style>

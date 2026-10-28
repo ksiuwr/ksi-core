@@ -21,6 +21,24 @@
     'articles.content.publish',
     'articles.content.edit-any'
   ];
+  const info = $derived<Record<string, [string, string]>>({
+    'articles.content.propose': [
+      'Create and propose articles',
+      'Create project articles and suggest changes to existing articles.'
+    ],
+    'articles.content.publish': [
+      'Publish articles',
+      'Review and publish project articles and proposed changes.'
+    ],
+    'articles.content.edit-any': [
+      'Edit articles created by anyone',
+      'Edit any project article, but publishing still requires publish permission.'
+    ],
+    'projects.preview-credentials.read': [
+      'View preview sign-in credentials',
+      'Show generated sample account passwords for this project’s previews.'
+    ]
+  });
   const groupPermissions = $derived(
     project.slug === 'ksi-core'
       ? [...articlePermissions, 'projects.preview-credentials.read']
@@ -93,172 +111,228 @@
 {#if notice}<p class="notice" role="status">{notice}</p>{/if}
 {#if loading}<p class="muted">{'Loading project permissions…'}</p>
 {:else}
-  <section class="card fields">
-    <h2>{'Default project access'}</h2>
-    <p class="muted">
-      {'These permissions apply to everyone in the selected category. They are additional to existing account-role permissions.'}
-    </p>
-    <fieldset class="permission-card">
-      <legend>{'Project members'}</legend>
-      {#each articlePermissions as permission}
-        <label class="check permission-option">
-          <input type="checkbox" value={permission} bind:group={memberPermissions} />
-          <span>
-            <strong
-              >{permission === 'articles.content.propose'
-                ? 'Create and propose articles'
-                : permission === 'articles.content.publish'
-                  ? 'Publish articles'
-                  : 'Edit articles created by anyone'}</strong
-            >
-            <small
-              >{permission === 'articles.content.propose'
-                ? 'Create project articles and suggest changes to existing articles.'
-                : permission === 'articles.content.publish'
-                  ? 'Review and publish project articles and proposed changes.'
-                  : 'Edit any project article, but publishing still requires publish permission.'}</small
-            >
-          </span>
-        </label>
-      {/each}
-    </fieldset>
-    <fieldset class="permission-card">
-      <legend>{'Non-members'}</legend>
-      <p class="muted">{'Active KSI members who are not members of this project.'}</p>
-      {#each articlePermissions as permission}
-        <label class="check permission-option">
-          <input type="checkbox" value={permission} bind:group={nonMemberPermissions} />
-          <span>
-            <strong
-              >{permission === 'articles.content.propose'
-                ? 'Create and propose articles'
-                : permission === 'articles.content.publish'
-                  ? 'Publish articles'
-                  : 'Edit articles created by anyone'}</strong
-            >
-            <small
-              >{permission === 'articles.content.propose'
-                ? 'Create project articles and suggest changes to existing articles.'
-                : permission === 'articles.content.publish'
-                  ? 'Review and publish project articles and proposed changes.'
-                  : 'Edit any project article, but publishing still requires publish permission.'}</small
-            >
-          </span>
-        </label>
-      {/each}
-    </fieldset>
-  </section>
-
-  <section class="card fields">
-    <div>
-      <h2>{'Named groups'}</h2>
-      <p class="muted">{'Only active project members can be assigned to a group.'}</p>
-    </div>
-    {#each groups as group, index (index)}
-      <fieldset class="permission-card">
-        <legend>{group.name || `Group ${index + 1}`}</legend>
-        <label
-          >{'Group name'}<input
-            bind:value={group.name}
-            maxlength="60"
-            placeholder="Example: Maintainers"
-            required
-          /></label
-        >
-        <div class="choice-list">
-          <p class="muted">{'Members'}</p>
-          {#each members as member}
-            <label class="check"
-              ><input
-                type="checkbox"
-                value={member.id}
-                bind:group={group.userIds}
-              />{member.firstName}
-              {member.lastName}</label
-            >
-          {/each}
+  <div class="settings-main">
+    <section class="settings-section">
+      <header>
+        <h2>{'Default project access'}</h2>
+        <p>
+          {'These permissions apply to everyone in the selected category. They are additional to existing account-role permissions.'}
+          {'Active KSI members who are not members of this project.'}
+        </p>
+      </header>
+      <div class="card matrix">
+        <div class="matrix-row matrix-head">
+          <span></span>
+          <span>{'Project members'}</span>
+          <span>{'Non-members'}</span>
         </div>
-        <div class="choice-list">
-          <p class="muted">{'Permissions'}</p>
-          {#each groupPermissions as permission}
-            <label class="check permission-option">
-              <input type="checkbox" value={permission} bind:group={group.permissions} />
-              <span>
-                <strong
-                  >{permission === 'articles.content.propose'
-                    ? 'Create and propose articles'
-                    : permission === 'articles.content.publish'
-                      ? 'Publish articles'
-                      : permission === 'articles.content.edit-any'
-                        ? 'Edit articles created by anyone'
-                        : 'View preview sign-in credentials'}</strong
-                >
-                <small
-                  >{permission === 'articles.content.propose'
-                    ? 'Create project articles and suggest changes to existing articles.'
-                    : permission === 'articles.content.publish'
-                      ? 'Review and publish project articles and proposed changes.'
-                      : permission === 'articles.content.edit-any'
-                        ? 'Edit any project article, but publishing still requires publish permission.'
-                        : 'Show generated sample account passwords for this project’s previews.'}</small
-                >
-              </span>
+        {#each articlePermissions as permission}
+          <div class="matrix-row">
+            <div>
+              <strong>{info[permission]?.[0]}</strong>
+              <small>{info[permission]?.[1]}</small>
+            </div>
+            <label class="matrix-cell">
+              <input
+                type="checkbox"
+                value={permission}
+                bind:group={memberPermissions}
+                aria-label={`${'Project members'}: ${info[permission]?.[0]}`}
+              />
             </label>
-          {/each}
+            <label class="matrix-cell">
+              <input
+                type="checkbox"
+                value={permission}
+                bind:group={nonMemberPermissions}
+                aria-label={`${'Non-members'}: ${info[permission]?.[0]}`}
+              />
+            </label>
+          </div>
+        {/each}
+      </div>
+    </section>
+
+    <section class="settings-section">
+      <header class="group-header">
+        <div>
+          <h2>{'Named groups'}</h2>
+          <p>{'Only active project members can be assigned to a group.'}</p>
         </div>
         <button
           type="button"
           class="btn btn-outline"
-          disabled={busy}
-          onclick={() => (groups = groups.filter((_, i) => i !== index))}
-          ><Trash2 size={15} />{'Remove group'}</button
+          disabled={busy || groups.length >= 30}
+          onclick={() => (groups = [...groups, { name: '', permissions: [], userIds: [] }])}
+          ><Plus size={15} aria-hidden="true" />{'Add group'}</button
         >
-      </fieldset>
-    {/each}
-    <button
-      type="button"
-      class="btn btn-outline"
-      disabled={busy || groups.length >= 30}
-      onclick={() => (groups = [...groups, { name: '', permissions: [], userIds: [] }])}
-      ><Plus size={15} />{'Add group'}</button
-    >
-  </section>
+      </header>
+      {#each groups as group, index (index)}
+        <div class="card group-card">
+          <div class="group-top">
+            <div class="group-name">
+              <label for={`group-name-${index}`}>{'Group name'}</label>
+              <input
+                id={`group-name-${index}`}
+                bind:value={group.name}
+                maxlength="60"
+                placeholder="Example: Maintainers"
+                required
+              />
+            </div>
+            <button
+              type="button"
+              class="btn btn-outline danger-button"
+              disabled={busy}
+              onclick={() => (groups = groups.filter((_, i) => i !== index))}
+              ><Trash2 size={15} aria-hidden="true" />{'Remove group'}</button
+            >
+          </div>
+          <div class="group-columns">
+            <fieldset>
+              <legend>{'Members'}</legend>
+              {#each members as member}
+                <label class="check"
+                  ><input
+                    type="checkbox"
+                    value={member.id}
+                    bind:group={group.userIds}
+                  />{member.firstName}
+                  {member.lastName}</label
+                >
+              {/each}
+            </fieldset>
+            <fieldset>
+              <legend>{'Permissions'}</legend>
+              {#each groupPermissions as permission}
+                <label class="check permission-option">
+                  <input type="checkbox" value={permission} bind:group={group.permissions} />
+                  <span>
+                    <strong>{info[permission]?.[0]}</strong>
+                    <small>{info[permission]?.[1]}</small>
+                  </span>
+                </label>
+              {/each}
+            </fieldset>
+          </div>
+        </div>
+      {:else}
+        <p class="list-empty">{'No groups yet.'}</p>
+      {/each}
+    </section>
+  </div>
 {/if}
 
 <style>
-  .fields,
-  .permission-card,
-  .choice-list,
-  .permission-option span {
+  .matrix {
+    display: grid;
+    padding: 4px 20px 12px;
+  }
+  .matrix-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 110px 110px;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 0;
+  }
+  .matrix-row + .matrix-row {
+    border-top: 1px solid var(--line);
+  }
+  .matrix-head {
+    padding: 12px 0 8px;
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+  }
+  .matrix-row strong,
+  .permission-option strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .matrix-row small,
+  .permission-option small {
+    display: block;
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .matrix-cell {
+    display: grid;
+    place-items: center;
+    margin: 0;
+    padding: 6px;
+    cursor: pointer;
+  }
+  .group-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .group-card {
+    display: grid;
+    gap: 18px;
+    padding: 20px;
+  }
+  .group-top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .group-name {
+    flex: 1 1 260px;
+    max-width: 420px;
+  }
+  .group-name input {
+    margin: 0;
+  }
+  .group-columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    align-items: start;
+  }
+  fieldset {
     display: grid;
     gap: 10px;
+    margin: 0;
+    padding: 12px 16px 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
   }
-  .permission-card {
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px;
+  legend {
+    padding: 0 6px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
   }
   .permission-option {
     align-items: flex-start;
-  }
-  .permission-option span {
-    gap: 3px;
-  }
-  .permission-option small {
-    color: var(--text-muted);
-    line-height: 1.45;
   }
   .notice {
     margin: 0 0 16px;
     padding: 12px 16px;
     border: 1px solid var(--line);
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     background: var(--surface-muted);
-    color: var(--text);
   }
-  h1,
-  h2,
-  p {
-    margin-top: 0;
+  @media (max-width: 760px) {
+    .group-columns {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .matrix-row {
+      grid-template-columns: minmax(0, 1fr) 72px 72px;
+    }
   }
 </style>

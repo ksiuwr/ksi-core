@@ -5,6 +5,7 @@
   let { data } = $props();
   import { Github, ArrowUpRight, ArrowRight, UserRound, KeyRound } from '@lucide/svelte';
   import ThemeSelector from '@ksi-core/ui/platform/ThemeSelector.svelte';
+  import { slider } from '@ksi-core/ui/platform/slider';
   import { preferences, setLanguage } from '@ksi-core/ui/platform/preferences';
   const language = $derived(preferences.language);
   let mode = $state<'login' | 'signup' | 'reset'>('login');
@@ -146,7 +147,12 @@
         <p class="auth-intro">
           {'One account. Every KSI project and conversation.'}
         </p>
-        {#if mode !== 'reset'}<div class="auth-mode" role="group" aria-label={'Account options'}>
+        {#if mode !== 'reset'}<div
+            class="auth-mode"
+            role="group"
+            aria-label={'Account options'}
+            use:slider
+          >
             <button
               class:active={mode === 'login'}
               aria-pressed={mode === 'login'}

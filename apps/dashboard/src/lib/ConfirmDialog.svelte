@@ -62,14 +62,14 @@
     width: min(420px, calc(100vw - 32px));
     padding: 0;
     border: 1px solid var(--line);
-    border-radius: 12px;
+    border-radius: var(--radius-xl);
     background: var(--surface);
     color: var(--ink);
-    box-shadow: 0 24px 80px #0004;
+    box-shadow: var(--shadow-lg);
   }
   .confirm-dialog::backdrop {
-    background: #10182870;
-    backdrop-filter: blur(4px);
+    background: rgb(12 13 15 / 0.42);
+    backdrop-filter: blur(2px);
   }
   .confirm-body {
     padding: 24px 24px 6px;

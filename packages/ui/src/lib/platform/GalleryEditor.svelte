@@ -232,7 +232,7 @@
     margin: 8px 0 0;
     padding: 16px;
     border: 1px solid var(--line, #ddd);
-    border-radius: 4px;
+    border-radius: var(--radius-lg, 8px);
   }
   .gallery-editor.dropping {
     border-color: var(--accent, #6750a4);
@@ -286,7 +286,7 @@
     position: relative;
     min-width: 0;
     border: 2px solid var(--line, #ddd);
-    border-radius: 4px;
+    border-radius: var(--radius-md, 6px);
     overflow: hidden;
   }
   li.selected {
@@ -378,7 +378,7 @@
     color: #fff;
     background: #000a;
     border: 1px solid #fff4;
-    border-radius: 3px;
+    border-radius: var(--radius-md, 6px);
   }
   .drag-handle {
     touch-action: none;
@@ -392,7 +392,7 @@
     min-height: 86px;
     padding: 16px;
     border: 1px dashed var(--line, #aaa);
-    border-radius: 3px;
+    border-radius: var(--radius-lg, 8px);
     background: transparent;
     color: var(--muted);
     font-size: 12px;

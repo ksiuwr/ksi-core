@@ -3,7 +3,11 @@
   import { linkForAction, linkForMetadata } from '$lib/links';
   import type { ActivityEvent } from '$lib/types';
 
+  const PAGE_SIZE = 30;
+
   let { events, language }: { events: ActivityEvent[]; language: 'pl' | 'en' } = $props();
+  let shown = $state(PAGE_SIZE);
+  const visible = $derived(events.slice(0, shown));
 </script>
 
 <div class="workspace-header">
@@ -11,66 +15,90 @@
     <h1>{'Activity'}</h1>
   </div>
 </div>
-{#each events as event (event.event.id)}
-  <div class="event-item">
-    <div class="event-meta">
-      <div>
-        <strong
-          >{#if event.event.actorId}<a href={`/members/${encodeURIComponent(event.event.actorId)}`}
-              >{event.firstName
-                ? `${event.firstName} ${event.lastName}`
-                : event.actorName || 'System'}</a
-            >{:else}{'System'}{/if}</strong
-        >
-        {#if linkForAction(event.event.action, event.event.targetId, event.projectSlug)}
-          <a
-            class="action-link"
-            href={linkForAction(event.event.action, event.event.targetId, event.projectSlug)}
-            >{event.event.action}</a
-          >
-        {:else}
-          <span class="muted">{event.event.action}</span>
-        {/if}
-      </div>
-      {#if event.event.metadata && Object.keys(event.event.metadata).length > 0}
-        <div class="event-metadata">
-          {#each Object.entries(event.event.metadata).filter(([key]) => key !== 'changes' && !(key === 'fields' && Array.isArray(event.event.metadata?.changes))) as [key, val]}
-            {#if linkForMetadata(key, val, event.projectSlug)}
-              <a class="meta-tag meta-link" href={linkForMetadata(key, val, event.projectSlug)}
-                >{key}: {String(val)}</a
+{#if events.length}<ul class="list-group">
+    {#each visible as event (event.event.id)}
+      <li class="event-item">
+        <div class="event-meta">
+          <div class="event-head">
+            <strong
+              >{#if event.event.actorId}<a
+                  href={`/members/${encodeURIComponent(event.event.actorId)}`}
+                  >{event.firstName
+                    ? `${event.firstName} ${event.lastName}`
+                    : event.actorName || 'System'}</a
+                >{:else}{'System'}{/if}</strong
+            >
+            {#if linkForAction(event.event.action, event.event.targetId, event.projectSlug)}
+              <a
+                class="action-link"
+                href={linkForAction(event.event.action, event.event.targetId, event.projectSlug)}
+                >{event.event.action}</a
               >
             {:else}
-              <span class="meta-tag">{key}: {String(val)}</span>
+              <span class="muted">{event.event.action}</span>
             {/if}
-          {/each}
+            <time class="muted" datetime={event.event.createdAt}
+              >{new Date(event.event.createdAt).toLocaleString(
+                language === 'pl' ? 'pl-PL' : 'en-GB'
+              )}</time
+            >
+          </div>
+          {#if event.event.metadata && Object.keys(event.event.metadata).length > 0}
+            <div class="event-metadata">
+              {#each Object.entries(event.event.metadata).filter(([key]) => key !== 'changes' && !(key === 'fields' && Array.isArray(event.event.metadata?.changes))) as [key, val]}
+                {#if linkForMetadata(key, val, event.projectSlug)}
+                  <a class="meta-tag meta-link" href={linkForMetadata(key, val, event.projectSlug)}
+                    >{key}: {String(val)}</a
+                  >
+                {:else}
+                  <span class="meta-tag">{key}: {String(val)}</span>
+                {/if}
+              {/each}
+            </div>
+            {#if Array.isArray(event.event.metadata.changes)}<ChangeDetails
+                changes={event.event.metadata.changes}
+                {language}
+              />{/if}
+          {/if}
         </div>
-        {#if Array.isArray(event.event.metadata.changes)}<ChangeDetails
-            changes={event.event.metadata.changes}
-            {language}
-          />{/if}
-      {/if}
-    </div>
-    <time class="muted" datetime={event.event.createdAt}
-      >{new Date(event.event.createdAt).toLocaleString(language === 'pl' ? 'pl-PL' : 'en-GB')}</time
+      </li>
+    {/each}
+  </ul>{/if}
+{#if events.length > shown}
+  <div class="show-more">
+    <button class="btn btn-outline" onclick={() => (shown += PAGE_SIZE)}
+      >{'Show more'} · {events.length - shown}</button
     >
   </div>
-{/each}
+{/if}
 {#if !events.length}
-  <p class="muted" style="margin-top: 20px;">{'No activity yet.'}</p>
+  <p class="list-empty">{'No activity yet.'}</p>
 {/if}
 
 <style>
+  .show-more {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+  }
   .event-item {
     padding: 12px 16px;
-    border-bottom: 1px solid var(--line);
+    border-bottom: 0;
+    display: block;
+  }
+  .event-head {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
+    align-items: baseline;
+    gap: 6px;
     flex-wrap: wrap;
   }
+  .event-head time {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    white-space: nowrap;
+  }
   .event-meta {
-    flex: 1 1 480px;
     min-width: 0;
     display: flex;
     flex-direction: column;
@@ -86,7 +114,7 @@
     font-size: 11px;
     padding: 2px 6px;
     background: var(--surface-muted);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     color: var(--muted);
   }
   .meta-link {

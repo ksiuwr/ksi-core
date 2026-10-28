@@ -454,7 +454,7 @@
     border-radius: 8px;
     background: var(--surface, #fffefa);
     color: var(--ink, #272638);
-    box-shadow: 0 12px 32px #0004;
+    box-shadow: var(--shadow-lg, 0 12px 32px #0004);
     font-size: 12px;
     overflow: hidden;
   }

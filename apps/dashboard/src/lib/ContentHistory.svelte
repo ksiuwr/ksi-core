@@ -16,8 +16,10 @@
   let {
     kind,
     targetId,
-    language = 'pl'
+    language = 'pl',
+    labeled = false
   }: {
+    labeled?: boolean;
     kind: 'comment' | 'task';
     targetId: string;
     language?: 'pl' | 'en';
@@ -88,13 +90,13 @@
 
 <button
   type="button"
-  class="history-trigger"
+  class={labeled ? 'btn btn-outline' : 'history-trigger'}
   {title}
   aria-label={title}
   aria-haspopup="dialog"
   onclick={show}
 >
-  <History size={15} aria-hidden="true" />
+  <History size={15} aria-hidden="true" />{#if labeled}{title}{/if}
 </button>
 
 {#if open}
@@ -231,7 +233,7 @@
     background: transparent;
     color: var(--muted);
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     width: 30px;
     height: 30px;
     transition:
@@ -251,13 +253,13 @@
     color: var(--ink);
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 14px;
+    border-radius: var(--radius-xl);
     padding: 0;
     width: min(920px, calc(100vw - 32px));
     max-width: none;
     max-height: 86dvh;
     overflow: auto;
-    box-shadow: 0 24px 90px #0003;
+    box-shadow: var(--shadow-lg);
     white-space: normal;
   }
   .history-dialog::backdrop {
@@ -351,7 +353,7 @@
   .revision {
     min-width: 0;
     border: 1px solid var(--line);
-    border-radius: 9px;
+    border-radius: var(--radius-lg);
     padding: 14px;
   }
   .revision-heading {
@@ -374,7 +376,7 @@
     font-weight: 500;
     color: var(--muted);
     padding: 2px 6px;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     background: var(--surface-muted);
   }
   time {
@@ -431,7 +433,7 @@
     border: 1px solid var(--line);
     background: var(--surface);
     color: var(--ink);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     padding: 8px 12px;
     font-size: 12px;
     cursor: pointer;

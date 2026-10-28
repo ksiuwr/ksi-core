@@ -1,0 +1,652 @@
+/*
+ * KSI Platform kit: soft, shadcn-like component layer for apps/auth and
+ * apps/dashboard. Load after platform.css and platform-theme.css.
+ *
+ * KSI identity is kept on purpose: Anybody headings, Sora body, Space Mono
+ * for metadata, warm paper neutrals, and terracotta reserved for focus rings,
+ * selection, and accents rather than every primary action.
+ */
+
+/* ─── Tokens ─────────────────────────────────────────────────────────────── */
+:root {
+  --paper: #f7f7f4;
+  --surface: #fff;
+  --surface-muted: #f0f0ec;
+  --ink: #1f2226;
+  --muted: #676e74;
+  --line: #e3e3de;
+  --input: #d6d7d2;
+  --control-border-hover: #b9bdbb;
+
+  --button-primary: #1f2226;
+  --button-primary-hover: #34383d;
+  --button-primary-text: #fbfbf9;
+  --button-secondary: #ecece8;
+  --button-secondary-hover: #e3e3de;
+  --tab-active: var(--surface);
+
+  --ring: color-mix(in srgb, var(--accent) 24%, transparent);
+  --ring-strong: color-mix(in srgb, var(--accent) 62%, var(--input));
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 999px;
+
+  --shadow-xs: 0 1px 2px 0 rgb(24 24 27 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(24 24 27 / 0.07), 0 1px 2px -1px rgb(24 24 27 / 0.06);
+  --shadow-md: 0 6px 16px -4px rgb(24 24 27 / 0.1), 0 2px 4px -2px rgb(24 24 27 / 0.06);
+  --shadow-lg: 0 18px 44px -12px rgb(24 24 27 / 0.2), 0 4px 10px -4px rgb(24 24 27 / 0.07);
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 120ms;
+  --dur: 180ms;
+  --dur-slow: 260ms;
+
+  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23676e74' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 15 5 5 5-5'/%3E%3Cpath d='m7 9 5-5 5 5'/%3E%3C/svg%3E");
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scrollbar-color: color-mix(in srgb, var(--muted) 38%, transparent) transparent;
+}
+:root[data-theme='dark'] {
+  --paper: #0f1113;
+  --surface: #16191c;
+  --surface-muted: #1f2327;
+  --ink: #e8eaec;
+  --muted: #9aa3aa;
+  --line: #2a2f34;
+  --input: #353b41;
+  --control-border-hover: #4a525a;
+
+  --button-primary: #eceef0;
+  --button-primary-hover: #fff;
+  --button-primary-text: #111315;
+  --button-secondary: #23282c;
+  --button-secondary-hover: #2c3237;
+  --tab-active: #2a3035;
+
+  --ring: color-mix(in srgb, var(--accent) 30%, transparent);
+  --ring-strong: color-mix(in srgb, var(--accent) 70%, var(--input));
+
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.35), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 8px 20px -6px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 22px 50px -12px rgb(0 0 0 / 0.65), 0 4px 12px -4px rgb(0 0 0 / 0.35);
+
+  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239aa3aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 15 5 5 5-5'/%3E%3Cpath d='m7 9 5-5 5 5'/%3E%3C/svg%3E");
+}
+
+* {
+  scrollbar-width: thin;
+}
+::selection {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+:focus-visible {
+  outline: 2px solid var(--ring-strong);
+  outline-offset: 2px;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--button-primary);
+  color: var(--button-primary-text);
+  box-shadow:
+    var(--shadow-xs),
+    inset 0 1px 0 rgb(255 255 255 / 0.08);
+  font-family: var(--font);
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform 80ms ease;
+}
+.btn:hover {
+  border-color: transparent;
+  outline: none;
+  background: var(--button-primary-hover);
+  color: var(--button-primary-text);
+  box-shadow:
+    var(--shadow-sm),
+    inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+.btn:active {
+  transform: scale(0.98);
+}
+.btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+.btn-outline,
+.btn.ghost {
+  background: var(--surface);
+  border-color: var(--input);
+  color: var(--ink);
+  box-shadow: var(--shadow-xs);
+}
+.btn-outline:hover,
+.btn.ghost:hover {
+  background: var(--surface-muted);
+  border-color: var(--input);
+  color: var(--ink);
+  box-shadow: var(--shadow-xs);
+}
+.btn.ghost {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+.btn.ghost:hover {
+  border-color: transparent;
+  box-shadow: none;
+}
+.btn-secondary {
+  background: var(--button-secondary);
+  color: var(--ink);
+  box-shadow: none;
+}
+.btn-secondary:hover {
+  background: var(--button-secondary-hover);
+  color: var(--ink);
+  box-shadow: none;
+}
+/* The terracotta call to action is the brand moment; use it sparingly. */
+.btn-coral,
+.btn-accent {
+  background: var(--primary);
+  border-color: transparent;
+  color: var(--primary-text);
+}
+.btn-coral:hover,
+.btn-accent:hover {
+  background: var(--primary-hover);
+  color: var(--primary-text);
+}
+.btn.danger-button {
+  background: var(--danger);
+  color: #fff;
+}
+.btn.danger-button:hover {
+  background: color-mix(in srgb, var(--danger) 88%, #000);
+  color: #fff;
+}
+:root[data-theme='dark'] .btn.danger-button:not(.btn-outline, .ghost) {
+  color: #1a0f0d;
+}
+.btn.btn-outline.danger-button,
+.btn.ghost.danger-button {
+  background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+  border-color: color-mix(in srgb, var(--danger) 30%, var(--input));
+  color: var(--danger);
+}
+.btn.btn-outline.danger-button:hover,
+.btn.ghost.danger-button:hover {
+  background: color-mix(in srgb, var(--danger) 14%, var(--surface));
+  color: var(--danger);
+}
+.btn-sm {
+  height: 28px;
+  min-height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+.btn-lg {
+  height: 38px;
+  min-height: 38px;
+  padding: 0 16px;
+  font-size: 13px;
+}
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  opacity: 0.5;
+  box-shadow: none;
+}
+.btn:focus-visible {
+  outline: none;
+  border-color: var(--ring-strong);
+  box-shadow:
+    var(--shadow-xs),
+    0 0 0 3px var(--ring);
+}
+
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background-color var(--dur-fast) ease,
+    color var(--dur-fast) ease;
+}
+.icon-button:hover {
+  border-color: transparent;
+  outline: none;
+  background: var(--surface-muted);
+  color: var(--ink);
+}
+.icon-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ring);
+  border-color: var(--ring-strong);
+}
+
+button:not([class]) {
+  padding: 6px 12px;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-xs);
+  font-size: 12.5px;
+  font-weight: 500;
+  transition:
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease;
+}
+button:not([class]):hover {
+  border-color: var(--input);
+}
+
+/* ─── Form fields ────────────────────────────────────────────────────────── */
+label {
+  font-family: var(--font);
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+label:has(input[type='checkbox'], input[type='radio']) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ink);
+}
+input:not(
+  [type='checkbox'],
+  [type='radio'],
+  [type='range'],
+  [type='color'],
+  [type='file'],
+  [type='hidden']
+),
+select,
+textarea {
+  padding: 7px 11px;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-xs);
+  font-size: 13px;
+  line-height: 1.45;
+  transition:
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    background-color var(--dur-fast) ease;
+}
+input:not(
+  [type='checkbox'],
+  [type='radio'],
+  [type='range'],
+  [type='color'],
+  [type='file'],
+  [type='hidden']
+),
+select {
+  min-height: 34px;
+}
+:root[data-theme='dark']
+  :is(
+    input:not(
+      [type='checkbox'],
+      [type='radio'],
+      [type='range'],
+      [type='color'],
+      [type='file'],
+      [type='hidden']
+    ),
+    select,
+    textarea
+  ) {
+  background: color-mix(in srgb, var(--surface-muted) 55%, var(--surface));
+}
+input:not(
+    [type='checkbox'],
+    [type='radio'],
+    [type='range'],
+    [type='color'],
+    [type='file'],
+    [type='hidden']
+  ):hover,
+select:hover,
+textarea:hover {
+  border-color: var(--control-border-hover);
+}
+input:not(
+    [type='checkbox'],
+    [type='radio'],
+    [type='range'],
+    [type='color'],
+    [type='file'],
+    [type='hidden']
+  ):focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--ring-strong);
+  box-shadow:
+    var(--shadow-xs),
+    0 0 0 3px var(--ring);
+}
+:is(input, select, textarea)[aria-invalid='true'] {
+  border-color: color-mix(in srgb, var(--danger) 70%, var(--input));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 16%, transparent);
+}
+:is(input, select, textarea):disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: var(--surface-muted);
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+  opacity: 0.75;
+}
+select {
+  appearance: none;
+  padding-right: 32px;
+  background-image: var(--chevron);
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  background-size: 14px;
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  appearance: none;
+  display: inline-grid;
+  place-content: center;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease;
+}
+input[type='radio'] {
+  border-radius: 50%;
+}
+input[type='checkbox']::before,
+input[type='radio']::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  scale: 0;
+  transition: scale var(--dur-fast) var(--ease-out);
+}
+input[type='checkbox']::before {
+  background: var(--button-primary-text);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
+input[type='radio']::before {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--button-primary);
+}
+input[type='checkbox']:checked {
+  background: var(--button-primary);
+  border-color: var(--button-primary);
+}
+input:is([type='checkbox'], [type='radio']):checked::before {
+  scale: 1;
+}
+input:is([type='checkbox'], [type='radio']):hover {
+  border-color: var(--control-border-hover);
+}
+input[type='checkbox']:checked:hover {
+  border-color: var(--button-primary);
+}
+input:is([type='checkbox'], [type='radio']):focus-visible {
+  outline: none;
+  border-color: var(--ring-strong);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+input:is([type='checkbox'], [type='radio']):disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── Sliding selection pill ─────────────────────────────────────────────── */
+/* Positioned by the `slider` action (src/lib/platform/slider.ts). */
+[data-slider] {
+  position: relative;
+  isolation: isolate;
+}
+[data-slider]::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  width: var(--slider-w, 0);
+  height: var(--slider-h, 0);
+  transform: translate(var(--slider-x, 0), var(--slider-y, 0));
+  border-radius: var(--slider-radius, var(--radius-md));
+  background: var(--slider-bg, var(--tab-active));
+  box-shadow: var(--slider-shadow, var(--shadow-sm));
+  pointer-events: none;
+}
+[data-slider-ready]::before {
+  transition:
+    transform var(--dur) var(--ease-out),
+    width var(--dur) var(--ease-out),
+    height var(--dur) var(--ease-out);
+}
+
+/* ─── Badges, cards, and surfaces ───────────────────────────────────────── */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 1.5;
+  letter-spacing: 0.03em;
+}
+.card,
+.project-card,
+.workspace-shortcut,
+.profile-section {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+}
+.project-card,
+.workspace-shortcut {
+  transition:
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur) ease,
+    transform var(--dur) var(--ease-out);
+}
+.project-card:hover,
+.workspace-shortcut:hover {
+  outline: none;
+  background: var(--surface) !important;
+  border-color: var(--control-border-hover);
+  box-shadow: var(--shadow-md);
+}
+.list-strip {
+  transition: background-color var(--dur-fast) ease;
+}
+.list-strip:hover {
+  outline: none;
+}
+kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 1;
+}
+
+/* ─── Alerts ─────────────────────────────────────────────────────────────── */
+.error,
+:root[data-theme='dark'] .error {
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--danger) 28%, transparent);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--danger) 7%, var(--surface));
+  color: var(--danger);
+  font-size: 13px;
+}
+.notice {
+  border-color: var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface-muted);
+}
+
+/* ─── Tables ─────────────────────────────────────────────────────────────── */
+th,
+td {
+  padding: 10px 12px;
+  border-bottom-color: var(--line);
+}
+th {
+  height: 38px;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+tbody tr {
+  transition: background-color var(--dur-fast) ease;
+}
+tbody tr:hover {
+  background: color-mix(in srgb, var(--surface-muted) 55%, transparent);
+}
+
+/* ─── Overlays ───────────────────────────────────────────────────────────── */
+/* Popovers and dialogs zoom in from 96% without overshoot. */
+:where(dialog, [popover]) {
+  opacity: 0;
+  scale: 0.96;
+  translate: 0 -2px;
+  transition:
+    opacity var(--dur-fast) ease-out,
+    scale var(--dur) var(--ease-out),
+    translate var(--dur) var(--ease-out),
+    display var(--dur) allow-discrete,
+    overlay var(--dur) allow-discrete;
+}
+:where(dialog) {
+  translate: 0 0;
+}
+:where(dialog[open], [popover]:popover-open) {
+  opacity: 1;
+  scale: 1;
+  translate: 0 0;
+}
+:where(dialog)::backdrop {
+  background: rgb(12 13 15 / 0.42);
+  backdrop-filter: blur(2px);
+  transition:
+    opacity var(--dur) ease-out,
+    display var(--dur) allow-discrete,
+    overlay var(--dur) allow-discrete;
+}
+@starting-style {
+  :where(dialog[open], [popover]:popover-open) {
+    opacity: 0;
+    scale: 0.96;
+  }
+  :where([popover]:popover-open) {
+    translate: 0 -2px;
+  }
+  :where(dialog[open])::backdrop {
+    opacity: 0;
+  }
+}
+
+/* ─── Activation screen ──────────────────────────────────────────────────── */
+.pending-screen {
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--line) 60%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--line) 60%, transparent) 1px, transparent 1px);
+}
+.pending-card {
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(dialog, [popover]),
+  :where(dialog)::backdrop,
+  input[type='checkbox']::before,
+  input[type='radio']::before,
+  [data-slider]::before {
+    transition: none;
+  }
+}

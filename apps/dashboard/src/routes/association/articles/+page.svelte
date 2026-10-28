@@ -9,7 +9,6 @@
 <ArticlesView
   workspace="association"
   projectSlug=""
-  projectId=""
   articles={data.articles}
   {language}
   canCreate={data.canCreate}

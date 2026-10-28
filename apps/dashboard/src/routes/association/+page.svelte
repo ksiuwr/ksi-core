@@ -12,4 +12,10 @@
   access={data.projectAccess}
   {language}
   websiteOrigin={data.websiteOrigin}
+  board={data.board}
+  items={data.items}
+  threads={data.threads}
+  threadCount={data.threadCount}
+  members={data.members}
+  articleCount={data.articleCount}
 />

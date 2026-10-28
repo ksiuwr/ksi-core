@@ -6,7 +6,10 @@ import {
   tabFromPath,
   taskPath,
   threadPath,
-  articlePath
+  articlePath,
+  newTaskPath,
+  newThreadPath,
+  newArticlePath
 } from './navigation';
 describe('dashboard routes', () => {
   test('project tools keep the same project after a refresh', () => {
@@ -103,6 +106,20 @@ test('task pages use dedicated routes for projects and the association', () => {
     tab: 'board'
   });
   expect(parseDashboardPath('/projects/roboty/tasks')).toBeNull();
+});
+
+test('creation pages stay inside their workspace', () => {
+  expect(newTaskPath('project', 'roboty ksi', 'in progress')).toBe(
+    '/projects/roboty%20ksi/tasks/new?status=in%20progress'
+  );
+  expect(newTaskPath('association', '')).toBe('/association/tasks/new');
+  expect(newThreadPath('project', 'roboty')).toBe('/projects/roboty/forum/new');
+  expect(newThreadPath('association', '')).toBe('/association/forum/new');
+  expect(newArticlePath('project', 'roboty')).toBe('/projects/roboty/articles/new');
+  expect(newArticlePath('association', '')).toBe('/association/articles/new');
+  expect(tabFromPath('/projects/roboty/tasks/new')).toBe('board');
+  expect(tabFromPath('/projects/roboty/forum/new')).toBe('forum');
+  expect(tabFromPath('/projects/roboty/articles/new')).toBe('articles');
 });
 
 test('member detail URLs preserve the selected person', () => {

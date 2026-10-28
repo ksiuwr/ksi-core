@@ -9,6 +9,7 @@
   import ThreadAside from '$lib/ThreadAside.svelte';
   import DetailLayout from '$lib/DetailLayout.svelte';
   import { api, errorMessage } from '$lib/api';
+  import { TIMELINE_CHUNK, TIMELINE_INITIAL, TIMELINE_TAIL } from '$lib/timeline';
   import { dashboardPath, type Workspace } from '$lib/navigation';
   import type { AssignmentMember, Comment, Thread, ThreadEvent } from '$lib/types';
   import { MessagesSquare, Pencil, RotateCcw, Trash2 } from '@lucide/svelte';
@@ -39,15 +40,13 @@
     refresh: () => Promise<void>;
   } = $props();
 
-  const TIMELINE_TAIL = 2;
-  const TIMELINE_CHUNK = 5;
   const DATE_LOCALES = { pl: 'pl-PL', en: 'en-GB' } as const;
   const dateLocale = $derived(DATE_LOCALES[language]);
 
   let busy = $state(false);
   let error = $state('');
   let reply = $state('');
-  let timelineHead = $state(1);
+  let timelineHead = $state(TIMELINE_INITIAL);
   let nextPage = $state<number | null>(untrack(() => eventsNextPage));
   let allEvents = $state<ThreadEvent[]>(untrack(() => events));
   let activityLoading = $state(false);
@@ -141,7 +140,7 @@
 
   $effect(() => {
     void thread.id;
-    timelineHead = 1;
+    timelineHead = TIMELINE_INITIAL;
     editingCommentId = null;
     reply = '';
     nextPage = eventsNextPage;

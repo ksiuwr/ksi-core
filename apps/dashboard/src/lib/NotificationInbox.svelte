@@ -569,10 +569,8 @@
     color: var(--ink);
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 10px;
-    box-shadow:
-      0 8px 28px #0002,
-      0 0 0 1px #00000004;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
     font-family: var(--font);
     font-size: 13px;
     line-height: 1.5;
@@ -583,8 +581,8 @@
     position: static;
     z-index: auto;
     width: 100%;
-    border-radius: 4px;
-    box-shadow: none;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xs);
   }
   .full-page .entry-title {
     display: block;
@@ -631,7 +629,7 @@
     height: 30px;
     padding: 0;
     border: 0;
-    border-radius: 5px;
+    border-radius: var(--radius-md);
     color: var(--muted);
     background: transparent;
     cursor: pointer;
@@ -804,7 +802,7 @@
   .approval-avatar {
     width: 28px;
     height: 28px;
-    border-radius: 5px;
+    border-radius: var(--radius-md);
     object-fit: cover;
     margin-bottom: 4px;
   }

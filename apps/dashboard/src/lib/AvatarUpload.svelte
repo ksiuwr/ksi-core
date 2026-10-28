@@ -146,7 +146,7 @@
     width: 100%;
     padding: 20px 12px;
     border: 1px dashed var(--line);
-    border-radius: 3px;
+    border-radius: var(--radius-lg);
     color: var(--muted);
     background: transparent;
     text-align: left;
@@ -178,7 +178,7 @@
     width: 60px;
     height: 60px;
     object-fit: cover;
-    border-radius: 4px;
+    border-radius: var(--radius-md);
     border: 1px solid var(--line);
   }
   .avatar-pending strong {
