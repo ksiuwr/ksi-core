@@ -27,7 +27,8 @@
     leading,
     panelContent,
     footer,
-    indicator
+    indicator,
+    valueContent
   }: {
     value?: string;
     options: DropdownOption[];
@@ -44,6 +45,8 @@
     panelContent?: Snippet<[close: () => void]>;
     footer?: Snippet<[close: () => void]>;
     indicator?: string;
+    /** Custom selection summary inside the normal dropdown trigger. */
+    valueContent?: Snippet;
   } = $props();
   const uid = $props.id();
   const listId = `${uid}-list`;
@@ -249,7 +252,10 @@
   >
     {#if leading}<span class="dropdown-leading">{@render leading()}</span>{/if}
     {#if selected?.color}<span class="color-dot" style:background={selected.color}></span>{/if}<span
-      class="dropdown-value">{selected?.label || placeholder || label}</span
+      class="dropdown-value"
+      >{#if valueContent}{@render valueContent()}{:else}{selected?.label ||
+          placeholder ||
+          label}{/if}</span
     >
     {#if indicator}<span
         class="notification-dot"

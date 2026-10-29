@@ -13,6 +13,7 @@ import type {
   Thread,
   ThreadEvent
 } from '../types';
+import type { TaskInvolvement } from '../task-filters';
 
 type JsonInit = Omit<RequestInit, 'body'> & { body?: unknown };
 
@@ -90,6 +91,17 @@ export async function getBoardItems(
   return platform<Item[]>(
     event,
     `/platform/boards/${encodeURIComponent(boardId)}/items?graveyard=${graveyard}`
+  );
+}
+
+/** Optional: the board still filters by assignee and author when this is unavailable. */
+export async function getBoardInvolvement(
+  event: RequestEvent,
+  boardId: string
+): Promise<TaskInvolvement | null> {
+  return optionalPlatform<TaskInvolvement>(
+    event,
+    `/platform/boards/${encodeURIComponent(boardId)}/involvement`
   );
 }
 

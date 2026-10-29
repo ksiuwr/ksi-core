@@ -1,8 +1,21 @@
 <script lang="ts">
   import { preferences } from '$lib/preferences.svelte';
+  import { goto } from '$app/navigation';
+  import { page } from '$app/state';
   import { formatDateTime } from 'shared/format';
-  import { tick } from 'svelte';
+  import { onMount, tick, untrack } from 'svelte';
   import Assignees, { type AssignmentMember } from './Assignees.svelte';
+  import KanbanFilters from './KanbanFilters.svelte';
+  import {
+    deadlineUrgency,
+    filterTasks,
+    involvedTaskIds,
+    parseTaskFilters,
+    renameFilterLabel,
+    writeTaskFilters,
+    type TaskFilters,
+    type TaskInvolvement
+  } from './task-filters';
   import { statusColor as colorForStatus } from './status-color';
   import { flip } from 'svelte/animate';
   import { prefersReducedMotion } from 'svelte/motion';
@@ -14,10 +27,8 @@
     Save,
     GripVertical,
     Settings2,
-    CalendarClock,
-    Users
+    CalendarClock
   } from '@lucide/svelte';
-  import Dropdown, { type DropdownOption } from '@ksi-core/ui/platform/Dropdown.svelte';
   import MarkdownContent from '@ksi-core/ui/platform/MarkdownContent.svelte';
   export type BoardStatus = { id: string; name: string; color?: string; deleted?: boolean };
   export type BoardLabel = { name: string; color?: string; description?: string };
@@ -38,6 +49,7 @@
   };
   let {
     items,
+    involvement = null,
     statuses,
     boardLabels = [],
     boardId,
@@ -50,6 +62,7 @@
     reportError
   }: {
     items: Item[];
+    involvement?: TaskInvolvement | null;
     statuses: BoardStatus[];
     boardLabels?: (string | BoardLabel)[];
     boardId: string;
@@ -87,7 +100,6 @@
     new Map(normalizedLabels.map((label) => [label.name, label]))
   );
 
-  let selectedLabel = $state<string>('');
   let labelDialog = $state<HTMLDialogElement>();
   let labelDraftName = $state('');
   let labelDraftColor = $state('#6b7280');
@@ -99,7 +111,6 @@
 
   $effect(() => {
     void boardId;
-    selectedLabel = '';
     managingLabels = false;
     editingLabelName = null;
     manageLabelError = '';
@@ -113,24 +124,52 @@
       return position < 0 ? item : { ...item, column: optimisticOrder!.column, position };
     })
   );
-  const visibleItems = $derived(
-    selectedLabel
-      ? displayedItems.filter((item) => item.labels.includes(selectedLabel))
-      : displayedItems
-  );
 
-  const labelFilterOptions = $derived<DropdownOption[]>([
-    {
-      value: '',
-      label: 'All labels'
-    },
-    ...normalizedLabels.map((label) => ({
-      value: label.name,
-      label: label.name,
-      color: label.color || '#6b7280',
-      description: label.description
-    }))
-  ]);
+  // Filters live in the URL so a filtered board can be shared or bookmarked. The search
+  // box filters as you type and writes the URL after a short pause.
+  const urlFilters = $derived(parseTaskFilters(page.url.searchParams));
+  let searchDraft = $state(untrack(() => urlFilters.query));
+  let writtenQuery = untrack(() => urlFilters.query);
+  let queryTimer: ReturnType<typeof setTimeout> | undefined;
+  $effect(() => {
+    const query = urlFilters.query;
+    // Adopt changes made elsewhere (navigation, history) without undoing in-progress typing.
+    if (query.trim() === writtenQuery.trim()) return;
+    clearTimeout(queryTimer);
+    writtenQuery = query;
+    searchDraft = query;
+  });
+  const filters = $derived<TaskFilters>({ ...urlFilters, query: searchDraft });
+  function applyFilters(next: TaskFilters) {
+    clearTimeout(queryTimer);
+    writtenQuery = next.query;
+    searchDraft = next.query;
+    const search = writeTaskFilters(page.url.searchParams, next).toString();
+    if (search === page.url.searchParams.toString()) return;
+    void goto(`${page.url.pathname}${search ? `?${search}` : ''}${page.url.hash}`, {
+      replaceState: true,
+      keepFocus: true,
+      noScroll: true
+    });
+  }
+  function setQuery(query: string) {
+    searchDraft = query;
+    clearTimeout(queryTimer);
+    queryTimer = setTimeout(() => applyFilters({ ...urlFilters, query }), 300);
+  }
+  // Deadline windows and overdue styling move with the clock.
+  let now = $state(Date.now());
+  onMount(() => {
+    const timer = setInterval(() => (now = Date.now()), 60_000);
+    return () => {
+      clearInterval(timer);
+      clearTimeout(queryTimer);
+    };
+  });
+  const involved = $derived(involvedTaskIds(involvement));
+  const visibleItems = $derived(
+    filterTasks(displayedItems, filters, { userId: userId ?? '', now, involved })
+  );
 
   function openLabelDialog(existing?: BoardLabel) {
     editingLabelName = existing?.name ?? null;
@@ -153,7 +192,7 @@
     if (!trimmed) return;
     const originalName = editingLabelName;
     labelFormError = '';
-    await run(async () => {
+    const saved = await run(async () => {
       const id = await ensureBoard();
       try {
         const path = `/platform/boards/${id}/labels`;
@@ -166,7 +205,6 @@
             description: labelDraftDescription.trim() || undefined
           }
         );
-        if (originalName !== null && selectedLabel === originalName) selectedLabel = trimmed;
         closeLabelDialog();
       } catch (error) {
         const code = error instanceof Error ? error.message : '';
@@ -179,15 +217,16 @@
         throw new Error(labelFormError);
       }
     });
+    if (saved && originalName !== null)
+      applyFilters(renameFilterLabel(filters, originalName, trimmed));
   }
 
   async function deleteLabel(name: string) {
     manageLabelError = '';
-    await run(async () => {
+    const deleted = await run(async () => {
       const id = await ensureBoard();
       try {
         await api(`/platform/boards/${id}/labels/${encodeURIComponent(name)}`, 'DELETE');
-        if (selectedLabel === name) selectedLabel = '';
       } catch (err: any) {
         const msg = err?.message || '';
         if (msg === 'LABEL_IN_USE') {
@@ -198,9 +237,19 @@
         throw err;
       }
     });
+    if (deleted) applyFilters(renameFilterLabel(filters, name, null));
   }
   let members = $state<AssignmentMember[]>([]);
   const formatTaskDateTime = (iso: string) => formatDateTime(iso, language);
+  // Cards show a short deadline; the full date and time is in the tooltip.
+  const formatShortDue = (iso: string) =>
+    formatDateTime(iso, language, {
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      ...(new Date(iso).getFullYear() === new Date(now).getFullYear() ? {} : { year: 'numeric' })
+    });
   $effect(() => {
     const controller = new AbortController();
     const path = projectId ? `/projects/${encodeURIComponent(projectId)}/members` : '/members';
@@ -363,15 +412,17 @@
     if (!response.ok) throw new Error(result?.code ?? result?.message ?? 'Request failed.');
     return result;
   }
-  async function run(work: () => Promise<void>) {
-    if (busy) return;
+  async function run(work: () => Promise<void>): Promise<boolean> {
+    if (busy) return false;
     busy = true;
     reportError('');
     try {
       await work();
       await refresh();
+      return true;
     } catch (error) {
       reportError(error instanceof Error ? error.message : 'Request failed');
+      return false;
     } finally {
       busy = false;
     }
@@ -556,33 +607,18 @@
   }}
 />
 
-<div class="board-toolbar">
-  <div class="board-filters">
-    <div class="label-filter-container">
-      <Dropdown
-        label={'Filter by label'}
-        placeholder={'Filter by label'}
-        bind:value={selectedLabel}
-        options={labelFilterOptions}
-        searchable={true}
-        searchPlaceholder={'Search labels…'}
-        panelContent={canManage && managingLabels ? labelManagement : undefined}
-        footer={canManage ? labelActions : undefined}
-      />
-      {#if selectedLabel}
-        <button
-          type="button"
-          class="btn-clear-filter"
-          onclick={() => (selectedLabel = '')}
-          title={'Clear label filter'}
-          aria-label={'Clear filter'}
-        >
-          <X size={14} aria-hidden="true" />
-        </button>
-      {/if}
-    </div>
-  </div>
-</div>
+<KanbanFilters
+  {filters}
+  {members}
+  labels={normalizedLabels}
+  {userId}
+  visibleCount={visibleItems.length}
+  totalCount={items.length}
+  onchange={applyFilters}
+  onquery={setQuery}
+  labelManagement={canManage && managingLabels ? labelManagement : undefined}
+  labelActions={canManage ? labelActions : undefined}
+/>
 
 {#snippet labelActions(close: () => void)}
   <div class="label-dropdown-actions">
@@ -593,7 +629,7 @@
       onclick={() => (managingLabels = !managingLabels)}
     >
       <Settings2 size={15} aria-hidden="true" />
-      {managingLabels ? 'Filter by label' : 'Manage labels'}
+      {#if managingLabels}Filter by label{:else}Manage labels{/if}
     </button>
     <button
       type="button"
@@ -797,19 +833,27 @@
                 {/each}
               </div>{/if}
             {#if item.dueAt || item.assigneeIds?.length}<div class="task-meta">
-                {#if item.dueAt}<div
-                    class="task-meta-row"
-                    class:overdue={new Date(item.dueAt).getTime() < Date.now() &&
-                      item.column !== 'done'}
-                    title={'Due'}
+                {#if item.dueAt}{@const urgency = deadlineUrgency(item, now)}<span
+                    class="task-due"
+                    class:overdue={urgency === 'overdue'}
+                    class:due-soon={urgency === 'soon'}
+                    title={formatTaskDateTime(item.dueAt)}
                   >
                     <CalendarClock size={13} aria-hidden="true" />
-                    <time datetime={item.dueAt}>{formatTaskDateTime(item.dueAt)}</time>
-                  </div>{/if}
-                {#if item.assigneeIds?.length}<div class="task-meta-row" title={'Assigned to'}>
-                    <Users size={13} aria-hidden="true" />
-                    <Assignees value={item.assigneeIds} {members} readonly showLabel={false} />
-                  </div>{/if}
+                    {#if urgency === 'overdue'}<span class="sr-only">Overdue</span>{:else}<span
+                        class="sr-only">Due</span
+                      >{/if}
+                    <time datetime={item.dueAt}>{formatShortDue(item.dueAt)}</time>
+                  </span>{/if}
+                {#if item.assigneeIds?.length}<span class="task-assignees" title={'Assigned to'}>
+                    <Assignees
+                      value={item.assigneeIds}
+                      {members}
+                      readonly
+                      showLabel={false}
+                      stacked={item.assigneeIds.length > 1}
+                    />
+                  </span>{/if}
               </div>{/if}
           </a>
         {/each}
@@ -1028,45 +1072,6 @@
   </dialog>{/if}
 
 <style>
-  .board-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-  }
-  .board-filters {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .label-filter-container {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    min-width: 220px;
-  }
-  .label-filter-container :global(.dropdown) {
-    min-width: 200px;
-    margin: 0;
-  }
-  .btn-clear-filter {
-    background: transparent;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-    padding: 6px;
-    border-radius: var(--radius-md);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .btn-clear-filter:hover {
-    color: var(--ink);
-    background: var(--surface-muted);
-  }
   .label-dropdown-actions {
     display: grid;
     gap: 2px;
@@ -1315,8 +1320,9 @@
     border: 1px solid var(--line);
     cursor: grab;
     display: grid;
-    gap: 9px;
+    gap: 7px;
     margin-bottom: 8px;
+    padding: 10px 11px;
     transition:
       translate 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
       opacity 120ms ease,
@@ -1355,6 +1361,12 @@
     font-size: 13.5px;
     font-weight: 500;
     line-height: 1.4;
+    /* Long titles stay readable without stretching the column. */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
   }
   .task-title :global(svg) {
     color: var(--muted);
@@ -1364,14 +1376,18 @@
   .task-card:hover .task-title :global(svg) {
     opacity: 1;
   }
+  /* A short text teaser: at most three lines, fading out, without media. */
   .kanban-markdown-preview {
     font-size: 12px;
     color: var(--muted);
     line-height: 1.5;
-    max-height: 100px;
+    max-height: 4.5em;
     overflow: hidden;
-    mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  }
+  .kanban-markdown-preview :global(:is(img, .gallery, pre, table, hr)) {
+    display: none;
   }
   .kanban-markdown-preview :global(h1),
   .kanban-markdown-preview :global(h2),
@@ -1394,12 +1410,6 @@
     font-size: inherit;
     font-weight: 600;
     line-height: inherit;
-  }
-  .kanban-markdown-preview :global(img) {
-    max-height: 60px;
-    width: auto;
-    border-radius: 4px;
-    margin: 4px 0;
   }
   .task-labels {
     display: flex;
@@ -1534,31 +1544,43 @@
     font-size: 11px;
     line-height: 1.4;
   }
+  /* One footer row: deadline on the left, assignees on the right. */
   .task-meta {
-    display: grid;
-    gap: 6px;
-    padding-top: 10px;
-    border-top: 1px solid var(--line);
-    color: var(--muted);
-    font-size: 12px;
-  }
-  .task-meta-row {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 6px;
-    min-width: 0;
+    justify-content: space-between;
+    gap: 4px 10px;
+    padding-top: 7px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 11.5px;
   }
-  .task-meta-row :global(svg) {
+  .task-due {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    white-space: nowrap;
+  }
+  .task-due :global(svg) {
     flex-shrink: 0;
-    color: currentColor;
     opacity: 0.75;
   }
-  .task-meta-row time {
+  .task-due time {
     color: inherit;
+  }
+  .task-assignees {
+    display: flex;
+    min-width: 0;
+    margin-left: auto;
   }
   .overdue {
     color: var(--danger);
+    font-weight: 600;
+  }
+  .due-soon {
+    color: color-mix(in srgb, #d58a32 82%, var(--ink));
     font-weight: 600;
   }
 </style>
