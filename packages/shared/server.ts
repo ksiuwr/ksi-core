@@ -1,10 +1,12 @@
 import { getUrls, type RuntimeEnvironment } from './index';
+import { forwardClientContext, type ClientContext } from './client-context';
 import { randomBytes, createHash } from 'node:crypto';
 export const sessionCookie = (env: RuntimeEnvironment) =>
   env.NODE_ENV === 'production' ? '__Host-ksi-session' : 'ksi-session';
 export interface ProxyEvent {
   request: Request;
   url: URL;
+  getClientAddress?(): string;
   cookies: {
     get(name: string): string | undefined;
     set(
@@ -21,6 +23,17 @@ export interface ProxyEvent {
     ): void;
     delete(name: string, opts: { path: string }): void;
   };
+}
+// The browser behind a frontend request; without it the backend records this
+// server's runtime instead.
+function clientContext(event: ProxyEvent): ClientContext {
+  let ip: string | null = null;
+  try {
+    ip = event.getClientAddress?.() ?? null;
+  } catch {
+    // The adapter cannot resolve the address (for example a missing ADDRESS_HEADER).
+  }
+  return { userAgent: event.request.headers.get('user-agent'), ip };
 }
 export async function proxy(
   event: ProxyEvent,
@@ -47,6 +60,7 @@ export async function proxy(
   }
   headers.set('x-ksi-proxy-key', env.PROXY_SECRET);
   headers.set('x-ksi-origin', expected);
+  forwardClientContext(headers, clientContext(event));
   const token = event.cookies.get(sessionCookie(env));
   if (token) headers.set('x-ksi-session', token);
   if (role === 'auth') headers.set('cookie', event.request.headers.get('cookie') ?? '');
@@ -80,6 +94,7 @@ export async function backendFetch(
   const headers = new Headers(options.headers);
   headers.set('x-ksi-proxy-key', env.PROXY_SECRET ?? '');
   headers.set('x-ksi-origin', event.url.origin);
+  forwardClientContext(headers, clientContext(event));
   const token = event.cookies.get(sessionCookie(env));
   if (token) headers.set('x-ksi-session', token);
   return fetch(`${urls.internalBackend}${path}`, { ...options, headers });

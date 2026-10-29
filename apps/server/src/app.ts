@@ -15,6 +15,7 @@ import { filesRoutes } from './routes/platform/files';
 import { realtimeRoutes } from './lib/realtime';
 import { createElysia } from './lib/createElysia';
 import { getUrls } from 'shared';
+import { trustedClientHeaders } from 'shared/client-context';
 import { previewCredentialRoutes } from './routes/platform/previews';
 export const app = new Elysia()
   .onError(({ error, set }) => {
@@ -63,7 +64,9 @@ export const app = new Elysia()
       request.headers.get('x-ksi-origin') !== getUrls().frontend.auth
     )
       throw status(403, { code: 'AUTH_PROXY_REQUIRED' });
-    return auth.handler(request);
+    // Better Auth stores a new session's user agent and IP from these headers. Record
+    // the browser the trusted auth proxy forwarded, not the proxy runtime itself.
+    return auth.handler(new Request(request, { headers: trustedClientHeaders(request.headers) }));
   })
   .use(ssoRoutes)
   .use(approvalRoutes)
