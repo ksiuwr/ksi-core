@@ -364,6 +364,19 @@
     position: relative;
     overflow-wrap: anywhere;
   }
+  /* A blank line starts a new block, so separate blocks by a little less than a line.
+     Typography (prose) containers keep their own rhythm. */
+  .markdown:not(:global(:where(.prose *)))
+    :global(:where(p, ul, ol, blockquote, pre, table, hr, h1, h2, h3, h4, h5, h6)) {
+    margin-block: 0;
+  }
+  .markdown:not(:global(:where(.prose *)))
+    :global(:where(*) + :where(p, ul, ol, blockquote, pre, table, hr, .gallery)) {
+    margin-top: 0.75em;
+  }
+  .markdown:not(:global(:where(.prose *))) :global(:where(*) + :where(h1, h2, h3, h4, h5, h6)) {
+    margin-top: 1.25em;
+  }
   .markdown :global(.reference-link) {
     color: var(--accent, #a33d29);
     text-decoration: none;
