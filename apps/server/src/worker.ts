@@ -6,6 +6,7 @@ import { db, files, fileReferences, mailJobs, outbox, authHandoffs, frontendSess
 import { canDeleteFile } from './domain/projects';
 import {
   deleteObject,
+  mailFailure,
   mailRetryDelay,
   publishObject,
   storageEnvironment,
@@ -23,7 +24,7 @@ function mailTransport() {
     port < 1 ||
     port > 65535
   )
-    throw new Error('SMTP_NOT_CONFIGURED');
+    throw Object.assign(new Error('SMTP_NOT_CONFIGURED'), { code: 'SMTP_NOT_CONFIGURED' });
   return nodemailer.createTransport({
     host: Bun.env.SMTP_HOST,
     port,
@@ -68,7 +69,7 @@ export async function deliverMailBatch(limit = 20) {
           .set({ sentAt: new Date(), body: '', attempts: job.attempts + 1 })
           .where(eq(mailJobs.id, job.id));
         sent++;
-      } catch {
+      } catch (error) {
         const attempts = job.attempts + 1;
         await tx
           .update(mailJobs)
@@ -79,7 +80,8 @@ export async function deliverMailBatch(limit = 20) {
             service: 'mail',
             code: attempts >= 12 ? 'MAIL_EXHAUSTED' : 'MAIL_RETRY',
             jobId: job.id,
-            attempts
+            attempts,
+            ...mailFailure(error)
           })
         );
       }
@@ -189,6 +191,14 @@ if (import.meta.main) {
   process.on('SIGINT', () => {
     stopping = true;
   });
+  // Confirms the worker is running and sees SMTP settings, without logging their values.
+  console.log(
+    JSON.stringify({
+      service: 'maintenance',
+      code: 'WORKER_STARTED',
+      smtpConfigured: Boolean(Bun.env.SMTP_HOST && Bun.env.SMTP_FROM)
+    })
+  );
   while (!stopping) {
     try {
       await maintenanceTick();

@@ -244,6 +244,14 @@ export function referencedFileIds(content: string): string[] {
 export function mailRetryDelay(attempt: number): number {
   return Math.min(60 * 60 * 1000, 30_000 * 2 ** Math.max(0, Math.min(attempt - 1, 10)));
 }
+/** Only error codes and SMTP statuses are logged; messages can echo addresses or credentials. */
+export function mailFailure(error: unknown): { reason: string; smtpStatus?: number } {
+  const { code, responseCode } = (error ?? {}) as { code?: unknown; responseCode?: unknown };
+  return {
+    reason: typeof code === 'string' && /^[A-Z_]{1,40}$/.test(code) ? code : 'UNKNOWN',
+    ...(typeof responseCode === 'number' ? { smtpStatus: responseCode } : {})
+  };
+}
 
 export async function uploadEncryptedBackup(path: string) {
   const { client, privateBucket } = configuration();

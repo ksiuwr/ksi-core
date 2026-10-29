@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import {
   MAX_UPLOAD_BYTES,
+  mailFailure,
   mailRetryDelay,
   objectKey,
   referencedFileIds,
@@ -72,5 +73,18 @@ describe('mail retry policy', () => {
     expect(mailRetryDelay(2)).toBe(60_000);
     expect(mailRetryDelay(50)).toBe(3_600_000);
     expect(mailRetryDelay(0)).toBe(30_000);
+  });
+  test('reports SMTP failure codes without error messages', () => {
+    const rejected = Object.assign(new Error('535 Invalid API key for user@example.test'), {
+      code: 'EAUTH',
+      responseCode: 535
+    });
+    expect(mailFailure(rejected)).toEqual({ reason: 'EAUTH', smtpStatus: 535 });
+    expect(mailFailure(Object.assign(new Error(), { code: 'SMTP_NOT_CONFIGURED' }))).toEqual({
+      reason: 'SMTP_NOT_CONFIGURED'
+    });
+    expect(mailFailure(new Error('secret'))).toEqual({ reason: 'UNKNOWN' });
+    expect(mailFailure({ code: 'user@example.test' })).toEqual({ reason: 'UNKNOWN' });
+    expect(mailFailure(null)).toEqual({ reason: 'UNKNOWN' });
   });
 });
