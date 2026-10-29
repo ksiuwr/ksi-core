@@ -924,6 +924,7 @@ msgid "Thread"
 msgstr "Wątek"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
+#: ../../packages/ui/src/lib/platform/MarkdownContent.svelte
 msgid "No description."
 msgstr "Brak opisu."
 

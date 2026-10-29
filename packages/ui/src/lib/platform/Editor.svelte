@@ -11,6 +11,8 @@
   import { markdownImages } from 'shared/markdown-images';
   import { resizeMarkdownImage } from 'shared/markdown-images';
   import MarkdownContent from './MarkdownContent.svelte';
+  import { page } from '$app/state';
+  import { referenceScopeForPath } from 'shared/markdown-references';
   import { Eye, Pencil, Images, Paperclip, LoaderCircle, ChevronDown } from '@lucide/svelte';
   let {
     value = $bindable(''),
@@ -192,10 +194,7 @@
 
   function currentReferenceScope() {
     if (referenceScope) return referenceScope;
-    if (typeof window === 'undefined') return '~association';
-    return decodeURIComponent(
-      window.location.pathname.match(/^\/projects\/([^/]+)/)?.[1] ?? '~association'
-    );
+    return referenceScopeForPath(page.url.pathname);
   }
 
   async function searchUsers(q: string) {
@@ -373,6 +372,7 @@
       <MarkdownContent
         {value}
         {allowReferences}
+        {referenceScope}
         onresize={(index, width) => (value = resizeMarkdownImage(value, index, width))}
       />
     </div>

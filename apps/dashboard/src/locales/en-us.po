@@ -2049,6 +2049,7 @@ msgid "Due"
 msgstr "Due"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
+#: ../../packages/ui/src/lib/platform/MarkdownContent.svelte
 #: src/lib/views/TaskView.svelte
 msgid "No description."
 msgstr "No description."

@@ -39,7 +39,7 @@ export const app = new Elysia()
       '/markdown',
       ({ body, user }) => {
         active(user);
-        return renderMarkdown(body.markdown, body.referenceScope);
+        return renderMarkdown(body.markdown, { referenceScope: body.referenceScope });
       },
       {
         body: t.Object({
