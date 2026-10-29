@@ -1,6 +1,6 @@
 {
   "name": "ksi-core",
-  "version": "2026.10.21",
+  "version": "2026.10.22",
   "workspaces": [
     "packages/*",
     "apps/*"
