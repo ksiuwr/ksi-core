@@ -275,7 +275,12 @@ describe.skipIf(!safe)('association alert scheduling and permissions', () => {
       unknown
     >;
     expect(removed).toMatchObject({ title: row.title, translations: {}, version: 4 });
-    const events = await db.select().from(auditEvents).where(eq(auditEvents.targetId, row.id));
+    // Without an order Postgres may return rows in any order, so `find` needs one.
+    const events = await db
+      .select()
+      .from(auditEvents)
+      .where(eq(auditEvents.targetId, row.id))
+      .orderBy(auditEvents.createdAt, auditEvents.id);
     expect(events.filter((event) => event.action === 'alerts.translation.updated')).toHaveLength(3);
     expect(
       events.find((event) => event.action === 'alerts.translation.updated')?.metadata
