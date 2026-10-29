@@ -242,7 +242,7 @@ jobs:
             '{audience:$audience,branch:$branch,commit:$commit,previewUrl:$previewUrl,accounts:["anna@example.test","jan@example.test","ewa@example.test"] | map({email:.,password:$password})}')
           curl --fail --silent --show-error --output /dev/null \
             -H "Authorization: Bearer $token" -H 'Content-Type: application/json' \
-            --data "$payload" "$API_ORIGIN/internal/projects/$PROJECT_SLUG/previews/$SLUG/credentials"
+            --data "$payload" "$API_ORIGIN/platform/internal/projects/$PROJECT_SLUG/previews/$SLUG/credentials"
           unset token payload KSI_SEED_PASSWORD
       - name: Publish preview URL
         env:
