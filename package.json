@@ -1,6 +1,6 @@
 {
   "name": "ksi-core",
-  "version": "2026.10.24",
+  "version": "2026.10.25",
   "workspaces": [
     "packages/*",
     "apps/*"
@@ -20,7 +20,7 @@
     "dev": "bun --env-file=.env run dev:all",
     "dev:all": "concurrently -n \"server,web,auth,dash\" -c \"bgGreen,bgBlue,bgMagenta,bgCyan\" \"bun run dev:backend\" \"bun run dev:web\" \"bun run dev:auth\" \"bun run dev:dash\"",
     "prepare": "husky",
-    "test": "bun test apps/server/src/domain apps/server/src/routes/platform/access.test.ts packages/shared apps/dashboard/src/lib/navigation.test.ts apps/dashboard/src/lib/task-filters.test.ts",
+    "test": "bun test apps/server/src/domain apps/server/src/routes/platform/access.test.ts packages/shared apps/dashboard/src/lib/navigation.test.ts apps/dashboard/src/lib/content-locale.test.ts apps/dashboard/src/lib/task-filters.test.ts",
     "check": "bun run --cwd apps/server check && bun run --cwd apps/web check && bun run --cwd apps/auth check && bun run --cwd apps/dashboard check",
     "lint": "oxlint",
     "format:check": "oxfmt --check .",

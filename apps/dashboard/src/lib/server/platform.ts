@@ -1,6 +1,7 @@
 import { error, type RequestEvent } from '@sveltejs/kit';
 import { backendFetch } from 'shared/server';
 import { env } from './environment';
+import { localizedContentPath } from '../content-locale';
 import type {
   ActivityEvent,
   Article,
@@ -68,7 +69,14 @@ export async function optionalPlatform<T>(
 }
 
 export async function getProjects(event: RequestEvent): Promise<Project[]> {
-  return platform<Project[]>(event, '/platform/public/projects');
+  return platform<Project[]>(
+    event,
+    localizedContentPath('/platform/public/projects', event.cookies.get('locale'))
+  );
+}
+
+export async function getProject(event: RequestEvent, id: string): Promise<Project> {
+  return platform<Project>(event, `/platform/projects/${encodeURIComponent(id)}`);
 }
 
 export async function getProjectAccess(event: RequestEvent, id: string): Promise<ProjectAccess> {

@@ -1,9 +1,13 @@
-import { frontendLocales, type FrontendLocale } from 'shared/content-locales';
+import {
+  defaultFrontendLocale,
+  frontendLocales,
+  type FrontendLocale
+} from 'shared/content-locales';
 import { observeTheme, setThemePreference, type ThemePreference } from './theme.js';
 export type { ThemePreference } from './theme.js';
 export const preferences = $state({
   theme: 'system' as ThemePreference,
-  language: 'pl' as FrontendLocale
+  language: defaultFrontendLocale as FrontendLocale
 });
 export function setTheme(theme: ThemePreference) {
   preferences.theme = theme;
@@ -25,7 +29,7 @@ export function initializePreferences() {
           ? 'en-us'
           : (frontendLocales as readonly string[]).includes(stored ?? '')
             ? (stored as FrontendLocale)
-            : 'pl';
+            : defaultFrontendLocale;
     } catch {}
     document.documentElement.lang = new Intl.Locale(preferences.language).toString();
   };
