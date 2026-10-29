@@ -1,6 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import { env } from '$lib/server/environment';
 import { getUrls } from 'shared';
+import { localizedContentPath } from '$lib/content-locale';
 import { optionalPlatform } from '$lib/server/platform';
 import { emptyProjectAccess, type PageInbox, type Project } from '$lib/types';
 import type { LayoutServerLoad } from './$types';
@@ -26,7 +27,12 @@ export const load: LayoutServerLoad = async (event) => {
     redirect(303, `/login?returnTo=${encodeURIComponent(url.pathname + url.search)}`);
   }
   const user = locals.user;
-  const projects = (await optionalPlatform<Project[]>(event, '/platform/public/projects')) ?? [];
+  event.depends('ksi:localized-content');
+  const projects =
+    (await optionalPlatform<Project[]>(
+      event,
+      localizedContentPath('/platform/public/projects', event.cookies.get('locale'))
+    )) ?? [];
   let inbox = emptyInbox;
   if (user.role !== 'member') {
     try {
