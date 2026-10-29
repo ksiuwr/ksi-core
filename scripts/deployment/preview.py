@@ -40,6 +40,16 @@ def resource(kind, name, spec, api="v1", labels=None):
     }
 
 
+def resources(memory_request):
+    # Previews reserve little of the node's two cores, so many fit beside production. CPU time is
+    # shared in proportion to requests, so production wins when the node is busy, and the limit
+    # keeps one preview from taking a whole core.
+    return {
+        "requests": {"cpu": "10m", "memory": memory_request},
+        "limits": {"cpu": "250m", "memory": "512Mi"},
+    }
+
+
 def job(name, image, command, slug, secret, env_from_admin=False):
     env_from = [{"secretRef": {"name": secret}}]
     if env_from_admin:
@@ -71,10 +81,7 @@ def job(name, image, command, slug, secret, env_from_admin=False):
                             "command": command,
                             "envFrom": env_from,
                             "securityContext": container_security,
-                            "resources": {
-                                "requests": {"cpu": "100m", "memory": "128Mi"},
-                                "limits": {"cpu": "500m", "memory": "512Mi"},
-                            },
+                            "resources": resources("128Mi"),
                         }
                     ],
                 },
@@ -171,7 +178,7 @@ def render(branch: str, commit: str, images: dict[str, str], output: Path) -> st
             "env": [{"name": "ORIGIN", "value": "https://" + hosts["dash" if app == "dashboard" else ("api" if app == "server" else app)]}],
             "readinessProbe": {"tcpSocket": {"port": 3000}, "initialDelaySeconds": 5},
             "livenessProbe": {"tcpSocket": {"port": 3000}, "initialDelaySeconds": 30},
-            "resources": {"requests": {"cpu": "50m", "memory": "64Mi"}, "limits": {"cpu": "500m", "memory": "512Mi"}},
+            "resources": resources("64Mi"),
             "securityContext": security,
         }
         if app == "server":
@@ -184,14 +191,13 @@ def render(branch: str, commit: str, images: dict[str, str], output: Path) -> st
             container["env"].append({"name": "BODY_SIZE_LIMIT", "value": "21M"})
         workloads.append(deployment(name, container))
         workloads.append(resource("Service", name, {"selector": {"app": name}, "ports": [{"port": 3000, "targetPort": 3000}]}, labels=labels))
-    # As in production, the background worker runs the server image and serves no traffic. Its small
-    # CPU request keeps it from reducing how many previews fit on the single node.
+    # As in production, the background worker runs the server image and serves no traffic.
     workloads.append(deployment(f"{slug}-worker", {
         "name": "worker",
         "image": images["server"],
         "command": ["bun", "apps/server/src/worker.ts"],
         "envFrom": [{"configMapRef": {"name": config_name}}, {"secretRef": {"name": secret}}],
-        "resources": {"requests": {"cpu": "10m", "memory": "64Mi"}, "limits": {"cpu": "500m", "memory": "512Mi"}},
+        "resources": resources("64Mi"),
         "securityContext": security,
     }))
     rules = []

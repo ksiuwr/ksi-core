@@ -67,6 +67,24 @@ class PreviewTest(unittest.TestCase):
             self.assertEqual(migration_security["runAsUser"], 1000)
             self.assertEqual(migration_security["runAsGroup"], 1000)
 
+    def test_every_preview_container_reserves_little_cpu(self):
+        with tempfile.TemporaryDirectory() as root:
+            output = Path(root)
+            render("feature/preview", "a" * 40, self.valid_images(), output)
+            render_cleanup("feature/preview", output / "cleanup.json")
+            pods = [
+                item["spec"]["template"]["spec"]
+                for item in json.loads((output / "workloads.json").read_text())["items"]
+                if item["kind"] == "Deployment"
+            ]
+            for name in ("provision", "migration", "seed", "cleanup"):
+                pods.append(json.loads((output / f"{name}.json").read_text())["spec"]["template"]["spec"])
+            cpu = [container["resources"]["requests"]["cpu"] for pod in pods for container in pod["containers"]]
+            limits = [container["resources"]["limits"]["cpu"] for pod in pods for container in pod["containers"]]
+            self.assertEqual(len(cpu), 9)
+            self.assertEqual(set(cpu), {"10m"})
+            self.assertEqual(set(limits), {"250m"})
+
     def test_cleanup_targets_only_the_branch_database(self):
         with tempfile.TemporaryDirectory() as root:
             output = Path(root) / "cleanup.json"

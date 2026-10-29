@@ -85,9 +85,10 @@ spec:
           readinessProbe:
             exec: { command: [pg_isready, -U, postgres] }
             initialDelaySeconds: 10
+          # Preview databases see little traffic; keep the shared node's CPU for production.
           resources:
-            requests: { cpu: 250m, memory: 256Mi }
-            limits: { cpu: '1', memory: 1Gi }
+            requests: { cpu: 50m, memory: 256Mi }
+            limits: { cpu: 500m, memory: 1Gi }
           securityContext:
             allowPrivilegeEscalation: false
             capabilities: { drop: ['ALL'] }
