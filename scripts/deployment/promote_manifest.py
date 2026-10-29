@@ -7,6 +7,8 @@ from pathlib import Path
 
 
 APPS = ("server", "web", "auth", "dashboard")
+# The worker Deployment runs the server image, so both move to the same digest together.
+REFERENCES = {"server": 2, "web": 1, "auth": 1, "dashboard": 1}
 
 
 def promote_manifest(manifest: Path, images: dict[str, str]) -> None:
@@ -27,9 +29,9 @@ def promote_manifest(manifest: Path, images: dict[str, str]) -> None:
             rf"(?::[^\s]+|@sha256:[a-f0-9]{{64}})(\s*)$"
         )
         text, replacements = pattern.subn(rf"\g<1>{image}\g<2>", text)
-        if replacements != 1:
+        if replacements != REFERENCES[app]:
             raise ValueError(
-                f"Expected one image reference for {app}, found {replacements}"
+                f"Expected {REFERENCES[app]} image references for {app}, found {replacements}"
             )
 
     manifest.write_text(text)

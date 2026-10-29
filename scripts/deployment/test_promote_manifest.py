@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from promote_manifest import APPS, promote_manifest
+from promote_manifest import APPS, REFERENCES, promote_manifest
 
 
 class PromoteManifestTest(unittest.TestCase):
@@ -13,6 +13,7 @@ class PromoteManifestTest(unittest.TestCase):
         }
 
     def manifest(self):
+        containers = [(app, app) for app in APPS] + [("worker", "server")]
         return "\n---\n".join(
             f"""apiVersion: apps/v1
 kind: Deployment
@@ -20,10 +21,10 @@ spec:
   template:
     spec:
       containers:
-      - name: {app}
+      - name: {name}
         image: ghcr.io/ksiuwr/ksi-core-{app}:old-commit
         imagePullPolicy: IfNotPresent"""
-            for app in APPS
+            for name, app in containers
         ) + "\n"
 
     def test_replaces_each_application_with_immutable_digest(self):
@@ -35,8 +36,8 @@ spec:
             promote_manifest(path, images)
 
             promoted = path.read_text()
-            for image in images.values():
-                self.assertEqual(promoted.count(image), 1)
+            for app, image in images.items():
+                self.assertEqual(promoted.count(image), REFERENCES[app])
             self.assertNotIn(":old-commit", promoted)
 
     def test_rejects_mutable_or_incomplete_images(self):
@@ -59,7 +60,14 @@ spec:
                 promote_manifest(path, self.images())
 
             path.write_text(self.manifest() + self.manifest())
-            with self.assertRaisesRegex(ValueError, "server, found 2"):
+            with self.assertRaisesRegex(ValueError, "server, found 4"):
+                promote_manifest(path, self.images())
+
+    def test_rejects_manifest_without_worker(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = Path(root) / "production-platform.yaml"
+            path.write_text(self.manifest().rsplit("\n---\n", 1)[0] + "\n")
+            with self.assertRaisesRegex(ValueError, "2 image references for server, found 1"):
                 promote_manifest(path, self.images())
 
 

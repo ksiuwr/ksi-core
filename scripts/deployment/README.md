@@ -19,8 +19,9 @@ Job, but cannot directly read Secrets or Pods or access preview resources.
 
 `promote_manifest.py` accepts exactly one server, web, auth, and dashboard image.
 It requires the expected GHCR repository and an immutable `sha256` digest for each
-image, then replaces exactly one matching reference in the production manifest.
-These checks prevent partial promotions and mutable image tags.
+image, then replaces the expected matching references in the production manifest:
+two for the server image, which the `server` and background `worker` Deployments share,
+and one for each frontend. These checks prevent partial promotions and mutable image tags.
 
 ```sh
 python3 -m unittest discover -s scripts/deployment -p 'test_*.py'
@@ -33,7 +34,7 @@ non-fast-forward push fails safely.
 After CI confirms the tested commit is still the current `master`, it runs the
 production migration Job with the new server image. On success, it rechecks `master`,
 commits the production image digests to `ksi-cluster`, applies that manifest, and
-waits for all four production Deployments to become ready. If the rollout fails, the
+waits for the four application Deployments and the worker to become ready. If the rollout fails, the
 manifest commit records the intended tested digests and the workflow reports failure;
 roll back by promoting the previous known-good image digests.
 
