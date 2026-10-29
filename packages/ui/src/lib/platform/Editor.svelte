@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { rebaseTextRange, type TextRange } from 'shared/markdown-edit';
   import { preferences } from './preferences.svelte.js';
   import { slider } from './slider.js';
   import {
@@ -82,8 +83,11 @@
   let input = $state<HTMLInputElement>();
   let galleryPicker = $state(false);
   let activeGallery = $state<number | 'draft' | null>(null);
-  let uploadTarget = $state<'content' | 'draft' | number>('content');
-  let pendingUploads = $state<{ key: number; name: string; status: 'queued' | 'uploading' }[]>([]);
+  type UploadTarget = 'content' | 'draft' | number;
+  let pendingUploads = $state<
+    { key: number; name: string; target: UploadTarget; status: 'queued' | 'uploading' }[]
+  >([]);
+  const contentUploads = $derived(pendingUploads.filter((upload) => upload.target === 'content'));
   let galleryDraft = $state<GalleryState>({ ids: [], preview: 0 });
   let uploadedImages = $state<{ id: string; name: string }[]>([]);
   const galleries = $derived(markdownGalleries(value));
@@ -118,13 +122,80 @@
     value = updateMarkdownGallery(value, index, gallery);
     if (!gallery.ids.length) activeGallery = null;
   }
+  type Insertion = TextRange & { source: string };
+  type Upload = {
+    key: number;
+    file: File;
+    target: UploadTarget;
+    insertion?: Insertion;
+  };
+  const uploadQueue: Upload[] = [];
+  const insertions = new Set<Insertion>();
+  let nextUploadKey = 0;
+
+  function trackInsertions(source: string) {
+    for (const insertion of insertions) {
+      Object.assign(insertion, rebaseTextRange(insertion.source, source, insertion), { source });
+    }
+  }
+  $effect(() => trackInsertions(value));
+
+  function insertUpload(markdown: string, insertion: Insertion) {
+    trackInsertions(value);
+    const before = value;
+    const range = { start: insertion.start, end: insertion.end };
+    const next = before.slice(0, insertion.start) + markdown + before.slice(insertion.end);
+    const selection = textarea
+      ? rebaseTextRange(
+          before,
+          next,
+          {
+            start: textarea.selectionStart,
+            end: textarea.selectionEnd
+          },
+          range
+        )
+      : null;
+    for (const pending of insertions)
+      Object.assign(pending, rebaseTextRange(before, next, pending, range), { source: next });
+    value = next;
+    if (textarea && selection) {
+      // Update immediately so an input event before the next render sees the new
+      // value. Preserve a moved caret and never steal focus from another field.
+      textarea.value = next;
+      textarea.setSelectionRange(selection.start, selection.end);
+    }
+  }
+
+  function handlePaste(event: ClipboardEvent) {
+    const clipboard = event.clipboardData;
+    if (!clipboard || !textarea) return;
+    const images = Array.from(clipboard.files).filter((file) => file.type.startsWith('image/'));
+    if (!images.length)
+      for (const item of Array.from(clipboard.items)) {
+        if (item.kind !== 'file' || !item.type.startsWith('image/')) continue;
+        const file = item.getAsFile();
+        if (file) images.push(file);
+      }
+    if (!images.length) return;
+    event.preventDefault();
+    autocompleteKind = null;
+    const insertion = {
+      source: value,
+      start: textarea.selectionStart,
+      end: textarea.selectionEnd
+    };
+    insertions.add(insertion);
+    void upload(images, 'content', insertion);
+  }
+
   async function upload(
     files: FileList | File[] | null,
-    target: 'content' | 'draft' | number = 'content'
+    target: UploadTarget = 'content',
+    insertion?: Insertion
   ) {
-    if (!files?.length || busy) return;
-    busy = true;
-    message = '';
+    if (!files?.length) return;
+    if (!busy) message = '';
     const uploads = Array.from(files).filter((file) => {
       if (
         target === 'content' ||
@@ -134,38 +205,56 @@
       message = labels.imagesOnly;
       return false;
     });
-    uploadTarget = target;
-    pendingUploads = uploads.map((file, key) => ({ key, name: file.name, status: 'queued' }));
+    const queued = uploads.map((file) => ({ key: nextUploadKey++, file, target, insertion }));
+    uploadQueue.push(...queued);
+    pendingUploads = [
+      ...pendingUploads,
+      ...queued.map(({ key, file, target }) => ({
+        key,
+        name: file.name,
+        target,
+        status: 'queued' as const
+      }))
+    ];
+    if (busy) return;
+    busy = true;
     try {
-      for (const [key, file] of uploads.entries()) {
+      while (uploadQueue.length) {
+        const { key, file, target, insertion } = uploadQueue.shift()!;
         pendingUploads = pendingUploads.map((upload) =>
           upload.key === key ? { ...upload, status: 'uploading' } : upload
         );
-        const body = new FormData();
-        body.set('file', file);
-        const response = await fetch('/api/files', { method: 'POST', body });
-        const data = await response.json();
-        if (!response.ok) throw new Error(`${file.name}: ${data.code ?? 'Upload failed.'}`);
-        pendingUploads = pendingUploads.filter((upload) => upload.key !== key);
-        if (file.type.startsWith('image/'))
-          uploadedImages = [...uploadedImages, { id: data.id, name: file.name }];
-        if (target !== 'content') {
-          const gallery = target === 'draft' ? galleryDraft : galleries[target];
-          if (!gallery || gallery.ids.includes(data.id)) continue;
-          const selected = gallery.preview === gallery.ids.length && gallery.preview < 3;
-          const ids = [...gallery.ids];
-          ids.splice(selected ? gallery.preview : ids.length, 0, data.id);
-          const updated = { ids, preview: gallery.preview + Number(selected) };
-          if (target === 'draft') galleryDraft = updated;
-          else changeGallery(target, updated);
-        } else {
-          value += `\n${file.type.startsWith('image/') ? '!' : ''}[${file.name.replace(/[[\]\\]/g, '_')}](file:${data.id})\n`;
+        try {
+          const body = new FormData();
+          body.set('file', file);
+          const response = await fetch('/api/files', { method: 'POST', body });
+          const data = await response.json();
+          if (!response.ok) throw new Error(`${file.name}: ${data.code ?? 'Upload failed.'}`);
+          if (file.type.startsWith('image/'))
+            uploadedImages = [...uploadedImages, { id: data.id, name: file.name }];
+          if (target !== 'content') {
+            const gallery = target === 'draft' ? galleryDraft : galleries[target];
+            if (!gallery || gallery.ids.includes(data.id)) continue;
+            const selected = gallery.preview === gallery.ids.length && gallery.preview < 3;
+            const ids = [...gallery.ids];
+            ids.splice(selected ? gallery.preview : ids.length, 0, data.id);
+            const updated = { ids, preview: gallery.preview + Number(selected) };
+            if (target === 'draft') galleryDraft = updated;
+            else changeGallery(target, updated);
+          } else {
+            const markdown = `\n${file.type.startsWith('image/') ? '!' : ''}[${file.name.replace(/[[\]\\]/g, '_')}](file:${data.id})\n`;
+            if (insertion) insertUpload(markdown, insertion);
+            else value += markdown;
+          }
+        } catch (error) {
+          message = error instanceof Error ? error.message : 'Upload failed.';
+        } finally {
+          pendingUploads = pendingUploads.filter((upload) => upload.key !== key);
+          if (insertion && !uploadQueue.some((upload) => upload.insertion === insertion))
+            insertions.delete(insertion);
         }
       }
-    } catch (error) {
-      message = error instanceof Error ? error.message : 'Upload failed.';
     } finally {
-      pendingUploads = [];
       busy = false;
       if (input) input.value = '';
     }
@@ -234,9 +323,31 @@
     }
   }
 
+  let pendingInput: { source: string; range: TextRange; type: string } | undefined;
+  function handleBeforeInput(event: InputEvent) {
+    if (!textarea) return;
+    pendingInput = {
+      source: textarea.value,
+      range: { start: textarea.selectionStart, end: textarea.selectionEnd },
+      type: event.inputType
+    };
+  }
+
   function handleInput(e: Event) {
     if (!textarea) return;
     const val = textarea.value;
+    if (pendingInput) {
+      const { source, range, type } = pendingInput;
+      const removed = source.length - val.length;
+      if (range.start === range.end && removed > 0) {
+        if (type.endsWith('Backward')) range.start -= removed;
+        else if (type.endsWith('Forward')) range.end += removed;
+      }
+      trackInsertions(source);
+      for (const insertion of insertions)
+        Object.assign(insertion, rebaseTextRange(source, val, insertion, range), { source: val });
+      pendingInput = undefined;
+    } else trackInsertions(val);
     const pos = textarea.selectionStart;
     const textBeforeCursor = val.slice(0, pos);
     const mention = textBeforeCursor.match(/(?:\s|^)@([a-zA-Z0-9_]*)$/);
@@ -397,6 +508,8 @@
           dragging = false;
           void upload(event.dataTransfer.files, 'content');
         }}
+        onbeforeinput={handleBeforeInput}
+        onpaste={handlePaste}
         oninput={handleInput}
         onkeydown={handleKeyDown}
         onclick={() => (autocompleteKind = null)}
@@ -461,9 +574,9 @@
     {busy ? labels.uploading : labels.drop}{#if allowReferences}
       <span class="hint-separator">·</span> {labels.referenceHint}{/if}
   </p>
-  {#if uploadTarget === 'content' && pendingUploads.length}
+  {#if contentUploads.length}
     <ul class="pending-uploads" aria-live="polite">
-      {#each pendingUploads as upload (upload.key)}<li>
+      {#each contentUploads as upload (upload.key)}<li>
           <span class="upload-spinner"><LoaderCircle size={18} aria-hidden="true" /></span><span
             >{upload.status === 'uploading' ? labels.uploading : labels.queued}<small
               >{upload.name}</small
@@ -498,7 +611,7 @@
               {gallery}
               {busy}
               names={imageNames}
-              uploads={uploadTarget === index ? pendingUploads : []}
+              uploads={pendingUploads.filter((upload) => upload.target === index)}
               onchange={(state) => changeGallery(index, state)}
               onupload={(files) => void upload(files, index)}
               onremove={() => changeGallery(index, { ids: [], preview: 0 })}
@@ -532,7 +645,7 @@
               gallery={galleryDraft}
               {busy}
               names={imageNames}
-              uploads={uploadTarget === 'draft' ? pendingUploads : []}
+              uploads={pendingUploads.filter((upload) => upload.target === 'draft')}
               onchange={(state) => (galleryDraft = state)}
               onupload={(files) => void upload(files, 'draft')}
               onremove={() => {
