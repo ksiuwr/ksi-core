@@ -612,6 +612,18 @@
     color: var(--muted, #6b6974);
     font-size: 12px;
   }
+  /* On narrow screens wide tables scroll inside their own box instead of breaking every
+     cell into single characters or widening the page. */
+  @media (max-width: 760px) {
+    .markdown :global(table) {
+      display: block;
+      max-width: 100%;
+      overflow-x: auto;
+    }
+    .markdown :global(:is(th, td)) {
+      overflow-wrap: normal;
+    }
+  }
   @media (max-width: 600px) {
     .gallery {
       grid-template-columns: repeat(2, minmax(0, 1fr));

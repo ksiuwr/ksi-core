@@ -290,6 +290,12 @@
   .article-layout {
     grid-template-columns: minmax(0, 1fr) 300px;
   }
+  /* The scoped rule outranks the shared .detail-layout breakpoint, so repeat it here. */
+  @media (max-width: 980px) {
+    .article-layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
   .article-title-input {
     width: 100%;
     margin: 0 0 14px;
