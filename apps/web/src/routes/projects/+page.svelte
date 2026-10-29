@@ -85,6 +85,7 @@
           {#each filters as filter (filter)}
             <button
               type="button"
+              class="bg-transparent shadow-none"
               aria-pressed={activeFilter === filter}
               onclick={() => void setFilter(filter)}
             >
