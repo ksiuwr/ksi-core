@@ -2,7 +2,6 @@ import { assignmentChanges } from 'shared/notifications';
 import { mentionedUserIds } from 'shared/mentions';
 import { and, eq, inArray, isNull, desc, sql } from 'drizzle-orm';
 import { status } from 'elysia';
-import { getUrls } from 'shared';
 import {
   db,
   users,
@@ -17,6 +16,7 @@ import {
   mailJobs
 } from '../db';
 import type { Executor, Transaction } from '../lib/audit';
+import { notificationMail } from '../lib/mail';
 import { scopeFor } from '../routes/platform/content';
 import { canReadThread } from '../domain/permissions';
 
@@ -122,27 +122,21 @@ export async function notifyCollaboration(
     }));
   if (values.length) await tx.insert(notifications).values(values).onConflictDoNothing();
 }
-export async function listNotifications(
-  executor: Executor,
-  user: typeof users.$inferSelect,
-  limit = 100
-) {
-  const rows = await executor
-    .select({
-      notification: notifications,
-      action: auditEvents.action,
-      actorName: users.name,
-      metadata: auditEvents.metadata
-    })
-    .from(notifications)
-    .innerJoin(auditEvents, eq(notifications.eventId, auditEvents.id))
-    .leftJoin(users, eq(auditEvents.actorId, users.id))
-    .where(eq(notifications.userId, user.id))
-    .orderBy(desc(notifications.createdAt))
-    .limit(limit);
+type NotificationEvent = {
+  action: string;
+  actorName: string | null;
+  metadata: Record<string, unknown>;
+};
+const notificationEvent = {
+  action: auditEvents.action,
+  actorName: users.name,
+  metadata: auditEvents.metadata
+};
+/** Resolve assignee names for a batch of events with a single lookup. */
+async function assigneeNames(executor: Executor, events: Pick<NotificationEvent, 'metadata'>[]) {
   const assigneeIds = [
     ...new Set(
-      rows.flatMap(({ metadata }) => {
+      events.flatMap(({ metadata }) => {
         const { added, removed } = assignmentChanges(metadata.changes);
         return [...added, ...removed];
       })
@@ -154,27 +148,50 @@ export async function listNotifications(
         .from(users)
         .where(inArray(users.id, assigneeIds))
     : [];
-  const assigneeNames = new Map(assignees.map((user) => [user.id, user.name]));
+  return new Map(assignees.map((user) => [user.id, user.name]));
+}
+function eventContext(
+  { action, actorName, metadata }: NotificationEvent,
+  names: Map<string, string>
+) {
+  const changedFields = Array.isArray(metadata.changes)
+    ? metadata.changes.flatMap((change) =>
+        change && typeof change.field === 'string' ? [change.field] : []
+      )
+    : [];
+  const assignments = assignmentChanges(metadata.changes);
+  return {
+    actorName,
+    action,
+    changedFields,
+    assignedNames: assignments.added.map((id) => names.get(id) ?? null),
+    unassignedNames: assignments.removed.map((id) => names.get(id) ?? null)
+  };
+}
+export async function listNotifications(
+  executor: Executor,
+  user: typeof users.$inferSelect,
+  limit = 100
+) {
+  const rows = await executor
+    .select({ notification: notifications, ...notificationEvent })
+    .from(notifications)
+    .innerJoin(auditEvents, eq(notifications.eventId, auditEvents.id))
+    .leftJoin(users, eq(auditEvents.actorId, users.id))
+    .where(eq(notifications.userId, user.id))
+    .orderBy(desc(notifications.createdAt))
+    .limit(limit);
+  const names = await assigneeNames(executor, rows);
   const visible = [];
-  for (const { notification, action, actorName, metadata } of rows) {
+  for (const { notification, ...event } of rows) {
     const target = await notificationTarget(executor, notification.ownerType, notification.ownerId);
     if (target?.canRead(user)) {
-      const changedFields = Array.isArray(metadata.changes)
-        ? metadata.changes.flatMap((change) =>
-            change && typeof change.field === 'string' ? [change.field] : []
-          )
-        : [];
-      const assignments = assignmentChanges(metadata.changes);
       visible.push({
         ...notification,
         title: target.title,
         href: target.href,
         projectName: target.projectName,
-        actorName,
-        action,
-        changedFields,
-        assignedNames: assignments.added.map((id) => assigneeNames.get(id) ?? null),
-        unassignedNames: assignments.removed.map((id) => assigneeNames.get(id) ?? null)
+        ...eventContext(event, names)
       });
     }
   }
@@ -201,10 +218,22 @@ export async function queueNotificationMailBatch(limit = 100) {
       const [user] = await tx.select().from(users).where(eq(users.id, row.userId));
       const target = await notificationTarget(tx, row.ownerType, row.ownerId);
       if (user?.emailVerified && target?.canRead(user)) {
+        const [event] = await tx
+          .select(notificationEvent)
+          .from(auditEvents)
+          .leftJoin(users, eq(auditEvents.actorId, users.id))
+          .where(eq(auditEvents.id, row.eventId));
         await tx.insert(mailJobs).values({
           to: user.email,
-          subject: `KSI: ${target.title}`,
-          body: `${row.reason}: ${target.title}\n${getUrls().frontend.dashboard}${target.href}`
+          ...notificationMail({
+            ...eventContext(event!, await assigneeNames(tx, [event!])),
+            ownerType: row.ownerType,
+            projectName: target.projectName,
+            reason: row.reason,
+            title: target.title,
+            href: target.href,
+            dueAt: typeof event!.metadata.dueAt === 'string' ? event!.metadata.dueAt : null
+          })
         });
         queued++;
       }

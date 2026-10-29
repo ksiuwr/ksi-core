@@ -433,6 +433,7 @@ export const mailJobs = snakeCase.table('mail_jobs', {
   to: text().notNull(),
   subject: text().notNull(),
   body: text().notNull(),
+  html: text(),
   attempts: integer().notNull().default(0),
   availableAt: timestamp().notNull().defaultNow(),
   sentAt: timestamp()
