@@ -493,9 +493,8 @@ msgstr "Our winter camp for computer science students in Lower Silesia."
 msgid "A summer version of ZOSIA, in preparation."
 msgstr "A summer version of ZOSIA, in preparation."
 
-#: src/components/Navbar.svelte
-msgid "Soon"
-msgstr "Soon"
+#~ msgid "Soon"
+#~ msgstr "Soon"
 
 #: src/components/Navbar.svelte
 msgid "The code behind this website."

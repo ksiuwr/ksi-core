@@ -97,18 +97,16 @@
     {
       title: 'LEOSIA',
       description: 'A summer version of ZOSIA, in preparation.',
-      href: '/projects',
+      href: '/projects/leosia',
       icon: Mountain,
-      field: 'community',
-      badge: 'Soon'
+      field: 'community'
     },
     {
       title: 'ksi-core',
       description: 'The code behind this website.',
-      href: 'https://github.com/ksiuwr/ksi-core',
+      href: '/projects/ksi-core',
       icon: Github,
-      field: 'engineering',
-      external: true
+      field: 'engineering'
     }
   ];
 
