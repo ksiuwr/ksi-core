@@ -1,19 +1,30 @@
 import type { LayoutServerLoad } from './$types';
-import { makeApi } from '$lib/backend';
+import type { api } from '$lib/backend';
+import { backendFetch } from 'shared/server';
+import { contentLocale } from 'shared/content-locales';
+import { env } from '$lib/server/environment';
 
-export const load: LayoutServerLoad = async ({ fetch, locals }) => {
-  let alert = null;
+type Alert = NonNullable<Awaited<ReturnType<typeof api.alerts.current.get>>['data']>;
+
+export const load: LayoutServerLoad = async (event) => {
+  event.depends('ksi:alert', 'ksi:localized-content');
+  let alert: Alert | null = null;
   try {
-    const res = await makeApi(fetch).alerts.current.get();
-    alert = res.data;
+    // The backend answers 404 while no alert is scheduled.
+    const response = await backendFetch(
+      event,
+      env,
+      `/alerts/current?locale=${contentLocale(event.cookies.get('locale') ?? 'pl')}`
+    );
+    if (response.ok) alert = await response.json();
   } catch {
     // no active alert
   }
 
   return {
     alert,
-    user: locals.user,
-    session: locals.session,
+    user: event.locals.user,
+    session: event.locals.session,
     dashboardOrigin: (await import('shared')).getUrls().frontend.dashboard
   };
 };

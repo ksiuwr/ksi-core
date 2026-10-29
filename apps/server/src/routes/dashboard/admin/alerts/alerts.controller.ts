@@ -1,10 +1,10 @@
 import { alerts } from '@ksi-core/server/db';
-import { createElysia } from '@ksi-core/server/lib/createElysia';
+import { createElysia, requirePermission } from '@ksi-core/server/lib/createElysia';
 import { recordEvent } from '@ksi-core/server/lib/audit';
 import { contentChanges } from 'shared/activity';
 import { AlertBodyType } from '@ksi-core/server/routes/dashboard/admin/alerts/alerts.type';
 import { safeAlertLink } from '@ksi-core/server/domain/content-policy';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { status, t } from 'elysia';
 const alertFields = [
   'title',
@@ -16,28 +16,32 @@ const alertFields = [
   'endDate'
 ] as const;
 export default createElysia({ prefix: '/alerts', protectedRoute: true })
+  .onBeforeHandle(({ user }) => {
+    requirePermission(user, 'association.alerts.manage');
+  })
   .get(
     '/',
     async ({ db, query }) => {
       const results = await db.query.alerts.findMany({
         offset: query.page * 20,
         limit: 20,
-        orderBy: { startDate: 'desc' }
+        orderBy: { startDate: 'desc', id: 'asc' }
       });
       const count = await db.$count(alerts);
       return { results, pages: Math.ceil(count / 20) };
     },
-    { query: t.Object({ page: t.Numeric() }) }
+    { query: t.Object({ page: t.Numeric({ minimum: 0, multipleOf: 1 }) }) }
   )
   .post(
     '/',
     async ({ db, body, user }) => {
+      if (body.endDate <= body.startDate) return status(400, { code: 'INVALID_ALERT_INTERVAL' });
       if (body.link && !safeAlertLink(body.link))
         return status(400, 'Alert link must be a relative, http(s) or mailto link');
       await db.transaction(async (tx) => {
         const [created] = await tx
           .insert(alerts)
-          .values({ ...body, createdBy: user!.id })
+          .values({ ...body, version: 1, createdBy: user!.id })
           .returning();
         await recordEvent(tx, {
           actorId: user!.id,
@@ -53,6 +57,7 @@ export default createElysia({ prefix: '/alerts', protectedRoute: true })
   .put(
     '/:id',
     async ({ db, params, body, user }) => {
+      if (body.endDate <= body.startDate) return status(400, { code: 'INVALID_ALERT_INTERVAL' });
       if (body.link && !safeAlertLink(body.link))
         return status(400, 'Alert link must be a relative, http(s) or mailto link');
       return db.transaction(async (tx) => {
@@ -62,9 +67,11 @@ export default createElysia({ prefix: '/alerts', protectedRoute: true })
           .where(eq(alerts.id, params.id))
           .for('update');
         if (!before) return status(404, `Alert ${params.id} was not found!`);
+        if (body.version !== undefined && body.version !== before.version)
+          return status(409, { code: 'REVISION_CONFLICT' });
         const [updated] = await tx
           .update(alerts)
-          .set(body)
+          .set({ ...body, version: sql`${alerts.version} + 1` })
           .where(eq(alerts.id, params.id))
           .returning();
         await recordEvent(tx, {

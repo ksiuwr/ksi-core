@@ -1,84 +1,95 @@
-<script lang="ts">
-  import { ArrowRight, ArrowUpRight } from '@lucide/svelte';
+<script lang="ts" module>
   import type { Component } from 'svelte';
 
+  export interface NavMenuItem {
+    title: string;
+    description: string;
+    href: string;
+    icon: Component;
+    field?: string;
+    external?: boolean;
+    badge?: string;
+  }
+</script>
+
+<script lang="ts">
+  import { ArrowRight, ArrowUpRight } from '@lucide/svelte';
+
   /**
-   * The full-width panel rendered under a Navbar mega-menu trigger (Projects,
-   * Groups, ...). Items render as a border-grid of cards, matching the same
-   * pattern used on the /projects listing page.
+   * The panel rendered under a Navbar menu trigger (Projects, Groups, ...).
+   * `compact` drops descriptions for the stacked mobile menu.
    */
   let {
     items,
     columns = 3,
+    compact = false,
     moreHref,
     moreLabel = 'See more',
     onNavigate
   }: {
-    items: {
-      title: string;
-      description: string;
-      href: string;
-      icon: Component;
-      external?: boolean;
-      badge?: string;
-    }[];
+    items: NavMenuItem[];
     columns?: 3 | 4;
+    compact?: boolean;
     moreHref?: string;
     moreLabel?: string;
     onNavigate?: () => void;
   } = $props();
 </script>
 
+<!-- Keys must not be translated text: labels are empty while hydrating in production. -->
 <div
   class={[
-    'border-base-content/15 grid w-full grid-cols-1 gap-px border-y sm:grid-cols-2',
-    columns === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3'
+    'grid gap-1',
+    !compact && 'sm:grid-cols-2',
+    !compact && (columns === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3')
   ]}
 >
-  {#each items as item (item.title)}
+  {#each items as item (item.href)}
     <a
       href={item.href}
       target={item.external ? '_blank' : undefined}
       rel={item.external ? 'noopener noreferrer' : undefined}
       onclick={onNavigate}
-      class="group bg-base-100 hover:bg-primary/8 focus-visible:outline-primary flex min-h-32 flex-col justify-between gap-4 p-5 transition-colors duration-200 focus-visible:outline-2 focus-visible:-outline-offset-2 lg:min-h-52"
+      class="menu-item"
+      data-field={item.field}
     >
-      <div class="flex items-start justify-between">
-        <item.icon class="text-primary size-5" strokeWidth={1.5} />
-        {#if item.external}
-          <ArrowUpRight
-            class="text-base-content/30 group-hover:text-primary size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-          />
-        {:else}
-          <ArrowRight
-            class="text-base-content/30 group-hover:text-primary size-4 transition-transform group-hover:translate-x-1"
-          />
-        {/if}
-      </div>
-      <div>
-        <p class="font-anybody flex items-center gap-2 font-semibold">
+      <span class="icon-tile"><item.icon /></span>
+      <span class="min-w-0">
+        <span class="text-ink flex items-center gap-2 text-sm font-medium">
           {item.title}
-          {#if item.badge}
-            <span
-              class="text-base-content/50 border-base-content/20 border px-2 py-0.5 text-[0.6rem] font-medium tracking-wide uppercase"
-              >{item.badge}</span
-            >
-          {/if}
-        </p>
-        <p class="text-base-content/55 mt-1 text-sm leading-relaxed">{item.description}</p>
-      </div>
+          {#if item.badge}<span class="tag">{item.badge}</span>{/if}
+          {#if item.external}<ArrowUpRight class="text-muted size-3.5" aria-hidden="true" />{/if}
+        </span>
+        {#if !compact}
+          <span class="text-muted mt-0.5 block text-[13px] leading-snug">{item.description}</span>
+        {/if}
+      </span>
     </a>
   {/each}
   {#if moreHref}
-    <a
-      href={moreHref}
-      onclick={onNavigate}
-      class="group bg-base-200/60 hover:bg-primary/8 focus-visible:outline-primary flex min-h-32 flex-col items-center justify-center gap-2 p-5 text-center transition-colors duration-200 focus-visible:outline-2 focus-visible:-outline-offset-2 lg:min-h-52"
-    >
-      <span class="font-anybody font-semibold">{moreLabel}</span>
-      <ArrowRight
-        class="text-base-content/40 group-hover:text-primary size-4 transition-transform group-hover:translate-x-1"
-      />
+    <a href={moreHref} onclick={onNavigate} class="menu-item group">
+      <span class="icon-tile neutral"><ArrowRight /></span>
+      <span class="text-ink flex items-center gap-1.5 text-sm font-medium">{moreLabel}</span>
     </a>
   {/if}
 </div>
+
+<style>
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 10px;
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    transition: background-color var(--dur-fast) ease;
+  }
+  .menu-item:hover,
+  .menu-item:focus-visible {
+    background: var(--surface-muted);
+  }
+  .menu-item:focus-visible {
+    outline-offset: -2px;
+  }
+</style>

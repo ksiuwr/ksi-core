@@ -20,153 +20,102 @@
   ];
 </script>
 
-<footer class="relative w-full" style="background: var(--surface); color: var(--ink);">
-  <div class="grid grid-cols-1 md:mx-8 lg:grid-cols-3">
-    <div class="border-muted lg:border-base-content/15 border-r border-dashed p-4 py-8 md:py-16">
-      <a
-        href="/"
-        class="hover:text-primary font-anybody inline-block text-6xl font-semibold tracking-[-0.04em]"
-      >
-        KSI UWr
+<footer class="border-line bg-surface text-ink border-t">
+  <div
+    class="page-container grid gap-10 py-12 sm:grid-cols-2 md:py-16 lg:grid-cols-[1.6fr_1fr_1fr]"
+  >
+    <div class="sm:col-span-2 lg:col-span-1">
+      <a href="/" class="text-ink inline-flex items-center gap-3">
+        <img src="/logo.svg" alt="" class="size-9 dark:invert" />
+        <span class="font-display text-2xl font-semibold tracking-[-0.04em]">KSI UWr</span>
       </a>
-      <p class="text-base-content/60 mt-4 max-w-sm text-sm leading-relaxed">
+      <p class="text-muted mt-4 max-w-sm text-sm leading-relaxed">
         Computer Science Students’ Association at the University of Wrocław.
       </p>
-      <address class="text-base-content/45 mt-6 text-xs leading-relaxed not-italic">
+      <address class="text-muted mt-5 text-xs leading-relaxed not-italic">
         Institute of Computer Science<br />
         15 Fryderyka Joliot-Curie St.<br />
         50-383 Wrocław · Room 24
       </address>
     </div>
 
-    <nav
-      aria-label="Footer navigation"
-      class="border-muted lg:border-base-content/15 flex flex-col gap-8 border-t border-dashed px-4 py-8 md:py-16 lg:border-t-0 lg:border-r lg:px-10"
-    >
-      <p class="text-base-content/40 mb-5 text-xs font-bold tracking-[0.18em] uppercase">Explore</p>
-      <ul class="space-y-3 text-sm">
-        <li><a href="/#about" class="hover:text-primary transition-colors">About us</a></li>
-        <li><a href="/projects" class="hover:text-primary transition-colors">Projects</a></li>
-        <li><a href="/articles" class="hover:text-primary transition-colors">Articles</a></li>
-        <li>
-          <a href="/projects/zosia" class="hover:text-primary transition-colors">ZOSIA</a>
-        </li>
-        <li>
-          <a href="mailto:ksi@cs.uni.wroc.pl" class="hover:text-primary transition-colors"
-            >Contact</a
-          >
-        </li>
+    <nav aria-label="Footer navigation">
+      <p class="eyebrow mb-4">Explore</p>
+      <ul class="space-y-2.5 text-sm">
+        <li><a href="/#about" class="footer-link">About us</a></li>
+        <li><a href="/projects" class="footer-link">Projects</a></li>
+        <li><a href="/articles" class="footer-link">Articles</a></li>
+        <li><a href="/projects/zosia" class="footer-link">ZOSIA</a></li>
+        <li><a href="mailto:ksi@cs.uni.wroc.pl" class="footer-link">Contact</a></li>
       </ul>
     </nav>
 
-    <div
-      class="border-muted flex flex-col gap-8 border-t border-dashed px-4 py-8 md:py-16 lg:border-t-0 lg:pl-10"
-    >
-      <p class="text-base-content/40 mb-5 text-xs font-bold tracking-[0.18em] uppercase">
-        Find us online
-      </p>
-      <div class="border-base-content/15 grid grid-cols-2 border-t border-l">
-        {#each socialLinks as social (social.label)}
-          <a
-            href={social.href}
-            target="_blank"
-            rel="noreferrer"
-            class="group border-base-content/15 hover:bg-base-200 hover:text-primary flex items-center justify-between gap-3 border-r border-b p-4 text-sm transition-colors"
-          >
-            <span class="flex items-center gap-3">
-              <social.icon class="size-4" />
+    <div>
+      <p class="eyebrow mb-4">Find us online</p>
+      <ul class="space-y-2.5 text-sm">
+        {#each socialLinks as social (social.href)}
+          <li>
+            <a href={social.href} target="_blank" rel="noreferrer" class="footer-link group">
+              <social.icon class="size-4" aria-hidden="true" />
               {social.label}
-            </span>
-            <ArrowUpRight
-              class="text-base-content/30 group-hover:text-primary size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-            />
-          </a>
+              <ArrowUpRight
+                class="size-3.5 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-60"
+                aria-hidden="true"
+              />
+            </a>
+          </li>
         {/each}
-      </div>
+      </ul>
     </div>
   </div>
 
-  <div
-    class="footer-bottom border-t border-dashed px-4 py-3 text-xs md:px-12"
-    style="background: var(--surface-muted); color: var(--ink); border-color: var(--line);"
-  >
-    <span class="footer-copy">© KSI {new Date().getFullYear()}</span>
-
-    <span class="footer-version font-mono" style="color: var(--muted);"
-      >v{import.meta.env.PUBLIC_APP_VERSION}</span
+  <div class="border-line border-t">
+    <div
+      class="page-container text-muted flex flex-wrap items-center justify-between gap-x-6 gap-y-3 py-4 text-xs"
     >
-
-    <div class="footer-links">
-      <a
-        href="https://github.com/ksiuwr/ksi-core"
-        target="_blank"
-        rel="noreferrer"
-        class="group font-anybody hover:text-primary flex items-center gap-2 transition-colors"
-      >
-        <Github class="size-3.5" />
-        Source code
-        <ArrowUpRight
-          class="size-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-        />
-      </a>
-
-      {#if commitHash}
+      <div class="flex items-center gap-3">
+        <span>© KSI {new Date().getFullYear()}</span>
+        <span
+          class="bg-surface-muted border-line rounded-sm border px-1.5 py-0.5 font-mono text-[10px]"
+          >v{import.meta.env.PUBLIC_APP_VERSION}</span
+        >
+      </div>
+      <div class="flex items-center gap-5">
         <a
-          href="https://github.com/ksiuwr/ksi-core/commit/{commitHash}"
+          href="https://github.com/ksiuwr/ksi-core"
           target="_blank"
           rel="noreferrer"
-          class="group hover:text-primary flex items-center gap-1.5 font-mono transition-colors"
-          title="Commit {commitHash}"
+          class="footer-link group"
         >
-          <GitCommitHorizontal class="size-3.5" />
-          <span>{shortCommitHash}</span>
+          <Github class="size-3.5" aria-hidden="true" />
+          Source code
         </a>
-      {/if}
+        {#if commitHash}
+          <a
+            href="https://github.com/ksiuwr/ksi-core/commit/{commitHash}"
+            target="_blank"
+            rel="noreferrer"
+            class="footer-link font-mono"
+            title="Commit {commitHash}"
+          >
+            <GitCommitHorizontal class="size-3.5" aria-hidden="true" />
+            {shortCommitHash}
+          </a>
+        {/if}
+      </div>
     </div>
   </div>
 </footer>
 
 <style>
-  .footer-bottom {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  .footer-link {
+    display: inline-flex;
     align-items: center;
-    column-gap: 12px;
-    row-gap: 12px;
+    gap: 8px;
+    color: var(--muted);
+    transition: color var(--dur-fast) ease;
   }
-  .footer-copy {
-    grid-column: 1;
-    grid-row: 1;
-  }
-  .footer-version {
-    grid-column: 1;
-    grid-row: 2;
-  }
-  .footer-links {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 12px;
-  }
-  @media (min-width: 640px) {
-    .footer-bottom {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    .footer-copy,
-    .footer-version,
-    .footer-links {
-      grid-column: auto;
-      grid-row: auto;
-    }
-    .footer-links {
-      margin-left: auto;
-      flex-direction: row;
-      align-items: center;
-      gap: 24px;
-    }
+  .footer-link:hover {
+    color: var(--ink);
   }
 </style>

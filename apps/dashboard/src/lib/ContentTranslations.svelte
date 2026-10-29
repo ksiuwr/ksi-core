@@ -20,7 +20,7 @@
     draft = $bindable<Record<string, string>>({}),
     onsaved
   }: {
-    kind: 'profile' | 'project' | 'article';
+    kind: 'profile' | 'project' | 'article' | 'alert';
     id: string;
     version?: number;
     translations?: ContentTranslations;
@@ -39,6 +39,7 @@
     description: 'Description',
     tags: 'Tags',
     title: 'Title',
+    link: 'Link',
     markdown: 'Article content'
   };
   const uiLanguage = $derived(preferences.language);
@@ -124,6 +125,10 @@
             : value
         ])
     );
+  }
+
+  export async function saveTranslation() {
+    if (!busy && dirty && hasDraftContent) await save();
   }
 
   async function save(remove = false) {

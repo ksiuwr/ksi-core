@@ -1,8 +1,8 @@
 <script lang="ts">
   import '../app.css';
   import { onMount, untrack } from 'svelte';
+  import { invalidate } from '$app/navigation';
   import Navbar from '../components/Navbar.svelte';
-  import Sidebar from '../components/Sidebar.svelte';
   import Footer from '../components/Footer.svelte';
   import { Toaster } from 'svelte-sonner';
   import { themeStore } from '@ksi-core/ui/lib';
@@ -11,6 +11,17 @@
   import { locale, refreshLocalizedContent } from '$lib/locale.svelte';
 
   onMount(themeStore.initialize);
+  onMount(() => {
+    const refresh = () => {
+      if (document.visibilityState === 'visible') void invalidate('ksi:alert');
+    };
+    const timer = setInterval(refresh, 60000);
+    document.addEventListener('visibilitychange', refresh);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', refresh);
+    };
+  });
   $effect(() => {
     const current = locale.current;
     untrack(() => void refreshLocalizedContent(current));
@@ -25,16 +36,13 @@
 
 <Toaster theme={$themeStore} richColors />
 
-<div class="relative flex min-h-screen flex-col">
+<div class="flex min-h-screen flex-col">
   {#if data.alert}
-    <div class="w-full lg:hidden">
-      <Alert alert={data.alert} />
-    </div>
+    <Alert alert={data.alert} />
   {/if}
-  <Navbar user={data.user} alert={data.alert} session={data.session} />
-  <Sidebar user={data.user} session={data.session} />
+  <Navbar user={data.user} session={data.session} />
 
-  <div class="bg-base-100 flex min-h-screen flex-1 flex-col pt-14">
+  <div class="flex flex-1 flex-col">
     {@render children?.()}
   </div>
   <Footer />

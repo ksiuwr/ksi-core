@@ -15,6 +15,7 @@ export const load: LayoutServerLoad = async (event) => {
     if (url.pathname.startsWith('/sso/'))
       return {
         user: null,
+        canManageAlerts: false,
         projects: [] as Project[],
         inbox: emptyInbox,
         project: null,
@@ -41,8 +42,10 @@ export const load: LayoutServerLoad = async (event) => {
       /* Permission denials must not block unrelated pages. */
     }
   }
+  const access = await optionalPlatform<{ canManageAlerts: boolean }>(event, '/dashboard/access');
   return {
     user,
+    canManageAlerts: access?.canManageAlerts ?? false,
     projects,
     inbox,
     project: null,

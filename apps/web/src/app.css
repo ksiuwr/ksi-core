@@ -1,23 +1,149 @@
 @import 'tailwindcss';
-@import '@ksi-core/ui/platform.css';
-@import '@ksi-core/ui/platform-theme.css';
-@import '@ksi-core/ui/styles.css';
+/*
+ * The same platform layers as apps/auth and apps/dashboard. They are placed in
+ * the base layer so Tailwind utilities can still override them.
+ */
+@import '@ksi-core/ui/platform.css' layer(base);
+@import '@ksi-core/ui/platform-theme.css' layer(base);
+@import '@ksi-core/ui/platform-kit.css' layer(base);
 
-/* Override some Tailwind base values to blend perfectly with our theme variables */
-:root {
-  --color-base-100: var(--paper);
-  --color-base-200: var(--surface);
-  --color-base-content: var(--ink);
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+@theme inline {
+  --font-sans: var(--font);
+  --font-display: var(--display);
+  --font-mono: var(--mono);
+
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-input: var(--input);
+  --color-hover-line: var(--control-border-hover);
+  --color-accent: var(--accent);
   --color-primary: var(--primary);
-  --color-primary-content: var(--primary-text);
-  --color-neutral: var(--surface-muted);
+  --color-danger: var(--danger);
 }
 
-:root {
-  --color-base-50: var(--paper);
+/* Project field hues, shared by covers, badges, and icon tiles. */
+:root,
+[data-field='engineering'] {
+  --field-hue: 165;
+}
+[data-field='research'] {
+  --field-hue: 285;
+}
+[data-field='community'] {
+  --field-hue: 38;
 }
 
-.btn-outline:hover {
-  outline: 1px solid var(--control-border-hover);
-  outline-offset: 2px;
+@utility page-container {
+  @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+}
+
+@layer components {
+  .eyebrow {
+    font-size: 11px;
+  }
+
+  /* A small rounded square holding an icon, tinted by the nearest data-field. */
+  .icon-tile {
+    --tile-tone: oklch(0.55 0.12 var(--field-hue));
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border: 1px solid color-mix(in oklch, var(--tile-tone) 22%, var(--line));
+    border-radius: var(--radius-lg);
+    background: color-mix(in oklch, var(--tile-tone) 9%, var(--surface));
+    color: var(--tile-tone);
+  }
+  :root[data-theme='dark'] .icon-tile {
+    --tile-tone: oklch(0.78 0.1 var(--field-hue));
+  }
+  .icon-tile.neutral,
+  :root[data-theme='dark'] .icon-tile.neutral {
+    --tile-tone: var(--muted);
+  }
+  .icon-tile svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* A raised panel matching the dashboard's cards. */
+  .surface-card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xl);
+    background: var(--surface);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .surface-card-link {
+    transition:
+      border-color var(--dur-fast) ease,
+      box-shadow var(--dur) ease,
+      translate var(--dur) var(--ease-out);
+  }
+  .surface-card-link:hover {
+    border-color: var(--control-border-hover);
+    box-shadow: var(--shadow-md);
+    translate: 0 -2px;
+  }
+
+  .field-tag {
+    --tag-tone: oklch(0.55 0.13 var(--field-hue));
+    border-color: color-mix(in oklch, var(--tag-tone) 28%, var(--line));
+    background: color-mix(in oklch, var(--tag-tone) 9%, var(--surface));
+    color: var(--ink);
+  }
+  .field-tag::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--tag-tone);
+  }
+  :root[data-theme='dark'] .field-tag {
+    --tag-tone: oklch(0.76 0.11 var(--field-hue));
+  }
+
+  .segmented-control {
+    --slider-radius: var(--radius-md);
+    display: flex;
+    gap: 2px;
+    padding: 3px;
+    border-radius: var(--radius-lg);
+    background: var(--surface-muted);
+  }
+  .segmented-control button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 28px;
+    padding: 4px 10px;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--muted);
+    font-size: 12.5px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color var(--dur-fast) ease;
+  }
+  .segmented-control button:hover,
+  .segmented-control button[aria-pressed='true'] {
+    color: var(--ink);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .surface-card-link,
+  .surface-card-link:hover {
+    transition: none;
+    translate: none;
+  }
 }

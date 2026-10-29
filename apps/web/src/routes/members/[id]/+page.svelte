@@ -2,89 +2,92 @@
   import ArticleList from '$lib/components/ArticleList.svelte';
   import { Github, Linkedin } from '@lucide/svelte';
   let { data } = $props<{ data: import('./$types').PageData }>();
+  const initials = $derived(
+    data.member.name
+      .split(/\s+/)
+      .filter(Boolean)
+      .filter(
+        (_: string, index: number, words: string[]) => index === 0 || index === words.length - 1
+      )
+      .map((word: string) => word[0])
+      .join('')
+      .toUpperCase()
+  );
 </script>
 
 <svelte:head><title>{data.member.name} · KSI UWr</title></svelte:head>
-<main class="member-page page-gutter">
-  <div class="flex flex-wrap items-center gap-6">
-    {#if data.member.image}<img
-        class="h-24 w-24 rounded-full object-cover"
-        src={data.member.image}
-        alt=""
-      />{:else}<span class="profile-initials" aria-hidden="true"
-        >{data.member.name
-          .split(/\s+/)
-          .filter(Boolean)
-          .filter(
-            (_: string, index: number, words: string[]) => index === 0 || index === words.length - 1
-          )
-          .map((word: string) => word[0])
-          .join('')
-          .toUpperCase()}</span
-      >{/if}
-    <div>
-      <h1 class="text-4xl font-bold">{data.member.name}</h1>
-      {#if data.member.nickname}<p class="mt-2">aka. {data.member.nickname}</p>{/if}
-    </div>
+<main class="page-container flex-1 pt-10 pb-20">
+  <div class="mx-auto max-w-4xl">
+    <header class="surface-card relative overflow-hidden p-6 sm:p-8">
+      <div class="profile-backdrop" aria-hidden="true"></div>
+      <div class="relative flex flex-col gap-6 sm:flex-row sm:items-center">
+        {#if data.member.image}<img
+            class="ring-surface size-24 shrink-0 rounded-full object-cover shadow-[var(--shadow-sm)] ring-4"
+            src={data.member.image}
+            alt=""
+          />{:else}<span class="profile-initials" aria-hidden="true">{initials}</span>{/if}
+        <div class="min-w-0">
+          <h1 class="text-[clamp(30px,5vw,44px)] font-bold tracking-[-0.045em] wrap-anywhere">
+            {data.member.name}
+          </h1>
+          {#if data.member.nickname}<p class="text-muted mt-1 font-mono text-sm">
+              aka. {data.member.nickname}
+            </p>{/if}
+        </div>
+      </div>
+      {#if data.member.bio}<p
+          class="relative mt-6 max-w-2xl leading-relaxed wrap-anywhere whitespace-pre-wrap"
+        >
+          {data.member.bio}
+        </p>{/if}
+      {#if data.member.github || data.member.linkedin}
+        <div class="relative mt-6 flex flex-wrap gap-2">
+          {#if data.member.github}<a
+              class="btn btn-outline"
+              href={data.member.github}
+              target="_blank"
+              rel="noopener noreferrer"><Github />GitHub</a
+            >{/if}{#if data.member.linkedin}<a
+              class="btn btn-outline"
+              href={data.member.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"><Linkedin />LinkedIn</a
+            >{/if}
+        </div>
+      {/if}
+    </header>
+    <section class="mt-12" aria-labelledby="member-articles-heading">
+      <h2 id="member-articles-heading" class="mb-6 text-2xl tracking-tight">Articles</h2>
+      <ArticleList articles={data.member.articles} />
+    </section>
   </div>
-  {#if data.member.bio}<p class="my-8 whitespace-pre-wrap">{data.member.bio}</p>{/if}
-  <div class="mt-6 flex gap-3">
-    {#if data.member.github}<a
-        class="btn btn-outline gap-2"
-        href={data.member.github}
-        target="_blank"
-        rel="noopener noreferrer"><Github size={16} />GitHub</a
-      >{/if}{#if data.member.linkedin}<a
-        class="btn btn-outline gap-2"
-        href={data.member.linkedin}
-        target="_blank"
-        rel="noopener noreferrer"><Linkedin size={16} />LinkedIn</a
-      >{/if}
-  </div>
-  <section class="member-articles" aria-labelledby="member-articles-heading">
-    <h2 id="member-articles-heading">Articles</h2>
-    <ArticleList articles={data.member.articles} />
-  </section>
 </main>
 
 <style>
-  .member-page {
-    width: 100%;
-    min-inline-size: min(100%, 36rem);
-    max-width: 1000px;
-    margin-inline: auto;
-    padding-top: 48px;
-    padding-bottom: 72px;
-  }
-  h1 {
-    overflow-wrap: anywhere;
-    letter-spacing: -0.035em;
+  .profile-backdrop {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 96px;
+    background-image: radial-gradient(
+      color-mix(in oklch, var(--ink) 14%, transparent) 1px,
+      transparent 1px
+    );
+    background-size: 18px 18px;
+    mask-image: linear-gradient(to bottom, #000, transparent);
   }
   .profile-initials {
     display: grid;
     place-items: center;
     width: 96px;
     height: 96px;
-    border-radius: 50%;
-    background: var(--surface-muted);
-    font-size: 28px;
     flex-shrink: 0;
-  }
-  .member-articles {
-    margin-top: 40px;
-    padding-top: 32px;
-    border-top: 1px solid var(--line);
-  }
-  h2 {
-    font-size: 26px;
+    border: 4px solid var(--surface);
+    border-radius: 50%;
+    background: var(--lavender);
+    box-shadow: var(--shadow-sm);
+    font-family: var(--display);
+    font-size: 30px;
     font-weight: 600;
-    letter-spacing: -0.025em;
-    margin-bottom: 24px;
-  }
-  @media (max-width: 600px) {
-    .member-page {
-      padding-top: 28px;
-      padding-bottom: 40px;
-    }
+    letter-spacing: -0.03em;
   }
 </style>

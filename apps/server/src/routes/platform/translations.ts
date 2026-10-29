@@ -1,9 +1,10 @@
 import { contentChanges } from 'shared/activity';
 import { status, t } from 'elysia';
 import { eq, sql } from 'drizzle-orm';
-import { users, projects, articles, articleRevisions } from '../../db';
+import { users, projects, articles, articleRevisions, alerts } from '../../db';
 import { createElysia, requirePermission } from '../../lib/createElysia';
 import { recordEvent } from '../../lib/audit';
+import { safeAlertLink } from '../../domain/content-policy';
 import { active, scopeFor, requireLeader } from './content';
 import { syncFileReferences } from './files';
 import {
@@ -41,7 +42,9 @@ export const translationRoutes = createElysia({
         ? ['firstName', 'lastName', 'nickname', 'bio']
         : params.kind === 'project'
           ? ['name', 'description', 'tags']
-          : ['title', 'markdown'];
+          : params.kind === 'alert'
+            ? ['title', 'description', 'link']
+            : ['title', 'markdown'];
     if (Object.keys(body.fields).some((key) => !allowed.includes(key)))
       throw status(422, { code: 'INVALID_TRANSLATION_FIELDS' });
     const translatedFields = body.fields as Record<string, string | string[]>;
@@ -53,6 +56,7 @@ export const translationRoutes = createElysia({
       name: 200,
       description: 10000,
       title: 200,
+      link: 2000,
       markdown: 500000
     };
     if (
@@ -63,6 +67,17 @@ export const translationRoutes = createElysia({
       )
     )
       throw status(422, { code: 'INVALID_TRANSLATION_FIELDS' });
+    if (params.kind === 'alert') {
+      requirePermission(actor, 'association.alerts.manage');
+      if (
+        (typeof translatedFields.description === 'string' &&
+          translatedFields.description.length > 2000) ||
+        (typeof translatedFields.link === 'string' &&
+          translatedFields.link.trim() &&
+          !safeAlertLink(translatedFields.link))
+      )
+        throw status(422, { code: 'INVALID_TRANSLATION_FIELDS' });
+    }
     return db.transaction(async (tx) => {
       const [currentActor] = await tx
         .select()
@@ -72,6 +87,35 @@ export const translationRoutes = createElysia({
       active(currentActor ?? null);
       const principal = currentActor!;
       const locale = params.locale as ContentLocale;
+      if (params.kind === 'alert') {
+        requirePermission(principal, 'association.alerts.manage');
+        const [alert] = await tx
+          .select()
+          .from(alerts)
+          .where(eq(alerts.id, params.id))
+          .for('update');
+        if (!alert) throw status(404, { code: 'ALERT_NOT_FOUND' });
+        if (body.version !== alert.version) throw status(409, { code: 'REVISION_CONFLICT' });
+        if (!alert.title.trim() || !hasEnglishSources(alert, translatedFields))
+          throw status(422, { code: 'ENGLISH_CONTENT_REQUIRED' });
+        const translations = setTranslation(alert.translations, locale, translatedFields);
+        const [updated] = await tx
+          .update(alerts)
+          .set({ translations, version: sql`${alerts.version} + 1` })
+          .where(eq(alerts.id, alert.id))
+          .returning();
+        await recordEvent(tx, {
+          actorId: principal.id,
+          targetId: alert.id,
+          action: 'alerts.translation.updated',
+          metadata: {
+            locale,
+            version: updated!.version,
+            changes: contentChanges(alert.translations[locale] ?? {}, translatedFields, allowed)
+          }
+        });
+        return updated;
+      }
       if (params.kind === 'profile') {
         const own = params.id === principal.id;
         if (!own) {
@@ -205,7 +249,12 @@ export const translationRoutes = createElysia({
   },
   {
     params: t.Object({
-      kind: t.Union([t.Literal('profile'), t.Literal('project'), t.Literal('article')]),
+      kind: t.Union([
+        t.Literal('profile'),
+        t.Literal('project'),
+        t.Literal('article'),
+        t.Literal('alert')
+      ]),
       id: t.String(),
       locale: t.String()
     }),

@@ -108,6 +108,8 @@ export const verifications = snakeCase.table('verifications', {
 export const alertStyleEnum = pgEnum('alert_color', ['neutral', 'info', 'warning', 'danger']);
 
 export const alerts = snakeCase.table('alerts', {
+  translations: jsonb().$type<ContentTranslations>().notNull().default({}),
+  version: integer().notNull().default(1),
   id: text().primaryKey().$defaultFn(createId),
   priority: integer(),
   title: text().notNull(),

@@ -156,7 +156,11 @@ test('workspace member and project settings paths are persistent', () => {
   expect(parseDashboardPath('/association/members')?.tab).toBe('roster');
   expect(parseDashboardPath('/projects/roboty/members')?.tab).toBe('roster');
   expect(parseDashboardPath('/projects/roboty/settings')?.tab).toBe('settings');
-  expect(parseDashboardPath('/association/settings')).toBeNull();
+  expect(parseDashboardPath('/association/settings')).toEqual({
+    workspace: 'association',
+    projectSlug: '',
+    tab: 'settings'
+  });
   expect(parseDashboardPath('/people/abc')?.memberId).toBe('abc');
 });
 

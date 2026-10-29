@@ -3,12 +3,13 @@ import { t } from 'elysia';
 
 export const AlertBodyType = {
   body: t.Object({
-    title: t.String(),
-    description: t.String(),
+    version: t.Optional(t.Integer({ minimum: 1 })),
+    title: t.String({ minLength: 1, maxLength: 200, pattern: '\\S' }),
+    description: t.String({ maxLength: 2000 }),
     color: t.Enum(Object.fromEntries(alertStyleEnum.enumValues.map((e) => [e, e]))),
     startDate: t.Date(),
     endDate: t.Date(),
     priority: t.Optional(t.Integer()),
-    link: t.Optional(t.String())
+    link: t.Optional(t.String({ maxLength: 2000 }))
   })
 };

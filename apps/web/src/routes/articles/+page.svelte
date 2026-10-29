@@ -3,7 +3,21 @@
   let { data } = $props<{ data: import('./$types').PageData }>();
 </script>
 
-<main class="page-gutter mx-auto w-full max-w-4xl py-12">
-  <h1 class="mb-8 text-4xl font-bold">Articles</h1>
-  <ArticleList articles={data.articles} />
+<svelte:head><title>Articles · KSI UWr</title></svelte:head>
+
+<main class="flex-1">
+  <header class="border-line border-b">
+    <div class="page-container py-14 md:py-20">
+      <p class="eyebrow"><span class="dot"></span>Blog</p>
+      <h1 class="mt-4 text-[clamp(40px,6vw,64px)] font-bold tracking-[-0.045em]">Articles</h1>
+      <p class="text-muted mt-4 max-w-xl text-lg leading-relaxed">
+        News, write-ups, and recaps from KSI members.
+      </p>
+    </div>
+  </header>
+  <div class="page-container py-10 pb-20">
+    <div class="max-w-4xl">
+      <ArticleList articles={data.articles} />
+    </div>
+  </div>
 </main>
