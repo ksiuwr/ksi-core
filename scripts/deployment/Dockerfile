@@ -1,4 +1,5 @@
-ARG APP
+# Selects the image to build: server, web, auth or dashboard.
+ARG APP=server
 
 FROM oven/bun:1.3.14-alpine AS deps
 WORKDIR /app
