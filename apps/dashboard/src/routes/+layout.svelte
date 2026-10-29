@@ -94,7 +94,8 @@
     ['articles', 'Articles'],
     ['events', 'Activity'],
     ['roster', 'Members'],
-    ...(workspace === 'project' && (projectAccess.canEdit || projectAccess.canManageMembers)
+    ...((workspace === 'project' && (projectAccess.canEdit || projectAccess.canManageMembers)) ||
+    (workspace === 'association' && data.canManageAlerts)
       ? [['settings', 'Settings']]
       : []),
     ...(workspace === 'project' && projectAccess.canManageGroups

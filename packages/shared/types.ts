@@ -16,3 +16,16 @@ export interface Profile {
   flags: string[];
   publicPrivacy: 'full-name' | 'last-initial' | 'initials';
 }
+
+export interface AssociationAlert {
+  translations: ContentTranslations;
+  version: number;
+  id: string;
+  title: string;
+  description: string;
+  color: 'info' | 'danger' | 'warning' | 'neutral';
+  link: string | null;
+  priority: number | null;
+  startDate: string;
+  endDate: string;
+}

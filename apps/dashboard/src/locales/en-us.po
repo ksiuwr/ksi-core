@@ -317,6 +317,7 @@ msgstr "New article"
 msgid "No articles yet. Create the first article in this workspace."
 msgstr "No articles yet. Create the first article in this workspace."
 
+#: src/lib/AssociationAlerts.svelte
 #: src/lib/ContentTranslations.svelte
 #: src/lib/DetailLayout.svelte
 #: src/lib/views/ArticleView.svelte
@@ -627,6 +628,7 @@ msgstr "What needs to be done?"
 msgid "Task status"
 msgstr "Task status"
 
+#: src/lib/AssociationAlerts.svelte
 #: src/lib/ConfirmDialog.svelte
 #: src/lib/ContentTranslations.svelte
 #: src/lib/KanbanBoard.svelte
@@ -695,6 +697,7 @@ msgstr "Save"
 msgid "Delete status"
 msgstr "Delete status"
 
+#: src/lib/AssociationAlerts.svelte
 #: src/lib/views/TaskView.svelte
 #: src/lib/views/ThreadView.svelte
 msgid "Edit"
@@ -940,10 +943,12 @@ msgstr "Status"
 msgid "No matching members."
 msgstr "No matching members."
 
+#: src/lib/AssociationAlerts.svelte
 #: src/lib/Members.svelte
 msgid "Previous"
 msgstr "Previous"
 
+#: src/lib/AssociationAlerts.svelte
 #: src/lib/Members.svelte
 msgid "Next"
 msgstr "Next"
@@ -1260,6 +1265,7 @@ msgstr "Biography"
 msgid "Save the English content before adding its translation."
 msgstr "Save the English content before adding its translation."
 
+#: src/lib/AssociationAlerts.svelte
 #: src/lib/ContentTranslations.svelte
 msgid "This content changed. Reload before saving."
 msgstr "This content changed. Reload before saving."
@@ -1546,13 +1552,11 @@ msgstr "Choose thumbnail"
 msgid "Remove thumbnail"
 msgstr "Remove thumbnail"
 
-#~ msgid "Clear filter"
-#~ msgstr "Clear filter"
-
 #: src/lib/KanbanBoard.svelte
 msgid "Description (optional)"
 msgstr "Description (optional)"
 
+#: src/lib/AssociationAlerts.svelte
 #: src/lib/KanbanBoard.svelte
 msgid "Preview"
 msgstr "Preview"
@@ -1560,9 +1564,6 @@ msgstr "Preview"
 #: src/lib/KanbanBoard.svelte
 msgid "Brief description"
 msgstr "Brief description"
-
-#~ msgid "All labels"
-#~ msgstr "All labels"
 
 #: src/lib/KanbanBoard.svelte
 msgid "A label with this name already exists."
@@ -1583,9 +1584,6 @@ msgstr "Filter by label"
 #: src/lib/KanbanFilters.svelte
 msgid "Search labels…"
 msgstr "Search labels…"
-
-#~ msgid "Clear label filter"
-#~ msgstr "Clear label filter"
 
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
@@ -1835,6 +1833,7 @@ msgid "End"
 msgstr "End"
 
 #: src/lib/Assignees.svelte
+#: src/lib/AssociationAlerts.svelte
 #: src/lib/DetailLayout.svelte
 msgid "Enter"
 msgstr "Enter"
@@ -2318,6 +2317,7 @@ msgstr "LinkedIn"
 msgid "Create a draft. Publishing and feed placement can be configured after it is saved."
 msgstr "Create a draft. Publishing and feed placement can be configured after it is saved."
 
+#: src/lib/AssociationAlerts.svelte
 #: src/lib/views/NewArticleView.svelte
 msgid "Content"
 msgstr "Content"
@@ -2601,3 +2601,180 @@ msgstr "No matching labels."
 #: src/lib/views/ProfileView.svelte
 msgid "{0} on {1}"
 msgstr "{0} on {1}"
+
+#: src/lib/AssociationAlerts.svelte
+#: src/lib/AssociationAlerts.svelte
+msgid "Association settings"
+msgstr "Association settings"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Manage announcements on the public website."
+msgstr "Manage announcements on the public website."
+
+#: src/lib/AssociationAlerts.svelte
+msgid "View website"
+msgstr "View website"
+
+#: ../../packages/ui/src/lib/platform/DateTimeRangePicker.svelte
+#: src/lib/AssociationAlerts.svelte
+msgid "The end must be after the start."
+msgstr "The end must be after the start."
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Could not save the changes. Check the link and try again."
+msgstr "Could not save the changes. Check the link and try again."
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Alert saved."
+msgstr "Alert saved."
+
+#: src/lib/AssociationAlerts.svelte
+#: src/lib/AssociationAlerts.svelte
+msgid "Website alerts"
+msgstr "Website alerts"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Alerts appear only during their display interval. When intervals overlap, the highest priority wins; ties show the most recently started alert."
+msgstr "Alerts appear only during their display interval. When intervals overlap, the highest priority wins; ties show the most recently started alert."
+
+#: src/lib/AssociationAlerts.svelte
+msgid "New alert"
+msgstr "New alert"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Edit alert"
+msgstr "Edit alert"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Create alert"
+msgstr "Create alert"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Your alert title"
+msgstr "Your alert title"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Link (optional)"
+msgstr "Link (optional)"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Use a website path, an HTTP(S) URL, or a mailto link. Leave empty for a banner without a link."
+msgstr "Use a website path, an HTTP(S) URL, or a mailto link. Leave empty for a banner without a link."
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Dates use your local time zone. They are saved as absolute instants."
+msgstr "Dates use your local time zone. They are saved as absolute instants."
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Saving…"
+msgstr "Saving…"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Save alert"
+msgstr "Save alert"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Scheduled"
+msgstr "Scheduled"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Expired"
+msgstr "Expired"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Active interval"
+msgstr "Active interval"
+
+#: src/lib/AssociationAlerts.svelte
+#: src/lib/AssociationAlerts.svelte
+msgid "Info"
+msgstr "Info"
+
+#: src/lib/AssociationAlerts.svelte
+#: src/lib/AssociationAlerts.svelte
+msgid "Danger"
+msgstr "Danger"
+
+#: src/lib/AssociationAlerts.svelte
+#: src/lib/AssociationAlerts.svelte
+msgid "Warning"
+msgstr "Warning"
+
+#: src/lib/AssociationAlerts.svelte
+#: src/lib/AssociationAlerts.svelte
+msgid "Neutral"
+msgstr "Neutral"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Delete alert"
+msgstr "Delete alert"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "No alerts yet"
+msgstr "No alerts yet"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Create an announcement and choose when it appears on the website."
+msgstr "Create an announcement and choose when it appears on the website."
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Alert pages"
+msgstr "Alert pages"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Delete alert?"
+msgstr "Delete alert?"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "This removes the announcement from the schedule and the public website."
+msgstr "This removes the announcement from the schedule and the public website."
+
+#: ../../packages/ui/src/lib/platform/DateTimeRangePicker.svelte
+msgid "From (local time)"
+msgstr "From (local time)"
+
+#: ../../packages/ui/src/lib/platform/DateTimeRangePicker.svelte
+msgid "Choose start date and time"
+msgstr "Choose start date and time"
+
+#: ../../packages/ui/src/lib/platform/DateTimeRangePicker.svelte
+msgid "To (local time)"
+msgstr "To (local time)"
+
+#: ../../packages/ui/src/lib/platform/DateTimeRangePicker.svelte
+msgid "Choose end date and time"
+msgstr "Choose end date and time"
+
+#: ../../packages/ui/src/lib/platform/DateTimeRangePicker.svelte
+msgid "Display interval"
+msgstr "Display interval"
+
+#: src/lib/AssociationAlerts.svelte
+#: src/lib/AssociationAlerts.svelte
+msgid "Style"
+msgstr "Style"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Priority"
+msgstr "Priority"
+
+#. 0: alert.priority ?? 0
+#: src/lib/AssociationAlerts.svelte
+msgid "Priority: {0}"
+msgstr "Priority: {0}"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Control+Enter"
+msgstr "Control+Enter"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Save the English alert before adding translations."
+msgstr "Save the English alert before adding translations."
+
+#: src/lib/ContentTranslations.svelte
+msgid "Link"
+msgstr "Link"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Leave blank to use the English link."
+msgstr "Leave blank to use the English link."

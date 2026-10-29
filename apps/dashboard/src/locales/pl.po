@@ -317,6 +317,7 @@ msgstr "Nowy artykuł"
 msgid "No articles yet. Create the first article in this workspace."
 msgstr "Brak artykułów. Utwórz pierwszy artykuł w tym obszarze roboczym."
 
+#: src/lib/AssociationAlerts.svelte
 #: src/lib/ContentTranslations.svelte
 #: src/lib/DetailLayout.svelte
 #: src/lib/views/ArticleView.svelte
@@ -627,6 +628,7 @@ msgstr "Co trzeba zrobić?"
 msgid "Task status"
 msgstr "Status zadania"
 
+#: src/lib/AssociationAlerts.svelte
 #: src/lib/ConfirmDialog.svelte
 #: src/lib/ContentTranslations.svelte
 #: src/lib/KanbanBoard.svelte
@@ -695,6 +697,7 @@ msgstr "Zapisz"
 msgid "Delete status"
 msgstr "Usuń status"
 
+#: src/lib/AssociationAlerts.svelte
 #: src/lib/views/TaskView.svelte
 #: src/lib/views/ThreadView.svelte
 msgid "Edit"
@@ -940,10 +943,12 @@ msgstr "Status"
 msgid "No matching members."
 msgstr "Brak pasujących osób."
 
+#: src/lib/AssociationAlerts.svelte
 #: src/lib/Members.svelte
 msgid "Previous"
 msgstr "Poprzednia"
 
+#: src/lib/AssociationAlerts.svelte
 #: src/lib/Members.svelte
 msgid "Next"
 msgstr "Następna"
@@ -1260,6 +1265,7 @@ msgstr "Opis"
 msgid "Save the English content before adding its translation."
 msgstr "Zapisz treść angielską przed dodaniem tłumaczenia."
 
+#: src/lib/AssociationAlerts.svelte
 #: src/lib/ContentTranslations.svelte
 msgid "This content changed. Reload before saving."
 msgstr "Treść została zmieniona. Odśwież przed zapisaniem."
@@ -1546,13 +1552,11 @@ msgstr "Wybierz miniaturę"
 msgid "Remove thumbnail"
 msgstr "Usuń miniaturę"
 
-#~ msgid "Clear filter"
-#~ msgstr "Wyczyść filtr"
-
 #: src/lib/KanbanBoard.svelte
 msgid "Description (optional)"
 msgstr "Opis (opcjonalny)"
 
+#: src/lib/AssociationAlerts.svelte
 #: src/lib/KanbanBoard.svelte
 msgid "Preview"
 msgstr "Podgląd"
@@ -1560,9 +1564,6 @@ msgstr "Podgląd"
 #: src/lib/KanbanBoard.svelte
 msgid "Brief description"
 msgstr "Krótki opis przeznaczenia etykiety"
-
-#~ msgid "All labels"
-#~ msgstr "Wszystkie etykiety"
 
 #: src/lib/KanbanBoard.svelte
 msgid "A label with this name already exists."
@@ -1583,9 +1584,6 @@ msgstr "Filtruj według etykiety"
 #: src/lib/KanbanFilters.svelte
 msgid "Search labels…"
 msgstr "Szukaj etykiet…"
-
-#~ msgid "Clear label filter"
-#~ msgstr "Wyczyść filtr etykiet"
 
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
@@ -1835,6 +1833,7 @@ msgid "End"
 msgstr "End"
 
 #: src/lib/Assignees.svelte
+#: src/lib/AssociationAlerts.svelte
 #: src/lib/DetailLayout.svelte
 msgid "Enter"
 msgstr "Enter"
@@ -2318,6 +2317,7 @@ msgstr "LinkedIn"
 msgid "Create a draft. Publishing and feed placement can be configured after it is saved."
 msgstr "Utwórz wersję roboczą. Publikację i widoczność w kanałach skonfigurujesz po zapisaniu."
 
+#: src/lib/AssociationAlerts.svelte
 #: src/lib/views/NewArticleView.svelte
 msgid "Content"
 msgstr "Treść"
@@ -2601,3 +2601,180 @@ msgstr "Brak pasujących etykiet."
 #: src/lib/views/ProfileView.svelte
 msgid "{0} on {1}"
 msgstr "{0} na {1}"
+
+#: src/lib/AssociationAlerts.svelte
+#: src/lib/AssociationAlerts.svelte
+msgid "Association settings"
+msgstr "Ustawienia koła"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Manage announcements on the public website."
+msgstr "Zarządzaj ogłoszeniami na stronie publicznej."
+
+#: src/lib/AssociationAlerts.svelte
+msgid "View website"
+msgstr "Zobacz stronę"
+
+#: ../../packages/ui/src/lib/platform/DateTimeRangePicker.svelte
+#: src/lib/AssociationAlerts.svelte
+msgid "The end must be after the start."
+msgstr "Koniec musi przypadać po początku."
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Could not save the changes. Check the link and try again."
+msgstr "Nie udało się zapisać zmian. Sprawdź link i spróbuj ponownie."
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Alert saved."
+msgstr "Zapisano alert."
+
+#: src/lib/AssociationAlerts.svelte
+#: src/lib/AssociationAlerts.svelte
+msgid "Website alerts"
+msgstr "Alerty na stronie"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Alerts appear only during their display interval. When intervals overlap, the highest priority wins; ties show the most recently started alert."
+msgstr "Alerty są widoczne tylko w wybranym przedziale czasu. Gdy przedziały się nakładają, wygrywa najwyższy priorytet; przy równym priorytecie wyświetlany jest alert z późniejszą datą rozpoczęcia."
+
+#: src/lib/AssociationAlerts.svelte
+msgid "New alert"
+msgstr "Nowy alert"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Edit alert"
+msgstr "Edytuj alert"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Create alert"
+msgstr "Utwórz alert"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Your alert title"
+msgstr "Tytuł Twojego alertu"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Link (optional)"
+msgstr "Link (opcjonalny)"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Use a website path, an HTTP(S) URL, or a mailto link. Leave empty for a banner without a link."
+msgstr "Użyj ścieżki strony, adresu HTTP(S) lub linku mailto. Pozostaw puste, aby baner nie zawierał linku."
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Dates use your local time zone. They are saved as absolute instants."
+msgstr "Daty są wyświetlane w Twojej lokalnej strefie czasowej i zapisywane jako jednoznaczne momenty w czasie."
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Saving…"
+msgstr "Zapisywanie…"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Save alert"
+msgstr "Zapisz alert"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Scheduled"
+msgstr "Zaplanowany"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Expired"
+msgstr "Zakończony"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Active interval"
+msgstr "W trakcie"
+
+#: src/lib/AssociationAlerts.svelte
+#: src/lib/AssociationAlerts.svelte
+msgid "Info"
+msgstr "Informacja"
+
+#: src/lib/AssociationAlerts.svelte
+#: src/lib/AssociationAlerts.svelte
+msgid "Danger"
+msgstr "Niebezpieczeństwo"
+
+#: src/lib/AssociationAlerts.svelte
+#: src/lib/AssociationAlerts.svelte
+msgid "Warning"
+msgstr "Ostrzeżenie"
+
+#: src/lib/AssociationAlerts.svelte
+#: src/lib/AssociationAlerts.svelte
+msgid "Neutral"
+msgstr "Neutralny"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Delete alert"
+msgstr "Usuń alert"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "No alerts yet"
+msgstr "Brak alertów"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Create an announcement and choose when it appears on the website."
+msgstr "Utwórz ogłoszenie i wybierz, kiedy pojawi się na stronie."
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Alert pages"
+msgstr "Strony alertów"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Delete alert?"
+msgstr "Usunąć alert?"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "This removes the announcement from the schedule and the public website."
+msgstr "Ogłoszenie zostanie usunięte z harmonogramu i strony publicznej."
+
+#: ../../packages/ui/src/lib/platform/DateTimeRangePicker.svelte
+msgid "From (local time)"
+msgstr "Od (czas lokalny)"
+
+#: ../../packages/ui/src/lib/platform/DateTimeRangePicker.svelte
+msgid "Choose start date and time"
+msgstr "Wybierz datę i godzinę rozpoczęcia"
+
+#: ../../packages/ui/src/lib/platform/DateTimeRangePicker.svelte
+msgid "To (local time)"
+msgstr "Do (czas lokalny)"
+
+#: ../../packages/ui/src/lib/platform/DateTimeRangePicker.svelte
+msgid "Choose end date and time"
+msgstr "Wybierz datę i godzinę zakończenia"
+
+#: ../../packages/ui/src/lib/platform/DateTimeRangePicker.svelte
+msgid "Display interval"
+msgstr "Przedział wyświetlania"
+
+#: src/lib/AssociationAlerts.svelte
+#: src/lib/AssociationAlerts.svelte
+msgid "Style"
+msgstr "Styl"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Priority"
+msgstr "Priorytet"
+
+#. 0: alert.priority ?? 0
+#: src/lib/AssociationAlerts.svelte
+msgid "Priority: {0}"
+msgstr "Priorytet: {0}"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Control+Enter"
+msgstr "Control+Enter"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Save the English alert before adding translations."
+msgstr "Zapisz angielską wersję alertu przed dodaniem tłumaczeń."
+
+#: src/lib/ContentTranslations.svelte
+msgid "Link"
+msgstr "Link"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Leave blank to use the English link."
+msgstr "Pozostaw puste, aby użyć angielskiego linku."

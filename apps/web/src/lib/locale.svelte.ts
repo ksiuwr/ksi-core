@@ -33,34 +33,3 @@ export async function refreshLocalizedContent(newLocale: Locale) {
   document.cookie = `locale=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
   await Promise.all([loadLocale(newLocale), invalidate('ksi:localized-content')]);
 }
-
-export function getFlagEmoji(countryCode: string): string {
-  if (countryCode.includes('-')) return getFlagEmoji(countryCode.split('-')[1]);
-  return [...countryCode.toUpperCase()]
-    .map((char) => String.fromCodePoint(127397 + char.charCodeAt(0)))
-    .join('');
-}
-
-export interface LocaleOption {
-  code: Locale;
-  emoji: string;
-  formattedLocale: string;
-}
-
-// Shared across the navbar, sidebar, and footer locale pickers so they never
-// drift out of sync with one another. `$derived` can't be exported directly
-// from a module, so consumers wrap these in their own `$derived(...)`.
-export function getAvailableLocales(): LocaleOption[] {
-  return locales
-    .map((code) => ({
-      code,
-      emoji: getFlagEmoji(code),
-      formattedLocale: new Intl.DisplayNames([code], { type: 'language' }).of(code)!
-    }))
-    .toSorted((a, b) => a.formattedLocale.localeCompare(b.formattedLocale));
-}
-
-export function getActiveLocale(): LocaleOption {
-  const available = getAvailableLocales();
-  return available.find((option) => option.code === locale.current) ?? available[0];
-}

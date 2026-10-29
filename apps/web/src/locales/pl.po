@@ -12,12 +12,7 @@ msgstr ""
 msgid "© KSI {0}"
 msgstr "© KSI {0}"
 
-#: src/components/Sidebar.svelte
-msgid "Home"
-msgstr "Strona główna"
-
 #: src/components/Footer.svelte
-#: src/components/Sidebar.svelte
 #: src/routes/+layout.svelte
 msgid "KSI UWr"
 msgstr "KSI UWr"
@@ -34,12 +29,7 @@ msgstr "Pomyślnie utworzono alert"
 msgid "Alert deleted"
 msgstr "Usunięto alert"
 
-#: src/components/Sidebar.svelte
-msgid "Logged in as"
-msgstr "Zalogowano jako"
-
 #: src/components/Navbar.svelte
-#: src/components/Sidebar.svelte
 msgid "Logout"
 msgstr "Wyloguj"
 
@@ -68,7 +58,6 @@ msgstr "Utwórz alert"
 msgid "Cancel"
 msgstr "Anuluj"
 
-#: src/components/Sidebar.svelte
 #: src/routes/dashboard/+page.svelte
 #: src/routes/dashboard/alerts/+page.svelte
 msgid "Alerts"
@@ -76,69 +65,22 @@ msgstr "Alerty"
 
 #: src/components/Footer.svelte
 #: src/components/Navbar.svelte
-#: src/components/Sidebar.svelte
 msgid "Projects"
 msgstr "Projekty"
 
-#: src/components/Sidebar.svelte
-msgid "Zosia"
-msgstr "Zosia"
-
-#: src/components/NavbarAccordion.svelte
-msgid "details"
-msgstr "szczegóły"
-
-#: src/components/Sidebar.svelte
-msgid "Member access"
-msgstr "Dostęp dla członków"
-
-#: src/components/Sidebar.svelte
 #: src/routes/+page.svelte
 #: src/routes/+page.svelte
 msgid "Hour of Code"
 msgstr "Hour of Code"
 
-#: src/components/Sidebar.svelte
-msgid "Machine Learning"
-msgstr "Uczenie maszynowe"
-
 #: src/components/Navbar.svelte
-#: src/components/Navbar.svelte
-#: src/components/Sidebar.svelte
 #: src/routes/dashboard/+page.svelte
 msgid "Dashboard"
 msgstr "Panel"
 
-#: src/components/Sidebar.svelte
-msgid "KET"
-msgstr "KET"
-
-#: src/components/Sidebar.svelte
-msgid "S3 Cache"
-msgstr "S3 Cache"
-
-#: src/components/Sidebar.svelte
-msgid "Login"
-msgstr "Zaloguj"
-
-#: src/components/SidebarAccordion.svelte
-msgid "Collapse"
-msgstr "Zwiń"
-
-#: src/components/SidebarAccordion.svelte
-msgid "Expand"
-msgstr "Rozwiń"
-
 #: src/components/Navbar.svelte
-#: src/components/Navbar.svelte
-#: src/components/Sidebar.svelte
 msgid "Logged out"
 msgstr "Wylogowano"
-
-#. 0: user.name
-#: src/components/Navbar.svelte
-msgid "{0}'s profile picture"
-msgstr "Zdjęcie profilowe użytkownika {0}"
 
 #: src/components/Navbar.svelte
 msgid "KSI"
@@ -393,13 +335,11 @@ msgstr "Odśwież"
 msgid "This cache key contains no URLs."
 msgstr "Ten klucz pamięci podręcznej nie zawiera żadnych adresów URL."
 
-#: src/routes/projects/+page.svelte
-#: src/routes/projects/+page.svelte
+#: src/components/ui/FieldName.svelte
 msgid "Community"
 msgstr "Społeczność"
 
-#: src/routes/projects/+page.svelte
-#: src/routes/projects/+page.svelte
+#: src/components/ui/FieldName.svelte
 msgid "Research"
 msgstr "Badania"
 
@@ -412,60 +352,22 @@ msgstr "Brak pasujących projektów."
 msgid "ZOSIA"
 msgstr "ZOSIA"
 
-#: src/components/DynamicGallery.svelte
-msgid "The gallery could not be loaded."
-msgstr "Nie udało się wczytać galerii."
-
-#: src/components/DynamicGallery.svelte
-msgid "Loading gallery"
-msgstr "Wczytywanie galerii"
-
-#: src/components/DynamicGallery.svelte
-msgid "Gallery unavailable"
-msgstr "Galeria niedostępna"
-
-#: src/components/DynamicGallery.svelte
-msgid "<0/> Try again"
-msgstr "<0/> Spróbuj ponownie"
-
-#: src/components/DynamicGallery.svelte
-msgid "No photographs have been added yet."
-msgstr "Nie dodano jeszcze żadnych zdjęć."
-
-#: src/components/Gallery.svelte
-msgid "Image viewer"
-msgstr "Przeglądarka obrazów"
-
-#: src/components/Gallery.svelte
-msgid "Close image viewer"
-msgstr "Zamknij przeglądarkę obrazów"
-
-#. 0: currentImageIndex + 1; 1: images.length
-#: src/components/Gallery.svelte
-msgid "Gallery image {0} of {1}"
-msgstr "Zdjęcie w galerii {0} z {1}"
-
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
-#: src/components/Gallery.svelte
 msgid "Previous image"
 msgstr "Poprzednie zdjęcie"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
-#: src/components/Gallery.svelte
 msgid "Next image"
 msgstr "Następne zdjęcie"
-
-#. 0: i * 3 + splitI + 1
-#: src/components/Gallery.svelte
-msgid "Gallery thumbnail {0}"
-msgstr "Miniatura zdjęcia w galerii {0}"
 
 #. 0: page.status
 #. 0: data.article.title
 #. 0: data.member.name
+#. 0: project.name
 #: src/routes/+error.svelte
 #: src/routes/articles/[slug]/+page.svelte
 #: src/routes/members/[id]/+page.svelte
+#: src/routes/projects/[slug]/+page.svelte
 msgid "{0} · KSI UWr"
 msgstr "{0} · KSI UWr"
 
@@ -513,13 +415,7 @@ msgstr "Odkrywaj"
 msgid "Find us online"
 msgstr "Znajdź nas w sieci"
 
-#: src/components/Footer.svelte
-msgid "<0/> Source code <1/>"
-msgstr "<0/> Kod źródłowy <1/>"
-
 #: src/components/Navbar.svelte
-#: src/components/Navbar.svelte
-#: src/components/ui/LocaleSwitcher.svelte
 msgid "Change language"
 msgstr "Zmień język"
 
@@ -527,22 +423,15 @@ msgstr "Zmień język"
 msgid "Manage public announcements and perform other tasks."
 msgstr "Zarządzaj ogłoszeniami publicznymi i wykonuj inne zadania."
 
-#: src/components/NavbarAccordion.svelte
-msgid "cursor-pointer self-end underline"
-msgstr "cursor-pointer self-end underline"
-
 #. 0: commitHash
 #: src/components/Footer.svelte
 msgid "Commit {0}"
 msgstr "Rewizja {0}"
 
 #: src/components/Navbar.svelte
+#: src/components/Navbar.svelte
 msgid "<0/> Sign in"
 msgstr "<0/> Zaloguj się"
-
-#: src/routes/projects/+page.svelte
-msgid "Explore our projects <0/>"
-msgstr "Poznaj nasze projekty <0/>"
 
 #: src/components/Navbar.svelte
 msgid "Projects <0/>"
@@ -572,14 +461,6 @@ msgstr "Zorganizowane konferencje"
 msgid "On-site lectures hosted"
 msgstr "Zorganizowane wykłady stacjonarne"
 
-#: src/components/Goal.svelte
-msgid "( technically )"
-msgstr "( technicznie )"
-
-#: src/components/Goal.svelte
-msgid "( socially )"
-msgstr "( społecznie )"
-
 #: src/routes/+page.svelte
 msgid "Reading groups"
 msgstr "Dyskusje o pracach naukowych"
@@ -604,10 +485,6 @@ msgstr "Projekty badawcze"
 msgid "We work on research problems with faculty."
 msgstr "Pracujemy nad problemami badawczymi z pracownikami naukowymi."
 
-#: src/components/Goal.svelte
-msgid "( scientifically )"
-msgstr "( naukowo )"
-
 #: src/components/Navbar.svelte
 msgid "Our winter camp for computer science students in Lower Silesia."
 msgstr "Nasz zimowy obóz dla studentów informatyki na Dolnym Śląsku."
@@ -616,16 +493,14 @@ msgstr "Nasz zimowy obóz dla studentów informatyki na Dolnym Śląsku."
 msgid "A summer version of ZOSIA, in preparation."
 msgstr "Letnia wersja ZOSI. W przygotowaniu."
 
-#: src/components/Navbar.svelte
-msgid "Soon"
-msgstr "Wkrótce"
+#~ msgid "Soon"
+#~ msgstr "Wkrótce"
 
 #: src/components/Navbar.svelte
 msgid "The code behind this website."
 msgstr "Kod tej strony."
 
 #: src/components/Navbar.svelte
-#: src/components/Sidebar.svelte
 msgid "Social"
 msgstr "Społeczność"
 
@@ -634,7 +509,6 @@ msgid "Camps, events, and meetups."
 msgstr "Obozy, wydarzenia i spotkania."
 
 #: src/components/Navbar.svelte
-#: src/components/Sidebar.svelte
 msgid "Technical"
 msgstr "Technika"
 
@@ -643,7 +517,6 @@ msgid "Software and tools built by our members."
 msgstr "Oprogramowanie i narzędzia tworzone przez członków koła."
 
 #: src/components/Navbar.svelte
-#: src/components/Sidebar.svelte
 msgid "Scientific research"
 msgstr "Badania naukowe"
 
@@ -651,6 +524,7 @@ msgstr "Badania naukowe"
 msgid "Paper discussions and research with faculty."
 msgstr "Dyskusje o pracach naukowych i badania z pracownikami naukowymi."
 
+#: src/components/Navbar.svelte
 #: src/components/Navbar.svelte
 msgid "See more projects"
 msgstr "Zobacz więcej projektów"
@@ -660,7 +534,6 @@ msgid "See more"
 msgstr "Zobacz więcej"
 
 #: src/components/Navbar.svelte
-#: src/components/Sidebar.svelte
 msgid "Groups"
 msgstr "Grupy"
 
@@ -685,13 +558,6 @@ msgid "Software, research, and events organized by KSI members."
 msgstr "Oprogramowanie, badania i wydarzenia tworzone przez członków KSI."
 
 #: src/routes/projects/+page.svelte
-msgid "Find a project to join."
-msgstr "Znajdź projekt dla siebie."
-
-#: src/routes/projects/+page.svelte
-msgid "Browse projects by topic<0/>or search by name."
-msgstr "Przeglądaj projekty według dziedziny<0/>lub szukaj po nazwie."
-
 #: src/routes/projects/+page.svelte
 msgid "Search projects..."
 msgstr "Szukaj projektów..."
@@ -700,11 +566,11 @@ msgstr "Szukaj projektów..."
 msgid "Try another search or explore a different field."
 msgstr "Spróbuj innego hasła lub wybierz inną dziedzinę."
 
-#: src/routes/projects/+page.svelte
+#: src/components/ui/ContactBanner.svelte
 msgid "Have a project idea?"
 msgstr "Masz pomysł na projekt?"
 
-#: src/routes/projects/+page.svelte
+#: src/components/ui/ContactBanner.svelte
 msgid "Tell us about it <0/>"
 msgstr "Napisz do nas <0/>"
 
@@ -716,10 +582,6 @@ msgstr "Wyświetlono {0} z {1} projektów"
 #: src/routes/+error.svelte
 msgid "Try again or return to the home page."
 msgstr "Spróbuj ponownie lub wróć na stronę główną."
-
-#: src/components/ui/GithubProjectCard.svelte
-msgid "View on GitHub <0/>"
-msgstr "Zobacz na GitHubie <0/>"
 
 #: src/routes/+page.svelte
 msgid "More projects coming soon."
@@ -738,11 +600,6 @@ msgid "Our winter camp in the mountains of Lower Silesia, with talks on research
 msgstr "Nasz zimowy obóz w górach na Dolnym Śląsku. Są wykłady o badaniach i zainteresowaniach oraz czas, żeby pobyć razem."
 
 #: src/routes/+page.svelte
-#: src/routes/+page.svelte
-msgid "Read more"
-msgstr "Czytaj dalej"
-
-#: src/routes/+page.svelte
 msgid "We teach children programming in one-hour workshops."
 msgstr "Uczymy dzieci programowania na godzinnych warsztatach."
 
@@ -758,10 +615,6 @@ msgstr "Nasze projekty"
 msgid "Research at KSI"
 msgstr "Badania w KSI"
 
-#: src/routes/projects/+page.svelte
-msgid "Project"
-msgstr "Projekt"
-
 #: src/routes/+page.svelte
 msgid "KSI Members"
 msgstr "Członkowie KSI"
@@ -775,29 +628,9 @@ msgstr "v{0}"
 msgid "Toggle mobile menu"
 msgstr "Przełącz menu mobilne"
 
-#: src/components/Navbar.svelte
-msgid "Sign in"
-msgstr "Zaloguj się"
-
-#: src/routes/projects/+page.svelte
-msgid "( our work )"
-msgstr "( nasze działania )"
-
-#: src/routes/projects/+page.svelte
-msgid "( explore )"
-msgstr "( odkrywaj )"
-
-#: src/routes/projects/+page.svelte
-msgid "Discover the project <0/>"
-msgstr "Poznaj projekt <0/>"
-
 #: src/routes/projects/+page.svelte
 msgid "<0/> Clear filters"
 msgstr "<0/> Wyczyść filtry"
-
-#: src/routes/projects/+page.svelte
-msgid "( what's next? )"
-msgstr "( co dalej? )"
 
 #: src/routes/projects/[slug]/+page.svelte
 msgid "<0/> Project settings"
@@ -808,10 +641,6 @@ msgid "<0/> Join project"
 msgstr "<0/> Dołącz do projektu"
 
 #: src/routes/projects/[slug]/+page.svelte
-msgid "Open project workspace"
-msgstr "Otwórz przestrzeń projektu"
-
-#: src/routes/projects/[slug]/+page.svelte
 msgid "Your join request has been sent."
 msgstr "Prośba o dołączenie została wysłana."
 
@@ -819,11 +648,8 @@ msgstr "Prośba o dołączenie została wysłana."
 msgid "You have joined the project."
 msgstr "Dołączono do projektu."
 
-#: src/routes/+page.svelte
-msgid "Open project <0/>"
-msgstr "Otwórz projekt <0/>"
-
 #: src/components/Footer.svelte
+#: src/components/Navbar.svelte
 #: src/routes/articles/+page.svelte
 #: src/routes/members/[id]/+page.svelte
 #: src/routes/projects/[slug]/+page.svelte
@@ -859,8 +685,7 @@ msgstr "<0/>LinkedIn"
 msgid "No published articles yet."
 msgstr "Nie ma jeszcze opublikowanych artykułów."
 
-#: src/routes/projects/+page.svelte
-#: src/routes/projects/+page.svelte
+#: src/components/ui/FieldName.svelte
 msgid "Engineering"
 msgstr "Inżynieria"
 
@@ -955,3 +780,64 @@ msgstr "utworzył(a) to zadanie"
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
 msgid "opened this thread"
 msgstr "utworzył(a) ten wątek"
+
+#: src/components/Navbar.svelte
+msgid "Main navigation"
+msgstr "Nawigacja główna"
+
+#: src/components/Navbar.svelte
+msgid "<0/> Dashboard"
+msgstr "<0/> Panel"
+
+#: src/components/Navbar.svelte
+msgid "<0/> Articles"
+msgstr "<0/> Artykuły"
+
+#: src/components/Navbar.svelte
+msgid "<0/> Logout"
+msgstr "<0/> Wyloguj"
+
+#: src/components/Footer.svelte
+msgid "<0/> Source code"
+msgstr "<0/> Kod źródłowy"
+
+#: src/routes/+page.svelte
+msgid "<0/> Student association at the University of Wrocław"
+msgstr "<0/> Koło naukowe na Uniwersytecie Wrocławskim"
+
+#: src/routes/+page.svelte
+#: src/routes/+page.svelte
+msgid "Read more <0/>"
+msgstr "Czytaj dalej <0/>"
+
+#: src/routes/+page.svelte
+msgid "See more projects <0/>"
+msgstr "Zobacz więcej projektów <0/>"
+
+#: src/routes/projects/+page.svelte
+msgid "<0/>Our work"
+msgstr "<0/>Nasze działania"
+
+#: src/routes/projects/+page.svelte
+msgid "Filter by field"
+msgstr "Filtruj według obszaru"
+
+#: src/routes/projects/[slug]/+page.svelte
+msgid "<0/> Open project workspace"
+msgstr "<0/> Otwórz przestrzeń projektu"
+
+#: src/routes/projects/[slug]/+page.svelte
+msgid "<0/>All projects"
+msgstr "<0/>Wszystkie projekty"
+
+#: src/routes/articles/+page.svelte
+msgid "Articles · KSI UWr"
+msgstr "Artykuły · KSI UWr"
+
+#: src/routes/articles/+page.svelte
+msgid "<0/>Blog"
+msgstr "<0/>Blog"
+
+#: src/routes/articles/+page.svelte
+msgid "News, write-ups, and recaps from KSI members."
+msgstr "Aktualności, artykuły i relacje członków KSI."

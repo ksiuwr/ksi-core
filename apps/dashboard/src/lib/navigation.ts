@@ -149,7 +149,7 @@ export function parseDashboardPath(pathname: string): {
     if (segments.length === 2) {
       if (slug === 'tasks') return { workspace: 'association', projectSlug: '', tab: 'board' };
       const tab = pathViews[slug];
-      return tab && !['settings', 'permissions', 'previews'].includes(tab)
+      return tab && !['permissions', 'previews'].includes(tab)
         ? { workspace: 'association', projectSlug: '', tab }
         : null;
     }

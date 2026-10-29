@@ -6,10 +6,16 @@
 
   let {
     value = $bindable(''),
-    disabled = false
+    disabled = false,
+    label,
+    placeholder,
+    defaultTime = '23:59'
   }: {
     value?: string;
     disabled?: boolean;
+    label?: string;
+    placeholder?: string;
+    defaultTime?: string;
   } = $props();
 
   const language = $derived(preferences.language);
@@ -42,8 +48,8 @@
   let warping = false;
   let syncing = false;
 
-  const fieldLabel = $derived(pl ? 'Termin (czas lokalny)' : 'Deadline (local time)');
-  const emptyLabel = $derived(pl ? 'Brak terminu' : 'No deadline');
+  const fieldLabel = $derived(label ?? (pl ? 'Termin (czas lokalny)' : 'Deadline (local time)'));
+  const emptyLabel = $derived(placeholder ?? (pl ? 'Brak terminu' : 'No deadline'));
   const doneLabel = $derived(pl ? 'Gotowe' : 'Done');
   const nextLabel = $derived(pl ? 'Dalej' : 'Next');
   const closeLabel = $derived(pl ? 'Zamknij' : 'Close');
@@ -73,7 +79,7 @@
 
   /** The draft stays local until the user confirms with "Done"; closing discards it. */
   function commit() {
-    if (draftDate) value = `${draftDate}T${draftTime || '23:59'}`;
+    if (draftDate) value = `${draftDate}T${draftTime || defaultTime}`;
   }
 
   function pad(n: number) {
@@ -125,7 +131,7 @@
     if (disabled || !panel || panel.matches(':popover-open')) return;
     const parts = partsOf(value);
     draftDate = parts.date;
-    draftTime = parts.time || (parts.date ? '23:59' : '');
+    draftTime = parts.time || (parts.date ? defaultTime : '');
     focusDay = parts.date || today;
     monthDirection = 1;
     modeDirection = -1;
@@ -297,7 +303,7 @@
   }
   function pick(day: string) {
     draftDate = day;
-    draftTime ||= '23:59';
+    draftTime ||= defaultTime;
     focusDay = day;
     // The date is the only thing left to decide in the first step; move on.
     void showTime();
@@ -305,7 +311,7 @@
   function preset(offset: number) {
     const date = addDays(today, offset);
     draftDate = hourless(date);
-    draftTime ||= '23:59';
+    draftTime ||= defaultTime;
     focusDay = draftDate;
     const next = firstOfMonth(date);
     monthDirection = next.getTime() >= cursor.getTime() ? 1 : -1;
@@ -337,7 +343,7 @@
   async function showTime() {
     modeDirection = 1;
     step = 'time';
-    draftTime ||= '23:59';
+    draftTime ||= defaultTime;
     await tick();
     wheelReset();
     place();

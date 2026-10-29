@@ -8,36 +8,50 @@
   <title>{page.status} · KSI UWr</title>
 </svelte:head>
 
-<main class="bg-base-100 flex min-h-[calc(100vh-56px)] w-full flex-col justify-center">
-  <div class="mx-auto w-full max-w-225 px-5 py-15">
-    <div class="flex flex-wrap items-center gap-10">
-      <div class="flex min-w-75 flex-1 flex-col gap-4">
-        <h1
-          class="font-anybody text-base-content mb-5 text-[clamp(40px,8vw,64px)] leading-[1.1] font-bold tracking-tight"
-        >
-          We couldn't load this page.
-        </h1>
-        <p class="text-base-content/70 mb-8 max-w-150 text-[18px] leading-relaxed">
-          Try again or return to the home page.
-        </p>
-        <div class="flex flex-wrap gap-3">
-          <a href={resolve('/')} class="btn gap-2">
-            <ArrowLeft class="size-4" /> Return home
-          </a>
-        </div>
-
-        <p class="text-base-content/40 max-w-150 font-mono text-sm">
-          {page.error?.message ||
-            'The page may have moved, or something went wrong while loading it.'}
-        </p>
-      </div>
-      <div class="flex min-w-75 flex-1 justify-center md:justify-end">
-        <div
-          class="text-base-content/5 font-anybody text-[clamp(10rem,20vw,15rem)] leading-none font-bold tracking-tighter"
-        >
-          {page.status}
-        </div>
-      </div>
+<main class="error-page relative isolate flex flex-1 items-center overflow-hidden">
+  <div class="page-container py-20">
+    <div class="mx-auto flex max-w-xl flex-col items-center text-center">
+      <p
+        class="status font-display text-[clamp(7rem,20vw,11rem)] leading-none font-bold tracking-[-0.06em]"
+        aria-hidden="true"
+      >
+        {page.status}
+      </p>
+      <h1 class="mt-4 text-[clamp(28px,5vw,40px)] tracking-tight">We couldn't load this page.</h1>
+      <p class="text-muted mt-3 text-lg leading-relaxed">Try again or return to the home page.</p>
+      <a href={resolve('/')} class="btn btn-lg mt-8">
+        <ArrowLeft /> Return home
+      </a>
+      <p
+        class="border-line bg-surface text-muted mt-10 rounded-lg border px-3 py-2 font-mono text-xs wrap-anywhere"
+      >
+        {page.error?.message ||
+          'The page may have moved, or something went wrong while loading it.'}
+      </p>
     </div>
   </div>
 </main>
+
+<style>
+  .error-page::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image: radial-gradient(
+      color-mix(in oklch, var(--ink) 14%, transparent) 1px,
+      transparent 1px
+    );
+    background-size: 22px 22px;
+    mask-image: radial-gradient(ellipse 50% 50% at 50% 40%, #000, transparent 80%);
+  }
+  .status {
+    background: linear-gradient(
+      to bottom,
+      var(--ink),
+      color-mix(in oklch, var(--ink) 8%, transparent)
+    );
+    background-clip: text;
+    color: transparent;
+  }
+</style>
