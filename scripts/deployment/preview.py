@@ -203,7 +203,11 @@ def render(branch: str, commit: str, images: dict[str, str], output: Path) -> st
     rules = []
     for host, app in [("api", "server"), ("ws", "server"), ("web", "web"), ("auth", "auth"), ("dash", "dashboard")]:
         rules.append({"host": hosts[host], "http": {"paths": [{"path": "/", "pathType": "Prefix", "backend": {"service": {"name": f"{slug}-{app}", "port": {"number": 3000}}}}]}})
-    workloads.append(resource("Ingress", slug, {"ingressClassName": "nginx", "tls": [{"hosts": list(hosts.values())}], "rules": rules}, "networking.k8s.io/v1", labels))
+    ingress = resource("Ingress", slug, {"ingressClassName": "nginx", "tls": [{"hosts": list(hosts.values())}], "rules": rules}, "networking.k8s.io/v1", labels)
+    # As in production, dashboard pages send response headers larger than nginx's default 4k buffer,
+    # which otherwise fails them with 502 Bad Gateway.
+    ingress["metadata"]["annotations"] = {"nginx.ingress.kubernetes.io/proxy-buffer-size": "16k"}
+    workloads.append(ingress)
     output.mkdir(parents=True, exist_ok=True)
     for name, value in [("prerequisite", prerequisite), ("provision", provision), ("migration", migration), ("seed", seed), ("workloads", {"apiVersion": "v1", "kind": "List", "items": workloads})]:
         (output / f"{name}.json").write_text(json.dumps(value, indent=2) + "\n")

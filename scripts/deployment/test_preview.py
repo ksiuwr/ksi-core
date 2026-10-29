@@ -55,6 +55,10 @@ class PreviewTest(unittest.TestCase):
             )
             ingress = next(item for item in workloads if item["kind"] == "Ingress")
             self.assertEqual(ingress["spec"]["ingressClassName"], "nginx")
+            self.assertEqual(
+                ingress["metadata"]["annotations"]["nginx.ingress.kubernetes.io/proxy-buffer-size"],
+                "16k",
+            )
             self.assertTrue(all(rule["host"].startswith(slug + "-") for rule in ingress["spec"]["rules"]))
             self.assertEqual(set(ingress["spec"]["tls"][0]["hosts"]), set(release["hosts"].values()))
             seed = json.loads((output / "seed.json").read_text())
