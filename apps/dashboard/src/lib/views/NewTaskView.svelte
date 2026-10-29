@@ -5,6 +5,7 @@
   import Assignees from '$lib/Assignees.svelte';
   import { api, errorMessage } from '$lib/api';
   import { dashboardPath, taskPath, type Workspace } from '$lib/navigation';
+  import { labelColorStyle } from 'shared/label-colors';
   import {
     defaultStatuses,
     type BoardData,
@@ -146,7 +147,7 @@
               class="label-chip"
               class:selected
               aria-pressed={selected}
-              style:--label-color={label.color}
+              style={labelColorStyle(label.color)}
               onclick={() => {
                 selectedLabels = selected
                   ? selectedLabels.filter((name) => name !== label.name)
@@ -190,15 +191,15 @@
     padding: 5px 8px;
     border: 1px solid var(--line);
     border-radius: var(--radius-full);
-    background: transparent;
-    color: var(--muted);
+    background: var(--label-bg-base, transparent);
+    color: var(--label-fg, var(--muted));
     font-size: 11px;
     cursor: pointer;
   }
   .label-chip.selected {
     border-color: color-mix(in srgb, var(--label-color) 55%, var(--line));
-    background: color-mix(in srgb, var(--label-color) 12%, var(--surface));
-    color: var(--ink);
+    background: var(--label-bg-soft, color-mix(in srgb, var(--label-color) 12%, var(--surface)));
+    color: var(--label-fg, var(--ink));
   }
   .label-dot {
     width: 8px;

@@ -15,6 +15,7 @@
   } from '@lucide/svelte';
   import type { ContentChange } from 'shared/activity';
   import { taskActivitySummary } from 'shared/task-activity';
+  import { labelColorStyle } from 'shared/label-colors';
   import type { AssignmentMember } from './Assignees.svelte';
   import MemberPreview from '@ksi-core/ui/platform/MemberPreview.svelte';
   let {
@@ -123,13 +124,12 @@
         {pl ? 'zmienił(a) nazwę etykiety z' : 'renamed the label from'}
         <del class="title-value">{summary.before}</del>
         {pl ? 'na' : 'to'}
-        <span
-          class="activity-label"
-          style:--label-color={labelInfo(summary.after)?.color || '#6b7280'}>{summary.after}</span
+        <span class="activity-label" style={labelColorStyle(labelInfo(summary.after)?.color)}
+          >{summary.after}</span
         >
       {:else if summary.kind === 'label-color'}
         {pl ? 'zmienił(a) kolor etykiety' : 'changed the color of the'}
-        <span class="activity-label" style:--label-color={summary.after}>{summary.label}</span>
+        <span class="activity-label" style={labelColorStyle(summary.after)}>{summary.label}</span>
         {pl ? 'z' : 'label from'}
         <span class="color-value"
           ><span class="color-swatch" style:background={summary.before}
@@ -151,9 +151,8 @@
             : summary.operation === 'removed'
               ? 'removed the description of the'
               : 'changed the description of the'}
-        <span
-          class="activity-label"
-          style:--label-color={labelInfo(summary.label)?.color || '#6b7280'}>{summary.label}</span
+        <span class="activity-label" style={labelColorStyle(labelInfo(summary.label)?.color)}
+          >{summary.label}</span
         >{#if !pl}
           label{/if}
       {:else if summary.kind === 'assignee-added' || summary.kind === 'assignee-removed'}
@@ -184,7 +183,7 @@
             : 'etykiety'
           : 'the'}{' '}{#each summary.labels as name}{@const label = labelInfo(name)}<span
             class="activity-label"
-            style:--label-color={label?.color || '#6b7280'}
+            style={labelColorStyle(label?.color)}
             title={label?.description || name}>{name}</span
           >{' '}{/each}
         {#if !pl}{summary.labels.length === 1 ? 'label' : 'labels'}{/if}
@@ -247,9 +246,9 @@
     display: inline;
     padding: 1px 7px;
     border-radius: 12px;
-    background: color-mix(in srgb, var(--label-color) 14%, var(--surface));
+    background: var(--label-bg, color-mix(in srgb, var(--label-color) 14%, var(--surface)));
     border: 1px solid color-mix(in srgb, var(--label-color) 45%, transparent);
-    color: hsl(from var(--label-color) h min(100, calc(s * 1.25)) clamp(30, calc(l + 18), 65));
+    color: var(--label-fg, var(--ink));
     font-weight: 500;
     font-size: 12px;
     box-decoration-break: clone;

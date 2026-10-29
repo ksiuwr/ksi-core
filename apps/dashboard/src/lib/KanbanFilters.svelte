@@ -11,6 +11,7 @@
     X
   } from '@lucide/svelte';
   import Dropdown from '@ksi-core/ui/platform/Dropdown.svelte';
+  import { labelColorStyle } from 'shared/label-colors';
   import Assignees, { type AssignmentMember } from './Assignees.svelte';
   import {
     activeFilterCount,
@@ -317,7 +318,7 @@
             checked={filters.labels.includes(label.name)}
             onchange={() => onchange({ ...filters, labels: toggle(filters.labels, label.name) })}
           />
-          <span class="label-badge" style:--label-color={label.color || '#6b7280'}>
+          <span class="label-badge" style={labelColorStyle(label.color)}>
             <span class="label-dot"></span>
             <span class="label-name">{label.name}</span>
           </span>

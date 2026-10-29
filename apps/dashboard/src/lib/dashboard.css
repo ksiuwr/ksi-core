@@ -1598,7 +1598,7 @@ summary,
   line-height: 1.2;
   padding: 2px 7px;
   border-radius: 12px;
-  background: color-mix(in srgb, var(--label-color, #6b7280) 14%, var(--surface));
+  background: var(--label-bg, color-mix(in srgb, var(--label-color, #6b7280) 14%, var(--surface)));
   border: 1px solid color-mix(in srgb, var(--label-color, #6b7280) 45%, transparent);
   max-width: 100%;
   white-space: nowrap;
@@ -1607,9 +1607,7 @@ summary,
 }
 .label-badge,
 .label-chip {
-  color: hsl(
-    from var(--label-color, #6b7280) h min(100, calc(s * 1.25)) clamp(30, calc(l + 18), 65)
-  );
+  color: var(--label-fg, var(--ink));
 }
 .label-dot {
   width: 6px;
@@ -1637,16 +1635,22 @@ summary,
   font-weight: 500;
   padding: 4px 10px;
   border-radius: 14px;
-  background: var(--surface);
+  background: var(--label-bg-base, var(--surface));
   border: 1px solid var(--control-border, var(--line));
   cursor: pointer;
 }
 .label-chip:hover {
   border-color: var(--label-color, #6b7280);
-  background: color-mix(in srgb, var(--label-color, #6b7280) 10%, var(--surface));
+  background: var(
+    --label-bg-hover,
+    color-mix(in srgb, var(--label-color, #6b7280) 10%, var(--surface))
+  );
 }
 .label-chip.selected {
-  background: color-mix(in srgb, var(--label-color, #6b7280) 22%, var(--surface));
+  background: var(
+    --label-bg-selected,
+    color-mix(in srgb, var(--label-color, #6b7280) 22%, var(--surface))
+  );
   border-color: var(--label-color, #6b7280);
   font-weight: 600;
 }

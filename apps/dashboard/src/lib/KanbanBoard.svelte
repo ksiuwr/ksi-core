@@ -3,6 +3,7 @@
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
   import { formatDateTime } from 'shared/format';
+  import { PRESET_LABEL_COLORS, labelColorStyle } from 'shared/label-colors';
   import { onMount, tick, untrack } from 'svelte';
   import Assignees, { type AssignmentMember } from './Assignees.svelte';
   import KanbanFilters from './KanbanFilters.svelte';
@@ -75,19 +76,6 @@
     reportError: (error: string) => void;
   } = $props();
   const language = $derived(preferences.language);
-
-  const PRESET_LABEL_COLORS = [
-    '#6b7280', // Default Gray
-    '#ef4444', // Red
-    '#f97316', // Orange
-    '#f59e0b', // Amber
-    '#10b981', // Emerald
-    '#06b6d4', // Cyan
-    '#3b82f6', // Blue
-    '#8b5cf6', // Violet
-    '#ec4899', // Pink
-    '#374151' // Slate
-  ];
 
   const normalizedLabels = $derived<BoardLabel[]>(
     boardLabels.map((t) =>
@@ -671,7 +659,7 @@
         {#each normalizedLabels as label}
           <div class="manage-label-item">
             <div class="manage-label-info">
-              <span class="label-badge" style:--label-color={label.color || '#6b7280'}>
+              <span class="label-badge" style={labelColorStyle(label.color)}>
                 <span class="label-dot"></span>
                 <span class="label-name">{label.name}</span>
               </span>
@@ -824,7 +812,7 @@
                   {@const label = labelMap.get(labelName)}
                   <span
                     class="label-badge"
-                    style:--label-color={label?.color || '#6b7280'}
+                    style={labelColorStyle(label?.color)}
                     title={label?.description || labelName}
                   >
                     <span class="label-dot"></span>
@@ -908,7 +896,7 @@
 
     <div class="label-preview-card">
       <span class="preview-title">{'Preview'}:</span>
-      <span class="label-badge" style:--label-color={labelDraftColor || '#6b7280'}>
+      <span class="label-badge" style={labelColorStyle(labelDraftColor)}>
         <span class="label-dot"></span>
         <span class="label-name">{labelDraftName.trim() || 'Label name'}</span>
       </span>
@@ -1103,7 +1091,10 @@
     line-height: 1.2;
     padding: 2px 7px;
     border-radius: 12px;
-    background: color-mix(in srgb, var(--label-color, #6b7280) 14%, var(--surface));
+    background: var(
+      --label-bg,
+      color-mix(in srgb, var(--label-color, #6b7280) 14%, var(--surface))
+    );
     border: 1px solid color-mix(in srgb, var(--label-color, #6b7280) 45%, transparent);
     max-width: 100%;
     white-space: nowrap;
@@ -1111,10 +1102,7 @@
     text-overflow: ellipsis;
   }
   .label-badge {
-    /* Keep neutral colors grey while lifting dark colors and enriching colored labels. */
-    color: hsl(
-      from var(--label-color, #6b7280) h min(100, calc(s * 1.25)) clamp(30, calc(l + 18), 65)
-    );
+    color: var(--label-fg, var(--ink));
   }
   .label-dot {
     width: 6px;
