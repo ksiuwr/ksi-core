@@ -434,7 +434,7 @@ msgid "Subject"
 msgstr "Temat"
 
 #: src/lib/ThreadAside.svelte
-#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/DocInfo.svelte
 #: src/lib/views/NewThreadView.svelte
 #: src/lib/views/NewThreadView.svelte
 msgid "Visibility"
@@ -706,6 +706,7 @@ msgid "Delete status"
 msgstr "Usuń status"
 
 #: src/lib/AssociationAlerts.svelte
+#: src/lib/docs/DocPage.svelte
 #: src/lib/views/TaskView.svelte
 #: src/lib/views/ThreadView.svelte
 msgid "Edit"
@@ -1430,6 +1431,7 @@ msgid "Commit"
 msgstr "Commit"
 
 #: src/lib/PreviewCredentials.svelte
+#: src/lib/docs/DocInfo.svelte
 #: src/lib/docs/DocPage.svelte
 #: src/lib/docs/Docs.svelte
 msgid "Updated"
@@ -1682,7 +1684,7 @@ msgstr "Utworzono"
 #: src/lib/ContentHistory.svelte
 #: src/lib/TaskAside.svelte
 #: src/lib/ThreadAside.svelte
-#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/DocInfo.svelte
 msgid "Created"
 msgstr "Utworzono"
 
@@ -2804,7 +2806,6 @@ msgstr "Akceptuj lub odrzucaj propozycje zmian w dokumentacji i edytuj strony be
 msgid "Choose article and documentation access defaults and create named groups for additional project permissions."
 msgstr "Wybierz domyślny dostęp do artykułów i dokumentacji oraz utwórz nazwane grupy z dodatkowymi uprawnieniami w projekcie."
 
-#: src/lib/docs/DocPage.svelte
 #: src/lib/docs/Docs.svelte
 #: src/lib/docs/Docs.svelte
 #: src/routes/+layout.svelte
@@ -2818,7 +2819,7 @@ msgstr "Dokumentacja"
 
 #: src/lib/docs/DocContributors.svelte
 #: src/lib/docs/DocContributors.svelte
-#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/DocInfo.svelte
 #: src/lib/docs/Docs.svelte
 msgid "Contributors"
 msgstr "Autorzy"
@@ -2837,7 +2838,7 @@ msgstr "Strony"
 #: src/lib/docs/DocContributors.svelte
 #: src/lib/docs/DocEditor.svelte
 #: src/lib/docs/DocHistory.svelte
-#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/DocInfo.svelte
 msgid "Changes"
 msgstr "Zmiany"
 
@@ -2878,7 +2879,6 @@ msgid "No contributions yet"
 msgstr "Brak wkładu"
 
 #: src/lib/docs/DocEditor.svelte
-#: src/lib/docs/DocPage.svelte
 msgid "Edit page"
 msgstr "Edytuj stronę"
 
@@ -3068,11 +3068,12 @@ msgid "Loading version"
 msgstr "Wczytywanie wersji"
 
 #: src/lib/docs/DocHistory.svelte
-#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/DocInfo.svelte
 msgid "Version"
 msgstr "Wersja"
 
 #: src/lib/docs/DocHistory.svelte
+#: src/lib/docs/DocPage.svelte
 #: src/lib/docs/Docs.svelte
 #: src/lib/docs/Docs.svelte
 msgid "Public"
@@ -3094,23 +3095,23 @@ msgstr "Skopiuj link do tej sekcji"
 msgid "Link copied"
 msgstr "Skopiowano link"
 
-#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/DocInfo.svelte
 msgid "Public on the website"
 msgstr "Publiczna na stronie KSI"
 
-#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/DocInfo.svelte
 msgid "Members only"
 msgstr "Tylko dla członków"
 
-#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/DocInfo.svelte
 msgid "History"
 msgstr "Historia"
 
-#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/DocInfo.svelte
 msgid "View on website"
 msgstr "Zobacz na stronie"
 
-#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/DocInfo.svelte
 msgid "Pending suggestions"
 msgstr "Oczekujące propozycje"
 
@@ -3242,9 +3243,8 @@ msgstr "Strony dokumentacji"
 msgid "No pages yet."
 msgstr "Brak stron."
 
-#: src/lib/docs/Docs.svelte
-msgid "Collaboration"
-msgstr "Współpraca"
+#~ msgid "Collaboration"
+#~ msgstr "Współpraca"
 
 #: src/lib/docs/Docs.svelte
 #: src/lib/docs/Docs.svelte
@@ -3266,3 +3266,16 @@ msgstr "Brak dokumentacji"
 #: src/lib/docs/Docs.svelte
 msgid "Write down how things work here, so the next team does not have to start from scratch."
 msgstr "Zapisz, jak tu wszystko działa, żeby kolejny zespół nie zaczynał od zera."
+
+#~ msgid "Page info"
+#~ msgstr ""
+
+#: src/lib/docs/DocInfo.svelte
+#: src/lib/docs/DocInfo.svelte
+#: src/lib/docs/DocInfo.svelte
+msgid "Page details"
+msgstr "Szczegóły strony"
+
+#: src/lib/docs/DocInfo.svelte
+msgid "Details"
+msgstr "Szczegóły"

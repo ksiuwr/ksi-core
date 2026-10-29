@@ -110,29 +110,32 @@
       {:else}
         <p class="docs-nav-empty">{'No pages yet.'}</p>
       {/each}
-      <p class="docs-nav-label">{'Collaboration'}</p>
-      <a
-        class="docs-nav-link"
-        class:active={view === 'suggestions' || view === 'suggestion'}
-        href={docsPath(slug, 'suggestions')}
-        ><GitPullRequestArrow size={15} aria-hidden="true" /><span>{'Suggestions'}</span
-        >{#if index.pendingSuggestions}<span class="docs-nav-count">{index.pendingSuggestions}</span
-          >{/if}</a
-      >
-      <a
-        class="docs-nav-link"
-        class:active={view === 'contributors'}
-        href={docsPath(slug, 'contributors')}
-        ><UsersRound size={15} aria-hidden="true" />{'Contributors'}</a
-      >
-      {#if index.access.canPropose}
-        <a class="btn btn-outline docs-new" href={docsPath(slug, 'new')}
-          ><Plus
-            size={15}
-            aria-hidden="true"
-          />{#if index.access.canReview}{'New page'}{:else}{'Suggest a page'}{/if}</a
+      <!-- Collaboration tools stay below the pages, quieter than the reading links. -->
+      <div class="docs-nav-tools">
+        <a
+          class="docs-nav-link minor"
+          class:active={view === 'suggestions' || view === 'suggestion'}
+          href={docsPath(slug, 'suggestions')}
+          ><GitPullRequestArrow size={14} aria-hidden="true" /><span>{'Suggestions'}</span
+          >{#if index.pendingSuggestions}<span class="docs-nav-count"
+              >{index.pendingSuggestions}</span
+            >{/if}</a
         >
-      {/if}
+        <a
+          class="docs-nav-link minor"
+          class:active={view === 'contributors'}
+          href={docsPath(slug, 'contributors')}
+          ><UsersRound size={14} aria-hidden="true" />{'Contributors'}</a
+        >
+        {#if index.access.canPropose}
+          <a class="docs-nav-link minor" class:active={view === 'new'} href={docsPath(slug, 'new')}
+            ><Plus
+              size={14}
+              aria-hidden="true"
+            />{#if index.access.canReview}{'New page'}{:else}{'Suggest a page'}{/if}</a
+          >
+        {/if}
+      </div>
     </nav>
   </details>
 
@@ -201,7 +204,7 @@
           </div>
         {/if}
       {:else if view === 'page' && data.page}
-        <DocPage page={data.page} {slug} {workspaceName} {websiteOrigin} />
+        <DocPage page={data.page} {slug} {websiteOrigin} />
       {:else if (view === 'edit' && data.page) || view === 'new'}
         <DocEditor {projectId} {slug} page={data.page} access={index.access} {workspaceName} />
       {:else if view === 'history' && data.page}
@@ -302,8 +305,16 @@
     color: var(--muted);
     font-size: 12px;
   }
-  .docs-new {
+  .docs-nav-tools {
+    display: grid;
+    gap: 1px;
     margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+  .docs-nav-link.minor {
+    padding-block: 5px;
+    font-size: 12px;
   }
   .docs-main {
     min-width: 0;

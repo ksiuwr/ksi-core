@@ -434,7 +434,7 @@ msgid "Subject"
 msgstr "Subject"
 
 #: src/lib/ThreadAside.svelte
-#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/DocInfo.svelte
 #: src/lib/views/NewThreadView.svelte
 #: src/lib/views/NewThreadView.svelte
 msgid "Visibility"
@@ -706,6 +706,7 @@ msgid "Delete status"
 msgstr "Delete status"
 
 #: src/lib/AssociationAlerts.svelte
+#: src/lib/docs/DocPage.svelte
 #: src/lib/views/TaskView.svelte
 #: src/lib/views/ThreadView.svelte
 msgid "Edit"
@@ -1430,6 +1431,7 @@ msgid "Commit"
 msgstr "Commit"
 
 #: src/lib/PreviewCredentials.svelte
+#: src/lib/docs/DocInfo.svelte
 #: src/lib/docs/DocPage.svelte
 #: src/lib/docs/Docs.svelte
 msgid "Updated"
@@ -1682,7 +1684,7 @@ msgstr "Utworzono"
 #: src/lib/ContentHistory.svelte
 #: src/lib/TaskAside.svelte
 #: src/lib/ThreadAside.svelte
-#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/DocInfo.svelte
 msgid "Created"
 msgstr "Created"
 
@@ -2804,7 +2806,6 @@ msgstr "Accept or decline suggested documentation changes and edit pages directl
 msgid "Choose article and documentation access defaults and create named groups for additional project permissions."
 msgstr "Choose article and documentation access defaults and create named groups for additional project permissions."
 
-#: src/lib/docs/DocPage.svelte
 #: src/lib/docs/Docs.svelte
 #: src/lib/docs/Docs.svelte
 #: src/routes/+layout.svelte
@@ -2818,7 +2819,7 @@ msgstr "Docs"
 
 #: src/lib/docs/DocContributors.svelte
 #: src/lib/docs/DocContributors.svelte
-#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/DocInfo.svelte
 #: src/lib/docs/Docs.svelte
 msgid "Contributors"
 msgstr "Contributors"
@@ -2837,7 +2838,7 @@ msgstr "Pages"
 #: src/lib/docs/DocContributors.svelte
 #: src/lib/docs/DocEditor.svelte
 #: src/lib/docs/DocHistory.svelte
-#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/DocInfo.svelte
 msgid "Changes"
 msgstr "Changes"
 
@@ -2878,7 +2879,6 @@ msgid "No contributions yet"
 msgstr "No contributions yet"
 
 #: src/lib/docs/DocEditor.svelte
-#: src/lib/docs/DocPage.svelte
 msgid "Edit page"
 msgstr "Edit page"
 
@@ -3068,11 +3068,12 @@ msgid "Loading version"
 msgstr "Loading version"
 
 #: src/lib/docs/DocHistory.svelte
-#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/DocInfo.svelte
 msgid "Version"
 msgstr "Version"
 
 #: src/lib/docs/DocHistory.svelte
+#: src/lib/docs/DocPage.svelte
 #: src/lib/docs/Docs.svelte
 #: src/lib/docs/Docs.svelte
 msgid "Public"
@@ -3094,23 +3095,23 @@ msgstr "Copy link to this section"
 msgid "Link copied"
 msgstr "Link copied"
 
-#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/DocInfo.svelte
 msgid "Public on the website"
 msgstr "Public on the website"
 
-#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/DocInfo.svelte
 msgid "Members only"
 msgstr "Members only"
 
-#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/DocInfo.svelte
 msgid "History"
 msgstr "History"
 
-#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/DocInfo.svelte
 msgid "View on website"
 msgstr "View on website"
 
-#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/DocInfo.svelte
 msgid "Pending suggestions"
 msgstr "Pending suggestions"
 
@@ -3242,9 +3243,8 @@ msgstr "Documentation pages"
 msgid "No pages yet."
 msgstr "No pages yet."
 
-#: src/lib/docs/Docs.svelte
-msgid "Collaboration"
-msgstr "Collaboration"
+#~ msgid "Collaboration"
+#~ msgstr "Collaboration"
 
 #: src/lib/docs/Docs.svelte
 #: src/lib/docs/Docs.svelte
@@ -3266,3 +3266,16 @@ msgstr "No documentation yet"
 #: src/lib/docs/Docs.svelte
 msgid "Write down how things work here, so the next team does not have to start from scratch."
 msgstr "Write down how things work here, so the next team does not have to start from scratch."
+
+#~ msgid "Page info"
+#~ msgstr "Page info"
+
+#: src/lib/docs/DocInfo.svelte
+#: src/lib/docs/DocInfo.svelte
+#: src/lib/docs/DocInfo.svelte
+msgid "Page details"
+msgstr "Page details"
+
+#: src/lib/docs/DocInfo.svelte
+msgid "Details"
+msgstr "Details"

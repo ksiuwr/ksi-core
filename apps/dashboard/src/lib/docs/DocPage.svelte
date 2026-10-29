@@ -2,32 +2,21 @@
   import { replaceState } from '$app/navigation';
   import Markdown from '@ksi-core/ui/platform/Markdown.svelte';
   import DocsToc from '@ksi-core/ui/platform/DocsToc.svelte';
-  import MemberPreview from '@ksi-core/ui/platform/MemberPreview.svelte';
   import { headingAnchors, scrollToSection } from '@ksi-core/ui/platform/heading-anchors';
-  import {
-    SquarePen,
-    History,
-    Globe,
-    Lock,
-    GitPullRequestArrow,
-    ArrowUpRight,
-    TextAlignStart,
-    ChevronDown
-  } from '@lucide/svelte';
+  import { SquarePen, Globe, CalendarDays, TextAlignStart, ChevronDown } from '@lucide/svelte';
   import { formatDate } from 'shared/format';
   import { associationDocsKey, docsPath } from 'shared/docs';
   import { preferences } from '$lib/preferences.svelte';
+  import DocInfo from './DocInfo.svelte';
   import type { DocDetail } from './docs';
 
   let {
     page,
     slug,
-    workspaceName,
     websiteOrigin
   }: {
     page: DocDetail;
     slug: string | null;
-    workspaceName: string;
     websiteOrigin: string;
   } = $props();
 
@@ -44,65 +33,30 @@
 
 <div class="doc-page">
   <article class="doc-article">
+    <!-- Most visits are for reading, so details and editing stay one quiet click away. -->
     <header class="doc-header">
-      <p class="doc-eyebrow">
-        <a href={docsPath(slug)}>{workspaceName}</a><span aria-hidden="true">/</span
-        >{'Documentation'}
-      </p>
       <h1>{page.title}</h1>
-      <dl class="doc-meta">
-        <div>
-          <dt>{'Updated'}</dt>
-          <dd>
-            <time datetime={page.updatedAt}>{date(page.updatedAt)}</time>
-            {#if page.updatedByUser}· {page.updatedByUser.name}{/if}
-          </dd>
-        </div>
-        <div>
-          <dt>{'Created'}</dt>
-          <dd>
-            <time datetime={page.createdAt}>{date(page.createdAt)}</time>
-            {#if page.createdByUser}· {page.createdByUser.name}{/if}
-          </dd>
-        </div>
-        <div>
-          <dt>{'Version'}</dt>
-          <dd>{page.version}</dd>
-        </div>
-        <div>
-          <dt>{'Visibility'}</dt>
-          <dd>
-            {#if page.public}<span class="doc-visibility public"
-                ><Globe size={13} aria-hidden="true" />{'Public on the website'}</span
-              >{:else}<span class="doc-visibility"
-                ><Lock size={13} aria-hidden="true" />{'Members only'}</span
-              >{/if}
-          </dd>
-        </div>
-      </dl>
-      <div class="doc-actions">
-        {#if page.access.canReview}
-          <a class="btn" href={docsPath(slug, page.slug, 'edit')}
-            ><SquarePen size={15} aria-hidden="true" />{'Edit page'}</a
-          >
-        {:else if page.access.canPropose}
-          <a class="btn" href={docsPath(slug, page.slug, 'edit')}
-            ><SquarePen size={15} aria-hidden="true" />{'Suggest changes'}</a
-          >
-        {/if}
-        <a class="btn btn-outline" href={docsPath(slug, page.slug, 'history')}
-          ><History size={15} aria-hidden="true" />{'History'}</a
+      <div class="doc-byline">
+        <span class="doc-updated"
+          ><CalendarDays size={14} aria-hidden="true" /><span
+            >{'Updated'} <time datetime={page.updatedAt}>{date(page.updatedAt)}</time></span
+          ></span
         >
-        {#if page.public}
-          <a class="btn btn-outline" href={publicUrl} target="_blank" rel="noopener noreferrer"
-            ><ArrowUpRight size={15} aria-hidden="true" />{'View on website'}</a
-          >
-        {/if}
-        {#if page.pendingSuggestions}
-          <a class="doc-pending" href={docsPath(slug, 'suggestions')}
-            ><GitPullRequestArrow size={14} aria-hidden="true" />{'Pending suggestions'}: {page.pendingSuggestions}</a
-          >
-        {/if}
+        {#if page.public}<span class="doc-public"
+            ><Globe size={13} aria-hidden="true" />{'Public'}</span
+          >{/if}
+        <span class="doc-tools">
+          {#if page.access.canReview}
+            <a class="btn ghost btn-sm" href={docsPath(slug, page.slug, 'edit')}
+              ><SquarePen aria-hidden="true" />{'Edit'}</a
+            >
+          {:else if page.access.canPropose}
+            <a class="btn ghost btn-sm" href={docsPath(slug, page.slug, 'edit')}
+              ><SquarePen aria-hidden="true" />{'Suggest changes'}</a
+            >
+          {/if}
+          <DocInfo {page} {slug} {publicUrl} />
+        </span>
       </div>
     </header>
 
@@ -141,28 +95,6 @@
         <p class="muted">{'This page is empty.'}</p>
       {/if}
     </div>
-
-    {#if page.contributors.length}
-      <section class="doc-contributors" aria-labelledby="doc-contributors-heading">
-        <h2 id="doc-contributors-heading">{'Contributors'}</h2>
-        <ul>
-          {#each page.contributors as contribution (contribution.user.id)}
-            <li>
-              <MemberPreview
-                member={contribution.user}
-                href={`/people/${encodeURIComponent(contribution.user.id)}`}
-                size={30}
-              />
-              <span class="doc-contribution">
-                {'Changes'}: {contribution.revisions}
-                <span class="added">+{contribution.additions}</span>
-                <span class="removed">−{contribution.deletions}</span>
-              </span>
-            </li>
-          {/each}
-        </ul>
-      </section>
-    {/if}
   </article>
   <aside class="doc-toc">
     <DocsToc headings={page.headings} {content} {onhash} />
@@ -173,143 +105,87 @@
   .doc-page {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 220px;
-    gap: 40px;
+    gap: 48px;
     align-items: start;
   }
   .doc-article {
     min-width: 0;
-    max-width: 78ch;
+    max-width: 760px;
   }
   .doc-header {
-    display: grid;
-    gap: 14px;
-    padding-bottom: 22px;
-    margin-bottom: 26px;
+    padding: 8px 0 22px;
     border-bottom: 1px solid var(--line);
   }
   .doc-header h1 {
-    font-size: clamp(28px, 3.4vw, 38px);
-    letter-spacing: -0.04em;
+    margin: 0 0 14px;
+    font-size: clamp(30px, 4vw, 46px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.045em;
+    text-wrap: balance;
     overflow-wrap: anywhere;
   }
-  .doc-eyebrow {
-    display: flex;
-    gap: 8px;
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-  .doc-eyebrow a {
-    color: inherit;
-    text-decoration: none;
-  }
-  .doc-eyebrow a:hover {
-    color: var(--ink);
-  }
-  .doc-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 28px;
-    margin: 0;
-    font-size: 13px;
-  }
-  .doc-meta div {
-    display: grid;
-    gap: 2px;
-  }
-  .doc-meta dt {
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-  .doc-meta dd {
-    margin: 0;
-  }
-  .doc-visibility {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-  }
-  .doc-visibility.public {
-    color: #2f7d4a;
-  }
-  .doc-actions {
+  .doc-byline {
     display: flex;
     align-items: center;
-    gap: 8px;
     flex-wrap: wrap;
+    gap: 6px 14px;
+    color: var(--muted);
+    font-size: 12px;
   }
-  .doc-pending {
+  .doc-updated,
+  .doc-public {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    margin-left: 4px;
-    color: var(--accent);
-    font-size: 12px;
   }
-  .doc-content {
-    font-size: 15px;
-    line-height: 1.7;
-  }
-  .doc-content :global(.markdown h1) {
-    font-size: 28px;
-  }
-  .doc-content :global(.markdown h2) {
-    font-size: 23px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--line);
-  }
-  .doc-content :global(.markdown h3) {
-    font-size: 18px;
-  }
-  .doc-content :global(.markdown h4) {
-    font-size: 15px;
-    font-family: var(--display);
-  }
-  .doc-content :global(.markdown :is(h1, h2, h3, h4)) {
-    letter-spacing: -0.02em;
-    line-height: 1.3;
-  }
-  .doc-contributors {
-    margin-top: 48px;
-    padding-top: 22px;
-    border-top: 1px solid var(--line);
-  }
-  .doc-contributors h2 {
-    margin-bottom: 14px;
-    font-size: 16px;
-  }
-  .doc-contributors ul {
-    display: grid;
-    gap: 10px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .doc-contributors li {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-    font-size: 13px;
-  }
-  .doc-contribution {
-    display: flex;
-    gap: 8px;
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 11px;
-  }
-  .added {
+  .doc-public {
     color: #2f7d4a;
   }
-  .removed {
-    color: var(--danger);
+  .doc-tools {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: auto;
+  }
+  .doc-tools > :global(.btn.ghost) {
+    color: var(--muted);
+  }
+  .doc-tools > :global(.btn.ghost:hover) {
+    color: var(--ink);
+  }
+  .doc-content {
+    padding-top: 28px;
+    font-size: 16px;
+    line-height: 1.75;
+    color: color-mix(in oklch, var(--ink) 88%, var(--muted));
+  }
+  .doc-content :global(.markdown :is(h1, h2, h3, h4)) {
+    color: var(--ink);
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+  }
+  .doc-content :global(.markdown h1) {
+    font-size: 1.9em;
+  }
+  .doc-content :global(.markdown h2) {
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+    font-size: 1.5em;
+  }
+  .doc-content :global(.markdown h3) {
+    font-size: 1.2em;
+  }
+  .doc-content :global(.markdown h4) {
+    font-size: 1em;
+  }
+  .doc-content :global(.markdown :not(pre) > code) {
+    padding: 0.1em 0.35em;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-muted);
+    font-size: 0.88em;
   }
   .doc-toc {
     position: sticky;
@@ -317,17 +193,16 @@
   }
   .doc-outline {
     display: none;
-    margin-bottom: 20px;
+    margin-top: 20px;
     border: 1px solid var(--line);
-    border-radius: var(--radius-xl);
-    background: var(--surface);
+    border-radius: var(--radius-lg);
     font-size: 13px;
   }
   .doc-outline summary {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 14px;
+    padding: 9px 12px;
     color: var(--muted);
     cursor: pointer;
     list-style: none;
@@ -340,7 +215,7 @@
   }
   .doc-outline ol {
     margin: 0;
-    padding: 0 14px 12px;
+    padding: 0 12px 10px;
     list-style: none;
   }
   .doc-outline a {
