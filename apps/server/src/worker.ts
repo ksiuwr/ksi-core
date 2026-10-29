@@ -61,11 +61,12 @@ export async function deliverMailBatch(limit = 20) {
           from: Bun.env.SMTP_FROM!,
           to: job.to,
           subject: job.subject,
-          text: job.body
+          text: job.body,
+          ...(job.html ? { html: job.html } : {})
         });
         await tx
           .update(mailJobs)
-          .set({ sentAt: new Date(), body: '', attempts: job.attempts + 1 })
+          .set({ sentAt: new Date(), body: '', html: null, attempts: job.attempts + 1 })
           .where(eq(mailJobs.id, job.id));
         sent++;
       } catch {

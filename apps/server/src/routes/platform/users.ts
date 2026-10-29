@@ -1,6 +1,7 @@
 import { createEmailVerificationToken } from 'better-auth/api';
 import { auth } from '../../lib/auth';
 import { recordEvent } from '../../lib/audit';
+import { verifyEmailMail } from '../../lib/mail';
 import { contentChanges, profileChangeFields } from 'shared/activity';
 import { getUrls } from 'shared';
 import { validProfileLink } from 'shared/profile-links';
@@ -347,9 +348,7 @@ export const userRoutes = createElysia({ prefix: '/users', protectedRoute: true 
             );
           const token = await createEmailVerificationToken(context.secret, email);
           const url = `${urls.frontend.auth}/api/auth/verify-email?token=${encodeURIComponent(token)}&callbackURL=${encodeURIComponent(urls.frontend.auth)}`;
-          await tx
-            .insert(mailJobs)
-            .values({ to: email, subject: 'KSI: potwierdź adres / verify email', body: url });
+          await tx.insert(mailJobs).values({ to: email, ...verifyEmailMail(url) });
           await recordEvent(tx, {
             actorId: actor.id,
             action: 'users.email.changed',

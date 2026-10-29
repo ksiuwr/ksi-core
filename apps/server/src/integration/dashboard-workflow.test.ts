@@ -767,7 +767,11 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       .select()
       .from(mailJobs)
       .where(eq(mailJobs.to, `${ids.outsider}@example.test`));
-    expect(mail.some((job) => job.subject === 'KSI: Notification task updated')).toBe(true);
+    const updateMail = mail.find(
+      (job) => job.subject === 'KSI: Notification task updated · Workflow project'
+    );
+    expect(updateMail?.body).toContain('admin Workflow zmienił(a) tytuł.');
+    expect(updateMail?.html).toContain(`/projects/${projectId}/tasks/${task.body.referenceNumber}`);
     await request('outsider', '/notifications/read-all', 'POST');
     expect((await request('outsider', '/notifications')).body.every((n: any) => !!n.readAt)).toBe(
       true

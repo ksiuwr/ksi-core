@@ -5,11 +5,12 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { db } from '@ksi-core/server/db';
 import { getUrls } from 'shared';
 import { recordEvent } from './audit';
+import { resetPasswordMail, verifyEmailMail, type Mail } from './mail';
 import * as schema from '../db/schema';
 
 const urls = getUrls();
-async function enqueueMail(to: string, subject: string, url: string) {
-  await db.insert(schema.mailJobs).values({ to, subject, body: url });
+async function enqueueMail(to: string, mail: Mail) {
+  await db.insert(schema.mailJobs).values({ to, ...mail });
 }
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: 'pg', schema, usePlural: true }),
@@ -25,12 +26,10 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification: true,
     revokeSessionsOnPasswordReset: true,
-    sendResetPassword: async ({ user, url }) =>
-      enqueueMail(user.email, 'KSI: reset hasła / password reset', url)
+    sendResetPassword: async ({ user, url }) => enqueueMail(user.email, resetPasswordMail(url))
   },
   emailVerification: {
-    sendVerificationEmail: async ({ user, url }) =>
-      enqueueMail(user.email, 'KSI: potwierdź adres / verify email', url)
+    sendVerificationEmail: async ({ user, url }) => enqueueMail(user.email, verifyEmailMail(url))
   },
   socialProviders: {
     ...(Bun.env.OAUTH_GITHUB_ID && Bun.env.OAUTH_GITHUB_SECRET
