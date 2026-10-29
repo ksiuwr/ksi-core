@@ -343,6 +343,6 @@ jobs:
       - name: Apply production manifest and wait for rollout
         run: |
           kubectl apply -f cluster/production-platform.yaml
-          for app in server web auth dashboard; do
+          for app in server worker web auth dashboard; do
             kubectl -n ksi-production rollout status "deployment/$app" --timeout=10m
           done
