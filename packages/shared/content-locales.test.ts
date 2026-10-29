@@ -5,9 +5,11 @@ import {
   articleFileContent,
   hasEnglishSources,
   frontendLocales,
+  defaultFrontendLocale,
   contentLocales
 } from './content-locales';
 test('public translations fall back per field and only support frontend locales', () => {
+  expect(defaultFrontendLocale).toBe(frontendLocales[0]);
   expect(frontendLocales.map(contentLocale)).toEqual([...contentLocales]);
   const project = {
     name: 'Robot',

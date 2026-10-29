@@ -1,5 +1,7 @@
 // The same locale list drives Wuchale and editable public content.
 export const frontendLocales = ['en-us', 'pl'] as const;
+/** Wuchale treats the first configured locale as its source and default locale. */
+export const defaultFrontendLocale = frontendLocales[0];
 export type FrontendLocale = (typeof frontendLocales)[number];
 export const contentLocales = ['en', 'pl'] as const;
 export type ContentLocale = (typeof contentLocales)[number];
