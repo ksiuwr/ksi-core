@@ -1,6 +1,7 @@
 <script lang="ts">
   import { preferences } from '$lib/preferences.svelte';
   import { formatDate } from 'shared/format';
+  import { labelColorStyle } from 'shared/label-colors';
   import { goto } from '$app/navigation';
   import { onDestroy } from 'svelte';
   import Assignees from './Assignees.svelte';
@@ -147,7 +148,7 @@
     <div class="task-label-list">
       {#each item.labels as labelName}
         {@const label = labels.find((candidate) => candidate.name === labelName)}
-        <span class="label-badge" style:--label-color={label?.color || '#6b7280'}>
+        <span class="label-badge" style={labelColorStyle(label?.color)}>
           <span class="label-dot"></span>
           <span class="label-name">{labelName}</span>
           <button
