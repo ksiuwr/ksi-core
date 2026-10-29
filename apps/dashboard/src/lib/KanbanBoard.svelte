@@ -70,7 +70,7 @@
     projectId: string;
     canManage?: boolean;
     userId?: string;
-    taskHref: (id: string) => string;
+    taskHref: (item: Item) => string;
     newTaskHref: (status: string) => string;
     refresh: () => Promise<void>;
     reportError: (error: string) => void;
@@ -764,7 +764,7 @@
           .filter((i) => i.column === status.id)
           .sort((a, b) => a.position - b.position) as item (item.id)}
           <a
-            href={taskHref(item.id)}
+            href={taskHref(item)}
             class="kanban-card task-card"
             data-item-id={item.id}
             animate:flip={{ duration: prefersReducedMotion.current ? 0 : 180 }}

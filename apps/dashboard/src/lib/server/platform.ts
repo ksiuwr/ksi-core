@@ -133,8 +133,13 @@ export async function getThreads(
   return platform<Thread[]>(event, `/platform/threads?${query}`);
 }
 
-export async function getThread(event: RequestEvent, id: string): Promise<Thread> {
-  return platform<Thread>(event, `/platform/threads/${encodeURIComponent(id)}`);
+export async function getThread(
+  event: RequestEvent,
+  id: string,
+  projectId: string | null = null
+): Promise<Thread> {
+  const query = projectId ? `?projectId=${encodeURIComponent(projectId)}` : '';
+  return platform<Thread>(event, `/platform/threads/${encodeURIComponent(id)}${query}`);
 }
 
 export async function getThreadActivity(

@@ -55,7 +55,7 @@
   {projectId}
   {canManage}
   {userId}
-  taskHref={(id) => taskPath(workspace, projectSlug, id)}
+  taskHref={(item) => taskPath(workspace, projectSlug, item.referenceNumber ?? item.id)}
   newTaskHref={(status) => newTaskPath(workspace, projectSlug, status)}
   {refresh}
   reportError={(message) => (error = message)}

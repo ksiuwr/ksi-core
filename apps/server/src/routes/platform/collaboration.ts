@@ -5,6 +5,7 @@ import {
   type ContentChange
 } from 'shared/activity';
 import { mentionedUserIds } from 'shared/mentions';
+import { isReferenceNumber } from 'shared/markdown-references';
 import { allocateReferenceNumber } from '../../services/references';
 import { notificationTarget, notifyCollaboration, subscribe } from '../../services/notifications';
 import {
@@ -133,6 +134,23 @@ async function persistStatuses(
 }
 async function threadScope(executor: Executor, id: string) {
   const [thread] = await executor.select().from(threads).where(eq(threads.id, id));
+  if (!thread) throw status(404, { code: 'THREAD_NOT_FOUND' });
+  return { thread, scope: await scopeFor(executor, thread.projectId) };
+}
+async function threadScopeByReference(
+  executor: Executor,
+  referenceNumber: number,
+  projectId: string | null
+) {
+  const [thread] = await executor
+    .select()
+    .from(threads)
+    .where(
+      and(
+        projectId ? eq(threads.projectId, projectId) : isNull(threads.projectId),
+        eq(threads.referenceNumber, referenceNumber)
+      )
+    );
   if (!thread) throw status(404, { code: 'THREAD_NOT_FOUND' });
   return { thread, scope: await scopeFor(executor, thread.projectId) };
 }
@@ -1540,31 +1558,38 @@ export default createElysia({ prefix: '/platform' })
       })
     }
   )
-  .get('/threads/:id', async ({ db, user, params }) => {
-    const actor = active(user);
-    const { thread, scope } = await threadScope(db, params.id);
-    assertThreadRead(actor, thread, scope);
-    const posts = await db
-      .select({
-        id: comments.id,
-        markdown: comments.markdown,
-        createdAt: comments.createdAt,
-        authorName: users.name,
-        authorId: comments.authorId
-      })
-      .from(comments)
-      .leftJoin(users, eq(comments.authorId, users.id))
-      .where(and(eq(comments.threadId, thread.id), isNull(comments.deletedAt)))
-      .orderBy(comments.createdAt);
-    const edited = await editedCommentIds(
-      db,
-      posts.map((post) => post.id)
-    );
-    return {
-      ...thread,
-      comments: posts.map((post) => ({ ...post, edited: edited.has(post.id) }))
-    };
-  })
+  // Numeric references are scoped per workspace, so their lookups need projectId.
+  .get(
+    '/threads/:id',
+    async ({ db, user, params, query }) => {
+      const actor = active(user);
+      const { thread, scope } = isReferenceNumber(params.id)
+        ? await threadScopeByReference(db, Number(params.id), query.projectId ?? null)
+        : await threadScope(db, params.id);
+      assertThreadRead(actor, thread, scope);
+      const posts = await db
+        .select({
+          id: comments.id,
+          markdown: comments.markdown,
+          createdAt: comments.createdAt,
+          authorName: users.name,
+          authorId: comments.authorId
+        })
+        .from(comments)
+        .leftJoin(users, eq(comments.authorId, users.id))
+        .where(and(eq(comments.threadId, thread.id), isNull(comments.deletedAt)))
+        .orderBy(comments.createdAt);
+      const edited = await editedCommentIds(
+        db,
+        posts.map((post) => post.id)
+      );
+      return {
+        ...thread,
+        comments: posts.map((post) => ({ ...post, edited: edited.has(post.id) }))
+      };
+    },
+    { query: t.Object({ projectId: t.Optional(t.String()) }) }
+  )
   .get(
     '/threads/:id/activity',
     async ({ db, user, params, query }) => {

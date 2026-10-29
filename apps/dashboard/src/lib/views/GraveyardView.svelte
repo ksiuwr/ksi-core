@@ -61,7 +61,11 @@
   {#each items as item (item.id)}
     <article class="removed-task">
       <div class="removed-task-info">
-        <h2><a href={taskPath(workspace, projectSlug, item.id)}>{item.title}</a></h2>
+        <h2>
+          <a href={taskPath(workspace, projectSlug, item.referenceNumber ?? item.id)}
+            >{item.title}</a
+          >
+        </h2>
         <p>{item.markdown.slice(0, 180)}</p>
         <span class="tag">{columnLabel(item.column)}</span>
         {#if item.deletedAt}<time datetime={item.deletedAt}

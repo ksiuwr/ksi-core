@@ -26,7 +26,7 @@ import {
   canSaveArticle,
   type WorkspaceContext
 } from './workspace';
-import { taskPath } from '../navigation';
+import { taskPath, threadPath } from '../navigation';
 import type { Profile } from 'shared/types';
 
 export async function workspacePageContext(event: ServerLoadEvent): Promise<WorkspaceContext> {
@@ -67,7 +67,20 @@ export async function overviewPageLoad(event: ServerLoadEvent) {
 export async function kanbanPageLoad(event: ServerLoadEvent) {
   const context = await workspacePageContext(event);
   const itemId = event.url.searchParams.get('item');
-  if (itemId) redirect(303, taskPath(context.workspace, context.project?.slug ?? '', itemId));
+  if (itemId) {
+    const projectId = context.project?.id ?? null;
+    const board = await getBoard(event, projectId);
+    const items = board ? await getBoardItems(event, board.id) : [];
+    const item = items.find(
+      (candidate) =>
+        candidate.id === itemId ||
+        (candidate.referenceNumber != null && String(candidate.referenceNumber) === itemId)
+    );
+    redirect(
+      303,
+      taskPath(context.workspace, context.project?.slug ?? '', item?.referenceNumber ?? itemId)
+    );
+  }
   const projectId = context.project?.id ?? null;
   const board = await getBoard(event, projectId);
   const [items, involvement] = board
@@ -123,8 +136,13 @@ export async function threadPageLoad(event: ServerLoadEvent) {
   const context = await workspacePageContext(event);
   const threadId = event.params.thread;
   if (!threadId) error(404, 'Thread not found');
-  const thread = await getThread(event, threadId);
+  const thread = await getThread(event, threadId, context.project?.id ?? null);
   if ((thread.projectId ?? null) !== (context.project?.id ?? null)) error(404, 'Thread not found');
+  if (thread.id === threadId && thread.referenceNumber != null)
+    redirect(
+      303,
+      threadPath(context.workspace, context.project?.slug ?? '', thread.referenceNumber)
+    );
   const [history, members] = await Promise.all([
     getThreadActivity(event, thread.id),
     getMembers(event, context.project?.id ?? null)
@@ -226,8 +244,14 @@ export async function taskPageLoad(event: ServerLoadEvent) {
   const board = await getBoard(event, projectId);
   if (!board) error(404, 'Task not found');
   const items = await getBoardItems(event, board.id);
-  const item = items.find((candidate) => candidate.id === event.params.id);
+  const item = items.find(
+    (candidate) =>
+      candidate.id === event.params.id ||
+      (candidate.referenceNumber != null && String(candidate.referenceNumber) === event.params.id)
+  );
   if (!item) error(404, 'Task not found');
+  if (item.id === event.params.id && item.referenceNumber != null)
+    redirect(303, taskPath(context.workspace, context.project?.slug ?? '', item.referenceNumber));
   const [members, comments, activity] = await Promise.all([
     getMembers(event, projectId),
     getItemComments(event, item.id),

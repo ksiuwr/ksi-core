@@ -56,7 +56,10 @@
   <ul class="list-group">
     {#each threads as thread (thread.id)}
       <li>
-        <a class="list-row" href={threadPath(workspace, projectSlug, thread.id)}>
+        <a
+          class="list-row"
+          href={threadPath(workspace, projectSlug, thread.referenceNumber ?? thread.id)}
+        >
           <MessagesSquare size={15} aria-hidden="true" />
           <span class="list-row-title">{thread.title}</span>
           {#if thread.referenceNumber}<span class="list-row-ref">#{thread.referenceNumber}</span

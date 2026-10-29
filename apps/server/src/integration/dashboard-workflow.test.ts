@@ -722,7 +722,7 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
     expect(mention.actorName).toBe('admin Workflow');
     expect(mention.action).toBe('kanban.created');
     expect(mention.projectName).toBe('Workflow project');
-    expect(mention.href).toBe(`/projects/${projectId}/tasks/${task.body.id}`);
+    expect(mention.href).toBe(`/projects/${projectId}/tasks/${task.body.referenceNumber}`);
     expect(
       (await request('admin', '/notifications')).body.some((n: any) => n.ownerId === task.body.id)
     ).toBe(false);
@@ -1064,12 +1064,28 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       'member',
       `/platform/references/${projectId}/${task.body.referenceNumber}`
     );
-    expect(taskLink.body.href).toBe(`/projects/${projectId}/tasks/${task.body.id}`);
+    expect(taskLink.body.href).toBe(`/projects/${projectId}/tasks/${task.body.referenceNumber}`);
     const threadLink = await request(
       'member',
       `/platform/references/${projectId}/${thread.body.referenceNumber}`
     );
-    expect(threadLink.body.href).toBe(`/projects/${projectId}/forum/${thread.body.id}`);
+    expect(threadLink.body.href).toBe(
+      `/projects/${projectId}/forum/${thread.body.referenceNumber}`
+    );
+    const threadByReference = await request(
+      'member',
+      `/platform/threads/${thread.body.referenceNumber}?projectId=${projectId}`
+    );
+    expect(threadByReference.status).toBe(200);
+    expect(threadByReference.body.id).toBe(thread.body.id);
+    expect(
+      (
+        await request(
+          'outsider',
+          `/platform/threads/${thread.body.referenceNumber}?projectId=${projectId}`
+        )
+      ).status
+    ).toBe(404);
     expect(
       (
         await request(

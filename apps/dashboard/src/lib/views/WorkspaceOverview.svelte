@@ -121,7 +121,10 @@
           {#each latestTasks as item (item.id)}
             {@const status = statusFor(item.column)}
             <li>
-              <a class="list-row" href={taskPath(workspace, projectSlug, item.id)}>
+              <a
+                class="list-row"
+                href={taskPath(workspace, projectSlug, item.referenceNumber ?? item.id)}
+              >
                 <span class="status-dot" style:--dot={statusColor(status)} aria-hidden="true"
                 ></span>
                 <span class="list-row-title">{item.title}</span>
@@ -146,7 +149,10 @@
         <ul class="list-group">
           {#each threads as thread (thread.id)}
             <li>
-              <a class="list-row" href={threadPath(workspace, projectSlug, thread.id)}>
+              <a
+                class="list-row"
+                href={threadPath(workspace, projectSlug, thread.referenceNumber ?? thread.id)}
+              >
                 <MessagesSquare size={15} aria-hidden="true" />
                 <span class="list-row-title">{thread.title}</span>
                 {#if thread.referenceNumber}<span class="list-row-ref"

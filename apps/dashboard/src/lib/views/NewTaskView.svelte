@@ -84,7 +84,7 @@
             ) + 1
         }
       );
-      await goto(taskPath(workspace, projectSlug, result.id));
+      await goto(taskPath(workspace, projectSlug, result.referenceNumber ?? result.id));
     } catch (cause) {
       error = errorMessage(cause);
     } finally {
