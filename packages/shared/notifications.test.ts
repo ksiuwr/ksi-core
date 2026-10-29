@@ -10,7 +10,7 @@ describe('notification action descriptions', () => {
       ownerType: 'thread'
     };
     expect(notificationAction(notification, 'en-us')).toBe('Alicja Nowak commented');
-    expect(notificationAction(notification, 'pl')).toBe('Alicja Nowak dodał komentarz');
+    expect(notificationAction(notification, 'pl')).toBe('Alicja Nowak dodał(a) komentarz');
     expect(notificationAction({ ...notification, action: 'comments.edited' }, 'en-us')).toBe(
       'Alicja Nowak edited a comment'
     );
@@ -24,10 +24,10 @@ describe('notification action descriptions', () => {
       notificationAction({ ...notification, changedFields: ['column', 'position'] }, 'en-us')
     ).toBe('Jan changed the task status');
     expect(notificationAction({ ...notification, changedFields: ['markdown'] }, 'pl')).toBe(
-      'Jan edytował opis'
+      'Jan edytował(a) opis'
     );
     expect(notificationAction({ ...notification, changedFields: ['assigneeIds'] }, 'pl')).toBe(
-      'Jan zmienił przypisane osoby'
+      'Jan zmienił(a) przypisane osoby'
     );
     expect(
       notificationAction({ ...notification, changedFields: ['title', 'markdown'] }, 'en-us')
@@ -38,10 +38,10 @@ describe('notification action descriptions', () => {
       'Jan archived the discussion'
     );
     expect(notificationAction({ action: 'threads.access.updated', actorName: 'Jan' }, 'pl')).toBe(
-      'Jan zmienił dostęp do dyskusji'
+      'Jan zmienił(a) dostęp do dyskusji'
     );
     expect(notificationAction({ action: 'threads.created', actorName: null }, 'pl')).toBe(
-      'Ktoś rozpoczął dyskusję'
+      'Ktoś rozpoczął(a) dyskusję'
     );
     expect(notificationAction({ action: 'unknown', ownerType: 'thread' }, 'en-us')).toBe(
       'Someone updated the discussion'
@@ -75,13 +75,13 @@ test('assignment descriptions name assigned and unassigned people in both langua
     'Jan assigned Alicja, Piotr and unassigned Marek'
   );
   expect(notificationAction(context, 'pl')).toBe(
-    'Jan przypisał: Alicja, Piotr; cofnął przypisanie: Marek'
+    'Jan przypisał(a): Alicja, Piotr; cofnął(a) przypisanie: Marek'
   );
   expect(notificationAction({ ...context, assignedNames: [] }, 'en-us')).toBe(
     'Jan unassigned Marek'
   );
   expect(notificationAction({ ...context, assignedNames: [], unassignedNames: [null] }, 'pl')).toBe(
-    'Jan cofnął przypisanie: Nieznany użytkownik'
+    'Jan cofnął(a) przypisanie: Nieznany użytkownik'
   );
   expect(
     notificationAction({ ...context, action: 'kanban.created', unassignedNames: [] }, 'en-us')

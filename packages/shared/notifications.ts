@@ -40,10 +40,10 @@ export function notificationAction(
     values.map((name) => name || (pl ? 'Nieznany użytkownik' : 'Unknown user')).join(', ');
   const assignments: string[] = [];
   if (notification.assignedNames?.length)
-    assignments.push(`${pl ? 'przypisał:' : 'assigned'} ${names(notification.assignedNames)}`);
+    assignments.push(`${pl ? 'przypisał(a):' : 'assigned'} ${names(notification.assignedNames)}`);
   if (notification.unassignedNames?.length)
     assignments.push(
-      `${pl ? 'cofnął przypisanie:' : 'unassigned'} ${names(notification.unassignedNames)}`
+      `${pl ? 'cofnął(a) przypisanie:' : 'unassigned'} ${names(notification.unassignedNames)}`
     );
   if (
     assignments.length &&
@@ -58,11 +58,11 @@ export function notificationAction(
     const created =
       action === 'kanban.created'
         ? pl
-          ? 'utworzył zadanie; '
+          ? 'utworzył(a) zadanie; '
           : 'created a task and '
         : action === 'threads.created'
           ? pl
-            ? 'rozpoczął dyskusję; '
+            ? 'rozpoczął(a) dyskusję; '
             : 'started a discussion and '
           : '';
     return `${actor} ${created}${assignments.join(pl ? '; ' : ' and ')}`;
@@ -71,48 +71,48 @@ export function notificationAction(
   switch (action) {
     case 'kanban.comment.created':
     case 'threads.comment.created':
-      description = pl ? 'dodał komentarz' : 'commented';
+      description = pl ? 'dodał(a) komentarz' : 'commented';
       break;
     case 'comments.edited':
-      description = pl ? 'edytował komentarz' : 'edited a comment';
+      description = pl ? 'edytował(a) komentarz' : 'edited a comment';
       break;
     case 'kanban.created':
-      description = pl ? 'utworzył zadanie' : 'created a task';
+      description = pl ? 'utworzył(a) zadanie' : 'created a task';
       break;
     case 'threads.created':
-      description = pl ? 'rozpoczął dyskusję' : 'started a discussion';
+      description = pl ? 'rozpoczął(a) dyskusję' : 'started a discussion';
       break;
     case 'threads.archived':
-      description = pl ? 'zarchiwizował dyskusję' : 'archived the discussion';
+      description = pl ? 'zarchiwizował(a) dyskusję' : 'archived the discussion';
       break;
     case 'threads.restored':
-      description = pl ? 'przywrócił dyskusję' : 'reopened the discussion';
+      description = pl ? 'przywrócił(a) dyskusję' : 'reopened the discussion';
       break;
     case 'threads.assignees.updated':
-      description = pl ? 'zmienił przypisane osoby' : 'changed the assignees';
+      description = pl ? 'zmienił(a) przypisane osoby' : 'changed the assignees';
       break;
     case 'threads.access.updated':
-      description = pl ? 'zmienił dostęp do dyskusji' : 'changed who can access the discussion';
+      description = pl ? 'zmienił(a) dostęp do dyskusji' : 'changed who can access the discussion';
       break;
     default:
       if (action === 'kanban.updated' || action === 'threads.updated') {
         if (fields.length === 1 && fields[0] === 'title') {
-          description = pl ? 'zmienił tytuł' : 'changed the title';
+          description = pl ? 'zmienił(a) tytuł' : 'changed the title';
         } else if (fields.includes('column')) {
-          description = pl ? 'zmienił status zadania' : 'changed the task status';
+          description = pl ? 'zmienił(a) status zadania' : 'changed the task status';
         } else if (fields.length === 1 && fields[0] === 'assigneeIds') {
-          description = pl ? 'zmienił przypisane osoby' : 'changed the assignees';
+          description = pl ? 'zmienił(a) przypisane osoby' : 'changed the assignees';
         } else if (fields.length === 1 && fields[0] === 'markdown') {
-          description = pl ? 'edytował opis' : 'edited the description';
+          description = pl ? 'edytował(a) opis' : 'edited the description';
         }
       }
       description ??=
         notification.ownerType === 'thread'
           ? pl
-            ? 'zaktualizował dyskusję'
+            ? 'zaktualizował(a) dyskusję'
             : 'updated the discussion'
           : pl
-            ? 'zaktualizował zadanie'
+            ? 'zaktualizował(a) zadanie'
             : 'updated the task';
   }
   return `${actor} ${description}`;
