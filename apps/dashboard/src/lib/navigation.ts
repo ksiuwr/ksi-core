@@ -4,6 +4,7 @@ const viewPaths: Record<string, string> = {
   board: 'kanban',
   forum: 'forum',
   articles: 'articles',
+  docs: 'docs',
   events: 'activity',
   roster: 'members',
   settings: 'settings',

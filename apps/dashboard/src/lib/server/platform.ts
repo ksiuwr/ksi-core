@@ -15,6 +15,7 @@ import type {
   ThreadEvent
 } from '../types';
 import type { TaskInvolvement } from '../task-filters';
+import type { DocIndex } from '../docs/docs';
 
 type JsonInit = Omit<RequestInit, 'body'> & { body?: unknown };
 
@@ -162,6 +163,15 @@ export async function getArticles(
 
 export async function getArticle(event: RequestEvent, slug: string): Promise<Article> {
   return platform<Article>(event, `/platform/articles/by-slug/${encodeURIComponent(slug)}`);
+}
+
+/** Optional so pages that only count documentation still load without it. */
+export async function getDocs(
+  event: RequestEvent,
+  projectId: string | null
+): Promise<DocIndex | null> {
+  const query = projectId ? `?projectId=${encodeURIComponent(projectId)}` : '';
+  return optionalPlatform<DocIndex>(event, `/platform/docs${query}`);
 }
 
 export async function getEvents(

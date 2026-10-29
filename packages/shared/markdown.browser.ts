@@ -4,6 +4,7 @@ import { createMarkdownRenderer } from './markdown-core.js';
 import {
   allowedMarkdownClasses,
   finalizeMarkdownAttributes,
+  finalizedMarkdownTags,
   isAllowedMarkdownUrl,
   markdownAttributeNames,
   markdownPolicy
@@ -12,7 +13,12 @@ import {
 // Browser entry, selected by the `browser` export condition of `shared/markdown`.
 // DOMPurify parses with the browser's own HTML parser, so what it approves is what
 // the page renders; it is a fraction of sanitize-html's size (no postcss/htmlparser2).
-export type { MarkdownBlock, MarkdownRenderOptions, MarkdownSanitizer } from './markdown-core.js';
+export type {
+  MarkdownBlock,
+  MarkdownRenderOptions,
+  MarkdownSanitizer,
+  ResolvedDocLink
+} from './markdown-core.js';
 export { mediaBasePath, resolveMarkdownUrl } from './markdown-core.js';
 
 const config = {
@@ -42,15 +48,19 @@ export function createDomPurifySanitizer(window: WindowLike) {
   });
   purify.addHook('afterSanitizeAttributes', (node) => {
     const tag = node.nodeName.toLowerCase();
-    if (tag !== 'a' && tag !== 'img') return;
+    if (!finalizedMarkdownTags.includes(tag)) return;
     const element = node as Element;
     const current = Object.fromEntries(
       Array.from(element.attributes, (attribute) => [attribute.name, attribute.value])
     );
     const next = finalizeMarkdownAttributes(tag, current);
-    for (const name of Object.keys(current)) if (!(name in next)) element.removeAttribute(name);
+    const kept = Object.keys(current).filter((name) => name in next);
+    // Rewritten elements are rebuilt in the policy's attribute order, as on the server.
+    const reordered = kept.some((name, index) => Object.keys(next)[index] !== name);
+    for (const name of Object.keys(current))
+      if (reordered || !(name in next)) element.removeAttribute(name);
     for (const [name, value] of Object.entries(next))
-      if (current[name] !== value) element.setAttribute(name, value);
+      if (reordered || current[name] !== value) element.setAttribute(name, value);
   });
   return (html: string) => purify.sanitize(html, config);
 }

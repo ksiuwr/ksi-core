@@ -362,10 +362,12 @@ msgstr "Next image"
 
 #. 0: page.status
 #. 0: data.article.title
+#. 0: data.page.title
 #. 0: data.member.name
 #. 0: project.name
 #: src/routes/+error.svelte
 #: src/routes/articles/[slug]/+page.svelte
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
 #: src/routes/members/[id]/+page.svelte
 #: src/routes/projects/[slug]/+page.svelte
 msgid "{0} · KSI UWr"
@@ -841,3 +843,43 @@ msgstr "<0/>Blog"
 #: src/routes/articles/+page.svelte
 msgid "News, write-ups, and recaps from KSI members."
 msgstr "News, write-ups, and recaps from KSI members."
+
+#: src/routes/docs/+page.svelte
+msgid "Documentation · KSI UWr"
+msgstr "Documentation · KSI UWr"
+
+#: src/routes/docs/+page.svelte
+msgid "<0/>Docs"
+msgstr "<0/>Docs"
+
+#: src/routes/docs/+page.svelte
+msgid "Documentation"
+msgstr "Documentation"
+
+#: src/routes/docs/+page.svelte
+msgid "How KSI and its projects work, shared openly by our members."
+msgstr "How KSI and its projects work, shared openly by our members."
+
+#: src/routes/docs/+page.svelte
+msgid "No public documentation yet."
+msgstr "No public documentation yet."
+
+#: ../../packages/ui/src/lib/platform/DocsToc.svelte
+msgid "On this page"
+msgstr "On this page"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Copy link to this section"
+msgstr "Copy link to this section"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Link copied"
+msgstr "Link copied"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Updated"
+msgstr "Updated"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "<0/>All documentation"
+msgstr "<0/>All documentation"

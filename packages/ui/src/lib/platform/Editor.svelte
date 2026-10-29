@@ -14,18 +14,29 @@
   import MarkdownContent from './MarkdownContent.svelte';
   import { page } from '$app/state';
   import { referenceScopeForPath } from 'shared/markdown-references';
-  import { Eye, Pencil, Images, Paperclip, LoaderCircle, ChevronDown } from '@lucide/svelte';
+  import {
+    Eye,
+    Pencil,
+    Images,
+    Paperclip,
+    LoaderCircle,
+    ChevronDown,
+    FileText
+  } from '@lucide/svelte';
   let {
     value = $bindable(''),
     rows = 10,
     allowGallery = false,
     allowReferences = false,
+    docs = false,
     referenceScope
   }: {
     value?: string;
     rows?: number;
     allowGallery?: boolean;
     allowReferences?: boolean;
+    /** Suggests documentation pages after `[` and previews page links. */
+    docs?: boolean;
     referenceScope?: string;
   } = $props();
   const language = $derived(preferences.language);
@@ -51,7 +62,10 @@
           referenceThread: 'Wątek',
           referenceAssociation: 'Ogólne',
           referenceArchived: 'Zarchiwizowane',
-          referenceEmpty: 'Brak pasujących zadań lub wątków.'
+          referenceEmpty: 'Brak pasujących zadań lub wątków.',
+          docHint: 'Wpisz [, aby podlinkować stronę dokumentacji.',
+          docPage: 'Strona',
+          docSection: 'Sekcja'
         }
       : {
           uploading: 'Uploading…',
@@ -72,7 +86,10 @@
           referenceThread: 'Thread',
           referenceAssociation: 'Association',
           referenceArchived: 'Archived',
-          referenceEmpty: 'No matching tasks or threads.'
+          referenceEmpty: 'No matching tasks or threads.',
+          docHint: 'Type [ to link a documentation page.',
+          docPage: 'Page',
+          docSection: 'Section'
         }
   );
 
@@ -270,8 +287,12 @@
     scopeLabel: string | null;
     archived: boolean;
   };
+  type DocSuggestion = { reference: string; title: string; context: string | null; level: number };
   let textarea: HTMLTextAreaElement | undefined = $state();
-  let autocompleteKind = $state<'user' | 'reference' | null>(null);
+  let autocompleteKind = $state<'user' | 'reference' | 'doc' | null>(null);
+  let docResults = $state<DocSuggestion[]>([]);
+  let docStart = $state(0);
+  let docRequest = 0;
   let autocompleteQuery = $state('');
   let autocompleteResults = $state<User[]>([]);
   let referenceResults = $state<Reference[]>([]);
@@ -323,6 +344,23 @@
     }
   }
 
+  async function searchDocs(q: string) {
+    const request = ++docRequest;
+    const params = new URLSearchParams({ q, scope: currentReferenceScope() });
+    try {
+      const response = await fetch(`/api/platform/docs/search?${params}`);
+      const results = response.ok ? await response.json() : [];
+      if (request !== docRequest) return;
+      docResults = Array.isArray(results) ? results : [];
+      autocompleteIndex = 0;
+    } catch {
+      if (request === docRequest) {
+        docResults = [];
+        autocompleteIndex = 0;
+      }
+    }
+  }
+
   let pendingInput: { source: string; range: TextRange; type: string } | undefined;
   function handleBeforeInput(event: InputEvent) {
     if (!textarea) return;
@@ -358,7 +396,17 @@
       void searchUsers(autocompleteQuery);
       return;
     }
-    if (allowReferences) {
+    if (docs) {
+      const page = textBeforeCursor.match(/(?:^|[^!\\\]])\[([^[\]\n\s][^[\]\n]{0,80})?$/);
+      // A bracket opening a task list item is a checkbox, not a page link.
+      if (page && !/(?:^|\n)\s*(?:[-*+]|\d+[.)])\s+\[[xX]?$/.test(textBeforeCursor)) {
+        autocompleteKind = 'doc';
+        docStart = pos - (page[1]?.length ?? 0) - 1;
+        void searchDocs(page[1] ?? '');
+        return;
+      }
+    }
+    if (allowReferences || docs) {
       const reference = textBeforeCursor.match(/(?:^|\s)(#{1,2}[a-z0-9-]*(?:\/\d*)?)$/);
       if (reference) {
         autocompleteKind = 'reference';
@@ -392,7 +440,12 @@
       return;
     }
     if (!autocompleteKind) return;
-    const results = autocompleteKind === 'user' ? autocompleteResults : referenceResults;
+    const results =
+      autocompleteKind === 'user'
+        ? autocompleteResults
+        : autocompleteKind === 'doc'
+          ? docResults
+          : referenceResults;
     if (!results.length) {
       if (e.key === KEYS.ESCAPE) autocompleteKind = null;
       return;
@@ -406,6 +459,7 @@
     } else if (e.key === KEYS.ENTER || e.key === KEYS.TAB) {
       e.preventDefault();
       if (autocompleteKind === 'user') insertMention(autocompleteResults[autocompleteIndex]!);
+      else if (autocompleteKind === 'doc') insertDocLink(docResults[autocompleteIndex]!);
       else insertReference(referenceResults[autocompleteIndex]!);
     } else if (e.key === KEYS.ESCAPE) {
       autocompleteKind = null;
@@ -425,6 +479,23 @@
     setTimeout(() => {
       if (textarea) {
         textarea.selectionStart = textarea.selectionEnd = mentionStart + mention.length + 1;
+        textarea.focus();
+      }
+    }, 0);
+  }
+
+  function insertDocLink(page: DocSuggestion) {
+    if (!textarea) return;
+    const pos = textarea.selectionStart;
+    const before = value.slice(0, docStart);
+    // Replace a closing bracket typed earlier instead of doubling it.
+    const after = value.slice(pos).replace(/^[^[\]\n\s]*\]/, '');
+    const inserted = `[${page.reference}]`;
+    value = before + inserted + after;
+    autocompleteKind = null;
+    setTimeout(() => {
+      if (textarea) {
+        textarea.selectionStart = textarea.selectionEnd = docStart + inserted.length;
         textarea.focus();
       }
     }, 0);
@@ -483,6 +554,7 @@
       <MarkdownContent
         {value}
         {allowReferences}
+        {docs}
         {referenceScope}
         onresize={(index, width) => (value = resizeMarkdownImage(value, index, width))}
       />
@@ -536,6 +608,32 @@
             </button>
           {/each}
         </div>
+      {:else if autocompleteKind === 'doc' && docResults.length > 0}
+        <div class="autocomplete-dropdown reference-dropdown">
+          {#each docResults as result, i (result.reference)}
+            <button
+              type="button"
+              class="autocomplete-item reference-item"
+              class:selected={i === autocompleteIndex}
+              onclick={() => insertDocLink(result)}
+              onmouseenter={() => (autocompleteIndex = i)}
+            >
+              <span class="reference-number"
+                >{#if result.level}H{result.level}{:else}<FileText
+                    size={11}
+                    aria-hidden="true"
+                  />{/if}</span
+              >
+              <span class="reference-info">
+                <span class="reference-title">{result.title}</span>
+                <span class="reference-meta">
+                  {result.level ? labels.docSection : labels.docPage} ·
+                  {result.context ?? labels.referenceAssociation} · {result.reference}
+                </span>
+              </span>
+            </button>
+          {/each}
+        </div>
       {:else if autocompleteKind === 'reference' && referenceResults.length > 0}
         <div class="autocomplete-dropdown reference-dropdown">
           {#each referenceResults as result, i}
@@ -571,8 +669,9 @@
     aria-hidden="true"
   />
   <p class="upload-hint" id={`${uid}-drop`}>
-    {busy ? labels.uploading : labels.drop}{#if allowReferences}
-      <span class="hint-separator">·</span> {labels.referenceHint}{/if}
+    {busy ? labels.uploading : labels.drop}{#if allowReferences || docs}
+      <span class="hint-separator">·</span> {labels.referenceHint}{/if}{#if docs}
+      <span class="hint-separator">·</span> {labels.docHint}{/if}
   </p>
   {#if contentUploads.length}
     <ul class="pending-uploads" aria-live="polite">

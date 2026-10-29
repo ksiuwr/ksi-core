@@ -78,6 +78,7 @@ msgstr "Wprowadź link do profilu https://github.com/username."
 msgid "Enter a https://linkedin.com/in/username profile link."
 msgstr "Wprowadź link do profilu https://linkedin.com/in/username."
 
+#: src/lib/docs/Docs.svelte
 #: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 msgid "Overview"
@@ -124,6 +125,7 @@ msgstr "Projekt"
 #: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
+#: src/routes/association/docs/[...path]/+page.svelte
 msgid "Association"
 msgstr "Całe koło"
 
@@ -320,6 +322,9 @@ msgstr "Brak artykułów. Utwórz pierwszy artykuł w tym obszarze roboczym."
 #: src/lib/AssociationAlerts.svelte
 #: src/lib/ContentTranslations.svelte
 #: src/lib/DetailLayout.svelte
+#: src/lib/docs/DocEditor.svelte
+#: src/lib/docs/DocHistory.svelte
+#: src/lib/docs/DocSuggestion.svelte
 #: src/lib/views/ArticleView.svelte
 #: src/lib/views/ArticleView.svelte
 #: src/lib/views/NewArticleView.svelte
@@ -429,6 +434,7 @@ msgid "Subject"
 msgstr "Temat"
 
 #: src/lib/ThreadAside.svelte
+#: src/lib/docs/DocPage.svelte
 #: src/lib/views/NewThreadView.svelte
 #: src/lib/views/NewThreadView.svelte
 msgid "Visibility"
@@ -452,6 +458,7 @@ msgstr "Przedstaw się kołu i wybierz, czym chcesz się podzielić publicznie."
 msgid "Saved"
 msgstr "Zapisano"
 
+#: src/lib/docs/DocEditor.svelte
 #: src/lib/views/ArticleView.svelte
 #: src/lib/views/ProfileView.svelte
 msgid "Save changes"
@@ -638,6 +645,7 @@ msgstr "Status zadania"
 #: src/lib/Members.svelte
 #: src/lib/ProjectSettings.svelte
 #: src/lib/WorkspaceMembers.svelte
+#: src/lib/docs/DocEditor.svelte
 #: src/lib/views/NewArticleView.svelte
 #: src/lib/views/NewTaskView.svelte
 #: src/lib/views/NewThreadView.svelte
@@ -744,6 +752,7 @@ msgstr "Aktywuj"
 #: src/lib/NotificationInbox.svelte
 #: src/lib/ProjectSettings.svelte
 #: src/lib/WorkspaceMembers.svelte
+#: src/lib/docs/DocSuggestion.svelte
 msgid "Decline"
 msgstr "Odrzuć"
 
@@ -828,6 +837,7 @@ msgstr "Każde nowe zdjęcie wymaga zatwierdzenia przez administratora."
 
 #: src/lib/Members.svelte
 #: src/lib/WorkspaceMembers.svelte
+#: src/lib/docs/DocContributors.svelte
 msgid "Member"
 msgstr "Członek"
 
@@ -1340,6 +1350,7 @@ msgstr "Bieżące urządzenie"
 msgid "Other device"
 msgstr "Inne urządzenie"
 
+#: src/lib/docs/DocHistory.svelte
 #: src/lib/views/ProfileView.svelte
 msgid "Current"
 msgstr "Bieżąca"
@@ -1419,6 +1430,8 @@ msgid "Commit"
 msgstr "Commit"
 
 #: src/lib/PreviewCredentials.svelte
+#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/Docs.svelte
 msgid "Updated"
 msgstr "Zaktualizowano"
 
@@ -1470,9 +1483,8 @@ msgstr "Nie udało się zapisać uprawnień projektu."
 msgid "Project permissions"
 msgstr "Uprawnienia projektu"
 
-#: src/lib/ProjectPermissions.svelte
-msgid "Choose article access defaults and create named groups for additional project permissions."
-msgstr "Wybierz domyślny dostęp do artykułów i utwórz nazwane grupy z dodatkowymi uprawnieniami w projekcie."
+#~ msgid "Choose article access defaults and create named groups for additional project permissions."
+#~ msgstr "Wybierz domyślny dostęp do artykułów i utwórz nazwane grupy z dodatkowymi uprawnieniami w projekcie."
 
 #: src/lib/ProjectPermissions.svelte
 msgid "Save permissions"
@@ -1670,6 +1682,7 @@ msgstr "Utworzono"
 #: src/lib/ContentHistory.svelte
 #: src/lib/TaskAside.svelte
 #: src/lib/ThreadAside.svelte
+#: src/lib/docs/DocPage.svelte
 msgid "Created"
 msgstr "Utworzono"
 
@@ -2778,3 +2791,478 @@ msgstr "Link"
 #: src/lib/AssociationAlerts.svelte
 msgid "Leave blank to use the English link."
 msgstr "Pozostaw puste, aby użyć angielskiego linku."
+
+#: src/lib/ProjectPermissions.svelte
+msgid "Review documentation"
+msgstr "Oceniaj dokumentację"
+
+#: src/lib/ProjectPermissions.svelte
+msgid "Accept or decline suggested documentation changes and edit pages directly. Making pages public still requires a project leader."
+msgstr "Akceptuj lub odrzucaj propozycje zmian w dokumentacji i edytuj strony bezpośrednio. Upublicznienie strony nadal wymaga lidera projektu."
+
+#: src/lib/ProjectPermissions.svelte
+msgid "Choose article and documentation access defaults and create named groups for additional project permissions."
+msgstr "Wybierz domyślny dostęp do artykułów i dokumentacji oraz utwórz nazwane grupy z dodatkowymi uprawnieniami w projekcie."
+
+#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/Docs.svelte
+#: src/lib/docs/Docs.svelte
+#: src/routes/+layout.svelte
+msgid "Documentation"
+msgstr "Dokumentacja"
+
+#: src/lib/views/WorkspaceOverview.svelte
+#: src/routes/+layout.svelte
+msgid "Docs"
+msgstr "Dokumentacja"
+
+#: src/lib/docs/DocContributors.svelte
+#: src/lib/docs/DocContributors.svelte
+#: src/lib/docs/DocPage.svelte
+#: src/lib/docs/Docs.svelte
+msgid "Contributors"
+msgstr "Autorzy"
+
+#: src/lib/docs/DocContributors.svelte
+msgid "Who keeps this documentation alive. Changes count accepted edits, including accepted suggestions."
+msgstr "Kto dba o tę dokumentację. Zmiany obejmują zaakceptowane edycje, również z propozycji."
+
+#: src/lib/docs/DocContributors.svelte
+#: src/lib/docs/DocContributors.svelte
+#: src/lib/docs/Docs.svelte
+msgid "Pages"
+msgstr "Strony"
+
+#: src/lib/docs/DocContributors.svelte
+#: src/lib/docs/DocContributors.svelte
+#: src/lib/docs/DocEditor.svelte
+#: src/lib/docs/DocHistory.svelte
+#: src/lib/docs/DocPage.svelte
+msgid "Changes"
+msgstr "Zmiany"
+
+#: src/lib/docs/DocContributors.svelte
+msgid "Lines"
+msgstr "Wiersze"
+
+#: src/lib/docs/DocContributors.svelte
+#: src/lib/docs/DocSuggestions.svelte
+#: src/lib/docs/Docs.svelte
+msgid "Suggestions"
+msgstr "Propozycje zmian"
+
+#: src/lib/docs/DocContributors.svelte
+msgid "Last change"
+msgstr "Ostatnia zmiana"
+
+#: src/lib/docs/DocContributors.svelte
+#: src/lib/docs/DocSuggestion.svelte
+#: src/lib/docs/DocSuggestions.svelte
+msgid "Accepted"
+msgstr "Zaakceptowana"
+
+#: src/lib/docs/DocContributors.svelte
+#: src/lib/docs/DocSuggestion.svelte
+#: src/lib/docs/DocSuggestions.svelte
+msgid "Waiting for review"
+msgstr "Czeka na ocenę"
+
+#: src/lib/docs/DocContributors.svelte
+#: src/lib/docs/DocSuggestion.svelte
+#: src/lib/docs/DocSuggestions.svelte
+msgid "Declined"
+msgstr "Odrzucona"
+
+#: src/lib/docs/DocContributors.svelte
+msgid "No contributions yet"
+msgstr "Brak wkładu"
+
+#: src/lib/docs/DocEditor.svelte
+#: src/lib/docs/DocPage.svelte
+msgid "Edit page"
+msgstr "Edytuj stronę"
+
+#: src/lib/docs/DocEditor.svelte
+#: src/lib/docs/DocPage.svelte
+msgid "Suggest changes"
+msgstr "Zaproponuj zmiany"
+
+#: src/lib/docs/DocEditor.svelte
+#: src/lib/docs/DocSuggestion.svelte
+#: src/lib/docs/DocSuggestions.svelte
+#: src/lib/docs/DocSuggestions.svelte
+#: src/lib/docs/Docs.svelte
+#: src/lib/docs/Docs.svelte
+msgid "New page"
+msgstr "Nowa strona"
+
+#: src/lib/docs/DocEditor.svelte
+msgid "Suggest a new page"
+msgstr "Zaproponuj nową stronę"
+
+#: src/lib/docs/DocEditor.svelte
+msgid "Leaders and reviewers of this workspace will compare your version with the current one and accept or decline it."
+msgstr "Liderzy i recenzenci tej przestrzeni porównają Twoją wersję z obecną i ją zaakceptują lub odrzucą."
+
+#: src/lib/docs/DocEditor.svelte
+msgid "Address"
+msgstr "Adres"
+
+#: src/lib/docs/DocEditor.svelte
+msgid "Use lowercase letters, digits and single hyphens. “new”, “suggestions” and “contributors” are reserved."
+msgstr "Użyj małych liter, cyfr i pojedynczych myślników. Adresy „new”, „suggestions” i „contributors” są zarezerwowane."
+
+#: src/lib/docs/DocEditor.svelte
+msgid "Other pages link here by writing"
+msgstr "Inne strony linkują tutaj, wpisując"
+
+#: src/lib/docs/DocEditor.svelte
+msgid "Summary of changes (optional)"
+msgstr "Podsumowanie zmian (opcjonalnie)"
+
+#: src/lib/docs/DocEditor.svelte
+msgid "Reason for the change"
+msgstr "Powód zmiany"
+
+#: src/lib/docs/DocEditor.svelte
+msgid "What changed and why? For example: “Updated after ZOSIA 2026, we ran out of extension cords.”"
+msgstr "Co się zmieniło i dlaczego? Na przykład: „Uzupełnione po ZOSI 2026, zabrakło przedłużaczy”."
+
+#: src/lib/docs/DocEditor.svelte
+msgid "Public on the KSI website"
+msgstr "Publiczna na stronie KSI"
+
+#: src/lib/docs/DocEditor.svelte
+msgid "Request publishing on the KSI website"
+msgstr "Poproś o publikację na stronie KSI"
+
+#: src/lib/docs/DocEditor.svelte
+#: src/lib/docs/DocError.svelte
+msgid "Only workspace leaders can change whether a page is public."
+msgstr "Tylko liderzy przestrzeni mogą zmieniać widoczność publiczną strony."
+
+#: src/lib/docs/DocEditor.svelte
+msgid "Public pages can be read by anyone. Links to internal pages show only their titles."
+msgstr "Strony publiczne może czytać każdy. Linki do stron wewnętrznych pokazują tylko ich tytuły."
+
+#: src/lib/docs/DocEditor.svelte
+msgid "Refresh comparison"
+msgstr "Odśwież porównanie"
+
+#: src/lib/docs/DocEditor.svelte
+msgid "Review changes"
+msgstr "Przejrzyj zmiany"
+
+#: src/lib/docs/DocEditor.svelte
+msgid "Create page"
+msgstr "Utwórz stronę"
+
+#: src/lib/docs/DocEditor.svelte
+msgid "Submit suggestion"
+msgstr "Wyślij propozycję"
+
+#: src/lib/docs/DocEditor.svelte
+msgid "Your changes"
+msgstr "Twoje zmiany"
+
+#: src/lib/docs/DocEditor.svelte
+#: src/lib/docs/DocSuggestion.svelte
+msgid "Current version"
+msgstr "Obecna wersja"
+
+#: src/lib/docs/DocEditor.svelte
+msgid "Your version"
+msgstr "Twoja wersja"
+
+#: src/lib/docs/DocDiff.svelte
+msgid "Changed lines"
+msgstr "Zmienione wiersze"
+
+#: src/lib/docs/DocDiff.svelte
+msgid "Comparison view"
+msgstr "Widok porównania"
+
+#: src/lib/docs/DocDiff.svelte
+msgid "Rendered"
+msgstr "Podgląd"
+
+#: src/lib/docs/DocDiff.svelte
+msgid "Markdown"
+msgstr "Markdown"
+
+#: src/lib/docs/DocDiff.svelte
+msgid "The content is the same in both versions."
+msgstr "Treść jest taka sama w obu wersjach."
+
+#: src/lib/docs/DocDiff.svelte
+msgid "Show unchanged sections"
+msgstr "Pokaż niezmienione fragmenty"
+
+#: src/lib/docs/DocError.svelte
+msgid "This page changed while you were editing. Copy your text, reload the page and apply your changes again."
+msgstr "Strona zmieniła się podczas edycji. Skopiuj swój tekst, odśwież stronę i wprowadź zmiany ponownie."
+
+#: src/lib/docs/DocError.svelte
+msgid "A page with this address already exists in this workspace."
+msgstr "W tej przestrzeni istnieje już strona o tym adresie."
+
+#: src/lib/docs/DocError.svelte
+msgid "This address is reserved. Choose another one."
+msgstr "Ten adres jest zarezerwowany. Wybierz inny."
+
+#: src/lib/docs/DocError.svelte
+msgid "This page does not exist or was moved."
+msgstr "Ta strona nie istnieje lub została przeniesiona."
+
+#: src/lib/docs/DocError.svelte
+msgid "This suggestion does not exist."
+msgstr "Ta propozycja nie istnieje."
+
+#: src/lib/docs/DocError.svelte
+msgid "Someone has already reviewed this suggestion."
+msgstr "Ktoś już ocenił tę propozycję."
+
+#: src/lib/docs/DocError.svelte
+msgid "Nothing changed yet. Edit the page before saving."
+msgstr "Nic się jeszcze nie zmieniło. Edytuj stronę przed zapisaniem."
+
+#: src/lib/docs/DocError.svelte
+msgid "Describe why you are suggesting this change."
+msgstr "Opisz, dlaczego proponujesz tę zmianę."
+
+#: src/lib/docs/DocError.svelte
+msgid "You do not have permission to do this."
+msgstr "Nie masz uprawnień do tej operacji."
+
+#: src/lib/docs/DocError.svelte
+msgid "Something went wrong. Try again."
+msgstr "Coś poszło nie tak. Spróbuj ponownie."
+
+#: src/lib/docs/DocHistory.svelte
+msgid "Version history"
+msgstr "Historia wersji"
+
+#: src/lib/docs/DocHistory.svelte
+msgid "Back to page"
+msgstr "Wróć do strony"
+
+#: src/lib/docs/DocHistory.svelte
+msgid "Versions"
+msgstr "Wersje"
+
+#. 0: revision.version
+#: src/lib/docs/DocHistory.svelte
+msgid "v{0}"
+msgstr "v{0}"
+
+#: src/lib/docs/DocHistory.svelte
+msgid "No summary"
+msgstr "Brak podsumowania"
+
+#: src/lib/docs/DocHistory.svelte
+msgid "Suggestion accepted by"
+msgstr "Propozycję zaakceptował(a)"
+
+#: src/lib/docs/DocHistory.svelte
+msgid "Loading version"
+msgstr "Wczytywanie wersji"
+
+#: src/lib/docs/DocHistory.svelte
+#: src/lib/docs/DocPage.svelte
+msgid "Version"
+msgstr "Wersja"
+
+#: src/lib/docs/DocHistory.svelte
+#: src/lib/docs/Docs.svelte
+#: src/lib/docs/Docs.svelte
+msgid "Public"
+msgstr "Publiczna"
+
+#: src/lib/docs/DocHistory.svelte
+msgid "Version view"
+msgstr "Widok wersji"
+
+#: src/lib/docs/DocHistory.svelte
+msgid "Full page"
+msgstr "Cała strona"
+
+#: src/lib/docs/DocPage.svelte
+msgid "Copy link to this section"
+msgstr "Skopiuj link do tej sekcji"
+
+#: src/lib/docs/DocPage.svelte
+msgid "Link copied"
+msgstr "Skopiowano link"
+
+#: src/lib/docs/DocPage.svelte
+msgid "Public on the website"
+msgstr "Publiczna na stronie KSI"
+
+#: src/lib/docs/DocPage.svelte
+msgid "Members only"
+msgstr "Tylko dla członków"
+
+#: src/lib/docs/DocPage.svelte
+msgid "History"
+msgstr "Historia"
+
+#: src/lib/docs/DocPage.svelte
+msgid "View on website"
+msgstr "Zobacz na stronie"
+
+#: src/lib/docs/DocPage.svelte
+msgid "Pending suggestions"
+msgstr "Oczekujące propozycje"
+
+#: ../../packages/ui/src/lib/platform/DocsToc.svelte
+#: src/lib/docs/DocPage.svelte
+msgid "On this page"
+msgstr "Na tej stronie"
+
+#: src/lib/docs/DocPage.svelte
+msgid "This page is empty."
+msgstr "Ta strona jest pusta."
+
+#: src/lib/docs/DocSuggestion.svelte
+msgid "Suggestion"
+msgstr "Propozycja"
+
+#: src/lib/docs/DocSuggestion.svelte
+msgid "All suggestions"
+msgstr "Wszystkie propozycje"
+
+#: src/lib/docs/DocSuggestion.svelte
+#: src/lib/docs/DocSuggestions.svelte
+msgid "Withdrawn"
+msgstr "Wycofana"
+
+#: src/lib/docs/DocSuggestion.svelte
+msgid "Creates a new page at"
+msgstr "Tworzy nową stronę pod adresem"
+
+#: src/lib/docs/DocSuggestion.svelte
+msgid "Asks to publish this page on the KSI website."
+msgstr "Prosi o publikację tej strony na stronie KSI."
+
+#: src/lib/docs/DocSuggestion.svelte
+msgid "Asks to make this page visible to members only."
+msgstr "Prosi o ograniczenie widoczności strony do członków."
+
+#: src/lib/docs/DocSuggestion.svelte
+msgid "The page changed after this suggestion was written"
+msgstr "Strona zmieniła się po napisaniu tej propozycji"
+
+#: src/lib/docs/DocSuggestion.svelte
+msgid "Accepting replaces the current text with the suggested one, so check the comparison below."
+msgstr "Akceptacja zastąpi obecną treść proponowaną, więc sprawdź porównanie poniżej."
+
+#. 0: 'The page changed after this suggestion was written'; 1: suggestion.baseVersion; 2: suggestion .page.version; 3: 'Accepting replaces the current text with the suggested one, so check the comparison below.'
+#: src/lib/docs/DocSuggestion.svelte
+msgid "{0} (v{1} → v{2}). {3}"
+msgstr "{0} (v{1} → v{2}). {3}"
+
+#: src/lib/docs/DocSuggestion.svelte
+msgid "Accepted by"
+msgstr "Zaakceptował(a)"
+
+#: src/lib/docs/DocSuggestion.svelte
+msgid "Declined by"
+msgstr "Odrzucił(a)"
+
+#: src/lib/docs/DocSuggestion.svelte
+msgid "Open page"
+msgstr "Otwórz stronę"
+
+#: src/lib/docs/DocSuggestion.svelte
+#: src/lib/docs/DocSuggestion.svelte
+msgid "Suggested version"
+msgstr "Proponowana wersja"
+
+#: src/lib/docs/DocSuggestion.svelte
+msgid "Your review"
+msgstr "Twoja ocena"
+
+#: src/lib/docs/DocSuggestion.svelte
+msgid "Note for the author (optional)"
+msgstr "Uwaga dla autora (opcjonalnie)"
+
+#: src/lib/docs/DocSuggestion.svelte
+msgid "Only workspace leaders can accept a change of visibility."
+msgstr "Tylko liderzy przestrzeni mogą zaakceptować zmianę widoczności."
+
+#: src/lib/docs/DocSuggestion.svelte
+msgid "Accept changes"
+msgstr "Akceptuj zmiany"
+
+#: src/lib/docs/DocSuggestion.svelte
+msgid "Withdraw suggestion"
+msgstr "Wycofaj propozycję"
+
+#: src/lib/docs/DocSuggestions.svelte
+msgid "Changes proposed by members, waiting for a leader or reviewer to compare and accept them."
+msgstr "Zmiany zaproponowane przez członków, czekające na porównanie i akceptację przez lidera lub recenzenta."
+
+#: src/lib/docs/DocSuggestions.svelte
+msgid "Suggestion state"
+msgstr "Stan propozycji"
+
+#: src/lib/docs/DocSuggestions.svelte
+msgid "Reviewed"
+msgstr "Ocenione"
+
+#: src/lib/docs/DocSuggestions.svelte
+msgid "Make public"
+msgstr "Upublicznienie"
+
+#: src/lib/docs/DocSuggestions.svelte
+msgid "Make members-only"
+msgstr "Tylko dla członków"
+
+#: src/lib/docs/DocSuggestions.svelte
+msgid "Page changed since"
+msgstr "Strona zmieniła się od tego czasu"
+
+#: src/lib/docs/DocSuggestions.svelte
+msgid "Nothing to review"
+msgstr "Nic do oceny"
+
+#: src/lib/docs/DocSuggestions.svelte
+msgid "New suggestions from members will appear here."
+msgstr "Tutaj pojawią się nowe propozycje od członków."
+
+#: src/lib/docs/DocSuggestions.svelte
+msgid "No reviewed suggestions yet"
+msgstr "Brak ocenionych propozycji"
+
+#: src/lib/docs/Docs.svelte
+msgid "Documentation pages"
+msgstr "Strony dokumentacji"
+
+#: src/lib/docs/Docs.svelte
+msgid "No pages yet."
+msgstr "Brak stron."
+
+#: src/lib/docs/Docs.svelte
+msgid "Collaboration"
+msgstr "Współpraca"
+
+#: src/lib/docs/Docs.svelte
+#: src/lib/docs/Docs.svelte
+msgid "Suggest a page"
+msgstr "Zaproponuj stronę"
+
+#: src/lib/docs/Docs.svelte
+msgid "How this workspace works, written down for everyone who comes next."
+msgstr "Jak działa ta przestrzeń — spisane dla wszystkich, którzy przyjdą po nas."
+
+#: src/lib/docs/Docs.svelte
+msgid "Suggestions waiting for your review"
+msgstr "Propozycje czekające na Twoją ocenę"
+
+#: src/lib/docs/Docs.svelte
+msgid "No documentation yet"
+msgstr "Brak dokumentacji"
+
+#: src/lib/docs/Docs.svelte
+msgid "Write down how things work here, so the next team does not have to start from scratch."
+msgstr "Zapisz, jak tu wszystko działa, żeby kolejny zespół nie zaczynał od zera."

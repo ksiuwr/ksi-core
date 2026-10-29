@@ -21,6 +21,7 @@
     Columns3,
     MessagesSquare,
     FileText,
+    BookOpen,
     Activity,
     LayoutDashboard,
     Users,
@@ -66,6 +67,7 @@
   const pageTitles = $derived<Record<string, string>>({
     Activity: 'Activity',
     Articles: 'Articles',
+    Documentation: 'Documentation',
     Forum: 'Forum',
     Kanban: 'Kanban',
     'Member profile': 'Member profile',
@@ -92,6 +94,7 @@
     ['board', 'Kanban'],
     ['forum', 'Forum'],
     ['articles', 'Articles'],
+    ['docs', 'Docs'],
     ['events', 'Activity'],
     ['roster', 'Members'],
     ...((workspace === 'project' && (projectAccess.canEdit || projectAccess.canManageMembers)) ||
@@ -114,7 +117,7 @@
       href: dashboardPath(
         'project',
         item.slug,
-        ['board', 'forum', 'articles', 'events', 'roster'].includes(tab) ? tab : 'overview'
+        ['board', 'forum', 'articles', 'docs', 'events', 'roster'].includes(tab) ? tab : 'overview'
       )
     }))
   ]);
@@ -123,6 +126,7 @@
     board: Columns3,
     forum: MessagesSquare,
     articles: FileText,
+    docs: BookOpen,
     events: Activity,
     roster: Users,
     settings: Settings,

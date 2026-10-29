@@ -49,14 +49,18 @@ async function validateThumbnail(executor: Executor, fileId: string | null | und
 const projectDefaultPermissionKeys: Permission[] = [
   'articles.content.propose',
   'articles.content.publish',
-  'articles.content.edit-any'
+  'articles.content.edit-any',
+  'docs.pages.review'
 ];
+const articleReadPermissionKeys = projectDefaultPermissionKeys.filter((permission) =>
+  permission.startsWith('articles.')
+);
 const projectGroupPermissionKeys: Permission[] = [
   ...projectDefaultPermissionKeys,
   'projects.preview-credentials.read'
 ];
 
-async function hasProjectPermission(
+export async function hasProjectPermission(
   executor: Executor,
   user: Principal,
   projectId: string,
@@ -104,7 +108,7 @@ async function canReadProjectArticles(
   const resolvedScope = scope ?? (await scopeFor(executor, projectId));
   if (canContribute(user, resolvedScope)) return true;
   if (!projectId) return false;
-  for (const permission of projectDefaultPermissionKeys)
+  for (const permission of articleReadPermissionKeys)
     if (await hasProjectPermission(executor, user, projectId, permission)) return true;
   return false;
 }

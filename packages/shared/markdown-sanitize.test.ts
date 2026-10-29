@@ -105,9 +105,9 @@ describe('both sanitizers enforce the policy on hostile input', () => {
 });
 
 describe('policy details', () => {
-  test('the allowlist is unchanged: sanitize-html defaults plus images', () => {
+  test('the allowlist is sanitize-html defaults plus images, strikethrough and checkboxes', () => {
     expect([...markdownPolicy.tags].sort()).toEqual(
-      [...sanitizeHtml.defaults.allowedTags, 'img'].sort()
+      [...sanitizeHtml.defaults.allowedTags, 'img', 'del', 'input'].sort()
     );
   });
 

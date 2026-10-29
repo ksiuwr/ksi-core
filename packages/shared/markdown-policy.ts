@@ -6,8 +6,12 @@ import { isReferenceNumber, isReferenceScope, referenceHref } from './markdown-r
  * sanitize-html and browsers apply it with DOMPurify (see markdown.ts and
  * markdown.browser.ts); both adapters must only translate this policy.
  */
+const headingTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+/** Elements whose attributes need rules beyond the allowlist, see finalizeMarkdownAttributes. */
+export const finalizedMarkdownTags = ['a', 'img', 'input', ...headingTags];
+
 export const markdownPolicy = {
-  // sanitize-html's default allowlist plus images.
+  // sanitize-html's default allowlist plus images, strikethrough and task list checkboxes.
   tags: [
     'address',
     'article',
@@ -79,7 +83,9 @@ export const markdownPolicy = {
     'th',
     'thead',
     'tr',
-    'img'
+    'img',
+    'del',
+    'input'
   ],
   attributes: {
     a: [
@@ -87,6 +93,7 @@ export const markdownPolicy = {
       'title',
       'rel',
       'class',
+      'aria-label',
       'data-reference-kind',
       'data-reference-scope',
       'data-reference-number',
@@ -95,12 +102,14 @@ export const markdownPolicy = {
     ],
     img: ['src', 'alt', 'title', 'width', 'data-ksi-image'],
     code: ['class'],
-    span: ['class']
+    span: ['class', 'title'],
+    input: ['type', 'checked', 'disabled'],
+    ...Object.fromEntries(headingTags.map((tag) => [tag, ['id']]))
   } as Record<string, string[]>,
   classes: {
-    a: ['reference-link'],
+    a: ['reference-link', 'doc-link', 'heading-anchor'],
     code: ['language-*'],
-    span: ['markdown-image-frame']
+    span: ['markdown-image-frame', 'doc-link-missing']
   } as Record<string, string[]>,
   schemes: ['https', 'http', 'mailto'],
   schemesByTag: { img: ['https', 'http'] } as Record<string, string[]>,
@@ -183,7 +192,12 @@ const referenceKinds = ['local', 'workspace', 'association'];
 export function finalizeMarkdownAttributes(tag: string, attributes: Record<string, string>) {
   const result = { ...attributes };
   if (tag === 'a') {
-    result.rel = markdownPolicy.linkRel;
+    // Page links and section anchors navigate inside the app instead of reloading it.
+    const internal =
+      /(^|\s)(doc-link|heading-anchor)(\s|$)/.test(result.class ?? '') &&
+      /^[/#](?![/\\])/.test(result.href ?? '');
+    if (internal) delete result.rel;
+    else result.rel = markdownPolicy.linkRel;
     const scope = result['data-reference-scope'] ?? '';
     const number = result['data-reference-number'] ?? '';
     const genuine =
@@ -201,6 +215,11 @@ export function finalizeMarkdownAttributes(tag: string, attributes: Record<strin
       else delete result.class;
     }
   }
+  // Only read-only task list checkboxes are rendered, whatever the source asked for.
+  if (tag === 'input')
+    return { ...('checked' in result ? { checked: '' } : {}), disabled: '', type: 'checkbox' };
+  // Heading ids are generated with a prefix, so content cannot reuse ids of the app.
+  if (headingTags.includes(tag) && !/^section-[a-z0-9-]+$/.test(result.id ?? '')) delete result.id;
   if (tag === 'img') {
     if (/^\d+$/.test(result.width ?? ''))
       result.width = String(clampImageWidth(Number(result.width)));

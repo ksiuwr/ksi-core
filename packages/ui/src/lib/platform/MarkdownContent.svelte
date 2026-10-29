@@ -3,16 +3,20 @@
   import { onMount } from 'svelte';
   import Markdown from './Markdown.svelte';
   import { preferences } from './preferences.svelte.js';
-  import { renderMarkdown } from 'shared/markdown';
+  import { renderMarkdown, type ResolvedDocLink } from 'shared/markdown';
   import { referenceScopeForPath } from 'shared/markdown-references';
+  import { docLinkCandidates } from 'shared/docs';
   let {
     value,
     allowReferences = false,
+    docs = false,
     referenceScope,
     onresize
   }: {
     value: string;
     allowReferences?: boolean;
+    /** Resolves `[page]` links like a documentation page does. */
+    docs?: boolean;
     referenceScope?: string;
     onresize?: (index: number, width: number) => void;
   } = $props();
@@ -23,11 +27,46 @@
   onMount(() => {
     mounted = true;
   });
+  const scope = $derived(referenceScope ?? referenceScopeForPath(page.url.pathname));
+  // Page names need data, so they are looked up once per distinct set of links.
+  const targets = $derived(docs ? docLinkCandidates(value).map((target) => target.raw) : []);
+  const targetKey = $derived(targets.join('\n'));
+  let links = $state<Record<string, ResolvedDocLink | null>>({});
+  $effect(() => {
+    const requested = targetKey ? targetKey.split('\n') : [];
+    const missing = requested.filter((target) => !(target in links));
+    if (!mounted || !missing.length) return;
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      fetch('/api/platform/docs/links', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ scope, targets: missing }),
+        signal: controller.signal
+      })
+        .then((response) => (response.ok ? response.json() : null))
+        .then((found) => {
+          if (found) links = { ...links, ...found };
+        })
+        .catch(() => {});
+    }, 250);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  });
   const blocks = $derived(
     mounted
       ? renderMarkdown(value, {
-          referenceScope: allowReferences
-            ? (referenceScope ?? referenceScopeForPath(page.url.pathname))
+          referenceScope: allowReferences || docs ? scope : undefined,
+          docs: docs
+            ? {
+                // Until a name is looked up it stays as typed rather than flashing as missing.
+                resolve: (target) =>
+                  target.raw in links
+                    ? (links[target.raw] ?? null)
+                    : { href: null, label: `[${target.raw}]`, title: '' }
+              }
             : undefined
         })
       : []

@@ -15,7 +15,15 @@
     ProjectAccess,
     Thread
   } from '$lib/types';
-  import { ArrowUpRight, Columns3, FileText, MessagesSquare, Pencil, Users } from '@lucide/svelte';
+  import {
+    ArrowUpRight,
+    BookOpen,
+    Columns3,
+    FileText,
+    MessagesSquare,
+    Pencil,
+    Users
+  } from '@lucide/svelte';
 
   let {
     workspace,
@@ -27,7 +35,8 @@
     threads,
     threadCount,
     members,
-    articleCount
+    articleCount,
+    docCount
   }: {
     workspace: Workspace;
     project: Project | null;
@@ -39,6 +48,7 @@
     threadCount: number;
     members: AssignmentMember[];
     articleCount: number;
+    docCount: number;
   } = $props();
   const language = $derived(preferences.language);
 
@@ -189,6 +199,11 @@
         <li>
           <a href={path('articles')}
             ><FileText size={15} aria-hidden="true" /><span>Articles</span><b>{articleCount}</b></a
+          >
+        </li>
+        <li>
+          <a href={path('docs')}
+            ><BookOpen size={15} aria-hidden="true" /><span>Docs</span><b>{docCount}</b></a
           >
         </li>
         <li>

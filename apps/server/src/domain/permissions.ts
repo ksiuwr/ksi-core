@@ -15,6 +15,7 @@ const memberDefaults: Permission[] = permissionKeys.filter(
       'projects.membership.join',
       'articles.content.propose',
       'articles.authors.manage-credit',
+      'docs.pages.propose',
       'collaboration.items.contribute',
       'files.objects.upload'
     ].includes(p)
@@ -27,6 +28,8 @@ const boardDefaults: Permission[] = [
   'projects.membership.manage',
   'projects.layout.edit',
   'articles.content.publish',
+  'docs.pages.review',
+  'docs.pages.publish',
   'collaboration.items.restore',
   'collaboration.threads.restrict',
   'audit.events.read',

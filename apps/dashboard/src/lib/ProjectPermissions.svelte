@@ -19,7 +19,8 @@
   const articlePermissions = [
     'articles.content.propose',
     'articles.content.publish',
-    'articles.content.edit-any'
+    'articles.content.edit-any',
+    'docs.pages.review'
   ];
   const info = $derived<Record<string, [string, string]>>({
     'articles.content.propose': [
@@ -33,6 +34,10 @@
     'articles.content.edit-any': [
       'Edit articles created by anyone',
       'Edit any project article, but publishing still requires publish permission.'
+    ],
+    'docs.pages.review': [
+      'Review documentation',
+      'Accept or decline suggested documentation changes and edit pages directly. Making pages public still requires a project leader.'
     ],
     'projects.preview-credentials.read': [
       'View preview sign-in credentials',
@@ -98,7 +103,8 @@
   <div>
     <h1>Project permissions</h1>
     <p class="muted">
-      Choose article access defaults and create named groups for additional project permissions.
+      Choose article and documentation access defaults and create named groups for additional
+      project permissions.
     </p>
   </div>
   <button

@@ -515,3 +515,79 @@ export const collaborationCounters = snakeCase.table('collaboration_counters', {
   scopeKey: text().primaryKey(),
   lastNumber: integer().notNull().default(0)
 });
+
+// Documentation pages belong to a project or, without one, to the association.
+export const docPages = snakeCase.table(
+  'doc_pages',
+  {
+    id: text().primaryKey().$defaultFn(createId),
+    projectId: text().references(() => projects.id),
+    slug: text().notNull(),
+    title: text().notNull(),
+    markdown: text().notNull().default(''),
+    public: boolean().notNull().default(false),
+    version: integer().notNull().default(1),
+    createdBy: text()
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp().notNull().defaultNow(),
+    updatedAt: timestamp().notNull().defaultNow()
+  },
+  (t) => [
+    uniqueIndex('doc_page_project_slug_unique').on(t.projectId, t.slug),
+    uniqueIndex('doc_page_association_slug_unique')
+      .on(t.slug)
+      .where(sql`${t.projectId} is null`)
+  ]
+);
+// Every accepted change is a full snapshot credited to the member who wrote it.
+export const docRevisions = snakeCase.table(
+  'doc_revisions',
+  {
+    id: text().primaryKey().$defaultFn(createId),
+    pageId: text()
+      .notNull()
+      .references(() => docPages.id),
+    version: integer().notNull(),
+    title: text().notNull(),
+    markdown: text().notNull(),
+    public: boolean().notNull(),
+    authorId: text()
+      .notNull()
+      .references(() => users.id),
+    reviewerId: text().references(() => users.id),
+    proposalId: text(),
+    reason: text().notNull().default(''),
+    additions: integer().notNull().default(0),
+    deletions: integer().notNull().default(0),
+    createdAt: timestamp().notNull().defaultNow()
+  },
+  (t) => [
+    uniqueIndex('doc_revision_unique').on(t.pageId, t.version),
+    index('doc_revision_author_idx').on(t.authorId)
+  ]
+);
+// Suggested edits, new pages (without pageId) and public visibility requests awaiting review.
+export const docProposals = snakeCase.table(
+  'doc_proposals',
+  {
+    id: text().primaryKey().$defaultFn(createId),
+    projectId: text().references(() => projects.id),
+    pageId: text().references(() => docPages.id),
+    slug: text(),
+    baseVersion: integer(),
+    title: text().notNull(),
+    markdown: text().notNull(),
+    public: boolean().notNull(),
+    reason: text().notNull(),
+    state: text().notNull().default('pending'),
+    authorId: text()
+      .notNull()
+      .references(() => users.id),
+    reviewerId: text().references(() => users.id),
+    reviewNote: text(),
+    reviewedAt: timestamp(),
+    createdAt: timestamp().notNull().defaultNow()
+  },
+  (t) => [index('doc_proposal_state_idx').on(t.state, t.projectId)]
+);

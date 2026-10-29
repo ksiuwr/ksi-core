@@ -377,6 +377,82 @@
   .markdown:not(:global(:where(.prose *))) :global(:where(*) + :where(h1, h2, h3, h4, h5, h6)) {
     margin-top: 1.25em;
   }
+  .markdown :global([id^='section-']) {
+    scroll-margin-top: 20px;
+  }
+  .markdown :global(.heading-anchor) {
+    display: inline-block;
+    width: 1.1em;
+    height: 1.1em;
+    margin-left: 0.4em;
+    vertical-align: -0.12em;
+    border-radius: 3px;
+    background: var(--muted, #6b6974);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/%3E%3Cpath d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/%3E%3C/svg%3E")
+      center / 0.75em no-repeat;
+    opacity: 0;
+    transition: opacity 120ms ease;
+  }
+  .markdown :global(:is(h1, h2, h3, h4, h5, h6):hover > .heading-anchor),
+  .markdown :global(.heading-anchor:focus-visible),
+  .markdown :global(.heading-anchor.copied) {
+    opacity: 1;
+  }
+  .markdown :global(.heading-anchor:hover) {
+    background: var(--ink, #272638);
+  }
+  .markdown :global(.heading-anchor.copied) {
+    background: var(--accent, #a33d29);
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+  }
+  @media (hover: none) {
+    .markdown :global(.heading-anchor) {
+      opacity: 0.45;
+    }
+  }
+  .markdown :global(.doc-link) {
+    color: var(--accent, #a33d29);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+  .markdown :global(.doc-link-missing) {
+    color: var(--danger, #a6322c);
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+    cursor: help;
+  }
+  .markdown :global(li:has(> input[type='checkbox']:first-child)) {
+    list-style: none;
+    margin-left: -1.4em;
+  }
+  .markdown :global(li > input[type='checkbox']:first-child) {
+    width: 1em;
+    height: 1em;
+    margin: 0 0.45em 0 0;
+    vertical-align: -0.12em;
+    accent-color: var(--accent, #a33d29);
+  }
+  .markdown:not(:global(:where(.prose *))) :global(table) {
+    border-collapse: collapse;
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  .markdown:not(:global(:where(.prose *))) :global(:is(th, td)) {
+    padding: 6px 12px;
+    border: 1px solid var(--line, #dcd8d0);
+    text-align: left;
+  }
+  .markdown:not(:global(:where(.prose *))) :global(th) {
+    background: var(--surface-muted, #edf1ed);
+  }
+  .markdown:not(:global(:where(.prose *))) :global(blockquote) {
+    margin-inline: 0;
+    padding-left: 14px;
+    border-left: 3px solid var(--line, #dcd8d0);
+    color: var(--muted, #6b6974);
+  }
   .markdown :global(.reference-link) {
     color: var(--accent, #a33d29);
     text-decoration: none;

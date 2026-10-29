@@ -13,6 +13,7 @@ import {
 } from './index';
 import { auth } from '../lib/auth';
 import { sectionTypes } from '../domain/projects';
+import { seedDocs } from './seed-docs';
 export async function seed() {
   if (getUrls().environment === 'production') throw new Error('PRODUCTION_SEED_FORBIDDEN');
   const password = Bun.env.KSI_SEED_PASSWORD;
@@ -41,6 +42,7 @@ export async function seed() {
     }
   ];
   const identities: string[] = [];
+  const projectIds: Record<string, string> = {};
   for (const sample of samples) {
     let [user] = await db.select().from(users).where(eq(users.email, sample.email));
     if (!user) {
@@ -112,6 +114,7 @@ export async function seed() {
           .values({ ...sample, layout: sectionTypes.map((type) => ({ type, hidden: false })) })
           .returning();
       }
+      projectIds[sample.slug] = project!.id;
       for (const [index, userId] of identities.entries())
         await tx
           .insert(projectMembers)
@@ -175,6 +178,7 @@ export async function seed() {
       ]
     })
     .onConflictDoNothing();
+  await seedDocs(identities, projectIds);
   console.log('Synthetic seed complete; existing records preserved.');
 }
 if (import.meta.main) await seed();

@@ -24,7 +24,8 @@ const reference = (kind: string, scope: string, number: number, text: string) =>
   `<a class="reference-link" data-sveltekit-reload data-sveltekit-preload-data="off" data-reference-kind="${kind}" data-reference-scope="${scope}" data-reference-number="${number}" href="/references/${scope}/${number}" ${rel}>${text}</a>`;
 
 // Output of the previous server-only renderer (the `/markdown` endpoint) for typical
-// documents. References now also carry `data-reference-kind`; nothing else changed.
+// documents. References now also carry `data-reference-kind`, and strikethrough and task
+// list checkboxes, which the old allowlist stripped, are kept; nothing else changed.
 const documents: { name: string; source: string; scope?: string; expected: MarkdownBlock[] }[] = [
   {
     name: 'headings, emphasis and links',
@@ -33,7 +34,7 @@ const documents: { name: string; source: string; scope?: string; expected: Markd
     expected: [
       {
         type: 'html',
-        html: `<h1>Title</h1>\n<p>Intro with <strong>bold</strong>, <em>em</em>, del and <code>code</code>.</p>\n<h2>Section</h2>\n<p>See <a href="https://example.com/docs" title="Docs" ${rel}>docs</a>, <a href="https://ksi.edu.pl" ${rel}>https://ksi.edu.pl</a> and <a href="mailto:mail@ksi.edu.pl" ${rel}>mail@ksi.edu.pl</a>.</p>\n`
+        html: `<h1>Title</h1>\n<p>Intro with <strong>bold</strong>, <em>em</em>, <del>del</del> and <code>code</code>.</p>\n<h2>Section</h2>\n<p>See <a href="https://example.com/docs" title="Docs" ${rel}>docs</a>, <a href="https://ksi.edu.pl" ${rel}>https://ksi.edu.pl</a> and <a href="mailto:mail@ksi.edu.pl" ${rel}>mail@ksi.edu.pl</a>.</p>\n`
       }
     ]
   },
@@ -96,7 +97,7 @@ const documents: { name: string; source: string; scope?: string; expected: Markd
     expected: [
       {
         type: 'html',
-        html: `<p>Fixes ${reference('local', 'current-project', 12, '#12')}, relates to ${reference('workspace', 'ksi-core', 34, '#ksi-core/34')} and ${reference('association', '~association', 5, '##5')}.</p>\n<h2>Follow-up for ${reference('local', 'current-project', 7, '#7')}</h2>\n<ul>\n<li> ${reference('local', 'current-project', 8, '#8')} pending</li>\n</ul>\n`
+        html: `<p>Fixes ${reference('local', 'current-project', 12, '#12')}, relates to ${reference('workspace', 'ksi-core', 34, '#ksi-core/34')} and ${reference('association', '~association', 5, '##5')}.</p>\n<h2>Follow-up for ${reference('local', 'current-project', 7, '#7')}</h2>\n<ul>\n<li><input disabled type="checkbox" /> ${reference('local', 'current-project', 8, '#8')} pending</li>\n</ul>\n`
       }
     ]
   },

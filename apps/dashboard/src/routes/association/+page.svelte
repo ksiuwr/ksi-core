@@ -15,4 +15,5 @@
   threadCount={data.threadCount}
   members={data.members}
   articleCount={data.articleCount}
+  docCount={data.docCount}
 />

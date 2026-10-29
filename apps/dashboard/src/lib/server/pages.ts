@@ -7,6 +7,7 @@ import {
   getBoard,
   getBoardInvolvement,
   getBoardItems,
+  getDocs,
   getEvents,
   getItemActivity,
   getItemComments,
@@ -27,6 +28,15 @@ import {
   type WorkspaceContext
 } from './workspace';
 import { taskPath, threadPath } from '../navigation';
+import {
+  docsView,
+  type DocDetail,
+  type DocIndex,
+  type DocInsights,
+  type DocRevision,
+  type SuggestionDetail,
+  type SuggestionSummary
+} from '../docs/docs';
 import type { Profile } from 'shared/types';
 
 export async function workspacePageContext(event: ServerLoadEvent): Promise<WorkspaceContext> {
@@ -44,11 +54,12 @@ export async function workspacePageContext(event: ServerLoadEvent): Promise<Work
 export async function overviewPageLoad(event: ServerLoadEvent) {
   const context = await workspacePageContext(event);
   const projectId = context.project?.id ?? null;
-  const [board, threads, members, articles] = await Promise.all([
+  const [board, threads, members, articles, docs] = await Promise.all([
     getBoard(event, projectId),
     getThreads(event, projectId).catch(() => []),
     getMembers(event, projectId),
-    getArticles(event, projectId).catch(() => [])
+    getArticles(event, projectId).catch(() => []),
+    getDocs(event, projectId)
   ]);
   const items = board ? await getBoardItems(event, board.id).catch(() => []) : [];
   return {
@@ -59,6 +70,7 @@ export async function overviewPageLoad(event: ServerLoadEvent) {
     threadCount: threads.length,
     members,
     articleCount: articles.length,
+    docCount: docs?.pages.length ?? 0,
     title: 'Overview',
     tab: 'overview'
   };
@@ -225,6 +237,58 @@ export async function articlePageLoad(event: ServerLoadEvent) {
       canManage: canManageWorkspace(context, event.locals.user as Profile)
     }
   };
+}
+
+export async function docsPageLoad(event: ServerLoadEvent) {
+  const context = await workspacePageContext(event);
+  const path = (event.params.path ?? '').split('/').filter(Boolean);
+  const view = docsView(path);
+  if (!view) error(404, 'Page not found');
+  const projectId = context.project?.id ?? null;
+  const workspaceQuery = (values: Record<string, string> = {}) =>
+    new URLSearchParams({ ...values, ...(projectId ? { projectId } : {}) });
+  const [index, page] = await Promise.all([
+    platform<DocIndex>(event, `/platform/docs?${workspaceQuery()}`),
+    view === 'page' || view === 'edit' || view === 'history'
+      ? platform<DocDetail>(event, `/platform/docs/page?${workspaceQuery({ slug: path[0]! })}`)
+      : null
+  ]);
+  const docs: {
+    view: typeof view;
+    path: string[];
+    index: DocIndex;
+    page: DocDetail | null;
+    revisions?: DocRevision[];
+    suggestions?: SuggestionSummary[];
+    resolved?: boolean;
+    suggestion?: SuggestionDetail;
+    insights?: DocInsights;
+  } = { view, path, index, page };
+  if (view === 'history' && page)
+    docs.revisions = await platform<DocRevision[]>(
+      event,
+      `/platform/docs/${encodeURIComponent(page.id)}/revisions`
+    );
+  if (view === 'suggestions') {
+    docs.resolved = event.url.searchParams.get('state') === 'resolved';
+    docs.suggestions = await platform<SuggestionSummary[]>(
+      event,
+      `/platform/docs/proposals?${workspaceQuery({ state: docs.resolved ? 'resolved' : 'pending' })}`
+    );
+  }
+  if (view === 'suggestion') {
+    docs.suggestion = await platform<SuggestionDetail>(
+      event,
+      `/platform/docs/proposals/${encodeURIComponent(path[1]!)}`
+    );
+    if ((docs.suggestion.projectId ?? null) !== projectId) error(404, 'Suggestion not found');
+  }
+  if (view === 'contributors')
+    docs.insights = await platform<DocInsights>(
+      event,
+      `/platform/docs/contributors?${workspaceQuery()}`
+    );
+  return { ...context, docs, title: page?.title ?? 'Documentation', tab: 'docs' };
 }
 
 export async function eventsPageLoad(event: ServerLoadEvent) {

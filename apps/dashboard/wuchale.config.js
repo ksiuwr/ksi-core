@@ -13,7 +13,8 @@ export default defineConfig({
         'src/**/*.svelte.{js,ts}',
         '../../packages/ui/src/lib/platform/Markdown.svelte',
         '../../packages/ui/src/lib/platform/DateTimeRangePicker.svelte',
-        '../../packages/ui/src/lib/platform/MarkdownContent.svelte'
+        '../../packages/ui/src/lib/platform/MarkdownContent.svelte',
+        '../../packages/ui/src/lib/platform/DocsToc.svelte'
       ]
     })
   }
