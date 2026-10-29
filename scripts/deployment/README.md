@@ -10,6 +10,24 @@ affected by their diff from `master`; unchanged applications reuse the immutable
 digest built from the merge-base. Server, shared package, lockfile, and container runtime
 changes rebuild every image. UI package changes rebuild all three frontends.
 
+## Images
+
+`Dockerfile` installs the workspace once from the lockfile in a layer keyed only by the
+package manifests, then bundles each application with `bun build`. Runtime images hold
+the `oven/bun` base and the bundles, without the workspace `node_modules`:
+
+- Frontends contain `apps/$APP/build/index.js` and the static `client/` directory.
+- The server contains its five entrypoints bundled at their source paths
+  (`apps/server/src/index.ts`, `worker.ts`, `operator.ts`, `db/seed.ts` and
+  `db/migrate.ts`), the migration SQL, `package.json` for `bun run db:migrate`, the musl
+  build of `sharp`, and `pg_dump`, `pg_restore` and `openssl` for operator backups.
+
+Existing cluster and operator commands keep working unchanged. A `bunfig.toml`
+disables Bun's runtime auto-install, so an unresolved import fails instead of fetching
+from npm. CI builds with BuildKit, which skips stages the selected `APP` does not need.
+The legacy builder runs every stage, so build locally with
+`docker buildx build -f scripts/deployment/Dockerfile --build-arg APP=web .`.
+
 Promotion requires a fine-grained `CLUSTER_WRITE_TOKEN` with contents write access
 to `ksiuwr/ksi-cluster` and the `PRODUCTION_KUBECONFIG_B64` secret in the protected
 `production` GitHub Environment. The kubeconfig belongs to a ServiceAccount that can
@@ -47,8 +65,10 @@ secret, so no preview deployment or secret access occurs before approval.
 
 Previews share the `ksi-previews` namespace and PostgreSQL instance. Every branch
 gets prefixed Deployments, Services, Ingress, ConfigMap, Secret, migration/seed Jobs,
-and its own database role and database. The kubeconfig ServiceAccount is restricted
-to namespaced resources in `ksi-previews`; it has no production permissions.
+and its own database role and database. As in production, a background worker
+Deployment runs the server image and delivers realtime events, notifications and
+reminders. The kubeconfig ServiceAccount is restricted to namespaced resources in
+`ksi-previews`; it has no production permissions.
 
 Bootstrap once from a trusted admin machine:
 
@@ -110,6 +130,12 @@ one, so retries cannot reuse a completed Job from an older release. Jobs have no
 automatic retries, a ten-minute deadline and a one-day cleanup TTL. Drizzle records
 applied migrations, so reruns skip migrations already applied successfully. Migrations
 must remain compatible with the previous application release while rollout occurs.
+
+`db:migrate` runs `apps/server/src/db/migrate.ts`, which calls the same drizzle-orm
+migrator as `drizzle-kit migrate`, so the server image does not need `drizzle-kit`. It
+holds a PostgreSQL advisory lock for the whole run, so concurrent migration Jobs wait
+instead of failing. All pending migrations apply in one transaction; a failure records
+nothing.
 
 To diagnose failures, an administrator can inspect the retained Job and Pod logs:
 

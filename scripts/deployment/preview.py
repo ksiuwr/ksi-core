@@ -40,6 +40,16 @@ def resource(kind, name, spec, api="v1", labels=None):
     }
 
 
+def resources(memory_request):
+    # Previews reserve little of the node's two cores, so many fit beside production. CPU time is
+    # shared in proportion to requests, so production wins when the node is busy, and the limit
+    # keeps one preview from taking a whole core.
+    return {
+        "requests": {"cpu": "10m", "memory": memory_request},
+        "limits": {"cpu": "250m", "memory": "512Mi"},
+    }
+
+
 def job(name, image, command, slug, secret, env_from_admin=False):
     env_from = [{"secretRef": {"name": secret}}]
     if env_from_admin:
@@ -71,10 +81,7 @@ def job(name, image, command, slug, secret, env_from_admin=False):
                             "command": command,
                             "envFrom": env_from,
                             "securityContext": container_security,
-                            "resources": {
-                                "requests": {"cpu": "100m", "memory": "128Mi"},
-                                "limits": {"cpu": "500m", "memory": "512Mi"},
-                            },
+                            "resources": resources("128Mi"),
                         }
                     ],
                 },
@@ -150,6 +157,16 @@ def render(branch: str, commit: str, images: dict[str, str], output: Path) -> st
         application_job["spec"]["template"]["spec"]["containers"][0]["envFrom"].insert(
             0, {"configMapRef": {"name": config_name}}
         )
+    security = {"allowPrivilegeEscalation": False, "capabilities": {"drop": ["ALL"]}, "runAsNonRoot": True, "runAsUser": 1000, "runAsGroup": 1000}
+
+    def deployment(name, container):
+        return resource("Deployment", name, {
+            "replicas": 1,
+            "strategy": {"type": "RollingUpdate", "rollingUpdate": {"maxUnavailable": 0, "maxSurge": 1}},
+            "selector": {"matchLabels": {"app": name}},
+            "template": {"metadata": {"labels": {"app": name, **labels}}, "spec": {"automountServiceAccountToken": False, "securityContext": {"seccompProfile": {"type": "RuntimeDefault"}}, "imagePullSecrets": [{"name": "ghcr-secret"}], "containers": [container]}},
+        }, "apps/v1", labels)
+
     workloads = []
     for app in APPS:
         name = f"{slug}-{app}"
@@ -161,8 +178,8 @@ def render(branch: str, commit: str, images: dict[str, str], output: Path) -> st
             "env": [{"name": "ORIGIN", "value": "https://" + hosts["dash" if app == "dashboard" else ("api" if app == "server" else app)]}],
             "readinessProbe": {"tcpSocket": {"port": 3000}, "initialDelaySeconds": 5},
             "livenessProbe": {"tcpSocket": {"port": 3000}, "initialDelaySeconds": 30},
-            "resources": {"requests": {"cpu": "50m", "memory": "64Mi"}, "limits": {"cpu": "500m", "memory": "512Mi"}},
-            "securityContext": {"allowPrivilegeEscalation": False, "capabilities": {"drop": ["ALL"]}, "runAsNonRoot": True, "runAsUser": 1000, "runAsGroup": 1000},
+            "resources": resources("64Mi"),
+            "securityContext": security,
         }
         if app == "server":
             container["envFrom"].append({"secretRef": {"name": secret}})
@@ -172,17 +189,25 @@ def render(branch: str, commit: str, images: dict[str, str], output: Path) -> st
             container["env"].append({"name": "PROXY_SECRET", "valueFrom": {"secretKeyRef": {"name": secret, "key": "PROXY_SECRET"}}})
         if app == "dashboard":
             container["env"].append({"name": "BODY_SIZE_LIMIT", "value": "21M"})
-        workloads.append(resource("Deployment", name, {
-            "replicas": 1,
-            "strategy": {"type": "RollingUpdate", "rollingUpdate": {"maxUnavailable": 0, "maxSurge": 1}},
-            "selector": {"matchLabels": {"app": name}},
-            "template": {"metadata": {"labels": {"app": name, **labels}}, "spec": {"automountServiceAccountToken": False, "securityContext": {"seccompProfile": {"type": "RuntimeDefault"}}, "imagePullSecrets": [{"name": "ghcr-secret"}], "containers": [container]}},
-        }, "apps/v1", labels))
+        workloads.append(deployment(name, container))
         workloads.append(resource("Service", name, {"selector": {"app": name}, "ports": [{"port": 3000, "targetPort": 3000}]}, labels=labels))
+    # As in production, the background worker runs the server image and serves no traffic.
+    workloads.append(deployment(f"{slug}-worker", {
+        "name": "worker",
+        "image": images["server"],
+        "command": ["bun", "apps/server/src/worker.ts"],
+        "envFrom": [{"configMapRef": {"name": config_name}}, {"secretRef": {"name": secret}}],
+        "resources": resources("64Mi"),
+        "securityContext": security,
+    }))
     rules = []
     for host, app in [("api", "server"), ("ws", "server"), ("web", "web"), ("auth", "auth"), ("dash", "dashboard")]:
         rules.append({"host": hosts[host], "http": {"paths": [{"path": "/", "pathType": "Prefix", "backend": {"service": {"name": f"{slug}-{app}", "port": {"number": 3000}}}}]}})
-    workloads.append(resource("Ingress", slug, {"ingressClassName": "nginx", "tls": [{"hosts": list(hosts.values())}], "rules": rules}, "networking.k8s.io/v1", labels))
+    ingress = resource("Ingress", slug, {"ingressClassName": "nginx", "tls": [{"hosts": list(hosts.values())}], "rules": rules}, "networking.k8s.io/v1", labels)
+    # As in production, dashboard pages send response headers larger than nginx's default 4k buffer,
+    # which otherwise fails them with 502 Bad Gateway.
+    ingress["metadata"]["annotations"] = {"nginx.ingress.kubernetes.io/proxy-buffer-size": "16k"}
+    workloads.append(ingress)
     output.mkdir(parents=True, exist_ok=True)
     for name, value in [("prerequisite", prerequisite), ("provision", provision), ("migration", migration), ("seed", seed), ("workloads", {"apiVersion": "v1", "kind": "List", "items": workloads})]:
         (output / f"{name}.json").write_text(json.dumps(value, indent=2) + "\n")

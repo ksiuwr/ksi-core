@@ -68,5 +68,5 @@ jobs:
           curl --fail --silent --show-error --output /dev/null -X DELETE \
             -H "Authorization: Bearer $token" -H 'Content-Type: application/json' \
             --data "{\"audience\":\"$AUDIENCE\"}" \
-            "$API_ORIGIN/internal/projects/$PROJECT_SLUG/previews/$SLUG/credentials"
+            "$API_ORIGIN/platform/internal/projects/$PROJECT_SLUG/previews/$SLUG/credentials"
           unset token

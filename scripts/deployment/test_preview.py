@@ -30,7 +30,7 @@ class PreviewTest(unittest.TestCase):
             workloads = json.loads((output / "workloads.json").read_text())["items"]
             self.assertTrue(all(item["metadata"]["namespace"] == NAMESPACE for item in workloads))
             deployments = [item for item in workloads if item["kind"] == "Deployment"]
-            self.assertEqual(len(deployments), 4)
+            self.assertEqual(len(deployments), 5)
             self.assertEqual(
                 {item["spec"]["template"]["spec"]["containers"][0]["image"] for item in deployments},
                 set(images.values()),
@@ -43,8 +43,22 @@ class PreviewTest(unittest.TestCase):
                     for item in deployments
                 )
             )
+            worker = next(item for item in deployments if item["metadata"]["name"] == f"{slug}-worker")
+            worker_container = worker["spec"]["template"]["spec"]["containers"][0]
+            self.assertEqual(worker_container["image"], images["server"])
+            self.assertEqual(worker_container["command"], ["bun", "apps/server/src/worker.ts"])
+            self.assertIn({"secretRef": {"name": f"runtime-{slug}"}}, worker_container["envFrom"])
+            self.assertEqual(worker["metadata"]["labels"], {"ksi.preview": slug})
+            self.assertNotIn(
+                f"{slug}-worker",
+                {item["metadata"]["name"] for item in workloads if item["kind"] == "Service"},
+            )
             ingress = next(item for item in workloads if item["kind"] == "Ingress")
             self.assertEqual(ingress["spec"]["ingressClassName"], "nginx")
+            self.assertEqual(
+                ingress["metadata"]["annotations"]["nginx.ingress.kubernetes.io/proxy-buffer-size"],
+                "16k",
+            )
             self.assertTrue(all(rule["host"].startswith(slug + "-") for rule in ingress["spec"]["rules"]))
             self.assertEqual(set(ingress["spec"]["tls"][0]["hosts"]), set(release["hosts"].values()))
             seed = json.loads((output / "seed.json").read_text())
@@ -56,6 +70,24 @@ class PreviewTest(unittest.TestCase):
             ]
             self.assertEqual(migration_security["runAsUser"], 1000)
             self.assertEqual(migration_security["runAsGroup"], 1000)
+
+    def test_every_preview_container_reserves_little_cpu(self):
+        with tempfile.TemporaryDirectory() as root:
+            output = Path(root)
+            render("feature/preview", "a" * 40, self.valid_images(), output)
+            render_cleanup("feature/preview", output / "cleanup.json")
+            pods = [
+                item["spec"]["template"]["spec"]
+                for item in json.loads((output / "workloads.json").read_text())["items"]
+                if item["kind"] == "Deployment"
+            ]
+            for name in ("provision", "migration", "seed", "cleanup"):
+                pods.append(json.loads((output / f"{name}.json").read_text())["spec"]["template"]["spec"])
+            cpu = [container["resources"]["requests"]["cpu"] for pod in pods for container in pod["containers"]]
+            limits = [container["resources"]["limits"]["cpu"] for pod in pods for container in pod["containers"]]
+            self.assertEqual(len(cpu), 9)
+            self.assertEqual(set(cpu), {"10m"})
+            self.assertEqual(set(limits), {"250m"})
 
     def test_cleanup_targets_only_the_branch_database(self):
         with tempfile.TemporaryDirectory() as root:
