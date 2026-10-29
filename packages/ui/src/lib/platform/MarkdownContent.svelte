@@ -1,68 +1,43 @@
 <script lang="ts">
+  import { page } from '$app/state';
+  import { onMount } from 'svelte';
   import Markdown from './Markdown.svelte';
   import { preferences } from './preferences.svelte.js';
-  import type { MarkdownBlock } from 'shared/markdown';
+  import { renderMarkdown } from 'shared/markdown';
+  import { referenceScopeForPath } from 'shared/markdown-references';
   let {
     value,
     allowReferences = false,
+    referenceScope,
     onresize
   }: {
     value: string;
     allowReferences?: boolean;
+    referenceScope?: string;
     onresize?: (index: number, width: number) => void;
   } = $props();
   const language = $derived(preferences.language);
-  let blocks = $state<MarkdownBlock[]>([]);
-  let loading = $state(true);
-  let failed = $state(false);
-  $effect(() => {
-    const markdown = value;
-    const references = allowReferences;
-    const controller = new AbortController();
-    loading = true;
-    failed = false;
-    fetch('/api/markdown', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        markdown,
-        ...(references
-          ? {
-              referenceScope: decodeURIComponent(
-                window.location.pathname.match(/^\/projects\/([^/]+)/)?.[1] ?? '~association'
-              )
-            }
-          : {})
-      }),
-      signal: controller.signal
-    })
-      .then(async (response) => {
-        if (!response.ok) throw new Error('Preview unavailable');
-        const result = await response.json();
-        if (!controller.signal.aborted) blocks = result;
-      })
-      .catch(() => {
-        if (!controller.signal.aborted) failed = true;
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) loading = false;
-      });
-    return () => controller.abort();
+  // Render after hydration: task cards may wrap this component in a link, and
+  // HTML parsers repair nested anchors differently from DOM insertion.
+  let mounted = $state(false);
+  onMount(() => {
+    mounted = true;
   });
+  const blocks = $derived(
+    mounted
+      ? renderMarkdown(value, {
+          referenceScope: allowReferences
+            ? (referenceScope ?? referenceScopeForPath(page.url.pathname))
+            : undefined
+        })
+      : []
+  );
 </script>
 
-{#if loading && blocks.length === 0}<div
-    class="markdown-skeleton"
-    aria-label={language === 'pl' ? 'Ładowanie podglądu' : 'Loading preview'}
-  >
+{#if !mounted}<div class="markdown-skeleton" aria-hidden="true">
     <span></span><span></span><span></span>
   </div>
-{:else if failed}<p role="alert">
-    {language === 'pl'
-      ? 'Podgląd niedostępny. Spróbuj ponownie.'
-      : 'Preview unavailable. Please try again.'}
-  </p>
-{:else if !value.trim()}<p class="muted">{language === 'pl' ? 'Brak opisu.' : 'No description.'}</p>
+{:else if !value.trim()}<p class="muted">No description.</p>
 {:else}<Markdown {blocks} {language} {onresize} />{/if}
 
 <style>

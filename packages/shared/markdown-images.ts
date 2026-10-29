@@ -61,13 +61,13 @@ export function resizeMarkdownImage(source: string, index: number, width: number
 
 const escapeAttribute = (value: string) =>
   value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-export function prepareMarkdownImages(source: string) {
+export function prepareMarkdownImages(source: string, resolveUrl = (href: string) => href) {
   const parts: string[] = [];
   let cursor = 0;
   markdownImages(source).forEach((image, index) => {
     // An image nested in another image's alt text is part of that image.
     if (image.start < cursor) return;
-    const tag = `<span class="markdown-image-frame"><img src="${escapeAttribute(image.href)}" alt="${escapeAttribute(image.text)}"${image.title ? ` title="${escapeAttribute(image.title)}"` : ''}${image.width ? ` width="${image.width}"` : ''} data-ksi-image="${index}"></span>`;
+    const tag = `<span class="markdown-image-frame"><img src="${escapeAttribute(resolveUrl(image.href))}" alt="${escapeAttribute(image.text)}"${image.title ? ` title="${escapeAttribute(image.title)}"` : ''}${image.width ? ` width="${image.width}"` : ''} data-ksi-image="${index}"></span>`;
     parts.push(source.slice(cursor, image.start), tag);
     cursor = image.end;
   });

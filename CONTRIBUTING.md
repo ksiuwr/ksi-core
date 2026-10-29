@@ -150,7 +150,7 @@ packages/
 - `packages/shared/content-locales.ts` provides `localizeContent`, `contentLocale`, and `hasEnglishSources`.
 - UI locales are `frontendLocales` (`en-us`, `pl`); content locales are `contentLocales` (`en`, `pl`).
 - Translation writes require the English source to exist and pass `hasEnglishSources`. Project and article translation writes also check version conflicts.
-- Markdown rendering is centralized in the backend `/markdown` endpoint with optional reference scoping.
+- Markdown parsing and its sanitization policy live in `packages/shared`. Dashboard content and editor previews render locally through the browser entry of `shared/markdown`; public pages and the compatibility `/markdown` endpoint use its server entry. Reference targets and `/media` URLs are inferred locally; previews and file access are resolved by the backend.
 
 ### Permissions
 

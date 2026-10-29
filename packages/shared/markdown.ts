@@ -1,97 +1,27 @@
-import { prepareMarkdownImages, clampImageWidth } from './markdown-images.js';
-import { markdownGalleries } from './markdown-gallery.js';
-import { Marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
-export type MarkdownBlock =
-  | { type: 'html'; html: string }
-  | { type: 'gallery'; ids: string[]; preview: number };
-export function renderMarkdown(source: string, referenceScope?: string): MarkdownBlock[] {
-  const marked = new Marked({
-    extensions: referenceScope
-      ? [
-          {
-            name: 'collaborationReference',
-            level: 'inline',
-            start(source) {
-              for (
-                let index = source.indexOf('#');
-                index !== -1;
-                index = source.indexOf('#', index + 1)
-              ) {
-                if (index === 0 || !/[\w/]/.test(source[index - 1]!)) return index;
-              }
-            },
-            tokenizer(source) {
-              if (this.lexer.state.inLink) return;
-              const match = source.match(
-                /^(?:##([1-9]\d{0,8})|#([a-z0-9]+(?:-[a-z0-9]+)*)\/([1-9]\d{0,8})|#([1-9]\d{0,8}))(?![\w/])/
-              );
-              if (!match) return;
-              return {
-                type: 'collaborationReference',
-                raw: match[0],
-                text: match[0],
-                scope: match[1] ? '~association' : (match[2] ?? referenceScope),
-                number: match[1] ?? match[3] ?? match[4]
-              };
-            },
-            renderer(token) {
-              return `<a class="reference-link" data-sveltekit-reload data-sveltekit-preload-data="off" data-reference-scope="${encodeURIComponent(token.scope)}" data-reference-number="${token.number}" href="/references/${encodeURIComponent(token.scope)}/${token.number}">${token.text}</a>`;
-            }
-          }
-        ]
-      : []
-  });
-  const blocks: MarkdownBlock[] = [];
-  source = prepareMarkdownImages(source);
-  const html = (value: string) =>
-    sanitizeHtml(
-      marked.parse(value.replace(/file:([A-Za-z0-9_-]{8,64})/g, '/media/$1'), {
-        async: false
-      }) as string,
-      {
-        allowedTags: [...sanitizeHtml.defaults.allowedTags, 'img'],
-        allowedAttributes: {
-          a: [
-            'href',
-            'title',
-            'rel',
-            'class',
-            'data-reference-scope',
-            'data-reference-number',
-            'data-sveltekit-preload-data',
-            'data-sveltekit-reload'
-          ],
-          img: ['src', 'alt', 'title', 'width', 'data-ksi-image'],
-          code: ['class'],
-          span: ['class']
-        },
-        allowedClasses: {
-          span: ['markdown-image-frame'],
-          code: ['language-*'],
-          a: ['reference-link']
-        },
-        allowedSchemes: ['https', 'http', 'mailto'],
-        allowedSchemesByTag: { img: ['https', 'http'] },
-        allowProtocolRelative: false,
-        transformTags: {
-          a: sanitizeHtml.simpleTransform('a', { rel: 'noopener noreferrer external' }),
-          img: (tagName, attribs) => {
-            if (attribs.width && /^\d+$/.test(attribs.width))
-              attribs.width = String(clampImageWidth(Number(attribs.width)));
-            else delete attribs.width;
-            if (!/^\d+$/.test(attribs['data-ksi-image'] ?? '')) delete attribs['data-ksi-image'];
-            return { tagName, attribs };
-          }
-        }
-      }
-    );
-  let start = 0;
-  for (const gallery of markdownGalleries(source)) {
-    blocks.push({ type: 'html', html: html(source.slice(start, gallery.start)) });
-    blocks.push({ type: 'gallery', ids: gallery.ids, preview: gallery.preview });
-    start = gallery.end;
-  }
-  blocks.push({ type: 'html', html: html(source.slice(start)) });
-  return blocks;
-}
+import { createMarkdownRenderer } from './markdown-core.js';
+import { finalizeMarkdownAttributes, markdownPolicy } from './markdown-policy.js';
+
+// Server entry (Bun, SvelteKit SSR). Browser bundles resolve `shared/markdown` to
+// markdown.browser.ts through the `browser` export condition instead, so
+// sanitize-html, htmlparser2 and postcss never ship to clients.
+export type { MarkdownBlock, MarkdownRenderOptions, MarkdownSanitizer } from './markdown-core.js';
+export { mediaBasePath, resolveMarkdownUrl } from './markdown-core.js';
+
+const finalize: sanitizeHtml.Transformer = (tagName, attribs) => ({
+  tagName,
+  attribs: finalizeMarkdownAttributes(tagName, attribs)
+});
+const options: sanitizeHtml.IOptions = {
+  allowedTags: markdownPolicy.tags,
+  allowedAttributes: markdownPolicy.attributes,
+  allowedClasses: markdownPolicy.classes,
+  allowedSchemes: markdownPolicy.schemes,
+  allowedSchemesByTag: markdownPolicy.schemesByTag,
+  allowProtocolRelative: false,
+  nonTextTags: markdownPolicy.discardContent,
+  transformTags: { a: finalize, img: finalize }
+};
+
+export const sanitizeMarkdownHtml = (html: string) => sanitizeHtml(html, options);
+export const renderMarkdown = createMarkdownRenderer(sanitizeMarkdownHtml);
