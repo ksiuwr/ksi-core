@@ -215,7 +215,7 @@ jobs:
             kubectl -n ksi-previews wait --for=condition=complete "job/$name" --timeout=10m
           done
           kubectl apply -f rendered-preview/workloads.json
-          for app in server web auth dashboard; do
+          for app in server worker web auth dashboard; do
             kubectl -n ksi-previews rollout status "deployment/$SLUG-$app" --timeout=10m
           done
       - name: Store preview credentials in the project portal

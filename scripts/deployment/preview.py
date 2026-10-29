@@ -150,6 +150,16 @@ def render(branch: str, commit: str, images: dict[str, str], output: Path) -> st
         application_job["spec"]["template"]["spec"]["containers"][0]["envFrom"].insert(
             0, {"configMapRef": {"name": config_name}}
         )
+    security = {"allowPrivilegeEscalation": False, "capabilities": {"drop": ["ALL"]}, "runAsNonRoot": True, "runAsUser": 1000, "runAsGroup": 1000}
+
+    def deployment(name, container):
+        return resource("Deployment", name, {
+            "replicas": 1,
+            "strategy": {"type": "RollingUpdate", "rollingUpdate": {"maxUnavailable": 0, "maxSurge": 1}},
+            "selector": {"matchLabels": {"app": name}},
+            "template": {"metadata": {"labels": {"app": name, **labels}}, "spec": {"automountServiceAccountToken": False, "securityContext": {"seccompProfile": {"type": "RuntimeDefault"}}, "imagePullSecrets": [{"name": "ghcr-secret"}], "containers": [container]}},
+        }, "apps/v1", labels)
+
     workloads = []
     for app in APPS:
         name = f"{slug}-{app}"
@@ -162,7 +172,7 @@ def render(branch: str, commit: str, images: dict[str, str], output: Path) -> st
             "readinessProbe": {"tcpSocket": {"port": 3000}, "initialDelaySeconds": 5},
             "livenessProbe": {"tcpSocket": {"port": 3000}, "initialDelaySeconds": 30},
             "resources": {"requests": {"cpu": "50m", "memory": "64Mi"}, "limits": {"cpu": "500m", "memory": "512Mi"}},
-            "securityContext": {"allowPrivilegeEscalation": False, "capabilities": {"drop": ["ALL"]}, "runAsNonRoot": True, "runAsUser": 1000, "runAsGroup": 1000},
+            "securityContext": security,
         }
         if app == "server":
             container["envFrom"].append({"secretRef": {"name": secret}})
@@ -172,13 +182,18 @@ def render(branch: str, commit: str, images: dict[str, str], output: Path) -> st
             container["env"].append({"name": "PROXY_SECRET", "valueFrom": {"secretKeyRef": {"name": secret, "key": "PROXY_SECRET"}}})
         if app == "dashboard":
             container["env"].append({"name": "BODY_SIZE_LIMIT", "value": "21M"})
-        workloads.append(resource("Deployment", name, {
-            "replicas": 1,
-            "strategy": {"type": "RollingUpdate", "rollingUpdate": {"maxUnavailable": 0, "maxSurge": 1}},
-            "selector": {"matchLabels": {"app": name}},
-            "template": {"metadata": {"labels": {"app": name, **labels}}, "spec": {"automountServiceAccountToken": False, "securityContext": {"seccompProfile": {"type": "RuntimeDefault"}}, "imagePullSecrets": [{"name": "ghcr-secret"}], "containers": [container]}},
-        }, "apps/v1", labels))
+        workloads.append(deployment(name, container))
         workloads.append(resource("Service", name, {"selector": {"app": name}, "ports": [{"port": 3000, "targetPort": 3000}]}, labels=labels))
+    # As in production, the background worker runs the server image and serves no traffic. Its small
+    # CPU request keeps it from reducing how many previews fit on the single node.
+    workloads.append(deployment(f"{slug}-worker", {
+        "name": "worker",
+        "image": images["server"],
+        "command": ["bun", "apps/server/src/worker.ts"],
+        "envFrom": [{"configMapRef": {"name": config_name}}, {"secretRef": {"name": secret}}],
+        "resources": {"requests": {"cpu": "10m", "memory": "64Mi"}, "limits": {"cpu": "500m", "memory": "512Mi"}},
+        "securityContext": security,
+    }))
     rules = []
     for host, app in [("api", "server"), ("ws", "server"), ("web", "web"), ("auth", "auth"), ("dash", "dashboard")]:
         rules.append({"host": hosts[host], "http": {"paths": [{"path": "/", "pathType": "Prefix", "backend": {"service": {"name": f"{slug}-{app}", "port": {"number": 3000}}}}]}})

@@ -65,8 +65,10 @@ secret, so no preview deployment or secret access occurs before approval.
 
 Previews share the `ksi-previews` namespace and PostgreSQL instance. Every branch
 gets prefixed Deployments, Services, Ingress, ConfigMap, Secret, migration/seed Jobs,
-and its own database role and database. The kubeconfig ServiceAccount is restricted
-to namespaced resources in `ksi-previews`; it has no production permissions.
+and its own database role and database. As in production, a background worker
+Deployment runs the server image and delivers realtime events, notifications and
+reminders. The kubeconfig ServiceAccount is restricted to namespaced resources in
+`ksi-previews`; it has no production permissions.
 
 Bootstrap once from a trusted admin machine:
 

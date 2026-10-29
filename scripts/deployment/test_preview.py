@@ -30,7 +30,7 @@ class PreviewTest(unittest.TestCase):
             workloads = json.loads((output / "workloads.json").read_text())["items"]
             self.assertTrue(all(item["metadata"]["namespace"] == NAMESPACE for item in workloads))
             deployments = [item for item in workloads if item["kind"] == "Deployment"]
-            self.assertEqual(len(deployments), 4)
+            self.assertEqual(len(deployments), 5)
             self.assertEqual(
                 {item["spec"]["template"]["spec"]["containers"][0]["image"] for item in deployments},
                 set(images.values()),
@@ -42,6 +42,16 @@ class PreviewTest(unittest.TestCase):
                     == 1000
                     for item in deployments
                 )
+            )
+            worker = next(item for item in deployments if item["metadata"]["name"] == f"{slug}-worker")
+            worker_container = worker["spec"]["template"]["spec"]["containers"][0]
+            self.assertEqual(worker_container["image"], images["server"])
+            self.assertEqual(worker_container["command"], ["bun", "apps/server/src/worker.ts"])
+            self.assertIn({"secretRef": {"name": f"runtime-{slug}"}}, worker_container["envFrom"])
+            self.assertEqual(worker["metadata"]["labels"], {"ksi.preview": slug})
+            self.assertNotIn(
+                f"{slug}-worker",
+                {item["metadata"]["name"] for item in workloads if item["kind"] == "Service"},
             )
             ingress = next(item for item in workloads if item["kind"] == "Ingress")
             self.assertEqual(ingress["spec"]["ingressClassName"], "nginx")
