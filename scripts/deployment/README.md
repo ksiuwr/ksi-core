@@ -10,6 +10,24 @@ affected by their diff from `master`; unchanged applications reuse the immutable
 digest built from the merge-base. Server, shared package, lockfile, and container runtime
 changes rebuild every image. UI package changes rebuild all three frontends.
 
+## Images
+
+`Dockerfile` installs the workspace once from the lockfile in a layer keyed only by the
+package manifests, then bundles each application with `bun build`. Runtime images hold
+the `oven/bun` base and the bundles, without the workspace `node_modules`:
+
+- Frontends contain `apps/$APP/build/index.js` and the static `client/` directory.
+- The server contains its five entrypoints bundled at their source paths
+  (`apps/server/src/index.ts`, `worker.ts`, `operator.ts`, `db/seed.ts` and
+  `db/migrate.ts`), the migration SQL, `package.json` for `bun run db:migrate`, the musl
+  build of `sharp`, and `pg_dump`, `pg_restore` and `openssl` for operator backups.
+
+Existing cluster and operator commands keep working unchanged. A `bunfig.toml`
+disables Bun's runtime auto-install, so an unresolved import fails instead of fetching
+from npm. CI builds with BuildKit, which skips stages the selected `APP` does not need.
+The legacy builder runs every stage, so build locally with
+`docker buildx build -f scripts/deployment/Dockerfile --build-arg APP=web .`.
+
 Promotion requires a fine-grained `CLUSTER_WRITE_TOKEN` with contents write access
 to `ksiuwr/ksi-cluster` and the `PRODUCTION_KUBECONFIG_B64` secret in the protected
 `production` GitHub Environment. The kubeconfig belongs to a ServiceAccount that can
