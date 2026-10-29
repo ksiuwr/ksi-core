@@ -6,6 +6,7 @@
   import { api, errorMessage } from '$lib/api';
   import { untrack } from 'svelte';
   import { validProfileLink } from 'shared/profile-links';
+  import { summarizeUserAgent } from 'shared/user-agent';
   import type { ContentLocale } from 'shared/content-locales';
   import type { Profile } from 'shared/types';
   import {
@@ -338,6 +339,7 @@
       {:else}
         <ul class="list-group">
           {#each sessions as session (session.id)}
+            {@const client = summarizeUserAgent(session.userAgent)}
             <li class="session-row">
               <Laptop size={16} aria-hidden="true" />
               <div class="session-info">
@@ -345,8 +347,14 @@
                   <strong>{session.isCurrent ? 'Current device' : 'Other device'}</strong>
                   {#if session.isCurrent}<span class="session-badge">Current</span>{/if}
                 </div>
-                <div class="muted session-detail">
-                  {session.userAgent || 'Unknown browser'}
+                <div class="muted session-detail" title={session.userAgent || undefined}>
+                  {#if client.browser && client.os}
+                    {client.browser} on {client.os}
+                  {:else if client.browser}
+                    {client.browser}
+                  {:else}
+                    Unknown browser
+                  {/if}
                   {#if session.ipAddress}
                     · {session.ipAddress}
                   {/if}
