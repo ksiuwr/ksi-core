@@ -934,6 +934,7 @@ msgid "Status"
 msgstr "Status"
 
 #: src/lib/Assignees.svelte
+#: src/lib/KanbanFilters.svelte
 #: src/lib/Members.svelte
 #: src/lib/WorkspaceMembers.svelte
 msgid "No matching members."
@@ -1545,9 +1546,8 @@ msgstr "Wybierz miniaturę"
 msgid "Remove thumbnail"
 msgstr "Usuń miniaturę"
 
-#: src/lib/KanbanBoard.svelte
-msgid "Clear filter"
-msgstr "Wyczyść filtr"
+#~ msgid "Clear filter"
+#~ msgstr "Wyczyść filtr"
 
 #: src/lib/KanbanBoard.svelte
 msgid "Description (optional)"
@@ -1561,9 +1561,8 @@ msgstr "Podgląd"
 msgid "Brief description"
 msgstr "Krótki opis przeznaczenia etykiety"
 
-#: src/lib/KanbanBoard.svelte
-msgid "All labels"
-msgstr "Wszystkie etykiety"
+#~ msgid "All labels"
+#~ msgstr "Wszystkie etykiety"
 
 #: src/lib/KanbanBoard.svelte
 msgid "A label with this name already exists."
@@ -1578,18 +1577,15 @@ msgid "Cannot delete label because it is assigned to tasks on the board. Remove 
 msgstr "Nie można usunąć etykiety, ponieważ jest przypisana do zadań na tablicy. Usuń ją najpierw z zadań."
 
 #: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
-#: src/lib/KanbanBoard.svelte
 msgid "Filter by label"
 msgstr "Filtruj według etykiety"
 
-#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanFilters.svelte
 msgid "Search labels…"
 msgstr "Szukaj etykiet…"
 
-#: src/lib/KanbanBoard.svelte
-msgid "Clear label filter"
-msgstr "Wyczyść filtr etykiet"
+#~ msgid "Clear label filter"
+#~ msgstr "Wyczyść filtr etykiet"
 
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
@@ -1854,10 +1850,12 @@ msgid "Add assignees"
 msgstr "Dodaj osoby"
 
 #: src/lib/Assignees.svelte
+#: src/lib/KanbanFilters.svelte
 msgid "Search people"
 msgstr "Szukaj osób"
 
 #: src/lib/Assignees.svelte
+#: src/lib/KanbanFilters.svelte
 msgid "Search people…"
 msgstr "Szukaj osób…"
 
@@ -2453,3 +2451,148 @@ msgstr "Etykieta · {0}"
 #: src/lib/ContentTranslations.svelte
 msgid "You are editing the {0} translation. Blank fields use the English value shown in the reference."
 msgstr "Edytujesz tłumaczenie: {0}. Puste pola użyją angielskiej wartości widocznej w podglądzie."
+
+#: src/lib/KanbanFilters.svelte
+#: src/lib/KanbanFilters.svelte
+msgid "Unassigned"
+msgstr "Bez przypisania"
+
+#: src/lib/KanbanFilters.svelte
+#: src/lib/KanbanFilters.svelte
+msgid "No label"
+msgstr "Bez etykiety"
+
+#: src/lib/KanbanFilters.svelte
+msgid "Filter tasks"
+msgstr "Filtruj zadania"
+
+#: src/lib/KanbanFilters.svelte
+msgid "Search tasks…"
+msgstr "Szukaj zadań…"
+
+#: src/lib/KanbanFilters.svelte
+msgid "Search tasks"
+msgstr "Szukaj zadań"
+
+#: src/lib/KanbanFilters.svelte
+#: src/lib/KanbanFilters.svelte
+msgid "Clear search"
+msgstr "Wyczyść wyszukiwanie"
+
+#: src/lib/KanbanFilters.svelte
+msgid "Filters"
+msgstr "Filtry"
+
+#: src/lib/KanbanFilters.svelte
+msgid "Show tasks"
+msgstr "Pokaż zadania"
+
+#: src/lib/KanbanFilters.svelte
+msgid "All tasks"
+msgstr "Wszystkie zadania"
+
+#: src/lib/KanbanFilters.svelte
+msgid "Assigned to you"
+msgstr "Przypisane do Ciebie"
+
+#: src/lib/KanbanFilters.svelte
+msgid "You are one of the assignees"
+msgstr "Jesteś wśród przypisanych osób"
+
+#: src/lib/KanbanFilters.svelte
+msgid "Authored by you"
+msgstr "Utworzone przez Ciebie"
+
+#: src/lib/KanbanFilters.svelte
+msgid "You created the task"
+msgstr "Zadanie utworzone przez Ciebie"
+
+#: src/lib/KanbanFilters.svelte
+msgid "Involves you"
+msgstr "Z Twoim udziałem"
+
+#: src/lib/KanbanFilters.svelte
+msgid "Assigned to or created by you, or you commented, were mentioned or watch it"
+msgstr "Przypisane do Ciebie lub utworzone przez Ciebie, z Twoim komentarzem, wzmianką o Tobie lub obserwowane przez Ciebie"
+
+#: src/lib/KanbanFilters.svelte
+msgid "Relevant"
+msgstr "Istotne"
+
+#: src/lib/KanbanFilters.svelte
+msgid "Involves you, or is still open with nobody assigned"
+msgstr "Z Twoim udziałem lub otwarte i wciąż bez przypisanej osoby"
+
+#: src/lib/KanbanFilters.svelte
+#: src/lib/KanbanFilters.svelte
+#: src/lib/KanbanFilters.svelte
+msgid "Assignee"
+msgstr "Osoba przypisana"
+
+#: src/lib/KanbanFilters.svelte
+#: src/lib/KanbanFilters.svelte
+#: src/lib/KanbanFilters.svelte
+msgid "Label"
+msgstr "Etykieta"
+
+#: src/lib/KanbanFilters.svelte
+msgid "Deadline"
+msgstr "Termin"
+
+#: src/lib/KanbanFilters.svelte
+msgid "Any deadline"
+msgstr "Dowolny termin"
+
+#: src/lib/KanbanBoard.svelte
+#: src/lib/KanbanFilters.svelte
+msgid "Overdue"
+msgstr "Po terminie"
+
+#: src/lib/KanbanFilters.svelte
+msgid "Past the deadline and not done"
+msgstr "Termin minął, a zadanie nie jest ukończone"
+
+#: src/lib/KanbanFilters.svelte
+msgid "Due today"
+msgstr "Termin dzisiaj"
+
+#: src/lib/KanbanFilters.svelte
+msgid "Due in the next 7 days"
+msgstr "Termin w ciągu 7 dni"
+
+#: src/lib/KanbanFilters.svelte
+msgid "Due in the next 30 days"
+msgstr "Termin w ciągu 30 dni"
+
+#: src/lib/KanbanFilters.svelte
+msgid "Has a deadline"
+msgstr "Z terminem"
+
+#: src/lib/KanbanFilters.svelte
+msgid "No deadline"
+msgstr "Bez terminu"
+
+#: src/lib/KanbanFilters.svelte
+msgid "No tasks match these filters."
+msgstr "Żadne zadanie nie pasuje do tych filtrów."
+
+#. 0: visibleCount; 1: totalCount
+#: src/lib/KanbanFilters.svelte
+msgid "Showing {0} of {1}"
+msgstr "Wyświetlane: {0} z {1}"
+
+#: src/lib/KanbanFilters.svelte
+msgid "Clear filters"
+msgstr "Wyczyść filtry"
+
+#: src/lib/KanbanFilters.svelte
+msgid "You"
+msgstr "Ty"
+
+#: src/lib/KanbanFilters.svelte
+msgid "Search labels"
+msgstr "Szukaj etykiet"
+
+#: src/lib/KanbanFilters.svelte
+msgid "No matching labels."
+msgstr "Brak pasujących etykiet."

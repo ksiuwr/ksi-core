@@ -39,6 +39,7 @@ describe('platform HTTP authorization boundaries', () => {
   test.each([
     '/boards',
     '/boards/missing/items',
+    '/boards/missing/involvement',
     '/threads',
     '/threads/missing',
     '/items/missing/comments',

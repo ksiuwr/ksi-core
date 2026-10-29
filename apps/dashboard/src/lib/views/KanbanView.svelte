@@ -2,6 +2,7 @@
   import KanbanBoard from '$lib/KanbanBoard.svelte';
   import { dashboardPath, newTaskPath, taskPath, type Workspace } from '$lib/navigation';
   import type { BoardData, BoardLabel, BoardStatus, Item } from '$lib/types';
+  import type { TaskInvolvement } from '$lib/task-filters';
   import { Trash2 } from '@lucide/svelte';
 
   let {
@@ -10,6 +11,7 @@
     projectId,
     board,
     items,
+    involvement = null,
     canManage,
     userId,
     refresh
@@ -19,6 +21,7 @@
     projectId: string;
     board: BoardData | null;
     items: Item[];
+    involvement?: TaskInvolvement | null;
     canManage: boolean;
     userId: string;
     refresh: () => Promise<void>;
@@ -45,6 +48,7 @@
 {#if error}<p class="error" role="alert">{error}</p>{/if}
 <KanbanBoard
   {items}
+  {involvement}
   {statuses}
   boardLabels={labels}
   boardId={board?.id ?? ''}

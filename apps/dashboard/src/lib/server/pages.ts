@@ -5,6 +5,7 @@ import {
   getArticle,
   getArticles,
   getBoard,
+  getBoardInvolvement,
   getBoardItems,
   getEvents,
   getItemActivity,
@@ -69,11 +70,14 @@ export async function kanbanPageLoad(event: ServerLoadEvent) {
   if (itemId) redirect(303, taskPath(context.workspace, context.project?.slug ?? '', itemId));
   const projectId = context.project?.id ?? null;
   const board = await getBoard(event, projectId);
-  const items = board ? await getBoardItems(event, board.id) : [];
+  const [items, involvement] = board
+    ? await Promise.all([getBoardItems(event, board.id), getBoardInvolvement(event, board.id)])
+    : [[], null];
   return {
     ...context,
     board,
     items,
+    involvement,
     title: 'Kanban',
     tab: 'board',
     canManage: canManageWorkspace(context, event.locals.user as Profile)

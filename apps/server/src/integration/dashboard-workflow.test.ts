@@ -923,6 +923,63 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       .delete(projectMembers)
       .where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, ids.outsider)));
   });
+  test('board involvement lists only the caller’s watched, commented and mentioned live tasks', async () => {
+    const created = new Set<string>();
+    const create = async (title: string, markdown = '') => {
+      const task = await request('admin', `/platform/boards/${boardId}/items`, 'POST', {
+        title,
+        markdown,
+        column: 'todo',
+        labels: [],
+        position: 0
+      });
+      expect(task.status).toBe(200);
+      created.add(task.body.id);
+      return task.body as { id: string; version: number };
+    };
+    const comment = async (actor: Actor, id: string, markdown: string) =>
+      expect(
+        (await request(actor, `/platform/items/${id}/comments`, 'POST', { markdown })).status
+      ).toBe(200);
+    const described = await create('Mentioned in description', `[@m](/members/${ids.member})`);
+    const discussed = await create('Discussed task');
+    // A bare path is not a mention; the comment below is.
+    const quiet = await create('Mentioned in a comment', `See /members/${ids.member} later`);
+    const archived = await create('Archived mention', `[@m](/members/${ids.member})`);
+    await comment('member', discussed.id, 'I can take this');
+    await comment('admin', quiet.id, `Thoughts, [@m](/members/${ids.member})?`);
+    expect(
+      (
+        await request('admin', `/platform/items/${archived.id}/archive`, 'POST', {
+          version: archived.version
+        })
+      ).status
+    ).toBe(200);
+    const involvement = async (actor: Actor) => {
+      const response = await request(actor, `/platform/boards/${boardId}/involvement`);
+      expect(response.status).toBe(200);
+      const mine = (values: string[]) => values.filter((id) => created.has(id)).sort();
+      return {
+        watching: mine(response.body.watching),
+        commented: mine(response.body.commented),
+        mentioned: mine(response.body.mentioned)
+      };
+    };
+    expect(await involvement('member')).toEqual({
+      watching: [discussed.id],
+      commented: [discussed.id],
+      mentioned: [described.id, quiet.id].sort()
+    });
+    expect(await involvement('admin')).toEqual({
+      watching: [described.id, discussed.id, quiet.id].sort(),
+      commented: [quiet.id],
+      mentioned: []
+    });
+    expect((await request('pending', `/platform/boards/${boardId}/involvement`)).status).toBe(403);
+    expect((await request('member', '/platform/boards/missing/involvement')).status).toBe(404);
+    await db.delete(comments).where(inArray(comments.itemId, [...created]));
+    await db.delete(kanbanItems).where(inArray(kanbanItems.id, [...created]));
+  });
   test('deadlines persist UTC dates, issue each reminder once, and stop for completed tasks', async () => {
     const now = new Date('2030-01-01T12:00:00Z');
     const dueAt = new Date(now.getTime() + 6 * 86400000).toISOString();

@@ -20,6 +20,7 @@
     readonly = false,
     disabled = false,
     showLabel = true,
+    stacked = false,
     onchange
   }: {
     value?: string[];
@@ -28,6 +29,8 @@
     readonly?: boolean;
     disabled?: boolean;
     showLabel?: boolean;
+    /** Read-only only: overlapping avatars; names stay available to screen readers. */
+    stacked?: boolean;
     onchange?: (value: string[]) => void;
   } = $props();
 
@@ -236,7 +239,7 @@
 {/snippet}
 
 {#if readonly}
-  <span class="assigned">
+  <span class="assigned" class:stacked>
     {#if selected.length && showLabel}<span class="readonly-label">Assigned to</span>{/if}
     {#each selected as person (person.id)}
       <span class="person-chip compact" title={fullName(person)}
@@ -438,6 +441,24 @@
     width: 18px;
     height: 18px;
     flex-basis: 18px;
+  }
+  .stacked {
+    flex-wrap: nowrap;
+    gap: 0;
+  }
+  .stacked .person-chip + .person-chip {
+    margin-left: -5px;
+  }
+  .stacked .avatar {
+    box-shadow: 0 0 0 2px var(--surface, #fffefa);
+  }
+  .stacked .person-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
   .remove {
     display: grid;

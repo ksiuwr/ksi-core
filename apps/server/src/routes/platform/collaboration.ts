@@ -4,6 +4,7 @@ import {
   hasContentChange,
   type ContentChange
 } from 'shared/activity';
+import { mentionedUserIds } from 'shared/mentions';
 import { allocateReferenceNumber } from '../../services/references';
 import { notificationTarget, notifyCollaboration, subscribe } from '../../services/notifications';
 import {
@@ -31,7 +32,8 @@ import {
   users,
   auditEvents,
   projects,
-  projectMembers
+  projectMembers,
+  subscriptions
 } from '../../db';
 import { canContribute, canReadThread } from '../../domain/permissions';
 import { validBoardStatuses, statusExists, type BoardStatus } from '../../domain/board-statuses';
@@ -957,6 +959,52 @@ export default createElysia({ prefix: '/platform' })
     },
     { query: t.Object({ graveyard: t.Optional(t.Union([t.Literal('true'), t.Literal('false')])) }) }
   )
+  // The caller's own activity on live tasks, for the board's "Involves you" filters.
+  .get('/boards/:id/involvement', async ({ db, user, params }) => {
+    const actor = active(user);
+    const { board } = await boardScope(db, params.id);
+    const live = and(eq(kanbanItems.boardId, board.id), isNull(kanbanItems.deletedAt));
+    const mentionLink = `/members/${actor.id}`;
+    const [described, watched, discussed] = await Promise.all([
+      db
+        .select({ id: kanbanItems.id, markdown: kanbanItems.markdown })
+        .from(kanbanItems)
+        .where(and(live, sql`strpos(${kanbanItems.markdown}, ${mentionLink}) > 0`)),
+      db
+        .select({ id: subscriptions.ownerId })
+        .from(subscriptions)
+        .innerJoin(kanbanItems, eq(subscriptions.ownerId, kanbanItems.id))
+        .where(and(live, eq(subscriptions.ownerType, 'item'), eq(subscriptions.userId, actor.id))),
+      db
+        .select({ id: kanbanItems.id, authorId: comments.authorId, markdown: comments.markdown })
+        .from(comments)
+        .innerJoin(kanbanItems, eq(comments.itemId, kanbanItems.id))
+        .where(
+          and(
+            live,
+            isNull(comments.deletedAt),
+            or(
+              eq(comments.authorId, actor.id),
+              sql`strpos(${comments.markdown}, ${mentionLink}) > 0`
+            )
+          )
+        )
+    ]);
+    const mentions = (markdown: string) => mentionedUserIds(markdown).includes(actor.id);
+    const mentioned = new Set(
+      described.filter((row) => mentions(row.markdown)).map((row) => row.id)
+    );
+    const commented = new Set<string>();
+    for (const row of discussed) {
+      if (row.authorId === actor.id) commented.add(row.id);
+      if (mentions(row.markdown)) mentioned.add(row.id);
+    }
+    return {
+      watching: [...new Set(watched.map((row) => row.id))],
+      commented: [...commented],
+      mentioned: [...mentioned]
+    };
+  })
   .put(
     '/boards/:id/order',
     async ({ db, user, params, body }) => {
