@@ -41,7 +41,7 @@
         invitedIds: [],
         ...(projectId ? { projectId } : {})
       });
-      await goto(threadPath(workspace, projectSlug, result.id));
+      await goto(threadPath(workspace, projectSlug, result.referenceNumber ?? result.id));
     } catch (cause) {
       error = errorMessage(cause);
     } finally {

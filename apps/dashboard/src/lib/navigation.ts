@@ -37,7 +37,7 @@ export function dashboardPath(workspace: Workspace, projectSlug: string, tab: st
   return !segment || tab === 'overview' ? base : `${base}/${segment}`;
 }
 
-export function taskPath(workspace: Workspace, projectSlug: string, id: string): string {
+export function taskPath(workspace: Workspace, projectSlug: string, id: string | number): string {
   return `${workspacePath(workspace, projectSlug)}/tasks/${encodeURIComponent(id)}`;
 }
 
@@ -46,7 +46,7 @@ export function newTaskPath(workspace: Workspace, projectSlug: string, status?: 
   return status ? `${path}?status=${encodeURIComponent(status)}` : path;
 }
 
-export function threadPath(workspace: Workspace, projectSlug: string, id: string): string {
+export function threadPath(workspace: Workspace, projectSlug: string, id: string | number): string {
   return `${dashboardPath(workspace, projectSlug, 'forum')}/${encodeURIComponent(id)}`;
 }
 

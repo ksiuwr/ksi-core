@@ -100,6 +100,8 @@ test('task pages use dedicated routes for projects and the association', () => {
     tab: 'board',
     taskId: 'task1'
   });
+  expect(taskPath('project', 'roboty', 29)).toBe('/projects/roboty/tasks/29');
+  expect(parseDashboardPath('/projects/roboty/tasks/29')?.taskId).toBe('29');
   expect(parseDashboardPath('/association/tasks')).toEqual({
     workspace: 'association',
     projectSlug: '',
@@ -146,6 +148,8 @@ test('forum threads have persistent project and association paths', () => {
   });
   expect(parseDashboardPath('/projects/roboty/forum/abc/extra')).toBeNull();
   expect(threadPath('project', 'roboty', 'abc')).toBe('/projects/roboty/forum/abc');
+  expect(threadPath('project', 'roboty', 29)).toBe('/projects/roboty/forum/29');
+  expect(parseDashboardPath('/projects/roboty/forum/29')?.threadId).toBe('29');
 });
 
 test('workspace member and project settings paths are persistent', () => {

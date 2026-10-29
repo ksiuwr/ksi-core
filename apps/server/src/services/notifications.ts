@@ -22,7 +22,7 @@ import { canReadThread } from '../domain/permissions';
 
 export type SubscriptionType = 'item' | 'thread';
 export async function notificationTarget(executor: Executor, type: string, id: string) {
-  let title: string, projectId: string | null;
+  let title: string, projectId: string | null, referenceNumber: number | null;
   let thread: typeof threads.$inferSelect | undefined;
   if (type === 'item') {
     const [item] = await executor.select().from(kanbanItems).where(eq(kanbanItems.id, id));
@@ -31,21 +31,21 @@ export async function notificationTarget(executor: Executor, type: string, id: s
     if (!board) return null;
     title = item.title;
     projectId = board.projectId;
+    referenceNumber = item.referenceNumber;
   } else if (type === 'thread') {
     [thread] = await executor.select().from(threads).where(eq(threads.id, id));
     if (!thread) return null;
     title = thread.title;
     projectId = thread.projectId;
+    referenceNumber = thread.referenceNumber;
   } else return null;
   const scope = await scopeFor(executor, projectId);
   const [project] = projectId
     ? await executor.select().from(projects).where(eq(projects.id, projectId))
     : [];
   const base = project ? `/projects/${encodeURIComponent(project.slug)}` : '/association';
-  const href =
-    type === 'item'
-      ? `${base}/tasks/${encodeURIComponent(id)}`
-      : `${base}/forum/${encodeURIComponent(id)}`;
+  const reference = referenceNumber ?? encodeURIComponent(id);
+  const href = type === 'item' ? `${base}/tasks/${reference}` : `${base}/forum/${reference}`;
   return {
     title,
     href,
