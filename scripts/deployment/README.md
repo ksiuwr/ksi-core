@@ -111,6 +111,12 @@ automatic retries, a ten-minute deadline and a one-day cleanup TTL. Drizzle reco
 applied migrations, so reruns skip migrations already applied successfully. Migrations
 must remain compatible with the previous application release while rollout occurs.
 
+`db:migrate` runs `apps/server/src/db/migrate.ts`, which calls the same drizzle-orm
+migrator as `drizzle-kit migrate`, so the server image does not need `drizzle-kit`. It
+holds a PostgreSQL advisory lock for the whole run, so concurrent migration Jobs wait
+instead of failing. All pending migrations apply in one transaction; a failure records
+nothing.
+
 To diagnose failures, an administrator can inspect the retained Job and Pod logs:
 
 ```sh
