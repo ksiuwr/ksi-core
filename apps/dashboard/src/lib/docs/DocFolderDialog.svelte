@@ -165,7 +165,7 @@
           bind:value={names[editing]}
           required={editing === 'en'}
           maxlength="80"
-          pattern="[^/]+"
+          pattern="[^\/]+"
           placeholder={editing === 'en' ? '' : names.en}
           disabled={busy}
         />
