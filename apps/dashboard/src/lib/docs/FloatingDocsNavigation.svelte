@@ -125,7 +125,8 @@
     --docked-width: 264px;
     position: sticky;
     top: 16px;
-    z-index: 45;
+    /* Above the article, below the dashboard sidebar (35), which opens over the page. */
+    z-index: 30;
     width: 44px;
     height: 44px;
     transition:
