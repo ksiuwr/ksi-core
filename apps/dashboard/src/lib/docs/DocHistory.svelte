@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, untrack } from 'svelte';
   import { replaceState } from '$app/navigation';
+  import Dropdown from '@ksi-core/ui/platform/Dropdown.svelte';
   import MarkdownContent from '@ksi-core/ui/platform/MarkdownContent.svelte';
   import DocPerson from './DocPerson.svelte';
   import { ArrowLeft, Globe, GitPullRequestArrow, History, ChevronUp, X } from '@lucide/svelte';
@@ -41,7 +42,7 @@
   let snapshot = $state<Snapshot | null>(null);
   const uid = $props.id();
   let trigger = $state<HTMLButtonElement>();
-  let picker = $state<HTMLDivElement>();
+  let picker = $state<HTMLElement>();
   let open = $state(false);
   let mode = $state<'preview' | 'changes'>('preview');
   let chosenLocale = $state<ContentLocale | null>(untrack(() => page.locale));
@@ -59,6 +60,7 @@
   );
   const after = $derived(textIn(snapshot, locale));
   const before = $derived(textIn(snapshot?.previous, locale));
+  const previewTitle = $derived(after.title || snapshot?.title);
 
   async function select(next: number) {
     const current = ++request;
@@ -91,7 +93,7 @@
 
 <div class="workspace-header">
   <div>
-    <p class="history-eyebrow">{'Version history'}</p>
+    <p class="workspace-eyebrow">{'Version history'}</p>
     <h1>{page.displayTitle}</h1>
   </div>
   <a class="btn btn-outline" href={docsPath(slug, page.slug)}
@@ -111,72 +113,6 @@
   {#if selected !== null}<span class="history-version">v{selected}</span>{/if}
   <ChevronUp size={14} aria-hidden="true" />
 </button>
-<div
-  bind:this={picker}
-  id={`${uid}-versions`}
-  class="history-picker"
-  popover="auto"
-  role="dialog"
-  aria-labelledby={`${uid}-versions-title`}
-  ontoggle={(event) => (open = event.newState === 'open')}
->
-  <header class="history-picker-head">
-    <h2 id={`${uid}-versions-title`}>{'Version history'}</h2>
-    <button
-      type="button"
-      class="btn ghost icon-btn btn-sm"
-      popovertarget={`${uid}-versions`}
-      popovertargetaction="hide"
-      aria-label={'Close'}><X size={16} aria-hidden="true" /></button
-    >
-  </header>
-  <ol class="history-list" aria-label={'Versions'}>
-    {#each revisions as revision (revision.id)}
-      <li>
-        <a
-          class="history-item"
-          class:active={selected === revision.version}
-          aria-current={selected === revision.version ? 'true' : undefined}
-          href={docsPath(slug, page.slug, 'history', String(revision.version))}
-          onclick={(event) => {
-            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-            event.preventDefault();
-            picker?.hidePopover();
-            trigger?.focus();
-            replaceState(event.currentTarget.href, {});
-            void select(revision.version);
-          }}
-        >
-          <span class="history-item-head">
-            <span class="history-version">v{revision.version}</span>
-            <time datetime={revision.createdAt}>{when(revision.createdAt)}</time>
-            {#if revision.version === page.version}<span class="tag tag-mint">{'Current'}</span
-              >{/if}
-          </span>
-          <span class="history-reason">
-            {#if revision.reason}{revision.reason}{:else}<span class="muted">{'No summary'}</span
-              >{/if}
-          </span>
-          <span class="history-item-meta">
-            {#if revision.author}
-              <DocPerson person={revision.author} />
-            {/if}
-            <span class="history-lines"
-              ><span class="added">+{revision.additions}</span>
-              <span class="removed">−{revision.deletions}</span></span
-            >
-          </span>
-          {#if revision.reviewer}
-            <span class="history-review"
-              ><GitPullRequestArrow size={12} aria-hidden="true" />{'Suggestion accepted by'}
-              {revision.reviewer.name}</span
-            >
-          {/if}
-        </a>
-      </li>
-    {/each}
-  </ol>
-</div>
 <div class="history">
   <section class="history-detail" aria-live="polite">
     {#if loading}
@@ -191,16 +127,18 @@
         </h2>
         <div class="history-controls">
           {#if locales.length > 1}
-            <select
-              class="history-language"
-              value={locale}
-              aria-label={'Language'}
-              onchange={(event) => (chosenLocale = event.currentTarget.value as ContentLocale)}
-            >
-              {#each locales as option (option)}
-                <option value={option}>{contentLocaleName(option, language)}</option>
-              {/each}
-            </select>
+            <div class="history-language">
+              <Dropdown
+                label={'Language'}
+                value={locale}
+                options={locales.map((option) => ({
+                  value: option,
+                  label: contentLocaleName(option, language)
+                }))}
+                onselect={(value) => (chosenLocale = value as ContentLocale)}
+                variant="compact"
+              />
+            </div>
           {/if}
           <div class="segmented-control" role="group" aria-label={'Version view'} use:slider>
             <button
@@ -230,8 +168,10 @@
         </p>
       {/if}
       {#if mode === 'preview'}
-        <div class="history-preview">
-          <h1 class="history-preview-title">{after.title || snapshot.title}</h1>
+        <div class="history-preview doc-prose">
+          {#if previewTitle !== page.displayTitle}
+            <h1 class="history-preview-title">{previewTitle}</h1>
+          {/if}
           {#if locale !== 'en' && !after.markdown}
             <p class="history-language-fallback">
               {'This version has no translation in this language. Showing the English text.'}
@@ -257,17 +197,74 @@
       >
     {/if}
   </section>
+  <aside
+    bind:this={picker}
+    id={`${uid}-versions`}
+    class="history-picker"
+    popover="auto"
+    aria-labelledby={`${uid}-versions-title`}
+    ontoggle={(event) => (open = event.newState === 'open')}
+  >
+    <header class="history-picker-head">
+      <h2 id={`${uid}-versions-title`}>{'Version history'}</h2>
+      <button
+        type="button"
+        class="btn ghost icon-btn btn-sm"
+        popovertarget={`${uid}-versions`}
+        popovertargetaction="hide"
+        aria-label={'Close'}><X size={16} aria-hidden="true" /></button
+      >
+    </header>
+    <ol class="history-list" aria-label={'Versions'}>
+      {#each revisions as revision (revision.id)}
+        <li>
+          <a
+            class="history-item"
+            class:active={selected === revision.version}
+            aria-current={selected === revision.version ? 'true' : undefined}
+            href={docsPath(slug, page.slug, 'history', String(revision.version))}
+            onclick={(event) => {
+              if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+              event.preventDefault();
+              picker?.hidePopover();
+              trigger?.focus();
+              replaceState(event.currentTarget.href, {});
+              void select(revision.version);
+            }}
+          >
+            <span class="history-item-head">
+              <span class="history-version">v{revision.version}</span>
+              <time datetime={revision.createdAt}>{when(revision.createdAt)}</time>
+              {#if revision.version === page.version}<span class="tag tag-mint">{'Current'}</span
+                >{/if}
+            </span>
+            <span class="history-reason">
+              {#if revision.reason}{revision.reason}{:else}<span class="muted">{'No summary'}</span
+                >{/if}
+            </span>
+            <span class="history-item-meta">
+              {#if revision.author}
+                <DocPerson person={revision.author} />
+              {/if}
+              <span class="history-lines"
+                ><span class="added">+{revision.additions}</span>
+                <span class="removed">−{revision.deletions}</span></span
+              >
+            </span>
+            {#if revision.reviewer}
+              <span class="history-review"
+                ><GitPullRequestArrow size={12} aria-hidden="true" />{'Suggestion accepted by'}
+                {revision.reviewer.name}</span
+              >
+            {/if}
+          </a>
+        </li>
+      {/each}
+    </ol>
+  </aside>
 </div>
 
 <style>
-  .history-eyebrow {
-    margin-bottom: 8px;
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
   .history {
     min-width: 0;
     padding-bottom: 88px;
@@ -335,8 +332,8 @@
     background: var(--surface-muted);
   }
   .history-item.active {
-    border-color: var(--accent);
-    box-shadow: inset 3px 0 0 var(--accent);
+    background: var(--surface-muted);
+    box-shadow: inset 2px 0 0 var(--accent);
   }
   .history-item-head {
     display: flex;
@@ -367,7 +364,7 @@
     font-size: 11px;
   }
   .added {
-    color: #2f7d4a;
+    color: var(--positive);
   }
   .removed {
     color: var(--danger);
@@ -405,10 +402,7 @@
     flex-wrap: wrap;
   }
   .history-language {
-    width: auto;
-    min-height: 32px;
-    padding-block: 4px;
-    font-size: 13px;
+    width: 140px;
   }
   .history-retry {
     justify-self: start;
@@ -422,7 +416,7 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    color: #2f7d4a;
+    color: var(--positive);
     font-family: var(--font);
     font-size: 12px;
     font-weight: 400;
@@ -436,13 +430,13 @@
     color: var(--danger);
   }
   .history-title-change ins {
-    color: #2f7d4a;
+    color: var(--positive);
     text-decoration: none;
   }
   .history-preview {
+    max-width: 760px;
     padding-block: 24px;
     border-top: 1px solid var(--line);
-    line-height: 1.75;
   }
   .history-preview-title {
     margin-bottom: 18px;
@@ -456,6 +450,33 @@
     .history-picker {
       right: 16px;
       bottom: 70px;
+    }
+  }
+  /* With room to spare the versions are always on screen, next to what they show. */
+  @media (min-width: 1280px) {
+    .history {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 32px;
+      align-items: start;
+      padding-bottom: 0;
+    }
+    .history-trigger,
+    .history-picker-head button {
+      display: none;
+    }
+    .history-picker {
+      position: sticky;
+      inset: 24px auto auto;
+      display: block;
+      width: auto;
+      height: auto;
+      max-height: calc(100dvh - 48px);
+      box-shadow: var(--shadow-xs);
+      /* Popovers rest hidden for their entry animation; here this one is always shown. */
+      opacity: 1;
+      transform: none;
+      transition: none;
     }
   }
 </style>

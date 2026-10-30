@@ -2,6 +2,7 @@
   import { invalidateAll } from '$app/navigation';
   import {
     FileText,
+    FilePlus,
     Globe,
     ChevronRight,
     FolderPlus,
@@ -9,10 +10,10 @@
     ArrowRightLeft,
     FolderOpen
   } from '@lucide/svelte';
+  import TreeLabel from '@ksi-core/ui/platform/TreeLabel.svelte';
   import { docsPath } from 'shared/docs';
   import { docFolderPath } from 'shared/doc-folders';
   import DocFolderSelect from './DocFolderSelect.svelte';
-  import DocTreeName from './DocTreeName.svelte';
   import DocFolderDialog from './DocFolderDialog.svelte';
   import DocError from './DocError.svelte';
   import {
@@ -44,6 +45,8 @@
   let busy = $state(false);
   let error = $state('');
   const destinationName = $derived(docFolderPath(index.folders, destination || null, index.locale));
+  // The top level is only a place to drop onto, so it appears for pages that can go there.
+  const liftable = $derived(!!index.pages.find((page) => page.id === dragging)?.folderId);
 
   function href(page: DocSummary) {
     return docsPath(slug, page.slug);
@@ -105,7 +108,7 @@
 </script>
 
 {#snippet pageRow(page: DocSummary, depth: number)}
-  <div class="tree-page" style:--depth={depth}>
+  <div class="tree-page" class:editable={index.access.canReview} style:--depth={depth}>
     <a
       class="tree-link"
       class:active={selected === page.slug}
@@ -119,8 +122,8 @@
         over = undefined;
       }}
     >
-      <FileText size={14} aria-hidden="true" /><DocTreeName value={page.title} />
-      {#if page.public}<Globe size={12} aria-label={'Public'} />{/if}
+      <FileText size={14} aria-hidden="true" /><TreeLabel value={page.title} />
+      {#if page.public}<Globe class="tree-public" size={12} aria-label={'Public'} />{/if}
     </a>
     {#if index.access.canReview}
       <button
@@ -136,8 +139,9 @@
 {/snippet}
 
 {#snippet branch(node: FolderNode, depth: number)}
+  {#each node.pages as page (page.id)}{@render pageRow(page, depth)}{/each}
   {#each node.folders as folder (folder.id)}
-    <details class="tree-folder" open>
+    <details class="tree-folder" class:editable={index.access.canReview} open>
       <summary
         class:drop-target={dragging && over === folder.id}
         title={folder.path.split('/').join(' / ')}
@@ -148,7 +152,7 @@
         }}
         ondrop={(event) => drop(event, folder.id)}
       >
-        <ChevronRight size={14} class="tree-chevron" aria-hidden="true" /><DocTreeName
+        <ChevronRight size={14} class="tree-chevron" aria-hidden="true" /><TreeLabel
           value={folder.name}
           tooltip={folder.path.split('/').join(' / ')}
         />
@@ -186,32 +190,41 @@
         </p>{/if}
     </details>
   {/each}
-  {#each node.pages as page (page.id)}{@render pageRow(page, depth)}{/each}
 {/snippet}
 
-<div class="tree-heading">
-  <span>{'Pages'}</span>
-  {#if index.access.canReview}<button
-      type="button"
-      class="tree-tool"
-      title={'New folder'}
-      aria-label={'New folder'}
-      onclick={() => folderForm(null, null)}><FolderPlus size={15} aria-hidden="true" /></button
-    >{/if}
+<div
+  class="tree-heading"
+  class:drop-zone={liftable}
+  class:drop-target={over === null}
+  role="group"
+  aria-label={liftable ? 'Top level' : undefined}
+  ondragover={(event) => dragOver(event, null)}
+  ondragleave={() => (over = undefined)}
+  ondrop={(event) => drop(event, null)}
+>
+  {#if liftable}
+    <FolderOpen size={14} aria-hidden="true" /><span>{'Move to top level'}</span>
+  {:else}
+    <span>{'Pages'}</span>
+    <span class="tree-heading-tools">
+      {#if index.access.canPropose}
+        {@const newPage = index.access.canReview ? 'New page' : 'Suggest a page'}
+        <a class="tree-tool" href={docsPath(slug, 'new')} title={newPage} aria-label={newPage}
+          ><FilePlus size={15} aria-hidden="true" /></a
+        >
+      {/if}
+      {#if index.access.canReview}
+        <button
+          type="button"
+          class="tree-tool"
+          title={'New folder'}
+          aria-label={'New folder'}
+          onclick={() => folderForm(null, null)}><FolderPlus size={15} aria-hidden="true" /></button
+        >
+      {/if}
+    </span>
+  {/if}
 </div>
-{#if index.access.canReview}
-  <div
-    class="tree-root"
-    class:drop-target={over === null}
-    role="group"
-    aria-label={'Top level'}
-    ondragover={(event) => dragOver(event, null)}
-    ondragleave={() => (over = undefined)}
-    ondrop={(event) => drop(event, null)}
-  >
-    <FolderOpen size={14} aria-hidden="true" />{'Top level'}
-  </div>
-{/if}
 <div class="page-tree" role="group" aria-label={'Documentation pages'}>
   {@render branch(tree, 0)}
   {#if !index.pages.length && !index.folders.length}<p class="tree-empty">{'No pages yet.'}</p>{/if}
@@ -279,25 +292,42 @@
 
 <style>
   .page-tree {
+    display: grid;
+    gap: 1px;
     min-width: 0;
   }
   .tree-heading {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin: 16px 8px 6px 10px;
+    gap: 7px;
+    min-height: 30px;
+    margin: 10px 0 2px;
+    padding-left: 6px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
     color: var(--muted);
     font: 10px var(--mono);
     text-transform: uppercase;
     letter-spacing: 0.08em;
   }
+  .tree-heading-tools {
+    display: inline-flex;
+    margin-left: auto;
+    padding-right: 2px;
+  }
+  .tree-heading.drop-zone {
+    border: 1px dashed var(--control-border-hover);
+    color: var(--ink);
+  }
+  /* A child's icon sits under its parent's name: chevron plus gap. */
   .tree-folder summary,
-  .tree-link,
-  .tree-root {
+  .tree-link {
+    position: relative;
     display: flex;
-    gap: 7px;
+    gap: 6px;
     align-items: center;
-    padding: 7px 8px 7px calc(8px + var(--depth, 0) * 14px);
+    min-height: 30px;
+    padding: 6px 8px 6px calc(6px + var(--depth, 0) * 20px);
     color: var(--muted);
     border-radius: var(--radius-md);
     font-size: 13px;
@@ -305,13 +335,21 @@
   }
   .tree-folder summary {
     cursor: pointer;
+    font-weight: 500;
     list-style: none;
   }
   .tree-folder summary::-webkit-details-marker {
     display: none;
   }
+  .tree-folder summary :global(.tree-chevron) {
+    transition: transform 120ms var(--ease-out);
+  }
   .tree-folder[open] > summary :global(.tree-chevron) {
     transform: rotate(90deg);
+  }
+  .tree-folder[open] {
+    display: grid;
+    gap: 1px;
   }
   .tree-folder :global(svg),
   .tree-link :global(svg) {
@@ -327,13 +365,9 @@
     color: var(--accent);
   }
   .tree-page {
-    display: flex;
-    align-items: center;
     position: relative;
   }
   .tree-link {
-    flex: 1;
-    min-width: 0;
     text-decoration: none;
   }
   .tree-link[draggable='true'] {
@@ -357,12 +391,18 @@
     cursor: pointer;
   }
   .tree-tool:hover {
-    background: var(--surface-muted);
+    background: color-mix(in srgb, var(--ink) 9%, transparent);
     color: var(--ink);
+  }
+  .tree-page > .tree-tool,
+  .tree-tools {
+    position: absolute;
+    top: 3px;
+    right: 3px;
   }
   .tree-tools {
     display: inline-flex;
-    flex-shrink: 0;
+    border-radius: var(--radius-sm);
   }
   @media (hover: hover) {
     .tree-page > .tree-tool,
@@ -375,20 +415,43 @@
     summary:focus-within .tree-tools {
       opacity: 1;
     }
+    /* Long names continue under the tools; the backdrop keeps both legible. */
+    summary:hover .tree-tools,
+    summary:focus-within .tree-tools {
+      background: var(--surface-muted);
+    }
+    .tree-page.editable:hover :global(.tree-public),
+    .tree-page.editable:focus-within :global(.tree-public) {
+      opacity: 0;
+    }
+  }
+  /* Touch screens have no hover, so tools stay visible, quietly, in space of their own. */
+  @media (hover: none) {
+    .tree-page.editable .tree-link {
+      padding-right: 32px;
+    }
+    .tree-folder.editable summary {
+      padding-right: 56px;
+    }
+    .tree-page > .tree-tool,
+    .tree-tools {
+      opacity: 0.6;
+    }
   }
   .tree-empty {
-    padding: 4px 10px 4px calc(12px + var(--depth, 0) * 14px);
+    padding: 4px 8px 4px calc(6px + var(--depth, 0) * 20px);
     color: var(--muted);
     font-size: 12px;
-  }
-  .tree-root {
-    margin-bottom: 4px;
-    border: 1px dashed var(--line);
   }
   .drop-target {
     background: color-mix(in srgb, var(--accent) 12%, var(--surface)) !important;
     outline: 1px solid var(--accent);
     outline-offset: -1px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tree-folder summary :global(.tree-chevron) {
+      transition: none;
+    }
   }
   .move-dialog {
     width: min(460px, calc(100vw - 32px));

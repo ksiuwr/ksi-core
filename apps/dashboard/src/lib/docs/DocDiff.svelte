@@ -184,7 +184,7 @@
     font-size: 12px;
   }
   .added-count {
-    color: #2f7d4a;
+    color: var(--positive);
   }
   .removed-count {
     color: var(--danger);
@@ -249,8 +249,8 @@
     box-shadow: inset 3px 0 0 color-mix(in srgb, var(--danger) 70%, transparent);
   }
   .doc-diff-row:is(.added, .changed) .after {
-    background: color-mix(in srgb, #2f9a57 10%, transparent);
-    box-shadow: inset 3px 0 0 color-mix(in srgb, #2f9a57 75%, transparent);
+    background: color-mix(in srgb, var(--positive) 10%, transparent);
+    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--positive) 75%, transparent);
   }
   .doc-diff-row.added .before,
   .doc-diff-row.removed .after {
@@ -308,7 +308,7 @@
     background: color-mix(in srgb, var(--danger) 9%, transparent);
   }
   .doc-diff-source.added {
-    background: color-mix(in srgb, #2f9a57 10%, transparent);
+    background: color-mix(in srgb, var(--positive) 10%, transparent);
   }
   .doc-diff-source del {
     background: color-mix(in srgb, var(--danger) 28%, transparent);
@@ -316,7 +316,7 @@
     text-decoration-color: color-mix(in srgb, var(--danger) 70%, transparent);
   }
   .doc-diff-source ins {
-    background: color-mix(in srgb, #2f9a57 30%, transparent);
+    background: color-mix(in srgb, var(--positive) 30%, transparent);
     text-decoration: none;
   }
   .doc-diff-empty {

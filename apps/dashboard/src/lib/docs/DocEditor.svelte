@@ -4,7 +4,7 @@
   import Editor from '@ksi-core/ui/platform/Editor.svelte';
   import MarkdownContent from '@ksi-core/ui/platform/MarkdownContent.svelte';
   import ContentLocaleEditor from '$lib/ContentLocaleEditor.svelte';
-  import { ArrowLeft, FileDiff, Save, Send, Info } from '@lucide/svelte';
+  import { ArrowLeft, FileDiff, FolderPlus, Save, Send, Info } from '@lucide/svelte';
   import {
     cleanDocTranslations,
     docSlugPattern,
@@ -158,7 +158,7 @@
 
 <div class="workspace-header">
   <div>
-    <p class="docs-editor-eyebrow">{workspaceName}</p>
+    <p class="workspace-eyebrow">{workspaceName}</p>
     <h1>
       {#if original && direct}{'Edit page'}{:else if original}{'Suggest changes'}{:else if direct}{'New page'}{:else}{'Suggest a new page'}{/if}
     </h1>
@@ -211,8 +211,8 @@
             disabled={busy}
           />
           {#if access.canReview}
-            <button type="button" class="btn ghost btn-sm" onclick={() => (addingFolder = true)}
-              >{'New folder'}</button
+            <button type="button" class="btn btn-outline" onclick={() => (addingFolder = true)}
+              ><FolderPlus size={15} aria-hidden="true" />{'New folder'}</button
             >
           {/if}
         </div>
@@ -354,18 +354,9 @@
     flex: 1;
     min-width: 0;
   }
-  .docs-editor-eyebrow {
-    margin-bottom: 8px;
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
   .docs-editor {
     display: grid;
     gap: 20px;
-    max-width: 1000px;
   }
   .docs-editor-fields {
     display: grid;
@@ -428,7 +419,6 @@
   .docs-editor-compare {
     display: grid;
     gap: 14px;
-    max-width: 1000px;
     margin-top: 28px;
   }
   .docs-editor-compare h2 {

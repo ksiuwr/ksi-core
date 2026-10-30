@@ -1,6 +1,6 @@
 <script lang="ts">
   import MemberPreview from '@ksi-core/ui/platform/MemberPreview.svelte';
-  import { UsersRound } from '@lucide/svelte';
+  import { Check, Clock, UsersRound, X } from '@lucide/svelte';
   import { formatDate } from 'shared/format';
   import { preferences } from '$lib/preferences.svelte';
   import type { DocInsights } from './docs';
@@ -15,7 +15,7 @@
 
 <div class="workspace-header">
   <div>
-    <p class="contributors-eyebrow">{workspaceName}</p>
+    <p class="workspace-eyebrow">{workspaceName}</p>
     <h1>{'Contributors'}</h1>
     <p class="workspace-description">
       {'Who keeps this documentation alive. Changes count accepted edits, including accepted suggestions.'}
@@ -70,15 +70,21 @@
             </td>
             <td>{row.pages}</td>
             <td class="contributors-lines"
-              ><span class="added">+{row.additions}</span>
-              <span class="removed">−{row.deletions}</span></td
+              ><span class="added" class:none={!row.additions}>+{row.additions}</span>
+              <span class="removed" class:none={!row.deletions}>−{row.deletions}</span></td
             >
             <td>
               <!-- Flex lives inside the cell; a flex cell drops out of the table's row layout. -->
               <span class="contributors-suggestions">
-                <span title={'Accepted'}>✓ {row.accepted}</span>
-                <span title={'Waiting for review'}>… {row.pending}</span>
-                <span title={'Declined'}>✕ {row.rejected}</span>
+                <span class:none={!row.accepted} title={'Accepted'}
+                  ><Check size={12} aria-hidden="true" />{row.accepted}</span
+                >
+                <span class:none={!row.pending} title={'Waiting for review'}
+                  ><Clock size={12} aria-hidden="true" />{row.pending}</span
+                >
+                <span class:none={!row.rejected} title={'Declined'}
+                  ><X size={12} aria-hidden="true" />{row.rejected}</span
+                >
               </span>
             </td>
             <td>
@@ -97,14 +103,6 @@
 {/if}
 
 <style>
-  .contributors-eyebrow {
-    margin-bottom: 8px;
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
   .contributors-totals {
     display: flex;
     gap: 14px;
@@ -190,11 +188,20 @@
   }
   .contributors-suggestions {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     color: var(--muted);
   }
+  .contributors-suggestions span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  /* Zeroes are most of this table; the numbers that matter should stand out from them. */
+  .none {
+    opacity: 0.5;
+  }
   .added {
-    color: #2f7d4a;
+    color: var(--positive);
   }
   .removed {
     color: var(--danger);

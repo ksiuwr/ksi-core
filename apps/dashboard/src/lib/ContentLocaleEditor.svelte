@@ -185,10 +185,9 @@
     flex-wrap: wrap;
     gap: 8px 16px;
     padding: 10px 12px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--line);
     border-radius: var(--radius-lg);
     background: var(--surface);
-    box-shadow: var(--shadow-sm);
   }
   .language-title,
   .language-actions {
@@ -316,7 +315,7 @@
   .reference-panel {
     margin-top: 10px;
     overflow: hidden;
-    border: 1px solid var(--border);
+    border: 1px solid var(--line);
     border-radius: var(--radius-lg);
     background: var(--surface-muted);
   }
@@ -326,7 +325,7 @@
     justify-content: space-between;
     gap: 12px;
     padding: 10px 12px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--line);
   }
   .reference-panel header div {
     display: flex;
@@ -346,7 +345,7 @@
     color: var(--muted);
     font-size: 12px;
   }
-  @container (max-width: 700px) {
+  @container (max-width: 460px) {
     .language-bar,
     .language-actions {
       align-items: stretch;

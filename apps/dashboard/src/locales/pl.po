@@ -2820,6 +2820,7 @@ msgstr "Wybierz domyślny dostęp do artykułów i dokumentacji oraz utwórz naz
 
 #: src/lib/docs/Docs.svelte
 #: src/lib/docs/Docs.svelte
+#: src/lib/docs/Docs.svelte
 #: src/routes/+layout.svelte
 msgid "Documentation"
 msgstr "Dokumentacja"
@@ -2904,7 +2905,7 @@ msgstr "Zaproponuj zmiany"
 #: src/lib/docs/DocSuggestion.svelte
 #: src/lib/docs/DocSuggestions.svelte
 #: src/lib/docs/DocSuggestions.svelte
-#: src/lib/docs/Docs.svelte
+#: src/lib/docs/DocTree.svelte
 #: src/lib/docs/Docs.svelte
 msgid "New page"
 msgstr "Nowa strona"
@@ -3132,8 +3133,8 @@ msgstr "Zobacz na stronie"
 msgid "Pending suggestions"
 msgstr "Oczekujące propozycje"
 
+#: ../../packages/ui/src/lib/platform/DocsOutline.svelte
 #: ../../packages/ui/src/lib/platform/DocsToc.svelte
-#: src/lib/docs/DocPage.svelte
 msgid "On this page"
 msgstr "Na tej stronie"
 
@@ -3252,7 +3253,6 @@ msgid "No reviewed suggestions yet"
 msgstr "Brak ocenionych propozycji"
 
 #: src/lib/docs/DocTree.svelte
-#: src/lib/docs/Docs.svelte
 msgid "Documentation pages"
 msgstr "Strony dokumentacji"
 
@@ -3263,7 +3263,7 @@ msgstr "Brak stron."
 #~ msgid "Collaboration"
 #~ msgstr "Współpraca"
 
-#: src/lib/docs/Docs.svelte
+#: src/lib/docs/DocTree.svelte
 #: src/lib/docs/Docs.svelte
 msgid "Suggest a page"
 msgstr "Zaproponuj stronę"
@@ -3343,7 +3343,6 @@ msgstr "Ta wersja nie ma tłumaczenia na ten język. Wyświetlany jest tekst ang
 #: src/lib/docs/DocFolderSelect.svelte
 #: src/lib/docs/DocSuggestion.svelte
 #: src/lib/docs/DocSuggestion.svelte
-#: src/lib/docs/DocTree.svelte
 #: src/lib/docs/DocTree.svelte
 msgid "Top level"
 msgstr "Najwyższy poziom"
@@ -3487,3 +3486,7 @@ msgstr "Wszystkie wersje językowe są zapisywane razem z folderem."
 #: src/lib/docs/DocFolderDialog.svelte
 msgid "Folder name"
 msgstr "Nazwa folderu"
+
+#: src/lib/docs/DocTree.svelte
+msgid "Move to top level"
+msgstr "Przenieś na najwyższy poziom"

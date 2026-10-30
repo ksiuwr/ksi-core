@@ -1,8 +1,10 @@
 <script lang="ts">
+  import '@ksi-core/ui/docs-prose.css';
   import DocPerson from './DocPerson.svelte';
   import {
     BookOpen,
     FileText,
+    Globe,
     GitPullRequestArrow,
     UsersRound,
     Plus,
@@ -82,7 +84,7 @@
 
 <div class="docs-layout" class:docs-history={view === 'history'}>
   {#if view !== 'history'}
-    <FloatingDocsNavigation label={'Documentation pages'}>
+    <FloatingDocsNavigation label={'Documentation'}>
       <nav aria-label={'Documentation'}>
         <a class="docs-nav-link" class:active={view === 'index'} href={home}
           ><BookOpen size={15} aria-hidden="true" />{'Overview'}</a
@@ -105,14 +107,6 @@
             href={hrefFor('contributors')}
             ><UsersRound size={14} aria-hidden="true" />{'Contributors'}</a
           >
-          {#if index.access.canPropose}
-            <a class="docs-nav-link minor" class:active={view === 'new'} href={hrefFor('new')}
-              ><Plus
-                size={14}
-                aria-hidden="true"
-              />{#if index.access.canReview}{'New page'}{:else}{'Suggest a page'}{/if}</a
-            >
-          {/if}
         </div>
       </nav>
     </FloatingDocsNavigation>
@@ -124,7 +118,7 @@
       {#if view === 'index'}
         <div class="workspace-header">
           <div>
-            <p class="docs-eyebrow">{workspaceName}</p>
+            <p class="workspace-eyebrow">{workspaceName}</p>
             <h1>{'Documentation'}</h1>
             <p class="workspace-description">
               {'How this workspace works, written down for everyone who comes next.'}
@@ -161,9 +155,12 @@
                 {#each group.pages as page (page.id)}
                   <a class="docs-card" href={hrefFor(page.slug)}>
                     <span class="docs-card-title"
-                      ><FileText size={16} aria-hidden="true" />{page.title}{#if page.public}<span
-                          class="tag tag-mint">{'Public'}</span
-                        >{/if}</span
+                      ><FileText size={16} aria-hidden="true" /><span>{page.title}</span
+                      >{#if page.public}<Globe
+                          class="docs-card-public"
+                          size={14}
+                          aria-label={'Public'}
+                        />{/if}</span
                     >
                     {#if page.excerpt}<span class="docs-card-excerpt">{page.excerpt}</span>{/if}
                     <span class="docs-card-meta">
@@ -211,7 +208,12 @@
           version={data.path[2] ? Number(data.path[2]) : null}
         />
       {:else if view === 'suggestions'}
-        <DocSuggestions {slug} suggestions={data.suggestions ?? []} resolved={!!data.resolved} />
+        <DocSuggestions
+          {slug}
+          {workspaceName}
+          suggestions={data.suggestions ?? []}
+          resolved={!!data.resolved}
+        />
       {:else if view === 'suggestion' && data.suggestion}
         <DocSuggestion {projectId} {slug} suggestion={data.suggestion} />
       {:else if view === 'contributors' && data.insights}
@@ -222,8 +224,16 @@
 </div>
 
 <style>
-  .docs-layout {
-    display: block;
+  .docs-layout:not(.docs-history) {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+  }
+  @media (max-width: 760px) {
+    .docs-layout:not(.docs-history) {
+      display: block;
+    }
   }
   nav {
     display: grid;
@@ -233,16 +243,14 @@
   .docs-nav-link {
     display: flex;
     align-items: center;
-    gap: 9px;
-    padding: 7px 10px;
+    gap: 8px;
+    min-height: 30px;
+    padding: 6px 8px 6px 6px;
     border-radius: var(--radius-md);
     color: var(--muted);
     font-size: 13px;
     line-height: 1.35;
     text-decoration: none;
-  }
-  .docs-nav-link {
-    padding-left: calc(10px + var(--depth, 0) * 14px);
   }
   .docs-group + .docs-group {
     margin-top: 28px;
@@ -291,24 +299,15 @@
   .docs-nav-tools {
     display: grid;
     gap: 1px;
-    margin-top: 18px;
-    padding-top: 12px;
+    margin-top: 10px;
+    padding-top: 8px;
     border-top: 1px solid var(--line);
   }
   .docs-nav-link.minor {
-    padding-block: 5px;
     font-size: 12px;
   }
   .docs-main {
     min-width: 0;
-  }
-  .docs-eyebrow {
-    margin-bottom: 8px;
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
   }
   .docs-callout {
     display: flex;
@@ -350,21 +349,27 @@
   }
   .docs-card:hover {
     border-color: var(--control-border-hover);
-    outline: 1px solid var(--control-border-hover);
-    outline-offset: 2px;
   }
   .docs-card-title {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 9px;
-    flex-wrap: wrap;
     font-family: var(--display);
     font-size: 17px;
     font-weight: 600;
     overflow-wrap: anywhere;
   }
+  .docs-card-title > span {
+    flex: 1;
+    min-width: 0;
+  }
   .docs-card-title :global(svg) {
+    flex-shrink: 0;
+    margin-top: 4px;
     color: var(--accent);
+  }
+  .docs-card-title :global(.docs-card-public) {
+    color: var(--positive);
   }
   .docs-card-excerpt {
     color: var(--muted);
@@ -382,8 +387,6 @@
   }
   .docs-card-people {
     display: flex;
-  }
-  .docs-card-people :global(.doc-person + .doc-person) {
-    margin-left: -6px;
+    gap: 3px;
   }
 </style>

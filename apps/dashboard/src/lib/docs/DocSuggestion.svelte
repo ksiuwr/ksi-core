@@ -79,7 +79,7 @@
 
 <div class="workspace-header">
   <div>
-    <p class="suggestion-eyebrow">{'Suggestion'}</p>
+    <p class="workspace-eyebrow">{'Suggestion'}</p>
     <h1>
       {#if suggestion.page}{suggestion.page.title}{:else}{'New page'}: {suggestion.title}{/if}
     </h1>
@@ -236,14 +236,6 @@
 </div>
 
 <style>
-  .suggestion-eyebrow {
-    margin-bottom: 8px;
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
   .review {
     display: grid;
     gap: 22px;
@@ -293,7 +285,7 @@
   }
   .review-notes ins,
   .review-title-change ins {
-    color: #2f7d4a;
+    color: var(--positive);
     text-decoration: none;
   }
   .review-notes code {
@@ -301,7 +293,7 @@
     font-size: 12px;
   }
   .review-visibility {
-    color: #2f7d4a;
+    color: var(--positive);
   }
   .review-warning {
     padding: 10px 12px;

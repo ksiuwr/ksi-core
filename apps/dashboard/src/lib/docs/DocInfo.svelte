@@ -283,7 +283,7 @@
     gap: 5px;
   }
   .doc-info-visibility.public {
-    color: #2f7d4a;
+    color: var(--positive);
   }
   section {
     padding: 12px 16px;
@@ -325,7 +325,7 @@
     font-size: 11px;
   }
   .added {
-    color: #2f7d4a;
+    color: var(--positive);
   }
   .removed {
     color: var(--danger);

@@ -1,26 +1,26 @@
 <script lang="ts">
-  import { onMount, type Snippet } from 'svelte';
+  import { onDestroy, type Snippet } from 'svelte';
   import { afterNavigate } from '$app/navigation';
   import { PanelLeft, X } from '@lucide/svelte';
 
   let { label, children }: { label: string; children: Snippet } = $props();
   const uid = $props.id();
-  let anchor = $state<HTMLDivElement>();
   let root = $state<HTMLDivElement>();
   let trigger = $state<HTMLButtonElement>();
   let hovered = $state(false);
-  let focused = $state(false);
   let pinned = $state(false);
   let dragging = $state(false);
-  let dismissed = $state(false);
-  let ready = $state(false);
-  let position = $state({ left: 16, top: 80, width: 320 });
-  const open = $derived(!dismissed && (hovered || focused || pinned || dragging));
+  let hoverTimer: ReturnType<typeof setTimeout> | undefined;
+  const open = $derived(hovered || pinned || dragging);
 
+  /** The delays ignore a pointer crossing the button and forgive a brief slip outside. */
+  function hover(next: boolean) {
+    clearTimeout(hoverTimer);
+    hoverTimer = setTimeout(() => (hovered = next), next ? 120 : 240);
+  }
   function close(restoreFocus = false) {
-    dismissed = true;
+    clearTimeout(hoverTimer);
     hovered = false;
-    focused = false;
     pinned = false;
     if (restoreFocus) trigger?.focus();
   }
@@ -35,68 +35,26 @@
     close(true);
   }
   afterNavigate(() => close());
-
-  onMount(() => {
-    if (!anchor) return;
-    const body = anchor.closest('.dash-body');
-    const topbar = body?.querySelector<HTMLElement>('.dash-topbar');
-    function place() {
-      if (!anchor) return;
-      const width = Math.min(320, window.innerWidth - 24);
-      position = {
-        width,
-        left: Math.max(
-          12,
-          Math.min(anchor.getBoundingClientRect().left, window.innerWidth - width - 12)
-        ),
-        top: Math.max(12, Math.min((topbar?.offsetHeight ?? 64) + 16, window.innerHeight - 56))
-      };
-      ready = true;
-    }
-    const observer = new ResizeObserver(place);
-    observer.observe(anchor);
-    if (body) observer.observe(body);
-    if (topbar) observer.observe(topbar);
-    window.addEventListener('resize', place);
-    place();
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('resize', place);
-    };
-  });
+  onDestroy(() => clearTimeout(hoverTimer));
 </script>
 
 <svelte:window onpointerdown={outside} onkeydown={escape} ondragend={() => (dragging = false)} />
 
-<div class="docs-navigation-anchor" bind:this={anchor}>
+<!-- Lives in its own rail so it stays reachable without ever covering the text. -->
+<div class="docs-navigation-anchor">
   <div
     bind:this={root}
     class="floating-docs-navigation"
     class:open
-    class:ready
     role="group"
     aria-label={label}
-    style:left={`${position.left}px`}
-    style:top={`${position.top}px`}
-    style:--navigation-width={`${position.width}px`}
-    style:--navigation-top={`${position.top}px`}
     onpointerenter={(event) => {
-      if (event.pointerType === 'mouse') {
-        hovered = true;
-        dismissed = false;
-      }
+      if (event.pointerType === 'mouse') hover(true);
     }}
-    onpointerleave={() => (hovered = false)}
-    onfocusin={(event) => {
-      focused = true;
-      if (!(event.relatedTarget instanceof Node && root?.contains(event.relatedTarget)))
-        dismissed = false;
-    }}
+    onpointerleave={() => hover(false)}
     onfocusout={(event) => {
-      if (!(event.relatedTarget instanceof Node && root?.contains(event.relatedTarget))) {
-        focused = false;
+      if (event.relatedTarget instanceof Node && !root?.contains(event.relatedTarget))
         pinned = false;
-      }
     }}
     ondragstart={() => (dragging = true)}
   >
@@ -109,16 +67,13 @@
         aria-controls={`${uid}-content`}
         aria-expanded={open}
         onclick={() => {
-          if (pinned) close(true);
-          else {
-            pinned = true;
-            dismissed = false;
-          }
+          if (open) close();
+          else pinned = true;
         }}
       >
         <PanelLeft size={18} aria-hidden="true" />
       </button>
-      <span class="floating-docs-title" aria-hidden={!open}>{label}</span>
+      <span class="floating-docs-title" aria-hidden="true">{label}</span>
       {#if open}<button
           type="button"
           class="docs-navigation-close"
@@ -134,17 +89,20 @@
 
 <style>
   .docs-navigation-anchor {
+    --navigation-width: 320px;
+    position: sticky;
+    top: 16px;
+    z-index: 45;
     height: 44px;
-    margin-bottom: 16px;
   }
   .floating-docs-navigation {
-    position: fixed;
-    z-index: 45;
+    position: absolute;
+    top: 0;
+    left: 0;
     display: grid;
     grid-template-rows: 42px 0fr;
     width: 44px;
     overflow: hidden;
-    visibility: hidden;
     border: 1px solid var(--line);
     border-radius: 22px;
     background: var(--surface);
@@ -155,9 +113,6 @@
       grid-template-rows 240ms var(--ease-out),
       border-radius 220ms var(--ease-out),
       box-shadow 180ms ease;
-  }
-  .floating-docs-navigation.ready {
-    visibility: visible;
   }
   .floating-docs-navigation.open {
     width: var(--navigation-width);
@@ -187,10 +142,14 @@
   .docs-navigation-trigger[aria-expanded='true'] {
     color: var(--ink);
   }
-  .docs-navigation-trigger:focus-visible,
+  .docs-navigation-trigger:focus-visible {
+    outline: 2px solid var(--ring-strong);
+    outline-offset: -7px;
+    border-radius: var(--radius-xl);
+  }
   .docs-navigation-close:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: -4px;
+    outline: 2px solid var(--ring-strong);
+    outline-offset: -2px;
   }
   .floating-docs-title {
     flex: 1;
@@ -208,7 +167,7 @@
     transition-delay: 60ms;
   }
   .docs-navigation-close {
-    display: grid;
+    display: none;
     place-items: center;
     flex: 0 0 28px;
     width: 28px;
@@ -225,6 +184,12 @@
     color: var(--ink);
     background: var(--surface-muted);
   }
+  /* With a mouse the button itself closes the panel; a touch target needs an explicit one. */
+  @media (hover: none) {
+    .docs-navigation-close {
+      display: grid;
+    }
+  }
   .floating-docs-content {
     min-height: 0;
     overflow: hidden;
@@ -239,11 +204,29 @@
   }
   .floating-docs-scroll {
     width: calc(var(--navigation-width) - 2px);
-    max-height: max(0px, calc(100dvh - var(--navigation-top) - 56px));
+    /* Fits below the top bar at the top of a page, which is the lowest this panel starts. */
+    max-height: max(0px, calc(100dvh - 160px));
     overflow: auto;
     overscroll-behavior: contain;
     scrollbar-width: thin;
-    padding: 4px 12px 12px;
+    padding: 2px 8px 8px;
+  }
+  /* Too narrow for a rail: the button becomes a full-width bar above the content. */
+  @media (max-width: 760px) {
+    .docs-navigation-anchor {
+      --navigation-width: calc(100vw - 32px);
+      position: relative;
+      top: 0;
+      margin-bottom: 20px;
+    }
+    .floating-docs-navigation,
+    .floating-docs-navigation.open {
+      width: 100%;
+      border-radius: var(--radius-lg);
+    }
+    .floating-docs-title {
+      opacity: 1;
+    }
   }
   @media (prefers-reduced-motion: reduce) {
     .floating-docs-navigation,

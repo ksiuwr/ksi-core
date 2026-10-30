@@ -10,9 +10,15 @@
 
   let {
     slug,
+    workspaceName,
     suggestions,
     resolved
-  }: { slug: string | null; suggestions: SuggestionSummary[]; resolved: boolean } = $props();
+  }: {
+    slug: string | null;
+    workspaceName: string;
+    suggestions: SuggestionSummary[];
+    resolved: boolean;
+  } = $props();
 
   const language = $derived(preferences.language);
   const when = (value: string) =>
@@ -21,6 +27,7 @@
 
 <div class="workspace-header">
   <div>
+    <p class="workspace-eyebrow">{workspaceName}</p>
     <h1>{'Suggestions'}</h1>
     <p class="workspace-description">
       {'Changes proposed by members, waiting for a leader or reviewer to compare and accept them.'}
@@ -163,7 +170,7 @@
     font-size: 11px;
   }
   .added {
-    color: #2f7d4a;
+    color: var(--positive);
   }
   .removed {
     color: var(--danger);
