@@ -60,10 +60,16 @@ roll back by promoting the previous known-good image digests.
 
 ## Pull request previews
 
-Non-`master` pushes build and test the same four images, then queue a deployment to
-the protected `preview` GitHub Environment. Required reviewers approve it with
-GitHub's **Review deployments** control. The cluster credential is an environment
-secret, so no preview deployment or secret access occurs before approval.
+Non-`master` pushes build and test the same four images, then deploy them through the
+`preview` GitHub Environment, which holds the cluster credential as an environment
+secret. A pull request labelled `auto-preview` deploys as soon as its images are built.
+Any other push first waits in the `preview-approval` Environment until a required
+reviewer approves it with GitHub's **Review deployments** control.
+
+This gate lives in the workflow, so it trusts the collaborators who can push branches
+here, who are also the only ones able to add the label (triage access or more). Pull
+requests from forks never deploy a preview: GitHub gives their runs no secrets and a
+read-only token, and the credential portal accepts only `push` runs.
 
 Previews share the `ksi-previews` namespace and PostgreSQL instance. Every branch
 gets prefixed Deployments, Services, Ingress, ConfigMap, Secret, migration/seed Jobs,
@@ -83,16 +89,17 @@ Bootstrap once from a trusted admin machine:
    preview Environment secret `PREVIEW_KUBECONFIG_B64`.
 4. Configure wildcard `*.ksi.edu.pl` DNS and make its origin certificate the
    ingress-nginx default certificate. Per-branch DNS credentials are not needed.
-5. Configure maintainers as required reviewers on the `preview` Environment. Leave
-   **Prevent self-review** disabled so an authorized PR author can approve their own
-   preview. Pull request merge approval remains controlled by branch protection.
+5. Configure maintainers as required reviewers on the `preview-approval` Environment and
+   leave `preview` without reviewers. Leave **Prevent self-review** disabled so an
+   authorized PR author can approve their own preview, and create the `auto-preview`
+   label. Pull request merge approval remains controlled by branch protection.
 
-After approval, CI verifies that the branch still has an open pull request, provisions
-the branch database, migrates and seeds it, rolls out the workloads, and publishes the
-web URL in the step log and job summary. GitHub also adds a **View deployment** link and
-creates or updates one preview comment on the pull request. Closing the pull request or
-deleting its branch drops the database and deletes only resources carrying its
-`ksi.preview` label. Wildcard DNS requires no per-branch cleanup.
+Once approved or labelled, CI verifies that the branch still has an open pull request,
+provisions the branch database, migrates and seeds it, rolls out the workloads, and
+publishes the web URL in the step log and job summary. GitHub also adds a **View
+deployment** link and creates or updates one preview comment on the pull request.
+Closing the pull request or deleting its branch drops the database and deletes only
+resources carrying its `ksi.preview` label. Wildcard DNS requires no per-branch cleanup.
 
 Preview credentials persist across updates. To read the sample-account password from
 a trusted admin machine, replace `$slug` with the job summary's hostname prefix:

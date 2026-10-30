@@ -159,9 +159,44 @@ jobs:
         with:
           name: image-${{ matrix.app }}
           path: image.json
-  preview:
-    needs: [static, integration, images]
+  # Pull requests labelled auto-preview deploy without approval; adding labels takes triage
+  # access or more. The label is read once the images are built, so a pull request opened or
+  # labelled right after the push still counts.
+  preview-gate:
+    needs: images
     if: github.event_name == 'push' && github.ref != 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      labelled: ${{ steps.label.outputs.labelled }}
+    steps:
+      - name: Check the pull request for the auto-preview label
+        id: label
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          owner=${REPOSITORY%%/*}
+          labelled=$(gh api --method GET "repos/$REPOSITORY/pulls" -f state=open -f "head=$owner:$BRANCH" \
+            --jq '[.[0].labels[]?.name] | any(. == "auto-preview")')
+          echo "labelled=$labelled" | tee -a "$GITHUB_OUTPUT"
+  # Every other preview waits here for a required reviewer. This environment holds no
+  # secrets; the cluster credential stays in the unprotected preview environment.
+  preview-approval:
+    needs: preview-gate
+    if: needs.preview-gate.outputs.labelled != 'true'
+    runs-on: ubuntu-latest
+    environment: preview-approval
+    steps:
+      - run: echo 'A reviewer approved this preview.'
+  preview:
+    needs: [static, integration, images, preview-gate, preview-approval]
+    if: >-
+      !cancelled() && !failure() && github.event_name == 'push' && github.ref != 'refs/heads/master' &&
+      (needs.preview-gate.outputs.labelled == 'true' || needs.preview-approval.result == 'success')
     runs-on: ubuntu-latest
     permissions:
       contents: read
