@@ -8,7 +8,9 @@ permissions:
   id-token: write
 jobs:
   cleanup:
-    if: (github.event_name == 'delete' && github.event.ref_type == 'branch' && github.event.ref != 'master') || github.event_name == 'pull_request_target'
+    # Previews only exist for this repository's branches, so closing a fork's pull request never
+    # needs a cleanup, and its branch name must not select one.
+    if: (github.event_name == 'delete' && github.event.ref_type == 'branch' && github.event.ref != 'master') || (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     environment: preview
     concurrency:
