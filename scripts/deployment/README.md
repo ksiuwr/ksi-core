@@ -1,9 +1,11 @@
 # Tested production promotion
 
-`platform.yml` runs checks for pull requests and pushes. Pushes build four ARM64
-images tagged with the source commit. A successful `master` build records each
-image's immutable registry digest, updates `ksi-cluster/production-platform.yaml`,
-and commits the manifest to the cluster repository.
+`platform.yml` runs static checks and integration tests for pull requests and pushes,
+in parallel jobs. Pull requests also build the three frontends; pushes skip that job
+because they build the same apps into four ARM64 images tagged with the source commit.
+A successful `master` build records each image's immutable registry digest, updates
+`ksi-cluster/production-platform.yaml`, and commits the manifest to the cluster
+repository.
 
 Production always rebuilds all four images. Preview branches rebuild only applications
 affected by their diff from `master`; unchanged applications reuse the immutable image
