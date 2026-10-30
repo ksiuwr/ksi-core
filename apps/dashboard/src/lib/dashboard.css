@@ -1,6 +1,7 @@
 .dash-shell {
+  --sidebar-width: 244px;
   --sidebar-content-width: 216px;
-  grid-template-columns: 244px minmax(0, 1fr);
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
   transition: grid-template-columns 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .dash-sidebar {
@@ -12,7 +13,12 @@
   padding: 0 14px 20px;
   gap: 5px;
   background: var(--paper);
-  transition: padding 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition:
+    padding 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    width 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    backdrop-filter 160ms ease;
 }
 .sidebar-controls {
   position: absolute;
@@ -253,6 +259,13 @@
 }
 .workspace-header > :first-child {
   min-width: 0;
+}
+.workspace-header .workspace-eyebrow {
+  margin: 0 0 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 .workspace-header h1 {
   font-size: 26px;
@@ -795,8 +808,8 @@ a[aria-disabled='true'] {
 }
 @media (max-width: 1100px) {
   .dash-shell {
+    --sidebar-width: 218px;
     --sidebar-content-width: 190px;
-    grid-template-columns: 218px minmax(0, 1fr);
   }
   .dash-topbar,
   .dash-workspace {
@@ -1199,10 +1212,15 @@ summary,
   color: var(--ink);
 }
 @media (min-width: 761px) {
+  .dash-sidebar {
+    z-index: 35;
+    width: var(--sidebar-width);
+  }
   .dash-shell.sidebar-collapsed {
     grid-template-columns: 64px minmax(0, 1fr);
   }
   .dash-shell.sidebar-collapsed .dash-sidebar {
+    width: 64px;
     padding-inline: 8px;
     overflow-x: hidden;
   }
@@ -1236,14 +1254,16 @@ summary,
     transition: padding 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
-  /* A collapsed sidebar temporarily opens on hover without changing the saved
-     preference. Its full-height control row is excluded from the hover target. */
-  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover):not(:has(.sidebar-controls:hover)) {
-    grid-template-columns: 244px minmax(0, 1fr);
-  }
+  /* A collapsed sidebar temporarily opens over the page as frosted glass without
+     changing the saved preference or reflowing the workspace. Its full-height
+     control row is excluded from the hover target. */
   .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover):not(:has(.sidebar-controls:hover))
     .dash-sidebar {
+    width: var(--sidebar-width);
     padding-inline: 14px;
+    background: color-mix(in srgb, var(--paper) 72%, transparent);
+    backdrop-filter: blur(16px) saturate(1.4);
+    box-shadow: 18px 0 40px -24px rgb(0 0 0 / 0.35);
   }
   .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover):not(:has(.sidebar-controls:hover))
     .sidebar-btn {
@@ -1704,12 +1724,6 @@ summary,
   }
   .comment-body {
     padding: 10px 12px;
-  }
-}
-
-@media (min-width: 761px) and (max-width: 1100px) {
-  .dash-shell.sidebar-collapsed:has(.dash-sidebar:hover):not(:has(.sidebar-controls:hover)) {
-    grid-template-columns: 218px minmax(0, 1fr);
   }
 }
 

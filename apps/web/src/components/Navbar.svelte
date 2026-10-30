@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    BookOpen,
     ChevronDown,
     CodeXml,
     FlaskConical,
@@ -175,7 +176,10 @@
   }}
   class="border-line bg-paper/80 sticky top-0 z-40 border-b backdrop-blur-md"
 >
-  <div class="page-container flex h-14 items-center gap-6">
+  <div
+    class="navbar-container page-container flex h-14 items-center gap-6"
+    class:docs-container={page.url.pathname.startsWith('/docs')}
+  >
     <a href="/" class="text-ink flex shrink-0 items-center gap-2.5">
       <img src="/logo.svg" alt="" class="size-7 dark:invert" />
       <span class="font-display text-lg font-semibold tracking-tight">KSI</span>
@@ -209,6 +213,11 @@
         href="/articles"
         class="nav-link"
         aria-current={page.url.pathname.startsWith('/articles') ? 'page' : undefined}>Articles</a
+      >
+      <a
+        href="/docs"
+        class="nav-link"
+        aria-current={page.url.pathname.startsWith('/docs') ? 'page' : undefined}>Docs</a
       >
       {#if member}
         <a href={page.data.dashboardOrigin} class="nav-link">Dashboard</a>
@@ -282,6 +291,10 @@
                 <Newspaper class="size-4" aria-hidden="true" />
                 Articles
               </a>
+              <a href="/docs" class="mobile-link" onclick={closeMenu}>
+                <BookOpen class="size-4" aria-hidden="true" />
+                Docs
+              </a>
               {#if member}
                 <a href={page.data.dashboardOrigin} class="mobile-link" onclick={closeMenu}>
                   <LayoutDashboard class="size-4" aria-hidden="true" />
@@ -343,6 +356,14 @@
 {/if}
 
 <style>
+  /* Documentation spans three columns, so the bar lines up with its wider layout
+     and eases between widths when navigating in or out of it. */
+  .navbar-container {
+    transition: max-width var(--dur-slow) var(--ease-out);
+  }
+  .docs-container {
+    max-width: 1360px;
+  }
   .nav-link {
     display: inline-flex;
     align-items: center;
@@ -413,6 +434,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .menu-reveal,
+    .navbar-container,
     .nav-link :global(.chevron) {
       transition: none;
     }

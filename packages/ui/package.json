@@ -29,10 +29,12 @@
     ],
     "./platform/preferences": "./src/lib/platform/preferences.svelte.ts",
     "./platform/slider": "./src/lib/platform/slider.ts",
+    "./platform/heading-anchors": "./src/lib/platform/heading-anchors.ts",
     "./platform/*": "./src/lib/platform/*",
     "./platform.css": "./platform.css",
     "./platform-theme.css": "./platform-theme.css",
-    "./platform-kit.css": "./platform-kit.css"
+    "./platform-kit.css": "./platform-kit.css",
+    "./docs-prose.css": "./docs-prose.css"
   },
   "scripts": {
     "dev": "vite dev",

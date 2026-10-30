@@ -63,7 +63,6 @@ msgstr "Cancel"
 msgid "Alerts"
 msgstr "Alerts"
 
-#: src/components/Footer.svelte
 #: src/components/Navbar.svelte
 msgid "Projects"
 msgstr "Projects"
@@ -83,6 +82,7 @@ msgid "Logged out"
 msgstr "Logged out"
 
 #: src/components/Navbar.svelte
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
 msgid "KSI"
 msgstr "KSI"
 
@@ -347,7 +347,6 @@ msgstr "Research"
 msgid "No matching projects."
 msgstr "No matching projects."
 
-#: src/components/Footer.svelte
 #: src/routes/+page.svelte
 msgid "ZOSIA"
 msgstr "ZOSIA"
@@ -362,10 +361,12 @@ msgstr "Next image"
 
 #. 0: page.status
 #. 0: data.article.title
+#. 0: data.page.title
 #. 0: data.member.name
 #. 0: project.name
 #: src/routes/+error.svelte
 #: src/routes/articles/[slug]/+page.svelte
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
 #: src/routes/members/[id]/+page.svelte
 #: src/routes/projects/[slug]/+page.svelte
 msgid "{0} · KSI UWr"
@@ -384,6 +385,7 @@ msgid "<0/> Return home"
 msgstr "<0/> Return home"
 
 #: src/components/Wrapper.svelte
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
 msgid "Breadcrumb"
 msgstr "Breadcrumb"
 
@@ -395,13 +397,11 @@ msgstr "Computer Science Students’ Association at the University of Wrocław."
 msgid "Institute of Computer Science<0/> 15 Fryderyka Joliot-Curie St.<1/> 50-383 Wrocław · Room 24"
 msgstr "Institute of Computer Science<0/> 15 Fryderyka Joliot-Curie St.<1/> 50-383 Wrocław · Room 24"
 
-#: src/components/Footer.svelte
-msgid "Footer navigation"
-msgstr "Footer navigation"
+#~ msgid "Footer navigation"
+#~ msgstr "Footer navigation"
 
-#: src/components/Footer.svelte
-msgid "About us"
-msgstr "About us"
+#~ msgid "About us"
+#~ msgstr "About us"
 
 #: src/components/Footer.svelte
 msgid "Contact"
@@ -411,9 +411,8 @@ msgstr "Contact"
 msgid "Explore"
 msgstr "Explore"
 
-#: src/components/Footer.svelte
-msgid "Find us online"
-msgstr "Find us online"
+#~ msgid "Find us online"
+#~ msgstr "Find us online"
 
 #: src/components/Navbar.svelte
 msgid "Change language"
@@ -537,6 +536,7 @@ msgstr "See more"
 msgid "Groups"
 msgstr "Groups"
 
+#: src/components/Footer.svelte
 #: src/routes/projects/+page.svelte
 msgid "All projects"
 msgstr "All projects"
@@ -607,6 +607,7 @@ msgstr "We teach children programming in one-hour workshops."
 msgid "Events and workshops"
 msgstr "Events and workshops"
 
+#: src/components/Footer.svelte
 #: src/routes/+page.svelte
 msgid "Our projects"
 msgstr "Our projects"
@@ -841,3 +842,96 @@ msgstr "<0/>Blog"
 #: src/routes/articles/+page.svelte
 msgid "News, write-ups, and recaps from KSI members."
 msgstr "News, write-ups, and recaps from KSI members."
+
+#: src/routes/docs/+page.svelte
+msgid "Documentation · KSI UWr"
+msgstr "Documentation · KSI UWr"
+
+#: src/routes/docs/+page.svelte
+msgid "<0/>Docs"
+msgstr "<0/>Docs"
+
+#: src/routes/docs/+page.svelte
+msgid "Documentation"
+msgstr "Documentation"
+
+#: src/routes/docs/+page.svelte
+msgid "How KSI and its projects work, shared openly by our members."
+msgstr "How KSI and its projects work, shared openly by our members."
+
+#: src/lib/components/PublicDocsSidebar.svelte
+#: src/routes/docs/+page.svelte
+msgid "No public documentation yet."
+msgstr "No public documentation yet."
+
+#: ../../packages/ui/src/lib/platform/DocsOutline.svelte
+#: ../../packages/ui/src/lib/platform/DocsToc.svelte
+msgid "On this page"
+msgstr "On this page"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Copy link to this section"
+msgstr "Copy link to this section"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Link copied"
+msgstr "Link copied"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Updated"
+msgstr "Updated"
+
+#~ msgid "Document language"
+#~ msgstr "Document language"
+
+#: src/lib/components/PublicDocsSidebar.svelte
+msgid "All documentation"
+msgstr "All documentation"
+
+#: src/components/Footer.svelte
+#: src/components/Navbar.svelte
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Docs"
+msgstr "Docs"
+
+#: src/lib/components/PublicDocsSidebar.svelte
+#: src/lib/components/PublicDocsSidebar.svelte
+msgid "Documentation pages"
+msgstr "Documentation pages"
+
+#: src/lib/components/PublicDocsSidebar.svelte
+msgid "Workspaces"
+msgstr "Workspaces"
+
+#: src/components/Navbar.svelte
+msgid "<0/> Docs"
+msgstr "<0/> Docs"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "The English version changed after this translation was written."
+msgstr "The English version changed after this translation was written."
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Read the English version"
+msgstr "Read the English version"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "More pages"
+msgstr "More pages"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Previous"
+msgstr "Previous"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Next"
+msgstr "Next"
+
+#: src/components/Footer.svelte
+msgid "Follow us"
+msgstr "Follow us"
+
+#: src/routes/docs/+layout.svelte
+#: src/routes/docs/+layout.svelte
+msgid "Toggle sidebar"
+msgstr "Toggle sidebar"

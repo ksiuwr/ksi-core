@@ -1,4 +1,11 @@
-import { Marked } from 'marked';
+import { Marked, type TokenizerAndRendererExtension } from 'marked';
+import {
+  docLinkToken,
+  headingSlugger,
+  headingText,
+  parseDocLinkTarget,
+  type DocLinkTarget
+} from './docs.js';
 import { markdownGalleries } from './markdown-gallery.js';
 import { prepareMarkdownImages } from './markdown-images.js';
 import { referenceExtension } from './markdown-references.js';
@@ -12,7 +19,14 @@ export type MarkdownRenderOptions = {
    * Without it references stay plain text, as on the public website.
    */
   referenceScope?: string;
+  /**
+   * Enables `[page]` links between documentation pages and, unless disabled, heading
+   * anchors. Unlike references, page names need data, so the caller resolves them.
+   */
+  docs?: { resolve: (target: DocLinkTarget) => ResolvedDocLink | null; anchors?: boolean };
 };
+/** Without an href the page exists but this reader may not open it, so only its title shows. */
+export type ResolvedDocLink = { href: string | null; label: string; title: string };
 /** Turns untrusted HTML into HTML that is safe to insert into the page. */
 export type MarkdownSanitizer = (html: string) => string;
 
@@ -32,8 +46,22 @@ export function createMarkdownRenderer(sanitize: MarkdownSanitizer) {
     source: string,
     options: MarkdownRenderOptions = {}
   ): MarkdownBlock[] {
+    const docs = options.docs;
+    const slug = docs && docs.anchors !== false ? headingSlugger() : null;
     const marked = new Marked({
-      extensions: options.referenceScope ? [referenceExtension(options.referenceScope)] : [],
+      extensions: [
+        ...(options.referenceScope ? [referenceExtension(options.referenceScope)] : []),
+        ...(docs ? [docLinkExtension(docs.resolve)] : [])
+      ],
+      renderer: {
+        heading({ tokens, depth, text }) {
+          const html = this.parser.parseInline(tokens);
+          if (!slug) return `<h${depth}>${html}</h${depth}>\n`;
+          // The prefix keeps page content from colliding with ids used by the app itself.
+          const id = slug(headingText(text));
+          return `<h${depth} id="section-${id}">${html}<a class="heading-anchor" href="#${id}" aria-label="Copy link to this section"></a></h${depth}>\n`;
+        }
+      },
       walkTokens(token) {
         // Attachments `[name](file:id)` and reference-style images; inline images are
         // rewritten by prepareMarkdownImages. Code and plain text keep `file:` literally.
@@ -52,5 +80,36 @@ export function createMarkdownRenderer(sanitize: MarkdownSanitizer) {
     }
     blocks.push({ type: 'html', html: html(prepared.slice(start)) });
     return blocks;
+  };
+}
+
+const escapeHtml = (value: string) =>
+  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+function docLinkExtension(
+  resolve: (target: DocLinkTarget) => ResolvedDocLink | null
+): TokenizerAndRendererExtension {
+  return {
+    name: 'docLink',
+    level: 'inline',
+    start(source) {
+      for (let index = source.indexOf('['); index !== -1; index = source.indexOf('[', index + 1))
+        if (index === 0 || !/[!\\\]]/.test(source[index - 1]!)) return index;
+    },
+    tokenizer(source) {
+      if (this.lexer.state.inLink) return;
+      const match = source.match(docLinkToken);
+      const target = match && parseDocLinkTarget(match[1]!);
+      // Reference-style links keep their Markdown meaning.
+      if (!target || this.lexer.tokens.links[match[1]!.toLowerCase().replace(/\s+/g, ' ')]) return;
+      return { type: 'docLink', raw: match[0], target };
+    },
+    renderer(token) {
+      const link = resolve(token.target);
+      if (!link)
+        return `<span class="doc-link-missing" title="${escapeHtml(`No page named “${token.target.raw}”`)}">${escapeHtml(token.raw)}</span>`;
+      if (!link.href) return escapeHtml(link.label);
+      return `<a class="doc-link" href="${escapeHtml(link.href)}" title="${escapeHtml(link.title)}">${escapeHtml(link.label)}</a>`;
+    }
   };
 }

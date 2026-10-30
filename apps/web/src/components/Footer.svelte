@@ -18,13 +18,20 @@
     { label: 'Facebook', href: 'https://www.facebook.com/ksi.uwr', icon: Facebook },
     { label: 'LinkedIn', href: 'https://www.linkedin.com/company/ksiuwr/', icon: Linkedin }
   ];
+
+  // @wc-ignore
+  const featuredProjects = [
+    { label: 'ZOSIA', href: '/projects/zosia' },
+    { label: 'LEOSIA', href: '/projects/leosia' },
+    { label: 'ksi-core', href: '/projects/ksi-core' }
+  ];
 </script>
 
 <footer class="border-line bg-surface text-ink border-t">
   <div
-    class="page-container grid gap-10 py-12 sm:grid-cols-2 md:py-16 lg:grid-cols-[1.6fr_1fr_1fr]"
+    class="page-container grid grid-cols-2 gap-x-6 gap-y-10 py-12 sm:grid-cols-3 md:py-16 lg:grid-cols-[1.6fr_1fr_1fr_1fr]"
   >
-    <div class="sm:col-span-2 lg:col-span-1">
+    <div class="col-span-2 sm:col-span-3 lg:col-span-1">
       <a href="/" class="text-ink inline-flex items-center gap-3">
         <img src="/logo.svg" alt="" class="size-9 dark:invert" />
         <span class="font-display text-2xl font-semibold tracking-[-0.04em]">KSI UWr</span>
@@ -39,19 +46,27 @@
       </address>
     </div>
 
-    <nav aria-label="Footer navigation">
-      <p class="eyebrow mb-4">Explore</p>
+    <nav aria-labelledby="footer-projects">
+      <p id="footer-projects" class="eyebrow mb-4">Our projects</p>
       <ul class="space-y-2.5 text-sm">
-        <li><a href="/#about" class="footer-link">About us</a></li>
-        <li><a href="/projects" class="footer-link">Projects</a></li>
+        {#each featuredProjects as project (project.href)}
+          <li><a href={project.href} class="footer-link">{project.label}</a></li>
+        {/each}
+        <li><a href="/projects" class="footer-link">All projects</a></li>
+      </ul>
+    </nav>
+
+    <nav aria-labelledby="footer-explore">
+      <p id="footer-explore" class="eyebrow mb-4">Explore</p>
+      <ul class="space-y-2.5 text-sm">
         <li><a href="/articles" class="footer-link">Articles</a></li>
-        <li><a href="/projects/zosia" class="footer-link">ZOSIA</a></li>
+        <li><a href="/docs" class="footer-link">Docs</a></li>
         <li><a href="mailto:ksi@cs.uni.wroc.pl" class="footer-link">Contact</a></li>
       </ul>
     </nav>
 
     <div>
-      <p class="eyebrow mb-4">Find us online</p>
+      <p class="eyebrow mb-4">Follow us</p>
       <ul class="space-y-2.5 text-sm">
         {#each socialLinks as social (social.href)}
           <li>

@@ -11,6 +11,7 @@ import { approvalRoutes } from './routes/platform/approvals';
 import { userRoutes } from './routes/platform/users';
 import content, { active } from './routes/platform/content';
 import collaboration from './routes/platform/collaboration';
+import docs from './routes/platform/docs';
 import { filesRoutes } from './routes/platform/files';
 import { realtimeRoutes } from './lib/realtime';
 import { createElysia } from './lib/createElysia';
@@ -74,6 +75,7 @@ export const app = new Elysia()
   .use(content)
   .use(translationRoutes)
   .use(collaboration)
+  .use(docs)
   .use(notificationRoutes)
   .use(filesRoutes)
   .use(previewCredentialRoutes)

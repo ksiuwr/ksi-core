@@ -1,11 +1,20 @@
 import sanitizeHtml from 'sanitize-html';
 import { createMarkdownRenderer } from './markdown-core.js';
-import { finalizeMarkdownAttributes, markdownPolicy } from './markdown-policy.js';
+import {
+  finalizeMarkdownAttributes,
+  finalizedMarkdownTags,
+  markdownPolicy
+} from './markdown-policy.js';
 
 // Server entry (Bun, SvelteKit SSR). Browser bundles resolve `shared/markdown` to
 // markdown.browser.ts through the `browser` export condition instead, so
 // sanitize-html, htmlparser2 and postcss never ship to clients.
-export type { MarkdownBlock, MarkdownRenderOptions, MarkdownSanitizer } from './markdown-core.js';
+export type {
+  MarkdownBlock,
+  MarkdownRenderOptions,
+  MarkdownSanitizer,
+  ResolvedDocLink
+} from './markdown-core.js';
 export { mediaBasePath, resolveMarkdownUrl } from './markdown-core.js';
 
 const finalize: sanitizeHtml.Transformer = (tagName, attribs) => ({
@@ -20,7 +29,7 @@ const options: sanitizeHtml.IOptions = {
   allowedSchemesByTag: markdownPolicy.schemesByTag,
   allowProtocolRelative: false,
   nonTextTags: markdownPolicy.discardContent,
-  transformTags: { a: finalize, img: finalize }
+  transformTags: Object.fromEntries(finalizedMarkdownTags.map((tag) => [tag, finalize]))
 };
 
 export const sanitizeMarkdownHtml = (html: string) => sanitizeHtml(html, options);

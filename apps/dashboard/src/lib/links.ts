@@ -15,6 +15,7 @@ export function linkForMetadata(
   if (key === 'threadId')
     return `${dashboardPath(workspace, slug, 'forum')}/${encodeURIComponent(value)}`;
   if (key === 'articleId') return dashboardPath(workspace, slug, 'articles');
+  if (key === 'pageId') return dashboardPath(workspace, slug, 'docs');
   if (key === 'projectId')
     return projectSlug ? `/projects/${encodeURIComponent(projectSlug)}` : null;
   if (key === 'itemId') return taskPath(workspace, slug, value);
@@ -29,6 +30,9 @@ export function linkForAction(
 ): string | null {
   const { workspace, slug } = scope(projectSlug);
   if (action.startsWith('articles.')) return dashboardPath(workspace, slug, 'articles');
+  if (action.startsWith('docs.proposal.'))
+    return `${dashboardPath(workspace, slug, 'docs')}/suggestions/${encodeURIComponent(targetId)}`;
+  if (action.startsWith('docs.')) return dashboardPath(workspace, slug, 'docs');
   if (action.startsWith('threads.'))
     return `${dashboardPath(workspace, slug, 'forum')}/${encodeURIComponent(targetId)}`;
   if (action === 'kanban.reordered') return dashboardPath(workspace, slug, 'board');

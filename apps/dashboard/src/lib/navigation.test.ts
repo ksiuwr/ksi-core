@@ -31,6 +31,18 @@ describe('dashboard routes', () => {
       });
     }
   });
+  test('documentation pages, editors, history and reviews highlight the docs tab', () => {
+    expect(dashboardPath('project', 'zosia', 'docs')).toBe('/projects/zosia/docs');
+    expect(dashboardPath('association', '', 'docs')).toBe('/association/docs');
+    for (const path of [
+      '/projects/zosia/docs',
+      '/projects/zosia/docs/bus-packing',
+      '/projects/zosia/docs/bus-packing/history/3',
+      '/association/docs/suggestions/abc123',
+      '/association/docs/new'
+    ])
+      expect(tabFromPath(path)).toBe('docs');
+  });
   test('association and global pages are explicit workspaces', () => {
     expect(parseDashboardPath('/association/kanban')).toEqual({
       workspace: 'association',

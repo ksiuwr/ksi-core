@@ -1,4 +1,5 @@
 import { sql } from 'drizzle-orm';
+import type { DocFolder } from 'shared/doc-folders';
 import type { ContentTranslations } from 'shared/content-locales';
 import { defaultBoardStatuses, type BoardStatus } from '../domain/board-statuses';
 import type { BoardLabel } from '../domain/board-labels';
@@ -12,7 +13,8 @@ import {
   snakeCase,
   jsonb,
   uniqueIndex,
-  index
+  index,
+  type AnyPgColumn
 } from 'drizzle-orm/pg-core';
 
 export const membershipStatusEnum = pgEnum('membership_status', [
@@ -515,3 +517,111 @@ export const collaborationCounters = snakeCase.table('collaboration_counters', {
   scopeKey: text().primaryKey(),
   lastNumber: integer().notNull().default(0)
 });
+
+// Folder identity and nesting are independent of page contents and translated names.
+export const docFolders = snakeCase.table(
+  'doc_folders',
+  {
+    id: text().primaryKey().$defaultFn(createId),
+    projectId: text().references(() => projects.id),
+    parentId: text().references((): AnyPgColumn => docFolders.id),
+    name: text().notNull(),
+    translations: jsonb().$type<DocFolder['translations']>().notNull().default({}),
+    createdAt: timestamp().notNull().defaultNow(),
+    updatedAt: timestamp().notNull().defaultNow()
+  },
+  (t) => [
+    index('doc_folder_project_idx').on(t.projectId),
+    uniqueIndex('doc_folder_sibling_name_unique').on(
+      sql`coalesce(${t.projectId}, '')`,
+      sql`coalesce(${t.parentId}, '')`,
+      sql`lower(${t.name})`
+    )
+  ]
+);
+
+// Documentation pages belong to a project or, without one, to the association.
+export const docPages = snakeCase.table(
+  'doc_pages',
+  {
+    id: text().primaryKey().$defaultFn(createId),
+    projectId: text().references(() => projects.id),
+    slug: text().notNull(),
+    folderId: text().references(() => docFolders.id),
+    /** English path snapshot for revision history and older API clients. */
+    folder: text().notNull().default(''),
+    title: text().notNull(),
+    markdown: text().notNull().default(''),
+    translations: jsonb().$type<ContentTranslations>().notNull().default({}),
+    public: boolean().notNull().default(false),
+    version: integer().notNull().default(1),
+    createdBy: text()
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp().notNull().defaultNow(),
+    updatedAt: timestamp().notNull().defaultNow()
+  },
+  (t) => [
+    uniqueIndex('doc_page_project_slug_unique').on(t.projectId, t.slug),
+    uniqueIndex('doc_page_association_slug_unique')
+      .on(t.slug)
+      .where(sql`${t.projectId} is null`)
+  ]
+);
+// Every accepted change is a full snapshot credited to the member who wrote it.
+export const docRevisions = snakeCase.table(
+  'doc_revisions',
+  {
+    id: text().primaryKey().$defaultFn(createId),
+    pageId: text()
+      .notNull()
+      .references(() => docPages.id),
+    version: integer().notNull(),
+    folderId: text().references(() => docFolders.id, { onDelete: 'set null' }),
+    folder: text().notNull().default(''),
+    title: text().notNull(),
+    markdown: text().notNull(),
+    translations: jsonb().$type<ContentTranslations>().notNull().default({}),
+    public: boolean().notNull(),
+    authorId: text()
+      .notNull()
+      .references(() => users.id),
+    reviewerId: text().references(() => users.id),
+    proposalId: text(),
+    reason: text().notNull().default(''),
+    additions: integer().notNull().default(0),
+    deletions: integer().notNull().default(0),
+    createdAt: timestamp().notNull().defaultNow()
+  },
+  (t) => [
+    uniqueIndex('doc_revision_unique').on(t.pageId, t.version),
+    index('doc_revision_author_idx').on(t.authorId)
+  ]
+);
+// Suggested edits, new pages (without pageId) and public visibility requests awaiting review.
+export const docProposals = snakeCase.table(
+  'doc_proposals',
+  {
+    id: text().primaryKey().$defaultFn(createId),
+    projectId: text().references(() => projects.id),
+    pageId: text().references(() => docPages.id),
+    slug: text(),
+    baseVersion: integer(),
+    folderId: text().references(() => docFolders.id, { onDelete: 'set null' }),
+    folder: text().notNull().default(''),
+    title: text().notNull(),
+    markdown: text().notNull(),
+    translations: jsonb().$type<ContentTranslations>().notNull().default({}),
+    public: boolean().notNull(),
+    reason: text().notNull(),
+    state: text().notNull().default('pending'),
+    authorId: text()
+      .notNull()
+      .references(() => users.id),
+    reviewerId: text().references(() => users.id),
+    reviewNote: text(),
+    reviewedAt: timestamp(),
+    createdAt: timestamp().notNull().defaultNow()
+  },
+  (t) => [index('doc_proposal_state_idx').on(t.state, t.projectId)]
+);

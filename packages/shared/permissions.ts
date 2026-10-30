@@ -36,6 +36,11 @@ export const permissions = {
     'Restore removed tasks and archive or restore threads as a leader.',
   'collaboration.threads.restrict':
     'Manage restricted thread visibility and invitations as a leader.',
+  'docs.pages.propose':
+    'Suggest documentation changes, new pages and public visibility for review.',
+  'docs.pages.review':
+    'Review documentation suggestions and edit pages directly as a workspace leader.',
+  'docs.pages.publish': 'Make documentation pages public on the website as a workspace leader.',
   'audit.events.read': 'Read audit events permitted by your workspace scope.',
   'files.objects.upload': 'Upload files to authorized content.',
   'association.alerts.manage': 'Manage association announcements and alerts.'
@@ -82,6 +87,12 @@ export const polishPermissionDescriptions: Record<Permission, string> = {
     'Przywracaj usunięte zadania oraz archiwizuj i przywracaj wątki jako lider.',
   'collaboration.threads.restrict':
     'Zarządzaj widocznością zamkniętych wątków i zaproszeniami jako lider.',
+  'docs.pages.propose':
+    'Proponuj zmiany w dokumentacji, nowe strony i ich upublicznienie do akceptacji.',
+  'docs.pages.review':
+    'Oceniaj propozycje i bezpośrednio edytuj dokumentację jako lider przestrzeni.',
+  'docs.pages.publish':
+    'Udostępniaj strony dokumentacji publicznie na stronie internetowej jako lider przestrzeni.',
   'audit.events.read': 'Czytaj historię zdarzeń dostępną w swojej przestrzeni.',
   'files.objects.upload': 'Przesyłaj pliki do treści, do których masz dostęp.',
   'association.alerts.manage': 'Zarządzaj ogłoszeniami i alertami koła.'
