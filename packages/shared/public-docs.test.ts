@@ -1,5 +1,11 @@
 import { describe, expect, test } from 'bun:test';
-import { publicDocPath, publicDocWorkspaces, type PublicDocSummary } from './public-docs';
+import {
+  publicDocNeighbors,
+  publicDocPages,
+  publicDocPath,
+  publicDocWorkspaces,
+  type PublicDocSummary
+} from './public-docs';
 
 const page = (
   slug: string,
@@ -54,6 +60,38 @@ describe('public documentation navigation', () => {
   });
   test('an empty public index does not invent workspaces or folders', () => {
     expect(publicDocWorkspaces([])).toEqual([]);
+  });
+  test('reads a workspace level by level, with pages before their sibling folders', () => {
+    const camp = { id: 'camp', name: 'Camp' };
+    const tree = publicDocWorkspaces(
+      [
+        page('packing', 'Packing', 'zosia', 'ZOSIA', [camp, { id: 'kit', name: 'Kit' }]),
+        page('schedule', 'Schedule', 'zosia', 'ZOSIA', [camp]),
+        page('intro', 'Intro', 'zosia', 'ZOSIA')
+      ],
+      'en'
+    );
+    expect(publicDocPages(tree[0]!).map((doc) => doc.slug)).toEqual([
+      'intro',
+      'schedule',
+      'packing'
+    ]);
+  });
+  test('neighbors stay inside the workspace and stop at its ends', () => {
+    const pages = [
+      page('intro', 'Intro', 'zosia', 'ZOSIA'),
+      page('packing', 'Packing', 'zosia', 'ZOSIA'),
+      page('intro', 'Association intro', null, null)
+    ];
+    const neighbors = (workspace: string, slug: string) => {
+      const { previous, next } = publicDocNeighbors(pages, workspace, slug, 'en');
+      return [previous?.slug, next?.slug];
+    };
+    expect(neighbors('zosia', 'intro')).toEqual([undefined, 'packing']);
+    expect(neighbors('zosia', 'packing')).toEqual(['intro', undefined]);
+    expect(neighbors('association', 'intro')).toEqual([undefined, undefined]);
+    expect(neighbors('zosia', 'missing')).toEqual([undefined, undefined]);
+    expect(neighbors('missing', 'intro')).toEqual([undefined, undefined]);
   });
   test('page links keep the workspace and page as separate encoded segments', () => {
     expect(publicDocPath('association', 'faq')).toBe('/docs/association/faq');

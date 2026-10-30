@@ -1,4 +1,5 @@
 <script lang="ts">
+  import '@ksi-core/ui/docs-prose.css';
   import type { Snippet } from 'svelte';
   import { page } from '$app/state';
   import PublicDocsSidebar from '$lib/components/PublicDocsSidebar.svelte';
@@ -19,17 +20,17 @@
 <style>
   .docs-shell {
     display: grid;
-    grid-template-columns: 228px minmax(0, 1fr);
-    gap: 40px;
+    grid-template-columns: 264px minmax(0, 1fr);
+    gap: 48px;
     align-items: start;
     max-width: 1360px;
-    padding-block: 28px 80px;
+    padding-block: 32px 80px;
   }
   .docs-sidebar {
     position: sticky;
-    top: 84px;
+    top: 88px;
     min-width: 0;
-    max-height: calc(100dvh - 108px);
+    max-height: calc(100dvh - 112px);
     overflow: auto;
     scrollbar-width: thin;
   }

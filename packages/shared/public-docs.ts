@@ -60,6 +60,26 @@ export function publicDocWorkspaces(
   );
 }
 
+/** Reading order: the pages of a level first, then each of its folders. */
+export function publicDocPages(
+  node: Pick<PublicDocFolder, 'folders' | 'pages'>
+): PublicDocSummary[] {
+  return [...node.pages, ...node.folders.flatMap(publicDocPages)];
+}
+
+/** The pages before and after one page, staying inside its workspace. */
+export function publicDocNeighbors(
+  pages: PublicDocSummary[],
+  workspace: string,
+  slug: string,
+  locale?: string
+) {
+  const owner = publicDocWorkspaces(pages, locale).find((item) => item.slug === workspace);
+  const order = owner ? publicDocPages(owner) : [];
+  const index = order.findIndex((page) => page.slug === slug);
+  return index < 0 ? {} : { previous: order[index - 1], next: order[index + 1] };
+}
+
 export function publicDocPath(workspace: string, slug: string) {
   return `/docs/${encodeURIComponent(workspace)}/${encodeURIComponent(slug)}`;
 }

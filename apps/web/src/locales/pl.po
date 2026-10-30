@@ -83,6 +83,7 @@ msgid "Logged out"
 msgstr "Wylogowano"
 
 #: src/components/Navbar.svelte
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
 msgid "KSI"
 msgstr "KSI"
 
@@ -386,6 +387,7 @@ msgid "<0/> Return home"
 msgstr "<0/> Wróć na stronę główną"
 
 #: src/components/Wrapper.svelte
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
 msgid "Breadcrumb"
 msgstr "Okruszki nawigacyjne"
 
@@ -865,6 +867,7 @@ msgstr "Jak działa KSI i jego projekty — opisane otwarcie przez naszych czło
 msgid "No public documentation yet."
 msgstr "Brak publicznej dokumentacji."
 
+#: ../../packages/ui/src/lib/platform/DocsOutline.svelte
 #: ../../packages/ui/src/lib/platform/DocsToc.svelte
 msgid "On this page"
 msgstr "Na tej stronie"
@@ -881,22 +884,16 @@ msgstr "Skopiowano link"
 msgid "Updated"
 msgstr "Zaktualizowano"
 
-#: src/routes/docs/[workspace]/[slug]/+page.svelte
-msgid "<0/>All documentation"
-msgstr "<0/>Cała dokumentacja"
-
 #~ msgid "Document language"
 #~ msgstr "Język dokumentu"
-
-#: src/routes/docs/[workspace]/[slug]/+page.svelte
-msgid "This translation may be outdated. Check the English version for the latest changes."
-msgstr "To tłumaczenie może być nieaktualne. Sprawdź najnowsze zmiany w wersji angielskiej."
 
 #: src/lib/components/PublicDocsSidebar.svelte
 msgid "All documentation"
 msgstr "Cała dokumentacja"
 
 #: src/components/Footer.svelte
+#: src/components/Navbar.svelte
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
 msgid "Docs"
 msgstr "Dokumentacja"
 
@@ -908,3 +905,27 @@ msgstr "Strony dokumentacji"
 #: src/lib/components/PublicDocsSidebar.svelte
 msgid "Workspaces"
 msgstr "Przestrzenie"
+
+#: src/components/Navbar.svelte
+msgid "<0/> Docs"
+msgstr "<0/> Dokumentacja"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "The English version changed after this translation was written."
+msgstr "Wersja angielska zmieniła się po przygotowaniu tego tłumaczenia."
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Read the English version"
+msgstr "Czytaj wersję angielską"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "More pages"
+msgstr "Więcej stron"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Previous"
+msgstr "Poprzednia"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Next"
+msgstr "Następna"

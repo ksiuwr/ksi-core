@@ -1,14 +1,22 @@
 <script lang="ts">
   import { replaceState } from '$app/navigation';
   import Markdown from '@ksi-core/ui/platform/Markdown.svelte';
+  import DocsOutline from '@ksi-core/ui/platform/DocsOutline.svelte';
   import DocsToc from '@ksi-core/ui/platform/DocsToc.svelte';
   import { headingAnchors } from '@ksi-core/ui/platform/heading-anchors';
-  import { ArrowLeft, ArrowUpRight, CalendarDays, Folder } from '@lucide/svelte';
-  import { locale } from '$lib/locale.svelte';
+  import { ArrowLeft, ArrowRight, ChevronRight, TriangleAlert } from '@lucide/svelte';
+  import { associationDocsKey } from 'shared/docs';
+  import { publicDocNeighbors, publicDocPath } from 'shared/public-docs';
+  import { locale, setLocale } from '$lib/locale.svelte';
   let { data } = $props<{ data: import('./$types').PageData }>();
   const language = $derived(locale.current);
   const formatter = $derived(
     new Intl.DateTimeFormat(locale.current, { day: 'numeric', month: 'long', year: 'numeric' })
+  );
+  const workspace = $derived(data.page.workspace.slug ?? associationDocsKey);
+  const folders = $derived(data.page.folder ? data.page.folder.split('/') : []);
+  const neighbors = $derived(
+    publicDocNeighbors(data.publicDocs, workspace, data.page.slug, locale.current)
   );
   const onhash = (url: URL) => replaceState(url, {});
   const anchorLabels = { copyLabel: 'Copy link to this section', copiedLabel: 'Link copied' };
@@ -17,41 +25,81 @@
 
 <svelte:head><title>{data.page.title} · KSI UWr</title></svelte:head>
 <main class="doc-page">
-  <a class="back-link" href="/docs"><ArrowLeft size={16} aria-hidden="true" />All documentation</a>
   <div class="doc-layout">
     <article lang={data.page.locale}>
       <header class="doc-heading">
-        {#if data.page.workspace.slug}<a
-            class="project-link"
-            href={`/projects/${encodeURIComponent(data.page.workspace.slug)}`}
-            ><Folder size={14} aria-hidden="true" />{data.page.workspace.name}<ArrowUpRight
-              size={13}
-              aria-hidden="true"
-            /></a
-          >{/if}
-        <h1>{data.page.title}</h1>
-        <div class="doc-meta">
-          <p class="updated">
-            <CalendarDays size={15} aria-hidden="true" /><span>{'Updated'}</span>
-            <time datetime={data.page.updatedAt}
-              >{formatter.format(new Date(data.page.updatedAt))}</time
+        <nav class="doc-breadcrumb" aria-label={'Breadcrumb'}>
+          <a href="/docs">{'Docs'}</a>
+          <ChevronRight size={13} aria-hidden="true" />
+          {#if data.page.workspace.slug}
+            <a href={`/projects/${encodeURIComponent(data.page.workspace.slug)}`}
+              >{data.page.workspace.name}</a
             >
-          </p>
-        </div>
-        {#if data.page.folder}
-          <p class="doc-folder">
-            <Folder size={13} aria-hidden="true" />{data.page.folder.split('/').join(' / ')}
-          </p>
-        {/if}
-        {#if data.page.outdatedLocales.includes(data.page.locale)}
-          <p class="doc-translation-notice">
-            {'This translation may be outdated. Check the English version for the latest changes.'}
-          </p>
-        {/if}
+          {:else}
+            <span>KSI</span>
+          {/if}
+          {#each folders as folder, index (index)}
+            <ChevronRight size={13} aria-hidden="true" />
+            <span>{folder}</span>
+          {/each}
+        </nav>
+        <h1>{data.page.title}</h1>
+        <p class="updated">
+          {'Updated'}
+          <time datetime={data.page.updatedAt}
+            >{formatter.format(new Date(data.page.updatedAt))}</time
+          >
+        </p>
       </header>
-      <div class="doc-content" bind:this={content} use:headingAnchors={{ onhash, ...anchorLabels }}>
+      {#if data.page.outdatedLocales.includes(data.page.locale)}
+        <p class="doc-outdated" role="note">
+          <TriangleAlert size={15} aria-hidden="true" />
+          <span>
+            {'The English version changed after this translation was written.'}
+            <button type="button" onclick={() => setLocale('en-us')}
+              >{'Read the English version'}</button
+            >
+          </span>
+        </p>
+      {/if}
+      <div class="doc-outline">
+        <DocsOutline headings={data.page.headings} {content} {onhash} />
+      </div>
+      <div
+        class="doc-content doc-prose"
+        bind:this={content}
+        use:headingAnchors={{ onhash, ...anchorLabels }}
+      >
         <Markdown blocks={data.page.blocks} {language} />
       </div>
+      {#if neighbors.previous || neighbors.next}
+        <nav class="doc-pager" aria-label={'More pages'}>
+          {#if neighbors.previous}
+            <a
+              class="surface-card surface-card-link"
+              rel="prev"
+              href={publicDocPath(workspace, neighbors.previous.slug)}
+            >
+              <span class="doc-pager-label"
+                ><ArrowLeft size={14} aria-hidden="true" />{'Previous'}</span
+              >
+              <strong>{neighbors.previous.title}</strong>
+            </a>
+          {/if}
+          {#if neighbors.next}
+            <a
+              class="surface-card surface-card-link doc-pager-next"
+              rel="next"
+              href={publicDocPath(workspace, neighbors.next.slug)}
+            >
+              <span class="doc-pager-label"
+                >{'Next'}<ArrowRight size={14} aria-hidden="true" /></span
+              >
+              <strong>{neighbors.next.title}</strong>
+            </a>
+          {/if}
+        </nav>
+      {/if}
     </article>
     <aside class="doc-toc">
       <DocsToc headings={data.page.headings} {content} {onhash} />
@@ -64,21 +112,10 @@
     flex: 1;
     padding: 0;
   }
-  .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding-block: 6px;
-    color: var(--muted);
-    font-size: 13px;
-  }
-  .back-link:hover {
-    color: var(--ink);
-  }
   .doc-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 200px;
-    gap: 36px;
+    grid-template-columns: minmax(0, 1fr) 220px;
+    gap: 48px;
     align-items: start;
   }
   article {
@@ -86,115 +123,115 @@
     max-width: 760px;
   }
   .doc-heading {
-    padding: 36px 0 28px;
+    padding-bottom: 22px;
     border-bottom: 1px solid var(--line);
   }
-  .project-link {
-    display: inline-flex;
+  .doc-breadcrumb {
+    display: flex;
     align-items: center;
-    gap: 6px;
-    margin-bottom: 20px;
-    padding: 4px 10px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-full);
-    background: var(--surface);
-    box-shadow: var(--shadow-xs);
+    flex-wrap: wrap;
+    gap: 2px 6px;
+    margin-bottom: 18px;
     color: var(--muted);
-    font-size: 12px;
-    font-weight: 500;
+    font-size: 13px;
+    overflow-wrap: anywhere;
   }
-  .project-link:hover {
+  .doc-breadcrumb a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .doc-breadcrumb a:hover {
     color: var(--ink);
-    border-color: var(--control-border-hover);
+  }
+  .doc-breadcrumb :global(svg) {
+    flex-shrink: 0;
+    opacity: 0.6;
   }
   h1 {
-    margin: 0 0 20px;
-    font-size: clamp(34px, 5vw, 56px);
+    margin: 0 0 14px;
+    font-size: clamp(30px, 4vw, 46px);
     font-weight: 700;
-    line-height: 1.08;
+    line-height: 1.1;
     letter-spacing: -0.045em;
     text-wrap: balance;
     overflow-wrap: anywhere;
   }
-  .doc-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .doc-folder {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 12px;
+  .updated {
+    margin: 0;
     color: var(--muted);
     font-size: 12px;
-    overflow-wrap: anywhere;
   }
-  .doc-translation-notice {
-    margin-top: 16px;
-    color: var(--muted);
+  .doc-outdated {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin: 20px 0 0;
+    padding: 10px 12px;
+    border-radius: var(--radius-lg);
+    background: var(--coral);
     font-size: 13px;
   }
-  .updated {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0;
-    flex-wrap: wrap;
-    color: var(--muted);
-    font-size: 12px;
+  .doc-outdated :global(svg) {
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+  .doc-outdated button {
+    margin-left: 4px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--accent);
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .doc-outline {
+    display: none;
+    margin-top: 20px;
   }
   .doc-content {
-    padding-block: 32px 56px;
-    font-size: 17px;
-    line-height: 1.8;
-    color: color-mix(in oklch, var(--ink) 88%, var(--muted));
+    padding-top: 28px;
   }
   /* Sections stop below the sticky site header. */
   .doc-content :global([id^='section-']) {
     scroll-margin-top: 76px;
   }
-  .doc-content :global(.markdown :is(h1, h2, h3, h4)) {
-    line-height: 1.25;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+  .doc-pager {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+  .doc-pager a {
+    display: grid;
+    gap: 4px;
+    padding: 14px 16px;
     color: var(--ink);
   }
-  .doc-content :global(.markdown h1) {
-    font-size: 2em;
+  .doc-pager-next {
+    grid-column: 2;
+    text-align: right;
   }
-  .doc-content :global(.markdown h2) {
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--line);
-    font-size: 1.5em;
-  }
-  .doc-content :global(.markdown h3) {
-    font-size: 1.2em;
-  }
-  .doc-content :global(.markdown :is(ul, ol)) {
-    padding-left: 1.5em;
-  }
-  .doc-content :global(.markdown ul) {
-    list-style: disc;
-  }
-  .doc-content :global(.markdown ol) {
-    list-style: decimal;
-  }
-  .doc-content :global(.markdown li::marker) {
+  .doc-pager-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     color: var(--muted);
+    font-size: 12px;
   }
-  .doc-content :global(.markdown :not(pre) > code) {
-    padding: 0.1em 0.35em;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
-    background: var(--surface-muted);
-    font-size: 0.88em;
+  .doc-pager-next .doc-pager-label {
+    justify-content: flex-end;
+  }
+  .doc-pager strong {
+    font-size: 14px;
+    font-weight: 500;
+    overflow-wrap: anywhere;
   }
   .doc-toc {
     position: sticky;
-    top: 84px;
+    top: 88px;
   }
   @media (max-width: 1279px) {
     .doc-layout {
@@ -202,6 +239,17 @@
     }
     .doc-toc {
       display: none;
+    }
+    .doc-outline {
+      display: block;
+    }
+  }
+  @media (max-width: 520px) {
+    .doc-pager {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .doc-pager-next {
+      grid-column: 1;
     }
   }
 </style>
