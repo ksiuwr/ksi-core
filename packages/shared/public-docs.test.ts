@@ -21,7 +21,8 @@ const page = (
   folderTrail,
   folder: folderTrail.map((folder) => folder.name).join('/'),
   excerpt: '',
-  updatedAt: '2026-10-30T00:00:00Z'
+  updatedAt: '2026-10-30T00:00:00Z',
+  public: true
 });
 
 describe('public documentation navigation', () => {

@@ -935,3 +935,9 @@ msgstr "Follow us"
 #: src/routes/docs/+layout.svelte
 msgid "Toggle sidebar"
 msgstr "Toggle sidebar"
+
+#: src/lib/components/PublicDocsSidebar.svelte
+#: src/routes/docs/+page.svelte
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Members only"
+msgstr "Members only"

@@ -181,11 +181,10 @@
         ><GitPullRequestArrow size={14} aria-hidden="true" />{'Pending suggestions'}: {page.pendingSuggestions}</a
       >
     {/if}
-    {#if page.public}
-      <a href={publicUrl} target="_blank" rel="noopener noreferrer"
-        ><ArrowUpRight size={14} aria-hidden="true" />{'View on website'}</a
-      >
-    {/if}
+    <!-- Members read members-only pages there too, without the dashboard around them. -->
+    <a href={publicUrl} target="_blank" rel="noopener noreferrer"
+      ><ArrowUpRight size={14} aria-hidden="true" />{'View on website'}</a
+    >
   </nav>
 </div>
 

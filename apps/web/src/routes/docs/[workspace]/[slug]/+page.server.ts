@@ -19,6 +19,7 @@ export const load: PageServerLoad = async (event) => {
     page: (await response.json()) as {
       title: string;
       slug: string;
+      public: boolean;
       folder: string;
       locale: ContentLocale;
       locales: ContentLocale[];

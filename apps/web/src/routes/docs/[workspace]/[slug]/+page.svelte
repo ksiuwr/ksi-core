@@ -4,7 +4,7 @@
   import DocsOutline from '@ksi-core/ui/platform/DocsOutline.svelte';
   import DocsToc from '@ksi-core/ui/platform/DocsToc.svelte';
   import { headingAnchors } from '@ksi-core/ui/platform/heading-anchors';
-  import { ArrowLeft, ArrowRight, ChevronRight, TriangleAlert } from '@lucide/svelte';
+  import { ArrowLeft, ArrowRight, ChevronRight, Lock, TriangleAlert } from '@lucide/svelte';
   import { associationDocsKey } from 'shared/docs';
   import { publicDocNeighbors, publicDocPath } from 'shared/public-docs';
   import { locale, setLocale } from '$lib/locale.svelte';
@@ -44,12 +44,17 @@
           {/each}
         </nav>
         <h1>{data.page.title}</h1>
-        <p class="updated">
-          {'Updated'}
-          <time datetime={data.page.updatedAt}
-            >{formatter.format(new Date(data.page.updatedAt))}</time
-          >
-        </p>
+        <div class="doc-meta">
+          <p>
+            {'Updated'}
+            <time datetime={data.page.updatedAt}
+              >{formatter.format(new Date(data.page.updatedAt))}</time
+            >
+          </p>
+          {#if !data.page.public}<span class="doc-private"
+              ><Lock size={13} aria-hidden="true" />{'Members only'}</span
+            >{/if}
+        </div>
       </header>
       {#if data.page.outdatedLocales.includes(data.page.locale)}
         <p class="doc-outdated" role="note">
@@ -156,10 +161,21 @@
     text-wrap: balance;
     overflow-wrap: anywhere;
   }
-  .updated {
-    margin: 0;
+  .doc-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
     color: var(--muted);
     font-size: 12px;
+  }
+  .doc-meta p {
+    margin: 0;
+  }
+  .doc-private {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
   .doc-outdated {
     display: flex;

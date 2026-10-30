@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import { createId } from '@paralleldrive/cuid2';
 import { eq, inArray } from 'drizzle-orm';
 import { getUrls } from 'shared';
+import type { PublicDocSummary } from 'shared/public-docs';
 import { app } from '../app';
 import {
   auditEvents,
@@ -25,9 +26,10 @@ const safe =
     '/ksi_integration';
 const leader = createId();
 const member = createId();
+const pending = createId();
 const projectId = createId();
 const foreignFolderId = createId();
-const tokens = { [leader]: createId(), [member]: createId() };
+const tokens = { [leader]: createId(), [member]: createId(), [pending]: createId() };
 
 async function request(actor: string | null, path: string, method = 'GET', body?: unknown) {
   const response = await app.handle(
@@ -47,12 +49,12 @@ async function request(actor: string | null, path: string, method = 'GET', body?
 
 describe.skipIf(!safe)('documentation folders and translations', () => {
   beforeAll(async () => {
-    for (const id of [leader, member]) {
+    for (const id of [leader, member, pending]) {
       await db.insert(users).values({
         id,
         name: 'Docs contributor',
         email: `${id}@example.test`,
-        membershipStatus: 'active'
+        membershipStatus: id === pending ? 'pending' : 'active'
       });
       const sessionId = createId();
       const expiresAt = new Date(Date.now() + 3600000);
@@ -106,7 +108,7 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
       );
     await db.delete(auditEvents).where(inArray(auditEvents.actorId, [leader, member]));
     await db.delete(projects).where(eq(projects.id, projectId));
-    await db.delete(users).where(inArray(users.id, [leader, member]));
+    await db.delete(users).where(inArray(users.id, [leader, member, pending]));
   });
 
   test('translation suggestions preserve folders, pass review, and keep their full history', async () => {
@@ -280,6 +282,37 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
     expect(
       index.body.some((page: any) => page.projectSlug === projectId && page.slug === 'fallback')
     ).toBe(false);
+  });
+  test('the website shows members-only pages to active members alone', async () => {
+    for (const page of [
+      { slug: 'handbook', title: 'Handbook', markdown: 'Read [internal-notes].', public: true },
+      { slug: 'internal-notes', title: 'Internal notes', markdown: 'Keys.', public: false }
+    ])
+      expect(
+        (await request(leader, '/platform/docs', 'POST', { ...page, projectId, reason: '' })).status
+      ).toBe(200);
+    const internal = `/platform/public/docs/${projectId}/internal-notes?locale=en`;
+    const listed = async (actor: string | null) =>
+      ((await request(actor, '/platform/public/docs?locale=en')).body as PublicDocSummary[])
+        .filter((page) => page.projectSlug === projectId)
+        .map((page) => [page.slug, page.public]);
+    const linked = async (actor: string | null) =>
+      JSON.stringify(
+        (await request(actor, `/platform/public/docs/${projectId}/handbook?locale=en`)).body.blocks
+      ).includes(`/docs/${projectId}/internal-notes?lang=en`);
+
+    for (const actor of [null, pending]) {
+      expect((await request(actor, internal)).status).toBe(404);
+      expect(await listed(actor)).toContainEqual(['handbook', true]);
+      expect(await listed(actor)).not.toContainEqual(['internal-notes', false]);
+      expect(await linked(actor)).toBe(false);
+    }
+    expect((await request(member, internal)).body).toMatchObject({
+      title: 'Internal notes',
+      public: false
+    });
+    expect(await listed(member)).toContainEqual(['internal-notes', false]);
+    expect(await linked(member)).toBe(true);
   });
   test('folder tree supports empty bilingual folders, nesting and moves without changing page content', async () => {
     const folder = await request(leader, '/platform/docs/folders', 'POST', {
