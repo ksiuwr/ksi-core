@@ -177,7 +177,7 @@
   class="border-line bg-paper/80 sticky top-0 z-40 border-b backdrop-blur-md"
 >
   <div
-    class="page-container flex h-14 items-center gap-6"
+    class="navbar-container page-container flex h-14 items-center gap-6"
     class:docs-container={page.url.pathname.startsWith('/docs')}
   >
     <a href="/" class="text-ink flex shrink-0 items-center gap-2.5">
@@ -356,7 +356,11 @@
 {/if}
 
 <style>
-  /* Documentation spans three columns, so the bar lines up with its wider layout. */
+  /* Documentation spans three columns, so the bar lines up with its wider layout
+     and eases between widths when navigating in or out of it. */
+  .navbar-container {
+    transition: max-width var(--dur-slow) var(--ease-out);
+  }
   .docs-container {
     max-width: 1360px;
   }
@@ -430,6 +434,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .menu-reveal,
+    .navbar-container,
     .nav-link :global(.chevron) {
       transition: none;
     }

@@ -63,7 +63,6 @@ msgstr "Cancel"
 msgid "Alerts"
 msgstr "Alerts"
 
-#: src/components/Footer.svelte
 #: src/components/Navbar.svelte
 msgid "Projects"
 msgstr "Projects"
@@ -348,7 +347,6 @@ msgstr "Research"
 msgid "No matching projects."
 msgstr "No matching projects."
 
-#: src/components/Footer.svelte
 #: src/routes/+page.svelte
 msgid "ZOSIA"
 msgstr "ZOSIA"
@@ -399,13 +397,11 @@ msgstr "Computer Science Students’ Association at the University of Wrocław."
 msgid "Institute of Computer Science<0/> 15 Fryderyka Joliot-Curie St.<1/> 50-383 Wrocław · Room 24"
 msgstr "Institute of Computer Science<0/> 15 Fryderyka Joliot-Curie St.<1/> 50-383 Wrocław · Room 24"
 
-#: src/components/Footer.svelte
-msgid "Footer navigation"
-msgstr "Footer navigation"
+#~ msgid "Footer navigation"
+#~ msgstr "Footer navigation"
 
-#: src/components/Footer.svelte
-msgid "About us"
-msgstr "About us"
+#~ msgid "About us"
+#~ msgstr "About us"
 
 #: src/components/Footer.svelte
 msgid "Contact"
@@ -415,9 +411,8 @@ msgstr "Contact"
 msgid "Explore"
 msgstr "Explore"
 
-#: src/components/Footer.svelte
-msgid "Find us online"
-msgstr "Find us online"
+#~ msgid "Find us online"
+#~ msgstr "Find us online"
 
 #: src/components/Navbar.svelte
 msgid "Change language"
@@ -541,6 +536,7 @@ msgstr "See more"
 msgid "Groups"
 msgstr "Groups"
 
+#: src/components/Footer.svelte
 #: src/routes/projects/+page.svelte
 msgid "All projects"
 msgstr "All projects"
@@ -611,6 +607,7 @@ msgstr "We teach children programming in one-hour workshops."
 msgid "Events and workshops"
 msgstr "Events and workshops"
 
+#: src/components/Footer.svelte
 #: src/routes/+page.svelte
 msgid "Our projects"
 msgstr "Our projects"
@@ -929,3 +926,12 @@ msgstr "Previous"
 #: src/routes/docs/[workspace]/[slug]/+page.svelte
 msgid "Next"
 msgstr "Next"
+
+#: src/components/Footer.svelte
+msgid "Follow us"
+msgstr "Follow us"
+
+#: src/routes/docs/+layout.svelte
+#: src/routes/docs/+layout.svelte
+msgid "Toggle sidebar"
+msgstr "Toggle sidebar"

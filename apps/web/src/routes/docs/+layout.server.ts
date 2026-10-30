@@ -10,5 +10,8 @@ export const load: LayoutServerLoad = async (event) => {
   const locale = contentLocale(event.cookies.get('locale') ?? 'pl');
   const response = await backendFetch(event, env, `/platform/public/docs?locale=${locale}`);
   if (!response.ok) error(response.status, 'Documentation unavailable');
-  return { publicDocs: (await response.json()) as PublicDocSummary[] };
+  return {
+    publicDocs: (await response.json()) as PublicDocSummary[],
+    sidebarCollapsed: event.cookies.get('ksi-docs-sidebar') === '1'
+  };
 };
