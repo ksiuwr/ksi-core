@@ -935,3 +935,17 @@ msgstr "Obserwuj nas"
 #: src/routes/docs/+layout.svelte
 msgid "Toggle sidebar"
 msgstr "Przełącz panel boczny"
+
+#: src/lib/components/PublicDocsSidebar.svelte
+#: src/routes/docs/+page.svelte
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Members only"
+msgstr "Tylko dla członków"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Edit"
+msgstr "Edytuj"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Suggest changes"
+msgstr "Zaproponuj zmiany"

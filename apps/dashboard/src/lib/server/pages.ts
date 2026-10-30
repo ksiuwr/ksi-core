@@ -267,7 +267,14 @@ export async function docsPageLoad(event: ServerLoadEvent) {
     resolved?: boolean;
     suggestion?: SuggestionDetail;
     insights?: DocInsights;
-  } = { view, path, index, page };
+    navigationDocked: boolean;
+  } = {
+    view,
+    path,
+    index,
+    page,
+    navigationDocked: event.cookies.get('ksi-docs-navigation') === '1'
+  };
   if (view === 'history' && page)
     docs.revisions = await platform<DocRevision[]>(
       event,

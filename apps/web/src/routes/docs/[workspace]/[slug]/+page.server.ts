@@ -19,6 +19,7 @@ export const load: PageServerLoad = async (event) => {
     page: (await response.json()) as {
       title: string;
       slug: string;
+      public: boolean;
       folder: string;
       locale: ContentLocale;
       locales: ContentLocale[];
@@ -28,6 +29,8 @@ export const load: PageServerLoad = async (event) => {
       workspace: { slug: string | null; name: string | null };
       headings: DocHeading[];
       blocks: MarkdownBlock[];
+      /** The reader's dashboard rights; null for guests and inactive accounts. */
+      access: { canReview: boolean; canPublish: boolean; canPropose: boolean } | null;
     }
   };
 };

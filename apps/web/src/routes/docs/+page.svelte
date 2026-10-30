@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { BookOpen } from '@lucide/svelte';
+  import { BookOpen, Lock } from '@lucide/svelte';
   import { publicDocPages, publicDocPath, publicDocWorkspaces } from 'shared/public-docs';
   import { locale } from '$lib/locale.svelte';
   let { data } = $props<{ data: import('./$types').PageData }>();
@@ -34,7 +34,12 @@
               {/if}
               <span class="docs-title">{page.title}</span>
               {#if page.excerpt}<span class="docs-excerpt">{page.excerpt}</span>{/if}
-              <time datetime={page.updatedAt}>{formatter.format(new Date(page.updatedAt))}</time>
+              <span class="docs-meta">
+                <time datetime={page.updatedAt}>{formatter.format(new Date(page.updatedAt))}</time>
+                {#if !page.public}<span class="docs-private"
+                    ><Lock size={12} aria-hidden="true" />{'Members only'}</span
+                  >{/if}
+              </span>
             </a>
           </li>
         {/each}
@@ -116,11 +121,21 @@
     -webkit-line-clamp: 3;
     line-clamp: 3;
   }
-  time {
+  .docs-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 12px;
     margin-top: auto;
     padding-top: 6px;
     color: var(--muted);
     font-size: 12px;
+  }
+  .docs-private {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
   }
   .docs-empty {
     display: grid;

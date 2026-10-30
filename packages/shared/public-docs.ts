@@ -7,6 +7,8 @@ export type PublicDocSummary = {
   folderTrail: { id: string; name: string }[];
   excerpt: string;
   updatedAt: string;
+  /** False for members-only pages, which the website lists only for active members. */
+  public: boolean;
   projectSlug: string | null;
   projectName: string | null;
 };
@@ -23,7 +25,7 @@ export type PublicDocWorkspace = {
   pages: PublicDocSummary[];
 };
 
-/** Navigation is derived exclusively from the public page index, including only its ancestors. */
+/** Navigation is derived exclusively from the reader's page index, including only its ancestors. */
 export function publicDocWorkspaces(
   pages: PublicDocSummary[],
   locale?: string

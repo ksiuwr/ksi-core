@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { BookOpen, ChevronDown, ChevronRight, FileText } from '@lucide/svelte';
+  import { BookOpen, ChevronDown, ChevronRight, FileText, Lock } from '@lucide/svelte';
   import TreeLabel from '@ksi-core/ui/platform/TreeLabel.svelte';
   import { associationDocsKey } from 'shared/docs';
   import {
@@ -39,6 +39,7 @@
       onclick={closePicker}
     >
       <FileText size={14} aria-hidden="true" /><TreeLabel value={doc.title} />
+      {#if !doc.public}<Lock class="doc-nav-private" size={12} aria-label={'Members only'} />{/if}
     </a>
   {/each}
   {#each node.folders as folder (folder.id)}
@@ -158,8 +159,11 @@
     background: var(--surface-muted);
     font-weight: 500;
   }
-  .doc-nav-page.active :global(svg) {
+  .doc-nav-page.active :global(svg:first-child) {
     color: var(--accent);
+  }
+  nav :global(.doc-nav-private) {
+    opacity: 0.7;
   }
   .doc-nav-label {
     margin: 20px 8px 6px;

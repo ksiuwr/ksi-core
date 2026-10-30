@@ -1328,7 +1328,9 @@ export default createElysia({ prefix: '/platform' })
   )
   .get(
     '/public/docs',
-    async ({ db, query }) => {
+    async ({ db, user, query }) => {
+      // Active members read every page in the dashboard, so the website shows them every page too.
+      const member = user?.membershipStatus === 'active';
       const rows = await db
         .select({
           slug: docPages.slug,
@@ -1338,13 +1340,14 @@ export default createElysia({ prefix: '/platform' })
           title: docPages.title,
           markdown: docPages.markdown,
           translations: docPages.translations,
+          public: docPages.public,
           updatedAt: docPages.updatedAt,
           projectSlug: projects.slug,
           projectName: projects.name
         })
         .from(docPages)
         .leftJoin(projects, eq(docPages.projectId, projects.id))
-        .where(eq(docPages.public, true))
+        .where(member ? undefined : eq(docPages.public, true))
         .orderBy(docPages.title);
       const folders = await db.select().from(docFolders);
       return rows.map(({ markdown, translations, projectId: _projectId, folderId, ...row }) => {
@@ -1362,7 +1365,8 @@ export default createElysia({ prefix: '/platform' })
   )
   .get(
     '/public/docs/:workspace/:slug',
-    async ({ db, params, query }) => {
+    async ({ db, user, params, query }) => {
+      const reader = user?.membershipStatus === 'active' ? user : null;
       const [project] =
         params.workspace === associationDocsKey
           ? [null]
@@ -1378,7 +1382,7 @@ export default createElysia({ prefix: '/platform' })
           and(
             workspaceCondition(project?.id ?? null),
             eq(docPages.slug, params.slug),
-            eq(docPages.public, true)
+            reader ? undefined : eq(docPages.public, true)
           )
         );
       if (!page) throw status(404, { code: 'DOC_NOT_FOUND' });
@@ -1399,13 +1403,14 @@ export default createElysia({ prefix: '/platform' })
         .where(eq(docRevisions.pageId, page.id))
         .orderBy(docRevisions.version);
       const resolve = await docLinkResolver(db, shown.markdown, current, {
-        publicOnly: true,
+        publicOnly: !reader,
         href: publicHref,
         locale: query.locale
       });
       return {
         title: shown.title,
         slug: page.slug,
+        public: page.public,
         folder: docFolderPath(
           await workspaceFolders(db, project?.id ?? null),
           page.folderId,
@@ -1418,7 +1423,9 @@ export default createElysia({ prefix: '/platform' })
         updatedAt: page.updatedAt,
         workspace: { slug: current.slug, name: current.name },
         headings: markdownHeadings(shown.markdown),
-        blocks: renderMarkdown(shown.markdown, { docs: { resolve } })
+        blocks: renderMarkdown(shown.markdown, { docs: { resolve } }),
+        // Members get the dashboard's editing rights, so the website can link to the editor.
+        access: reader ? await docsAccess(db, reader, current.projectId) : null
       };
     },
     { query: t.Object({ locale }) }

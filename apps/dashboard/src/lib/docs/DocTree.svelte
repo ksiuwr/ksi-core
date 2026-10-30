@@ -291,8 +291,11 @@
 </dialog>
 
 <style>
+  /* An auto column would grow to fit full page names; this keeps rows to the panel so
+     names shorten instead of scrolling sideways. */
   .page-tree {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 1px;
     min-width: 0;
   }
@@ -349,6 +352,7 @@
   }
   .tree-folder[open] {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 1px;
   }
   .tree-folder :global(svg),
