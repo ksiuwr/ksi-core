@@ -3,10 +3,17 @@
   import Markdown from '@ksi-core/ui/platform/Markdown.svelte';
   import DocsToc from '@ksi-core/ui/platform/DocsToc.svelte';
   import { headingAnchors, scrollToSection } from '@ksi-core/ui/platform/heading-anchors';
-  import { SquarePen, Globe, CalendarDays, TextAlignStart, ChevronDown } from '@lucide/svelte';
-  import { formatDate } from 'shared/format';
+  import {
+    SquarePen,
+    Globe,
+    CalendarDays,
+    TextAlignStart,
+    ChevronDown,
+    TriangleAlert
+  } from '@lucide/svelte';
+  import { formatDate, formatDateTime } from 'shared/format';
   import { associationDocsKey, docsPath } from 'shared/docs';
-  import { preferences } from '$lib/preferences.svelte';
+  import { preferences, setLanguage } from '$lib/preferences.svelte';
   import DocInfo from './DocInfo.svelte';
   import type { DocDetail } from './docs';
 
@@ -32,14 +39,21 @@
 </script>
 
 <div class="doc-page">
-  <article class="doc-article">
+  <article class="doc-article" lang={page.locale}>
     <!-- Most visits are for reading, so details and editing stay one quiet click away. -->
     <header class="doc-header">
-      <h1>{page.title}</h1>
+      <h1>{page.displayTitle}</h1>
       <div class="doc-byline">
         <span class="doc-updated"
           ><CalendarDays size={14} aria-hidden="true" /><span
-            >{'Updated'} <time datetime={page.updatedAt}>{date(page.updatedAt)}</time></span
+            >{'Updated'}
+            <time
+              datetime={page.updatedAt}
+              title={formatDateTime(page.updatedAt, language, {
+                dateStyle: 'full',
+                timeStyle: 'long'
+              })}>{date(page.updatedAt)}</time
+            ></span
           ></span
         >
         {#if page.public}<span class="doc-public"
@@ -59,6 +73,18 @@
         </span>
       </div>
     </header>
+
+    {#if page.outdatedLocales.includes(page.locale)}
+      <p class="doc-outdated" role="note">
+        <TriangleAlert size={15} aria-hidden="true" />
+        <span>
+          {'The English version changed after this translation was written.'}
+          <button type="button" onclick={() => setLanguage('en-us')}
+            >{'Read the English version'}</button
+          >
+        </span>
+      </p>
+    {/if}
 
     {#if page.headings.length}
       <details class="doc-outline">
@@ -141,6 +167,30 @@
   }
   .doc-public {
     color: #2f7d4a;
+  }
+  .doc-outdated {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin: 20px 0 0;
+    padding: 10px 12px;
+    border-radius: var(--radius-lg);
+    background: var(--coral);
+    font-size: 13px;
+  }
+  .doc-outdated :global(svg) {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .doc-outdated button {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-left: 4px;
+    color: var(--accent);
   }
   .doc-tools {
     display: flex;

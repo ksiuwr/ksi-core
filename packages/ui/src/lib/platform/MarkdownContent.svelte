@@ -6,10 +6,12 @@
   import { renderMarkdown, type ResolvedDocLink } from 'shared/markdown';
   import { referenceScopeForPath } from 'shared/markdown-references';
   import { docLinkCandidates } from 'shared/docs';
+  import { contentLocale, type ContentLocale } from 'shared/content-locales';
   let {
     value,
     allowReferences = false,
     docs = false,
+    docLocale,
     referenceScope,
     onresize
   }: {
@@ -17,6 +19,7 @@
     allowReferences?: boolean;
     /** Resolves `[page]` links like a documentation page does. */
     docs?: boolean;
+    docLocale?: ContentLocale;
     referenceScope?: string;
     onresize?: (index: number, width: number) => void;
   } = $props();
@@ -31,8 +34,15 @@
   // Page names need data, so they are looked up once per distinct set of links.
   const targets = $derived(docs ? docLinkCandidates(value).map((target) => target.raw) : []);
   const targetKey = $derived(targets.join('\n'));
+  const locale = $derived(docLocale ?? contentLocale(language));
+  const context = $derived(`${scope}:${locale}`);
+  let resolvedContext = $state('');
   let links = $state<Record<string, ResolvedDocLink | null>>({});
   $effect(() => {
+    if (resolvedContext !== context) {
+      links = {};
+      resolvedContext = context;
+    }
     const requested = targetKey ? targetKey.split('\n') : [];
     const missing = requested.filter((target) => !(target in links));
     if (!mounted || !missing.length) return;
@@ -41,7 +51,7 @@
       fetch('/api/platform/docs/links', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ scope, targets: missing }),
+        body: JSON.stringify({ scope, locale, targets: missing }),
         signal: controller.signal
       })
         .then((response) => (response.ok ? response.json() : null))

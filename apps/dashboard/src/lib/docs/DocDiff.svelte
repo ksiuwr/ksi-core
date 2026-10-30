@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { contentLocale, type ContentLocale } from 'shared/content-locales';
   import Markdown from '@ksi-core/ui/platform/Markdown.svelte';
   import { ChevronsUpDown, FileDiff } from '@lucide/svelte';
   import { SvelteSet } from 'svelte/reactivity';
@@ -12,13 +13,15 @@
     after,
     projectId,
     beforeLabel,
-    afterLabel
+    afterLabel,
+    locale
   }: {
     before: string;
     after: string;
     projectId: string;
     beforeLabel: string;
     afterLabel: string;
+    locale?: ContentLocale;
   } = $props();
 
   const language = $derived(preferences.language);
@@ -29,7 +32,12 @@
   const expanded = new SvelteSet<number>();
 
   $effect(() => {
-    const body = { before, after, ...(projectId ? { projectId } : {}) };
+    const body = {
+      before,
+      after,
+      locale: locale ?? contentLocale(language),
+      ...(projectId ? { projectId } : {})
+    };
     let cancelled = false;
     loading = true;
     error = '';

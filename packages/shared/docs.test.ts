@@ -1,11 +1,15 @@
 import { expect, test } from 'bun:test';
 import {
+  cleanDocTranslations,
+  docLineChanges,
+  outdatedTranslations,
   docLinkCandidates,
   headingSlug,
   lineChanges,
   markdownBlockDiff,
   markdownHeadings,
   parseDocLinkTarget,
+  translatedDocHeading,
   wordDiff
 } from './docs';
 import type { WindowLike } from 'dompurify';
@@ -142,4 +146,46 @@ test('browsers render documentation links, anchors and checkboxes like the serve
   // A raw link dressed as a page link cannot leave the site or skip the external rel.
   expect(server).not.toContain('evil.test');
   expect(server).toContain('<a class="doc-link" rel="noopener noreferrer external">e</a>');
+});
+
+test('English and translated section references reach the translated outline', () => {
+  const source = '## Membership\n\n### How to join?\n\n## Events';
+  const translated = '## Członkostwo\n\n### Jak dołączyć?\n\n## Wydarzenia';
+  expect(translatedDocHeading(source, translated, 'how-to-join')).toMatchObject({
+    id: 'jak-dolaczyc',
+    text: 'Jak dołączyć?'
+  });
+  expect(translatedDocHeading(source, translated, 'jak-dolaczyc')).toMatchObject({
+    id: 'jak-dolaczyc'
+  });
+  expect(translatedDocHeading(source, `${translated}\n\n## Extra`, 'events')).toBeUndefined();
+  expect(translatedDocHeading(source, translated, 'missing')).toBeUndefined();
+});
+
+test('translations keep meaningful fields and count toward contributions', () => {
+  expect(
+    cleanDocTranslations({ pl: { title: '  Plan dnia ', markdown: '  ' }, en: { title: 'x' } })
+  ).toEqual({ pl: { title: 'Plan dnia' } });
+  expect(
+    docLineChanges(
+      { markdown: 'a', translations: {} },
+      { markdown: 'a\nb', translations: { pl: { markdown: 'x\ny' } } }
+    )
+  ).toEqual({ additions: 3, deletions: 0 });
+});
+
+test('a translation is outdated once the English page changes after it', () => {
+  const pl = (markdown: string) => ({ pl: { markdown } });
+  expect(
+    outdatedTranslations([
+      { version: 1, title: 'A', markdown: 'one', translations: {} },
+      { version: 2, title: 'A', markdown: 'one', translations: pl('jeden') }
+    ])
+  ).toEqual([]);
+  expect(
+    outdatedTranslations([
+      { version: 1, title: 'A', markdown: 'one', translations: pl('jeden') },
+      { version: 2, title: 'A', markdown: 'one two', translations: pl('jeden') }
+    ])
+  ).toEqual(['pl']);
 });

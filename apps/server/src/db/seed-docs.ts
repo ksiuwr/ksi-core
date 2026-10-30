@@ -1,6 +1,7 @@
 import { and, eq, isNull } from 'drizzle-orm';
-import { lineChanges } from 'shared/docs';
-import { db, docPages, docProposals, docRevisions } from './index';
+import { workspaceFolders } from '../services/doc-folders';
+import { docLineChanges, type DocTranslations } from 'shared/docs';
+import { db, docFolders, docPages, docProposals, docRevisions } from './index';
 
 // Synthetic documentation showing cross-workspace links, deep outlines, history and review.
 const dashboardGuide = `The KSI dashboard is where members plan work, discuss ideas and keep what the association knows. This guide walks through each area. Membership rules live in the [statute] and quick answers are collected in the [faq].
@@ -149,6 +150,67 @@ Yes, as many as you like.
 
 The winter camp of computer science students, with lectures, workshops and a lot of time together. See [zosia/day-plan] for how a day at the camp looks.`;
 
+const faqPolish = `Odpowiedzi na pytania, które słyszymy najczęściej. Czegoś brakuje? Zaproponuj zmianę tej strony.
+
+## Członkostwo
+
+### Jak dołączyć do KSI?
+
+Załóż konto w panelu i poproś członka zarządu o jego aktywację. Zasady opisuje [statute#membership].
+
+### Czy muszę studiować informatykę?
+
+Nie. Zapraszamy wszystkich studentów Uniwersytetu Wrocławskiego.
+
+## Projekty
+
+### Jak założyć nowy projekt?
+
+Opisz pomysł na forum koła. Zarząd utworzy projekt i wyznaczy jego pierwszych liderów.
+
+### Czy mogę należeć do kilku projektów?
+
+Tak, do dowolnie wielu.
+
+## Wydarzenia
+
+### Czym jest ZOSIA?
+
+Zimowy Obóz Studentów Informatyki: wykłady, warsztaty i mnóstwo czasu spędzonego razem. Zobacz [zosia/day-plan], jak wygląda dzień na obozie.`;
+
+// Translated before the clicker batteries were added, so it shows as outdated.
+const dayPlanPolish = `Jak wygląda typowy dzień obozu, żeby kolejni organizatorzy nie musieli odtwarzać planu z pamięci. Wszystko, co z nami jedzie, jest na liście [bus-packing], a ogólne pytania opisuje [association/faq].
+
+## Rano
+
+### 7:30 Śniadanie
+
+Śniadanie trwa do 9:00. Dyżurny organizator sprawdza salę jadalną do 7:15.
+
+### 9:00 Wykłady
+
+Dwa bloki wykładów z przerwą na kawę.
+
+#### Przygotowanie sali
+
+- [ ] Projektor i przejściówki HDMI/USB-C sprawdzone
+- [ ] Mikrofony naładowane
+- [ ] Laptop do transmisji zalogowany
+
+## Po południu
+
+### 13:00 Obiad
+
+### 14:30 Warsztaty i sport
+
+## Wieczór
+
+### 19:00 Kolacja
+
+### 20:30 Wydarzenia wieczorne
+
+### 23:00 Cisza nocna`;
+
 const dayPlan = (
   version: number
 ) => `How a typical camp day runs, so next year's organizers do not have to rebuild the schedule from memory. Everything that travels with us is listed in the [bus-packing]; general questions are answered in the [association/faq].
@@ -273,15 +335,58 @@ ${
 - [ ] Inventory returned to the storage room
 - [ ] Missing items written down on this page`;
 
-type Version = { markdown: string; authorId: string; reviewerId?: string; reason: string };
+type Version = {
+  markdown: string;
+  translations?: DocTranslations;
+  authorId: string;
+  reviewerId?: string;
+  reason: string;
+};
 
-async function seedPage(
-  projectId: string | null,
-  slug: string,
-  title: string,
-  versions: Version[],
-  isPublic = false
-) {
+const folderPolishNames: Record<string, string> = {
+  Camp: 'Obóz',
+  Schedule: 'Plan dnia',
+  Logistics: 'Logistyka',
+  Speakers: 'Prelegenci',
+  Guides: 'Poradniki',
+  'About KSI': 'O KSI'
+};
+async function seedFolderPath(projectId: string | null, path: string): Promise<string | null> {
+  const folders = await workspaceFolders(db, projectId);
+  let parentId: string | null = null;
+  for (const name of path.split('/').filter(Boolean)) {
+    let folder: typeof docFolders.$inferSelect | undefined = folders.find(
+      (item) => item.parentId === parentId && item.name === name
+    );
+    if (!folder) {
+      const [created]: (typeof docFolders.$inferSelect)[] = await db
+        .insert(docFolders)
+        .values({
+          projectId,
+          parentId,
+          name,
+          translations: folderPolishNames[name] ? { pl: { name: folderPolishNames[name] } } : {}
+        })
+        .returning();
+      folder = created!;
+      folders.push(folder);
+    }
+    parentId = folder.id;
+  }
+  return parentId;
+}
+
+async function seedPage(page: {
+  projectId: string | null;
+  slug: string;
+  title: string;
+  folder: string;
+  versions: Version[];
+  public?: boolean;
+}) {
+  const { projectId, slug, title, folder, versions } = page;
+  const folderId = await seedFolderPath(projectId, folder);
+  const isPublic = page.public ?? false;
   const [existing] = await db
     .select({ id: docPages.id })
     .from(docPages)
@@ -296,13 +401,16 @@ async function seedPage(
     const latest = versions.at(-1)!;
     const day = 24 * 60 * 60 * 1000;
     const createdAt = new Date(Date.now() - versions.length * 9 * day);
-    const [page] = await tx
+    const [created] = await tx
       .insert(docPages)
       .values({
         projectId,
         slug,
+        folder,
+        folderId,
         title,
         markdown: latest.markdown,
+        translations: latest.translations ?? {},
         public: isPublic,
         version: versions.length,
         createdBy: versions[0]!.authorId,
@@ -312,18 +420,21 @@ async function seedPage(
       .returning();
     for (const [index, version] of versions.entries())
       await tx.insert(docRevisions).values({
-        pageId: page!.id,
+        pageId: created!.id,
         version: index + 1,
+        folder,
+        folderId,
         title,
         markdown: version.markdown,
+        translations: version.translations ?? {},
         public: isPublic && index === versions.length - 1,
         authorId: version.authorId,
         reviewerId: version.reviewerId ?? null,
         reason: version.reason,
         createdAt: new Date(createdAt.getTime() + index * 8 * day),
-        ...lineChanges(versions[index - 1]?.markdown ?? '', version.markdown)
+        ...docLineChanges(versions[index - 1] ?? null, version)
       });
-    return page!.id;
+    return created!.id;
   });
 }
 
@@ -332,50 +443,99 @@ async function seedProposal(values: typeof docProposals.$inferInsert) {
     .select({ id: docProposals.id })
     .from(docProposals)
     .where(and(eq(docProposals.authorId, values.authorId), eq(docProposals.reason, values.reason)));
-  if (!existing) await db.insert(docProposals).values(values);
+  if (!existing)
+    await db.insert(docProposals).values({
+      ...values,
+      folderId: await seedFolderPath(values.projectId ?? null, values.folder ?? '')
+    });
 }
 
 export async function seedDocs([anna, jan, ewa]: string[], projectIds: Record<string, string>) {
-  await seedPage(null, 'dashboard-guide', 'Dashboard guide', [
-    { markdown: dashboardGuide, authorId: jan!, reason: 'First version of the guide.' }
-  ]);
-  await seedPage(null, 'statute', 'Statute', [
-    { markdown: statute, authorId: anna!, reason: 'Summary of the statute adopted in 2025.' }
-  ]);
-  await seedPage(
-    null,
-    'faq',
-    'Frequently asked questions',
-    [{ markdown: faq, authorId: ewa!, reviewerId: jan, reason: 'Collected at the open meeting.' }],
-    true
-  );
+  await seedPage({
+    projectId: null,
+    slug: 'dashboard-guide',
+    title: 'Dashboard guide',
+    folder: 'Guides',
+    versions: [{ markdown: dashboardGuide, authorId: jan!, reason: 'First version of the guide.' }]
+  });
+  await seedPage({
+    projectId: null,
+    slug: 'statute',
+    title: 'Statute',
+    folder: 'About KSI',
+    versions: [
+      {
+        markdown: statute,
+        translations: { pl: { title: 'Statut' } },
+        authorId: anna!,
+        reason: 'Summary of the statute adopted in 2025.'
+      }
+    ]
+  });
+  await seedPage({
+    projectId: null,
+    slug: 'faq',
+    title: 'Frequently asked questions',
+    folder: 'About KSI',
+    public: true,
+    versions: [
+      { markdown: faq, authorId: ewa!, reviewerId: jan, reason: 'Collected at the open meeting.' },
+      {
+        markdown: faq,
+        translations: { pl: { title: 'Najczęściej zadawane pytania', markdown: faqPolish } },
+        authorId: ewa!,
+        reviewerId: jan,
+        reason: 'Polish version for first-year students.'
+      }
+    ]
+  });
   const zosia = projectIds.zosia!;
-  const dayPlanId = await seedPage(zosia, 'day-plan', 'A day at ZOSIA', [
-    { markdown: dayPlan(1), authorId: jan!, reason: 'Schedule from ZOSIA 2025.' },
-    {
-      markdown: dayPlan(2),
-      authorId: anna!,
-      reason: 'Clickers ran out of batteries on the second day.'
-    }
-  ]);
-  await seedPage(zosia, 'bus-packing', 'Bus packing checklist', [
-    { markdown: busPacking(1), authorId: anna!, reason: 'Checklist used for ZOSIA 2025.' },
-    {
-      markdown: busPacking(2),
-      authorId: ewa!,
-      reviewerId: anna,
-      reason: 'We were missing extension cords in the lecture room last year.'
-    },
-    {
-      markdown: busPacking(3),
-      authorId: jan!,
-      reason: 'Split the technical team list into network and AV for the two crews.'
-    }
-  ]);
+  const dayPlanId = await seedPage({
+    projectId: zosia,
+    slug: 'day-plan',
+    title: 'A day at ZOSIA',
+    folder: 'Camp/Schedule',
+    versions: [
+      {
+        markdown: dayPlan(1),
+        translations: { pl: { title: 'Dzień na ZOSI', markdown: dayPlanPolish } },
+        authorId: jan!,
+        reason: 'Schedule from ZOSIA 2025, also in Polish.'
+      },
+      {
+        markdown: dayPlan(2),
+        translations: { pl: { title: 'Dzień na ZOSI', markdown: dayPlanPolish } },
+        authorId: anna!,
+        reason: 'Clickers ran out of batteries on the second day.'
+      }
+    ]
+  });
+  await seedPage({
+    projectId: zosia,
+    slug: 'bus-packing',
+    title: 'Bus packing checklist',
+    folder: 'Camp/Logistics',
+    versions: [
+      { markdown: busPacking(1), authorId: anna!, reason: 'Checklist used for ZOSIA 2025.' },
+      {
+        markdown: busPacking(2),
+        authorId: ewa!,
+        reviewerId: anna,
+        reason: 'We were missing extension cords in the lecture room last year.'
+      },
+      {
+        markdown: busPacking(3),
+        authorId: jan!,
+        reason: 'Split the technical team list into network and AV for the two crews.'
+      }
+    ]
+  });
   await seedProposal({
     projectId: zosia,
     pageId: dayPlanId,
     baseVersion: 2,
+    folder: 'Camp/Schedule',
+    translations: { pl: { title: 'Dzień na ZOSI', markdown: dayPlanPolish } },
     title: 'A day at ZOSIA',
     markdown: dayPlan(2)
       .replace(
@@ -391,6 +551,7 @@ export async function seedDocs([anna, jan, ewa]: string[], projectIds: Record<st
   await seedProposal({
     projectId: zosia,
     slug: 'speaker-invitation',
+    folder: 'Camp/Speakers',
     title: 'Speaker invitation template',
     markdown:
       'A template for inviting speakers. Send it at least two months before the camp and add the speaker to the [day-plan].\n\n## E-mail\n\n> Dear …,\n>\n> We would like to invite you to give a talk at ZOSIA, the winter camp of computer science students.\n\n## Follow-up\n\n- [ ] Confirm the talk title\n- [ ] Ask about AV needs\n- [ ] Book accommodation',
@@ -406,7 +567,17 @@ export async function seedDocs([anna, jan, ewa]: string[], projectIds: Record<st
         .from(docPages)
         .where(and(isNull(docPages.projectId), eq(docPages.slug, 'faq')))
     )[0]!.id,
-    baseVersion: 1,
+    baseVersion: 2,
+    folder: 'About KSI',
+    translations: {
+      pl: {
+        title: 'Najczęściej zadawane pytania',
+        markdown: faqPolish.replace(
+          '## Projekty',
+          '### Czy jest składka członkowska?\n\nNie, członkostwo w KSI jest bezpłatne.\n\n## Projekty'
+        )
+      }
+    },
     title: 'Frequently asked questions',
     markdown: faq.replace(
       '## Projects',

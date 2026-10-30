@@ -1,4 +1,5 @@
 import { sql } from 'drizzle-orm';
+import type { DocFolder } from 'shared/doc-folders';
 import type { ContentTranslations } from 'shared/content-locales';
 import { defaultBoardStatuses, type BoardStatus } from '../domain/board-statuses';
 import type { BoardLabel } from '../domain/board-labels';
@@ -12,7 +13,8 @@ import {
   snakeCase,
   jsonb,
   uniqueIndex,
-  index
+  index,
+  type AnyPgColumn
 } from 'drizzle-orm/pg-core';
 
 export const membershipStatusEnum = pgEnum('membership_status', [
@@ -516,6 +518,28 @@ export const collaborationCounters = snakeCase.table('collaboration_counters', {
   lastNumber: integer().notNull().default(0)
 });
 
+// Folder identity and nesting are independent of page contents and translated names.
+export const docFolders = snakeCase.table(
+  'doc_folders',
+  {
+    id: text().primaryKey().$defaultFn(createId),
+    projectId: text().references(() => projects.id),
+    parentId: text().references((): AnyPgColumn => docFolders.id),
+    name: text().notNull(),
+    translations: jsonb().$type<DocFolder['translations']>().notNull().default({}),
+    createdAt: timestamp().notNull().defaultNow(),
+    updatedAt: timestamp().notNull().defaultNow()
+  },
+  (t) => [
+    index('doc_folder_project_idx').on(t.projectId),
+    uniqueIndex('doc_folder_sibling_name_unique').on(
+      sql`coalesce(${t.projectId}, '')`,
+      sql`coalesce(${t.parentId}, '')`,
+      sql`lower(${t.name})`
+    )
+  ]
+);
+
 // Documentation pages belong to a project or, without one, to the association.
 export const docPages = snakeCase.table(
   'doc_pages',
@@ -523,8 +547,12 @@ export const docPages = snakeCase.table(
     id: text().primaryKey().$defaultFn(createId),
     projectId: text().references(() => projects.id),
     slug: text().notNull(),
+    folderId: text().references(() => docFolders.id),
+    /** English path snapshot for revision history and older API clients. */
+    folder: text().notNull().default(''),
     title: text().notNull(),
     markdown: text().notNull().default(''),
+    translations: jsonb().$type<ContentTranslations>().notNull().default({}),
     public: boolean().notNull().default(false),
     version: integer().notNull().default(1),
     createdBy: text()
@@ -549,8 +577,11 @@ export const docRevisions = snakeCase.table(
       .notNull()
       .references(() => docPages.id),
     version: integer().notNull(),
+    folderId: text().references(() => docFolders.id, { onDelete: 'set null' }),
+    folder: text().notNull().default(''),
     title: text().notNull(),
     markdown: text().notNull(),
+    translations: jsonb().$type<ContentTranslations>().notNull().default({}),
     public: boolean().notNull(),
     authorId: text()
       .notNull()
@@ -576,8 +607,11 @@ export const docProposals = snakeCase.table(
     pageId: text().references(() => docPages.id),
     slug: text(),
     baseVersion: integer(),
+    folderId: text().references(() => docFolders.id, { onDelete: 'set null' }),
+    folder: text().notNull().default(''),
     title: text().notNull(),
     markdown: text().notNull(),
+    translations: jsonb().$type<ContentTranslations>().notNull().default({}),
     public: boolean().notNull(),
     reason: text().notNull(),
     state: text().notNull().default('pending'),

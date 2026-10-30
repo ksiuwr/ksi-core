@@ -1,7 +1,36 @@
 <script lang="ts">
-  import { ArrowUpRight, FileText } from '@lucide/svelte';
+  import { ArrowUpRight, Folder } from '@lucide/svelte';
   import { locale } from '$lib/locale.svelte';
   let { data } = $props<{ data: import('./$types').PageData }>();
+  const groups = $derived.by(() => {
+    type Group = {
+      projectSlug: string | null;
+      name: string;
+      folder: string;
+      pages: typeof data.pages;
+    };
+    const grouped = new Map<string, Group>();
+    for (const page of data.pages) {
+      const folder = page.folder || '';
+      const key = JSON.stringify([page.projectSlug, folder]);
+      let group = grouped.get(key);
+      if (!group) {
+        group = {
+          projectSlug: page.projectSlug,
+          name: page.projectName ?? 'KSI',
+          folder,
+          pages: []
+        };
+        grouped.set(key, group);
+      }
+      group.pages.push(page);
+    }
+    return [...grouped.values()].sort(
+      (a, b) =>
+        a.name.localeCompare(b.name, locale.current) ||
+        a.folder.localeCompare(b.folder, locale.current)
+    );
+  });
   const formatter = $derived(
     new Intl.DateTimeFormat(locale.current, { day: 'numeric', month: 'long', year: 'numeric' })
   );
@@ -11,7 +40,7 @@
 
 <main class="flex-1">
   <header class="border-line border-b">
-    <div class="page-container py-14 md:py-20">
+    <div class="pt-4 pb-8 md:pb-12">
       <p class="eyebrow"><span class="dot"></span>Docs</p>
       <h1 class="mt-4 text-[clamp(40px,6vw,64px)] font-bold tracking-[-0.045em]">Documentation</h1>
       <p class="text-muted mt-4 max-w-xl text-lg leading-relaxed">
@@ -19,28 +48,40 @@
       </p>
     </div>
   </header>
-  <div class="page-container py-10 pb-20">
+  <div class="py-10">
     {#if data.pages.length}
-      <ul class="docs-grid">
-        {#each data.pages as page (`${page.projectSlug ?? ''}/${page.slug}`)}
-          <li>
-            <a
-              class="docs-card surface-card surface-card-link"
-              href={`/docs/${encodeURIComponent(page.projectSlug ?? 'association')}/${encodeURIComponent(page.slug)}`}
-            >
-              <span class="docs-context"
-                ><FileText size={14} aria-hidden="true" />{page.projectName ?? 'KSI'}</span
-              >
-              <span class="docs-title">{page.title}</span>
-              {#if page.excerpt}<span class="docs-excerpt">{page.excerpt}</span>{/if}
-              <span class="docs-footer">
-                <time datetime={page.updatedAt}>{formatter.format(new Date(page.updatedAt))}</time>
-                <ArrowUpRight size={18} aria-hidden="true" />
-              </span>
-            </a>
-          </li>
-        {/each}
-      </ul>
+      {#each groups as group (JSON.stringify([group.projectSlug, group.folder]))}
+        <section
+          class="docs-group"
+          aria-label={[group.name, group.folder].filter(Boolean).join(' / ')}
+        >
+          <h2 class="docs-context">
+            <Folder size={15} aria-hidden="true" /><span>{group.name}</span>
+            {#if group.folder}<span class="docs-folder"
+                >/ {group.folder.split('/').join(' / ')}</span
+              >{/if}
+          </h2>
+          <ul class="docs-grid">
+            {#each group.pages as page (`${page.projectSlug ?? ''}/${page.slug}`)}
+              <li>
+                <a
+                  class="docs-card surface-card surface-card-link"
+                  href={`/docs/${encodeURIComponent(page.projectSlug ?? 'association')}/${encodeURIComponent(page.slug)}`}
+                >
+                  <span class="docs-title">{page.title}</span>
+                  {#if page.excerpt}<span class="docs-excerpt">{page.excerpt}</span>{/if}
+                  <span class="docs-footer">
+                    <time datetime={page.updatedAt}
+                      >{formatter.format(new Date(page.updatedAt))}</time
+                    >
+                    <ArrowUpRight size={18} aria-hidden="true" />
+                  </span>
+                </a>
+              </li>
+            {/each}
+          </ul>
+        </section>
+      {/each}
     {:else}
       <p class="text-muted">No public documentation yet.</p>
     {/if}
@@ -48,6 +89,18 @@
 </main>
 
 <style>
+  .docs-group + .docs-group {
+    margin-top: 36px;
+  }
+  .docs-group h2 {
+    margin: 0 0 14px;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .docs-folder {
+    overflow-wrap: anywhere;
+  }
   .docs-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
@@ -68,7 +121,8 @@
     gap: 6px;
     color: var(--muted);
     font-family: var(--mono);
-    font-size: 11px;
+    font-size: 12px;
+    flex-wrap: wrap;
   }
   .docs-title {
     font-size: 20px;

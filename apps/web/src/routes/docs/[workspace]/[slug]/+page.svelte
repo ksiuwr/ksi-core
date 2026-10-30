@@ -16,10 +16,10 @@
 </script>
 
 <svelte:head><title>{data.page.title} · KSI UWr</title></svelte:head>
-<main class="doc-page page-container">
+<main class="doc-page">
   <a class="back-link" href="/docs"><ArrowLeft size={16} aria-hidden="true" />All documentation</a>
   <div class="doc-layout">
-    <article>
+    <article lang={data.page.locale}>
       <header class="doc-heading">
         {#if data.page.workspace.slug}<a
             class="project-link"
@@ -30,14 +30,24 @@
             /></a
           >{/if}
         <h1>{data.page.title}</h1>
-        <p class="updated">
-          <CalendarDays size={15} aria-hidden="true" /><span
-            >{'Updated'}
+        <div class="doc-meta">
+          <p class="updated">
+            <CalendarDays size={15} aria-hidden="true" /><span>{'Updated'}</span>
             <time datetime={data.page.updatedAt}
               >{formatter.format(new Date(data.page.updatedAt))}</time
-            ></span
-          >
-        </p>
+            >
+          </p>
+        </div>
+        {#if data.page.folder}
+          <p class="doc-folder">
+            <Folder size={13} aria-hidden="true" />{data.page.folder.split('/').join(' / ')}
+          </p>
+        {/if}
+        {#if data.page.outdatedLocales.includes(data.page.locale)}
+          <p class="doc-translation-notice">
+            {'This translation may be outdated. Check the English version for the latest changes.'}
+          </p>
+        {/if}
       </header>
       <div class="doc-content" bind:this={content} use:headingAnchors={{ onhash, ...anchorLabels }}>
         <Markdown blocks={data.page.blocks} {language} />
@@ -52,8 +62,7 @@
 <style>
   .doc-page {
     flex: 1;
-    padding-top: 28px;
-    padding-bottom: 80px;
+    padding: 0;
   }
   .back-link {
     display: inline-flex;
@@ -68,8 +77,8 @@
   }
   .doc-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 240px;
-    gap: 56px;
+    grid-template-columns: minmax(0, 1fr) 200px;
+    gap: 36px;
     align-items: start;
   }
   article {
@@ -107,10 +116,33 @@
     text-wrap: balance;
     overflow-wrap: anywhere;
   }
+  .doc-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .doc-folder {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+  .doc-translation-notice {
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: 13px;
+  }
   .updated {
     display: flex;
     align-items: center;
     gap: 8px;
+    margin: 0;
+    flex-wrap: wrap;
     color: var(--muted);
     font-size: 12px;
   }
@@ -164,7 +196,7 @@
     position: sticky;
     top: 84px;
   }
-  @media (max-width: 1000px) {
+  @media (max-width: 1279px) {
     .doc-layout {
       grid-template-columns: minmax(0, 1fr);
     }

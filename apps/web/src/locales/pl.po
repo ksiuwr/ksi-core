@@ -860,6 +860,7 @@ msgstr "Dokumentacja"
 msgid "How KSI and its projects work, shared openly by our members."
 msgstr "Jak działa KSI i jego projekty — opisane otwarcie przez naszych członków."
 
+#: src/lib/components/PublicDocsSidebar.svelte
 #: src/routes/docs/+page.svelte
 msgid "No public documentation yet."
 msgstr "Brak publicznej dokumentacji."
@@ -883,3 +884,27 @@ msgstr "Zaktualizowano"
 #: src/routes/docs/[workspace]/[slug]/+page.svelte
 msgid "<0/>All documentation"
 msgstr "<0/>Cała dokumentacja"
+
+#~ msgid "Document language"
+#~ msgstr "Język dokumentu"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "This translation may be outdated. Check the English version for the latest changes."
+msgstr "To tłumaczenie może być nieaktualne. Sprawdź najnowsze zmiany w wersji angielskiej."
+
+#: src/lib/components/PublicDocsSidebar.svelte
+msgid "All documentation"
+msgstr "Cała dokumentacja"
+
+#: src/components/Footer.svelte
+msgid "Docs"
+msgstr "Dokumentacja"
+
+#: src/lib/components/PublicDocsSidebar.svelte
+#: src/lib/components/PublicDocsSidebar.svelte
+msgid "Documentation pages"
+msgstr "Strony dokumentacji"
+
+#: src/lib/components/PublicDocsSidebar.svelte
+msgid "Workspaces"
+msgstr "Przestrzenie"

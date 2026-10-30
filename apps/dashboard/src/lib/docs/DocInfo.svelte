@@ -1,7 +1,9 @@
 <script lang="ts">
   import { tick } from 'svelte';
   import { Info, History, Globe, Lock, GitPullRequestArrow, ArrowUpRight } from '@lucide/svelte';
-  import { formatDate } from 'shared/format';
+  import { formatDate, formatDateTime } from 'shared/format';
+  import MemberPreview from '@ksi-core/ui/platform/MemberPreview.svelte';
+  import { contentLocaleName } from 'shared/content-locales';
   import { docsPath } from 'shared/docs';
   import { preferences } from '$lib/preferences.svelte';
   import DocPerson from './DocPerson.svelte';
@@ -19,6 +21,9 @@
   const date = (value: string) =>
     formatDate(value, language, { day: 'numeric', month: 'long', year: 'numeric' });
 
+  const preciseDate = (value: string) =>
+    formatDateTime(value, language, { dateStyle: 'full', timeStyle: 'long' });
+
   // Anchored under the button, or above it when the screen has no room below.
   function place() {
     if (!trigger || !panel) return;
@@ -29,7 +34,13 @@
     position = {
       width,
       left: Math.max(12, Math.min(rect.right - width, window.innerWidth - width - 12)),
-      top: below >= height || rect.top < height ? rect.bottom + 6 : rect.top - height - 6
+      top: Math.max(
+        12,
+        Math.min(
+          below >= height ? rect.bottom + 6 : rect.top - height - 6,
+          window.innerHeight - height - 12
+        )
+      )
     };
   }
 
@@ -73,21 +84,63 @@
   <dl>
     <div>
       <dt>{'Updated'}</dt>
-      <dd>
-        <time datetime={page.updatedAt}>{date(page.updatedAt)}</time>
-        {#if page.updatedByUser}<span class="muted">· {page.updatedByUser.name}</span>{/if}
+      <dd class="doc-info-authorship">
+        <time
+          datetime={page.updatedAt}
+          title={preciseDate(page.updatedAt)}
+          aria-label={preciseDate(page.updatedAt)}>{date(page.updatedAt)}</time
+        >
+        {#if page.updatedByUser}
+          <div class="doc-info-user">
+            <MemberPreview
+              member={page.updatedByUser}
+              href={`/people/${encodeURIComponent(page.updatedByUser.id)}`}
+              size={20}
+            />
+          </div>
+        {/if}
       </dd>
     </div>
     <div>
       <dt>{'Created'}</dt>
-      <dd>
-        <time datetime={page.createdAt}>{date(page.createdAt)}</time>
-        {#if page.createdByUser}<span class="muted">· {page.createdByUser.name}</span>{/if}
+      <dd class="doc-info-authorship">
+        <time
+          datetime={page.createdAt}
+          title={preciseDate(page.createdAt)}
+          aria-label={preciseDate(page.createdAt)}>{date(page.createdAt)}</time
+        >
+        {#if page.createdByUser}
+          <div class="doc-info-user">
+            <MemberPreview
+              member={page.createdByUser}
+              href={`/people/${encodeURIComponent(page.createdByUser.id)}`}
+              size={20}
+            />
+          </div>
+        {/if}
       </dd>
     </div>
     <div>
       <dt>{'Version'}</dt>
       <dd>{page.version}</dd>
+    </div>
+    {#if page.folder}
+      <div>
+        <dt>{'Folder'}</dt>
+        <dd>{page.folder.split('/').join(' / ')}</dd>
+      </div>
+    {/if}
+    <div>
+      <dt>{'Languages'}</dt>
+      <dd class="doc-info-languages">
+        {#each page.locales as locale (locale)}
+          <span
+            >{contentLocaleName(locale, language)}{#if page.outdatedLocales.includes(locale)}<span
+                class="doc-info-outdated">({'outdated'})</span
+              >{/if}</span
+          >
+        {/each}
+      </dd>
     </div>
     <div>
       <dt>{'Visibility'}</dt>
@@ -159,6 +212,8 @@
   .doc-info {
     position: fixed;
     inset: auto;
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
     margin: 0;
     padding: 0;
     border: 1px solid var(--line);
@@ -168,16 +223,16 @@
     box-shadow: var(--shadow-md);
     font-size: 13px;
   }
+  /* One label column sized by the longest label, so translations never overlap values. */
   dl {
     display: grid;
-    gap: 10px;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 10px 16px;
     margin: 0;
     padding: 14px 16px;
   }
   dl div {
-    display: grid;
-    grid-template-columns: 82px minmax(0, 1fr);
-    gap: 10px;
+    display: contents;
   }
   dt {
     color: var(--muted);
@@ -186,6 +241,41 @@
   dd {
     margin: 0;
     overflow-wrap: anywhere;
+  }
+  .doc-info-authorship {
+    display: grid;
+    gap: 6px;
+  }
+  .doc-info-authorship time {
+    cursor: default;
+  }
+  .doc-info-user {
+    min-width: 0;
+  }
+  .doc-info-user :global(.person-link) {
+    gap: 6px;
+    max-width: 100%;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .doc-info-user :global(.person-link:hover) {
+    color: var(--ink);
+  }
+  .doc-info-user :global(.identity-text) {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .doc-info-languages {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+  }
+  .doc-info-outdated {
+    margin-left: 4px;
+    color: var(--danger);
+    font-size: 12px;
   }
   .doc-info-visibility {
     display: inline-flex;

@@ -28,6 +28,7 @@ import {
   type WorkspaceContext
 } from './workspace';
 import { taskPath, threadPath } from '../navigation';
+import { dashboardContentLocale } from '../content-locale';
 import {
   docsView,
   type DocDetail,
@@ -240,13 +241,16 @@ export async function articlePageLoad(event: ServerLoadEvent) {
 }
 
 export async function docsPageLoad(event: ServerLoadEvent) {
+  event.depends('ksi:localized-content');
   const context = await workspacePageContext(event);
   const path = (event.params.path ?? '').split('/').filter(Boolean);
   const view = docsView(path);
   if (!view) error(404, 'Page not found');
   const projectId = context.project?.id ?? null;
+  // Content follows the global dashboard language, even on previously shared ?lang links.
+  const locale = dashboardContentLocale(event.cookies.get('locale'));
   const workspaceQuery = (values: Record<string, string> = {}) =>
-    new URLSearchParams({ ...values, ...(projectId ? { projectId } : {}) });
+    new URLSearchParams({ ...values, locale, ...(projectId ? { projectId } : {}) });
   const [index, page] = await Promise.all([
     platform<DocIndex>(event, `/platform/docs?${workspaceQuery()}`),
     view === 'page' || view === 'edit' || view === 'history'
@@ -288,7 +292,7 @@ export async function docsPageLoad(event: ServerLoadEvent) {
       event,
       `/platform/docs/contributors?${workspaceQuery()}`
     );
-  return { ...context, docs, title: page?.title ?? 'Documentation', tab: 'docs' };
+  return { ...context, docs, title: page?.displayTitle ?? 'Documentation', tab: 'docs' };
 }
 
 export async function eventsPageLoad(event: ServerLoadEvent) {

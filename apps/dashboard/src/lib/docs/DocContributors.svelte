@@ -73,10 +73,13 @@
               ><span class="added">+{row.additions}</span>
               <span class="removed">−{row.deletions}</span></td
             >
-            <td class="contributors-suggestions">
-              <span title={'Accepted'}>✓ {row.accepted}</span>
-              <span title={'Waiting for review'}>… {row.pending}</span>
-              <span title={'Declined'}>✕ {row.rejected}</span>
+            <td>
+              <!-- Flex lives inside the cell; a flex cell drops out of the table's row layout. -->
+              <span class="contributors-suggestions">
+                <span title={'Accepted'}>✓ {row.accepted}</span>
+                <span title={'Waiting for review'}>… {row.pending}</span>
+                <span title={'Declined'}>✕ {row.rejected}</span>
+              </span>
             </td>
             <td>
               <time datetime={row.lastContributionAt}>{when(row.lastContributionAt)}</time>

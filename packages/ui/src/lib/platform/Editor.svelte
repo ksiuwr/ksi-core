@@ -13,6 +13,7 @@
   import { resizeMarkdownImage } from 'shared/markdown-images';
   import MarkdownContent from './MarkdownContent.svelte';
   import { page } from '$app/state';
+  import { contentLocale, type ContentLocale } from 'shared/content-locales';
   import { referenceScopeForPath } from 'shared/markdown-references';
   import {
     Eye,
@@ -29,6 +30,7 @@
     allowGallery = false,
     allowReferences = false,
     docs = false,
+    docLocale,
     referenceScope
   }: {
     value?: string;
@@ -37,6 +39,7 @@
     allowReferences?: boolean;
     /** Suggests documentation pages after `[` and previews page links. */
     docs?: boolean;
+    docLocale?: ContentLocale;
     referenceScope?: string;
   } = $props();
   const language = $derived(preferences.language);
@@ -346,7 +349,11 @@
 
   async function searchDocs(q: string) {
     const request = ++docRequest;
-    const params = new URLSearchParams({ q, scope: currentReferenceScope() });
+    const params = new URLSearchParams({
+      q,
+      scope: currentReferenceScope(),
+      locale: docLocale ?? contentLocale(language)
+    });
     try {
       const response = await fetch(`/api/platform/docs/search?${params}`);
       const results = response.ok ? await response.json() : [];
@@ -555,6 +562,7 @@
         {value}
         {allowReferences}
         {docs}
+        {docLocale}
         {referenceScope}
         onresize={(index, width) => (value = resizeMarkdownImage(value, index, width))}
       />

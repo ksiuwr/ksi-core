@@ -1,6 +1,17 @@
+import { docFolderPath, docFolderTrail } from 'shared/doc-folders';
+import {
+  folderDestination,
+  folderDraft,
+  lockFolderTree,
+  workspaceFolders
+} from '../../services/doc-folders';
 import { contentChanges } from 'shared/activity';
 import {
   associationDocsKey,
+  cleanDocTranslations,
+  docLineChanges,
+  docTranslationLocales,
+  outdatedTranslations,
   docLinkCandidates,
   docNameKey,
   docSlugPattern,
@@ -11,15 +22,18 @@ import {
   markdownHeadings,
   parseDocLinkTarget,
   reservedDocSlugs,
+  translatedDocHeading,
   wordDiff,
-  type DocLinkTarget
+  type DocLinkTarget,
+  type DocTranslations
 } from 'shared/docs';
+import { contentLocale, localizeContent, type ContentLocale } from 'shared/content-locales';
 import { renderMarkdown, type ResolvedDocLink } from 'shared/markdown';
 import { and, desc, eq, ilike, inArray, isNull, or, sql, type SQL } from 'drizzle-orm';
 import { status, t } from 'elysia';
 import { createElysia } from '../../lib/createElysia';
 import { recordEvent, type Executor } from '../../lib/audit';
-import { docPages, docProposals, docRevisions, projects, users } from '../../db';
+import { docFolders, docPages, docProposals, docRevisions, projects, users } from '../../db';
 import { effectivePermissions, type Principal } from '../../domain/permissions';
 import { hasScopedLeadership } from '../../domain/content-policy';
 import { active, hasProjectPermission, scopeFor } from './content';
@@ -28,7 +42,85 @@ const title = t.String({ minLength: 1, maxLength: 200 });
 const markdown = t.String({ maxLength: 500000 });
 const slug = t.String({ pattern: docSlugPattern, maxLength: 100 });
 const reason = t.String({ maxLength: 1000 });
-const projectQuery = t.Object({ projectId: t.Optional(t.String()) });
+const folder = t.String({ maxLength: 200 });
+const translations = t.Object(
+  Object.fromEntries(
+    docTranslationLocales.map((locale) => [
+      locale,
+      t.Optional(
+        t.Object(
+          { title: t.Optional(t.String({ maxLength: 200 })), markdown: t.Optional(markdown) },
+          { additionalProperties: false }
+        )
+      )
+    ])
+  ),
+  { additionalProperties: false }
+);
+const locale = t.Optional(t.String({ maxLength: 20 }));
+const projectQuery = t.Object({ projectId: t.Optional(t.String()), locale });
+const escapeLike = (value: string) => value.replace(/[%_\\]/g, '\\$&');
+const translatedTitleMatches = (pattern: string) =>
+  docTranslationLocales.map((locale) =>
+    ilike(sql<string>`${docPages.translations}->${locale}->>'title'`, pattern)
+  );
+
+type DocContent = {
+  title: string;
+  markdown: string;
+  folder: string;
+  folderId: string | null;
+  translations: DocTranslations;
+  public: boolean;
+};
+/** Normalizes submitted content; translations need the English text they translate. */
+function docContent(
+  body: {
+    title: string;
+    markdown: string;
+    folder?: string;
+    folderId?: string | null;
+    translations?: DocTranslations;
+    public: boolean;
+  },
+  baseline?: typeof docPages.$inferSelect
+): DocContent {
+  const cleaned = cleanDocTranslations(body.translations ?? baseline?.translations);
+  if (!body.title.trim()) throw status(422, { code: 'TITLE_REQUIRED' });
+  if (!body.markdown.trim() && Object.values(cleaned).some((fields) => fields?.markdown))
+    throw status(422, { code: 'ENGLISH_SOURCE_REQUIRED' });
+  return {
+    title: body.title.trim(),
+    markdown: body.markdown,
+    folder: body.folder ?? baseline?.folder ?? '',
+    folderId: body.folderId !== undefined ? body.folderId : (baseline?.folderId ?? null),
+    translations: cleaned,
+    public: body.public
+  };
+}
+function sameContent(page: DocContent | typeof docPages.$inferSelect, next: DocContent) {
+  return (
+    page.title === next.title &&
+    page.markdown === next.markdown &&
+    page.folderId === next.folderId &&
+    page.public === next.public &&
+    JSON.stringify(cleanDocTranslations(page.translations)) === JSON.stringify(next.translations)
+  );
+}
+/** The title and text a reader sees in their language, falling back to English per field. */
+function readable(
+  page: { title: string; markdown: string; translations: unknown },
+  requested: string | null | undefined
+) {
+  const shown = contentLocale(requested);
+  const translation =
+    shown === 'en' ? undefined : cleanDocTranslations(page.translations as DocTranslations)[shown];
+  const localized = localizeContent(
+    { title: page.title, markdown: page.markdown, translations: { [shown]: translation ?? {} } },
+    shown
+  );
+  return { ...localized, locale: (translation ? shown : 'en') as ContentLocale };
+}
 
 type Person = { id: string; name: string; image: string | null };
 type Workspace = { projectId: string | null; slug: string | null; name: string | null };
@@ -111,7 +203,11 @@ async function docLinkResolver(
   executor: Executor,
   source: string,
   current: Workspace,
-  options: { publicOnly?: boolean; href: (workspace: string | null, page: string) => string }
+  options: {
+    publicOnly?: boolean;
+    locale?: string;
+    href: (workspace: string | null, page: string) => string;
+  }
 ) {
   const candidates = docLinkCandidates(source);
   if (!candidates.length) return () => null;
@@ -135,6 +231,7 @@ async function docLinkResolver(
       projectId: docPages.projectId,
       slug: docPages.slug,
       title: docPages.title,
+      translations: docPages.translations,
       public: docPages.public,
       markdown: withHeadings ? docPages.markdown : sql<string>`''`
     })
@@ -151,6 +248,8 @@ async function docLinkResolver(
     const key = page.projectId ?? '';
     const entries = index.get(key) ?? new Map();
     entries.set(`title:${docNameKey(page.title)}`, page);
+    for (const translation of Object.values(cleanDocTranslations(page.translations)))
+      if (translation?.title) entries.set(`title:${docNameKey(translation.title)}`, page);
     entries.set(`slug:${page.slug}`, page);
     index.set(key, entries);
   }
@@ -171,16 +270,23 @@ async function docLinkResolver(
       const page = find(projectId, name);
       if (!page) continue;
       const owner = workspaces.get(projectId ?? '');
+      const shown = readable(page, options.locale);
       const heading = target.heading
-        ? markdownHeadings(page.markdown).find((item) => item.id === target.heading)
+        ? translatedDocHeading(page.markdown, shown.markdown, target.heading)
         : undefined;
+      const title = shown.title;
+      const path = options.href(owner?.slug ?? null, page.slug);
+      const languageQuery =
+        options.publicOnly || options.locale !== undefined
+          ? `?lang=${contentLocale(options.locale)}`
+          : '';
       return {
         href:
           options.publicOnly && !page.public
             ? null
-            : `${options.href(owner?.slug ?? null, page.slug)}${target.heading ? `#${target.heading}` : ''}`,
-        label: heading ? `${page.title} › ${heading.text}` : page.title,
-        title: `${owner?.name ?? 'Association'} · ${page.title}`
+            : `${path}${languageQuery}${target.heading ? `#${heading?.id ?? target.heading}` : ''}`,
+        label: heading ? `${title} › ${heading.text}` : title,
+        title: `${owner?.name ?? 'Association'} · ${title}`
       };
     }
     return null;
@@ -196,10 +302,14 @@ export async function renderDocMarkdown(
   executor: Executor,
   source: string,
   projectId: string | null,
-  anchors = true
+  anchors = true,
+  locale?: string
 ) {
   const current = await workspace(executor, projectId);
-  const resolve = await docLinkResolver(executor, source, current, { href: dashboardHref });
+  const resolve = await docLinkResolver(executor, source, current, {
+    href: dashboardHref,
+    locale
+  });
   return renderMarkdown(source, {
     referenceScope: current.slug ?? '~association',
     docs: { resolve, anchors }
@@ -237,6 +347,7 @@ async function proposalSummaries(executor: Executor, condition: SQL) {
       pageTitle: docPages.title,
       pageSlug: docPages.slug,
       pageMarkdown: docPages.markdown,
+      pageTranslations: docPages.translations,
       pagePublic: docPages.public,
       pageVersion: docPages.version
     })
@@ -249,24 +360,31 @@ async function proposalSummaries(executor: Executor, condition: SQL) {
     executor,
     rows.flatMap((row) => [row.proposal.authorId, row.proposal.reviewerId])
   );
-  return rows.map(({ proposal, pageMarkdown, pagePublic, pageVersion, ...page }) => ({
-    id: proposal.id,
-    pageId: proposal.pageId,
-    pageTitle: page.pageTitle,
-    pageSlug: page.pageSlug ?? proposal.slug,
-    title: proposal.title,
-    reason: proposal.reason,
-    state: proposal.state,
-    public: proposal.public,
-    visibilityChange: proposal.public !== (pagePublic ?? false),
-    outdated: !!proposal.pageId && proposal.baseVersion !== pageVersion,
-    createdAt: proposal.createdAt,
-    reviewedAt: proposal.reviewedAt,
-    reviewNote: proposal.reviewNote,
-    author: names.get(proposal.authorId) ?? null,
-    reviewer: proposal.reviewerId ? (names.get(proposal.reviewerId) ?? null) : null,
-    ...lineChanges(pageMarkdown ?? '', proposal.markdown)
-  }));
+  return rows.map(
+    ({ proposal, pageMarkdown, pageTranslations, pagePublic, pageVersion, ...page }) => ({
+      id: proposal.id,
+      pageId: proposal.pageId,
+      pageTitle: page.pageTitle,
+      pageSlug: page.pageSlug ?? proposal.slug,
+      title: proposal.title,
+      reason: proposal.reason,
+      state: proposal.state,
+      public: proposal.public,
+      visibilityChange: proposal.public !== (pagePublic ?? false),
+      outdated: !!proposal.pageId && proposal.baseVersion !== pageVersion,
+      createdAt: proposal.createdAt,
+      reviewedAt: proposal.reviewedAt,
+      reviewNote: proposal.reviewNote,
+      author: names.get(proposal.authorId) ?? null,
+      reviewer: proposal.reviewerId ? (names.get(proposal.reviewerId) ?? null) : null,
+      ...docLineChanges(
+        pageMarkdown === null
+          ? null
+          : { markdown: pageMarkdown, translations: pageTranslations ?? {} },
+        proposal
+      )
+    })
+  );
 }
 
 export default createElysia({ prefix: '/platform' })
@@ -311,12 +429,18 @@ export default createElysia({ prefix: '/platform' })
             ...(access.canReview ? [] : [eq(docProposals.authorId, actor.id)])
           )
         );
+      const folders = await workspaceFolders(db, projectId);
       return {
         access,
+        folders,
+        locale: contentLocale(query.locale),
         pendingSuggestions: pending?.count ?? 0,
-        pages: pages.map(({ markdown, ...page }) => ({
+        pages: pages.map(({ markdown, translations, ...page }) => ({
           ...page,
-          excerpt: markdownExcerpt(markdown),
+          folder: docFolderPath(folders, page.folderId, query.locale),
+          ...(({ title, markdown: text }) => ({ title, excerpt: markdownExcerpt(text) }))(
+            readable({ title: page.title, markdown, translations }, query.locale)
+          ),
           contributors: credits
             .filter((credit) => credit.pageId === page.id)
             .sort((a, b) => b.revisions - a.revisions)
@@ -325,6 +449,168 @@ export default createElysia({ prefix: '/platform' })
       };
     },
     { query: projectQuery }
+  )
+  .post(
+    '/docs/folders',
+    async ({ db, user, body }) => {
+      const actor = active(user);
+      const projectId = body.projectId ?? null;
+      return db.transaction(async (tx) => {
+        if (!(await docsAccess(tx, actor, projectId)).canReview)
+          throw status(403, { code: 'FORBIDDEN' });
+        await lockFolderTree(tx, projectId);
+        const draft = folderDraft(await workspaceFolders(tx, projectId), body);
+        const [created] = await tx
+          .insert(docFolders)
+          .values({ projectId, ...draft })
+          .returning();
+        await recordEvent(tx, {
+          actorId: actor.id,
+          projectId,
+          action: 'docs.folder.created',
+          targetId: created!.id,
+          metadata: { name: draft.name, parentId: draft.parentId }
+        });
+        return created!;
+      });
+    },
+    {
+      body: t.Object({
+        projectId: t.Optional(t.String()),
+        parentId: t.Nullable(t.String()),
+        name: t.String({ minLength: 1, maxLength: 80 }),
+        translations: t.Optional(
+          t.Object({ pl: t.Optional(t.Object({ name: t.String({ maxLength: 80 }) })) })
+        )
+      })
+    }
+  )
+  .put(
+    '/docs/folders/:id',
+    async ({ db, user, params, body }) => {
+      const actor = active(user);
+      return db.transaction(async (tx) => {
+        const [original] = await tx.select().from(docFolders).where(eq(docFolders.id, params.id));
+        if (!original) throw status(404, { code: 'FOLDER_NOT_FOUND' });
+        const projectId = original.projectId;
+        if (!(await docsAccess(tx, actor, projectId)).canReview)
+          throw status(403, { code: 'FORBIDDEN' });
+        await lockFolderTree(tx, projectId);
+        const folders = await workspaceFolders(tx, projectId);
+        if (!folders.some((folder) => folder.id === original.id))
+          throw status(404, { code: 'FOLDER_NOT_FOUND' });
+        const draft = folderDraft(folders, body, original.id);
+        const [updated] = await tx
+          .update(docFolders)
+          .set({ ...draft, updatedAt: new Date() })
+          .where(eq(docFolders.id, original.id))
+          .returning();
+        await recordEvent(tx, {
+          actorId: actor.id,
+          projectId,
+          action: 'docs.folder.updated',
+          targetId: original.id,
+          metadata: {
+            changes: contentChanges(original, updated!, ['name', 'parentId', 'translations'])
+          }
+        });
+        return updated!;
+      });
+    },
+    {
+      body: t.Object({
+        parentId: t.Nullable(t.String()),
+        name: t.String({ minLength: 1, maxLength: 80 }),
+        translations: t.Optional(
+          t.Object({ pl: t.Optional(t.Object({ name: t.String({ maxLength: 80 }) })) })
+        )
+      })
+    }
+  )
+  .delete('/docs/folders/:id', async ({ db, user, params }) => {
+    const actor = active(user);
+    return db.transaction(async (tx) => {
+      const [folder] = await tx.select().from(docFolders).where(eq(docFolders.id, params.id));
+      if (!folder) throw status(404, { code: 'FOLDER_NOT_FOUND' });
+      if (!(await docsAccess(tx, actor, folder.projectId)).canReview)
+        throw status(403, { code: 'FORBIDDEN' });
+      await lockFolderTree(tx, folder.projectId);
+      const [child] = await tx
+        .select({ id: docFolders.id })
+        .from(docFolders)
+        .where(eq(docFolders.parentId, folder.id))
+        .limit(1);
+      const [page] = await tx
+        .select({ id: docPages.id })
+        .from(docPages)
+        .where(eq(docPages.folderId, folder.id))
+        .limit(1);
+      if (child || page) throw status(409, { code: 'FOLDER_NOT_EMPTY' });
+      const [proposal] = await tx
+        .select({ id: docProposals.id })
+        .from(docProposals)
+        .where(and(eq(docProposals.folderId, folder.id), eq(docProposals.state, 'pending')))
+        .limit(1);
+      if (proposal) throw status(409, { code: 'FOLDER_IN_USE' });
+      const [deleted] = await tx.delete(docFolders).where(eq(docFolders.id, folder.id)).returning();
+      if (!deleted) throw status(404, { code: 'FOLDER_NOT_FOUND' });
+      await recordEvent(tx, {
+        actorId: actor.id,
+        projectId: folder.projectId,
+        action: 'docs.folder.deleted',
+        targetId: folder.id,
+        metadata: {
+          name: deleted.name,
+          parentId: deleted.parentId,
+          translations: deleted.translations
+        }
+      });
+      return { deleted: true };
+    });
+  })
+  .post(
+    '/docs/:id/move',
+    async ({ db, user, params, body }) => {
+      const actor = active(user);
+      return db.transaction(async (tx) => {
+        const page = await pageById(tx, params.id, true);
+        if (!(await docsAccess(tx, actor, page.projectId)).canReview)
+          throw status(403, { code: 'FORBIDDEN' });
+        if (page.version !== body.version) throw status(409, { code: 'REVISION_CONFLICT' });
+        const destination = await folderDestination(tx, page.projectId, body);
+        if (page.folderId === destination.folderId) throw status(422, { code: 'NO_CHANGES' });
+        const [updated] = await tx
+          .update(docPages)
+          .set({ ...destination, version: page.version + 1, updatedAt: new Date() })
+          .where(eq(docPages.id, page.id))
+          .returning();
+        await tx.insert(docRevisions).values({
+          pageId: page.id,
+          version: updated!.version,
+          ...destination,
+          title: page.title,
+          markdown: page.markdown,
+          translations: page.translations,
+          public: page.public,
+          authorId: actor.id,
+          reason: 'Moved page',
+          additions: 0,
+          deletions: 0
+        });
+        await recordEvent(tx, {
+          actorId: actor.id,
+          projectId: page.projectId,
+          action: 'docs.updated',
+          targetId: page.id,
+          metadata: {
+            version: updated!.version,
+            changes: contentChanges(page, updated!, ['folder', 'folderId'])
+          }
+        });
+        return updated!;
+      });
+    },
+    { body: t.Object({ folderId: t.Nullable(t.String()), version: t.Integer({ minimum: 1 }) }) }
   )
   .get(
     '/docs/search',
@@ -360,18 +646,30 @@ export default createElysia({ prefix: '/platform' })
         const projectId =
           target.workspace === associationDocsKey ? null : (project?.id ?? currentId);
         const [page] = await db
-          .select({ slug: docPages.slug, title: docPages.title, markdown: docPages.markdown })
+          .select({
+            slug: docPages.slug,
+            title: docPages.title,
+            markdown: docPages.markdown,
+            translations: docPages.translations
+          })
           .from(docPages)
           .where(
             and(
               workspaceCondition(projectId),
-              or(eq(docPages.slug, target.name), ilike(docPages.title, target.name))
+              or(
+                eq(docPages.slug, target.name),
+                ilike(docPages.title, escapeLike(target.name)),
+                ...translatedTitleMatches(escapeLike(target.name))
+              )
             )
-          );
+          )
+          .orderBy(sql`case when ${docPages.slug} = ${target.name} then 0 else 1 end`)
+          .limit(1);
         if (!page) return [];
+        const shown = readable(page, query.locale);
         const term = raw.slice(hash + 1).toLowerCase();
         const pageReference = raw.slice(0, hash);
-        return markdownHeadings(page.markdown)
+        return markdownHeadings(shown.markdown)
           .filter(
             (heading) => heading.id.includes(term) || heading.text.toLowerCase().includes(term)
           )
@@ -379,24 +677,31 @@ export default createElysia({ prefix: '/platform' })
           .map((heading) => ({
             reference: `${pageReference}#${heading.id}`,
             title: heading.text,
-            context: page.title,
+            context: shown.title,
             level: heading.level
           }));
       }
       const prefix = raw.match(/^([a-z0-9]+(?:-[a-z0-9]+)*)\//)?.[1] ?? null;
       const term = prefix ? raw.slice(prefix.length + 1) : raw;
-      const like = `%${term.replace(/[%_\\]/g, '\\$&')}%`;
+      const like = `%${escapeLike(term)}%`;
       const rows = await db
         .select({
           slug: docPages.slug,
           title: docPages.title,
+          translations: docPages.translations,
           projectId: docPages.projectId,
           projectSlug: projects.slug,
           projectName: projects.name
         })
         .from(docPages)
         .leftJoin(projects, eq(docPages.projectId, projects.id))
-        .where(or(ilike(docPages.title, like), ilike(docPages.slug, like)))
+        .where(
+          or(
+            ilike(docPages.title, like),
+            ilike(docPages.slug, like),
+            ...translatedTitleMatches(like)
+          )
+        )
         .orderBy(docPages.title)
         .limit(200);
       return rows
@@ -412,7 +717,7 @@ export default createElysia({ prefix: '/platform' })
         .slice(0, 12)
         .map((row) => ({
           reference: reference(row.projectSlug, row.slug),
-          title: row.title,
+          title: readable({ ...row, markdown: '' }, query.locale).title,
           context: row.projectName ?? null,
           level: 0
         }));
@@ -422,7 +727,8 @@ export default createElysia({ prefix: '/platform' })
         q: t.Optional(t.String({ maxLength: 200 })),
         scope: t.Optional(
           t.String({ maxLength: 100, pattern: '^(~association|[a-z0-9]+(?:-[a-z0-9]+)*)$' })
-        )
+        ),
+        locale
       })
     }
   )
@@ -448,18 +754,41 @@ export default createElysia({ prefix: '/platform' })
         .select({ count: sql<number>`count(*)::int` })
         .from(docProposals)
         .where(and(eq(docProposals.pageId, page.id), eq(docProposals.state, 'pending')));
+      const history = await db
+        .select({
+          version: docRevisions.version,
+          title: docRevisions.title,
+          markdown: docRevisions.markdown,
+          translations: docRevisions.translations
+        })
+        .from(docRevisions)
+        .where(eq(docRevisions.pageId, page.id))
+        .orderBy(docRevisions.version);
+      const shown = readable(page, query.locale);
+      const folders = await workspaceFolders(db, projectId);
       return {
         ...page,
+        folder: docFolderPath(folders, page.folderId, query.locale),
         access,
-        blocks: await renderDocMarkdown(db, page.markdown, projectId),
-        headings: markdownHeadings(page.markdown),
+        locale: shown.locale,
+        locales: ['en', ...Object.keys(cleanDocTranslations(page.translations))] as ContentLocale[],
+        outdatedLocales: outdatedTranslations(history),
+        displayTitle: shown.title,
+        blocks: await renderDocMarkdown(db, shown.markdown, projectId, true, query.locale),
+        headings: markdownHeadings(shown.markdown),
         createdByUser: names.get(page.createdBy) ?? null,
         updatedByUser: latest ? (names.get(latest.authorId) ?? null) : null,
         contributors: await contributorStats(db, eq(docRevisions.pageId, page.id)),
         pendingSuggestions: pending?.count ?? 0
       };
     },
-    { query: t.Object({ projectId: t.Optional(t.String()), slug: t.String({ maxLength: 100 }) }) }
+    {
+      query: t.Object({
+        projectId: t.Optional(t.String()),
+        slug: t.String({ maxLength: 100 }),
+        locale
+      })
+    }
   )
   .post(
     '/docs',
@@ -473,26 +802,18 @@ export default createElysia({ prefix: '/platform' })
         if (body.public && !access.canPublish) throw status(403, { code: 'PUBLISH_FORBIDDEN' });
         if (await slugTaken(tx, projectId, body.slug))
           throw status(409, { code: 'DOC_SLUG_TAKEN' });
+        const content = { ...docContent(body), ...(await folderDestination(tx, projectId, body)) };
         const [page] = await tx
           .insert(docPages)
-          .values({
-            projectId,
-            slug: body.slug,
-            title: body.title,
-            markdown: body.markdown,
-            public: body.public,
-            createdBy: actor.id
-          })
+          .values({ projectId, slug: body.slug, ...content, createdBy: actor.id })
           .returning();
         await tx.insert(docRevisions).values({
           pageId: page!.id,
           version: 1,
-          title: page!.title,
-          markdown: page!.markdown,
-          public: page!.public,
+          ...content,
           authorId: actor.id,
           reason: body.reason.trim(),
-          ...lineChanges('', page!.markdown)
+          ...docLineChanges(null, content)
         });
         await recordEvent(tx, {
           actorId: actor.id,
@@ -501,7 +822,7 @@ export default createElysia({ prefix: '/platform' })
           targetId: page!.id,
           metadata: {
             version: 1,
-            changes: contentChanges({}, page!, ['title', 'slug', 'public'])
+            changes: contentChanges({}, page!, ['title', 'slug', 'folder', 'public'])
           }
         });
         return page!;
@@ -513,6 +834,9 @@ export default createElysia({ prefix: '/platform' })
         slug,
         title,
         markdown,
+        folder: t.Optional(folder),
+        folderId: t.Optional(t.Nullable(t.String())),
+        translations: t.Optional(translations),
         public: t.Boolean(),
         reason
       })
@@ -530,32 +854,23 @@ export default createElysia({ prefix: '/platform' })
           throw status(403, { code: 'PUBLISH_FORBIDDEN' });
         if (body.version !== page.version)
           throw status(409, { code: 'REVISION_CONFLICT', currentVersion: page.version });
-        if (
-          body.title === page.title &&
-          body.markdown === page.markdown &&
-          body.public === page.public
-        )
-          throw status(422, { code: 'NO_CHANGES' });
+        const content = {
+          ...docContent(body, page),
+          ...(await folderDestination(tx, page.projectId, body, page))
+        };
+        if (sameContent(page, content)) throw status(422, { code: 'NO_CHANGES' });
         const [updated] = await tx
           .update(docPages)
-          .set({
-            title: body.title,
-            markdown: body.markdown,
-            public: body.public,
-            version: page.version + 1,
-            updatedAt: new Date()
-          })
+          .set({ ...content, version: page.version + 1, updatedAt: new Date() })
           .where(eq(docPages.id, page.id))
           .returning();
         await tx.insert(docRevisions).values({
           pageId: page.id,
           version: updated!.version,
-          title: updated!.title,
-          markdown: updated!.markdown,
-          public: updated!.public,
+          ...content,
           authorId: actor.id,
           reason: body.reason.trim(),
-          ...lineChanges(page.markdown, updated!.markdown)
+          ...docLineChanges(page, content)
         });
         await recordEvent(tx, {
           actorId: actor.id,
@@ -565,7 +880,13 @@ export default createElysia({ prefix: '/platform' })
           metadata: {
             version: updated!.version,
             reason: body.reason.trim() || undefined,
-            changes: contentChanges(page, updated!, ['title', 'markdown', 'public'])
+            changes: contentChanges(page, updated!, [
+              'title',
+              'markdown',
+              'folder',
+              'translations',
+              'public'
+            ])
           }
         });
         return updated!;
@@ -576,6 +897,9 @@ export default createElysia({ prefix: '/platform' })
         version: t.Integer({ minimum: 1 }),
         title,
         markdown,
+        folder: t.Optional(folder),
+        folderId: t.Optional(t.Nullable(t.String())),
+        translations: t.Optional(translations),
         public: t.Boolean(),
         reason
       })
@@ -628,19 +952,15 @@ export default createElysia({ prefix: '/platform' })
       const revision = revisions.find((item) => item.version === params.version);
       if (!revision) throw status(404, { code: 'REVISION_NOT_FOUND' });
       const previous = revisions.find((item) => item.version === params.version - 1) ?? null;
-      return {
-        version: revision.version,
-        title: revision.title,
-        markdown: revision.markdown,
-        public: revision.public,
-        blocks: await renderDocMarkdown(db, revision.markdown, page.projectId, false),
-        previous: previous && {
-          version: previous.version,
-          title: previous.title,
-          markdown: previous.markdown,
-          public: previous.public
-        }
-      };
+      const snapshot = (item: typeof revision) => ({
+        version: item.version,
+        folder: item.folder,
+        title: item.title,
+        markdown: item.markdown,
+        translations: cleanDocTranslations(item.translations),
+        public: item.public
+      });
+      return { ...snapshot(revision), previous: previous && snapshot(previous) };
     },
     {
       params: t.Object({
@@ -663,7 +983,10 @@ export default createElysia({ prefix: '/platform' })
       if (project === undefined) throw status(404, { code: 'PROJECT_NOT_FOUND' });
       const current = await workspace(db, project?.id ?? null);
       const source = body.targets.map((target) => `[${target}]`).join(' ');
-      const resolve = await docLinkResolver(db, source, current, { href: dashboardHref });
+      const resolve = await docLinkResolver(db, source, current, {
+        href: dashboardHref,
+        locale: body.locale
+      });
       return Object.fromEntries(
         body.targets.map((target) => {
           const parsed = parseDocLinkTarget(target);
@@ -674,7 +997,8 @@ export default createElysia({ prefix: '/platform' })
     {
       body: t.Object({
         scope: t.String({ maxLength: 100, pattern: '^(~association|[a-z0-9]+(?:-[a-z0-9]+)*)$' }),
-        targets: t.Array(t.String({ minLength: 1, maxLength: 200 }), { maxItems: 200 })
+        targets: t.Array(t.String({ minLength: 1, maxLength: 200 }), { maxItems: 200 }),
+        locale
       })
     }
   )
@@ -685,7 +1009,8 @@ export default createElysia({ prefix: '/platform' })
       const projectId = body.projectId ?? null;
       const current = await workspace(db, projectId);
       const resolve = await docLinkResolver(db, `${body.before}\n\n${body.after}`, current, {
-        href: dashboardHref
+        href: dashboardHref,
+        locale: body.locale
       });
       const render = (source: string) =>
         renderMarkdown(source, {
@@ -704,7 +1029,14 @@ export default createElysia({ prefix: '/platform' })
         }))
       };
     },
-    { body: t.Object({ projectId: t.Optional(t.String()), before: markdown, after: markdown }) }
+    {
+      body: t.Object({
+        projectId: t.Optional(t.String()),
+        before: markdown,
+        after: markdown,
+        locale
+      })
+    }
   )
   .post(
     '/docs/proposals',
@@ -716,15 +1048,14 @@ export default createElysia({ prefix: '/platform' })
         const projectId = page ? page.projectId : (body.projectId ?? null);
         const access = await docsAccess(tx, actor, projectId);
         if (!access.canPropose) throw status(403, { code: 'FORBIDDEN' });
+        const content = {
+          ...docContent(body, page ?? undefined),
+          ...(await folderDestination(tx, projectId, body, page ?? undefined))
+        };
         if (page) {
           if (body.baseVersion !== page.version)
             throw status(409, { code: 'REVISION_CONFLICT', currentVersion: page.version });
-          if (
-            body.title === page.title &&
-            body.markdown === page.markdown &&
-            body.public === page.public
-          )
-            throw status(422, { code: 'NO_CHANGES' });
+          if (sameContent(page, content)) throw status(422, { code: 'NO_CHANGES' });
         } else {
           if (!body.slug) throw status(422, { code: 'DOC_SLUG_REQUIRED' });
           validNewSlug(body.slug);
@@ -738,9 +1069,7 @@ export default createElysia({ prefix: '/platform' })
             pageId: page?.id ?? null,
             slug: page ? null : body.slug,
             baseVersion: page?.version ?? null,
-            title: body.title,
-            markdown: body.markdown,
-            public: body.public,
+            ...content,
             reason: body.reason.trim(),
             authorId: actor.id
           })
@@ -763,6 +1092,9 @@ export default createElysia({ prefix: '/platform' })
         baseVersion: t.Optional(t.Integer({ minimum: 1 })),
         title,
         markdown,
+        folder: t.Optional(folder),
+        folderId: t.Optional(t.Nullable(t.String())),
+        translations: t.Optional(translations),
         public: t.Boolean(),
         reason
       })
@@ -801,7 +1133,12 @@ export default createElysia({ prefix: '/platform' })
     const [base] =
       page && proposal.baseVersion
         ? await db
-            .select({ markdown: docRevisions.markdown })
+            .select({
+              title: docRevisions.title,
+              markdown: docRevisions.markdown,
+              folder: docRevisions.folder,
+              translations: docRevisions.translations
+            })
             .from(docRevisions)
             .where(
               and(eq(docRevisions.pageId, page.id), eq(docRevisions.version, proposal.baseVersion))
@@ -809,17 +1146,20 @@ export default createElysia({ prefix: '/platform' })
         : [];
     return {
       ...proposal,
+      translations: cleanDocTranslations(proposal.translations),
       author: names.get(proposal.authorId) ?? null,
       reviewer: proposal.reviewerId ? (names.get(proposal.reviewerId) ?? null) : null,
       page: page && {
         id: page.id,
         slug: page.slug,
+        folder: page.folder,
         title: page.title,
         markdown: page.markdown,
+        translations: cleanDocTranslations(page.translations),
         public: page.public,
         version: page.version
       },
-      baseMarkdown: base?.markdown ?? null,
+      base: base ? { ...base, translations: cleanDocTranslations(base.translations) } : null,
       outdated: !!page && proposal.baseVersion !== page.version,
       access: await docsAccess(db, actor, proposal.projectId),
       isAuthor: proposal.authorId === actor.id
@@ -842,31 +1182,30 @@ export default createElysia({ prefix: '/platform' })
         const page = proposal.pageId ? await pageById(tx, proposal.pageId, true) : null;
         let pageId = page?.id ?? null;
         if (body.accept) {
+          const content = {
+            ...docContent({
+              ...proposal,
+              translations: proposal.translations as DocTranslations
+            }),
+            ...(await folderDestination(tx, proposal.projectId, { folderId: proposal.folderId }))
+          };
           if (proposal.public !== (page?.public ?? false) && !access.canPublish)
             throw status(403, { code: 'PUBLISH_FORBIDDEN' });
           if (page) {
             const [updated] = await tx
               .update(docPages)
-              .set({
-                title: proposal.title,
-                markdown: proposal.markdown,
-                public: proposal.public,
-                version: page.version + 1,
-                updatedAt: new Date()
-              })
+              .set({ ...content, version: page.version + 1, updatedAt: new Date() })
               .where(eq(docPages.id, page.id))
               .returning();
             await tx.insert(docRevisions).values({
               pageId: page.id,
               version: updated!.version,
-              title: updated!.title,
-              markdown: updated!.markdown,
-              public: updated!.public,
+              ...content,
               authorId: proposal.authorId,
               reviewerId: actor.id,
               proposalId: proposal.id,
               reason: proposal.reason,
-              ...lineChanges(page.markdown, updated!.markdown)
+              ...docLineChanges(page, content)
             });
           } else {
             if (await slugTaken(tx, proposal.projectId, proposal.slug!))
@@ -876,9 +1215,7 @@ export default createElysia({ prefix: '/platform' })
               .values({
                 projectId: proposal.projectId,
                 slug: proposal.slug!,
-                title: proposal.title,
-                markdown: proposal.markdown,
-                public: proposal.public,
+                ...content,
                 createdBy: proposal.authorId
               })
               .returning();
@@ -886,14 +1223,12 @@ export default createElysia({ prefix: '/platform' })
             await tx.insert(docRevisions).values({
               pageId: created!.id,
               version: 1,
-              title: created!.title,
-              markdown: created!.markdown,
-              public: created!.public,
+              ...content,
               authorId: proposal.authorId,
               reviewerId: actor.id,
               proposalId: proposal.id,
               reason: proposal.reason,
-              ...lineChanges('', created!.markdown)
+              ...docLineChanges(null, content)
             });
           }
         }
@@ -991,58 +1326,100 @@ export default createElysia({ prefix: '/platform' })
     },
     { query: projectQuery }
   )
-  .get('/public/docs', async ({ db }) => {
-    const rows = await db
-      .select({
-        slug: docPages.slug,
-        title: docPages.title,
-        markdown: docPages.markdown,
-        updatedAt: docPages.updatedAt,
-        projectSlug: projects.slug,
-        projectName: projects.name
-      })
-      .from(docPages)
-      .leftJoin(projects, eq(docPages.projectId, projects.id))
-      .where(eq(docPages.public, true))
-      .orderBy(docPages.title);
-    return rows.map(({ markdown, ...row }) => ({ ...row, excerpt: markdownExcerpt(markdown) }));
-  })
-  .get('/public/docs/:workspace/:slug', async ({ db, params }) => {
-    const [project] =
-      params.workspace === associationDocsKey
-        ? [null]
-        : await db
-            .select({ id: projects.id, slug: projects.slug, name: projects.name })
-            .from(projects)
-            .where(eq(projects.slug, params.workspace));
-    if (project === undefined) throw status(404, { code: 'DOC_NOT_FOUND' });
-    const [page] = await db
-      .select()
-      .from(docPages)
-      .where(
-        and(
-          workspaceCondition(project?.id ?? null),
-          eq(docPages.slug, params.slug),
-          eq(docPages.public, true)
-        )
-      );
-    if (!page) throw status(404, { code: 'DOC_NOT_FOUND' });
-    const current: Workspace = {
-      projectId: project?.id ?? null,
-      slug: project?.slug ?? null,
-      name: project?.name ?? null
-    };
-    const resolve = await docLinkResolver(db, page.markdown, current, {
-      publicOnly: true,
-      href: publicHref
-    });
-    return {
-      title: page.title,
-      slug: page.slug,
-      createdAt: page.createdAt,
-      updatedAt: page.updatedAt,
-      workspace: { slug: current.slug, name: current.name },
-      headings: markdownHeadings(page.markdown),
-      blocks: renderMarkdown(page.markdown, { docs: { resolve } })
-    };
-  });
+  .get(
+    '/public/docs',
+    async ({ db, query }) => {
+      const rows = await db
+        .select({
+          slug: docPages.slug,
+          folder: docPages.folder,
+          folderId: docPages.folderId,
+          projectId: docPages.projectId,
+          title: docPages.title,
+          markdown: docPages.markdown,
+          translations: docPages.translations,
+          updatedAt: docPages.updatedAt,
+          projectSlug: projects.slug,
+          projectName: projects.name
+        })
+        .from(docPages)
+        .leftJoin(projects, eq(docPages.projectId, projects.id))
+        .where(eq(docPages.public, true))
+        .orderBy(docPages.title);
+      const folders = await db.select().from(docFolders);
+      return rows.map(({ markdown, translations, projectId: _projectId, folderId, ...row }) => {
+        const shown = readable({ title: row.title, markdown, translations }, query.locale);
+        return {
+          ...row,
+          folder: docFolderPath(folders, folderId, query.locale),
+          folderTrail: docFolderTrail(folders, folderId, query.locale),
+          title: shown.title,
+          excerpt: markdownExcerpt(shown.markdown)
+        };
+      });
+    },
+    { query: t.Object({ locale }) }
+  )
+  .get(
+    '/public/docs/:workspace/:slug',
+    async ({ db, params, query }) => {
+      const [project] =
+        params.workspace === associationDocsKey
+          ? [null]
+          : await db
+              .select({ id: projects.id, slug: projects.slug, name: projects.name })
+              .from(projects)
+              .where(eq(projects.slug, params.workspace));
+      if (project === undefined) throw status(404, { code: 'DOC_NOT_FOUND' });
+      const [page] = await db
+        .select()
+        .from(docPages)
+        .where(
+          and(
+            workspaceCondition(project?.id ?? null),
+            eq(docPages.slug, params.slug),
+            eq(docPages.public, true)
+          )
+        );
+      if (!page) throw status(404, { code: 'DOC_NOT_FOUND' });
+      const current: Workspace = {
+        projectId: project?.id ?? null,
+        slug: project?.slug ?? null,
+        name: project?.name ?? null
+      };
+      const shown = readable(page, query.locale);
+      const history = await db
+        .select({
+          version: docRevisions.version,
+          title: docRevisions.title,
+          markdown: docRevisions.markdown,
+          translations: docRevisions.translations
+        })
+        .from(docRevisions)
+        .where(eq(docRevisions.pageId, page.id))
+        .orderBy(docRevisions.version);
+      const resolve = await docLinkResolver(db, shown.markdown, current, {
+        publicOnly: true,
+        href: publicHref,
+        locale: query.locale
+      });
+      return {
+        title: shown.title,
+        slug: page.slug,
+        folder: docFolderPath(
+          await workspaceFolders(db, project?.id ?? null),
+          page.folderId,
+          query.locale
+        ),
+        locale: shown.locale,
+        locales: ['en', ...Object.keys(cleanDocTranslations(page.translations))] as ContentLocale[],
+        outdatedLocales: outdatedTranslations(history),
+        createdAt: page.createdAt,
+        updatedAt: page.updatedAt,
+        workspace: { slug: current.slug, name: current.name },
+        headings: markdownHeadings(shown.markdown),
+        blocks: renderMarkdown(shown.markdown, { docs: { resolve } })
+      };
+    },
+    { query: t.Object({ locale }) }
+  );

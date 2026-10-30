@@ -1,27 +1,28 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, untrack } from 'svelte';
   import { replaceState } from '$app/navigation';
-  import Markdown from '@ksi-core/ui/platform/Markdown.svelte';
+  import MarkdownContent from '@ksi-core/ui/platform/MarkdownContent.svelte';
   import DocPerson from './DocPerson.svelte';
-  import { ArrowLeft, Globe, GitPullRequestArrow } from '@lucide/svelte';
+  import { ArrowLeft, Globe, GitPullRequestArrow, History, ChevronUp, X } from '@lucide/svelte';
   import { formatDateTime } from 'shared/format';
   import { docsPath } from 'shared/docs';
-  import type { MarkdownBlock } from 'shared/markdown';
+  import { contentLocale, contentLocaleName, type ContentLocale } from 'shared/content-locales';
   import { slider } from '@ksi-core/ui/platform/slider';
   import { preferences } from '$lib/preferences.svelte';
   import Skeleton from '$lib/Skeleton.svelte';
   import DocDiff from './DocDiff.svelte';
   import DocError from './DocError.svelte';
-  import { docsRequest, errorCode, type DocDetail, type DocRevision } from './docs';
+  import {
+    docsRequest,
+    errorCode,
+    languagesOf,
+    textIn,
+    type DocDetail,
+    type DocRevision,
+    type DocSnapshot
+  } from './docs';
 
-  type Snapshot = {
-    version: number;
-    title: string;
-    markdown: string;
-    public: boolean;
-    blocks: MarkdownBlock[];
-    previous: { version: number; title: string; markdown: string; public: boolean } | null;
-  };
+  type Snapshot = DocSnapshot & { previous: DocSnapshot | null };
   let {
     projectId,
     slug,
@@ -38,26 +39,50 @@
 
   let selected = $state<number | null>(null);
   let snapshot = $state<Snapshot | null>(null);
-  let mode = $state<'preview' | 'changes'>('changes');
+  const uid = $props.id();
+  let trigger = $state<HTMLButtonElement>();
+  let picker = $state<HTMLDivElement>();
+  let open = $state(false);
+  let mode = $state<'preview' | 'changes'>('preview');
+  let chosenLocale = $state<ContentLocale | null>(untrack(() => page.locale));
+  let loading = $state(true);
   let error = $state('');
   let request = 0;
   const language = $derived(preferences.language);
+  const locales = $derived(languagesOf(snapshot, snapshot?.previous));
+  const locale = $derived(
+    chosenLocale && locales.includes(chosenLocale)
+      ? chosenLocale
+      : locales.includes(contentLocale(language))
+        ? contentLocale(language)
+        : 'en'
+  );
+  const after = $derived(textIn(snapshot, locale));
+  const before = $derived(textIn(snapshot?.previous, locale));
 
   async function select(next: number) {
     const current = ++request;
     selected = next;
     snapshot = null;
+    loading = true;
+    error = '';
     try {
       const result = await docsRequest<Snapshot>(`/docs/${page.id}/revisions/${next}`);
       if (current === request) snapshot = result;
     } catch (cause) {
       if (current === request) error = errorCode(cause);
+    } finally {
+      if (current === request) loading = false;
     }
   }
 
   onMount(() => {
     const initial = revisions.find((revision) => revision.version === version) ?? revisions[0];
     if (initial) void select(initial.version);
+    else loading = false;
+    return () => {
+      request++;
+    };
   });
 
   const when = (value: string) =>
@@ -67,14 +92,44 @@
 <div class="workspace-header">
   <div>
     <p class="history-eyebrow">{'Version history'}</p>
-    <h1>{page.title}</h1>
+    <h1>{page.displayTitle}</h1>
   </div>
   <a class="btn btn-outline" href={docsPath(slug, page.slug)}
     ><ArrowLeft size={15} aria-hidden="true" />{'Back to page'}</a
   >
 </div>
 <DocError code={error} />
-<div class="history">
+<button
+  bind:this={trigger}
+  type="button"
+  class="btn btn-outline history-trigger"
+  popovertarget={`${uid}-versions`}
+  aria-expanded={open}
+  aria-controls={`${uid}-versions`}
+>
+  <History size={16} aria-hidden="true" />{'Versions'}
+  {#if selected !== null}<span class="history-version">v{selected}</span>{/if}
+  <ChevronUp size={14} aria-hidden="true" />
+</button>
+<div
+  bind:this={picker}
+  id={`${uid}-versions`}
+  class="history-picker"
+  popover="auto"
+  role="dialog"
+  aria-labelledby={`${uid}-versions-title`}
+  ontoggle={(event) => (open = event.newState === 'open')}
+>
+  <header class="history-picker-head">
+    <h2 id={`${uid}-versions-title`}>{'Version history'}</h2>
+    <button
+      type="button"
+      class="btn ghost icon-btn btn-sm"
+      popovertarget={`${uid}-versions`}
+      popovertargetaction="hide"
+      aria-label={'Close'}><X size={16} aria-hidden="true" /></button
+    >
+  </header>
   <ol class="history-list" aria-label={'Versions'}>
     {#each revisions as revision (revision.id)}
       <li>
@@ -84,7 +139,10 @@
           aria-current={selected === revision.version ? 'true' : undefined}
           href={docsPath(slug, page.slug, 'history', String(revision.version))}
           onclick={(event) => {
+            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
             event.preventDefault();
+            picker?.hidePopover();
+            trigger?.focus();
             replaceState(event.currentTarget.href, {});
             void select(revision.version);
           }}
@@ -118,10 +176,12 @@
       </li>
     {/each}
   </ol>
+</div>
+<div class="history">
   <section class="history-detail" aria-live="polite">
-    {#if !snapshot}
+    {#if loading}
       <Skeleton label={'Loading version'} />
-    {:else}
+    {:else if snapshot}
       <div class="history-detail-head">
         <h2>
           {'Version'}
@@ -129,40 +189,72 @@
               ><Globe size={13} aria-hidden="true" />{'Public'}</span
             >{/if}
         </h2>
-        <div class="segmented-control" role="group" aria-label={'Version view'} use:slider>
-          <button
-            type="button"
-            class:active={mode === 'changes'}
-            aria-pressed={mode === 'changes'}
-            onclick={() => (mode = 'changes')}>{'Changes'}</button
-          >
-          <button
-            type="button"
-            class:active={mode === 'preview'}
-            aria-pressed={mode === 'preview'}
-            onclick={() => (mode = 'preview')}>{'Full page'}</button
-          >
+        <div class="history-controls">
+          {#if locales.length > 1}
+            <select
+              class="history-language"
+              value={locale}
+              aria-label={'Language'}
+              onchange={(event) => (chosenLocale = event.currentTarget.value as ContentLocale)}
+            >
+              {#each locales as option (option)}
+                <option value={option}>{contentLocaleName(option, language)}</option>
+              {/each}
+            </select>
+          {/if}
+          <div class="segmented-control" role="group" aria-label={'Version view'} use:slider>
+            <button
+              type="button"
+              class:active={mode === 'changes'}
+              aria-pressed={mode === 'changes'}
+              onclick={() => (mode = 'changes')}>{'Changes'}</button
+            >
+            <button
+              type="button"
+              class:active={mode === 'preview'}
+              aria-pressed={mode === 'preview'}
+              onclick={() => (mode = 'preview')}>{'Full page'}</button
+            >
+          </div>
         </div>
       </div>
-      {#if snapshot.previous && snapshot.previous.title !== snapshot.title}
+      {#if mode === 'changes' && snapshot.previous && before.title !== after.title}
         <p class="history-title-change">
-          {'Title'}: <del>{snapshot.previous.title}</del> → <ins>{snapshot.title}</ins>
+          {'Title'}: <del>{before.title}</del> → <ins>{after.title}</ins>
+        </p>
+      {/if}
+      {#if mode === 'changes' && snapshot.previous && snapshot.previous.folder !== snapshot.folder}
+        <p class="history-title-change">
+          {'Folder'}: <del>{snapshot.previous.folder || '—'}</del> →
+          <ins>{snapshot.folder || '—'}</ins>
         </p>
       {/if}
       {#if mode === 'preview'}
         <div class="history-preview">
-          <h1 class="history-preview-title">{snapshot.title}</h1>
-          <Markdown blocks={snapshot.blocks} {language} />
+          <h1 class="history-preview-title">{after.title || snapshot.title}</h1>
+          {#if locale !== 'en' && !after.markdown}
+            <p class="history-language-fallback">
+              {'This version has no translation in this language. Showing the English text.'}
+            </p>
+          {/if}
+          <MarkdownContent value={after.markdown || snapshot.markdown} docs docLocale={locale} />
         </div>
       {:else}
         <DocDiff
-          before={snapshot.previous?.markdown ?? ''}
-          after={snapshot.markdown}
+          before={before.markdown}
+          after={after.markdown}
           {projectId}
+          {locale}
           beforeLabel={snapshot.previous ? `v${snapshot.previous.version}` : '—'}
           afterLabel={`v${snapshot.version}`}
         />
       {/if}
+    {:else if error && selected !== null}
+      <button
+        type="button"
+        class="btn btn-outline history-retry"
+        onclick={() => selected !== null && select(selected)}>{'Try again'}</button
+      >
     {/if}
   </section>
 </div>
@@ -177,36 +269,70 @@
     letter-spacing: 0.08em;
   }
   .history {
-    display: grid;
-    grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
-    gap: 28px;
-    align-items: start;
+    min-width: 0;
+    padding-bottom: 88px;
+  }
+  .history-trigger {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 30;
+    gap: 8px;
+    background: var(--surface);
+    box-shadow: var(--shadow-md);
+  }
+  .history-picker {
+    position: fixed;
+    inset: auto 24px 78px auto;
+    width: min(380px, calc(100vw - 32px));
+    max-height: calc(100dvh - 112px);
+    margin: 0;
+    padding: 0;
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xl);
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--shadow-md);
+  }
+  .history-picker-head {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+  }
+  .history-picker-head h2 {
+    margin: 0;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0;
   }
   .history-list {
     display: grid;
-    gap: 8px;
+    gap: 6px;
     margin: 0;
-    padding: 0;
+    padding: 8px;
     list-style: none;
-    position: sticky;
-    top: 24px;
-    max-height: calc(100vh - 48px);
-    overflow-y: auto;
   }
   .history-item {
     display: grid;
     gap: 8px;
     padding: 12px 14px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-xl);
-    background: var(--surface);
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg);
     color: var(--ink);
     font-size: 13px;
     text-decoration: none;
-    box-shadow: var(--shadow-xs);
   }
   .history-item:hover {
-    border-color: var(--control-border-hover);
+    background: var(--surface-muted);
   }
   .history-item.active {
     border-color: var(--accent);
@@ -257,6 +383,7 @@
     display: grid;
     gap: 16px;
     min-width: 0;
+    width: 100%;
   }
   .history-detail-head {
     display: flex;
@@ -270,6 +397,26 @@
     align-items: center;
     gap: 10px;
     font-size: 20px;
+  }
+  .history-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .history-language {
+    width: auto;
+    min-height: 32px;
+    padding-block: 4px;
+    font-size: 13px;
+  }
+  .history-retry {
+    justify-self: start;
+  }
+  .history-language-fallback {
+    margin-bottom: 16px;
+    color: var(--muted);
+    font-size: 13px;
   }
   .history-public {
     display: inline-flex;
@@ -293,24 +440,22 @@
     text-decoration: none;
   }
   .history-preview {
-    padding: 24px 28px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-xl);
-    background: var(--surface);
-    line-height: 1.7;
-    box-shadow: var(--shadow-xs);
+    padding-block: 24px;
+    border-top: 1px solid var(--line);
+    line-height: 1.75;
   }
   .history-preview-title {
     margin-bottom: 18px;
     font-size: 28px;
   }
-  @media (max-width: 900px) {
-    .history {
-      grid-template-columns: minmax(0, 1fr);
+  @media (max-width: 600px) {
+    .history-trigger {
+      right: 16px;
+      bottom: 16px;
     }
-    .history-list {
-      position: static;
-      max-height: 320px;
+    .history-picker {
+      right: 16px;
+      bottom: 70px;
     }
   }
 </style>

@@ -1,4 +1,13 @@
-import { headingSlug, type DocHeading, type WordSegment } from 'shared/docs';
+import {
+  docTranslationLocales,
+  headingSlug,
+  type DocHeading,
+  type DocTranslations,
+  type WordSegment
+} from 'shared/docs';
+import { docFolderName, docFolderPath, type DocFolder } from 'shared/doc-folders';
+export type { DocFolder } from 'shared/doc-folders';
+import type { ContentLocale } from 'shared/content-locales';
 import type { MarkdownBlock } from 'shared/markdown';
 
 export type Person = { id: string; name: string; image: string | null };
@@ -6,6 +15,8 @@ export type DocAccess = { canPropose: boolean; canReview: boolean; canPublish: b
 export type DocSummary = {
   id: string;
   slug: string;
+  folder: string;
+  folderId: string | null;
   title: string;
   public: boolean;
   version: number;
@@ -14,7 +25,13 @@ export type DocSummary = {
   excerpt: string;
   contributors: Person[];
 };
-export type DocIndex = { access: DocAccess; pendingSuggestions: number; pages: DocSummary[] };
+export type DocIndex = {
+  access: DocAccess;
+  locale: ContentLocale;
+  folders: DocFolder[];
+  pendingSuggestions: number;
+  pages: DocSummary[];
+};
 export type Contribution = {
   user: Person;
   revisions: number;
@@ -26,6 +43,12 @@ export type Contribution = {
 export type DocDetail = Omit<DocSummary, 'excerpt' | 'contributors'> & {
   projectId: string | null;
   markdown: string;
+  translations: DocTranslations;
+  /** Language the page is shown in, and the languages it is available in. */
+  locale: ContentLocale;
+  locales: ContentLocale[];
+  outdatedLocales: ContentLocale[];
+  displayTitle: string;
   access: DocAccess;
   blocks: MarkdownBlock[];
   headings: DocHeading[];
@@ -75,12 +98,22 @@ export type DiffRow = {
   words: { before: WordSegment[]; after: WordSegment[] } | null;
 };
 export type DocDiffResult = { additions: number; deletions: number; rows: DiffRow[] };
+/** The text a page has at one point: its English source plus translations. */
+export type DocText = {
+  folder: string;
+  title: string;
+  markdown: string;
+  translations: DocTranslations;
+};
+export type DocSnapshot = DocText & { version: number; public: boolean };
 export type SuggestionDetail = {
   id: string;
   projectId: string | null;
   pageId: string | null;
   slug: string | null;
   baseVersion: number | null;
+  folder: string;
+  translations: DocTranslations;
   title: string;
   markdown: string;
   public: boolean;
@@ -91,15 +124,8 @@ export type SuggestionDetail = {
   createdAt: string;
   author: Person | null;
   reviewer: Person | null;
-  page: {
-    id: string;
-    slug: string;
-    title: string;
-    markdown: string;
-    public: boolean;
-    version: number;
-  } | null;
-  baseMarkdown: string | null;
+  page: (DocText & { id: string; slug: string; public: boolean; version: number }) | null;
+  base: DocText | null;
   outdated: boolean;
   access: DocAccess;
   isAuthor: boolean;
@@ -158,3 +184,57 @@ export const workspaceQuery = (projectId: string) =>
 
 /** Suggests a page address from its title while the author has not chosen one. */
 export const slugFromTitle = (title: string) => (/[a-z0-9]/i.test(title) ? headingSlug(title) : '');
+
+/** The title and text of one language; translations fall back to nothing, not English. */
+export function textIn(text: DocText | null | undefined, locale: ContentLocale) {
+  if (locale === 'en') return { title: text?.title ?? '', markdown: text?.markdown ?? '' };
+  const translation = text?.translations[locale];
+  return { title: translation?.title ?? '', markdown: translation?.markdown ?? '' };
+}
+
+/** English plus every language any of the given versions is translated into. */
+export function languagesOf(...texts: (DocText | null | undefined)[]): ContentLocale[] {
+  const translated = new Set(texts.flatMap((text) => Object.keys(text?.translations ?? {})));
+  return ['en', ...docTranslationLocales.filter((locale) => translated.has(locale))];
+}
+
+export type FolderNode = {
+  id: string | null;
+  name: string;
+  path: string;
+  folders: FolderNode[];
+  pages: DocSummary[];
+};
+/** Build a real tree, including empty folders. Page membership follows IDs. */
+export function folderTree(
+  pages: DocSummary[],
+  folders: DocFolder[],
+  locale: ContentLocale = 'en'
+): FolderNode {
+  const root: FolderNode = { id: null, name: '', path: '', folders: [], pages: [] };
+  const nodes = new Map(
+    folders.map((folder) => [
+      folder.id,
+      {
+        id: folder.id,
+        name: docFolderName(folder, locale),
+        path: docFolderPath(folders, folder.id, locale),
+        folders: [],
+        pages: []
+      } as FolderNode
+    ])
+  );
+  for (const folder of folders)
+    (nodes.get(folder.parentId ?? '') ?? root).folders.push(nodes.get(folder.id)!);
+  for (const page of pages) (nodes.get(page.folderId ?? '') ?? root).pages.push(page);
+  const seen = new Set<FolderNode>();
+  const sort = (node: FolderNode) => {
+    if (seen.has(node)) return;
+    seen.add(node);
+    node.folders.sort((a, b) => a.name.localeCompare(b.name));
+    node.pages.sort((a, b) => a.title.localeCompare(b.title));
+    node.folders.forEach(sort);
+  };
+  sort(root);
+  return root;
+}

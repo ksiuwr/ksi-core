@@ -10,14 +10,17 @@
     TriangleAlert,
     Undo2,
     X,
-    FilePlus
+    FilePlus,
+    Folder
   } from '@lucide/svelte';
   import { formatDateTime } from 'shared/format';
   import { docsPath } from 'shared/docs';
+  import { contentLocaleName, type ContentLocale } from 'shared/content-locales';
+  import { slider } from '@ksi-core/ui/platform/slider';
   import { preferences } from '$lib/preferences.svelte';
   import DocDiff from './DocDiff.svelte';
   import DocError from './DocError.svelte';
-  import { docsRequest, errorCode, type SuggestionDetail } from './docs';
+  import { docsRequest, errorCode, languagesOf, textIn, type SuggestionDetail } from './docs';
 
   let {
     projectId,
@@ -28,6 +31,7 @@
   let note = $state('');
   let busy = $state(false);
   let error = $state('');
+  let editing = $state<ContentLocale | null>(null);
   const language = $derived(preferences.language);
 
   async function act(path: string, body?: unknown) {
@@ -52,6 +56,25 @@
   const when = (value: string) =>
     formatDateTime(value, language, { dateStyle: 'medium', timeStyle: 'short' });
   const pageSlug = $derived(suggestion.page?.slug ?? suggestion.slug ?? '');
+  // Pending reviews compare with what accepting would replace; resolved reviews
+  // keep comparing against the immutable version the author started from.
+  const before = $derived(suggestion.state === 'pending' ? suggestion.page : suggestion.base);
+  const locales = $derived(languagesOf(before, suggestion));
+  const locale = $derived(
+    editing && locales.includes(editing) ? editing : (locales.find(languageChanged) ?? 'en')
+  );
+  const beforeText = $derived(textIn(before, locale));
+  const afterText = $derived(textIn(suggestion, locale));
+  const beforeLabel = $derived(
+    suggestion.state === 'pending' || !suggestion.baseVersion
+      ? 'Current version'
+      : `v${suggestion.baseVersion}`
+  );
+  function languageChanged(value: ContentLocale) {
+    const old = textIn(before, value);
+    const next = textIn(suggestion, value);
+    return old.title !== next.title || old.markdown !== next.markdown;
+  }
 </script>
 
 <div class="workspace-header">
@@ -89,9 +112,20 @@
           <FilePlus size={15} aria-hidden="true" />
           <span>{'Creates a new page at'} <code>{suggestion.slug}</code></span>
         </li>
-      {:else if suggestion.page.title !== suggestion.title}
+      {/if}
+      {#if (before?.folder ?? '') !== suggestion.folder}
         <li>
-          <span>{'Title'}: <del>{suggestion.page.title}</del> → <ins>{suggestion.title}</ins></span>
+          <Folder size={15} aria-hidden="true" />
+          <span
+            >{'Folder'}:
+            <del
+              >{#if before?.folder}{before.folder}{:else}{'Top level'}{/if}</del
+            >
+            →
+            <ins
+              >{#if suggestion.folder}{suggestion.folder}{:else}{'Top level'}{/if}</ins
+            ></span
+          >
         </li>
       {/if}
       {#if visibilityChange}
@@ -130,23 +164,41 @@
     {/if}
   </section>
 
-  {#if suggestion.state === 'pending' || !suggestion.baseVersion}
+  <section class="review-comparison" aria-label={'Changes'}>
+    {#if locales.length > 1}
+      <div class="segmented-control" role="group" aria-label={'Language'} use:slider>
+        {#each locales as item (item)}
+          <button
+            type="button"
+            class:active={locale === item}
+            aria-pressed={locale === item}
+            onclick={() => (editing = item)}
+          >
+            {contentLocaleName(item, language)}
+            {#if languageChanged(item)}<span class="review-language-change" title={'Changed'}
+                ><span class="sr-only">{'Changed'}</span></span
+              >{/if}
+          </button>
+        {/each}
+      </div>
+    {/if}
+    {#if beforeText.title !== afterText.title}
+      <p class="review-title-change">
+        {'Title'}: <del>{beforeText.title || '—'}</del> → <ins>{afterText.title || '—'}</ins>
+      </p>
+    {/if}
+    {#if locale !== 'en' && (!afterText.title || !afterText.markdown)}
+      <p class="review-fallback">{'Empty translated fields show the English text to readers.'}</p>
+    {/if}
     <DocDiff
-      before={suggestion.state === 'pending' ? (suggestion.page?.markdown ?? '') : ''}
-      after={suggestion.markdown}
+      before={beforeText.markdown}
+      after={afterText.markdown}
       {projectId}
-      beforeLabel={'Current version'}
+      {locale}
+      {beforeLabel}
       afterLabel={'Suggested version'}
     />
-  {:else}
-    <DocDiff
-      before={suggestion.baseMarkdown ?? ''}
-      after={suggestion.markdown}
-      {projectId}
-      beforeLabel={`v${suggestion.baseVersion}`}
-      afterLabel={'Suggested version'}
-    />
-  {/if}
+  </section>
 
   {#if suggestion.state === 'pending' && suggestion.access.canReview}
     <section class="review-actions card" aria-labelledby="review-heading">
@@ -235,10 +287,12 @@
     flex-shrink: 0;
     margin-top: 2px;
   }
-  .review-notes del {
+  .review-notes del,
+  .review-title-change del {
     color: var(--danger);
   }
-  .review-notes ins {
+  .review-notes ins,
+  .review-title-change ins {
     color: #2f7d4a;
     text-decoration: none;
   }
@@ -269,6 +323,30 @@
   }
   .review-open {
     justify-self: start;
+  }
+  .review-comparison {
+    display: grid;
+    gap: 14px;
+    min-width: 0;
+  }
+  .review-comparison > .segmented-control {
+    justify-self: start;
+  }
+  .review-language-change {
+    width: 6px;
+    height: 6px;
+    margin-left: 6px;
+    border-radius: var(--radius-full);
+    background: var(--accent);
+  }
+  .review-title-change,
+  .review-fallback {
+    margin: 0;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+  }
+  .review-fallback {
+    color: var(--muted);
   }
   .review-actions {
     display: grid;

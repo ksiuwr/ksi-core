@@ -1,5 +1,6 @@
 import { Lexer, type Token, type Tokens } from 'marked';
 import { prepareMarkdownImages } from './markdown-images.js';
+import { contentLocales, type ContentLocale, type ContentTranslations } from './content-locales.js';
 
 /** Workspace key used in cross-workspace links such as `[association/statute]`. */
 export const associationDocsKey = 'association';
@@ -112,11 +113,88 @@ export function markdownHeadings(source: string): DocHeading[] {
   return headings;
 }
 
+/** Resolves a section anchor in translated text, keeping English references useful. */
+export function translatedDocHeading(source: string, translated: string, id: string) {
+  const headings = markdownHeadings(translated);
+  const direct = headings.find((heading) => heading.id === id);
+  if (direct || source === translated) return direct;
+  const original = markdownHeadings(source);
+  // Only align equal outlines: an extra section in a translation must not redirect a link
+  // to a different section simply because its position moved.
+  if (
+    original.length !== headings.length ||
+    original.some((heading, index) => heading.level !== headings[index]?.level)
+  )
+    return undefined;
+  const index = original.findIndex((heading) => heading.id === id);
+  return index < 0 ? undefined : headings[index];
+}
+
 /** The opening paragraph as plain text, used for page cards. */
 export function markdownExcerpt(source: string, limit = 180) {
   const paragraph = Lexer.lex(source, { gfm: true }).find((token) => token.type === 'paragraph');
   const text = paragraph ? headingText((paragraph as Tokens.Paragraph).text) : '';
   return text.length > limit ? `${text.slice(0, limit).trimEnd()}…` : text;
+}
+
+/** Languages a page can be translated into; English is the page itself. */
+export const docTranslationLocales = contentLocales.filter(
+  (locale): locale is Exclude<ContentLocale, 'en'> => locale !== 'en'
+);
+export type DocTranslation = { title?: string; markdown?: string };
+export type DocTranslations = Partial<Record<Exclude<ContentLocale, 'en'>, DocTranslation>>;
+
+/** Keeps translated titles and texts that say something, in a stable shape for comparisons. */
+export function cleanDocTranslations(value: ContentTranslations | DocTranslations | undefined) {
+  const result: DocTranslations = {};
+  for (const locale of docTranslationLocales) {
+    const fields = (value as DocTranslations | undefined)?.[locale];
+    const title = typeof fields?.title === 'string' ? fields.title.trim() : '';
+    const markdown =
+      typeof fields?.markdown === 'string' && fields.markdown.trim() ? fields.markdown : '';
+    if (title || markdown)
+      result[locale] = { ...(title ? { title } : {}), ...(markdown ? { markdown } : {}) };
+  }
+  return result;
+}
+
+type DocText = { markdown: string; translations?: ContentTranslations | DocTranslations };
+/** Changed lines across the page and its translations, so translating counts as contributing. */
+export function docLineChanges(before: DocText | null, after: DocText) {
+  const total = lineChanges(before?.markdown ?? '', after.markdown);
+  const previous = cleanDocTranslations(before?.translations);
+  const next = cleanDocTranslations(after.translations);
+  for (const locale of docTranslationLocales) {
+    const change = lineChanges(previous[locale]?.markdown ?? '', next[locale]?.markdown ?? '');
+    total.additions += change.additions;
+    total.deletions += change.deletions;
+  }
+  return total;
+}
+
+/**
+ * A translation is outdated when the English page changed in a later version than the
+ * translation did. Revisions are given oldest first.
+ */
+export function outdatedTranslations(
+  revisions: { version: number; title: string; markdown: string; translations: unknown }[]
+) {
+  let sourceChanged = 0;
+  const translated: Partial<Record<string, number>> = {};
+  revisions.forEach((revision, index) => {
+    const previous = revisions[index - 1];
+    if (!previous || previous.title !== revision.title || previous.markdown !== revision.markdown)
+      sourceChanged = revision.version;
+    const before = cleanDocTranslations(previous?.translations as DocTranslations);
+    const after = cleanDocTranslations(revision.translations as DocTranslations);
+    for (const locale of docTranslationLocales)
+      if (JSON.stringify(before[locale]) !== JSON.stringify(after[locale]))
+        translated[locale] = revision.version;
+  });
+  const latest = cleanDocTranslations(revisions.at(-1)?.translations as DocTranslations);
+  return docTranslationLocales.filter(
+    (locale) => latest[locale] && (translated[locale] ?? 0) < sourceChanged
+  );
 }
 
 export type DiffOperation<T> = { type: 'equal' | 'delete' | 'insert'; value: T };

@@ -45,6 +45,7 @@
         <li><a href="/#about" class="footer-link">About us</a></li>
         <li><a href="/projects" class="footer-link">Projects</a></li>
         <li><a href="/articles" class="footer-link">Articles</a></li>
+        <li><a href="/docs" class="footer-link">Docs</a></li>
         <li><a href="/projects/zosia" class="footer-link">ZOSIA</a></li>
         <li><a href="mailto:ksi@cs.uni.wroc.pl" class="footer-link">Contact</a></li>
       </ul>

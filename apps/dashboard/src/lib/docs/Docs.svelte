@@ -1,14 +1,12 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import DocPerson from './DocPerson.svelte';
   import {
     BookOpen,
     FileText,
-    Globe,
     GitPullRequestArrow,
     UsersRound,
     Plus,
-    ChevronDown,
+    Folder,
     ArrowRight
   } from '@lucide/svelte';
   import { formatDate } from 'shared/format';
@@ -20,6 +18,9 @@
   import DocSuggestions from './DocSuggestions.svelte';
   import DocSuggestion from './DocSuggestion.svelte';
   import DocContributors from './DocContributors.svelte';
+  import type { DocSummary } from './docs';
+  import DocTree from './DocTree.svelte';
+  import FloatingDocsNavigation from './FloatingDocsNavigation.svelte';
   import type {
     DocDetail,
     DocIndex,
@@ -57,87 +58,65 @@
 
   const language = $derived(preferences.language);
   const slug = $derived(projectSlug || null);
-  const home = $derived(docsPath(slug));
+  const home = $derived(hrefFor());
   const view = $derived(data.view);
   const index = $derived(data.index);
   const first = $derived(data.path[0]);
-  let wide = $state(true);
-  let navigationOpen = $state(false);
-
-  onMount(() => {
-    const media = window.matchMedia('(min-width: 1400px)');
-    const sync = () => (wide = media.matches);
-    sync();
-    media.addEventListener('change', sync);
-    return () => media.removeEventListener('change', sync);
-  });
-
+  // Pages without a folder come first, then one section per folder path.
+  const groups = $derived(
+    Object.entries(
+      Object.groupBy(index.pages, (page) => page.folder) as Record<string, DocSummary[]>
+    )
+      .map(([folder, pages]) => ({
+        folder,
+        pages: pages.sort((a, b) => a.title.localeCompare(b.title))
+      }))
+      .sort((a, b) => (a.folder && b.folder ? a.folder.localeCompare(b.folder) : a.folder ? 1 : -1))
+  );
+  function hrefFor(...segments: string[]) {
+    return docsPath(slug, ...segments);
+  }
   const updated = (value: string) =>
     formatDate(value, language, { day: 'numeric', month: 'short', year: 'numeric' });
 </script>
 
-<div class="docs-layout">
-  <details
-    class="docs-navigation"
-    open={wide || navigationOpen}
-    ontoggle={(event) => {
-      if (!wide) navigationOpen = event.currentTarget.open;
-    }}
-  >
-    <summary
-      ><BookOpen size={16} aria-hidden="true" />{'Documentation pages'}<ChevronDown
-        size={16}
-        aria-hidden="true"
-      /></summary
-    >
-    <nav aria-label={'Documentation'}>
-      <a class="docs-nav-link" class:active={view === 'index'} href={home}
-        ><BookOpen size={15} aria-hidden="true" />{'Overview'}</a
-      >
-      <p class="docs-nav-label">{'Pages'}</p>
-      {#each index.pages as page (page.id)}
-        <a
-          class="docs-nav-link"
-          class:active={first === page.slug}
-          aria-current={first === page.slug && view === 'page' ? 'page' : undefined}
-          href={docsPath(slug, page.slug)}
-          ><FileText size={15} aria-hidden="true" /><span>{page.title}</span>{#if page.public}<Globe
-              size={13}
-              class="docs-nav-public"
-              aria-label={'Public'}
-            />{/if}</a
+<div class="docs-layout" class:docs-history={view === 'history'}>
+  {#if view !== 'history'}
+    <FloatingDocsNavigation label={'Documentation pages'}>
+      <nav aria-label={'Documentation'}>
+        <a class="docs-nav-link" class:active={view === 'index'} href={home}
+          ><BookOpen size={15} aria-hidden="true" />{'Overview'}</a
         >
-      {:else}
-        <p class="docs-nav-empty">{'No pages yet.'}</p>
-      {/each}
-      <!-- Collaboration tools stay below the pages, quieter than the reading links. -->
-      <div class="docs-nav-tools">
-        <a
-          class="docs-nav-link minor"
-          class:active={view === 'suggestions' || view === 'suggestion'}
-          href={docsPath(slug, 'suggestions')}
-          ><GitPullRequestArrow size={14} aria-hidden="true" /><span>{'Suggestions'}</span
-          >{#if index.pendingSuggestions}<span class="docs-nav-count"
-              >{index.pendingSuggestions}</span
-            >{/if}</a
-        >
-        <a
-          class="docs-nav-link minor"
-          class:active={view === 'contributors'}
-          href={docsPath(slug, 'contributors')}
-          ><UsersRound size={14} aria-hidden="true" />{'Contributors'}</a
-        >
-        {#if index.access.canPropose}
-          <a class="docs-nav-link minor" class:active={view === 'new'} href={docsPath(slug, 'new')}
-            ><Plus
-              size={14}
-              aria-hidden="true"
-            />{#if index.access.canReview}{'New page'}{:else}{'Suggest a page'}{/if}</a
+        <DocTree {index} {projectId} {slug} selected={first} />
+        <!-- Collaboration tools stay below the pages, quieter than the reading links. -->
+        <div class="docs-nav-tools">
+          <a
+            class="docs-nav-link minor"
+            class:active={view === 'suggestions' || view === 'suggestion'}
+            href={hrefFor('suggestions')}
+            ><GitPullRequestArrow size={14} aria-hidden="true" /><span>{'Suggestions'}</span
+            >{#if index.pendingSuggestions}<span class="docs-nav-count"
+                >{index.pendingSuggestions}</span
+              >{/if}</a
           >
-        {/if}
-      </div>
-    </nav>
-  </details>
+          <a
+            class="docs-nav-link minor"
+            class:active={view === 'contributors'}
+            href={hrefFor('contributors')}
+            ><UsersRound size={14} aria-hidden="true" />{'Contributors'}</a
+          >
+          {#if index.access.canPropose}
+            <a class="docs-nav-link minor" class:active={view === 'new'} href={hrefFor('new')}
+              ><Plus
+                size={14}
+                aria-hidden="true"
+              />{#if index.access.canReview}{'New page'}{:else}{'Suggest a page'}{/if}</a
+            >
+          {/if}
+        </div>
+      </nav>
+    </FloatingDocsNavigation>
+  {/if}
 
   <div class="docs-main">
     <!-- Views keep editor and selection state, so each address starts fresh. -->
@@ -152,7 +131,7 @@
             </p>
           </div>
           {#if index.access.canPropose}
-            <a class="btn" href={docsPath(slug, 'new')}
+            <a class="btn" href={hrefFor('new')}
               ><Plus
                 size={15}
                 aria-hidden="true"
@@ -161,7 +140,7 @@
           {/if}
         </div>
         {#if index.access.canReview && index.pendingSuggestions}
-          <a class="docs-callout" href={docsPath(slug, 'suggestions')}>
+          <a class="docs-callout" href={hrefFor('suggestions')}>
             <GitPullRequestArrow size={18} aria-hidden="true" />
             <span
               >{'Suggestions waiting for your review'}:
@@ -171,29 +150,38 @@
           </a>
         {/if}
         {#if index.pages.length}
-          <div class="docs-cards">
-            {#each index.pages as page (page.id)}
-              <a class="docs-card" href={docsPath(slug, page.slug)}>
-                <span class="docs-card-title"
-                  ><FileText size={16} aria-hidden="true" />{page.title}{#if page.public}<span
-                      class="tag tag-mint">{'Public'}</span
-                    >{/if}</span
-                >
-                {#if page.excerpt}<span class="docs-card-excerpt">{page.excerpt}</span>{/if}
-                <span class="docs-card-meta">
-                  <span class="docs-card-people">
-                    {#each page.contributors.slice(0, 4) as person (person.id)}
-                      <DocPerson {person} size={22} showName={false} />
-                    {/each}
-                  </span>
-                  <span
-                    >{'Updated'}
-                    <time datetime={page.updatedAt}>{updated(page.updatedAt)}</time></span
-                  >
-                </span>
-              </a>
-            {/each}
-          </div>
+          {#each groups as group (group.folder)}
+            <section class="docs-group" aria-label={group.folder || undefined}>
+              {#if group.folder}
+                <h2 class="docs-group-title">
+                  <Folder size={15} aria-hidden="true" />{group.folder.split('/').join(' / ')}
+                </h2>
+              {/if}
+              <div class="docs-cards">
+                {#each group.pages as page (page.id)}
+                  <a class="docs-card" href={hrefFor(page.slug)}>
+                    <span class="docs-card-title"
+                      ><FileText size={16} aria-hidden="true" />{page.title}{#if page.public}<span
+                          class="tag tag-mint">{'Public'}</span
+                        >{/if}</span
+                    >
+                    {#if page.excerpt}<span class="docs-card-excerpt">{page.excerpt}</span>{/if}
+                    <span class="docs-card-meta">
+                      <span class="docs-card-people">
+                        {#each page.contributors.slice(0, 4) as person (person.id)}
+                          <DocPerson {person} size={22} showName={false} />
+                        {/each}
+                      </span>
+                      <span
+                        >{'Updated'}
+                        <time datetime={page.updatedAt}>{updated(page.updatedAt)}</time></span
+                      >
+                    </span>
+                  </a>
+                {/each}
+              </div>
+            </section>
+          {/each}
         {:else}
           <div class="empty-state">
             <BookOpen size={28} strokeWidth={1.4} aria-hidden="true" />
@@ -206,7 +194,14 @@
       {:else if view === 'page' && data.page}
         <DocPage page={data.page} {slug} {websiteOrigin} />
       {:else if (view === 'edit' && data.page) || view === 'new'}
-        <DocEditor {projectId} {slug} page={data.page} access={index.access} {workspaceName} />
+        <DocEditor
+          {projectId}
+          {slug}
+          page={data.page}
+          access={index.access}
+          folders={index.folders}
+          {workspaceName}
+        />
       {:else if view === 'history' && data.page}
         <DocHistory
           {projectId}
@@ -228,32 +223,12 @@
 
 <style>
   .docs-layout {
-    display: grid;
-    grid-template-columns: 210px minmax(0, 1fr);
-    gap: 36px;
-    align-items: start;
-  }
-  .docs-navigation {
-    position: sticky;
-    top: 24px;
-    max-height: calc(100vh - 48px);
-    overflow-y: auto;
-    scrollbar-width: thin;
-  }
-  .docs-navigation summary {
-    display: none;
+    display: block;
   }
   nav {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 2px;
-  }
-  .docs-nav-label {
-    margin: 18px 10px 6px;
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
   }
   .docs-nav-link {
     display: flex;
@@ -265,6 +240,23 @@
     font-size: 13px;
     line-height: 1.35;
     text-decoration: none;
+  }
+  .docs-nav-link {
+    padding-left: calc(10px + var(--depth, 0) * 14px);
+  }
+  .docs-group + .docs-group {
+    margin-top: 28px;
+  }
+  .docs-group-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 12px;
+    color: var(--muted);
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0;
   }
   .docs-nav-link span {
     flex: 1;
@@ -285,9 +277,6 @@
   .docs-nav-link.active :global(svg:first-child) {
     color: var(--accent);
   }
-  .docs-nav-link :global(.docs-nav-public) {
-    color: var(--muted);
-  }
   .docs-nav-count {
     flex: 0 0 auto !important;
     min-width: 20px;
@@ -298,12 +287,6 @@
     font-family: var(--mono);
     font-size: 10px;
     text-align: center;
-  }
-  .docs-nav-empty {
-    margin: 0;
-    padding: 6px 10px;
-    color: var(--muted);
-    font-size: 12px;
   }
   .docs-nav-tools {
     display: grid;
@@ -402,40 +385,5 @@
   }
   .docs-card-people :global(.doc-person + .doc-person) {
     margin-left: -6px;
-  }
-  @media (max-width: 1399px) {
-    .docs-layout {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 20px;
-    }
-    .docs-navigation {
-      position: static;
-      max-height: none;
-      border: 1px solid var(--line);
-      border-radius: var(--radius-xl);
-      background: var(--surface);
-    }
-    .docs-navigation summary {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      font-size: 13px;
-      cursor: pointer;
-      list-style: none;
-    }
-    .docs-navigation summary::-webkit-details-marker {
-      display: none;
-    }
-    .docs-navigation summary :global(svg:last-child) {
-      margin-left: auto;
-      transition: transform 150ms ease;
-    }
-    .docs-navigation[open] summary :global(svg:last-child) {
-      transform: rotate(180deg);
-    }
-    nav {
-      padding: 0 8px 12px;
-    }
   }
 </style>

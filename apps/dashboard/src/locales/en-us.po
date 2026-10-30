@@ -66,6 +66,7 @@ msgstr "Tab"
 #: src/lib/KanbanBoard.svelte
 #: src/lib/NestedMenu.svelte
 #: src/lib/NotificationInbox.svelte
+#: src/lib/docs/FloatingDocsNavigation.svelte
 #: src/routes/+layout.svelte
 msgid "Escape"
 msgstr "Escape"
@@ -202,6 +203,7 @@ msgstr "Your account first needs to be activated by an administrator. Ask direct
 msgid "Sign out"
 msgstr "Sign out"
 
+#: src/lib/docs/FloatingDocsNavigation.svelte
 #: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 msgid "Close navigation"
@@ -250,6 +252,8 @@ msgid "KSI · {0} <0>v{0} · <0/></0>"
 msgstr "KSI · {0} <0>v{0} · <0/></0>"
 
 #: src/lib/AppearanceMenu.svelte
+#: src/lib/docs/DocHistory.svelte
+#: src/lib/docs/DocSuggestion.svelte
 msgid "Language"
 msgstr "Language"
 
@@ -459,6 +463,7 @@ msgid "Saved"
 msgstr "Saved"
 
 #: src/lib/docs/DocEditor.svelte
+#: src/lib/docs/DocFolderDialog.svelte
 #: src/lib/views/ArticleView.svelte
 #: src/lib/views/ProfileView.svelte
 msgid "Save changes"
@@ -637,7 +642,7 @@ msgstr "Task status"
 
 #: src/lib/AssociationAlerts.svelte
 #: src/lib/ConfirmDialog.svelte
-#: src/lib/ContentTranslations.svelte
+#: src/lib/ContentLocaleEditor.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
@@ -646,6 +651,9 @@ msgstr "Task status"
 #: src/lib/ProjectSettings.svelte
 #: src/lib/WorkspaceMembers.svelte
 #: src/lib/docs/DocEditor.svelte
+#: src/lib/docs/DocFolderDialog.svelte
+#: src/lib/docs/DocFolderDialog.svelte
+#: src/lib/docs/DocTree.svelte
 #: src/lib/views/NewArticleView.svelte
 #: src/lib/views/NewTaskView.svelte
 #: src/lib/views/NewThreadView.svelte
@@ -680,6 +688,7 @@ msgstr "Deleted statuses"
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
 #: src/lib/KanbanBoard.svelte
+#: src/lib/docs/DocHistory.svelte
 msgid "Close"
 msgstr "Close"
 
@@ -1286,10 +1295,12 @@ msgid "Translate every tag in the same order as the English tags."
 msgstr "Translate every tag in the same order as the English tags."
 
 #: src/lib/ContentTranslations.svelte
+#: src/lib/docs/DocEditor.svelte
+#: src/lib/docs/DocFolderDialog.svelte
 msgid "No content"
 msgstr "No content"
 
-#: src/lib/ContentTranslations.svelte
+#: src/lib/ContentLocaleEditor.svelte
 msgid "Save translation"
 msgstr "Save translation"
 
@@ -1761,6 +1772,7 @@ msgid "Spróbuj ponownie"
 msgstr "Spróbuj ponownie"
 
 #: src/lib/ContentHistory.svelte
+#: src/lib/docs/DocHistory.svelte
 #: src/lib/views/TaskView.svelte
 #: src/lib/views/ThreadView.svelte
 msgid "Try again"
@@ -2281,7 +2293,7 @@ msgstr "Public page"
 msgid "Profile sections"
 msgstr "Profile sections"
 
-#: src/lib/ContentTranslations.svelte
+#: src/lib/ContentLocaleEditor.svelte
 #: src/lib/views/ProfileView.svelte
 msgid "Unsaved changes"
 msgstr "Unsaved changes"
@@ -2371,24 +2383,24 @@ msgstr "First post"
 msgid "Tags"
 msgstr "Tags"
 
-#: src/lib/ContentTranslations.svelte
+#: src/lib/ContentLocaleEditor.svelte
 msgid "Primary language"
 msgstr "Primary language"
 
-#: src/lib/ContentTranslations.svelte
+#: src/lib/ContentLocaleEditor.svelte
 msgid "Translation added"
 msgstr "Translation added"
 
-#: src/lib/ContentTranslations.svelte
+#: src/lib/ContentLocaleEditor.svelte
 msgid "Not added"
 msgstr "Not added"
 
-#: src/lib/ContentTranslations.svelte
+#: src/lib/ContentLocaleEditor.svelte
 msgid "Primary"
 msgstr "Primary"
 
-#: src/lib/ContentTranslations.svelte
-#: src/lib/ContentTranslations.svelte
+#: src/lib/ContentLocaleEditor.svelte
+#: src/lib/ContentLocaleEditor.svelte
 msgid "Added"
 msgstr "Added"
 
@@ -2396,12 +2408,12 @@ msgstr "Added"
 msgid "Add at least one translated field before saving."
 msgstr "Add at least one translated field before saving."
 
-#: src/lib/ContentTranslations.svelte
-#: src/lib/ContentTranslations.svelte
+#: src/lib/ContentLocaleEditor.svelte
+#: src/lib/ContentLocaleEditor.svelte
 msgid "Content language"
 msgstr "Content language"
 
-#: src/lib/ContentTranslations.svelte
+#: src/lib/ContentLocaleEditor.svelte
 msgid "New"
 msgstr "New"
 
@@ -2409,20 +2421,20 @@ msgstr "New"
 msgid "Save the translation from the language bar above."
 msgstr "Save the translation from the language bar above."
 
-#: src/lib/ContentTranslations.svelte
-#: src/lib/ContentTranslations.svelte
+#: src/lib/ContentLocaleEditor.svelte
+#: src/lib/ContentLocaleEditor.svelte
 msgid "English reference"
 msgstr "English reference"
 
-#: src/lib/ContentTranslations.svelte
+#: src/lib/ContentLocaleEditor.svelte
 msgid "Confirm remove"
 msgstr "Confirm remove"
 
-#: src/lib/ContentTranslations.svelte
+#: src/lib/ContentLocaleEditor.svelte
 msgid "Read only"
 msgstr "Read only"
 
-#: src/lib/ContentTranslations.svelte
+#: src/lib/ContentLocaleEditor.svelte
 msgid "Use this as context while writing the translation."
 msgstr "Use this as context while writing the translation."
 
@@ -2436,8 +2448,8 @@ msgstr "URL"
 
 #. 0: localeLabel(selected)
 #. 0: localeLabel(selected)
-#: src/lib/ContentTranslations.svelte
-#: src/lib/ContentTranslations.svelte
+#: src/lib/ContentLocaleEditor.svelte
+#: src/lib/ContentLocaleEditor.svelte
 msgid "Remove {0} translation"
 msgstr "Remove {0} translation"
 
@@ -2463,7 +2475,7 @@ msgid "Label · {0}"
 msgstr "Label · {0}"
 
 #. 0: localeLabel(selected)
-#: src/lib/ContentTranslations.svelte
+#: src/lib/ContentLocaleEditor.svelte
 msgid "You are editing the {0} translation. Blank fields use the English value shown in the reference."
 msgstr "You are editing the {0} translation. Blank fields use the English value shown in the reference."
 
@@ -2830,7 +2842,7 @@ msgstr "Who keeps this documentation alive. Changes count accepted edits, includ
 
 #: src/lib/docs/DocContributors.svelte
 #: src/lib/docs/DocContributors.svelte
-#: src/lib/docs/Docs.svelte
+#: src/lib/docs/DocTree.svelte
 msgid "Pages"
 msgstr "Pages"
 
@@ -2839,6 +2851,7 @@ msgstr "Pages"
 #: src/lib/docs/DocEditor.svelte
 #: src/lib/docs/DocHistory.svelte
 #: src/lib/docs/DocInfo.svelte
+#: src/lib/docs/DocSuggestion.svelte
 msgid "Changes"
 msgstr "Changes"
 
@@ -3039,6 +3052,7 @@ msgid "Something went wrong. Try again."
 msgstr "Something went wrong. Try again."
 
 #: src/lib/docs/DocHistory.svelte
+#: src/lib/docs/DocHistory.svelte
 msgid "Version history"
 msgstr "Version history"
 
@@ -3047,10 +3061,13 @@ msgid "Back to page"
 msgstr "Back to page"
 
 #: src/lib/docs/DocHistory.svelte
+#: src/lib/docs/DocHistory.svelte
 msgid "Versions"
 msgstr "Versions"
 
+#. 0: selected
 #. 0: revision.version
+#: src/lib/docs/DocHistory.svelte
 #: src/lib/docs/DocHistory.svelte
 msgid "v{0}"
 msgstr "v{0}"
@@ -3074,7 +3091,7 @@ msgstr "Version"
 
 #: src/lib/docs/DocHistory.svelte
 #: src/lib/docs/DocPage.svelte
-#: src/lib/docs/Docs.svelte
+#: src/lib/docs/DocTree.svelte
 #: src/lib/docs/Docs.svelte
 msgid "Public"
 msgstr "Public"
@@ -3175,7 +3192,6 @@ msgid "Open page"
 msgstr "Open page"
 
 #: src/lib/docs/DocSuggestion.svelte
-#: src/lib/docs/DocSuggestion.svelte
 msgid "Suggested version"
 msgstr "Suggested version"
 
@@ -3235,11 +3251,12 @@ msgstr "New suggestions from members will appear here."
 msgid "No reviewed suggestions yet"
 msgstr "No reviewed suggestions yet"
 
+#: src/lib/docs/DocTree.svelte
 #: src/lib/docs/Docs.svelte
 msgid "Documentation pages"
 msgstr "Documentation pages"
 
-#: src/lib/docs/Docs.svelte
+#: src/lib/docs/DocTree.svelte
 msgid "No pages yet."
 msgstr "No pages yet."
 
@@ -3279,3 +3296,194 @@ msgstr "Page details"
 #: src/lib/docs/DocInfo.svelte
 msgid "Details"
 msgstr "Details"
+
+#: src/lib/docs/DocError.svelte
+msgid "Write the English text first; translations translate it."
+msgstr "Write the English text first; translations translate it."
+
+#: src/lib/docs/DocPage.svelte
+msgid "The English version changed after this translation was written."
+msgstr "The English version changed after this translation was written."
+
+#: src/lib/docs/DocPage.svelte
+msgid "Read the English version"
+msgstr "Read the English version"
+
+#: src/lib/docs/DocEditor.svelte
+#: src/lib/docs/DocEditor.svelte
+#: src/lib/docs/DocHistory.svelte
+#: src/lib/docs/DocInfo.svelte
+#: src/lib/docs/DocSuggestion.svelte
+msgid "Folder"
+msgstr "Folder"
+
+#: src/lib/docs/DocInfo.svelte
+msgid "Languages"
+msgstr "Languages"
+
+#~ msgid "For example: Camp/Logistics"
+#~ msgstr "For example: Camp/Logistics"
+
+#~ msgid "Separate nested folders with “/”. Leave empty to keep the page at the top."
+#~ msgstr "Separate nested folders with “/”. Leave empty to keep the page at the top."
+
+#~ msgid "Original"
+#~ msgstr "Original"
+
+#~ msgid "Readers who use this language see the translation. Anything left empty shows the English text."
+#~ msgstr "Readers who use this language see the translation. Anything left empty shows the English text."
+
+#~ msgid "Show the English text"
+#~ msgstr "Show the English text"
+
+#: src/lib/docs/DocHistory.svelte
+msgid "This version has no translation in this language. Showing the English text."
+msgstr "This version has no translation in this language. Showing the English text."
+
+#: src/lib/docs/DocFolderSelect.svelte
+#: src/lib/docs/DocSuggestion.svelte
+#: src/lib/docs/DocSuggestion.svelte
+#: src/lib/docs/DocTree.svelte
+#: src/lib/docs/DocTree.svelte
+msgid "Top level"
+msgstr "Top level"
+
+#: src/lib/docs/DocSuggestion.svelte
+#: src/lib/docs/DocSuggestion.svelte
+msgid "Changed"
+msgstr "Changed"
+
+#: src/lib/docs/DocSuggestion.svelte
+msgid "Empty translated fields show the English text to readers."
+msgstr "Empty translated fields show the English text to readers."
+
+#: src/lib/docs/DocEditor.svelte
+#: src/lib/docs/DocFolderDialog.svelte
+#: src/lib/docs/DocTree.svelte
+#: src/lib/docs/DocTree.svelte
+msgid "New folder"
+msgstr "New folder"
+
+#: src/lib/docs/DocFolderDialog.svelte
+#: src/lib/docs/DocTree.svelte
+#: src/lib/docs/DocTree.svelte
+msgid "Edit folder"
+msgstr "Edit folder"
+
+#~ msgid "English name"
+#~ msgstr "English name"
+
+#~ msgid "Polish name"
+#~ msgstr "Polish name"
+
+#~ msgid "Optional. Falls back to the English name."
+#~ msgstr "Optional. Falls back to the English name."
+
+#: src/lib/docs/DocFolderDialog.svelte
+#: src/lib/docs/DocFolderDialog.svelte
+msgid "Parent folder"
+msgstr "Parent folder"
+
+#: src/lib/docs/DocFolderDialog.svelte
+msgid "Create folder"
+msgstr "Create folder"
+
+#: src/lib/docs/DocError.svelte
+msgid "This folder is unavailable in this workspace. Refresh and choose another folder."
+msgstr "This folder is unavailable in this workspace. Refresh and choose another folder."
+
+#: src/lib/docs/DocError.svelte
+msgid "A folder with this English name already exists inside the selected parent folder."
+msgstr "A folder with this English name already exists inside the selected parent folder."
+
+#: src/lib/docs/DocError.svelte
+msgid "Enter a folder name without “/”. Choose its parent folder separately."
+msgstr "Enter a folder name without “/”. Choose its parent folder separately."
+
+#: src/lib/docs/DocError.svelte
+msgid "A folder cannot be placed inside itself or one of its subfolders."
+msgstr "A folder cannot be placed inside itself or one of its subfolders."
+
+#: src/lib/docs/DocTree.svelte
+#: src/lib/docs/DocTree.svelte
+#: src/lib/docs/DocTree.svelte
+msgid "Move page"
+msgstr "Move page"
+
+#: src/lib/docs/DocTree.svelte
+#: src/lib/docs/DocTree.svelte
+msgid "Add subfolder"
+msgstr "Add subfolder"
+
+#: src/lib/docs/DocTree.svelte
+msgid "Empty folder"
+msgstr "Empty folder"
+
+#~ msgid "Do you want to move"
+#~ msgstr "Do you want to move"
+
+#: src/lib/docs/DocTree.svelte
+#: src/lib/docs/DocTree.svelte
+msgid "Destination folder"
+msgstr "Destination folder"
+
+#: src/lib/docs/DocTree.svelte
+msgid "Move"
+msgstr "Move"
+
+#. 0: moving.title; 1: destinationName
+#: src/lib/docs/DocTree.svelte
+msgid "Do you want to move “{0}” into folder “{1}”?"
+msgstr "Do you want to move “{0}” into folder “{1}”?"
+
+#. 0: moving.title
+#: src/lib/docs/DocTree.svelte
+msgid "Do you want to move “{0}” to the top level?"
+msgstr "Do you want to move “{0}” to the top level?"
+
+#: src/lib/docs/DocFolderSelect.svelte
+msgid "Search folders"
+msgstr "Search folders"
+
+#: src/lib/docs/DocFolderSelect.svelte
+msgid "No folders found"
+msgstr "No folders found"
+
+#: src/lib/docs/DocError.svelte
+#: src/lib/docs/DocFolderDialog.svelte
+msgid "Move pages and subfolders out before deleting this folder."
+msgstr "Move pages and subfolders out before deleting this folder."
+
+#: src/lib/docs/DocError.svelte
+msgid "This folder is used by a pending suggestion. Review or withdraw that suggestion before deleting it."
+msgstr "This folder is used by a pending suggestion. Review or withdraw that suggestion before deleting it."
+
+#: src/lib/docs/DocEditor.svelte
+msgid "All language versions are saved together with the document."
+msgstr "All language versions are saved together with the document."
+
+#: src/lib/docs/DocFolderDialog.svelte
+msgid "Delete folder?"
+msgstr "Delete folder?"
+
+#. 0: docFolderName(folder, preferences.language)
+#: src/lib/docs/DocFolderDialog.svelte
+msgid "Delete folder “{0}”?"
+msgstr "Delete folder “{0}”?"
+
+#: src/lib/docs/DocFolderDialog.svelte
+msgid "This cannot be undone. Existing version history will be preserved."
+msgstr "This cannot be undone. Existing version history will be preserved."
+
+#: src/lib/docs/DocFolderDialog.svelte
+#: src/lib/docs/DocFolderDialog.svelte
+msgid "Delete folder"
+msgstr "Delete folder"
+
+#: src/lib/docs/DocFolderDialog.svelte
+msgid "All language versions are saved together with the folder."
+msgstr "All language versions are saved together with the folder."
+
+#: src/lib/docs/DocFolderDialog.svelte
+msgid "Folder name"
+msgstr "Folder name"
