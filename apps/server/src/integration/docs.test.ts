@@ -283,7 +283,7 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
       index.body.some((page: any) => page.projectSlug === projectId && page.slug === 'fallback')
     ).toBe(false);
   });
-  test('the website shows members-only pages to active members alone', async () => {
+  test('the website shows members-only pages and editing rights to active members alone', async () => {
     for (const page of [
       { slug: 'handbook', title: 'Handbook', markdown: 'Read [internal-notes].', public: true },
       { slug: 'internal-notes', title: 'Internal notes', markdown: 'Keys.', public: false }
@@ -292,20 +292,22 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
         (await request(leader, '/platform/docs', 'POST', { ...page, projectId, reason: '' })).status
       ).toBe(200);
     const internal = `/platform/public/docs/${projectId}/internal-notes?locale=en`;
+    const handbook = `/platform/public/docs/${projectId}/handbook?locale=en`;
     const listed = async (actor: string | null) =>
       ((await request(actor, '/platform/public/docs?locale=en')).body as PublicDocSummary[])
         .filter((page) => page.projectSlug === projectId)
         .map((page) => [page.slug, page.public]);
     const linked = async (actor: string | null) =>
-      JSON.stringify(
-        (await request(actor, `/platform/public/docs/${projectId}/handbook?locale=en`)).body.blocks
-      ).includes(`/docs/${projectId}/internal-notes?lang=en`);
+      JSON.stringify((await request(actor, handbook)).body.blocks).includes(
+        `/docs/${projectId}/internal-notes?lang=en`
+      );
 
     for (const actor of [null, pending]) {
       expect((await request(actor, internal)).status).toBe(404);
       expect(await listed(actor)).toContainEqual(['handbook', true]);
       expect(await listed(actor)).not.toContainEqual(['internal-notes', false]);
       expect(await linked(actor)).toBe(false);
+      expect((await request(actor, handbook)).body.access).toBeNull();
     }
     expect((await request(member, internal)).body).toMatchObject({
       title: 'Internal notes',
@@ -313,6 +315,11 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
     });
     expect(await listed(member)).toContainEqual(['internal-notes', false]);
     expect(await linked(member)).toBe(true);
+    expect((await request(member, handbook)).body.access).toMatchObject({
+      canReview: false,
+      canPropose: true
+    });
+    expect((await request(leader, handbook)).body.access).toMatchObject({ canReview: true });
   });
   test('folder tree supports empty bilingual folders, nesting and moves without changing page content', async () => {
     const folder = await request(leader, '/platform/docs/folders', 'POST', {

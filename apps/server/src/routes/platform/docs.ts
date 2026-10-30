@@ -1366,7 +1366,7 @@ export default createElysia({ prefix: '/platform' })
   .get(
     '/public/docs/:workspace/:slug',
     async ({ db, user, params, query }) => {
-      const member = user?.membershipStatus === 'active';
+      const reader = user?.membershipStatus === 'active' ? user : null;
       const [project] =
         params.workspace === associationDocsKey
           ? [null]
@@ -1382,7 +1382,7 @@ export default createElysia({ prefix: '/platform' })
           and(
             workspaceCondition(project?.id ?? null),
             eq(docPages.slug, params.slug),
-            member ? undefined : eq(docPages.public, true)
+            reader ? undefined : eq(docPages.public, true)
           )
         );
       if (!page) throw status(404, { code: 'DOC_NOT_FOUND' });
@@ -1403,7 +1403,7 @@ export default createElysia({ prefix: '/platform' })
         .where(eq(docRevisions.pageId, page.id))
         .orderBy(docRevisions.version);
       const resolve = await docLinkResolver(db, shown.markdown, current, {
-        publicOnly: !member,
+        publicOnly: !reader,
         href: publicHref,
         locale: query.locale
       });
@@ -1423,7 +1423,9 @@ export default createElysia({ prefix: '/platform' })
         updatedAt: page.updatedAt,
         workspace: { slug: current.slug, name: current.name },
         headings: markdownHeadings(shown.markdown),
-        blocks: renderMarkdown(shown.markdown, { docs: { resolve } })
+        blocks: renderMarkdown(shown.markdown, { docs: { resolve } }),
+        // Members get the dashboard's editing rights, so the website can link to the editor.
+        access: reader ? await docsAccess(db, reader, current.projectId) : null
       };
     },
     { query: t.Object({ locale }) }

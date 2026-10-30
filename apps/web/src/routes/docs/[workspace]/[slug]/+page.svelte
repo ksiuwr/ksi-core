@@ -4,8 +4,15 @@
   import DocsOutline from '@ksi-core/ui/platform/DocsOutline.svelte';
   import DocsToc from '@ksi-core/ui/platform/DocsToc.svelte';
   import { headingAnchors } from '@ksi-core/ui/platform/heading-anchors';
-  import { ArrowLeft, ArrowRight, ChevronRight, Lock, TriangleAlert } from '@lucide/svelte';
-  import { associationDocsKey } from 'shared/docs';
+  import {
+    ArrowLeft,
+    ArrowRight,
+    ChevronRight,
+    Lock,
+    SquarePen,
+    TriangleAlert
+  } from '@lucide/svelte';
+  import { associationDocsKey, docsPath } from 'shared/docs';
   import { publicDocNeighbors, publicDocPath } from 'shared/public-docs';
   import { locale, setLocale } from '$lib/locale.svelte';
   let { data } = $props<{ data: import('./$types').PageData }>();
@@ -17,6 +24,9 @@
   const folders = $derived(data.page.folder ? data.page.folder.split('/') : []);
   const neighbors = $derived(
     publicDocNeighbors(data.publicDocs, workspace, data.page.slug, locale.current)
+  );
+  const editUrl = $derived(
+    `${data.dashboardOrigin}${docsPath(data.page.workspace.slug, data.page.slug, 'edit')}`
   );
   const onhash = (url: URL) => replaceState(url, {});
   const anchorLabels = { copyLabel: 'Copy link to this section', copiedLabel: 'Link copied' };
@@ -54,6 +64,14 @@
           {#if !data.page.public}<span class="doc-private"
               ><Lock size={13} aria-hidden="true" />{'Members only'}</span
             >{/if}
+          {#if data.page.access?.canReview}
+            <a class="doc-edit" href={editUrl}><SquarePen size={13} aria-hidden="true" />{'Edit'}</a
+            >
+          {:else if data.page.access?.canPropose}
+            <a class="doc-edit" href={editUrl}
+              ><SquarePen size={13} aria-hidden="true" />{'Suggest changes'}</a
+            >
+          {/if}
         </div>
       </header>
       {#if data.page.outdatedLocales.includes(data.page.locale)}
@@ -176,6 +194,22 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
+  }
+  /* Quiet like the rest of the byline: most visits only read, and editing happens in the
+     dashboard. */
+  .doc-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: -4px -8px -4px auto;
+    padding: 4px 8px;
+    border-radius: var(--radius-md);
+    color: inherit;
+    text-decoration: none;
+  }
+  .doc-edit:hover {
+    color: var(--ink);
+    background: var(--surface-muted);
   }
   .doc-outdated {
     display: flex;

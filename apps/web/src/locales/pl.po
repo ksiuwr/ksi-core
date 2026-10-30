@@ -941,3 +941,11 @@ msgstr "Przełącz panel boczny"
 #: src/routes/docs/[workspace]/[slug]/+page.svelte
 msgid "Members only"
 msgstr "Tylko dla członków"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Edit"
+msgstr "Edytuj"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Suggest changes"
+msgstr "Zaproponuj zmiany"
