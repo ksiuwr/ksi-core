@@ -2214,11 +2214,13 @@ msgstr "Twoja propozycja zmian została wysłana."
 msgid "Dashboard"
 msgstr "Pulpit"
 
+#: src/lib/docs/FloatingDocsNavigation.svelte
 #: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 msgid "Show sidebar"
 msgstr "Pokaż panel boczny"
 
+#: src/lib/docs/FloatingDocsNavigation.svelte
 #: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 msgid "Hide sidebar"

@@ -54,6 +54,8 @@
       resolved?: boolean;
       suggestion?: SuggestionDetail;
       insights?: DocInsights;
+      /** The reader keeps the page tree docked beside the text. */
+      navigationDocked: boolean;
     };
     websiteOrigin: string;
   } = $props();
@@ -84,7 +86,7 @@
 
 <div class="docs-layout" class:docs-history={view === 'history'}>
   {#if view !== 'history'}
-    <FloatingDocsNavigation label={'Documentation'}>
+    <FloatingDocsNavigation label={'Documentation'} docked={data.navigationDocked}>
       <nav aria-label={'Documentation'}>
         <a class="docs-nav-link" class:active={view === 'index'} href={home}
           ><BookOpen size={15} aria-hidden="true" />{'Overview'}</a
@@ -224,9 +226,10 @@
 </div>
 
 <style>
+  /* The rail sizes its own column, so docking widens it without a second width here. */
   .docs-layout:not(.docs-history) {
     display: grid;
-    grid-template-columns: 44px minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr);
     gap: 16px;
     align-items: start;
   }

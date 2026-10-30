@@ -1,21 +1,35 @@
 <script lang="ts">
-  import { onDestroy, type Snippet } from 'svelte';
+  import { onDestroy, untrack, type Snippet } from 'svelte';
+  import { MediaQuery } from 'svelte/reactivity';
   import { afterNavigate } from '$app/navigation';
-  import { PanelLeft, X } from '@lucide/svelte';
+  import { PanelLeftClose, PanelLeftOpen, X } from '@lucide/svelte';
 
-  let { label, children }: { label: string; children: Snippet } = $props();
+  let {
+    label,
+    docked: savedDocked,
+    children
+  }: { label: string; docked: boolean; children: Snippet } = $props();
   const uid = $props.id();
+  // Phones keep the bar above the content; a docked tree would push every page down.
+  const narrow = new MediaQuery('(max-width: 760px)');
   let root = $state<HTMLDivElement>();
   let trigger = $state<HTMLButtonElement>();
+  let docked = $state(untrack(() => savedDocked));
   let hovered = $state(false);
   let pinned = $state(false);
   let dragging = $state(false);
   let hoverTimer: ReturnType<typeof setTimeout> | undefined;
-  const open = $derived(hovered || pinned || dragging);
+  const inColumn = $derived(docked && !narrow.current);
+  /** Floating over the page; a docked tree already shows everything in its column. */
+  const open = $derived(!inColumn && (hovered || pinned || dragging));
+  const expanded = $derived(inColumn || open);
+  /** What the button toggles: the docked column on wide screens, the bar on phones. */
+  const shown = $derived(inColumn || (narrow.current && open));
 
   /** The delays ignore a pointer crossing the button and forgive a brief slip outside. */
   function hover(next: boolean) {
     clearTimeout(hoverTimer);
+    if (next && inColumn) return;
     hoverTimer = setTimeout(() => (hovered = next), next ? 120 : 240);
   }
   function close(restoreFocus = false) {
@@ -34,14 +48,26 @@
     event.preventDefault();
     close(true);
   }
+  function toggle() {
+    if (narrow.current) {
+      if (open) close();
+      else pinned = true;
+      return;
+    }
+    // Hover opens only on entry, so undocking under the pointer stays shut until it returns.
+    close();
+    docked = !docked;
+    document.cookie = `ksi-docs-navigation=${docked ? '1' : '0'}; Path=/; Max-Age=31536000; SameSite=Lax`;
+  }
   afterNavigate(() => close());
   onDestroy(() => clearTimeout(hoverTimer));
 </script>
 
 <svelte:window onpointerdown={outside} onkeydown={escape} ondragend={() => (dragging = false)} />
 
-<!-- Lives in its own rail so it stays reachable without ever covering the text. -->
-<div class="docs-navigation-anchor">
+<!-- Lives in its own rail so it stays reachable without ever covering the text; docked, the
+     rail widens into a column beside it. -->
+<div class="docs-navigation-anchor" class:docked>
   <div
     bind:this={root}
     class="floating-docs-navigation"
@@ -65,13 +91,14 @@
         class="docs-navigation-trigger"
         aria-label={label}
         aria-controls={`${uid}-content`}
-        aria-expanded={open}
-        onclick={() => {
-          if (open) close();
-          else pinned = true;
-        }}
+        aria-expanded={expanded}
+        title={shown ? 'Hide sidebar' : 'Show sidebar'}
+        onclick={toggle}
       >
-        <PanelLeft size={18} aria-hidden="true" />
+        {#if shown}<PanelLeftClose size={18} aria-hidden="true" />{:else}<PanelLeftOpen
+            size={18}
+            aria-hidden="true"
+          />{/if}
       </button>
       <span class="floating-docs-title" aria-hidden="true">{label}</span>
       {#if open}<button
@@ -81,7 +108,12 @@
           onclick={() => close(true)}><X size={16} aria-hidden="true" /></button
         >{/if}
     </div>
-    <div id={`${uid}-content`} class="floating-docs-content" inert={!open} aria-hidden={!open}>
+    <div
+      id={`${uid}-content`}
+      class="floating-docs-content"
+      inert={!expanded}
+      aria-hidden={!expanded}
+    >
       <div class="floating-docs-scroll">{@render children()}</div>
     </div>
   </div>
@@ -90,10 +122,15 @@
 <style>
   .docs-navigation-anchor {
     --navigation-width: 320px;
+    --docked-width: 264px;
     position: sticky;
     top: 16px;
     z-index: 45;
+    width: 44px;
     height: 44px;
+    transition:
+      width 240ms var(--ease-out),
+      margin 240ms var(--ease-out);
   }
   .floating-docs-navigation {
     position: absolute;
@@ -112,6 +149,8 @@
       width 220ms var(--ease-out),
       grid-template-rows 240ms var(--ease-out),
       border-radius 220ms var(--ease-out),
+      border-color 180ms ease,
+      background-color 180ms ease,
       box-shadow 180ms ease;
   }
   .floating-docs-navigation.open {
@@ -211,12 +250,40 @@
     scrollbar-width: thin;
     padding: 2px 8px 8px;
   }
+  /* Docked, the panel becomes the plain column: it grows to the tree's height and drops
+     its border, shadow and fill, while the button stays where the rail had it. */
+  @media (min-width: 761px) {
+    .docs-navigation-anchor.docked {
+      width: var(--docked-width);
+      height: auto;
+      margin-right: 12px;
+    }
+    .docked .floating-docs-navigation {
+      position: relative;
+      width: var(--docked-width);
+      grid-template-rows: 42px 1fr;
+      border-color: transparent;
+      border-radius: var(--radius-xl);
+      background-color: transparent;
+      box-shadow: none;
+    }
+    .docked .floating-docs-title,
+    .docked .floating-docs-content {
+      visibility: visible;
+      opacity: 1;
+      transition-delay: 60ms;
+    }
+    .docked .floating-docs-scroll {
+      width: calc(var(--docked-width) - 2px);
+    }
+  }
   /* Too narrow for a rail: the button becomes a full-width bar above the content. */
   @media (max-width: 760px) {
     .docs-navigation-anchor {
       --navigation-width: calc(100vw - 32px);
       position: relative;
       top: 0;
+      width: auto;
       margin-bottom: 20px;
     }
     .floating-docs-navigation,
@@ -229,6 +296,7 @@
     }
   }
   @media (prefers-reduced-motion: reduce) {
+    .docs-navigation-anchor,
     .floating-docs-navigation,
     .floating-docs-title,
     .floating-docs-content {
