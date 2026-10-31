@@ -233,10 +233,6 @@ msgstr "Dark"
 msgid "Logowanie · KSI"
 msgstr "Logowanie · KSI"
 
-#: src/routes/reset-password/+page.svelte
-msgid "EN"
-msgstr "PL"
-
 #: src/routes/+page.svelte
 msgid "Przejdź do Panelu<0/>"
 msgstr "Go to Dashboard<0/>"
