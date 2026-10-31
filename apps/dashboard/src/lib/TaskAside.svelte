@@ -118,14 +118,14 @@
   }
 </script>
 
-<aside class="detail-aside task-aside" aria-label={'Task details'}>
+<aside class="detail-aside task-aside" aria-label={'Szczegóły zadania'}>
   {#if error}<p class="error" role="alert">{error}</p>{/if}
 
   <section class="aside-section">
     <dl class="metadata-list">
       {#if created}
         <div>
-          <dt>Created</dt>
+          <dt>Utworzono</dt>
           <dd><time datetime={item.createdAt}>{created}</time></dd>
         </div>
       {/if}
@@ -133,7 +133,7 @@
   </section>
 
   <section class="aside-section">
-    <h2>Assignees</h2>
+    <h2>Przypisane osoby</h2>
     <Assignees
       value={item.assigneeIds ?? []}
       {members}
@@ -144,7 +144,7 @@
   </section>
 
   <section class="aside-section">
-    <h2>Labels</h2>
+    <h2>Etykiety</h2>
     <div class="task-label-list">
       {#each item.labels as labelName}
         {@const label = labels.find((candidate) => candidate.name === labelName)}
@@ -154,8 +154,8 @@
           <button
             type="button"
             class="label-remove"
-            aria-label={`Remove label ${labelName}`}
-            title={`Remove label ${labelName}`}
+            aria-label={`Usuń etykietę ${labelName}`}
+            title={`Usuń etykietę ${labelName}`}
             disabled={busy}
             onclick={() => removeLabel(labelName)}
           >
@@ -163,12 +163,12 @@
           </button>
         </span>
       {:else}
-        <span class="muted">None yet</span>
+        <span class="muted">Brak etykiet</span>
       {/each}
       {#if unassignedLabels.length}
         <Dropdown
-          label={'Add label'}
-          placeholder={'Add label'}
+          label={'Dodaj etykietę'}
+          placeholder={'Dodaj etykietę'}
           options={unassignedLabels.map((label) => ({
             value: label.name,
             label: label.name,
@@ -191,8 +191,8 @@
         <button
           type="button"
           class="icon-action-btn"
-          title={'Remove deadline'}
-          aria-label={'Remove deadline'}
+          title={'Usuń termin'}
+          aria-label={'Usuń termin'}
           disabled={busy}
           onclick={clearDeadline}
         >
@@ -203,7 +203,7 @@
   </section>
 
   <section class="aside-section">
-    <h2>Notifications</h2>
+    <h2>Powiadomienia</h2>
     {#key (item.assigneeIds ?? []).join(',')}
       <WatchButton type="item" id={item.id} showLabel />
     {/key}
@@ -212,7 +212,7 @@
   <section class="aside-section aside-actions">
     <ContentHistory kind="task" targetId={item.id} labeled />
     <button class="btn btn-outline" disabled={busy} onclick={archive}>
-      <Archive size={15} aria-hidden="true" />{'Archive task'}
+      <Archive size={15} aria-hidden="true" />Zarchiwizuj zadanie
     </button>
   </section>
 </aside>

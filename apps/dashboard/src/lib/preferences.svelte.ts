@@ -1,5 +1,5 @@
 import { invalidate } from '$app/navigation';
-import { contentLocale, type FrontendLocale } from 'shared/content-locales';
+import type { FrontendLocale } from 'shared/content-locales';
 import {
   preferences,
   setTheme,
@@ -7,42 +7,31 @@ import {
   initializePreferences as initializeUiPreferences,
   type ThemePreference
 } from '@ksi-core/ui/platform/preferences';
-import { dashboardContentLocale } from './content-locale';
 
 export { preferences, setTheme, type ThemePreference };
 
-const languageStorageKey = 'ksi-dashboard-language';
-
-function languageCookie(): string | null {
-  if (typeof document === 'undefined') return null;
-  const match = document.cookie.match(/(?:^|; )locale=([^;]*)/);
-  return match ? decodeURIComponent(match[1] ?? '') : null;
-}
-
-/** Keep the server content locale in sync with the dashboard language preference. */
-function syncContentLocale(language: FrontendLocale): void {
-  if (typeof document === 'undefined') return;
-  const previous = languageCookie();
-  document.cookie = `locale=${language}; path=/; max-age=31536000; SameSite=Lax`;
-  if (dashboardContentLocale(previous) !== contentLocale(language))
-    void invalidate('ksi:localized-content');
-}
+const languageEvents = ['ksi-locale-change', 'storage', 'focus', 'pageshow'] as const;
+let appliedLanguage: FrontendLocale = preferences.language;
 
 export function setLanguage(language: FrontendLocale): void {
+  const previous = preferences.language;
   setUiLanguage(language);
-  syncContentLocale(language);
+  if (language !== previous) void invalidate('ksi:localized-content');
 }
 
 export function initializePreferences() {
-  const cleanup = initializeUiPreferences();
-  syncContentLocale(preferences.language);
-  const syncStoredLanguage = (event: StorageEvent) => {
-    if (event.key === null || event.key === languageStorageKey)
-      syncContentLocale(preferences.language);
+  const cleanupUi = initializeUiPreferences();
+  appliedLanguage = preferences.language;
+  const refreshLocalizedContent = () => {
+    if (preferences.language === appliedLanguage) return;
+    appliedLanguage = preferences.language;
+    void invalidate('ksi:localized-content');
   };
-  window.addEventListener('storage', syncStoredLanguage);
+  for (const event of languageEvents) window.addEventListener(event, refreshLocalizedContent);
+  document.addEventListener('visibilitychange', refreshLocalizedContent);
   return () => {
-    cleanup();
-    window.removeEventListener('storage', syncStoredLanguage);
+    cleanupUi();
+    for (const event of languageEvents) window.removeEventListener(event, refreshLocalizedContent);
+    document.removeEventListener('visibilitychange', refreshLocalizedContent);
   };
 }

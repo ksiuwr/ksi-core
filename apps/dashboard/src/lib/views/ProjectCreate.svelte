@@ -40,21 +40,21 @@
 
 <div class="workspace-header">
   <div>
-    <h1>New project</h1>
+    <h1>Nowy projekt</h1>
   </div>
-  <a class="btn btn-outline" href="/projects"><ArrowLeft size={15} aria-hidden="true" />{'Back'}</a>
+  <a class="btn btn-outline" href="/projects"><ArrowLeft size={15} aria-hidden="true" />Wróć</a>
 </div>
 {#if error}<p class="error" role="alert">{error}</p>{/if}
 <div class="card" style="max-width: 600px;">
-  <label for="cp-title">Name</label>
+  <label for="cp-title">Nazwa</label>
   <input id="cp-title" bind:value={title} required />
   <label for="cp-slug">Slug</label>
   <input id="cp-slug" bind:value={slug} />
-  <label for="cp-leaders">Leaders</label>
+  <label for="cp-leaders">Liderzy</label>
   <UserSelect bind:userIds={leaderIds} {api} />
-  <label for="cp-desc">Description</label>
+  <label for="cp-desc">Opis</label>
   <Editor bind:value={markdown} />
   <button class="btn" disabled={busy || !title.trim()} onclick={create} style="margin-top: 12px;">
-    Create project
+    Utwórz projekt
   </button>
 </div>

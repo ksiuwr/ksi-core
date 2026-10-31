@@ -2,11 +2,16 @@
   import type { Snippet } from 'svelte';
   import { ChevronDown, Eye, Languages, Save, Trash2, X } from '@lucide/svelte';
   import Dropdown, { type DropdownOption } from '@ksi-core/ui/platform/Dropdown.svelte';
-  import { contentLocaleName, contentLocales, type ContentLocale } from 'shared/content-locales';
+  import {
+    contentLocaleName,
+    contentLocales,
+    primaryContentLocale,
+    type ContentLocale
+  } from 'shared/content-locales';
   import { preferences } from './preferences.svelte';
 
   let {
-    selected = $bindable<ContentLocale>('en'),
+    selected = $bindable<ContentLocale>(primaryContentLocale),
     added = [],
     busy = false,
     dirty = false,
@@ -40,12 +45,13 @@
       value: locale,
       label: contentLocaleName(locale, locale),
       description:
-        locale === 'en'
-          ? 'Primary language'
+        locale === primaryContentLocale
+          ? 'Język główny'
           : added.includes(locale)
-            ? 'Translation added'
-            : 'Not added',
-      indicator: locale === 'en' ? 'Primary' : added.includes(locale) ? 'Added' : undefined
+            ? 'Tłumaczenie dodane'
+            : 'Nie dodano',
+      indicator:
+        locale === primaryContentLocale ? 'Główny' : added.includes(locale) ? 'Dodano' : undefined
     }))
   );
   function selectLanguage(value: string) {
@@ -60,15 +66,15 @@
   <div class="language-bar">
     <div class="language-title">
       <Languages size={17} aria-hidden="true" />
-      <strong>Content language</strong>
+      <strong>Język treści</strong>
     </div>
 
     <div class="language-actions">
       <div
         class="translation-tools-reveal"
-        class:open={selected !== 'en'}
-        aria-hidden={selected === 'en'}
-        inert={selected === 'en'}
+        class:open={selected !== primaryContentLocale}
+        aria-hidden={selected === primaryContentLocale}
+        inert={selected === primaryContentLocale}
       >
         <div class="translation-tools">
           <button
@@ -77,7 +83,7 @@
             aria-expanded={referenceOpen}
             onclick={() => (referenceOpen = !referenceOpen)}
           >
-            <Eye size={15} aria-hidden="true" />{'English reference'}
+            <Eye size={15} aria-hidden="true" />Polski tekst źródłowy
             <ChevronDown size={14} aria-hidden="true" class={referenceOpen ? 'open' : ''} />
           </button>
           {#if confirmingRemoval}
@@ -90,14 +96,14 @@
                 confirmingRemoval = false;
               }}
             >
-              <Trash2 size={15} aria-hidden="true" />{'Confirm remove'}
+              <Trash2 size={15} aria-hidden="true" />Usuń trwale
             </button>
             <button
               type="button"
               class="btn btn-outline"
               disabled={busy}
               onclick={() => (confirmingRemoval = false)}
-              ><X size={15} aria-hidden="true" />{'Cancel'}</button
+              ><X size={15} aria-hidden="true" />Anuluj</button
             >
           {:else}
             {#if translationExists && onremove}
@@ -105,8 +111,8 @@
                 type="button"
                 class="btn btn-outline remove-button"
                 disabled={busy}
-                aria-label={`Remove ${localeLabel(selected)} translation`}
-                title={`Remove ${localeLabel(selected)} translation`}
+                aria-label={`Usuń tłumaczenie: ${localeLabel(selected)}`}
+                title={`Usuń tłumaczenie: ${localeLabel(selected)}`}
                 onclick={() => (confirmingRemoval = true)}
                 ><Trash2 size={15} aria-hidden="true" /></button
               >
@@ -117,7 +123,7 @@
                 class="btn"
                 disabled={busy || !canSave}
                 onclick={() => onsave?.()}
-                ><Save size={15} aria-hidden="true" />{'Save translation'}</button
+                ><Save size={15} aria-hidden="true" />Zapisz tłumaczenie</button
               >
             {/if}
           {/if}
@@ -125,7 +131,7 @@
       </div>
 
       <Dropdown
-        label={'Content language'}
+        label={'Język treści'}
         value={selected}
         options={languageOptions}
         onselect={selectLanguage}
@@ -137,17 +143,17 @@
 
   <div
     class="translation-context-reveal"
-    class:open={selected !== 'en'}
-    aria-hidden={selected === 'en'}
+    class:open={selected !== primaryContentLocale}
+    aria-hidden={selected === primaryContentLocale}
   >
     <div>
       <div class="translation-context">
-        <span class="tag">{translationExists ? 'Added' : 'New'}</span>
+        <span class="tag">{translationExists ? 'Dodano' : 'Nowe'}</span>
         <p>
-          You are editing the {localeLabel(selected)} translation. Blank fields use the English value
-          shown in the reference.
+          Edytujesz tłumaczenie: {localeLabel(selected)}. Puste pola użyją polskiej wartości
+          widocznej w podglądzie.
         </p>
-        {#if dirty}<span class="dirty"><span></span>{'Unsaved changes'}</span>{/if}
+        {#if dirty}<span class="dirty"><span></span>Niezapisane zmiany</span>{/if}
       </div>
       {#if saveHint}<p class="save-hint">{saveHint}</p>{/if}
     </div>
@@ -157,15 +163,15 @@
 
   <div
     class="reference-reveal"
-    class:open={selected !== 'en' && referenceOpen}
-    aria-hidden={selected === 'en' || !referenceOpen}
-    inert={selected === 'en' || !referenceOpen}
+    class:open={selected !== primaryContentLocale && referenceOpen}
+    aria-hidden={selected === primaryContentLocale || !referenceOpen}
+    inert={selected === primaryContentLocale || !referenceOpen}
   >
     <div>
       <div class="reference-panel">
         <header>
-          <div><strong>English reference</strong><span>Read only</span></div>
-          <p>Use this as context while writing the translation.</p>
+          <div><strong>Polski tekst źródłowy</strong><span>Tylko do odczytu</span></div>
+          <p>Użyj tego tekstu jako kontekstu podczas pisania tłumaczenia.</p>
         </header>
         {@render reference()}
       </div>

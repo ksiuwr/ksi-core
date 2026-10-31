@@ -26,16 +26,7 @@
   } = $props();
   const language = $derived(preferences.language);
   const uid = $props.id();
-  const pl = $derived(language === 'pl');
-  const title = $derived(
-    kind === 'task'
-      ? pl
-        ? 'Historia zadania'
-        : 'Task history'
-      : pl
-        ? 'Historia komentarza'
-        : 'Comment history'
-  );
+  const title = $derived(kind === 'task' ? 'Historia zadania' : 'Historia komentarza');
   let open = $state(false);
   let dialog = $state<HTMLDialogElement>();
   let revisions = $state<ContentRevision[]>([]);
@@ -57,7 +48,7 @@
         `/api/platform/${kind === 'task' ? 'items' : 'comments'}/${encodeURIComponent(targetId)}/revisions?page=${page}`,
         { signal: request.signal }
       );
-      if (!response.ok) throw new Error('History unavailable');
+      if (!response.ok) throw new Error('Historia niedostępna');
       const result: ContentRevisionPage = await response.json();
       if (request.signal.aborted) return;
       revisions = page === 0 ? result.revisions : [...revisions, ...result.revisions];
@@ -83,9 +74,9 @@
   }
   onDestroy(() => controller?.abort());
   function label(revision: ContentRevision) {
-    if (revision.kind === 'created') return pl ? 'Utworzono' : 'Created';
-    if (revision.kind === 'moved') return pl ? 'Zmieniono status' : 'Status changed';
-    return pl ? 'Edytowano' : 'Edited';
+    if (revision.kind === 'created') return 'Utworzono';
+    if (revision.kind === 'moved') return 'Zmieniono status';
+    return 'Edytowano';
   }
 </script>
 
@@ -118,23 +109,16 @@
       <span class="history-emblem"><History size={22} aria-hidden="true" /></span>
       <div>
         <h2 id={`${uid}-title`}>{title}</h2>
-        <p>
-          {pl
-            ? 'Sprawdź, co zmieniono i kto wprowadził(a) zmiany.'
-            : 'See what changed and who changed it.'}
-        </p>
+        <p>Sprawdź, co zmieniono i kto wprowadził(a) zmiany.</p>
       </div>
-      <button
-        type="button"
-        class="close-history"
-        aria-label={pl ? 'Zamknij historię' : 'Close history'}
-        onclick={close}><X size={20} aria-hidden="true" /></button
+      <button type="button" class="close-history" aria-label={'Zamknij historię'} onclick={close}
+        ><X size={20} aria-hidden="true" /></button
       >
     </header>
     <div class="history-body" aria-busy={loading}>
       {#if revisions.length}
         <div class="timeline-label">
-          <Clock3 size={13} aria-hidden="true" />{pl ? 'Od najnowszych' : 'Newest first'}
+          <Clock3 size={13} aria-hidden="true" />Od najnowszych
         </div>
         <ol class="revision-list">
           {#each revisions as revision, index (revision.id)}
@@ -151,7 +135,7 @@
               <article class="revision">
                 <div class="revision-heading">
                   <div>
-                    <strong>{revision.authorName || 'System'}</strong><span class="revision-kind"
+                    <strong>{revision.authorName || 'Systemowy'}</strong><span class="revision-kind"
                       >{label(revision)}</span
                     >
                   </div>
@@ -167,12 +151,8 @@
                 {:else}
                   <p class="revision-note">
                     {revision.changes === null
-                      ? pl
-                        ? 'Dla tej starszej wersji nie zapisano szczegółów zmian.'
-                        : 'Detailed changes were not recorded for this older revision.'
-                      : pl
-                        ? 'Bez zmian w treści.'
-                        : 'No content changes.'}
+                      ? 'Dla tej starszej wersji nie zapisano szczegółów zmian.'
+                      : 'Bez zmian w treści.'}
                   </p>
                 {/if}
               </article>
@@ -182,40 +162,28 @@
       {/if}
       {#if loading}
         <div class="history-loading" role="status">
-          <span class="loading-dot"></span>{pl ? 'Wczytywanie historii…' : 'Loading history…'}
+          <span class="loading-dot"></span>Wczytywanie historii…
         </div>
       {:else if error}
         <div class="history-message" role="alert">
-          <p>{pl ? 'Nie udało się wczytać historii.' : 'Could not load history.'}</p>
+          <p>Nie udało się wczytać historii.</p>
           <button class="history-secondary" type="button" onclick={() => load(failedPage)}
-            ><RotateCcw size={14} aria-hidden="true" />{pl
-              ? 'Spróbuj ponownie'
-              : 'Try again'}</button
+            ><RotateCcw size={14} aria-hidden="true" />Spróbuj ponownie</button
           >
         </div>
       {:else if !revisions.length}
         <div class="history-message">
           <History size={28} aria-hidden="true" />
-          <h3>{pl ? 'Brak zapisanych wersji' : 'No revisions recorded'}</h3>
-          <p>
-            {pl
-              ? 'Nowe zmiany pojawią się tutaj po zapisaniu.'
-              : 'New changes will appear here when saved.'}
-          </p>
+          <h3>Brak zapisanych wersji</h3>
+          <p>Nowe zmiany pojawią się tutaj po zapisaniu.</p>
         </div>
       {:else if nextPage !== null}
         <button type="button" class="history-secondary load-more" onclick={() => load(nextPage!)}
-          ><ArrowDown size={14} aria-hidden="true" />{pl
-            ? 'Pokaż starsze wersje'
-            : 'Load older revisions'}</button
+          ><ArrowDown size={14} aria-hidden="true" />Pokaż starsze wersje</button
         >
       {/if}
     </div>
-    <footer>
-      {pl
-        ? 'Historia jest widoczna dla osób z dostępem do tej treści.'
-        : 'History is visible to everyone with access to this content.'}
-    </footer>
+    <footer>Historia jest widoczna dla osób z dostępem do tej treści.</footer>
   </dialog>
 {/if}
 

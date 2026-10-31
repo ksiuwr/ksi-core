@@ -102,7 +102,7 @@
         saving = false;
         return;
       }
-      toast.success('Alert updated successfully');
+      toast.success('Pomyślnie zaktualizowano alert');
     } else {
       const response = await api.dashboard.admin.alerts.post({
         ...newAlert,
@@ -114,7 +114,7 @@
         saving = false;
         return;
       }
-      toast.success('Alert created successfully');
+      toast.success('Pomyślnie utworzono alert');
     }
 
     saving = false;
@@ -123,7 +123,7 @@
   }
 
   async function deleteAlert(alert: Alert) {
-    if (!window.confirm(`Delete “${alert.title}”? This action cannot be undone.`)) return;
+    if (!window.confirm(`Usunąć „${alert.title}”? Tej operacji nie można cofnąć.`)) return;
 
     deletingId = alert.id;
     const response = await api.dashboard.admin.alerts({ id: alert.id }).delete();
@@ -133,7 +133,7 @@
       return;
     }
 
-    toast.success('Alert deleted');
+    toast.success('Usunięto alert');
     deletingId = null;
     await fetchAlerts(currentPage);
   }
@@ -180,10 +180,10 @@
     class="border-base-content/15 flex flex-col gap-8 border-b pb-10 md:flex-row md:items-end md:justify-between"
   >
     <div>
-      <p class="text-primary mb-4 text-xs font-bold tracking-[0.2em] uppercase">Announcements</p>
-      <h1 class="mb-0! text-4xl tracking-[-0.04em] sm:text-5xl">Alerts</h1>
+      <p class="text-primary mb-4 text-xs font-bold tracking-[0.2em] uppercase">Komunikaty</p>
+      <h1 class="mb-0! text-4xl tracking-[-0.04em] sm:text-5xl">Alerty</h1>
       <p class="text-base-content/65 mt-4 max-w-2xl text-lg leading-relaxed">
-        Schedule and maintain the notices displayed at the top of the public website.
+        Planuj i aktualizuj powiadomienia wyświetlane u góry publicznej witryny.
       </p>
     </div>
     {#if !creating}
@@ -193,7 +193,7 @@
         onclick={() => (creating = true)}
       >
         <Plus class="size-4" />
-        New alert
+        Nowy alert
       </button>
     {/if}
   </header>
@@ -207,16 +207,16 @@
           class="border-base-content/15 flex items-center justify-between border-b px-5 py-4 md:px-7"
         >
           <div>
-            <p class="text-primary mb-1 font-mono text-xs tracking-[0.16em] uppercase">Editor</p>
+            <p class="text-primary mb-1 font-mono text-xs tracking-[0.16em] uppercase">Edytor</p>
             <h2 id="editor-heading" class="mb-0! text-2xl">
-              {editingId ? 'Edit alert' : 'Create alert'}
+              {editingId ? 'Edytuj alert' : 'Utwórz alert'}
             </h2>
           </div>
           <button
             class="btn btn-square btn-ghost btn-sm"
             type="button"
             onclick={resetForm}
-            aria-label="Close alert editor"
+            aria-label="Zamknij edytor alertu"
             disabled={saving}
           >
             <X class="size-5" />
@@ -225,10 +225,10 @@
 
         <div class="grid gap-6 p-5 md:grid-cols-2 md:p-7">
           <label class="form-control w-full">
-            <span class="mb-2 text-sm font-bold">Title</span>
+            <span class="mb-2 text-sm font-bold">Tytuł</span>
             <input
               type="text"
-              placeholder="Maintenance notice"
+              placeholder="Przerwa techniczna"
               class="input input-bordered w-full"
               bind:value={newAlert.title}
               required
@@ -236,17 +236,17 @@
           </label>
 
           <label class="form-control w-full">
-            <span class="mb-2 text-sm font-bold">Display style</span>
+            <span class="mb-2 text-sm font-bold">Styl wyświetlania</span>
             <select class="select select-bordered w-full" bind:value={newAlert.color}>
-              <option value="neutral">Neutral</option>
-              <option value="info">Information</option>
-              <option value="warning">Warning</option>
-              <option value="danger">Danger</option>
+              <option value="neutral">Neutralny</option>
+              <option value="info">Informacja</option>
+              <option value="warning">Ostrzeżenie</option>
+              <option value="danger">Zagrożenie</option>
             </select>
           </label>
 
           <label class="form-control w-full">
-            <span class="mb-2 text-sm font-bold">Starts at</span>
+            <span class="mb-2 text-sm font-bold">Początek</span>
             <input
               type="datetime-local"
               class="input input-bordered w-full"
@@ -254,11 +254,11 @@
               oninput={(event) => (newAlert.startDate = new Date(event.currentTarget.value))}
               required
             />
-            <span class="text-base-content/45 mt-2 font-mono text-xs">Your local time</span>
+            <span class="text-base-content/45 mt-2 font-mono text-xs">Twój czas lokalny</span>
           </label>
 
           <label class="form-control w-full">
-            <span class="mb-2 text-sm font-bold">Ends at</span>
+            <span class="mb-2 text-sm font-bold">Koniec</span>
             <input
               type="datetime-local"
               class="input input-bordered w-full"
@@ -266,13 +266,13 @@
               oninput={(event) => (newAlert.endDate = new Date(event.currentTarget.value))}
               required
             />
-            <span class="text-base-content/45 mt-2 font-mono text-xs">Your local time</span>
+            <span class="text-base-content/45 mt-2 font-mono text-xs">Twój czas lokalny</span>
           </label>
 
           <label class="form-control w-full">
             <span class="mb-2 flex items-center justify-between gap-3 text-sm font-bold">
-              Priority
-              <span class="text-base-content/45 font-mono text-xs font-normal">Optional</span>
+              Priorytet
+              <span class="text-base-content/45 font-mono text-xs font-normal">Opcjonalnie</span>
             </span>
             <input
               type="number"
@@ -286,7 +286,7 @@
           <label class="form-control w-full">
             <span class="mb-2 flex items-center justify-between gap-3 text-sm font-bold">
               Link
-              <span class="text-base-content/45 font-mono text-xs font-normal">Optional</span>
+              <span class="text-base-content/45 font-mono text-xs font-normal">Opcjonalnie</span>
             </span>
             <input
               type="url"
@@ -297,10 +297,10 @@
           </label>
 
           <label class="form-control w-full md:col-span-2">
-            <span class="mb-2 text-sm font-bold">Description</span>
+            <span class="mb-2 text-sm font-bold">Opis</span>
             <textarea
               class="textarea textarea-bordered min-h-32 w-full text-base leading-relaxed"
-              placeholder="Explain what visitors need to know…"
+              placeholder="Napisz, co powinni wiedzieć odwiedzający…"
               bind:value={newAlert.description}
               required
             ></textarea>
@@ -311,10 +311,10 @@
           class="border-base-content/15 flex flex-col-reverse gap-3 border-t p-5 sm:flex-row sm:justify-end md:px-7"
         >
           <button class="btn btn-ghost" type="button" onclick={resetForm} disabled={saving}
-            >Cancel</button
+            >Anuluj</button
           >
           <button class="btn btn-primary min-w-36" type="submit" disabled={saving}>
-            {saving ? 'Saving…' : editingId ? 'Save changes' : 'Create alert'}
+            {saving ? 'Zapisywanie…' : editingId ? 'Zapisz zmiany' : 'Utwórz alert'}
           </button>
         </div>
       </form>
@@ -325,40 +325,40 @@
     <div class="mb-7 flex items-end justify-between gap-4">
       <div>
         <p class="text-primary mb-3 text-xs font-bold tracking-[0.2em] uppercase">
-          01 / Published records
+          01 / Opublikowane wpisy
         </p>
         <h2 id="alert-list-heading" class="mb-0! text-2xl tracking-tight sm:text-3xl">
-          All alerts
+          Wszystkie alerty
         </h2>
       </div>
       {#if !loading && !loadError}
         <span class="text-base-content/45 font-mono text-xs"
-          >Page {currentPage + 1} / {Math.max(pageCount, 1)}</span
+          >Strona {currentPage + 1} / {Math.max(pageCount, 1)}</span
         >
       {/if}
     </div>
 
     {#if loading}
       <div class="border-base-content/15 border p-8 text-center" role="status">
-        <p class="text-base-content/55 font-mono text-sm">Loading alerts…</p>
+        <p class="text-base-content/55 font-mono text-sm">Ładowanie alertów…</p>
       </div>
     {:else if loadError}
       <div class="border-error/30 bg-error/5 border p-6">
-        <p class="text-error font-bold">Alerts could not be loaded.</p>
+        <p class="text-error font-bold">Nie udało się załadować alertów.</p>
         <p class="text-base-content/65 mt-1 text-sm">{loadError}</p>
         <button
           class="btn btn-outline btn-sm mt-4"
           type="button"
           onclick={() => void fetchAlerts(currentPage)}
         >
-          Try again
+          Spróbuj ponownie
         </button>
       </div>
     {:else if alerts.length === 0}
       <div class="border-base-content/25 border border-dashed px-6 py-14 text-center">
         <Megaphone class="text-base-content/30 mx-auto mb-4 size-8" strokeWidth={1.5} />
-        <h3 class="mb-2! text-xl">No alerts on this page</h3>
-        <p class="text-base-content/55">Create an alert to publish the first announcement.</p>
+        <h3 class="mb-2! text-xl">Brak alertów na tej stronie</h3>
+        <p class="text-base-content/55">Utwórz alert, aby opublikować pierwszy komunikat.</p>
       </div>
     {:else}
       <div class="border-base-content/15 bg-base-content/15 grid gap-px border">
@@ -382,13 +382,13 @@
                     <span
                       class="border-base-content/15 text-base-content/50 border px-2 py-1 font-mono text-[0.65rem] tracking-[0.12em] uppercase"
                     >
-                      Priority {alert.priority}
+                      Priorytet {alert.priority}
                     </span>
                   {/if}
                 </div>
                 <h3 class="mb-2! text-xl tracking-tight sm:text-2xl">{alert.title}</h3>
                 <p class="text-base-content/50 mb-4 font-mono text-xs leading-relaxed">
-                  From {formatLocalDate(alert.startDate)} to {formatLocalDate(alert.endDate)}
+                  Od {formatLocalDate(alert.startDate)} do {formatLocalDate(alert.endDate)}
                 </p>
                 <p
                   class="text-base-content/75 max-w-4xl leading-relaxed wrap-anywhere whitespace-pre-wrap"
@@ -411,7 +411,7 @@
                   class="btn btn-square btn-ghost btn-sm"
                   type="button"
                   onclick={() => startEditing(alert)}
-                  aria-label={`Edit ${alert.title}`}
+                  aria-label={`Edytuj ${alert.title}`}
                   disabled={deletingId === alert.id}
                 >
                   <Pencil class="size-4" />
@@ -420,7 +420,7 @@
                   class="btn btn-square btn-ghost btn-sm text-error"
                   type="button"
                   onclick={() => void deleteAlert(alert)}
-                  aria-label={`Delete ${alert.title}`}
+                  aria-label={`Usuń ${alert.title}`}
                   disabled={deletingId !== null}
                 >
                   {#if deletingId === alert.id}
@@ -437,14 +437,14 @@
     {/if}
 
     {#if !loading && !loadError && pageCount > 1}
-      <nav class="mt-8 flex flex-wrap justify-center gap-2" aria-label="Alerts pagination">
+      <nav class="mt-8 flex flex-wrap justify-center gap-2" aria-label="Stronicowanie alertów">
         {#each pages as page}
           <button
             class={currentPage === page
               ? 'btn btn-square btn-sm btn-primary'
               : 'btn btn-square btn-sm btn-outline'}
             type="button"
-            aria-label={`Go to page ${page + 1}`}
+            aria-label={`Przejdź do strony ${page + 1}`}
             aria-current={currentPage === page ? 'page' : undefined}
             onclick={() => (currentPage = page)}>{page + 1}</button
           >

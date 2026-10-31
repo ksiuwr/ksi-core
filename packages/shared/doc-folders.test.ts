@@ -8,20 +8,21 @@ import {
 } from './doc-folders';
 
 const folders: DocFolder[] = [
-  { id: 'camp', parentId: null, name: 'Camp', translations: { pl: { name: 'Obóz' } } },
-  { id: 'kit', parentId: 'camp', name: 'Kit', translations: { pl: { name: 'Sprzęt' } } },
-  { id: 'empty', parentId: 'kit', name: 'Empty', translations: {} },
-  { id: 'other', parentId: null, name: 'Archive', translations: {} }
+  { id: 'camp', parentId: null, name: 'Obóz', translations: { en: { name: 'Camp' } } },
+  { id: 'kit', parentId: 'camp', name: 'Sprzęt', translations: { en: { name: 'Kit' } } },
+  { id: 'empty', parentId: 'kit', name: 'Pusty', translations: {} },
+  { id: 'other', parentId: null, name: 'Archiwum', translations: {} }
 ];
 
 describe('documentation folder identities', () => {
   test('paths localize each ancestor with per-name fallback', () => {
-    expect(docFolderPath(folders, 'empty', 'pl')).toBe('Obóz/Sprzęt/Empty');
-    expect(docFolderPath(folders, 'empty', 'en')).toBe('Camp/Kit/Empty');
-    expect(docFolderPath(folders, null, 'pl')).toBe('');
-    expect(docFolderTrail(folders, 'kit', 'pl')).toEqual([
-      { id: 'camp', name: 'Obóz' },
-      { id: 'kit', name: 'Sprzęt' }
+    expect(docFolderPath(folders, 'empty', 'en-us')).toBe('Camp/Kit/Pusty');
+    expect(docFolderPath(folders, 'empty', 'pl')).toBe('Obóz/Sprzęt/Pusty');
+    expect(docFolderPath(folders, 'empty')).toBe('Obóz/Sprzęt/Pusty');
+    expect(docFolderPath(folders, null, 'en')).toBe('');
+    expect(docFolderTrail(folders, 'kit', 'en')).toEqual([
+      { id: 'camp', name: 'Camp' },
+      { id: 'kit', name: 'Kit' }
     ]);
   });
   test('descendants prevent moving a folder into any level of its own subtree', () => {
@@ -29,11 +30,11 @@ describe('documentation folder identities', () => {
     expect([...docFolderDescendants(folders, 'kit')].sort()).toEqual(['empty', 'kit']);
   });
   test('choices keep stable ids and nested depth, sorted by localized name', () => {
-    expect(docFolderOptions(folders, 'pl')).toEqual([
-      { id: 'other', label: 'Archive', depth: 0 },
-      { id: 'camp', label: 'Obóz', depth: 0 },
-      { id: 'kit', label: 'Sprzęt', depth: 1 },
-      { id: 'empty', label: 'Empty', depth: 2 }
+    expect(docFolderOptions(folders, 'en')).toEqual([
+      { id: 'other', label: 'Archiwum', depth: 0 },
+      { id: 'camp', label: 'Camp', depth: 0 },
+      { id: 'kit', label: 'Kit', depth: 1 },
+      { id: 'empty', label: 'Pusty', depth: 2 }
     ]);
   });
 });

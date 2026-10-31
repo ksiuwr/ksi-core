@@ -65,52 +65,55 @@
   const tab = $derived(tabFromPath(pathname));
   // Loaders send English page names; map the static ones through the catalog.
   const pageTitles = $derived<Record<string, string>>({
-    Activity: 'Activity',
-    Articles: 'Articles',
-    Documentation: 'Documentation',
+    Activity: 'Aktywność',
+    Articles: 'Artykuły',
+    Documentation: 'Dokumentacja',
     Forum: 'Forum',
     Kanban: 'Kanban',
-    'Member profile': 'Member profile',
-    Members: 'Members',
-    'My profile': 'My profile',
-    'New project': 'New project',
-    Notifications: 'Notifications',
-    Overview: 'Overview',
-    Permissions: 'Permissions',
-    'Preview credentials': 'Preview credentials',
-    Projects: 'Projects',
-    'Removed tasks': 'Removed tasks',
-    Settings: 'Settings'
+    'Member profile': 'Profil członka',
+    Members: 'Członkowie',
+    'My profile': 'Mój profil',
+    'New article': 'Nowy artykuł',
+    'New project': 'Nowy projekt',
+    'New task': 'Nowe zadanie',
+    'New thread': 'Nowy wątek',
+    Notifications: 'Powiadomienia',
+    Overview: 'Przegląd',
+    Permissions: 'Uprawnienia',
+    'Preview credentials': 'Dane logowania podglądu',
+    Projects: 'Projekty',
+    'Removed tasks': 'Usunięte zadania',
+    Settings: 'Ustawienia'
   });
-  const rawTitle = $derived((merged.title as string | undefined) ?? 'Dashboard');
+  const rawTitle = $derived((merged.title as string | undefined) ?? 'Pulpit');
   const viewName = $derived(pageTitles[rawTitle] ?? rawTitle);
   const workspaceName = $derived(
-    workspace === 'project' ? (project?.name ?? 'Project') : 'Association'
+    workspace === 'project' ? (project?.name ?? 'Projekt') : 'Całe koło'
   );
   const role = $derived(user?.role ?? 'member');
 
   const tabs = $derived([
-    ['overview', 'Overview'],
+    ['overview', 'Przegląd'],
     ['board', 'Kanban'],
     ['forum', 'Forum'],
-    ['articles', 'Articles'],
-    ['docs', 'Docs'],
-    ['events', 'Activity'],
-    ['roster', 'Members'],
+    ['articles', 'Artykuły'],
+    ['docs', 'Dokumentacja'],
+    ['events', 'Aktywność'],
+    ['roster', 'Członkowie'],
     ...((workspace === 'project' && (projectAccess.canEdit || projectAccess.canManageMembers)) ||
     (workspace === 'association' && data.canManageAlerts)
-      ? [['settings', 'Settings']]
+      ? [['settings', 'Ustawienia']]
       : []),
     ...(workspace === 'project' && projectAccess.canManageGroups
-      ? [['permissions', 'Permissions']]
+      ? [['permissions', 'Uprawnienia']]
       : []),
     ...(workspace === 'project' && projectAccess.canReadPreviewCredentials
-      ? [['previews', 'Preview credentials']]
+      ? [['previews', 'Dane logowania podglądu']]
       : [])
   ] as [string, string][]);
   const pickerOptions = $derived([
-    { value: 'directory', label: 'All projects', href: '/projects' },
-    { value: 'association', label: 'Association', href: '/association' },
+    { value: 'directory', label: 'Wszystkie projekty', href: '/projects' },
+    { value: 'association', label: 'Całe koło', href: '/association' },
     ...projects.map((item) => ({
       value: item.id,
       label: item.name,
@@ -286,13 +289,13 @@
 {:else if user.membershipStatus !== 'active'}
   <div class="pending-screen">
     <div class="pending-card">
-      <h1>Account activation required</h1>
+      <h1>Konto wymaga aktywacji</h1>
       <p>
-        {'Your account first needs to be activated by an administrator. Ask directly:'}
+        Twoje konto musi najpierw zostać aktywowane przez administratora. Zapytaj bezpośrednio:
         {data.activationContact}.
       </p>
       <form method="POST" action="/logout">
-        <button class="btn" style="margin: 0 auto;">Sign out</button>
+        <button class="btn" style="margin: 0 auto;">Wyloguj się</button>
       </form>
     </div>
   </div>
@@ -303,7 +306,7 @@
         class="navigation-backdrop"
         tabindex="-1"
         aria-hidden="true"
-        aria-label={'Close navigation'}
+        aria-label={'Zamknij nawigację'}
         onclick={() => {
           mobileNavigation = false;
           document.getElementById('navigation-toggle')?.focus();
@@ -316,15 +319,15 @@
       class:mobile-open={mobileNavigation}
       role={mobileNavigation ? 'dialog' : undefined}
       aria-modal={mobileNavigation ? true : undefined}
-      aria-label={'Navigation'}
+      aria-label={'Nawigacja'}
     >
       <div class="sidebar-controls">
         <button
           class="sidebar-collapse"
           aria-controls="dashboard-navigation"
           aria-expanded={!sidebarCollapsed}
-          aria-label={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
-          title={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
+          aria-label={sidebarCollapsed ? 'Pokaż panel boczny' : 'Ukryj panel boczny'}
+          title={sidebarCollapsed ? 'Pokaż panel boczny' : 'Ukryj panel boczny'}
           onclick={toggleSidebar}
         >
           {#if sidebarCollapsed}<PanelLeftOpen size={16} aria-hidden="true" />{:else}<PanelLeftClose
@@ -338,7 +341,7 @@
             mobileNavigation = false;
             document.getElementById('navigation-toggle')?.focus();
           }}
-          aria-label={'Close navigation'}><X size={20} aria-hidden="true" /></button
+          aria-label={'Zamknij nawigację'}><X size={20} aria-hidden="true" /></button
         >
       </div>
       <div class="sidebar-brand">
@@ -369,52 +372,53 @@
           class:active={tab === 'projects' || tab === '__create_project__'}
           href="/projects"
           aria-current={tab === 'projects' ? 'page' : undefined}
-          title={'Projects'}
+          title={'Projekty'}
           ><span class="navigation-label"
-            ><Folder size={16} aria-hidden="true" /><span class="navigation-text">Projects</span
+            ><Folder size={16} aria-hidden="true" /><span class="navigation-text">Projekty</span
             ></span
           ></a
         >
-        <a class="sidebar-btn" href="/association" title={'Association'}>
+        <a class="sidebar-btn" href="/association" title={'Całe koło'}>
           <span class="navigation-label"
-            ><Users size={16} aria-hidden="true" /><span class="navigation-text">Association</span
+            ><Users size={16} aria-hidden="true" /><span class="navigation-text">Całe koło</span
             ></span
           ><ArrowUpRight size={14} aria-hidden="true" />
         </a>
-        <p class="sidebar-hint">Choose a project to open its board, forum, and articles.</p>
+        <p class="sidebar-hint">Wybierz projekt, aby otworzyć jego tablicę, forum i artykuły.</p>
       {/if}
       <div class="sidebar-global">
         {#if workspace === 'project'}
-          <a class="sidebar-btn" href="/association" title={'Association'}
+          <a class="sidebar-btn" href="/association" title={'Całe koło'}
             ><span class="navigation-label"
-              ><Users size={16} aria-hidden="true" /><span class="navigation-text">Association</span
+              ><Users size={16} aria-hidden="true" /><span class="navigation-text">Całe koło</span
               ></span
             ><ArrowUpRight size={14} aria-hidden="true" /></a
           >
         {/if}
         {#if role !== 'member'}
-          <span class="sidebar-section">Association management</span>
+          <span class="sidebar-section">Administracja koła</span>
           <a
             class="sidebar-btn"
             class:active={tab === 'users'}
             aria-current={tab === 'users' ? 'page' : undefined}
             href="/members"
-            title={'Members'}
+            title={'Członkowie'}
             ><span class="navigation-label"
-              ><UserRound size={16} aria-hidden="true" /><span class="navigation-text">Members</span
+              ><UserRound size={16} aria-hidden="true" /><span class="navigation-text"
+                >Członkowie</span
               ></span
             ></a
           >
         {/if}
-        <a class="sidebar-btn" href={data.websiteOrigin} title={'KSI website'}
+        <a class="sidebar-btn" href={data.websiteOrigin} title={'Strona KSI'}
           ><span class="navigation-label"
             ><ArrowUpRight size={16} aria-hidden="true" /><span class="navigation-text"
-              >KSI website</span
+              >Strona KSI</span
             ></span
           ></a
         >
         <div class="sidebar-footnote">
-          KSI · {'University of Wrocław'}
+          KSI · Uniwersytet Wrocławski
           <div class="build-details">
             v{import.meta.env.PUBLIC_APP_VERSION} ·
             <a
@@ -423,7 +427,7 @@
                 : 'https://github.com/ksiuwr/ksi-core'}
               target="_blank"
               rel="noopener noreferrer"
-              >{import.meta.env.PUBLIC_COMMIT_HASH?.slice(0, 7) || 'Source'}</a
+              >{import.meta.env.PUBLIC_COMMIT_HASH?.slice(0, 7) || 'Kod źródłowy'}</a
             >
           </div>
         </div>
@@ -440,12 +444,12 @@
           onclick={openNavigation}
         >
           <Menu size={20} strokeWidth={1.7} aria-hidden="true" /><span class="sr-only"
-            >Navigation</span
+            >Nawigacja</span
           >
         </button>
         <div class="workspace-picker">
           <Dropdown
-            label={'Choose workspace'}
+            label={'Wybierz przestrzeń'}
             value={workspace === 'project'
               ? scope
               : workspace === 'association'
@@ -455,13 +459,13 @@
             placeholder={workspaceName}
             searchable
             variant="bar"
-            searchPlaceholder={'Search projects…'}
-            emptyLabel={'No projects found.'}
+            searchPlaceholder={'Szukaj projektu…'}
+            emptyLabel={'Nie znaleziono projektu.'}
           >
             {#snippet leading()}<Folder size={16} strokeWidth={1.7} aria-hidden="true" />{/snippet}
           </Dropdown>
         </div>
-        <nav class="workspace-breadcrumb" aria-label={'Current page'}>
+        <nav class="workspace-breadcrumb" aria-label={'Bieżąca strona'}>
           <span aria-hidden="true">/</span><strong>{viewName}</strong>
         </nav>
         <div class="topbar-controls">
@@ -474,7 +478,7 @@
           <AppearanceMenu />
           <details class="topbar-menu" bind:this={accountMenu}>
             <summary
-              aria-label={'My account'}
+              aria-label={'Moje konto'}
               onpointerdown={pressAccountMenu}
               onclick={ignoreHoldClick}
               ><span class="account-avatar"
@@ -486,13 +490,13 @@
             >
             <div class="menu-panel account-panel">
               <strong>{user.firstName || user.name} {user.lastName}</strong>
-              <span class="muted">Account settings</span>
+              <span class="muted">Ustawienia konta</span>
               <button
                 class="account-action"
                 onclick={() => {
                   if (accountMenu) accountMenu.open = false;
                   changeTab('profile');
-                }}><UserRound size={16} aria-hidden="true" />{'My profile'}</button
+                }}><UserRound size={16} aria-hidden="true" />Mój profil</button
               >
               <form
                 method="POST"
@@ -502,7 +506,7 @@
                 }}
               >
                 <button class="account-action sign-out"
-                  ><LogOut size={16} aria-hidden="true" />{'Sign out'}</button
+                  ><LogOut size={16} aria-hidden="true" />Wyloguj się</button
                 >
               </form>
             </div>

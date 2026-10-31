@@ -20,7 +20,6 @@
 
   const language = $derived(preferences.language);
   const uid = $props.id();
-  const pl = $derived(language === 'pl');
   const intl = $derived(language);
 
   let trigger = $state<HTMLButtonElement>();
@@ -48,14 +47,14 @@
   let warping = false;
   let syncing = false;
 
-  const fieldLabel = $derived(label ?? (pl ? 'Termin (czas lokalny)' : 'Deadline (local time)'));
-  const emptyLabel = $derived(placeholder ?? (pl ? 'Brak terminu' : 'No deadline'));
-  const doneLabel = $derived(pl ? 'Gotowe' : 'Done');
-  const nextLabel = $derived(pl ? 'Dalej' : 'Next');
-  const closeLabel = $derived(pl ? 'Zamknij' : 'Close');
-  const timeLabel = $derived(pl ? 'Godzina' : 'Time');
-  const hoursLabel = $derived(pl ? 'Godzina' : 'Hour');
-  const minutesLabel = $derived(pl ? 'Minuta' : 'Minute');
+  const fieldLabel = $derived(label ?? 'Termin (czas lokalny)');
+  const emptyLabel = $derived(placeholder ?? 'Brak terminu');
+  const doneLabel = $derived('Gotowe');
+  const nextLabel = $derived('Dalej');
+  const closeLabel = $derived('Zamknij');
+  const timeLabel = $derived('Godzina');
+  const hoursLabel = $derived('Godzina');
+  const minutesLabel = $derived('Minuta');
   const hours = Array.from({ length: 24 }, (_, index) => pad(index));
   const minutes = Array.from({ length: 60 }, (_, index) => pad(index));
   const hourUnits = [...hours, ...hours, ...hours];
@@ -496,23 +495,17 @@
           type="button"
           class="picker-step"
           onclick={() => void shiftMonth(-1)}
-          aria-label={pl ? 'Poprzedni miesiąc' : 'Previous month'}
-          ><ChevronLeft size={17} aria-hidden="true" /></button
+          aria-label={'Poprzedni miesiąc'}><ChevronLeft size={17} aria-hidden="true" /></button
         >
         <strong class="picker-title" aria-live="polite">{title}</strong>
         <button
           type="button"
           class="picker-step"
           onclick={() => void shiftMonth(1)}
-          aria-label={pl ? 'Następny miesiąc' : 'Next month'}
-          ><ChevronRight size={17} aria-hidden="true" /></button
+          aria-label={'Następny miesiąc'}><ChevronRight size={17} aria-hidden="true" /></button
         >
       {:else}
-        <button
-          type="button"
-          class="picker-step"
-          onclick={showDate}
-          aria-label={pl ? 'Wstecz do daty' : 'Back to date'}
+        <button type="button" class="picker-step" onclick={showDate} aria-label={'Wstecz do daty'}
           ><ChevronLeft size={17} aria-hidden="true" /></button
         >
         <strong class="picker-title" aria-live="polite">{timeLabel}</strong>
@@ -537,25 +530,25 @@
               type="button"
               class:selected={draftDate === presetDate(0)}
               aria-pressed={draftDate === presetDate(0)}
-              onclick={() => preset(0)}>{pl ? 'Dziś' : 'Today'}</button
+              onclick={() => preset(0)}>Dziś</button
             >
             <button
               type="button"
               class:selected={draftDate === presetDate(1)}
               aria-pressed={draftDate === presetDate(1)}
-              onclick={() => preset(1)}>{pl ? 'Jutro' : 'Tomorrow'}</button
+              onclick={() => preset(1)}>Jutro</button
             >
             <button
               type="button"
               class:selected={draftDate === presetDate(7)}
               aria-pressed={draftDate === presetDate(7)}
-              onclick={() => preset(7)}>{pl ? 'Za tydzień' : 'In a week'}</button
+              onclick={() => preset(7)}>Za tydzień</button
             >
             <button
               type="button"
               class:selected={draftDate === presetDate(28)}
               aria-pressed={draftDate === presetDate(28)}
-              onclick={() => preset(28)}>{pl ? 'Za miesiąc' : 'In a month'}</button
+              onclick={() => preset(28)}>Za miesiąc</button
             >
           </div>
           <div class="picker-cal-wrap">
@@ -710,16 +703,14 @@
             type="button"
             class="picker-step"
             onclick={() => void shiftMonth(-1)}
-            aria-label={pl ? 'Poprzedni miesiąc' : 'Previous month'}
-            ><ChevronLeft size={19} aria-hidden="true" /></button
+            aria-label={'Poprzedni miesiąc'}><ChevronLeft size={19} aria-hidden="true" /></button
           >
           <strong class="picker-title" aria-live="polite">{title}</strong>
           <button
             type="button"
             class="picker-step"
             onclick={() => void shiftMonth(1)}
-            aria-label={pl ? 'Następny miesiąc' : 'Next month'}
-            ><ChevronRight size={19} aria-hidden="true" /></button
+            aria-label={'Następny miesiąc'}><ChevronRight size={19} aria-hidden="true" /></button
           >
         </div>
       {/if}

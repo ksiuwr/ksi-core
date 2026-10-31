@@ -4,6 +4,7 @@ import {
   themeCookieDomain,
   type ThemePreference
 } from 'shared/theme-policy.ts';
+import { preferenceCookieRemoval } from 'shared/preference-cookie.ts';
 export type { ThemePreference } from 'shared/theme-policy.ts';
 function readStorage(key: string) {
   try {
@@ -30,12 +31,24 @@ export function setThemePreference(preference: ThemePreference) {
   try {
     localStorage.setItem('ksi-theme', preference);
   } catch {}
+  const removal = preferenceCookieRemoval('ksi-theme', location.hostname);
+  if (removal) document.cookie = removal;
   const domain = themeCookieDomain(location.hostname);
   document.cookie = `ksi-theme=${preference}; Path=/; Max-Age=31536000; SameSite=Lax${domain ? `; Domain=${domain}` : ''}${location.protocol === 'https:' ? '; Secure' : ''}`;
   apply(preference);
   window.dispatchEvent(new Event('ksi-theme-change'));
 }
+/** Pre-domain builds left a host-only cookie that shadows the shared one. */
+function migrateLegacyThemeCookie() {
+  const removal = preferenceCookieRemoval('ksi-theme', location.hostname);
+  if (!removal) return;
+  const seen = themeFromCookie(document.cookie);
+  document.cookie = removal;
+  if (themeFromCookie(document.cookie)) return;
+  if (validTheme(seen)) setThemePreference(seen);
+}
 export function observeTheme(callback: (theme: ThemePreference) => void) {
+  migrateLegacyThemeCookie();
   const sync = () => {
     const theme = readTheme();
     apply(theme);

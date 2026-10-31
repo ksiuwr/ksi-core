@@ -59,24 +59,24 @@
   }
 </script>
 
-<aside class="detail-aside" aria-label={'Thread details'}>
+<aside class="detail-aside" aria-label={'Szczegóły wątku'}>
   {#if error}<p class="error" role="alert">{error}</p>{/if}
 
   <section class="aside-section">
     <dl class="metadata-list">
       <div>
-        <dt>Visibility</dt>
+        <dt>Widoczność</dt>
         <dd>
           {thread.visibility === 'leaders'
-            ? 'Leaders'
+            ? 'Liderzy'
             : thread.visibility === 'members'
-              ? 'Project members'
-              : 'Association members'}
+              ? 'Członkowie projektu'
+              : 'Członkowie koła'}
         </dd>
       </div>
       {#if created}
         <div>
-          <dt>Created</dt>
+          <dt>Utworzono</dt>
           <dd><time datetime={thread.createdAt}>{created}</time></dd>
         </div>
       {/if}
@@ -84,7 +84,7 @@
   </section>
 
   <section class="aside-section">
-    <h2>Assignees</h2>
+    <h2>Przypisane osoby</h2>
     <Assignees
       value={thread.assigneeIds ?? []}
       {members}
@@ -95,7 +95,7 @@
   </section>
 
   <section class="aside-section">
-    <h2>Notifications</h2>
+    <h2>Powiadomienia</h2>
     {#key (thread.assigneeIds ?? []).join(',')}
       <WatchButton type="thread" id={thread.id} showLabel />
     {/key}
@@ -104,10 +104,10 @@
   <section class="aside-section aside-actions">
     {#if canManage}
       <button class="btn btn-outline" disabled={busy} onclick={toggleArchive}>
-        {#if archived}<RotateCcw size={15} aria-hidden="true" />{'Restore thread'}{:else}<Archive
+        {#if archived}<RotateCcw size={15} aria-hidden="true" />Przywróć wątek{:else}<Archive
             size={15}
             aria-hidden="true"
-          />{'Archive thread'}{/if}
+          />Zarchiwizuj wątek{/if}
       </button>
     {/if}
   </section>

@@ -3,9 +3,9 @@
 </script>
 
 {#if field === 'research'}
-  Research
+  Badania
 {:else if field === 'community'}
-  Community
+  Społeczność
 {:else}
-  Engineering
+  Inżynieria
 {/if}

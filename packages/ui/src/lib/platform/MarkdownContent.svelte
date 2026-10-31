@@ -86,7 +86,7 @@
 {#if !mounted}<div class="markdown-skeleton" aria-hidden="true">
     <span></span><span></span><span></span>
   </div>
-{:else if !value.trim()}<p class="muted">No description.</p>
+{:else if !value.trim()}<p class="muted">Brak opisu.</p>
 {:else}<Markdown {blocks} {language} {onresize} />{/if}
 
 <style>

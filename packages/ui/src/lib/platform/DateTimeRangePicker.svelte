@@ -15,23 +15,23 @@
 </script>
 
 <fieldset class="interval" {disabled}>
-  <legend>Display interval</legend>
+  <legend>Przedział wyświetlania</legend>
   <div class="interval-fields">
     <DateTimePicker
       bind:value={start}
-      label="From (local time)"
-      placeholder="Choose start date and time"
+      label="Od (czas lokalny)"
+      placeholder="Wybierz datę i godzinę rozpoczęcia"
       defaultTime="00:00"
       {disabled}
     />
     <DateTimePicker
       bind:value={end}
-      label="To (local time)"
-      placeholder="Choose end date and time"
+      label="Do (czas lokalny)"
+      placeholder="Wybierz datę i godzinę zakończenia"
       {disabled}
     />
   </div>
-  {#if invalid}<p class="interval-error" role="alert">The end must be after the start.</p>{/if}
+  {#if invalid}<p class="interval-error" role="alert">Koniec musi przypadać po początku.</p>{/if}
 </fieldset>
 
 <style>

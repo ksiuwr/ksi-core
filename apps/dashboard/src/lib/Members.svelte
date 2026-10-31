@@ -10,7 +10,7 @@
   import MemberPreview from './MemberPreview.svelte';
   import { Search, ArrowLeft, Trash2, Save, ChevronLeft, ChevronRight } from '@lucide/svelte';
   import type { Profile } from 'shared/types';
-  import type { ContentLocale } from 'shared/content-locales';
+  import { primaryContentLocale, type ContentLocale } from 'shared/content-locales';
   let {
     administrator,
     memberId,
@@ -18,15 +18,15 @@
   }: { administrator: boolean; memberId?: string; websiteOrigin: string } = $props();
 
   const roles = $derived([
-    { value: 'member', label: 'Member' },
-    { value: 'board', label: 'Board' },
+    { value: 'member', label: 'Członek' },
+    { value: 'board', label: 'Zarząd' },
     { value: 'administrator', label: 'Administrator' }
   ]);
   const statuses = $derived([
-    { value: 'pending', label: 'Pending' },
-    { value: 'active', label: 'Active' },
-    { value: 'suspended', label: 'Suspended' },
-    { value: 'deleted', label: 'Deleted' }
+    { value: 'pending', label: 'Oczekujący' },
+    { value: 'active', label: 'Aktywne' },
+    { value: 'suspended', label: 'Zawieszony' },
+    { value: 'deleted', label: 'Usunięty' }
   ]);
   let records = $state<Profile[]>([]),
     total = $state(0),
@@ -40,14 +40,16 @@
     search = $state('');
   let emailDraft = $state('');
   let resetConfirmation = $state(false);
-  let contentLocale = $state<ContentLocale>('en');
+  let contentLocale = $state<ContentLocale>(primaryContentLocale);
   let translationDraft = $state<Record<string, string>>({});
   type LocalizedMemberField = 'firstName' | 'lastName' | 'nickname' | 'bio';
   function localizedMember(key: LocalizedMemberField) {
-    return contentLocale === 'en' ? (member?.[key] ?? '') : (translationDraft[key] ?? '');
+    return contentLocale === primaryContentLocale
+      ? (member?.[key] ?? '')
+      : (translationDraft[key] ?? '');
   }
   function setLocalizedMember(key: LocalizedMemberField, value: string) {
-    if (contentLocale !== 'en') translationDraft[key] = value;
+    if (contentLocale !== primaryContentLocale) translationDraft[key] = value;
     else if (member) member[key] = value;
   }
   async function resetPassword() {
@@ -57,10 +59,10 @@
     notice = '';
     try {
       await api(`/${member.id}/password-reset`, 'POST');
-      notice = 'Password recovery email queued.';
+      notice = 'Wiadomość z linkiem do odzyskania hasła została zakolejkowana.';
       resetConfirmation = false;
     } catch (e) {
-      error = e instanceof Error ? e.message : 'Error';
+      error = e instanceof Error ? e.message : 'Błąd';
     } finally {
       busy = false;
     }
@@ -98,11 +100,11 @@
       } catch {}
     if (!response.ok) {
       const messages: Record<string, string> = {
-        INVALID_GITHUB_URL: 'Use a https://github.com/username profile link.',
-        INVALID_LINKEDIN_URL: 'Use a https://linkedin.com/in/username profile link.',
-        EMAIL_IN_USE: 'This email address is already used by another account.',
-        ACCOUNT_DELETED: 'Deleted accounts cannot be changed.',
-        LAST_ADMINISTRATOR: 'The final active administrator must retain access.'
+        INVALID_GITHUB_URL: 'Użyj linku profilu https://github.com/username.',
+        INVALID_LINKEDIN_URL: 'Użyj linku profilu https://linkedin.com/in/username.',
+        EMAIL_IN_USE: 'Ten adres e-mail jest już używany przez inne konto.',
+        ACCOUNT_DELETED: 'Nie można zmieniać usuniętych kont.',
+        LAST_ADMINISTRATOR: 'Ostatni aktywny administrator musi zachować dostęp.'
       };
       throw new Error(messages[result.code] ?? result.code ?? result.message);
     }
@@ -117,7 +119,7 @@
     records = [];
     total = 0;
     confirmDelete = false;
-    contentLocale = 'en';
+    contentLocale = primaryContentLocale;
     translationDraft = {};
     try {
       const result = await api(id ? `/${encodeURIComponent(id)}` : `?${query}`);
@@ -136,7 +138,7 @@
         member = null;
       }
     } catch (e) {
-      if (current === generation) error = e instanceof Error ? e.message : 'Error';
+      if (current === generation) error = e instanceof Error ? e.message : 'Błąd';
     } finally {
       if (current === generation) loading = false;
     }
@@ -178,11 +180,11 @@
           emailDraft = updated.email;
         } else member = updated;
         notice = path.endsWith('/email')
-          ? 'Email updated. Sessions revoked and verification email queued.'
-          : 'Changes saved.';
+          ? 'Adres e-mail zmieniony. Sesje unieważniono i zakolejkowano wiadomość weryfikacyjną.'
+          : 'Zmiany zapisane.';
       }
     } catch (e) {
-      error = e instanceof Error ? e.message : 'Error';
+      error = e instanceof Error ? e.message : 'Błąd';
     } finally {
       busy = false;
     }
@@ -191,10 +193,10 @@
 
 {#if notice}<p class="notice" role="status">{notice}</p>{/if}
 {#if error}<p class="error" role="alert">{error}</p>{/if}
-{#if loading}<Skeleton label={'Loading members'} />{:else if member}
+{#if loading}<Skeleton label={'Ładowanie członków'} />{:else if member}
   {@const editable = member.membershipStatus !== 'deleted'}
   <a class="btn btn-outline detail-back" href="/members"
-    ><ArrowLeft size={15} aria-hidden="true" />{'All members'}</a
+    ><ArrowLeft size={15} aria-hidden="true" />Wszyscy członkowie</a
   >
   <div class="workspace-header">
     <div class="member-heading">
@@ -207,20 +209,20 @@
     {#if member.membershipStatus === 'active'}<a
         class="btn btn-outline"
         href={`${websiteOrigin}/members/${encodeURIComponent(member.id)}`}
-        ><ArrowUpRight size={15} aria-hidden="true" />{'View public profile'}</a
+        ><ArrowUpRight size={15} aria-hidden="true" />Zobacz publiczny profil</a
       >{/if}
   </div>
 
   <div class="settings-layout">
     <SettingsNav
-      label={'Member sections'}
+      label={'Sekcje członka'}
       items={[
-        { id: 'profile', label: 'Profile', icon: UserRound },
-        { id: 'access', label: 'Access', icon: Shield },
+        { id: 'profile', label: 'Profil', icon: UserRound },
+        { id: 'access', label: 'Dostęp', icon: Shield },
         ...(administrator && editable
           ? [
-              { id: 'authentication', label: 'Authentication', icon: KeyRound },
-              { id: 'danger', label: 'Delete account', icon: Trash2, danger: true }
+              { id: 'authentication', label: 'Uwierzytelnianie', icon: KeyRound },
+              { id: 'danger', label: 'Usuń konto', icon: Trash2, danger: true }
             ]
           : [])
       ]}
@@ -228,13 +230,13 @@
 
     <div class="settings-main">
       <section id="profile" class="settings-section" aria-labelledby="profile-heading">
-        <header><h2 id="profile-heading">Profile</h2></header>
+        <header><h2 id="profile-heading">Profil</h2></header>
         {#if administrator && editable}
           <form
             class="card settings-card"
             onsubmit={(event) => {
               event.preventDefault();
-              if (contentLocale !== 'en') return;
+              if (contentLocale !== primaryContentLocale) return;
               void mutate(`/${member!.id}/profile`, 'PATCH', {
                 firstName: member!.firstName,
                 lastName: member!.lastName,
@@ -263,18 +265,18 @@
             />
             <div class="field-grid">
               <div>
-                <label for="m-first">First name</label><input
+                <label for="m-first">Imię</label><input
                   id="m-first"
                   bind:value={
                     () => localizedMember('firstName'),
                     (value) => setLocalizedMember('firstName', value)
                   }
-                  required={contentLocale === 'en'}
+                  required={contentLocale === primaryContentLocale}
                   maxlength="100"
                 />
               </div>
               <div>
-                <label for="m-last">Last name</label><input
+                <label for="m-last">Nazwisko</label><input
                   id="m-last"
                   bind:value={
                     () => localizedMember('lastName'),
@@ -284,7 +286,7 @@
                 />
               </div>
               <div class="field-wide">
-                <label for="m-nick">Nickname</label><input
+                <label for="m-nick">Pseudonim</label><input
                   id="m-nick"
                   bind:value={
                     () => localizedMember('nickname'),
@@ -303,7 +305,7 @@
                   maxlength="5000"
                 ></textarea>
               </div>
-              {#if contentLocale === 'en'}<div>
+              {#if contentLocale === primaryContentLocale}<div>
                   <label for="m-gh">GitHub</label><input
                     id="m-gh"
                     type="url"
@@ -320,9 +322,9 @@
                   />
                 </div>{/if}
             </div>
-            {#if contentLocale === 'en'}<div class="card-footer">
+            {#if contentLocale === primaryContentLocale}<div class="card-footer">
                 <button class="btn" disabled={busy}
-                  ><Save size={15} aria-hidden="true" />{'Save profile'}</button
+                  ><Save size={15} aria-hidden="true" />Zapisz profil</button
                 >
               </div>{/if}
           </form>
@@ -333,8 +335,8 @@
 
       <section id="access" class="settings-section" aria-labelledby="access-heading">
         <header>
-          <h2 id="access-heading">Access</h2>
-          <p>Access changes take effect when you save them.</p>
+          <h2 id="access-heading">Dostęp</h2>
+          <p>Zmiany dostępu zaczną obowiązywać po zapisaniu.</p>
         </header>
         <form
           class="card settings-card"
@@ -352,10 +354,10 @@
         >
           <div class="field-grid">
             <div>
-              <label for="member-status">Account status</label>
+              <label for="member-status">Status konta</label>
               <Dropdown
                 id="member-status"
-                label={'Account status'}
+                label={'Status konta'}
                 value={accessStatus}
                 options={statuses.filter(
                   (s) =>
@@ -367,10 +369,10 @@
               />
             </div>
             <div>
-              <label for="member-role">Role</label>
+              <label for="member-role">Rola</label>
               <Dropdown
                 id="member-role"
-                label={'Role'}
+                label={'Rola'}
                 value={accessRole}
                 options={roles}
                 disabled={busy || !administrator || !editable}
@@ -385,7 +387,7 @@
           {#if canSaveAccess}
             <div class="card-footer">
               <button class="btn" disabled={busy}
-                ><Save size={15} aria-hidden="true" />{'Save access'}</button
+                ><Save size={15} aria-hidden="true" />Zapisz dostęp</button
               >
             </div>
           {/if}
@@ -394,7 +396,7 @@
 
       {#if administrator && editable}
         <section id="authentication" class="settings-section" aria-labelledby="auth-heading">
-          <header><h2 id="auth-heading">Authentication</h2></header>
+          <header><h2 id="auth-heading">Uwierzytelnianie</h2></header>
           <form
             class="card settings-card"
             onsubmit={(event) => {
@@ -403,7 +405,7 @@
             }}
           >
             <div>
-              <label for="m-email">Email address</label><input
+              <label for="m-email">Adres e-mail</label><input
                 id="m-email"
                 type="email"
                 bind:value={emailDraft}
@@ -411,31 +413,31 @@
                 maxlength="254"
               />
               <p class="field-help">
-                Changing the email revokes sessions and sends a verification link to the new
-                address.
+                Zmiana adresu e-mail unieważnia sesje i wysyła link weryfikacyjny na nowy adres.
               </p>
             </div>
             <div class="card-footer">
               <button
                 class="btn"
                 disabled={busy || emailDraft.trim().toLowerCase() === member.email.toLowerCase()}
-                ><Save size={15} aria-hidden="true" />{'Save email'}</button
+                ><Save size={15} aria-hidden="true" />Zapisz e-mail</button
               >
             </div>
           </form>
           <div class="card settings-card">
             <p class="muted">
-              Send a recovery link to the saved email address. Passwords are never displayed here.
+              Wyślij link do odzyskania hasła na zapisany adres e-mail. Hasła nie są tutaj
+              wyświetlane.
             </p>
             {#if resetConfirmation}
-              <p>Send a password recovery email to this member?</p>
+              <p>Wysłać temu członkowi wiadomość do odzyskania hasła?</p>
               <div class="row">
                 <button class="btn" disabled={busy} onclick={resetPassword}
-                  >Send recovery link</button
+                  >Wyślij link do odzyskania hasła</button
                 ><button
                   class="btn btn-outline"
                   disabled={busy}
-                  onclick={() => (resetConfirmation = false)}>Cancel</button
+                  onclick={() => (resetConfirmation = false)}>Anuluj</button
                 >
               </div>
             {:else}
@@ -443,7 +445,7 @@
                 <button
                   class="btn btn-outline"
                   disabled={busy}
-                  onclick={() => (resetConfirmation = true)}>Reset password</button
+                  onclick={() => (resetConfirmation = true)}>Resetuj hasło</button
                 >
               </div>
             {/if}
@@ -451,24 +453,24 @@
         </section>
 
         <section id="danger" class="settings-section" aria-labelledby="danger-heading">
-          <header><h2 id="danger-heading">Delete account</h2></header>
+          <header><h2 id="danger-heading">Usuń konto</h2></header>
           <div class="card settings-card danger">
-            <p class="muted">Personal data will be anonymized. Association content will remain.</p>
+            <p class="muted">Dane osobowe zostaną zanonimizowane. Treści koła pozostaną.</p>
             {#if confirmDelete}
               <div role="alert" class="settings-card">
-                <p>Delete account? Personal data will be anonymized. Content will remain.</p>
+                <p>Usunąć konto? Dane osobowe zostaną zanonimizowane. Treści pozostaną.</p>
                 <div class="row">
                   <button
                     type="button"
                     class="btn danger-button"
                     disabled={busy}
-                    onclick={() => mutate(`/${member!.id}`, 'DELETE')}>Confirm deletion</button
+                    onclick={() => mutate(`/${member!.id}`, 'DELETE')}>Potwierdź usunięcie</button
                   >
                   <button
                     type="button"
                     class="btn btn-outline"
                     disabled={busy}
-                    onclick={() => (confirmDelete = false)}>Cancel</button
+                    onclick={() => (confirmDelete = false)}>Anuluj</button
                   >
                 </div>
               </div>
@@ -478,7 +480,7 @@
                   type="button"
                   class="btn btn-outline danger-button"
                   disabled={busy}
-                  onclick={() => (confirmDelete = true)}>Delete account</button
+                  onclick={() => (confirmDelete = true)}>Usuń konto</button
                 >
               </div>
             {/if}
@@ -488,7 +490,7 @@
     </div>
   </div>
 {:else if memberId}
-  <a class="btn btn-outline" href="/members">All members</a>
+  <a class="btn btn-outline" href="/members">Wszyscy członkowie</a>
 {:else}
   <form
     class="member-filters"
@@ -498,42 +500,42 @@
     }}
   >
     <div class="search">
-      <label for="member-search" class="sr-only">Search members</label><Search
+      <label for="member-search" class="sr-only">Szukaj członków</label><Search
         size={16}
         aria-hidden="true"
       /><input
         id="member-search"
         bind:value={search}
-        placeholder={'Name, nickname or email…'}
-      /><button class="btn btn-outline">Search</button>
+        placeholder={'Imię, pseudonim lub email…'}
+      /><button class="btn btn-outline">Szukaj</button>
     </div>
     <Dropdown
-      label={'Filter status'}
+      label={'Filtr statusu'}
       value={page.url.searchParams.get('status') ?? ''}
-      indicator={pendingCount > 0 ? 'Pending memberships awaiting approval' : undefined}
+      indicator={pendingCount > 0 ? 'Członkostwa oczekujące na zatwierdzenie' : undefined}
       options={[
-        { value: '', label: 'Active and suspended' },
+        { value: '', label: 'Aktywni i zawieszeni' },
         ...statuses.map((status) => ({
           ...status,
           indicator:
             status.value === 'pending' && pendingCount > 0
-              ? 'Pending memberships awaiting approval'
+              ? 'Członkostwa oczekujące na zatwierdzenie'
               : undefined
         }))
       ]}
       onselect={(v) => filter('status', v)}
     />
     <Dropdown
-      label={'Filter role'}
+      label={'Filtr roli'}
       value={page.url.searchParams.get('role') ?? ''}
-      options={[{ value: '', label: 'All roles' }, ...roles]}
+      options={[{ value: '', label: 'Wszystkie role' }, ...roles]}
       onselect={(v) => filter('role', v)}
     />
   </form>
-  <section class="member-directory" aria-label="Member directory">
+  <section class="member-directory" aria-label="Lista członków">
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Person</th><th>Email</th><th>Status</th><th>Role</th></tr></thead><tbody
+        <thead><tr><th>Osoba</th><th>Email</th><th>Status</th><th>Rola</th></tr></thead><tbody
           >{#each records as record}<tr
               ><td
                 ><MemberPreview
@@ -548,21 +550,19 @@
         >
       </table>
     </div>
-    {#if !records.length}<p>No matching members.</p>{/if}
+    {#if !records.length}<p>Brak pasujących osób.</p>{/if}
     <footer class="directory-footer">
       <p class="muted">
-        {firstResult}
-        to
-        {lastResult} / {total} <span>members</span>
+        {firstResult}–{lastResult} / {total} <span>członków</span>
       </p>
-      <nav class="pagination" aria-label="Member table pagination">
+      <nav class="pagination" aria-label="Strony listy członków">
         <button
           type="button"
           class="btn btn-outline page-button"
           disabled={currentPage === 0 || loading}
           onclick={() => paginate(-1)}
-          aria-label="Previous page"
-          ><ChevronLeft size={16} aria-hidden="true" /><span>Previous</span></button
+          aria-label="Poprzednia strona"
+          ><ChevronLeft size={16} aria-hidden="true" /><span>Poprzednia</span></button
         >
         <span class="page-number">{currentPage + 1} / {Math.max(1, Math.ceil(total / 50))}</span>
         <button
@@ -570,8 +570,8 @@
           class="btn btn-outline page-button"
           disabled={(currentPage + 1) * 50 >= total || loading}
           onclick={() => paginate(1)}
-          aria-label="Next page"
-          ><span>Next</span><ChevronRight size={16} aria-hidden="true" /></button
+          aria-label="Następna strona"
+          ><span>Następna</span><ChevronRight size={16} aria-hidden="true" /></button
         >
       </nav>
     </footer>

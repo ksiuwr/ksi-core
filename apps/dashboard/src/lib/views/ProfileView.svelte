@@ -7,7 +7,7 @@
   import { untrack } from 'svelte';
   import { validProfileLink } from 'shared/profile-links';
   import { summarizeUserAgent } from 'shared/user-agent';
-  import type { ContentLocale } from 'shared/content-locales';
+  import { primaryContentLocale, type ContentLocale } from 'shared/content-locales';
   import type { Profile } from 'shared/types';
   import {
     ArrowUpRight,
@@ -51,22 +51,24 @@
   let saved = $state(false);
   let dirty = $state(false);
   let error = $state('');
-  let contentLocale = $state<ContentLocale>('en');
+  let contentLocale = $state<ContentLocale>(primaryContentLocale);
   let translationDraft = $state<Record<string, string>>({});
 
   type LocalizedProfileField = 'firstName' | 'lastName' | 'nickname' | 'bio';
   function localized(key: LocalizedProfileField) {
-    return contentLocale === 'en' ? (draft[key] ?? '') : (translationDraft[key] ?? '');
+    return contentLocale === primaryContentLocale
+      ? (draft[key] ?? '')
+      : (translationDraft[key] ?? '');
   }
   function setLocalized(key: LocalizedProfileField, value: string) {
-    if (contentLocale === 'en') draft[key] = value;
+    if (contentLocale === primaryContentLocale) draft[key] = value;
     else translationDraft[key] = value;
   }
 
   const privacyOptions = $derived([
-    { value: 'full-name', label: 'Full name' },
-    { value: 'last-initial', label: 'First name + last initial' },
-    { value: 'initials', label: 'Initials only' }
+    { value: 'full-name', label: 'Pełne imię i nazwisko' },
+    { value: 'last-initial', label: 'Imię i inicjał nazwiska' },
+    { value: 'initials', label: 'Tylko inicjały' }
   ]);
   const publicName = $derived(
     draft.publicPrivacy === 'initials'
@@ -92,11 +94,11 @@
   function saveProfile() {
     saved = false;
     if (!validProfileLink('github', draft.github)) {
-      error = 'Enter a https://github.com/username profile link.';
+      error = 'Wprowadź link do profilu https://github.com/username.';
       return;
     }
     if (!validProfileLink('linkedin', draft.linkedin)) {
-      error = 'Enter a https://linkedin.com/in/username profile link.';
+      error = 'Wprowadź link do profilu https://linkedin.com/in/username.';
       return;
     }
     void run(async () => {
@@ -133,23 +135,23 @@
 
 <div class="workspace-header">
   <div>
-    <h1>Profile</h1>
-    <p>Introduce yourself to the association and choose what to share publicly.</p>
+    <h1>Profil</h1>
+    <p>Przedstaw się kołu i wybierz, czym chcesz się podzielić publicznie.</p>
   </div>
   <a class="btn btn-outline" href={`${websiteOrigin}/members/${encodeURIComponent(draft.id)}`}
-    ><ArrowUpRight size={15} aria-hidden="true" />{'View public profile'}</a
+    ><ArrowUpRight size={15} aria-hidden="true" />Zobacz publiczny profil</a
   >
 </div>
 
 <div class="settings-layout">
   <SettingsNav
-    label={'Profile sections'}
+    label={'Sekcje profilu'}
     items={[
-      { id: 'about', label: 'About you', icon: UserRound },
-      { id: 'photo', label: 'Profile picture', icon: ImageIcon },
-      { id: 'links', label: 'Find me online', icon: Link2 },
-      { id: 'sessions', label: 'Active sessions', icon: Laptop },
-      { id: 'danger', label: 'Delete account', icon: Trash2, danger: true }
+      { id: 'about', label: 'O Tobie', icon: UserRound },
+      { id: 'photo', label: 'Zdjęcie profilowe', icon: ImageIcon },
+      { id: 'links', label: 'Znajdź mnie w sieci', icon: Link2 },
+      { id: 'sessions', label: 'Aktywne sesje', icon: Laptop },
+      { id: 'danger', label: 'Usuń konto', icon: Trash2, danger: true }
     ]}
   />
 
@@ -158,12 +160,12 @@
       class="settings-main"
       onsubmit={(event) => {
         event.preventDefault();
-        if (contentLocale !== 'en') return;
+        if (contentLocale !== primaryContentLocale) return;
         saveProfile();
       }}
       oninput={(event) => {
         if (
-          contentLocale !== 'en' &&
+          contentLocale !== primaryContentLocale &&
           event.target instanceof Element &&
           event.target.closest('.localized-profile-fields')
         )
@@ -174,7 +176,7 @@
     >
       {#if error}<p class="error" role="alert">{error}</p>{/if}
 
-      <section class="profile-hero card" aria-label={'Public profile'}>
+      <section class="profile-hero card" aria-label={'Profil publiczny'}>
         {#if draft.image}<img src={draft.image} alt="" class="profile-avatar" />{:else}<span
             class="profile-avatar"
             >{`${draft.firstName?.[0] ?? ''}${draft.lastName?.[0] ?? ''}`.toUpperCase() ||
@@ -184,7 +186,7 @@
           <strong>{publicName}</strong>
           {#if draft.nickname?.trim()}<span class="profile-nickname">aka. {draft.nickname}</span
             >{/if}
-          <p>{draft.bio || 'Your public profile on the KSI website.'}</p>
+          <p>{draft.bio || 'Twój publiczny profil na stronie KSI.'}</p>
         </div>
         <div class="profile-socials">
           {#if draft.github && validProfileLink('github', draft.github)}<a
@@ -203,7 +205,7 @@
       </section>
 
       <section id="about" class="settings-section" aria-labelledby="identity-heading">
-        <header><h2 id="identity-heading">About you</h2></header>
+        <header><h2 id="identity-heading">O Tobie</h2></header>
         <ContentTranslations
           kind="profile"
           id={draft.id}
@@ -223,40 +225,40 @@
         <div class="card settings-card">
           <div class="field-grid localized-profile-fields">
             <div>
-              <label for="p-first">First name</label><input
+              <label for="p-first">Imię</label><input
                 id="p-first"
                 bind:value={
                   () => localized('firstName'), (value) => setLocalized('firstName', value)
                 }
-                required={contentLocale === 'en'}
+                required={contentLocale === primaryContentLocale}
               />
             </div>
             <div>
-              <label for="p-last">Last name</label><input
+              <label for="p-last">Nazwisko</label><input
                 id="p-last"
                 bind:value={() => localized('lastName'), (value) => setLocalized('lastName', value)}
               />
             </div>
             <div class="field-wide">
-              <label for="p-nick">Nickname</label><input
+              <label for="p-nick">Pseudonim</label><input
                 id="p-nick"
                 bind:value={() => localized('nickname'), (value) => setLocalized('nickname', value)}
-                placeholder={'What should we call you?'}
+                placeholder={'Jak mamy się do ciebie zwracać?'}
               />
             </div>
             <div class="field-wide">
-              <label for="p-bio">A little about you</label><textarea
+              <label for="p-bio">Kilka słów o sobie</label><textarea
                 id="p-bio"
                 bind:value={() => localized('bio'), (value) => setLocalized('bio', value)}
                 rows="4"
-                placeholder={'Interests, projects, and things you enjoy…'}
+                placeholder={'Zainteresowania, projekty, rzeczy, które lubisz…'}
               ></textarea>
             </div>
-            {#if contentLocale === 'en'}<div class="field-wide">
-                <label for="p-priv">Name visibility</label>
+            {#if contentLocale === primaryContentLocale}<div class="field-wide">
+                <label for="p-priv">Widoczność imienia i nazwiska</label>
                 <Dropdown
                   id="p-priv"
-                  label={'Name visibility'}
+                  label={'Widoczność imienia i nazwiska'}
                   value={draft.publicPrivacy}
                   options={privacyOptions}
                   onselect={(value) => {
@@ -266,15 +268,16 @@
                   }}
                 />
                 <p class="field-help">
-                  Applies to the public website. Members see your full name in the dashboard.
+                  Dotyczy publicznej strony internetowej. Członkowie widzą twoje imię i nazwisko w
+                  panelu.
                 </p>
               </div>{/if}
           </div>
         </div>
       </section>
 
-      <section id="photo" class="settings-section photo-section" aria-label={'Profile picture'}>
-        <header><h2>Profile picture</h2></header>
+      <section id="photo" class="settings-section photo-section" aria-label={'Zdjęcie profilowe'}>
+        <header><h2>Zdjęcie profilowe</h2></header>
         <div class="card settings-card">
           <AvatarUpload
             request={avatarRequest}
@@ -285,7 +288,7 @@
       </section>
 
       <section id="links" class="settings-section" aria-labelledby="links-heading">
-        <header><h2 id="links-heading">Find me online</h2></header>
+        <header><h2 id="links-heading">Znajdź mnie w sieci</h2></header>
         <div class="card settings-card">
           <div class="field-grid">
             <div>
@@ -296,7 +299,7 @@
                 placeholder="https://github.com/…"
               />
               {#if !validProfileLink('github', draft.github)}<p class="field-error" role="status">
-                  Use a https://github.com/username link.
+                  Użyj linku https://github.com/username.
                 </p>{/if}
             </div>
             <div>
@@ -310,20 +313,20 @@
                   class="field-error"
                   role="status"
                 >
-                  Use a https://linkedin.com/in/username link.
+                  Użyj linku https://linkedin.com/in/username.
                 </p>{/if}
             </div>
           </div>
         </div>
       </section>
 
-      {#if contentLocale === 'en' && (dirty || saved)}
+      {#if contentLocale === primaryContentLocale && (dirty || saved)}
         <div class="save-bar">
           <span role="status"
-            >{#if saved}<Check size={15} aria-hidden="true" />{'Saved'}{:else}Unsaved changes{/if}</span
+            >{#if saved}<Check size={15} aria-hidden="true" />Zapisano{:else}Niezapisane zmiany{/if}</span
           >
           <button class="btn" disabled={busy}
-            ><Save size={16} aria-hidden="true" />{'Save changes'}</button
+            ><Save size={16} aria-hidden="true" />Zapisz zmiany</button
           >
         </div>
       {/if}
@@ -331,11 +334,11 @@
 
     <section id="sessions" class="settings-section" aria-labelledby="sessions-heading">
       <header>
-        <h2 id="sessions-heading">Active sessions</h2>
-        <p>Devices and browsers currently logged into your KSI account.</p>
+        <h2 id="sessions-heading">Aktywne sesje</h2>
+        <p>Urządzenia i przeglądarki aktualnie zalogowane na Twoje konto KSI.</p>
       </header>
       {#if sessions.length === 0}
-        <p class="list-empty">No active sessions.</p>
+        <p class="list-empty">Brak aktywnych sesji.</p>
       {:else}
         <ul class="list-group">
           {#each sessions as session (session.id)}
@@ -344,16 +347,16 @@
               <Laptop size={16} aria-hidden="true" />
               <div class="session-info">
                 <div class="session-title">
-                  <strong>{session.isCurrent ? 'Current device' : 'Other device'}</strong>
-                  {#if session.isCurrent}<span class="session-badge">Current</span>{/if}
+                  <strong>{session.isCurrent ? 'Bieżące urządzenie' : 'Inne urządzenie'}</strong>
+                  {#if session.isCurrent}<span class="session-badge">Bieżąca</span>{/if}
                 </div>
                 <div class="muted session-detail" title={session.userAgent || undefined}>
                   {#if client.browser && client.os}
-                    {client.browser} on {client.os}
+                    {client.browser} na {client.os}
                   {:else if client.browser}
                     {client.browser}
                   {:else}
-                    Unknown browser
+                    Nieznana przeglądarka
                   {/if}
                   {#if session.ipAddress}
                     · {session.ipAddress}
@@ -364,7 +367,7 @@
                 <button
                   class="btn btn-outline btn-sm"
                   disabled={busy}
-                  onclick={() => revokeSession(session.id)}>Revoke</button
+                  onclick={() => revokeSession(session.id)}>Odwołaj</button
                 >
               {/if}
             </li>
@@ -374,12 +377,12 @@
     </section>
 
     <section id="danger" class="settings-section" aria-labelledby="danger-heading">
-      <header><h2 id="danger-heading">Delete account</h2></header>
+      <header><h2 id="danger-heading">Usuń konto</h2></header>
       <div class="card settings-card danger">
-        <p class="muted">Your profile will be anonymized. Association content remains.</p>
+        <p class="muted">Twój profil zostanie zanonimizowany. Treści koła pozostaną.</p>
         <div>
           <button class="btn btn-outline danger-button" disabled={busy} onclick={deleteAccount}
-            >Confirm account deletion</button
+            >Potwierdzam usunięcie konta</button
           >
         </div>
       </div>

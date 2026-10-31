@@ -1,6 +1,7 @@
 <script lang="ts">
   import { preferences } from '$lib/preferences.svelte';
   import { goto } from '$app/navigation';
+  import { primaryContentLocale } from 'shared/content-locales';
   import ArticleThumbnail from '$lib/ArticleThumbnail.svelte';
   import { api, errorMessage } from '$lib/api';
   import { articlePath, dashboardPath, type Workspace } from '$lib/navigation';
@@ -54,7 +55,7 @@
         title: title.trim(),
         markdown,
         ...(projectId ? { projectId } : {}),
-        language: 'en',
+        language: primaryContentLocale,
         thumbnailFileId
       });
       await goto(articlePath(result.slug));
@@ -67,11 +68,11 @@
 </script>
 
 <a class="btn btn-outline detail-back" href={dashboardPath(workspace, projectSlug, 'articles')}
-  ><ArrowLeft size={15} aria-hidden="true" />{'Articles'}</a
+  ><ArrowLeft size={15} aria-hidden="true" />Artykuły</a
 >
 <header class="create-heading">
-  <h1>New article</h1>
-  <p>Create a draft. Publishing and feed placement can be configured after it is saved.</p>
+  <h1>Nowy artykuł</h1>
+  <p>Utwórz wersję roboczą. Publikację i widoczność w kanałach skonfigurujesz po zapisaniu.</p>
 </header>
 
 {#if error}<p class="error" role="alert">{error}</p>{/if}
@@ -84,7 +85,7 @@
 >
   <section class="card create-main">
     <div>
-      <label for="new-article-title">Title</label>
+      <label for="new-article-title">Tytuł</label>
       <input
         id="new-article-title"
         value={title}
@@ -94,7 +95,7 @@
       />
     </div>
     <div>
-      <span class="create-label">Content</span>
+      <span class="create-label">Treść</span>
       <Editor allowGallery rows={24} bind:value={markdown} />
     </div>
   </section>
@@ -111,7 +112,7 @@
         placeholder="article-url"
         oninput={() => (slugEdited = true)}
       />
-      <p class="muted">Used in the public article URL.</p>
+      <p class="muted">Używany w publicznym adresie artykułu.</p>
     </section>
     <section class="create-section">
       <ArticleThumbnail
@@ -122,9 +123,11 @@
     </section>
     <div class="create-actions">
       <button class="btn" disabled={busy || thumbnailUploading || !title.trim() || !slug.trim()}
-        ><FilePlus2 size={15} aria-hidden="true" />{busy ? 'Creating…' : 'Create draft'}</button
+        ><FilePlus2 size={15} aria-hidden="true" />{busy
+          ? 'Tworzenie…'
+          : 'Utwórz wersję roboczą'}</button
       >
-      <a class="btn btn-outline" href={dashboardPath(workspace, projectSlug, 'articles')}>Cancel</a>
+      <a class="btn btn-outline" href={dashboardPath(workspace, projectSlug, 'articles')}>Anuluj</a>
     </div>
   </aside>
 </form>

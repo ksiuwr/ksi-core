@@ -33,21 +33,20 @@
   </div>
   <div class="row">
     <a class="btn" href={newThreadPath(workspace, projectSlug)}
-      ><Plus size={16} aria-hidden="true" />{'New thread'}</a
+      ><Plus size={16} aria-hidden="true" />Nowy wątek</a
     >
-    <div class="segmented-control" role="group" aria-label={'Forum view'} use:slider>
+    <div class="segmented-control" role="group" aria-label={'Widok forum'} use:slider>
       <button
         type="button"
         class:active={!archived}
         aria-pressed={!archived}
-        onclick={() => setArchived(false)}>Active</button
+        onclick={() => setArchived(false)}>Aktywne</button
       >
       <button
         type="button"
         class:active={archived}
         aria-pressed={archived}
-        onclick={() => setArchived(true)}
-        ><Archive size={14} aria-hidden="true" />{'Archive'}</button
+        onclick={() => setArchived(true)}><Archive size={14} aria-hidden="true" />Archiwum</button
       >
     </div>
   </div>
@@ -66,10 +65,10 @@
             >{/if}
           <span class="tag"
             >{thread.visibility === 'leaders'
-              ? 'Leaders'
+              ? 'Liderzy'
               : thread.visibility === 'members'
-                ? 'Project members'
-                : 'Association members'}</span
+                ? 'Członkowie projektu'
+                : 'Członkowie koła'}</span
           >
           {#if thread.createdAt}<time class="list-row-meta" datetime={thread.createdAt}
               >{formatDate(thread.createdAt, language)}</time
@@ -79,5 +78,5 @@
     {/each}
   </ul>
 {:else}
-  <p class="list-empty">No threads yet.</p>
+  <p class="list-empty">Brak wątków.</p>
 {/if}

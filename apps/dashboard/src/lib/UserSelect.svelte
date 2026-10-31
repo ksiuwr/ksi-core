@@ -66,7 +66,7 @@
       type="text"
       bind:value={query}
       oninput={search}
-      placeholder="Search users..."
+      placeholder="Szukaj użytkowników…"
       class="search-input"
     />
     {#if query.trim() && results.length > 0}

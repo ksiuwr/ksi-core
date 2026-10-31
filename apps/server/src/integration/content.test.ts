@@ -307,7 +307,7 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
       projectId,
       title: 'Explicit thumbnail',
       markdown: 'No inline images',
-      language: 'en'
+      language: 'pl'
     };
     const created = await content('/articles', 'leader', 'POST', {
       ...draft,
@@ -386,7 +386,7 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
       slug: `building-krasnal-${suffix}`,
       title: 'Building Krasnal',
       markdown: 'Initial draft',
-      language: 'en'
+      language: 'pl'
     });
     expect(created.status).toBe(200);
     articleId = created.body.id;
@@ -495,11 +495,11 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
         projectId,
         createdBy: ids.leader,
         slug: `recommended-${suffix}`,
-        title: 'Recommended',
+        title: 'Polecany',
         state: 'published',
         projectFeed: true,
         publishedAt: new Date(),
-        translations: { pl: { title: 'Polecany' } }
+        translations: { en: { title: 'Recommended' } }
       })
       .returning();
     await db.insert(articles).values([
@@ -523,12 +523,12 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
     ]);
     const recommendations = (await (
       await contentRoutes.handle(
-        new Request(`http://localhost/platform/public/articles/${created.body.slug}?locale=pl`)
+        new Request(`http://localhost/platform/public/articles/${created.body.slug}?locale=en`)
       )
     ).json()) as any;
     expect(
       recommendations.related.some(
-        (a: any) => a.id === recommendation[0]!.id && a.title === 'Polecany'
+        (a: any) => a.id === recommendation[0]!.id && a.title === 'Recommended'
       )
     ).toBe(true);
     expect(
@@ -544,7 +544,7 @@ describe.skipIf(!disposable)('Postgres persisted content and collaboration', () 
       slug: `rejected-proposal-${suffix}`,
       title: 'Rejected proposal',
       markdown: 'Draft',
-      language: 'en'
+      language: 'pl'
     });
     const credit = () =>
       content(`/articles/${created.body.id}/credit`, 'member', 'PUT', { publicCredit: true });

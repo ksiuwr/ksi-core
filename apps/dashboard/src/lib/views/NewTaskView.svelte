@@ -94,11 +94,11 @@
 </script>
 
 <a class="btn btn-outline detail-back" href={dashboardPath(workspace, projectSlug, 'board')}
-  ><ArrowLeft size={15} aria-hidden="true" />{'Task board'}</a
+  ><ArrowLeft size={15} aria-hidden="true" />Tablica zadań</a
 >
 <header class="create-heading">
-  <h1>New task</h1>
-  <p>Add the details now; you can continue the discussion after creating the task.</p>
+  <h1>Nowe zadanie</h1>
+  <p>Dodaj szczegóły teraz; po utworzeniu zadania możesz kontynuować dyskusję.</p>
 </header>
 
 {#if error}<p class="error" role="alert">{error}</p>{/if}
@@ -111,17 +111,17 @@
 >
   <section class="card create-main">
     <div>
-      <label for="new-task-title">Task title</label>
+      <label for="new-task-title">Tytuł zadania</label>
       <input
         id="new-task-title"
         bind:value={title}
         required
         maxlength="200"
-        placeholder={'What needs to be done?'}
+        placeholder={'Co trzeba zrobić?'}
       />
     </div>
     <div>
-      <span class="create-label">Description</span>
+      <span class="create-label">Opis</span>
       <Editor bind:value={markdown} rows={18} allowReferences />
     </div>
   </section>
@@ -131,14 +131,14 @@
       <label for="new-task-status">Status</label>
       <Dropdown
         id="new-task-status"
-        label={'Task status'}
+        label={'Status zadania'}
         bind:value={status}
         options={statusOptions}
       />
     </section>
     {#if labels.length}
       <section class="create-section">
-        <span class="create-label">Labels</span>
+        <span class="create-label">Etykiety</span>
         <div class="label-chips">
           {#each labels as label (label.name)}
             {@const selected = selectedLabels.includes(label.name)}
@@ -171,9 +171,9 @@
     </section>
     <div class="create-actions">
       <button class="btn" disabled={busy || !title.trim() || !status}
-        ><Plus size={15} aria-hidden="true" />{busy ? 'Creating…' : 'Create task'}</button
+        ><Plus size={15} aria-hidden="true" />{busy ? 'Tworzenie…' : 'Utwórz zadanie'}</button
       >
-      <a class="btn btn-outline" href={dashboardPath(workspace, projectSlug, 'board')}>Cancel</a>
+      <a class="btn btn-outline" href={dashboardPath(workspace, projectSlug, 'board')}>Anuluj</a>
     </div>
   </aside>
 </form>

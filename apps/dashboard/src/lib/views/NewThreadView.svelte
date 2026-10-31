@@ -51,11 +51,11 @@
 </script>
 
 <a class="btn btn-outline detail-back" href={dashboardPath(workspace, projectSlug, 'forum')}
-  ><ArrowLeft size={15} aria-hidden="true" />{'Forum'}</a
+  ><ArrowLeft size={15} aria-hidden="true" />Forum</a
 >
 <header class="create-heading">
-  <h1>New thread</h1>
-  <p>Start a focused discussion and choose who can see it.</p>
+  <h1>Nowy wątek</h1>
+  <p>Rozpocznij dyskusję i wybierz, kto może ją zobaczyć.</p>
 </header>
 
 {#if error}<p class="error" role="alert">{error}</p>{/if}
@@ -68,26 +68,26 @@
 >
   <section class="card create-main">
     <div>
-      <label for="new-thread-title">Subject</label>
+      <label for="new-thread-title">Temat</label>
       <input id="new-thread-title" bind:value={title} required maxlength="200" />
     </div>
     <div>
-      <span class="create-label">First post</span>
+      <span class="create-label">Pierwszy post</span>
       <Editor bind:value={markdown} rows={18} allowReferences />
     </div>
   </section>
 
   <aside class="card create-aside">
     <section class="create-section">
-      <label for="new-thread-visibility">Visibility</label>
+      <label for="new-thread-visibility">Widoczność</label>
       <Dropdown
         id="new-thread-visibility"
-        label={'Visibility'}
+        label={'Widoczność'}
         bind:value={visibility}
         options={[
-          { value: 'association', label: 'Association members' },
-          ...(projectId ? [{ value: 'members', label: 'Project members' }] : []),
-          { value: 'leaders', label: 'Leaders' }
+          { value: 'association', label: 'Członkowie koła' },
+          ...(projectId ? [{ value: 'members', label: 'Członkowie projektu' }] : []),
+          { value: 'leaders', label: 'Liderzy' }
         ]}
       />
     </section>
@@ -97,10 +97,10 @@
     <div class="create-actions">
       <button class="btn" disabled={busy || !title.trim()}
         ><MessageSquarePlus size={15} aria-hidden="true" />{busy
-          ? 'Creating…'
-          : 'Create thread'}</button
+          ? 'Tworzenie…'
+          : 'Utwórz wątek'}</button
       >
-      <a class="btn btn-outline" href={dashboardPath(workspace, projectSlug, 'forum')}>Cancel</a>
+      <a class="btn btn-outline" href={dashboardPath(workspace, projectSlug, 'forum')}>Anuluj</a>
     </div>
   </aside>
 </form>

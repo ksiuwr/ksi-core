@@ -58,22 +58,20 @@
 </script>
 
 <svelte:head>
-  <title>Projects · KSI UWr</title>
+  <title>Projekty · KSI UWr</title>
   <meta
     name="description"
-    content="KSI projects: conferences, programming workshops, machine learning, and quantum computing."
+    content="Projekty KSI: konferencje, warsztaty programowania, uczenie maszynowe i obliczenia kwantowe."
   />
 </svelte:head>
 
 <main class="flex-1">
   <header class="border-line border-b">
     <div class="page-container py-14 md:py-20">
-      <p class="eyebrow"><span class="dot"></span>Our work</p>
-      <h1 class="mt-4 text-[clamp(40px,6vw,64px)] font-bold tracking-[-0.045em]">
-        Projects at KSI
-      </h1>
+      <p class="eyebrow"><span class="dot"></span>Nasze działania</p>
+      <h1 class="mt-4 text-[clamp(40px,6vw,64px)] font-bold tracking-[-0.045em]">Projekty w KSI</h1>
       <p class="text-muted mt-4 max-w-xl text-lg leading-relaxed">
-        Software, research, and events organized by KSI members.
+        Oprogramowanie, badania i wydarzenia tworzone przez członków KSI.
       </p>
     </div>
   </header>
@@ -81,7 +79,12 @@
   <section id="project-directory" class="page-container scroll-mt-20 py-10">
     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
       <div class="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
-        <div class="segmented-control w-max" role="group" aria-label="Filter by field" use:slider>
+        <div
+          class="segmented-control w-max"
+          role="group"
+          aria-label="Filtruj według obszaru"
+          use:slider
+        >
           {#each filters as filter (filter)}
             <button
               type="button"
@@ -89,7 +92,7 @@
               aria-pressed={activeFilter === filter}
               onclick={() => void setFilter(filter)}
             >
-              {#if filter === 'all'}All projects{:else}<FieldName field={filter} />{/if}
+              {#if filter === 'all'}Wszystkie projekty{:else}<FieldName field={filter} />{/if}
               <span class="text-muted font-mono text-[10px]">{counts[filter]}</span>
             </button>
           {/each}
@@ -104,15 +107,15 @@
         <input
           type="search"
           class="mb-0 pl-9"
-          placeholder="Search projects..."
-          aria-label="Search projects..."
+          placeholder="Szukaj projektów..."
+          aria-label="Szukaj projektów..."
           bind:value={query}
         />
       </div>
     </div>
 
     <p class="text-muted mt-5 mb-5 font-mono text-[11px]" aria-live="polite">
-      Showing {filteredProjects.length} of {projects.length} projects
+      Wyświetlono {filteredProjects.length} z {projects.length} projektów
     </p>
 
     {#if filteredProjects.length}
@@ -124,8 +127,8 @@
     {:else}
       <div class="border-input rounded-xl border border-dashed px-6 py-14 text-center">
         <SearchX class="text-muted mx-auto mb-4 size-6" aria-hidden="true" />
-        <h2 class="text-lg">No matching projects.</h2>
-        <p class="text-muted mt-1.5 text-sm">Try another search or explore a different field.</p>
+        <h2 class="text-lg">Brak pasujących projektów.</h2>
+        <p class="text-muted mt-1.5 text-sm">Spróbuj innego hasła lub wybierz inną dziedzinę.</p>
         <button
           class="btn btn-outline mt-6"
           type="button"
@@ -134,7 +137,7 @@
             void setFilter('all');
           }}
         >
-          <X /> Clear filters
+          <X /> Wyczyść filtry
         </button>
       </div>
     {/if}

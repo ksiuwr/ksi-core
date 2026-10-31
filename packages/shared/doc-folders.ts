@@ -1,15 +1,18 @@
-import { contentLocale, type ContentLocale } from './content-locales.js';
+import { contentLocale, primaryContentLocale, type TranslationLocale } from './content-locales.js';
 
 export type DocFolder = {
   id: string;
   parentId: string | null;
   name: string;
-  translations: Partial<Record<Exclude<ContentLocale, 'en'>, { name: string }>>;
+  translations: Partial<Record<TranslationLocale, { name: string }>>;
 };
 
 export function docFolderName(folder: DocFolder, locale?: string | null) {
   const language = contentLocale(locale);
-  return (language === 'en' ? '' : folder.translations[language]?.name.trim()) || folder.name;
+  return (
+    (language === primaryContentLocale ? '' : folder.translations[language]?.name.trim()) ||
+    folder.name
+  );
 }
 
 /** Walk IDs, never translated names: renaming a folder cannot change page membership. */

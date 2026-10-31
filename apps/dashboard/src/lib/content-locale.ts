@@ -1,6 +1,6 @@
 import { contentLocale, defaultFrontendLocale, type ContentLocale } from 'shared/content-locales';
 
-/** Dashboard content follows the `locale` cookie, defaulting to Wuchale's source locale (English). */
+/** Dashboard content follows the `locale` cookie, defaulting to the default UI locale (Polish). */
 export function dashboardContentLocale(cookie: string | null | undefined): ContentLocale {
   return contentLocale(cookie ?? defaultFrontendLocale);
 }

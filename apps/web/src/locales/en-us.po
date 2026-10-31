@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Plural-Forms: nplurals=2; plural=n == 1 ? 0 : 1;\n"
-"Source-Language: en-us\n"
+"Source-Language: pl\n"
 "Language: en-us\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -18,53 +18,53 @@ msgid "KSI UWr"
 msgstr "KSI UWr"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Alert updated successfully"
+msgid "Pomyślnie zaktualizowano alert"
 msgstr "Alert updated successfully"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Alert created successfully"
+msgid "Pomyślnie utworzono alert"
 msgstr "Alert created successfully"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Alert deleted"
+msgid "Usunięto alert"
 msgstr "Alert deleted"
 
 #: src/components/Navbar.svelte
-msgid "Logout"
+msgid "Wyloguj"
 msgstr "Logout"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Edit alert"
+msgid "Edytuj alert"
 msgstr "Edit alert"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Title"
+msgid "Tytuł"
 msgstr "Title"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Description"
+msgid "Opis"
 msgstr "Description"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Save changes"
+msgid "Zapisz zmiany"
 msgstr "Save changes"
 
 #: src/routes/dashboard/alerts/+page.svelte
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Create alert"
+msgid "Utwórz alert"
 msgstr "Create alert"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Cancel"
+msgid "Anuluj"
 msgstr "Cancel"
 
 #: src/routes/dashboard/+page.svelte
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Alerts"
+msgid "Alerty"
 msgstr "Alerts"
 
 #: src/components/Navbar.svelte
-msgid "Projects"
+msgid "Projekty"
 msgstr "Projects"
 
 #: src/routes/+page.svelte
@@ -74,11 +74,11 @@ msgstr "Hour of Code"
 
 #: src/components/Navbar.svelte
 #: src/routes/dashboard/+page.svelte
-msgid "Dashboard"
+msgid "Panel"
 msgstr "Dashboard"
 
 #: src/components/Navbar.svelte
-msgid "Logged out"
+msgid "Wylogowano"
 msgstr "Logged out"
 
 #: src/components/Navbar.svelte
@@ -87,264 +87,252 @@ msgid "KSI"
 msgstr "KSI"
 
 #: src/routes/dashboard/+page.svelte
-msgid "01 / Tools"
+msgid "01 / Narzędzia"
 msgstr "01 / Tools"
 
 #: src/routes/dashboard/+page.svelte
-msgid "Choose a workspace"
+msgid "Wybierz obszar roboczy"
 msgstr "Choose a workspace"
 
 #: src/routes/dashboard/+page.svelte
-msgid "2 modules available"
+msgid "Dostępne moduły: 2"
 msgstr "2 modules available"
 
 #: src/routes/dashboard/+page.svelte
-msgid "Module / 01"
+msgid "Moduł / 01"
 msgstr "Module / 01"
 
 #: src/routes/dashboard/+page.svelte
-msgid "Create, schedule, edit, and remove the announcements shown to visitors across the site."
+msgid "Twórz, planuj, edytuj i usuwaj komunikaty wyświetlane odwiedzającym w całej witrynie."
 msgstr "Create, schedule, edit, and remove the announcements shown to visitors across the site."
 
 #: src/routes/dashboard/+page.svelte
-msgid "Manage alerts →"
+msgid "Zarządzaj alertami →"
 msgstr "Manage alerts →"
 
 #: src/routes/dashboard/+page.svelte
-msgid "Module / 02"
+msgid "Moduł / 02"
 msgstr "Module / 02"
 
 #: src/routes/dashboard/+page.svelte
 #: src/routes/dashboard/s3cache/+page.svelte
-msgid "S3 cache"
+msgid "Pamięć podręczna S3"
 msgstr "S3 cache"
 
 #: src/routes/dashboard/+page.svelte
-msgid "Review cached Cloudflare R2 object lists and refresh individual cache keys on demand."
+msgid "Przeglądaj listy obiektów Cloudflare R2 zapisane w pamięci podręcznej i w razie potrzeby odświeżaj poszczególne klucze."
 msgstr "Review cached Cloudflare R2 object lists and refresh individual cache keys on demand."
 
 #: src/routes/dashboard/+page.svelte
-msgid "Inspect cache →"
+msgid "Przejrzyj pamięć podręczną →"
 msgstr "Inspect cache →"
 
 #. 0: alert.title
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Delete “{0}”? This action cannot be undone."
+msgid "Usunąć „{0}”? Tej operacji nie można cofnąć."
 msgstr "Delete “{0}”? This action cannot be undone."
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Announcements"
+msgid "Komunikaty"
 msgstr "Announcements"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Schedule and maintain the notices displayed at the top of the public website."
+msgid "Planuj i aktualizuj powiadomienia wyświetlane u góry publicznej witryny."
 msgstr "Schedule and maintain the notices displayed at the top of the public website."
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "<0/> New alert"
+msgid "<0/> Nowy alert"
 msgstr "<0/> New alert"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Editor"
+msgid "Edytor"
 msgstr "Editor"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Close alert editor"
+msgid "Zamknij edytor alertu"
 msgstr "Close alert editor"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Maintenance notice"
+msgid "Przerwa techniczna"
 msgstr "Maintenance notice"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Neutral"
+msgid "Neutralny"
 msgstr "Neutral"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Information"
+msgid "Informacja"
 msgstr "Information"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Warning"
+msgid "Ostrzeżenie"
 msgstr "Warning"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Danger"
+msgid "Zagrożenie"
 msgstr "Danger"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Display style"
+msgid "Styl wyświetlania"
 msgstr "Display style"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Starts at"
+msgid "Początek"
 msgstr "Starts at"
 
 #: src/routes/dashboard/alerts/+page.svelte
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Your local time"
+msgid "Twój czas lokalny"
 msgstr "Your local time"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Ends at"
+msgid "Koniec"
 msgstr "Ends at"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Priority <0>Optional</0>"
-msgstr "Priority <0>Optional</0>"
-
-#: src/routes/dashboard/alerts/+page.svelte
-msgid "Link <0>Optional</0>"
-msgstr "Link <0>Optional</0>"
-
-#: src/routes/dashboard/alerts/+page.svelte
-msgid "Explain what visitors need to know…"
+msgid "Napisz, co powinni wiedzieć odwiedzający…"
 msgstr "Explain what visitors need to know…"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Saving…"
+msgid "Zapisywanie…"
 msgstr "Saving…"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "01 / Published records"
+msgid "01 / Opublikowane wpisy"
 msgstr "01 / Published records"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "All alerts"
+msgid "Wszystkie alerty"
 msgstr "All alerts"
 
 #. 0: currentPage + 1; 1: Math.max(pageCount, 1)
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Page {0} / {1}"
+msgid "Strona {0} / {1}"
 msgstr "Page {0} / {1}"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Loading alerts…"
+msgid "Ładowanie alertów…"
 msgstr "Loading alerts…"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Alerts could not be loaded."
+msgid "Nie udało się załadować alertów."
 msgstr "Alerts could not be loaded."
 
 #: src/routes/dashboard/alerts/+page.svelte
 #: src/routes/dashboard/s3cache/+page.svelte
-msgid "Try again"
+msgid "Spróbuj ponownie"
 msgstr "Try again"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "No alerts on this page"
+msgid "Brak alertów na tej stronie"
 msgstr "No alerts on this page"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Create an alert to publish the first announcement."
+msgid "Utwórz alert, aby opublikować pierwszy komunikat."
 msgstr "Create an alert to publish the first announcement."
 
 #. 0: alert.priority
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Priority {0}"
+msgid "Priorytet {0}"
 msgstr "Priority {0}"
 
 #. 0: alert.title
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Edit {0}"
+msgid "Edytuj {0}"
 msgstr "Edit {0}"
 
 #. 0: alert.title
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Delete {0}"
+msgid "Usuń {0}"
 msgstr "Delete {0}"
 
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Alerts pagination"
+msgid "Stronicowanie alertów"
 msgstr "Alerts pagination"
 
 #. 0: page + 1
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "Go to page {0}"
+msgid "Przejdź do strony {0}"
 msgstr "Go to page {0}"
 
 #: src/routes/dashboard/s3cache/+page.svelte
-msgid "An unknown error occurred."
+msgid "Wystąpił nieznany błąd."
 msgstr "An unknown error occurred."
 
 #. 0: key
 #: src/routes/dashboard/s3cache/+page.svelte
-msgid "Refreshed cache key “{0}”"
+msgid "Odświeżono klucz pamięci podręcznej „{0}”"
 msgstr "Refreshed cache key “{0}”"
 
 #: src/routes/dashboard/s3cache/+page.svelte
-msgid "Storage operations"
+msgid "Operacje na magazynie danych"
 msgstr "Storage operations"
 
 #: src/routes/dashboard/s3cache/+page.svelte
-msgid "The website caches lists of object URLs from Cloudflare R2 to avoid repeatedly scanning storage. Inspect each cached group below or refresh a key after its bucket contents change."
+msgid "Witryna zapisuje w pamięci podręcznej listy adresów URL obiektów z Cloudflare R2, aby uniknąć wielokrotnego skanowania magazynu. Przejrzyj poniżej każdą zapisaną grupę lub odśwież klucz po zmianie zawartości jego zasobnika."
 msgstr "The website caches lists of object URLs from Cloudflare R2 to avoid repeatedly scanning storage. Inspect each cached group below or refresh a key after its bucket contents change."
 
 #: src/routes/dashboard/s3cache/+page.svelte
-msgid "01 / Cached groups"
+msgid "01 / Grupy w pamięci podręcznej"
 msgstr "01 / Cached groups"
 
 #: src/routes/dashboard/s3cache/+page.svelte
-msgid "Object listings"
+msgid "Listy obiektów"
 msgstr "Object listings"
 
-#. 0: cacheEntries.length; 1: cacheEntries.length === 1 ? 'key' \\: 'keys'
 #: src/routes/dashboard/s3cache/+page.svelte
-msgid "{0} {1} cached"
-msgstr "{0} {1} cached"
-
-#: src/routes/dashboard/s3cache/+page.svelte
-msgid "Loading cached object listings…"
+msgid "Ładowanie list obiektów z pamięci podręcznej…"
 msgstr "Loading cached object listings…"
 
 #: src/routes/dashboard/s3cache/+page.svelte
-msgid "The S3 cache could not be loaded."
+msgid "Nie udało się załadować pamięci podręcznej S3."
 msgstr "The S3 cache could not be loaded."
 
 #: src/routes/dashboard/s3cache/+page.svelte
-msgid "No cache keys found"
+msgid "Nie znaleziono kluczy pamięci podręcznej"
 msgstr "No cache keys found"
 
 #: src/routes/dashboard/s3cache/+page.svelte
-msgid "Cached object listings will appear here after they are used."
+msgid "Listy obiektów pojawią się tutaj po zapisaniu ich w pamięci podręcznej."
 msgstr "Cached object listings will appear here after they are used."
 
 #: src/routes/dashboard/s3cache/+page.svelte
-msgid "Cache key"
+msgid "Klucz pamięci podręcznej"
 msgstr "Cache key"
 
 #. 0: formatLocalDate(cache.time)
 #: src/routes/dashboard/s3cache/+page.svelte
-msgid "Updated {0}"
+msgid "Zaktualizowano {0}"
 msgstr "Updated {0}"
 
 #. 0: key
 #: src/routes/dashboard/s3cache/+page.svelte
-msgid "Refresh cache key {0}"
+msgid "Odśwież klucz pamięci podręcznej {0}"
 msgstr "Refresh cache key {0}"
 
 #: src/routes/dashboard/s3cache/+page.svelte
-msgid "Refreshing…"
+msgid "Odświeżanie…"
 msgstr "Refreshing…"
 
 #: src/routes/dashboard/s3cache/+page.svelte
-msgid "Refresh"
+msgid "Odśwież"
 msgstr "Refresh"
 
 #: src/routes/dashboard/s3cache/+page.svelte
-msgid "This cache key contains no URLs."
+msgid "Ten klucz pamięci podręcznej nie zawiera żadnych adresów URL."
 msgstr "This cache key contains no URLs."
 
+#: src/components/Navbar.svelte
 #: src/components/ui/FieldName.svelte
-msgid "Community"
+msgid "Społeczność"
 msgstr "Community"
 
 #: src/components/ui/FieldName.svelte
-msgid "Research"
+msgid "Badania"
 msgstr "Research"
 
 #: src/routes/projects/+page.svelte
-msgid "No matching projects."
+msgid "Brak pasujących projektów."
 msgstr "No matching projects."
 
 #: src/routes/+page.svelte
@@ -352,11 +340,11 @@ msgid "ZOSIA"
 msgstr "ZOSIA"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
-msgid "Previous image"
+msgid "Poprzednie zdjęcie"
 msgstr "Previous image"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
-msgid "Next image"
+msgid "Następne zdjęcie"
 msgstr "Next image"
 
 #. 0: page.status
@@ -373,251 +361,235 @@ msgid "{0} · KSI UWr"
 msgstr "{0} · KSI UWr"
 
 #: src/routes/+error.svelte
-msgid "The page may have moved, or something went wrong while loading it."
+msgid "Strona mogła zostać przeniesiona lub wystąpił błąd podczas jej wczytywania."
 msgstr "The page may have moved, or something went wrong while loading it."
 
 #: src/routes/+error.svelte
-msgid "We couldn't load this page."
+msgid "Nie udało się wczytać tej strony."
 msgstr "We couldn't load this page."
 
 #: src/routes/+error.svelte
-msgid "<0/> Return home"
+msgid "<0/> Wróć na stronę główną"
 msgstr "<0/> Return home"
 
 #: src/components/Wrapper.svelte
 #: src/routes/docs/[workspace]/[slug]/+page.svelte
-msgid "Breadcrumb"
+msgid "Okruszki nawigacyjne"
 msgstr "Breadcrumb"
 
 #: src/components/Footer.svelte
-msgid "Computer Science Students’ Association at the University of Wrocław."
+msgid "Koło Studentów Informatyki Uniwersytetu Wrocławskiego."
 msgstr "Computer Science Students’ Association at the University of Wrocław."
 
 #: src/components/Footer.svelte
-msgid "Institute of Computer Science<0/> 15 Fryderyka Joliot-Curie St.<1/> 50-383 Wrocław · Room 24"
+msgid "Instytut Informatyki<0/> ul. Fryderyka Joliot-Curie 15<1/> 50-383 Wrocław · pokój 24"
 msgstr "Institute of Computer Science<0/> 15 Fryderyka Joliot-Curie St.<1/> 50-383 Wrocław · Room 24"
 
-#~ msgid "Footer navigation"
-#~ msgstr "Footer navigation"
-
-#~ msgid "About us"
-#~ msgstr "About us"
-
 #: src/components/Footer.svelte
-msgid "Contact"
+msgid "Kontakt"
 msgstr "Contact"
 
 #: src/components/Footer.svelte
-msgid "Explore"
+msgid "Odkrywaj"
 msgstr "Explore"
 
-#~ msgid "Find us online"
-#~ msgstr "Find us online"
-
 #: src/components/Navbar.svelte
-msgid "Change language"
+msgid "Zmień język"
 msgstr "Change language"
 
 #: src/routes/dashboard/+page.svelte
-msgid "Manage public announcements and perform other tasks."
+msgid "Zarządzaj ogłoszeniami publicznymi i wykonuj inne zadania."
 msgstr "Manage public announcements and perform other tasks."
 
 #. 0: commitHash
 #: src/components/Footer.svelte
-msgid "Commit {0}"
+msgid "Rewizja {0}"
 msgstr "Commit {0}"
 
 #: src/components/Navbar.svelte
 #: src/components/Navbar.svelte
-msgid "<0/> Sign in"
+msgid "<0/> Zaloguj się"
 msgstr "<0/> Sign in"
 
 #: src/components/Navbar.svelte
-msgid "Projects <0/>"
+msgid "Projekty <0/>"
 msgstr "Projects <0/>"
 
 #: src/components/Navbar.svelte
-msgid "Groups <0/>"
+msgid "Grupy <0/>"
 msgstr "Groups <0/>"
 
 #: src/routes/+page.svelte
-msgid "We're computer science students at the University of Wrocław. We build software and organize workshops and events."
+msgid "Jesteśmy studentami informatyki na Uniwersytecie Wrocławskim. Tworzymy oprogramowanie, prowadzimy warsztaty i organizujemy wydarzenia."
 msgstr "We're computer science students at the University of Wrocław. We build software and organize workshops and events."
 
 #: src/routes/+page.svelte
-msgid "See what we do <0/>"
+msgid "Zobacz, co robimy <0/>"
 msgstr "See what we do <0/>"
 
 #: src/routes/+page.svelte
-msgid "Children taught programming"
+msgid "Dzieci uczące się programowania"
 msgstr "Children taught programming"
 
 #: src/routes/+page.svelte
-msgid "Conferences organized"
+msgid "Zorganizowane konferencje"
 msgstr "Conferences organized"
 
 #: src/routes/+page.svelte
-msgid "On-site lectures hosted"
+msgid "Zorganizowane wykłady stacjonarne"
 msgstr "On-site lectures hosted"
 
 #: src/routes/+page.svelte
-msgid "Reading groups"
+msgid "Dyskusje o pracach naukowych"
 msgstr "Reading groups"
 
 #: src/routes/+page.svelte
-msgid "We meet to read and discuss research papers."
+msgid "Spotykamy się, żeby czytać i omawiać prace naukowe."
 msgstr "We meet to read and discuss research papers."
 
 #: src/routes/+page.svelte
-msgid "Guest seminars"
+msgid "Seminaria gościnne"
 msgstr "Guest seminars"
 
 #: src/routes/+page.svelte
-msgid "Researchers and alumni talk about their work."
+msgid "Badacze i absolwenci opowiadają o swojej pracy."
 msgstr "Researchers and alumni talk about their work."
 
 #: src/routes/+page.svelte
-msgid "Research projects"
+msgid "Projekty badawcze"
 msgstr "Research projects"
 
 #: src/routes/+page.svelte
-msgid "We work on research problems with faculty."
+msgid "Pracujemy nad problemami badawczymi z pracownikami naukowymi."
 msgstr "We work on research problems with faculty."
 
 #: src/components/Navbar.svelte
-msgid "Our winter camp for computer science students in Lower Silesia."
+msgid "Nasz zimowy obóz dla studentów informatyki na Dolnym Śląsku."
 msgstr "Our winter camp for computer science students in Lower Silesia."
 
 #: src/components/Navbar.svelte
-msgid "A summer version of ZOSIA, in preparation."
+msgid "Letnia wersja ZOSI. W przygotowaniu."
 msgstr "A summer version of ZOSIA, in preparation."
 
-#~ msgid "Soon"
-#~ msgstr "Soon"
-
 #: src/components/Navbar.svelte
-msgid "The code behind this website."
+msgid "Kod tej strony."
 msgstr "The code behind this website."
 
 #: src/components/Navbar.svelte
-msgid "Social"
-msgstr "Social"
-
-#: src/components/Navbar.svelte
-msgid "Camps, events, and meetups."
+msgid "Obozy, wydarzenia i spotkania."
 msgstr "Camps, events, and meetups."
 
 #: src/components/Navbar.svelte
-msgid "Technical"
+msgid "Technika"
 msgstr "Technical"
 
 #: src/components/Navbar.svelte
-msgid "Software and tools built by our members."
+msgid "Oprogramowanie i narzędzia tworzone przez członków koła."
 msgstr "Software and tools built by our members."
 
 #: src/components/Navbar.svelte
-msgid "Scientific research"
+msgid "Badania naukowe"
 msgstr "Scientific research"
 
 #: src/components/Navbar.svelte
-msgid "Paper discussions and research with faculty."
+msgid "Dyskusje o pracach naukowych i badania z pracownikami naukowymi."
 msgstr "Paper discussions and research with faculty."
 
 #: src/components/Navbar.svelte
 #: src/components/Navbar.svelte
-msgid "See more projects"
+msgid "Zobacz więcej projektów"
 msgstr "See more projects"
 
 #: src/components/ui/NavMenuPanel.svelte
-msgid "See more"
+msgid "Zobacz więcej"
 msgstr "See more"
 
 #: src/components/Navbar.svelte
-msgid "Groups"
+msgid "Grupy"
 msgstr "Groups"
 
 #: src/components/Footer.svelte
 #: src/routes/projects/+page.svelte
-msgid "All projects"
+msgid "Wszystkie projekty"
 msgstr "All projects"
 
 #: src/routes/projects/+page.svelte
-msgid "KSI projects: conferences, programming workshops, machine learning, and quantum computing."
+msgid "Projekty KSI: konferencje, warsztaty programowania, uczenie maszynowe i obliczenia kwantowe."
 msgstr "KSI projects: conferences, programming workshops, machine learning, and quantum computing."
 
 #: src/routes/projects/+page.svelte
-msgid "Projects · KSI UWr"
+msgid "Projekty · KSI UWr"
 msgstr "Projects · KSI UWr"
 
 #: src/routes/projects/+page.svelte
-msgid "Projects at KSI"
+msgid "Projekty w KSI"
 msgstr "Projects at KSI"
 
 #: src/routes/projects/+page.svelte
-msgid "Software, research, and events organized by KSI members."
+msgid "Oprogramowanie, badania i wydarzenia tworzone przez członków KSI."
 msgstr "Software, research, and events organized by KSI members."
 
 #: src/routes/projects/+page.svelte
 #: src/routes/projects/+page.svelte
-msgid "Search projects..."
+msgid "Szukaj projektów..."
 msgstr "Search projects..."
 
 #: src/routes/projects/+page.svelte
-msgid "Try another search or explore a different field."
+msgid "Spróbuj innego hasła lub wybierz inną dziedzinę."
 msgstr "Try another search or explore a different field."
 
 #: src/components/ui/ContactBanner.svelte
-msgid "Have a project idea?"
+msgid "Masz pomysł na projekt?"
 msgstr "Have a project idea?"
 
 #: src/components/ui/ContactBanner.svelte
-msgid "Tell us about it <0/>"
+msgid "Napisz do nas <0/>"
 msgstr "Tell us about it <0/>"
 
 #. 0: filteredProjects.length; 1: projects.length
 #: src/routes/projects/+page.svelte
-msgid "Showing {0} of {1} projects"
+msgid "Wyświetlono {0} z {1} projektów"
 msgstr "Showing {0} of {1} projects"
 
 #: src/routes/+error.svelte
-msgid "Try again or return to the home page."
+msgid "Spróbuj ponownie lub wróć na stronę główną."
 msgstr "Try again or return to the home page."
 
 #: src/routes/+page.svelte
-msgid "More projects coming soon."
+msgid "Więcej projektów wkrótce."
 msgstr "More projects coming soon."
 
 #: src/routes/+page.svelte
-msgid "About KSI"
+msgid "O KSI"
 msgstr "About KSI"
 
 #: src/routes/+page.svelte
-msgid "We're KSI."
+msgid "Jesteśmy KSI."
 msgstr "We're KSI."
 
 #: src/routes/+page.svelte
-msgid "Our winter camp in the mountains of Lower Silesia, with talks on research and hobbies, and time to hang out."
+msgid "Nasz zimowy obóz w górach na Dolnym Śląsku. Są wykłady o badaniach i zainteresowaniach oraz czas, żeby pobyć razem."
 msgstr "Our winter camp in the mountains of Lower Silesia, with talks on research and hobbies, and time to hang out."
 
 #: src/routes/+page.svelte
-msgid "We teach children programming in one-hour workshops."
+msgid "Uczymy dzieci programowania na godzinnych warsztatach."
 msgstr "We teach children programming in one-hour workshops."
 
 #: src/routes/+page.svelte
-msgid "Events and workshops"
+msgid "Wydarzenia i warsztaty"
 msgstr "Events and workshops"
 
 #: src/components/Footer.svelte
 #: src/routes/+page.svelte
-msgid "Our projects"
+msgid "Nasze projekty"
 msgstr "Our projects"
 
 #: src/routes/+page.svelte
-msgid "Research at KSI"
+msgid "Badania w KSI"
 msgstr "Research at KSI"
 
 #: src/routes/+page.svelte
-msgid "KSI Members"
+msgid "Członkowie KSI"
 msgstr "KSI Members"
 
 #. 0: import.meta.env.PUBLIC_APP_VERSION
@@ -626,27 +598,27 @@ msgid "v{0}"
 msgstr "v{0}"
 
 #: src/components/Navbar.svelte
-msgid "Toggle mobile menu"
+msgid "Przełącz menu mobilne"
 msgstr "Toggle mobile menu"
 
 #: src/routes/projects/+page.svelte
-msgid "<0/> Clear filters"
+msgid "<0/> Wyczyść filtry"
 msgstr "<0/> Clear filters"
 
 #: src/routes/projects/[slug]/+page.svelte
-msgid "<0/> Project settings"
+msgid "<0/> Ustawienia projektu"
 msgstr "<0/> Project settings"
 
 #: src/routes/projects/[slug]/+page.svelte
-msgid "<0/> Join project"
+msgid "<0/> Dołącz do projektu"
 msgstr "<0/> Join project"
 
 #: src/routes/projects/[slug]/+page.svelte
-msgid "Your join request has been sent."
+msgid "Prośba o dołączenie została wysłana."
 msgstr "Your join request has been sent."
 
 #: src/routes/projects/[slug]/+page.svelte
-msgid "You have joined the project."
+msgid "Dołączono do projektu."
 msgstr "You have joined the project."
 
 #: src/components/Footer.svelte
@@ -654,24 +626,28 @@ msgstr "You have joined the project."
 #: src/routes/articles/+page.svelte
 #: src/routes/members/[id]/+page.svelte
 #: src/routes/projects/[slug]/+page.svelte
-msgid "Articles"
+msgid "Artykuły"
 msgstr "Articles"
 
 #: src/routes/projects/[slug]/+page.svelte
-msgid "Project leaders"
+msgid "Liderzy projektu"
 msgstr "Project leaders"
 
 #: src/routes/projects/[slug]/+page.svelte
-msgid "Members"
+msgid "Członkowie"
 msgstr "Members"
 
+#. 0: member.nickname
+#. 0: member.nickname
 #. 0: data.member.nickname
+#: ../../packages/ui/src/lib/platform/MemberPreview.svelte
+#: ../../packages/ui/src/lib/platform/MemberPreview.svelte
 #: src/routes/members/[id]/+page.svelte
 msgid "aka. {0}"
 msgstr "aka. {0}"
 
 #: src/routes/projects/[slug]/+page.svelte
-msgid "Links"
+msgid "Linki"
 msgstr "Links"
 
 #: src/routes/members/[id]/+page.svelte
@@ -683,156 +659,136 @@ msgid "<0/>LinkedIn"
 msgstr "<0/>LinkedIn"
 
 #: src/lib/components/ArticleList.svelte
-msgid "No published articles yet."
+msgid "Nie ma jeszcze opublikowanych artykułów."
 msgstr "No published articles yet."
 
 #: src/components/ui/FieldName.svelte
-msgid "Engineering"
+msgid "Inżynieria"
 msgstr "Engineering"
 
 #: src/lib/components/ArticleList.svelte
 #: src/routes/articles/[slug]/+page.svelte
-msgid "Authors"
+msgid "Autorzy"
 msgstr "Authors"
 
 #: src/routes/articles/[slug]/+page.svelte
-msgid "Published"
-msgstr "Published"
-
-#: src/routes/articles/[slug]/+page.svelte
-msgid "Keep reading"
+msgid "Czytaj dalej"
 msgstr "Keep reading"
-
-#: src/routes/articles/[slug]/+page.svelte
-msgid "All articles<0/>"
-msgstr "All articles<0/>"
-
-#: src/routes/articles/[slug]/+page.svelte
-msgid "<0/>All articles"
-msgstr "<0/>All articles"
 
 #. 0: formatLocalDate(alert.startDate); 1: formatLocalDate(alert.endDate)
 #: src/routes/dashboard/alerts/+page.svelte
-msgid "From {0} to {1}"
+msgid "Od {0} do {1}"
 msgstr "From {0} to {1}"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
-msgid "Open image"
+msgid "Otwórz zdjęcie"
 msgstr "Open image"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
-msgid "Gallery image"
+msgid "Zdjęcie w galerii"
 msgstr "Gallery image"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
-msgid "Loading…"
+msgid "Wczytywanie…"
 msgstr "Loading…"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
-msgid "Reference not found"
+msgid "Nie znaleziono odwołania"
 msgstr "Reference not found"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
-msgid "Preview unavailable"
+msgid "Podgląd niedostępny"
 msgstr "Preview unavailable"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
-msgid "Association"
+msgid "Całe koło"
 msgstr "Association"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
-msgid "Task"
+msgid "Zadanie"
 msgstr "Task"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
-msgid "Thread"
+msgid "Wątek"
 msgstr "Thread"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
 #: ../../packages/ui/src/lib/platform/MarkdownContent.svelte
-msgid "No description."
+msgid "Brak opisu."
 msgstr "No description."
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
-msgid "Association member"
+msgid "Członek koła"
 msgstr "Association member"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
-msgid "Due"
-msgstr "Due"
-
-#: ../../packages/ui/src/lib/platform/Markdown.svelte
-msgid "Open"
+msgid "Otwórz"
 msgstr "Open"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
-msgid "Gallery"
+msgid "Galeria"
 msgstr "Gallery"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
-msgid "Close"
-msgstr "Close"
+msgid "utworzył(a) to zadanie"
+msgstr "created this task"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
-msgid "opened this task"
-msgstr "opened this task"
-
-#: ../../packages/ui/src/lib/platform/Markdown.svelte
-msgid "opened this thread"
-msgstr "opened this thread"
+msgid "utworzył(a) ten wątek"
+msgstr "created this thread"
 
 #: src/components/Navbar.svelte
-msgid "Main navigation"
+msgid "Nawigacja główna"
 msgstr "Main navigation"
 
 #: src/components/Navbar.svelte
-msgid "<0/> Dashboard"
+msgid "<0/> Panel"
 msgstr "<0/> Dashboard"
 
 #: src/components/Navbar.svelte
-msgid "<0/> Articles"
+msgid "<0/> Artykuły"
 msgstr "<0/> Articles"
 
 #: src/components/Navbar.svelte
-msgid "<0/> Logout"
+msgid "<0/> Wyloguj"
 msgstr "<0/> Logout"
 
 #: src/components/Footer.svelte
-msgid "<0/> Source code"
+msgid "<0/> Kod źródłowy"
 msgstr "<0/> Source code"
 
 #: src/routes/+page.svelte
-msgid "<0/> Student association at the University of Wrocław"
+msgid "<0/> Koło naukowe na Uniwersytecie Wrocławskim"
 msgstr "<0/> Student association at the University of Wrocław"
 
 #: src/routes/+page.svelte
 #: src/routes/+page.svelte
-msgid "Read more <0/>"
+msgid "Czytaj dalej <0/>"
 msgstr "Read more <0/>"
 
 #: src/routes/+page.svelte
-msgid "See more projects <0/>"
+msgid "Zobacz więcej projektów <0/>"
 msgstr "See more projects <0/>"
 
 #: src/routes/projects/+page.svelte
-msgid "<0/>Our work"
+msgid "<0/>Nasze działania"
 msgstr "<0/>Our work"
 
 #: src/routes/projects/+page.svelte
-msgid "Filter by field"
+msgid "Filtruj według obszaru"
 msgstr "Filter by field"
 
 #: src/routes/projects/[slug]/+page.svelte
-msgid "<0/> Open project workspace"
+msgid "<0/> Otwórz przestrzeń projektu"
 msgstr "<0/> Open project workspace"
 
 #: src/routes/projects/[slug]/+page.svelte
-msgid "<0/>All projects"
+msgid "<0/>Wszystkie projekty"
 msgstr "<0/>All projects"
 
 #: src/routes/articles/+page.svelte
-msgid "Articles · KSI UWr"
+msgid "Artykuły · KSI UWr"
 msgstr "Articles · KSI UWr"
 
 #: src/routes/articles/+page.svelte
@@ -840,112 +796,207 @@ msgid "<0/>Blog"
 msgstr "<0/>Blog"
 
 #: src/routes/articles/+page.svelte
-msgid "News, write-ups, and recaps from KSI members."
+msgid "Aktualności, artykuły i relacje członków KSI."
 msgstr "News, write-ups, and recaps from KSI members."
 
 #: src/routes/docs/+page.svelte
-msgid "Documentation · KSI UWr"
+msgid "Dokumentacja · KSI UWr"
 msgstr "Documentation · KSI UWr"
 
 #: src/routes/docs/+page.svelte
-msgid "<0/>Docs"
+msgid "<0/>Dokumentacja"
 msgstr "<0/>Docs"
 
+#: src/components/Footer.svelte
+#: src/components/Navbar.svelte
 #: src/routes/docs/+page.svelte
-msgid "Documentation"
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Dokumentacja"
 msgstr "Documentation"
 
 #: src/routes/docs/+page.svelte
-msgid "How KSI and its projects work, shared openly by our members."
+msgid "Jak działa KSI i jego projekty — opisane otwarcie przez naszych członków."
 msgstr "How KSI and its projects work, shared openly by our members."
 
 #: src/lib/components/PublicDocsSidebar.svelte
 #: src/routes/docs/+page.svelte
-msgid "No public documentation yet."
+msgid "Brak publicznej dokumentacji."
 msgstr "No public documentation yet."
 
-#: ../../packages/ui/src/lib/platform/DocsOutline.svelte
-#: ../../packages/ui/src/lib/platform/DocsToc.svelte
-msgid "On this page"
-msgstr "On this page"
-
 #: src/routes/docs/[workspace]/[slug]/+page.svelte
-msgid "Copy link to this section"
+msgid "Skopiuj link do tej sekcji"
 msgstr "Copy link to this section"
 
 #: src/routes/docs/[workspace]/[slug]/+page.svelte
-msgid "Link copied"
+msgid "Skopiowano link"
 msgstr "Link copied"
 
-#: src/routes/docs/[workspace]/[slug]/+page.svelte
-msgid "Updated"
-msgstr "Updated"
-
-#~ msgid "Document language"
-#~ msgstr "Document language"
-
-#: src/lib/components/PublicDocsSidebar.svelte
-msgid "All documentation"
-msgstr "All documentation"
-
-#: src/components/Footer.svelte
-#: src/components/Navbar.svelte
-#: src/routes/docs/[workspace]/[slug]/+page.svelte
-msgid "Docs"
-msgstr "Docs"
-
 #: src/lib/components/PublicDocsSidebar.svelte
 #: src/lib/components/PublicDocsSidebar.svelte
-msgid "Documentation pages"
+msgid "Strony dokumentacji"
 msgstr "Documentation pages"
 
 #: src/lib/components/PublicDocsSidebar.svelte
-msgid "Workspaces"
+msgid "Przestrzenie"
 msgstr "Workspaces"
 
 #: src/components/Navbar.svelte
-msgid "<0/> Docs"
+msgid "<0/> Dokumentacja"
 msgstr "<0/> Docs"
 
 #: src/routes/docs/[workspace]/[slug]/+page.svelte
-msgid "The English version changed after this translation was written."
-msgstr "The English version changed after this translation was written."
-
-#: src/routes/docs/[workspace]/[slug]/+page.svelte
-msgid "Read the English version"
-msgstr "Read the English version"
-
-#: src/routes/docs/[workspace]/[slug]/+page.svelte
-msgid "More pages"
+msgid "Więcej stron"
 msgstr "More pages"
 
-#: src/routes/docs/[workspace]/[slug]/+page.svelte
-msgid "Previous"
-msgstr "Previous"
-
-#: src/routes/docs/[workspace]/[slug]/+page.svelte
-msgid "Next"
-msgstr "Next"
-
 #: src/components/Footer.svelte
-msgid "Follow us"
+msgid "Obserwuj nas"
 msgstr "Follow us"
 
 #: src/routes/docs/+layout.svelte
 #: src/routes/docs/+layout.svelte
-msgid "Toggle sidebar"
+msgid "Przełącz panel boczny"
 msgstr "Toggle sidebar"
 
 #: src/lib/components/PublicDocsSidebar.svelte
-#: src/routes/docs/+page.svelte
-#: src/routes/docs/[workspace]/[slug]/+page.svelte
-msgid "Members only"
+msgid "Tylko dla członków"
 msgstr "Members only"
 
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+msgid "Szukaj…"
+msgstr "Search…"
+
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+msgid "Brak wyników"
+msgstr "No results"
+
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+#: ../../packages/ui/src/lib/platform/MemberPreview.svelte
+msgid "Escape"
+msgstr "Escape"
+
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+msgid "Tab"
+msgstr "Tab"
+
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+msgid "ArrowDown"
+msgstr "ArrowDown"
+
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+msgid "ArrowUp"
+msgstr "ArrowUp"
+
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+msgid "Home"
+msgstr "Home"
+
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+msgid "End"
+msgstr "End"
+
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+msgid "Enter"
+msgstr "Enter"
+
+#: ../../packages/ui/src/lib/platform/MemberPreview.svelte
+msgid "Brak biografii."
+msgstr "No biography yet."
+
+#: ../../packages/ui/src/lib/platform/MemberPreview.svelte
+msgid "Zobacz profil"
+msgstr "View profile"
+
+#: ../../packages/ui/src/lib/platform/ThemeSelector.svelte
+msgid "Wygląd"
+msgstr "Appearance"
+
+#: ../../packages/ui/src/lib/platform/ThemeSelector.svelte
+msgid "Systemowy"
+msgstr "System"
+
+#: ../../packages/ui/src/lib/platform/ThemeSelector.svelte
+msgid "Jasny"
+msgstr "Light"
+
+#: ../../packages/ui/src/lib/platform/ThemeSelector.svelte
+msgid "Ciemny"
+msgstr "Dark"
+
+#: src/routes/articles/[slug]/+page.svelte
+msgid "<0/>Wszystkie artykuły"
+msgstr "<0/>All articles"
+
+#: src/routes/articles/[slug]/+page.svelte
+msgid "Wszystkie artykuły<0/>"
+msgstr "All articles<0/>"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Priorytet <0>Opcjonalnie</0>"
+msgstr "Priority <0>Optional</0>"
+
+#: src/routes/dashboard/alerts/+page.svelte
+msgid "Link <0>Opcjonalnie</0>"
+msgstr "Link <0>Optional</0>"
+
+#. 0: cacheEntries.length
+#: src/routes/dashboard/s3cache/+page.svelte
+msgid "Zapisano w pamięci podręcznej: {0}"
+msgstr "Cached: {0}"
+
+#: src/lib/components/PublicDocsSidebar.svelte
+msgid "<0/>Cała dokumentacja"
+msgstr "<0/>All documentation"
+
+#: src/routes/docs/+page.svelte
 #: src/routes/docs/[workspace]/[slug]/+page.svelte
-msgid "Edit"
-msgstr "Edit"
+msgid "<0/>Tylko dla członków"
+msgstr "<0/>Members only"
+
+#: ../../packages/ui/src/lib/platform/DocsOutline.svelte
+msgid "<0/>Na tej stronie<1/>"
+msgstr "<0/>On this page<1/>"
+
+#: ../../packages/ui/src/lib/platform/DocsToc.svelte
+msgid "<0/>Na tej stronie"
+msgstr "<0/>On this page"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Termin: <0/>"
+msgstr "Termin: <0/>"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "<0/>Zamknij"
+msgstr "<0/>Close"
+
+#: src/routes/articles/[slug]/+page.svelte
+msgid "Opublikowano <0/>"
+msgstr "Published <0/>"
 
 #: src/routes/docs/[workspace]/[slug]/+page.svelte
-msgid "Suggest changes"
-msgstr "Suggest changes"
+msgid "<0/>Edytuj"
+msgstr "<0/>Edit"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "<0/>Zaproponuj zmiany"
+msgstr "<0/>Suggest changes"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Zaktualizowano <0/>"
+msgstr "Updated <0/>"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Wersja polska zmieniła się po przygotowaniu tego tłumaczenia. <0>Czytaj wersję polską</0>"
+msgstr "The Polish version changed after this translation was written. <0>Read the Polish version</0>"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "<0/>Poprzednia"
+msgstr "<0/>Previous"
+
+#: src/routes/docs/[workspace]/[slug]/+page.svelte
+msgid "Następna<0/>"
+msgstr "Next<0/>"

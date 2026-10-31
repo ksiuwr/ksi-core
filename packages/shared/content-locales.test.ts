@@ -3,35 +3,43 @@ import {
   localizeContent,
   contentLocale,
   articleFileContent,
-  hasEnglishSources,
+  hasPrimarySources,
   frontendLocales,
   defaultFrontendLocale,
-  contentLocales
+  contentLocales,
+  primaryContentLocale,
+  translationLocales
 } from './content-locales';
-test('public translations fall back per field and only support frontend locales', () => {
-  expect(defaultFrontendLocale).toBe(frontendLocales[0]);
-  expect(frontendLocales.map(contentLocale)).toEqual([...contentLocales]);
+test('Polish is the default UI language and the required content language', () => {
+  expect(contentLocale(defaultFrontendLocale)).toBe(primaryContentLocale);
+  expect(new Set(frontendLocales.map(contentLocale))).toEqual(new Set(contentLocales));
+  expect(translationLocales).toEqual(['en']);
+  for (const missing of [null, undefined, '', 'de-DE', 'not a locale'])
+    expect(contentLocale(missing)).toBe('pl');
+});
+test('English translations fall back per field to the Polish content', () => {
   const project = {
     name: 'Robot',
-    description: 'English description',
-    tags: ['robotics'],
-    translations: { pl: { name: 'Robot PL', description: '  ', tags: ['robotyka'] } }
+    description: 'Polski opis',
+    tags: ['robotyka'],
+    translations: { en: { name: 'Robot EN', description: '  ', tags: ['robotics'] } }
   };
-  expect(localizeContent(project, 'pl')).toMatchObject({
-    name: 'Robot PL',
-    description: 'English description',
-    tags: ['robotyka']
+  expect(localizeContent(project, 'en-us')).toMatchObject({
+    name: 'Robot EN',
+    description: 'Polski opis',
+    tags: ['robotics']
   });
+  expect(localizeContent(project, 'pl')).toBe(project);
   expect(localizeContent(project, 'fr')).toBe(project);
-  expect(hasEnglishSources({ name: '' }, { name: 'Nazwa' })).toBe(false);
-  expect(hasEnglishSources({ bio: null }, { bio: '' })).toBe(true);
+  expect(hasPrimarySources({ name: '' }, { name: 'Name' })).toBe(false);
+  expect(hasPrimarySources({ bio: null }, { bio: '' })).toBe(true);
 });
 test('file references include the thumbnail and all translated article content', () => {
   expect(
     articleFileContent({
-      markdown: 'file:english12',
+      markdown: 'file:polish123',
       thumbnailFileId: 'thumbnail123',
-      translations: { pl: { markdown: 'file:polish123' } }
+      translations: { en: { markdown: 'file:english12' } }
     })
-  ).toBe('file:english12\nfile:thumbnail123\nfile:polish123');
+  ).toBe('file:polish123\nfile:thumbnail123\nfile:english12');
 });

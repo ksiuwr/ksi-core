@@ -17,10 +17,10 @@
     class="flex flex-col items-start justify-between gap-6 p-8 md:flex-row md:items-center md:p-12"
   >
     <h2 id="contact-banner-heading" class="text-[clamp(26px,3.5vw,36px)] tracking-tight">
-      Have a project idea?
+      Masz pomysł na projekt?
     </h2>
     <a href="mailto:ksi@cs.uni.wroc.pl" class="btn btn-lg group">
-      Tell us about it
+      Napisz do nas
       <ArrowUpRight
         class="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
       />

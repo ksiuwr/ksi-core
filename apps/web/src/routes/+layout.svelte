@@ -8,9 +8,10 @@
   import { themeStore } from '@ksi-core/ui/lib';
   import Alert from '../components/Alert.svelte';
   import '../locales/main.loader.svelte.js';
-  import { locale, refreshLocalizedContent } from '$lib/locale.svelte';
+  import { locale, observeLocalePreference, refreshLocalizedContent } from '$lib/locale.svelte';
 
   onMount(themeStore.initialize);
+  onMount(observeLocalePreference);
   onMount(() => {
     const refresh = () => {
       if (document.visibilityState === 'visible') void invalidate('ksi:alert');

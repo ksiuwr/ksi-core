@@ -29,7 +29,7 @@
     `${data.dashboardOrigin}${docsPath(data.page.workspace.slug, data.page.slug, 'edit')}`
   );
   const onhash = (url: URL) => replaceState(url, {});
-  const anchorLabels = { copyLabel: 'Copy link to this section', copiedLabel: 'Link copied' };
+  const anchorLabels = { copyLabel: 'Skopiuj link do tej sekcji', copiedLabel: 'Skopiowano link' };
   let content = $state<HTMLDivElement>();
 </script>
 
@@ -38,8 +38,8 @@
   <div class="doc-layout">
     <article lang={data.page.locale}>
       <header class="doc-heading">
-        <nav class="doc-breadcrumb" aria-label={'Breadcrumb'}>
-          <a href="/docs">{'Docs'}</a>
+        <nav class="doc-breadcrumb" aria-label={'Okruszki nawigacyjne'}>
+          <a href="/docs">Dokumentacja</a>
           <ChevronRight size={13} aria-hidden="true" />
           {#if data.page.workspace.slug}
             <a href={`/projects/${encodeURIComponent(data.page.workspace.slug)}`}
@@ -56,20 +56,19 @@
         <h1>{data.page.title}</h1>
         <div class="doc-meta">
           <p>
-            {'Updated'}
+            Zaktualizowano
             <time datetime={data.page.updatedAt}
               >{formatter.format(new Date(data.page.updatedAt))}</time
             >
           </p>
           {#if !data.page.public}<span class="doc-private"
-              ><Lock size={13} aria-hidden="true" />{'Members only'}</span
+              ><Lock size={13} aria-hidden="true" />Tylko dla członków</span
             >{/if}
           {#if data.page.access?.canReview}
-            <a class="doc-edit" href={editUrl}><SquarePen size={13} aria-hidden="true" />{'Edit'}</a
-            >
+            <a class="doc-edit" href={editUrl}><SquarePen size={13} aria-hidden="true" />Edytuj</a>
           {:else if data.page.access?.canPropose}
             <a class="doc-edit" href={editUrl}
-              ><SquarePen size={13} aria-hidden="true" />{'Suggest changes'}</a
+              ><SquarePen size={13} aria-hidden="true" />Zaproponuj zmiany</a
             >
           {/if}
         </div>
@@ -78,10 +77,8 @@
         <p class="doc-outdated" role="note">
           <TriangleAlert size={15} aria-hidden="true" />
           <span>
-            {'The English version changed after this translation was written.'}
-            <button type="button" onclick={() => setLocale('en-us')}
-              >{'Read the English version'}</button
-            >
+            Wersja polska zmieniła się po przygotowaniu tego tłumaczenia.
+            <button type="button" onclick={() => setLocale('pl')}>Czytaj wersję polską</button>
           </span>
         </p>
       {/if}
@@ -96,7 +93,7 @@
         <Markdown blocks={data.page.blocks} {language} />
       </div>
       {#if neighbors.previous || neighbors.next}
-        <nav class="doc-pager" aria-label={'More pages'}>
+        <nav class="doc-pager" aria-label={'Więcej stron'}>
           {#if neighbors.previous}
             <a
               class="surface-card surface-card-link"
@@ -104,7 +101,7 @@
               href={publicDocPath(workspace, neighbors.previous.slug)}
             >
               <span class="doc-pager-label"
-                ><ArrowLeft size={14} aria-hidden="true" />{'Previous'}</span
+                ><ArrowLeft size={14} aria-hidden="true" />Poprzednia</span
               >
               <strong>{neighbors.previous.title}</strong>
             </a>
@@ -116,7 +113,7 @@
               href={publicDocPath(workspace, neighbors.next.slug)}
             >
               <span class="doc-pager-label"
-                >{'Next'}<ArrowRight size={14} aria-hidden="true" /></span
+                >Następna<ArrowRight size={14} aria-hidden="true" /></span
               >
               <strong>{neighbors.next.title}</strong>
             </a>

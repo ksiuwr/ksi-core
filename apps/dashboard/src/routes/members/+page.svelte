@@ -5,7 +5,7 @@
 
 <div class="workspace-header">
   <div>
-    <h1>Members</h1>
+    <h1>Członkowie</h1>
   </div>
 </div>
 <Members websiteOrigin={data.websiteOrigin} administrator={data.user?.role === 'administrator'} />

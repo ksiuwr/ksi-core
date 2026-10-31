@@ -8,14 +8,18 @@
   import {
     cleanDocTranslations,
     docSlugPattern,
-    docTranslationLocales,
     docsPath,
     reservedDocSlugs,
     type DocTranslations
   } from 'shared/docs';
   import type { DocFolder } from 'shared/doc-folders';
   import DocFolderSelect from './DocFolderSelect.svelte';
-  import { contentLocaleName, type ContentLocale } from 'shared/content-locales';
+  import {
+    contentLocaleName,
+    primaryContentLocale,
+    translationLocales,
+    type ContentLocale
+  } from 'shared/content-locales';
   import { preferences } from '$lib/preferences.svelte';
   import { invalidateAll } from '$app/navigation';
   import DocFolderDialog from './DocFolderDialog.svelte';
@@ -49,7 +53,7 @@
   } = $props();
 
   const language = $derived(preferences.language);
-  const locales: ContentLocale[] = ['en', ...docTranslationLocales];
+  const locales: ContentLocale[] = [primaryContentLocale, ...translationLocales];
   // Live updates refresh the page data; the editor keeps the version it started from,
   // so saving over someone else's change is still reported as a conflict.
   const original = untrack(() =>
@@ -67,13 +71,13 @@
         }
       : null
   );
-  // English is the page itself; other languages are optional translations of it.
+  // Polish is the page itself; other languages are optional translations of it.
   let texts = $state(
     Object.fromEntries(
       locales.map((locale) => [locale, { ...textIn(original, locale) }])
     ) as Record<ContentLocale, { title: string; markdown: string }>
   );
-  let editing = $state<ContentLocale>('en');
+  let editing = $state<ContentLocale>(primaryContentLocale);
   let folderId = $state(original?.folderId ?? '');
   let addingFolder = $state(false);
   let address = $state('');
@@ -87,28 +91,28 @@
   const translations = $derived(
     cleanDocTranslations(
       Object.fromEntries(
-        docTranslationLocales.map((locale) => [locale, texts[locale]])
+        translationLocales.map((locale) => [locale, texts[locale]])
       ) as DocTranslations
     )
   );
   const localeDirty = $derived(
     JSON.stringify(texts[editing]) !== JSON.stringify(textIn(original, editing))
   );
-  const addedLocales = $derived(docTranslationLocales.filter((locale) => !!translations[locale]));
+  const addedLocales = $derived(translationLocales.filter((locale) => !!translations[locale]));
   const direct = $derived(access.canReview);
   const addressValid = $derived(
     new RegExp(docSlugPattern).test(address) && !reservedDocSlugs.includes(address)
   );
   const changed = $derived(
     !original ||
-      texts.en.title.trim() !== original.title ||
-      texts.en.markdown !== original.markdown ||
+      texts[primaryContentLocale].title.trim() !== original.title ||
+      texts[primaryContentLocale].markdown !== original.markdown ||
       (folderId || null) !== original.folderId ||
       visible !== original.public ||
       JSON.stringify(translations) !== JSON.stringify(original.translations)
   );
   const ready = $derived(
-    !!texts.en.title.trim() &&
+    !!texts[primaryContentLocale].title.trim() &&
       changed &&
       (!!original || addressValid) &&
       (direct || reason.trim().length >= 3)
@@ -121,8 +125,8 @@
     busy = true;
     error = '';
     const content = {
-      title: texts.en.title.trim(),
-      markdown: texts.en.markdown,
+      title: texts[primaryContentLocale].title.trim(),
+      markdown: texts[primaryContentLocale].markdown,
       folderId: folderId || null,
       translations,
       public: visible,
@@ -160,15 +164,17 @@
   <div>
     <p class="workspace-eyebrow">{workspaceName}</p>
     <h1>
-      {#if original && direct}{'Edit page'}{:else if original}{'Suggest changes'}{:else if direct}{'New page'}{:else}{'Suggest a new page'}{/if}
+      {#if original && direct}Edytuj stronę{:else if original}Zaproponuj zmiany{:else if direct}Nowa
+        strona{:else}Zaproponuj nową stronę{/if}
     </h1>
     {#if !direct}
       <p class="workspace-description">
-        {'Leaders and reviewers of this workspace will compare your version with the current one and accept or decline it.'}
+        Liderzy i recenzenci tej przestrzeni porównają Twoją wersję z obecną i ją zaakceptują lub
+        odrzucą.
       </p>
     {/if}
   </div>
-  <a class="btn btn-outline" href={back}><ArrowLeft size={15} aria-hidden="true" />{'Cancel'}</a>
+  <a class="btn btn-outline" href={back}><ArrowLeft size={15} aria-hidden="true" />Anuluj</a>
 </div>
 <DocError code={error} />
 {#if !access.canPropose}
@@ -178,7 +184,7 @@
     <div class="docs-editor-fields">
       {#if !original}
         <div>
-          <label for="doc-address">{'Address'}</label>
+          <label for="doc-address">Adres</label>
           <input
             id="doc-address"
             bind:value={address}
@@ -190,17 +196,17 @@
           <p id="doc-address-help" class="field-help">
             {#if address && !addressValid}
               <span class="field-error"
-                >{'Use lowercase letters, digits and single hyphens. “new”, “suggestions” and “contributors” are reserved.'}</span
+                >Użyj małych liter, cyfr i pojedynczych myślników. Adresy „new”, „suggestions” i
+                „contributors” są zarezerwowane.</span
               >
             {:else}
-              <span>{'Other pages link here by writing'} <code>[{address || 'address'}]</code></span
-              >
+              <span>Inne strony linkują tutaj, wpisując <code>[{address || 'address'}]</code></span>
             {/if}
           </p>
         </div>
       {/if}
       <div>
-        <label for="doc-folder">{'Folder'}</label>
+        <label for="doc-folder">Folder</label>
         <div class="docs-folder-choice">
           <DocFolderSelect
             id="doc-folder"
@@ -212,7 +218,7 @@
           />
           {#if access.canReview}
             <button type="button" class="btn btn-outline" onclick={() => (addingFolder = true)}
-              ><FolderPlus size={15} aria-hidden="true" />{'New folder'}</button
+              ><FolderPlus size={15} aria-hidden="true" />Nowy folder</button
             >
           {/if}
         </div>
@@ -224,31 +230,35 @@
       added={addedLocales}
       dirty={localeDirty}
       {busy}
-      saveHint={'All language versions are saved together with the document.'}
+      saveHint={'Wszystkie wersje językowe są zapisywane razem z dokumentem.'}
       onremove={() => {
-        if (editing !== 'en') texts[editing] = { title: '', markdown: '' };
+        if (editing !== primaryContentLocale) texts[editing] = { title: '', markdown: '' };
       }}
     >
       {#snippet reference()}
-        <div class="docs-editor-source" lang="en">
-          <h3>{texts.en.title || 'No content'}</h3>
-          <MarkdownContent value={texts.en.markdown} docs docLocale="en" />
+        <div class="docs-editor-source" lang={primaryContentLocale}>
+          <h3>{texts[primaryContentLocale].title || 'Brak treści'}</h3>
+          <MarkdownContent
+            value={texts[primaryContentLocale].markdown}
+            docs
+            docLocale={primaryContentLocale}
+          />
         </div>
       {/snippet}
     </ContentLocaleEditor>
 
     {#key editing}
       <div>
-        <label for="doc-title">{'Title'}</label>
+        <label for="doc-title">Tytuł</label>
         <input
           id="doc-title"
           bind:value={texts[editing].title}
           maxlength="200"
-          required={editing === 'en'}
-          placeholder={editing === 'en' ? '' : texts.en.title}
+          required={editing === primaryContentLocale}
+          placeholder={editing === primaryContentLocale ? '' : texts[primaryContentLocale].title}
           oninput={() => {
-            if (editing === 'en' && !original && !addressEdited)
-              address = slugFromTitle(texts.en.title);
+            if (editing === primaryContentLocale && !original && !addressEdited)
+              address = slugFromTitle(texts[primaryContentLocale].title);
           }}
         />
       </div>
@@ -266,7 +276,7 @@
     <div class="docs-editor-fields">
       <div class="docs-editor-reason">
         <label for="doc-reason">
-          {#if direct}{'Summary of changes (optional)'}{:else}{'Reason for the change'}{/if}
+          {#if direct}Podsumowanie zmian (opcjonalnie){:else}Powód zmiany{/if}
         </label>
         <textarea
           id="doc-reason"
@@ -274,21 +284,22 @@
           rows="3"
           maxlength="1000"
           required={!direct}
-          placeholder={'What changed and why? For example: “Updated after ZOSIA 2026, we ran out of extension cords.”'}
+          placeholder={'Co się zmieniło i dlaczego? Na przykład: „Uzupełnione po ZOSI 2026, zabrakło przedłużaczy”.'}
         ></textarea>
       </div>
       <div class="docs-editor-visibility">
         <label class="docs-check">
           <input type="checkbox" bind:checked={visible} disabled={direct && !access.canPublish} />
-          {#if direct}{'Public on the KSI website'}{:else}{'Request publishing on the KSI website'}{/if}
+          {#if direct}Publiczna na stronie KSI{:else}Poproś o publikację na stronie KSI{/if}
         </label>
         <p class="field-help">
           <Info size={13} aria-hidden="true" />
           <span>
             {#if direct && !access.canPublish}
-              {'Only workspace leaders can change whether a page is public.'}
+              Tylko liderzy przestrzeni mogą zmieniać widoczność publiczną strony.
             {:else}
-              {'Public pages can be read by anyone. Links to internal pages show only their titles.'}
+              Strony publiczne może czytać każdy. Linki do stron wewnętrznych pokazują tylko ich
+              tytuły.
             {/if}
           </span>
         </p>
@@ -303,29 +314,25 @@
         ><FileDiff
           size={15}
           aria-hidden="true"
-        />{#if compared && (compared.locale !== editing || compared.markdown !== texts[editing].markdown)}{'Refresh comparison'}{:else}{'Review changes'}{/if}</button
+        />{#if compared && (compared.locale !== editing || compared.markdown !== texts[editing].markdown)}Odśwież
+          porównanie{:else}Przejrzyj zmiany{/if}</button
       >
       <button class="btn" disabled={!ready || busy}>
-        {#if direct}<Save
-            size={15}
-            aria-hidden="true"
-          />{#if original}{'Save changes'}{:else}{'Create page'}{/if}{:else}<Send
-            size={15}
-            aria-hidden="true"
-          />{'Submit suggestion'}{/if}
+        {#if direct}<Save size={15} aria-hidden="true" />{#if original}Zapisz zmiany{:else}Utwórz
+            stronę{/if}{:else}<Send size={15} aria-hidden="true" />Wyślij propozycję{/if}
       </button>
     </div>
   </form>
   {#if compared}
-    <section class="docs-editor-compare" aria-label={'Changes'}>
-      <h2>{'Your changes'} · {contentLocaleName(compared.locale, language)}</h2>
+    <section class="docs-editor-compare" aria-label={'Zmiany'}>
+      <h2>Twoje zmiany · {contentLocaleName(compared.locale, language)}</h2>
       <DocDiff
         before={textIn(original, compared.locale).markdown}
         after={compared.markdown}
         locale={compared.locale}
         {projectId}
-        beforeLabel={'Current version'}
-        afterLabel={'Your version'}
+        beforeLabel={'Obecna wersja'}
+        afterLabel={'Twoja wersja'}
       />
     </section>
   {/if}

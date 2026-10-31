@@ -122,7 +122,7 @@
   );
   const hiddenTimelineItems = $derived(Math.max(0, timeline.length - TIMELINE_TAIL - timelineHead));
   const showTimelineGap = $derived(hiddenTimelineItems > 0 || nextPage !== null);
-  const remainingTimelineLabel = $derived(`${hiddenTimelineItems} remaining items`);
+  const remainingTimelineLabel = $derived(`Pozostało: ${hiddenTimelineItems}`);
   const visibleTimeline = $derived.by(() => {
     if (!showTimelineGap) return timeline;
     const tailStart = Math.max(timelineHead, timeline.length - TIMELINE_TAIL);
@@ -275,7 +275,7 @@
 
 <DetailLayout
   backHref={dashboardPath(workspace, projectSlug, 'board')}
-  backLabel={'Back to board'}
+  backLabel={'Wróć do tablicy'}
   title={item.title}
   referenceNumber={item.referenceNumber}
   canEditTitle={true}
@@ -288,7 +288,7 @@
 
   {#if error}<p class="error" role="alert">{error}</p>{/if}
 
-  <section class="issue-discussion" aria-label={'Discussion'}>
+  <section class="issue-discussion" aria-label={'Dyskusja'}>
     <div class="discussion-timeline">
       {#each visibleTimeline as entry (`${entry.kind}-${entry.id}`)}
         {#if entry.kind === 'event'}
@@ -299,7 +299,7 @@
                 {remainingTimelineLabel}
               </p>{/if}
             {#if loadActivityError}<p class="timeline-gap-error" role="alert">
-                Could not load activity.
+                Nie udało się wczytać aktywności.
               </p>{/if}
             <button
               type="button"
@@ -308,7 +308,8 @@
               onclick={() => void revealTimeline()}
             >
               {#if loadActivityError}<RotateCcw size={13} aria-hidden="true" />{/if}
-              {#if activityLoading}Loading…{:else if loadActivityError}Try again{:else}Load more{/if}
+              {#if activityLoading}Wczytywanie…{:else if loadActivityError}Spróbuj ponownie{:else}Wczytaj
+                więcej{/if}
             </button>
           </div>
         {:else if entry.kind === 'description'}
@@ -325,9 +326,9 @@
             <div class="comment-card">
               <header class="comment-header">
                 <a class="comment-author" href={`/members/${encodeURIComponent(author.id)}`}
-                  >{#if memberName(author)}{memberName(author)}{:else}Association member{/if}</a
+                  >{#if memberName(author)}{memberName(author)}{:else}Członek koła{/if}</a
                 >
-                <span class="comment-verb">opened this task</span>
+                <span class="comment-verb">utworzył(a) to zadanie</span>
                 {#if entry.createdAt}<time
                     datetime={entry.createdAt}
                     title={formatDateTime(entry.createdAt)}
@@ -339,8 +340,8 @@
                     <button
                       type="button"
                       class="icon-action-btn"
-                      title={'Edit description'}
-                      aria-label={'Edit description'}
+                      title={'Edytuj opis'}
+                      aria-label={'Edytuj opis'}
                       disabled={busy}
                       onclick={startDescriptionEdit}
                     >
@@ -360,18 +361,19 @@
                   >
                     <Editor bind:value={descriptionDraft} rows={6} allowReferences />
                     <div class="comment-composer-actions">
-                      <button class="btn" disabled={busy || !descriptionDraft.trim()}>Save</button>
+                      <button class="btn" disabled={busy || !descriptionDraft.trim()}>Zapisz</button
+                      >
                       <button
                         type="button"
                         class="btn btn-outline"
-                        onclick={() => (descriptionEditing = false)}>Cancel</button
+                        onclick={() => (descriptionEditing = false)}>Anuluj</button
                       >
                     </div>
                   </form>
                 {:else if entry.item.markdown.trim()}
                   <MarkdownContent value={entry.item.markdown} allowReferences />
                 {:else}
-                  <p class="issue-empty">No description.</p>
+                  <p class="issue-empty">Brak opisu.</p>
                 {/if}
               </div>
             </div>
@@ -391,9 +393,9 @@
             <div class="comment-card">
               <header class="comment-header">
                 <a class="comment-author" href={`/members/${encodeURIComponent(author.id)}`}
-                  >{#if memberName(author)}{memberName(author)}{:else}Association member{/if}</a
+                  >{#if memberName(author)}{memberName(author)}{:else}Członek koła{/if}</a
                 >
-                <span class="comment-verb">commented</span>
+                <span class="comment-verb">skomentował(a)</span>
                 <time
                   datetime={comment.createdAt}
                   title={formatDateTime(comment.createdAt)}
@@ -408,7 +410,7 @@
                     <button
                       type="button"
                       class="icon-action-btn"
-                      title="Edit"
+                      title="Edytuj"
                       onclick={() => {
                         editingCommentId = comment.id;
                         editingCommentMarkdown = comment.markdown;
@@ -419,7 +421,7 @@
                     <button
                       type="button"
                       class="icon-action-btn danger"
-                      title="Delete"
+                      title="Usuń"
                       onclick={() => (pendingCommentDelete = comment.id)}
                     >
                       <Trash2 size={13} aria-hidden="true" />
@@ -439,12 +441,12 @@
                     <Editor bind:value={editingCommentMarkdown} rows={4} allowReferences />
                     <div class="comment-composer-actions">
                       <button class="btn" disabled={busy || !editingCommentMarkdown.trim()}
-                        >Save</button
+                        >Zapisz</button
                       >
                       <button
                         type="button"
                         class="btn ghost"
-                        onclick={() => (editingCommentId = null)}>Cancel</button
+                        onclick={() => (editingCommentId = null)}>Anuluj</button
                       >
                     </div>
                   </form>
@@ -465,19 +467,19 @@
         submitReply();
       }}
     >
-      <h2><MessagesSquare size={17} aria-hidden="true" />{'Add to discussion'}</h2>
+      <h2><MessagesSquare size={17} aria-hidden="true" />Dodaj do dyskusji</h2>
       <Editor bind:value={reply} rows={4} allowReferences />
-      <button class="btn" disabled={busy || !reply.trim()}>Comment</button>
+      <button class="btn" disabled={busy || !reply.trim()}>Komentarz</button>
     </form>
   </section>
 </DetailLayout>
 
 <ConfirmDialog
   open={pendingCommentDelete !== null}
-  title={'Delete comment?'}
-  message={'This action cannot be undone.'}
-  confirmLabel={'Delete'}
-  cancelLabel={'Cancel'}
+  title={'Usunąć komentarz?'}
+  message={'Tej operacji nie można cofnąć.'}
+  confirmLabel={'Usuń'}
+  cancelLabel={'Anuluj'}
   {busy}
   onconfirm={deleteComment}
   onclose={() => (pendingCommentDelete = null)}

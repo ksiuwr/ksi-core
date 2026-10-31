@@ -7,9 +7,9 @@
   import { preferences, setLanguage, setTheme, type ThemePreference } from './preferences.svelte';
 
   const themeOptions: { value: ThemePreference; label: string }[] = [
-    { value: 'system', label: 'System' },
-    { value: 'light', label: 'Light' },
-    { value: 'dark', label: 'Dark' }
+    { value: 'system', label: 'Systemowy' },
+    { value: 'light', label: 'Jasny' },
+    { value: 'dark', label: 'Ciemny' }
   ];
   function languageName(locale: Locale) {
     const code = new Intl.Locale(locale).language;
@@ -26,7 +26,7 @@
   const items = $derived<MenuItem[]>([
     {
       id: 'theme',
-      label: 'Theme',
+      label: 'Motyw',
       value: themeLabel,
       children: themeOptions.map((option) => ({
         id: option.value,
@@ -37,7 +37,7 @@
     },
     {
       id: 'language',
-      label: 'Language',
+      label: 'Język',
       value: languageLabel,
       children: languageOptions.map((option) => ({
         id: option.value,
@@ -49,6 +49,6 @@
   ]);
 </script>
 
-<NestedMenu label={'Appearance'} {items}>
+<NestedMenu label={'Wygląd'} {items}>
   {#snippet trigger()}<SunMoon size={18} aria-hidden="true" />{/snippet}
 </NestedMenu>

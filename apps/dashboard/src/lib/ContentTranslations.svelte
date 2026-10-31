@@ -5,6 +5,7 @@
   import {
     contentLocaleName,
     contentLocales,
+    primaryContentLocale,
     type ContentLocale,
     type ContentTranslations
   } from 'shared/content-locales';
@@ -16,7 +17,7 @@
     version,
     translations = {},
     baseline,
-    selected = $bindable<ContentLocale>('en'),
+    selected = $bindable<ContentLocale>(primaryContentLocale),
     draft = $bindable<Record<string, string>>({}),
     onsaved
   }: {
@@ -31,19 +32,21 @@
   } = $props();
 
   const labels: Record<string, string> = {
-    firstName: 'First name',
-    lastName: 'Last name',
-    nickname: 'Nickname',
-    bio: 'Biography',
-    name: 'Name',
-    description: 'Description',
-    tags: 'Tags',
-    title: 'Title',
+    firstName: 'Imię',
+    lastName: 'Nazwisko',
+    nickname: 'Pseudonim',
+    bio: 'Biografia',
+    name: 'Nazwa',
+    description: 'Opis',
+    tags: 'Tagi',
+    title: 'Tytuł',
     link: 'Link',
-    markdown: 'Article content'
+    markdown: 'Treść artykułu'
   };
   const uiLanguage = $derived(preferences.language);
   const localeLabel = (locale: ContentLocale) => contentLocaleName(locale, uiLanguage);
+  const fieldsIn = (source: ContentTranslations, locale: ContentLocale) =>
+    locale === primaryContentLocale ? undefined : source[locale];
   const hasFields = (fields?: Record<string, string | string[]>) =>
     Boolean(fields && Object.keys(fields).length);
   const toDraft = (fields: Record<string, string | string[]> = {}) =>
@@ -58,7 +61,7 @@
   const initialDrafts = untrack(
     () =>
       Object.fromEntries(
-        contentLocales.map((locale) => [locale, toDraft(initial.translations[locale])])
+        contentLocales.map((locale) => [locale, toDraft(fieldsIn(initial.translations, locale))])
       ) as Record<ContentLocale, Record<string, string>>
   );
   let workingTranslations = $state<ContentTranslations>({ ...initial.translations });
@@ -72,7 +75,7 @@
   let notice = $state<'saved' | 'removed' | ''>('');
 
   const hasTranslation = (locale: ContentLocale) =>
-    locale !== 'en' && hasFields(workingTranslations[locale]);
+    hasFields(fieldsIn(workingTranslations, locale));
   const dirty = $derived(JSON.stringify(draft) !== JSON.stringify(savedDraft));
   const hasDraftContent = $derived(Object.values(draft).some((value) => value.trim()));
   $effect(() => {
@@ -84,7 +87,7 @@
     if (next === selected) return;
     drafts[selected] = draft;
     selected = next;
-    const nextDraft = drafts[selected] ?? toDraft(workingTranslations[selected]);
+    const nextDraft = drafts[selected] ?? toDraft(fieldsIn(workingTranslations, selected));
     drafts[selected] = nextDraft;
     savedDraft = savedDrafts[selected] ?? { ...nextDraft };
     draft = nextDraft;
@@ -113,14 +116,14 @@
   }
 
   async function save(remove = false) {
-    if (selected === 'en') return;
+    if (selected === primaryContentLocale) return;
     busy = true;
     error = '';
     notice = '';
     try {
       const fields = remove ? {} : fieldsFromDraft();
       if (!remove && !Object.keys(fields).length) {
-        error = 'Add at least one translated field before saving.';
+        error = 'Przed zapisaniem przetłumacz co najmniej jedno pole.';
         return;
       }
       const response = await fetch(
@@ -134,11 +137,11 @@
       const result = await response.json();
       if (!response.ok) {
         const messages: Record<string, string> = {
-          ENGLISH_CONTENT_REQUIRED: 'Save the English content before adding its translation.',
-          REVISION_CONFLICT: 'This content changed. Reload before saving.',
-          TRANSLATED_TAG_COUNT: 'Translate every tag in the same order as the English tags.'
+          PRIMARY_CONTENT_REQUIRED: 'Zapisz treść polską przed dodaniem tłumaczenia.',
+          REVISION_CONFLICT: 'Treść została zmieniona. Odśwież przed zapisaniem.',
+          TRANSLATED_TAG_COUNT: 'Przetłumacz wszystkie tagi w kolejności tagów polskich.'
         };
-        throw new Error(messages[result.code] ?? result.code ?? 'Request failed');
+        throw new Error(messages[result.code] ?? result.code ?? 'Żądanie nie powiodło się');
       }
 
       workingTranslations = { ...((result.translations ?? {}) as ContentTranslations) };
@@ -157,7 +160,7 @@
       }
       await onsaved(result);
     } catch (cause) {
-      error = cause instanceof Error ? cause.message : 'Request failed';
+      error = cause instanceof Error ? cause.message : 'Żądanie nie powiodło się';
     } finally {
       busy = false;
     }
@@ -177,9 +180,10 @@
   {#snippet messages()}
     {#if error}<p class="message error" role="alert">{error}</p>{/if}
     {#if notice}<p class="message success" role="status">
-        <Check size={14} />{#if notice === 'saved'}{localeLabel(selected)} translation saved.{:else}{localeLabel(
+        <Check size={14} />{#if notice === 'saved'}Zapisano tłumaczenie: {localeLabel(
             selected
-          )} was removed. Visitors will now see English.{/if}
+          )}.{:else}Usunięto tłumaczenie: {localeLabel(selected)}. Odwiedzający zobaczą teraz wersję
+          polską.{/if}
       </p>{/if}
   {/snippet}
   {#snippet reference()}
@@ -190,7 +194,7 @@
           <p>
             {Array.isArray(baseline[key])
               ? (baseline[key] as string[]).join(', ')
-              : baseline[key] || 'No content'}
+              : baseline[key] || 'Brak treści'}
           </p>
         </div>
       {/each}

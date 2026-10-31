@@ -58,7 +58,7 @@
   let busy = $state(false);
   let error = $state('');
 
-  const name = $derived(workspace === 'project' ? (project?.name ?? 'Project') : 'Association');
+  const name = $derived(workspace === 'project' ? (project?.name ?? 'Projekt') : 'Całe koło');
   const projectSlug = $derived(project?.slug ?? '');
   const statuses = $derived(board?.statuses ?? []);
   const statusFor = (column: string) => statuses.find((status) => status.id === column);
@@ -98,16 +98,16 @@
       <a
         class="btn btn-outline"
         href={`${websiteOrigin}/projects/${encodeURIComponent(project.slug)}`}
-        ><ArrowUpRight size={15} aria-hidden="true" />{'View public project'}</a
+        ><ArrowUpRight size={15} aria-hidden="true" />Zobacz publiczny projekt</a
       >
     {/if}
     {#if project && (access.canEdit || access.canManageMembers)}
       <a class="btn btn-outline" href={path('settings')}
-        ><Pencil size={15} aria-hidden="true" />{'Project settings'}</a
+        ><Pencil size={15} aria-hidden="true" />Ustawienia projektu</a
       >
     {/if}
     {#if project && !access.isMember}
-      <button class="btn" disabled={busy} onclick={join}>Join project</button>
+      <button class="btn" disabled={busy} onclick={join}>Dołącz do projektu</button>
     {/if}
   </div>
 </header>
@@ -123,8 +123,8 @@
 
     <section class="overview-section">
       <header class="section-bar">
-        <h2>Latest tasks</h2>
-        <a href={path('board')}>View board</a>
+        <h2>Najnowsze zadania</h2>
+        <a href={path('board')}>Zobacz tablicę</a>
       </header>
       {#if latestTasks.length}
         <ul class="list-group">
@@ -146,14 +146,14 @@
           {/each}
         </ul>
       {:else}
-        <p class="list-empty">No tasks yet.</p>
+        <p class="list-empty">Brak zadań.</p>
       {/if}
     </section>
 
     <section class="overview-section">
       <header class="section-bar">
-        <h2>Recent discussions</h2>
-        <a href={path('forum')}>All threads</a>
+        <h2>Ostatnie dyskusje</h2>
+        <a href={path('forum')}>Wszystkie wątki</a>
       </header>
       {#if threads.length}
         <ul class="list-group">
@@ -176,14 +176,14 @@
           {/each}
         </ul>
       {:else}
-        <p class="list-empty">No threads yet.</p>
+        <p class="list-empty">Brak wątków.</p>
       {/if}
     </section>
   </div>
 
   <aside class="detail-aside">
     <section class="aside-section">
-      <h2>Explore</h2>
+      <h2>Przeglądaj</h2>
       <ul class="nav-list">
         <li>
           <a href={path('board')}
@@ -198,17 +198,17 @@
         </li>
         <li>
           <a href={path('articles')}
-            ><FileText size={15} aria-hidden="true" /><span>Articles</span><b>{articleCount}</b></a
+            ><FileText size={15} aria-hidden="true" /><span>Artykuły</span><b>{articleCount}</b></a
           >
         </li>
         <li>
           <a href={path('docs')}
-            ><BookOpen size={15} aria-hidden="true" /><span>Docs</span><b>{docCount}</b></a
+            ><BookOpen size={15} aria-hidden="true" /><span>Dokumentacja</span><b>{docCount}</b></a
           >
         </li>
         <li>
           <a href={path('roster')}
-            ><Users size={15} aria-hidden="true" /><span>Members</span><b>{members.length}</b></a
+            ><Users size={15} aria-hidden="true" /><span>Członkowie</span><b>{members.length}</b></a
           >
         </li>
       </ul>
@@ -216,7 +216,7 @@
 
     {#if members.length}
       <section class="aside-section">
-        <h2>Members</h2>
+        <h2>Członkowie</h2>
         <div class="avatar-row">
           {#each members.slice(0, MEMBER_AVATARS) as member (member.id)}
             <MemberPreview
@@ -229,7 +229,7 @@
         </div>
         {#if members.length > MEMBER_AVATARS}
           <a class="muted" href={path('roster')}
-            >{'Show more'} (+{members.length - MEMBER_AVATARS})</a
+            >Pokaż więcej (+{members.length - MEMBER_AVATARS})</a
           >
         {/if}
       </section>
@@ -237,12 +237,12 @@
 
     {#if workspace === 'project' && access.canEdit}
       <section class="aside-section">
-        <h2>Public page</h2>
+        <h2>Strona publiczna</h2>
         <p class="muted">
-          To choose the article displayed on the public project home page, open an article, enable
-          “Main project article”, and publish it.
+          Aby wybrać artykuł wyświetlany na publicznej stronie projektu, otwórz artykuł, zaznacz
+          „Główny artykuł projektu” i opublikuj go.
         </p>
-        <a class="btn btn-outline btn-sm" href={path('articles')}>Manage articles</a>
+        <a class="btn btn-outline btn-sm" href={path('articles')}>Zarządzaj artykułami</a>
       </section>
     {/if}
   </aside>

@@ -9,13 +9,15 @@
   );
 </script>
 
-<svelte:head><title>Documentation · KSI UWr</title></svelte:head>
+<svelte:head><title>Dokumentacja · KSI UWr</title></svelte:head>
 
 <main class="docs-index">
   <header>
-    <p class="eyebrow"><span class="dot"></span>Docs</p>
-    <h1>Documentation</h1>
-    <p class="docs-lead">How KSI and its projects work, shared openly by our members.</p>
+    <p class="eyebrow"><span class="dot"></span>Dokumentacja</p>
+    <h1>Dokumentacja</h1>
+    <p class="docs-lead">
+      Jak działa KSI i jego projekty — opisane otwarcie przez naszych członków.
+    </p>
   </header>
   {#each workspaces as workspace (workspace.slug)}
     <section aria-labelledby={`workspace-${workspace.slug}`}>
@@ -37,7 +39,7 @@
               <span class="docs-meta">
                 <time datetime={page.updatedAt}>{formatter.format(new Date(page.updatedAt))}</time>
                 {#if !page.public}<span class="docs-private"
-                    ><Lock size={12} aria-hidden="true" />{'Members only'}</span
+                    ><Lock size={12} aria-hidden="true" />Tylko dla członków</span
                   >{/if}
               </span>
             </a>
@@ -48,7 +50,7 @@
   {:else}
     <div class="docs-empty">
       <BookOpen size={28} strokeWidth={1.4} aria-hidden="true" />
-      <p>No public documentation yet.</p>
+      <p>Brak publicznej dokumentacji.</p>
     </div>
   {/each}
 </main>

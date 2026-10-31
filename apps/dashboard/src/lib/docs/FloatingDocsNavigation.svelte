@@ -92,7 +92,7 @@
         aria-label={label}
         aria-controls={`${uid}-content`}
         aria-expanded={expanded}
-        title={shown ? 'Hide sidebar' : 'Show sidebar'}
+        title={shown ? 'Ukryj panel boczny' : 'Pokaż panel boczny'}
         onclick={toggle}
       >
         {#if shown}<PanelLeftClose size={18} aria-hidden="true" />{:else}<PanelLeftOpen
@@ -104,7 +104,7 @@
       {#if open}<button
           type="button"
           class="docs-navigation-close"
-          aria-label={'Close navigation'}
+          aria-label={'Zamknij nawigację'}
           onclick={() => close(true)}><X size={16} aria-hidden="true" /></button
         >{/if}
     </div>

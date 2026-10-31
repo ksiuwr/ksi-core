@@ -62,9 +62,9 @@
   class="btn ghost btn-sm doc-info-trigger"
   popovertarget={`${uid}-panel`}
   aria-expanded={open}
-  title={'Page details'}
+  title={'Szczegóły strony'}
 >
-  <Info aria-hidden="true" />{'Details'}{#if page.access.canReview && page.pendingSuggestions}<span
+  <Info aria-hidden="true" />Szczegóły{#if page.access.canReview && page.pendingSuggestions}<span
       class="doc-info-dot"
       aria-hidden="true"
     ></span>{/if}
@@ -75,7 +75,7 @@
   class="doc-info"
   popover="auto"
   role="dialog"
-  aria-label={'Page details'}
+  aria-label={'Szczegóły strony'}
   style:top={`${position.top}px`}
   style:left={`${position.left}px`}
   style:width={`${position.width}px`}
@@ -83,7 +83,7 @@
 >
   <dl>
     <div>
-      <dt>{'Updated'}</dt>
+      <dt>Zaktualizowano</dt>
       <dd class="doc-info-authorship">
         <time
           datetime={page.updatedAt}
@@ -102,7 +102,7 @@
       </dd>
     </div>
     <div>
-      <dt>{'Created'}</dt>
+      <dt>Utworzono</dt>
       <dd class="doc-info-authorship">
         <time
           datetime={page.createdAt}
@@ -121,48 +121,48 @@
       </dd>
     </div>
     <div>
-      <dt>{'Version'}</dt>
+      <dt>Wersja</dt>
       <dd>{page.version}</dd>
     </div>
     {#if page.folder}
       <div>
-        <dt>{'Folder'}</dt>
+        <dt>Folder</dt>
         <dd>{page.folder.split('/').join(' / ')}</dd>
       </div>
     {/if}
     <div>
-      <dt>{'Languages'}</dt>
+      <dt>Języki</dt>
       <dd class="doc-info-languages">
         {#each page.locales as locale (locale)}
           <span
             >{contentLocaleName(locale, language)}{#if page.outdatedLocales.includes(locale)}<span
-                class="doc-info-outdated">({'outdated'})</span
+                class="doc-info-outdated">(nieaktualna)</span
               >{/if}</span
           >
         {/each}
       </dd>
     </div>
     <div>
-      <dt>{'Visibility'}</dt>
+      <dt>Widoczność</dt>
       <dd>
         {#if page.public}<span class="doc-info-visibility public"
-            ><Globe size={13} aria-hidden="true" />{'Public on the website'}</span
+            ><Globe size={13} aria-hidden="true" />Publiczna na stronie</span
           >{:else}<span class="doc-info-visibility"
-            ><Lock size={13} aria-hidden="true" />{'Members only'}</span
+            ><Lock size={13} aria-hidden="true" />Tylko dla członków</span
           >{/if}
       </dd>
     </div>
   </dl>
   {#if page.contributors.length}
     <section aria-labelledby={`${uid}-contributors`}>
-      <h2 id={`${uid}-contributors`}>{'Contributors'}</h2>
+      <h2 id={`${uid}-contributors`}>Autorzy</h2>
       <ul>
         {#each page.contributors as contribution (contribution.user.id)}
           <li>
             <a href={`/people/${encodeURIComponent(contribution.user.id)}`}
               ><DocPerson person={contribution.user} size={22} /></a
             >
-            <span class="doc-info-stats" title={'Changes'}>
+            <span class="doc-info-stats" title={'Zmiany'}>
               {contribution.revisions}×
               <span class="added">+{contribution.additions}</span>
               <span class="removed">−{contribution.deletions}</span>
@@ -172,18 +172,18 @@
       </ul>
     </section>
   {/if}
-  <nav class="doc-info-links" aria-label={'Page details'}>
+  <nav class="doc-info-links" aria-label={'Szczegóły strony'}>
     <a href={docsPath(slug, page.slug, 'history')}
-      ><History size={14} aria-hidden="true" />{'History'}</a
+      ><History size={14} aria-hidden="true" />Historia</a
     >
     {#if page.pendingSuggestions}
       <a href={docsPath(slug, 'suggestions')}
-        ><GitPullRequestArrow size={14} aria-hidden="true" />{'Pending suggestions'}: {page.pendingSuggestions}</a
+        ><GitPullRequestArrow size={14} aria-hidden="true" />Oczekujące propozycje: {page.pendingSuggestions}</a
       >
     {/if}
     <!-- Members read members-only pages there too, without the dashboard around them. -->
     <a href={publicUrl} target="_blank" rel="noopener noreferrer"
-      ><ArrowUpRight size={14} aria-hidden="true" />{'View on website'}</a
+      ><ArrowUpRight size={14} aria-hidden="true" />Zobacz na stronie</a
     >
   </nav>
 </div>

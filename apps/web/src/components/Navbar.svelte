@@ -81,7 +81,7 @@
   async function logout() {
     const response = await fetch('/logout', { method: 'POST' });
     if (response.ok) {
-      toast.success('Logged out');
+      toast.success('Wylogowano');
       closeMenu();
       await invalidateAll();
     }
@@ -90,21 +90,21 @@
   const projectItems: NavMenuItem[] = [
     {
       title: 'ZOSIA',
-      description: 'Our winter camp for computer science students in Lower Silesia.',
+      description: 'Nasz zimowy obóz dla studentów informatyki na Dolnym Śląsku.',
       href: '/projects/zosia',
       icon: MountainSnow,
       field: 'community'
     },
     {
       title: 'LEOSIA',
-      description: 'A summer version of ZOSIA, in preparation.',
+      description: 'Letnia wersja ZOSI. W przygotowaniu.',
       href: '/projects/leosia',
       icon: Mountain,
       field: 'community'
     },
     {
       title: 'ksi-core',
-      description: 'The code behind this website.',
+      description: 'Kod tej strony.',
       href: '/projects/ksi-core',
       icon: Github,
       field: 'engineering'
@@ -113,22 +113,22 @@
 
   const groupItems: NavMenuItem[] = [
     {
-      title: 'Social',
-      description: 'Camps, events, and meetups.',
+      title: 'Społeczność',
+      description: 'Obozy, wydarzenia i spotkania.',
       href: '/projects?field=community#project-directory',
       icon: Share2,
       field: 'community'
     },
     {
-      title: 'Technical',
-      description: 'Software and tools built by our members.',
+      title: 'Technika',
+      description: 'Oprogramowanie i narzędzia tworzone przez członków koła.',
       href: '/projects?field=engineering#project-directory',
       icon: CodeXml,
       field: 'engineering'
     },
     {
-      title: 'Scientific research',
-      description: 'Paper discussions and research with faculty.',
+      title: 'Badania naukowe',
+      description: 'Dyskusje o pracach naukowych i badania z pracownikami naukowymi.',
       href: '/projects?field=research#project-directory',
       icon: FlaskConical,
       field: 'research'
@@ -152,7 +152,7 @@
   <button
     type="button"
     class="btn btn-outline btn-sm font-mono"
-    aria-label="Change language"
+    aria-label="Zmień język"
     onclick={() => setLocale(locale.current === 'pl' ? 'en-us' : 'pl')}
     >{locale.current === 'pl' ? 'EN' : 'PL'}</button
   >
@@ -185,7 +185,7 @@
       <span class="font-display text-lg font-semibold tracking-tight">KSI</span>
     </a>
 
-    <nav class="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
+    <nav class="hidden items-center gap-1 lg:flex" aria-label="Nawigacja główna">
       <button
         type="button"
         class="nav-link"
@@ -195,7 +195,7 @@
         aria-controls="navbar-menu"
         aria-expanded={openMenu === 'projects'}
       >
-        Projects
+        Projekty
         <ChevronDown class="chevron size-3.5" aria-hidden="true" />
       </button>
       <button
@@ -206,21 +206,21 @@
         aria-controls="navbar-menu"
         aria-expanded={openMenu === 'groups'}
       >
-        Groups
+        Grupy
         <ChevronDown class="chevron size-3.5" aria-hidden="true" />
       </button>
       <a
         href="/articles"
         class="nav-link"
-        aria-current={page.url.pathname.startsWith('/articles') ? 'page' : undefined}>Articles</a
+        aria-current={page.url.pathname.startsWith('/articles') ? 'page' : undefined}>Artykuły</a
       >
       <a
         href="/docs"
         class="nav-link"
-        aria-current={page.url.pathname.startsWith('/docs') ? 'page' : undefined}>Docs</a
+        aria-current={page.url.pathname.startsWith('/docs') ? 'page' : undefined}>Dokumentacja</a
       >
       {#if member}
-        <a href={page.data.dashboardOrigin} class="nav-link">Dashboard</a>
+        <a href={page.data.dashboardOrigin} class="nav-link">Panel</a>
       {/if}
     </nav>
 
@@ -236,14 +236,14 @@
             {@render avatar()}
             <span class="max-w-36 truncate">{user.name}</span>
           </a>
-          <button type="button" class="icon-button" title="Logout" onclick={logout}>
+          <button type="button" class="icon-button" title="Wyloguj" onclick={logout}>
             <LogOut class="size-4" />
           </button>
         </div>
       {:else}
         <a href={loginHref} class="btn btn-sm" data-sveltekit-reload>
           <LogIn />
-          Sign in
+          Zaloguj się
         </a>
       {/if}
     </div>
@@ -252,7 +252,7 @@
       type="button"
       onclick={() => toggleMenu('mobile')}
       class="icon-button ml-auto lg:hidden"
-      aria-label="Toggle mobile menu"
+      aria-label="Przełącz menu mobilne"
       aria-controls="navbar-menu"
       aria-expanded={openMenu === 'mobile'}
     >
@@ -273,32 +273,32 @@
             class="page-container flex max-h-[calc(100dvh-3.5rem)] flex-col gap-5 overflow-y-auto py-5"
           >
             <div>
-              <p class="eyebrow mb-2 px-2.5">Projects</p>
+              <p class="eyebrow mb-2 px-2.5">Projekty</p>
               <NavMenuPanel
                 items={projectItems}
                 compact
                 moreHref="/projects"
-                moreLabel="See more projects"
+                moreLabel="Zobacz więcej projektów"
                 onNavigate={closeMenu}
               />
             </div>
             <div>
-              <p class="eyebrow mb-2 px-2.5">Groups</p>
+              <p class="eyebrow mb-2 px-2.5">Grupy</p>
               <NavMenuPanel items={groupItems} compact onNavigate={closeMenu} />
             </div>
             <div class="border-line grid gap-1 border-t pt-4">
               <a href="/articles" class="mobile-link" onclick={closeMenu}>
                 <Newspaper class="size-4" aria-hidden="true" />
-                Articles
+                Artykuły
               </a>
               <a href="/docs" class="mobile-link" onclick={closeMenu}>
                 <BookOpen class="size-4" aria-hidden="true" />
-                Docs
+                Dokumentacja
               </a>
               {#if member}
                 <a href={page.data.dashboardOrigin} class="mobile-link" onclick={closeMenu}>
                   <LayoutDashboard class="size-4" aria-hidden="true" />
-                  Dashboard
+                  Panel
                 </a>
               {/if}
             </div>
@@ -315,13 +315,13 @@
                   </div>
                   <button type="button" class="btn btn-outline btn-sm" onclick={logout}>
                     <LogOut />
-                    Logout
+                    Wyloguj
                   </button>
                 </div>
               {:else}
                 <a href={loginHref} class="btn w-full" data-sveltekit-reload>
                   <LogIn />
-                  Sign in
+                  Zaloguj się
                 </a>
               {/if}
             </div>
@@ -333,7 +333,7 @@
                 items={projectItems}
                 columns={4}
                 moreHref="/projects"
-                moreLabel="See more projects"
+                moreLabel="Zobacz więcej projektów"
                 onNavigate={closeMenu}
               />
             {:else}

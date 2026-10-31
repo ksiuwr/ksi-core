@@ -1,6 +1,10 @@
 import { Lexer, type Token, type Tokens } from 'marked';
 import { prepareMarkdownImages } from './markdown-images.js';
-import { contentLocales, type ContentLocale, type ContentTranslations } from './content-locales.js';
+import {
+  translationLocales,
+  type ContentTranslations,
+  type TranslationLocale
+} from './content-locales.js';
 
 /** Workspace key used in cross-workspace links such as `[association/statute]`. */
 export const associationDocsKey = 'association';
@@ -113,7 +117,7 @@ export function markdownHeadings(source: string): DocHeading[] {
   return headings;
 }
 
-/** Resolves a section anchor in translated text, keeping English references useful. */
+/** Resolves a section anchor in translated text, keeping references to the primary text useful. */
 export function translatedDocHeading(source: string, translated: string, id: string) {
   const headings = markdownHeadings(translated);
   const direct = headings.find((heading) => heading.id === id);
@@ -137,17 +141,13 @@ export function markdownExcerpt(source: string, limit = 180) {
   return text.length > limit ? `${text.slice(0, limit).trimEnd()}…` : text;
 }
 
-/** Languages a page can be translated into; English is the page itself. */
-export const docTranslationLocales = contentLocales.filter(
-  (locale): locale is Exclude<ContentLocale, 'en'> => locale !== 'en'
-);
 export type DocTranslation = { title?: string; markdown?: string };
-export type DocTranslations = Partial<Record<Exclude<ContentLocale, 'en'>, DocTranslation>>;
+export type DocTranslations = Partial<Record<TranslationLocale, DocTranslation>>;
 
 /** Keeps translated titles and texts that say something, in a stable shape for comparisons. */
 export function cleanDocTranslations(value: ContentTranslations | DocTranslations | undefined) {
   const result: DocTranslations = {};
-  for (const locale of docTranslationLocales) {
+  for (const locale of translationLocales) {
     const fields = (value as DocTranslations | undefined)?.[locale];
     const title = typeof fields?.title === 'string' ? fields.title.trim() : '';
     const markdown =
@@ -164,7 +164,7 @@ export function docLineChanges(before: DocText | null, after: DocText) {
   const total = lineChanges(before?.markdown ?? '', after.markdown);
   const previous = cleanDocTranslations(before?.translations);
   const next = cleanDocTranslations(after.translations);
-  for (const locale of docTranslationLocales) {
+  for (const locale of translationLocales) {
     const change = lineChanges(previous[locale]?.markdown ?? '', next[locale]?.markdown ?? '');
     total.additions += change.additions;
     total.deletions += change.deletions;
@@ -173,7 +173,7 @@ export function docLineChanges(before: DocText | null, after: DocText) {
 }
 
 /**
- * A translation is outdated when the English page changed in a later version than the
+ * A translation is outdated when the primary page changed in a later version than the
  * translation did. Revisions are given oldest first.
  */
 export function outdatedTranslations(
@@ -187,12 +187,12 @@ export function outdatedTranslations(
       sourceChanged = revision.version;
     const before = cleanDocTranslations(previous?.translations as DocTranslations);
     const after = cleanDocTranslations(revision.translations as DocTranslations);
-    for (const locale of docTranslationLocales)
+    for (const locale of translationLocales)
       if (JSON.stringify(before[locale]) !== JSON.stringify(after[locale]))
         translated[locale] = revision.version;
   });
   const latest = cleanDocTranslations(revisions.at(-1)?.translations as DocTranslations);
-  return docTranslationLocales.filter(
+  return translationLocales.filter(
     (locale) => latest[locale] && (translated[locale] ?? 0) < sourceChanged
   );
 }

@@ -1,35 +1,79 @@
 import { invalidate } from '$app/navigation';
 import { loadLocale } from 'wuchale/load-utils';
 import '../locales/main.loader.svelte.js';
-import { locales } from '../locales/data.js';
 import type { Locale } from '../locales/data.js';
+import {
+  defaultFrontendLocale,
+  frontendLocale,
+  frontendLocaleFromCookie
+} from 'shared/content-locales';
+import { preferenceCookie, preferenceCookieRemoval } from 'shared/preference-cookie';
 
-function getInitialLocale(): Locale {
-  if (typeof window !== 'undefined') {
-    const saved = localStorage.getItem('locale');
-    if (saved && (locales as string[]).includes(saved)) return saved as Locale;
+const languageEvents = ['storage', 'focus', 'pageshow', 'ksi-locale-change'] as const;
 
-    const cookieMatch = document.cookie.match(/(?:^|; )locale=([^;]*)/);
-    if (cookieMatch && (locales as string[]).includes(cookieMatch[1])) {
-      return cookieMatch[1] as Locale;
-    }
+function storedLocale(): Locale | null {
+  try {
+    return frontendLocale(localStorage.getItem('locale'));
+  } catch {
+    return null;
   }
-  return 'pl';
 }
 
-export const locale = $state({ current: getInitialLocale() });
+/** The shared cookie wins so every KSI frontend follows the last chosen locale. */
+function preferredLocale(): Locale {
+  const removal = preferenceCookieRemoval('locale', location.hostname);
+  if (!removal)
+    return frontendLocaleFromCookie(document.cookie) ?? storedLocale() ?? defaultFrontendLocale;
+  const seen = frontendLocaleFromCookie(document.cookie);
+  document.cookie = removal;
+  return (
+    frontendLocaleFromCookie(document.cookie) ?? seen ?? storedLocale() ?? defaultFrontendLocale
+  );
+}
+
+function persist(newLocale: Locale) {
+  try {
+    localStorage.setItem('locale', newLocale);
+  } catch {}
+  const removal = preferenceCookieRemoval('locale', location.hostname);
+  if (removal) document.cookie = removal;
+  document.cookie = preferenceCookie(
+    'locale',
+    newLocale,
+    location.hostname,
+    location.protocol === 'https:'
+  );
+  document.documentElement.lang = new Intl.Locale(newLocale).toString();
+}
+
+export const locale = $state({
+  current: typeof window === 'undefined' ? defaultFrontendLocale : preferredLocale()
+});
 
 export function setLocale(newLocale: Locale) {
   locale.current = newLocale;
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('locale', newLocale);
-    document.cookie = `locale=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
-  }
+  if (typeof window === 'undefined') return;
+  persist(newLocale);
+  window.dispatchEvent(new Event('ksi-locale-change'));
 }
 
-// The layout subscribes to this store, including locale restored from localStorage.
+// The layout subscribes to this store, including locale restored from the shared cookie.
 // Persist before invalidation so server loads use the same locale as the UI.
 export async function refreshLocalizedContent(newLocale: Locale) {
-  document.cookie = `locale=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
+  if (typeof window !== 'undefined') persist(newLocale);
   await Promise.all([loadLocale(newLocale), invalidate('ksi:localized-content')]);
+}
+
+/** Re-read the shared cookie when another KSI frontend changes the locale. */
+export function observeLocalePreference() {
+  const sync = () => {
+    const preferred = preferredLocale();
+    if (preferred !== locale.current) locale.current = preferred;
+  };
+  for (const event of languageEvents) window.addEventListener(event, sync);
+  document.addEventListener('visibilitychange', sync);
+  return () => {
+    for (const event of languageEvents) window.removeEventListener(event, sync);
+    document.removeEventListener('visibilitychange', sync);
+  };
 }

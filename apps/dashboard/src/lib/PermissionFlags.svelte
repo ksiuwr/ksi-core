@@ -20,7 +20,7 @@
     ...groups.map((pattern) => ({
       value: pattern,
       label: pattern,
-      description: 'All permissions in this group, including future additions.'
+      description: 'Wszystkie uprawnienia z tej grupy, również dodane w przyszłości.'
     }))
   ]);
   function add(pattern: string) {
@@ -32,30 +32,31 @@
 <div class="permission-editor">
   <div class="permission-picker">
     <Dropdown
-      label={'Permission action'}
+      label={'Działanie uprawnienia'}
       value={mode}
       options={[
-        { value: '+', label: 'Grant (+)' },
-        { value: '-', label: 'Deny (−)' }
+        { value: '+', label: 'Nadaj (+)' },
+        { value: '-', label: 'Odmów (−)' }
       ]}
       disabled={disabled || flags.length >= 100}
       onselect={(value) => (mode = value)}
     />
     <Dropdown
-      label={'Find a permission'}
-      placeholder={'Add a permission…'}
+      label={'Znajdź uprawnienie'}
+      placeholder={'Dodaj uprawnienie…'}
       {options}
       searchable
-      searchPlaceholder={'Search names or descriptions…'}
-      emptyLabel={'No matching permissions'}
+      searchPlaceholder={'Szukaj nazw lub opisów…'}
+      emptyLabel={'Brak pasujących uprawnień'}
       disabled={disabled || flags.length >= 100}
       onselect={add}
     />
   </div>
   <p class="muted help">
-    {'Search to see every permission and its description. Grants add access; denials take precedence. Status and workspace boundaries still apply.'}
+    Wyszukaj uprawnienia i ich opisy. Nadania dodają dostęp; odmowy mają pierwszeństwo. Nadal
+    obowiązują ograniczenia statusu konta i przestrzeni.
   </p>
-  <label for="member-flags">{'Permission flags (one per line)'}</label>
+  <label for="member-flags">Wyjątki uprawnień (jeden na linię)</label>
   <textarea
     id="member-flags"
     rows="6"
@@ -69,7 +70,8 @@
         .filter(Boolean))}
   ></textarea>
   <p class="muted help">
-    {'You can also enter a pattern, such as -users.profile.edit*. It denies every matching permission, including future ones.'}
+    Możesz też wpisać wzorzec, np. -users.profile.edit*. Odmawia on wszystkich pasujących uprawnień,
+    również przyszłych.
   </p>
 </div>
 

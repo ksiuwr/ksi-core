@@ -161,8 +161,8 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
   });
   test('profile, translation and access changes persist allowlisted before/after values and notifications', async () => {
     const before = (await request('member', '/users/me')).body.user;
-    const nickname = 'Audit nickname',
-      bio = 'Audit line one\nAudit line two';
+    const nickname = 'Pseudonim audytu',
+      bio = 'Pierwsza linia audytu\nDruga linia audytu';
     try {
       expect((await request('member', '/users/me', 'PATCH', { nickname, bio })).status).toBe(200);
       const ownEvents = await db
@@ -185,7 +185,7 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
       expect(
         (
           await request('admin', `/users/${ids.member}/profile`, 'PATCH', {
-            firstName: 'Audit member'
+            firstName: 'Członek audytu'
           })
         ).status
       ).toBe(200);
@@ -197,12 +197,12 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
         (event) => event.actorId === ids.admin && event.action === 'users.profile.updated'
       );
       expect(adminEvent?.metadata.changes).toEqual([
-        { field: 'firstName', before: before.firstName, after: 'Audit member' }
+        { field: 'firstName', before: before.firstName, after: 'Członek audytu' }
       ]);
       expect(
         (
-          await request('member', `/platform/translations/profile/${ids.member}/pl`, 'PUT', {
-            fields: { bio: 'Zmieniona biografia' }
+          await request('member', `/platform/translations/profile/${ids.member}/en`, 'PUT', {
+            fields: { bio: 'Changed biography' }
           })
         ).status
       ).toBe(200);
@@ -210,9 +210,9 @@ describe.skipIf(!safe)('persistent dashboard workflows', () => {
         await db.select().from(auditEvents).where(eq(auditEvents.targetId, ids.member))
       ).find((event) => event.action === 'users.translation.updated');
       expect(translated?.metadata.changes).toEqual([
-        { field: 'bio', before: null, after: 'Zmieniona biografia' }
+        { field: 'bio', before: null, after: 'Changed biography' }
       ]);
-      expect(translated?.metadata.locale).toBe('pl');
+      expect(translated?.metadata.locale).toBe('en');
       expect(
         (
           await request('admin', `/users/${ids.outsider}/access`, 'PATCH', {

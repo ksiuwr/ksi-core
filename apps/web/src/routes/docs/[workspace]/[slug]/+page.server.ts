@@ -7,7 +7,7 @@ import { env } from '$lib/server/environment';
 import { error } from '@sveltejs/kit';
 export const load: PageServerLoad = async (event) => {
   event.depends('ksi:localized-content');
-  const docLocale = contentLocale(event.cookies.get('locale') ?? 'pl');
+  const docLocale = contentLocale(event.cookies.get('locale'));
   const response = await backendFetch(
     event,
     env,

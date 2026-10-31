@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Plural-Forms: nplurals=2; plural=n == 1 ? 0 : 1;\n"
-"Source-Language: en-us\n"
+"Source-Language: pl\n"
 "Language: en-us\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -9,57 +9,49 @@ msgstr ""
 
 #: src/routes/+page.svelte
 #: src/routes/+page.svelte
-msgid "Login failed."
+msgid "Nie udało się zalogować."
 msgstr "Login failed."
 
 #: src/routes/+page.svelte
-msgid "Check your email inbox."
+msgid "Sprawdź skrzynkę e-mail."
 msgstr "Check your email inbox."
 
 #: src/routes/+page.svelte
 #: src/routes/+page.svelte
 #: src/routes/reset-password/+page.svelte
-msgid "Server unavailable."
+msgid "Nie można połączyć się z serwerem."
 msgstr "Server unavailable."
 
 #: src/routes/+page.svelte
 #: src/routes/+page.svelte
-msgid "Create account"
+msgid "Nowe konto"
 msgstr "Create account"
 
 #: src/routes/+page.svelte
-msgid "Send recovery link"
+msgid "Wyślij link"
 msgstr "Send recovery link"
 
 #: src/routes/+page.svelte
 #: src/routes/+page.svelte
-#: src/routes/+page.svelte
-msgid "Sign in"
+msgid "Logowanie"
 msgstr "Sign in"
 
 #: src/routes/+page.svelte
-msgid "Join KSI"
+msgid "Dołącz do KSI"
 msgstr "Join KSI"
 
 #: src/routes/+page.svelte
-msgid "Recover access"
+msgid "Odzyskaj dostęp"
 msgstr "Recover access"
 
 #: src/routes/+page.svelte
 #: src/routes/+page.svelte
-msgid "Welcome to KSI"
+msgid "Witaj w KSI"
 msgstr "Welcome to KSI"
 
-#. 0: 'Sign in'
-#. 0: 'New password'
 #: src/routes/+page.svelte
 #: src/routes/reset-password/+page.svelte
-msgid "{0} · KSI"
-msgstr "{0} · KSI"
-
-#: src/routes/+page.svelte
-#: src/routes/reset-password/+page.svelte
-msgid "Change language"
+msgid "Zmień język"
 msgstr "Change language"
 
 #: src/routes/+page.svelte
@@ -68,31 +60,31 @@ msgid "KSI<0>/ core</0>"
 msgstr "KSI<0>/ core</0>"
 
 #: src/routes/+page.svelte
-msgid "One account. Every KSI project and conversation."
+msgid "Jedno konto. Wszystkie projekty i rozmowy KSI."
 msgstr "One account. Every KSI project and conversation."
 
 #: src/routes/+page.svelte
-msgid "Account options"
+msgid "Opcje konta"
 msgstr "Account options"
 
 #: src/routes/+page.svelte
-msgid "Remembered accounts"
+msgid "Zapamiętane konta"
 msgstr "Remembered accounts"
 
 #: src/routes/+page.svelte
-msgid "Forget account"
+msgid "Zapomnij konto"
 msgstr "Forget account"
 
 #: src/routes/+page.svelte
-msgid "Forget"
+msgid "Zapomnij"
 msgstr "Forget"
 
 #: src/routes/+page.svelte
-msgid "Continue with GitHub"
+msgid "Kontynuuj z GitHub"
 msgstr "Continue with GitHub"
 
 #: src/routes/+page.svelte
-msgid "Continue with Google"
+msgid "Kontynuuj z Google"
 msgstr "Continue with Google"
 
 #: src/routes/+page.svelte
@@ -100,7 +92,7 @@ msgid "G"
 msgstr "G"
 
 #: src/routes/+page.svelte
-msgid "Full name"
+msgid "Pełne imię i nazwisko"
 msgstr "Full name"
 
 #: src/routes/+page.svelte
@@ -113,51 +105,33 @@ msgstr "E-mail"
 
 #: src/routes/+page.svelte
 #: src/routes/reset-password/+page.svelte
-msgid "Password"
+msgid "Hasło"
 msgstr "Password"
 
 #: src/routes/+page.svelte
-msgid "Forgot password"
+msgid "Nie pamiętam hasła"
 msgstr "Forgot password"
 
 #: src/routes/+page.svelte
-msgid "Remember account on this device"
-msgstr "Remember account on this device"
-
-#: src/routes/+page.svelte
-msgid "Please wait…"
+msgid "Proszę czekać…"
 msgstr "Please wait…"
 
 #: src/routes/+page.svelte
-#: src/routes/reset-password/+page.svelte
-msgid "Back to sign in"
+msgid "Wróć do logowania"
 msgstr "Back to sign in"
 
 #: src/routes/+page.svelte
-msgid "New accounts require activation by the KSI board."
+msgid "Nowe konta wymagają aktywacji przez zarząd KSI."
 msgstr "New accounts require activation by the KSI board."
 
-#: src/routes/+page.svelte
 #: src/routes/reset-password/+page.svelte
-msgid "Back to KSI"
+msgid "Wróć na stronę KSI"
 msgstr "Back to KSI"
 
 #: src/routes/+page.svelte
 #: src/routes/reset-password/+page.svelte
-msgid "University of Wrocław"
-msgstr "University of Wrocław"
-
-#: src/routes/+page.svelte
-#: src/routes/reset-password/+page.svelte
-msgid "Source"
+msgid "Kod źródłowy"
 msgstr "Source"
-
-#. 0: 'University of Wrocław'
-#. 0: 'University of Wrocław'
-#: src/routes/+page.svelte
-#: src/routes/reset-password/+page.svelte
-msgid "KSI · {0}"
-msgstr "KSI · {0}"
 
 #. 0: import.meta.env.PUBLIC_APP_VERSION
 #. 0: import.meta.env.PUBLIC_APP_VERSION
@@ -167,42 +141,123 @@ msgid "v{0}"
 msgstr "v{0}"
 
 #: src/routes/reset-password/+page.svelte
-msgid "Password changed. You can sign in now."
+msgid "Hasło zmienione. Możesz się zalogować."
 msgstr "Password changed. You can sign in now."
 
 #: src/routes/reset-password/+page.svelte
-#: src/routes/reset-password/+page.svelte
-msgid "New password"
+msgid "Nowe hasło"
 msgstr "New password"
 
 #: src/routes/reset-password/+page.svelte
-msgid "Choose a new password for your KSI account."
+msgid "Wybierz nowe hasło dla swojego konta KSI."
 msgstr "Choose a new password for your KSI account."
 
 #: src/routes/reset-password/+page.svelte
-msgid "Recovery link missing. Request a new link on the sign-in page."
+msgid "Brak linku odzyskiwania. Poproś o nowy link na stronie logowania."
 msgstr "Recovery link missing. Request a new link on the sign-in page."
 
 #: src/routes/reset-password/+page.svelte
-msgid "Saving…"
+msgid "Zapisywanie…"
 msgstr "Saving…"
 
 #: src/routes/reset-password/+page.svelte
-msgid "Save password"
+msgid "Zapisz hasło"
 msgstr "Save password"
 
 #: src/routes/+page.svelte
-msgid "You are signed in as"
-msgstr "You are signed in as"
-
-#: src/routes/+page.svelte
-msgid "Go to Dashboard"
-msgstr "Go to Dashboard"
-
-#: src/routes/+page.svelte
-msgid "Sign out"
+msgid "Wyloguj się"
 msgstr "Sign out"
 
 #: src/routes/+page.svelte
-msgid "or use email"
+msgid "lub użyj adresu e-mail"
 msgstr "or use email"
+
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+msgid "Szukaj…"
+msgstr "Search…"
+
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+msgid "Brak wyników"
+msgstr "No results"
+
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+msgid "Escape"
+msgstr "Escape"
+
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+msgid "Tab"
+msgstr "Tab"
+
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+msgid "ArrowDown"
+msgstr "ArrowDown"
+
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+msgid "ArrowUp"
+msgstr "ArrowUp"
+
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+msgid "Home"
+msgstr "Home"
+
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+msgid "End"
+msgstr "End"
+
+#: ../../packages/ui/src/lib/platform/Dropdown.svelte
+msgid "Enter"
+msgstr "Enter"
+
+#: ../../packages/ui/src/lib/platform/ThemeSelector.svelte
+msgid "Wygląd"
+msgstr "Appearance"
+
+#: ../../packages/ui/src/lib/platform/ThemeSelector.svelte
+msgid "Systemowy"
+msgstr "System"
+
+#: ../../packages/ui/src/lib/platform/ThemeSelector.svelte
+msgid "Jasny"
+msgstr "Light"
+
+#: ../../packages/ui/src/lib/platform/ThemeSelector.svelte
+msgid "Ciemny"
+msgstr "Dark"
+
+#: src/routes/+page.svelte
+msgid "Logowanie · KSI"
+msgstr "Logowanie · KSI"
+
+#: src/routes/+page.svelte
+msgid "Przejdź do Panelu<0/>"
+msgstr "Go to Dashboard<0/>"
+
+#: src/routes/+page.svelte
+msgid "Jesteś zalogowany(a) jako <0/>."
+msgstr "You are signed in as <0/>."
+
+#: src/routes/+page.svelte
+msgid "<0/>Zapamiętaj konto na tym urządzeniu"
+msgstr "<0/>Remember account on this device"
+
+#: src/routes/+page.svelte
+msgid "Wróć na stronę KSI<0/>"
+msgstr "Back to KSI<0/>"
+
+#: src/routes/+page.svelte
+#: src/routes/reset-password/+page.svelte
+msgid "KSI · Uniwersytet Wrocławski"
+msgstr "KSI · University of Wrocław"
+
+#: src/routes/reset-password/+page.svelte
+msgid "Nowe hasło · KSI"
+msgstr "New password · KSI"
+
+#: src/routes/reset-password/+page.svelte
+msgid "<0/>Wróć do logowania"
+msgstr "<0/>Back to sign in"

@@ -1,13 +1,10 @@
 <script lang="ts">
-  import type { FrontendLocale } from 'shared/content-locales';
   import { tick, onMount } from 'svelte';
-  import { preferences } from './preferences.svelte.js';
   let {
     member,
     href,
     role = '',
     avatarOnly = false,
-    language: languageProp,
     size = 36,
     inline = false
   }: {
@@ -23,11 +20,9 @@
     href: string;
     role?: string;
     avatarOnly?: boolean;
-    language?: FrontendLocale;
     size?: number;
     inline?: boolean;
   } = $props();
-  const language = $derived(languageProp ?? preferences.language);
   const uid = $props.id();
   let touch = false;
   let anchor = $state<HTMLAnchorElement>(),
@@ -177,8 +172,8 @@
           >{/if}{#if role}<small>{role}</small>{/if}
       </div>
     </div>
-    <p class="bio">{member.bio || (language === 'pl' ? 'Brak biografii.' : 'No biography yet.')}</p>
-    <a class="btn btn-outline" {href}>{language === 'pl' ? 'Zobacz profil' : 'View profile'}</a>
+    <p class="bio">{member.bio || 'Brak biografii.'}</p>
+    <a class="btn btn-outline" {href}>Zobacz profil</a>
   </div>
 </div>
 

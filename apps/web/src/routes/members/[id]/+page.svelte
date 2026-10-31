@@ -57,7 +57,7 @@
       {/if}
     </header>
     <section class="mt-12" aria-labelledby="member-articles-heading">
-      <h2 id="member-articles-heading" class="mb-6 text-2xl tracking-tight">Articles</h2>
+      <h2 id="member-articles-heading" class="mb-6 text-2xl tracking-tight">Artykuły</h2>
       <ArticleList articles={data.member.articles} />
     </section>
   </div>

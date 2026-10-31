@@ -25,9 +25,9 @@
   let error = $state('');
 
   const columnLabel = (id: string) => {
-    if (id === 'todo') return 'To do';
-    if (id === 'progress') return 'In progress';
-    if (id === 'done') return 'Done';
+    if (id === 'todo') return 'Do zrobienia';
+    if (id === 'progress') return 'W trakcie';
+    if (id === 'done') return 'Gotowe';
     return statuses.find((status) => status.id === id)?.name ?? id;
   };
 
@@ -47,15 +47,15 @@
 </script>
 
 <div class="workspace-header">
-  <h1>Removed tasks</h1>
+  <h1>Usunięte zadania</h1>
   <a class="btn btn-outline" href={dashboardPath(workspace, projectSlug, 'board')}
-    ><ArrowLeft size={15} aria-hidden="true" />{'Back to board'}</a
+    ><ArrowLeft size={15} aria-hidden="true" />Wróć do tablicy</a
   >
 </div>
 {#if error}<p class="error" role="alert">{error}</p>{/if}
 <div class="graveyard-notice">
   <Archive size={18} aria-hidden="true" />
-  <p>Removed tasks are kept here. Leaders can restore them to their previous column.</p>
+  <p>Usunięte zadania są przechowywane tutaj. Liderzy mogą przywrócić je do poprzedniej kolumny.</p>
 </div>
 <div class="graveyard-list">
   {#each items as item (item.id)}
@@ -73,15 +73,15 @@
           >{/if}
       </div>
       <button class="btn btn-outline" disabled={busy} onclick={() => restore(item)}
-        ><RotateCcw size={15} aria-hidden="true" />{'Restore'}</button
+        ><RotateCcw size={15} aria-hidden="true" />Przywróć</button
       >
     </article>
   {/each}
   {#if !items.length}
     <div class="empty-state">
       <Trash2 size={28} strokeWidth={1.4} aria-hidden="true" />
-      <h2>No removed tasks</h2>
-      <p>Tasks removed from the board will appear here.</p>
+      <h2>Brak usuniętych zadań</h2>
+      <p>Usunięte z tablicy zadania pojawią się tutaj.</p>
     </div>
   {/if}
 </div>

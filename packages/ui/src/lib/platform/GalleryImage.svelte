@@ -1,8 +1,6 @@
 <script lang="ts">
   import { ImageOff, LoaderCircle } from '@lucide/svelte';
-  import { preferences } from './preferences.svelte.js';
   let { src, alt = '' }: { src: string; alt?: string } = $props();
-  const language = $derived(preferences.language);
   let ready = $state(false);
   let failed = $state(false);
   $effect(() => {
@@ -21,13 +19,9 @@
     onerror={() => (failed = true)}
   />
   {#if !ready || failed}<span class="image-status" role="status">
-      {#if failed}<ImageOff size={22} aria-hidden="true" />{language === 'pl'
-          ? 'Obraz niedostępny'
-          : 'Image unavailable'}
-      {:else}<span class="spinner"><LoaderCircle size={22} aria-hidden="true" /></span>{language ===
-        'pl'
-          ? 'Ładowanie zdjęcia…'
-          : 'Loading image…'}{/if}
+      {#if failed}<ImageOff size={22} aria-hidden="true" />Obraz niedostępny
+      {:else}<span class="spinner"><LoaderCircle size={22} aria-hidden="true" /></span>Ładowanie
+        zdjęcia…{/if}
     </span>{/if}
 </div>
 

@@ -3,6 +3,7 @@ import { status } from 'elysia';
 import { docFolders } from '../db';
 import type { Executor } from '../lib/audit';
 import { docFolderDescendants, docFolderPath, type DocFolder } from 'shared/doc-folders';
+import { translationLocales } from 'shared/content-locales';
 
 export const folderWorkspace = (projectId: string | null) =>
   projectId ? eq(docFolders.projectId, projectId) : isNull(docFolders.projectId);
@@ -27,7 +28,7 @@ export async function folderDestination(
   await lockFolderTree(executor, projectId);
   const folders = await workspaceFolders(executor, projectId);
   let folderId = body.folderId !== undefined ? body.folderId : (baseline?.folderId ?? null);
-  // Older clients may select an existing English path, but cannot create folders as a side effect.
+  // Older clients may select an existing Polish path, but cannot create folders as a side effect.
   if (body.folderId === undefined && body.folder !== undefined) {
     const path = body.folder
       .split('/')
@@ -50,8 +51,16 @@ export function folderDraft(
   id?: string
 ) {
   const name = body.name.trim();
-  const polish = body.translations?.pl?.name.trim() ?? '';
-  if (!name || name.includes('/') || polish.includes('/'))
+  const translations: DocFolder['translations'] = {};
+  for (const locale of translationLocales) {
+    const translated = body.translations?.[locale]?.name.trim();
+    if (translated) translations[locale] = { name: translated };
+  }
+  if (
+    !name ||
+    name.includes('/') ||
+    Object.values(translations).some((translation) => translation.name.includes('/'))
+  )
     throw status(422, { code: 'FOLDER_NAME_INVALID' });
   if (body.parentId && !folders.some((folder) => folder.id === body.parentId))
     throw status(422, { code: 'FOLDER_NOT_FOUND' });
@@ -66,5 +75,5 @@ export function folderDraft(
     )
   )
     throw status(409, { code: 'FOLDER_NAME_TAKEN' });
-  return { name, parentId: body.parentId, translations: polish ? { pl: { name: polish } } : {} };
+  return { name, parentId: body.parentId, translations };
 }

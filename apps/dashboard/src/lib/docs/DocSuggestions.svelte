@@ -28,23 +28,24 @@
 <div class="workspace-header">
   <div>
     <p class="workspace-eyebrow">{workspaceName}</p>
-    <h1>{'Suggestions'}</h1>
+    <h1>Propozycje zmian</h1>
     <p class="workspace-description">
-      {'Changes proposed by members, waiting for a leader or reviewer to compare and accept them.'}
+      Zmiany zaproponowane przez członków, czekające na porównanie i akceptację przez lidera lub
+      recenzenta.
     </p>
   </div>
-  <div class="segmented-control" role="group" aria-label={'Suggestion state'} use:slider>
+  <div class="segmented-control" role="group" aria-label={'Stan propozycji'} use:slider>
     <button
       type="button"
       class:active={!resolved}
       aria-pressed={!resolved}
-      onclick={() => goto(docsPath(slug, 'suggestions'))}>{'Waiting for review'}</button
+      onclick={() => goto(docsPath(slug, 'suggestions'))}>Czeka na ocenę</button
     >
     <button
       type="button"
       class:active={resolved}
       aria-pressed={resolved}
-      onclick={() => goto(`${docsPath(slug, 'suggestions')}?state=resolved`)}>{'Reviewed'}</button
+      onclick={() => goto(`${docsPath(slug, 'suggestions')}?state=resolved`)}>Ocenione</button
     >
   </div>
 </div>
@@ -61,22 +62,21 @@
           </span>
           <span class="suggestion-body">
             <span class="suggestion-title">
-              {#if suggestion.pageTitle}{suggestion.pageTitle}{:else}{'New page'}: {suggestion.title}{/if}
+              {#if suggestion.pageTitle}{suggestion.pageTitle}{:else}Nowa strona: {suggestion.title}{/if}
             </span>
             <span class="suggestion-reason">{suggestion.reason}</span>
             <span class="suggestion-tags">
-              {#if !suggestion.pageId}<span class="tag tag-lavender">{'New page'}</span>{/if}
+              {#if !suggestion.pageId}<span class="tag tag-lavender">Nowa strona</span>{/if}
               {#if suggestion.visibilityChange}<span class="tag tag-mint"
                   ><Globe size={11} aria-hidden="true" />
-                  {#if suggestion.public}{'Make public'}{:else}{'Make members-only'}{/if}</span
+                  {#if suggestion.public}Upublicznienie{:else}Udostępnij tylko członkom{/if}</span
                 >{/if}
               {#if suggestion.state === 'pending' && suggestion.outdated}<span class="tag tag-coral"
-                  ><TriangleAlert size={11} aria-hidden="true" />{'Page changed since'}</span
+                  ><TriangleAlert size={11} aria-hidden="true" />Strona zmieniła się od tego czasu</span
                 >{/if}
-              {#if suggestion.state === 'accepted'}<span class="tag tag-mint">{'Accepted'}</span
-                >{:else if suggestion.state === 'rejected'}<span class="tag">{'Declined'}</span
-                >{:else if suggestion.state === 'withdrawn'}<span class="tag">{'Withdrawn'}</span
-                >{/if}
+              {#if suggestion.state === 'accepted'}<span class="tag tag-mint">Zaakceptowana</span
+                >{:else if suggestion.state === 'rejected'}<span class="tag">Odrzucona</span
+                >{:else if suggestion.state === 'withdrawn'}<span class="tag">Wycofana</span>{/if}
             </span>
           </span>
           <span class="suggestion-meta">
@@ -95,10 +95,10 @@
   <div class="empty-state">
     <GitPullRequestArrow size={28} strokeWidth={1.4} aria-hidden="true" />
     {#if !resolved}
-      <h2>{'Nothing to review'}</h2>
-      <p>{'New suggestions from members will appear here.'}</p>
+      <h2>Nic do oceny</h2>
+      <p>Tutaj pojawią się nowe propozycje od członków.</p>
     {:else}
-      <h2>{'No reviewed suggestions yet'}</h2>
+      <h2>Brak ocenionych propozycji</h2>
     {/if}
   </div>
 {/if}

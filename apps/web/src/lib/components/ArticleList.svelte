@@ -22,7 +22,6 @@
       }[];
     }[];
   } = $props();
-  const language = $derived(locale.current);
   const formatter = $derived(
     new Intl.DateTimeFormat(locale.current, { day: 'numeric', month: 'long', year: 'numeric' })
   );
@@ -70,14 +69,13 @@
         </h3>
         {#if article.markdown}<p class="preview">{preview(article.markdown)}</p>{/if}
         <div class="metadata">
-          {#if article.authors.length}<div class="authors" role="group" aria-label={'Authors'}>
+          {#if article.authors.length}<div class="authors" role="group" aria-label={'Autorzy'}>
               {#each article.authors as author (author.id)}
                 <MemberPreview
                   member={author}
                   href={`/members/${encodeURIComponent(author.id)}`}
                   avatarOnly
                   size={28}
-                  {language}
                 />
               {/each}
             </div>{/if}
@@ -95,7 +93,7 @@
   {:else}
     <div class="empty">
       <Newspaper size={22} aria-hidden="true" />
-      <p>No published articles yet.</p>
+      <p>Nie ma jeszcze opublikowanych artykułów.</p>
     </div>
   {/each}
 </div>

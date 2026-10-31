@@ -62,11 +62,12 @@ export async function seed() {
       slug: 'krasnal',
       name: 'Krasnal',
       fields: ['research', 'engineering'],
-      description: 'A Transformer-based chess engine exploring how neural networks learn to play.',
+      description:
+        'Badamy, jak sieci neuronowe uczą się grać, tworząc silnik szachowy oparty na Transformerach.',
       translations: {
-        pl: {
+        en: {
           description:
-            'Badamy, jak sieci neuronowe uczą się grać, tworząc silnik szachowy oparty na Transformerach.'
+            'A Transformer-based chess engine exploring how neural networks learn to play.'
         }
       }
     },
@@ -74,10 +75,10 @@ export async function seed() {
       slug: 'zosia',
       name: 'ZOSIA',
       fields: ['community'],
-      description: 'The Winter Computer Science Student Camp: talks and time together.',
+      description: 'Zimowy Obóz Studentów Informatyki. Wykłady i czas spędzony razem.',
       translations: {
-        pl: {
-          description: 'Zimowy Obóz Studentów Informatyki. Wykłady i czas spędzony razem.'
+        en: {
+          description: 'The Winter Computer Science Student Camp: talks and time together.'
         }
       }
     },
@@ -85,24 +86,24 @@ export async function seed() {
       slug: 'hoc',
       name: 'Hour of Code',
       fields: ['community', 'engineering'],
-      description: 'Introducing children to the world of programming.',
-      translations: { pl: { description: 'Wprowadzamy dzieci w świat programowania.' } }
+      description: 'Wprowadzamy dzieci w świat programowania.',
+      translations: { en: { description: 'Introducing children to the world of programming.' } }
     },
     {
       slug: 'ket',
       name: 'KET',
       fields: ['research'],
-      description: 'From qubits to algorithms on real quantum computers.',
+      description: 'Od kubitów do algorytmów na prawdziwych komputerach kwantowych.',
       translations: {
-        pl: { description: 'Od kubitów do algorytmów na prawdziwych komputerach kwantowych.' }
+        en: { description: 'From qubits to algorithms on real quantum computers.' }
       }
     },
     {
       slug: 'physarum',
       name: 'Physarum',
       fields: ['research'],
-      description: 'Biological inspirations for neural networks.',
-      translations: { pl: { description: 'Inspiracje biologiczne dla sieci neuronowych.' } }
+      description: 'Inspiracje biologiczne dla sieci neuronowych.',
+      translations: { en: { description: 'Biological inspirations for neural networks.' } }
     }
   ];
   for (const sample of catalog) {
@@ -132,10 +133,10 @@ export async function seed() {
       const [existing] = await tx.select().from(articles).where(eq(articles.slug, articleSlug));
       if (!existing) {
         const id = createId();
-        const markdown = `# ${sample.name}\n\n${sample.description}\n\n## Join us\n\nWe create, learn and explore together.`;
+        const markdown = `# ${sample.name}\n\n${sample.description}\n\n## Dołącz do nas\n\nRazem tworzymy, uczymy się i odkrywamy.`;
         const translations = {
-          pl: {
-            markdown: `# ${sample.name}\n\n${sample.translations.pl.description}\n\n## Dołącz do nas\n\nRazem tworzymy, uczymy się i odkrywamy.`
+          en: {
+            markdown: `# ${sample.name}\n\n${sample.translations.en.description}\n\n## Join us\n\nWe create, learn and explore together.`
           }
         };
         await tx.insert(articles).values({
@@ -144,7 +145,7 @@ export async function seed() {
           slug: articleSlug,
           title: sample.name,
           markdown,
-          language: 'en',
+          language: 'pl',
           translations,
           state: 'published',
           publishedAt: new Date(),

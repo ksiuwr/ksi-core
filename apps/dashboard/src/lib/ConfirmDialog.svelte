@@ -3,8 +3,8 @@
     open,
     title,
     message = '',
-    confirmLabel = 'Delete',
-    cancelLabel = 'Cancel',
+    confirmLabel = 'Usuń',
+    cancelLabel = 'Anuluj',
     busy = false,
     onconfirm,
     onclose

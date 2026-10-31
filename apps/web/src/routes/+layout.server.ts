@@ -14,7 +14,7 @@ export const load: LayoutServerLoad = async (event) => {
     const response = await backendFetch(
       event,
       env,
-      `/alerts/current?locale=${contentLocale(event.cookies.get('locale') ?? 'pl')}`
+      `/alerts/current?locale=${contentLocale(event.cookies.get('locale'))}`
     );
     if (response.ok) alert = await response.json();
   } catch {

@@ -14,7 +14,9 @@
 <svelte:head><title>{data.article.title} · KSI UWr</title></svelte:head>
 <main class="article-page page-container">
   <div class="column">
-    <a class="back-link" href="/articles"><ArrowLeft size={16} aria-hidden="true" />All articles</a>
+    <a class="back-link" href="/articles"
+      ><ArrowLeft size={16} aria-hidden="true" />Wszystkie artykuły</a
+    >
     <article>
       <header class="article-heading">
         {#if data.article.project}<a
@@ -27,17 +29,16 @@
           >{/if}
         <h1>{data.article.title}</h1>
         <div class="byline">
-          {#if data.article.authors.length}<div class="authors" role="group" aria-label={'Authors'}>
+          {#if data.article.authors.length}<div class="authors" role="group" aria-label={'Autorzy'}>
               {#each data.article.authors as author (author.id)}<MemberPreview
                   member={author}
                   href={`/members/${encodeURIComponent(author.id)}`}
                   avatarOnly
-                  {language}
                 />{/each}
             </div>{/if}
           {#if published && !Number.isNaN(published.getTime())}<div class="publication-date">
               <CalendarDays size={15} aria-hidden="true" /><span
-                >{'Published'}
+                >Opublikowano
                 <time datetime={published.toISOString()}>{formatter.format(published)}</time></span
               >
             </div>{/if}
@@ -48,9 +49,9 @@
   </div>
   {#if data.article.related?.length}<section class="related" aria-labelledby="related-heading">
       <div class="section-heading">
-        <h2 id="related-heading">Keep reading</h2>
+        <h2 id="related-heading">Czytaj dalej</h2>
         <a class="back-link" href="/articles"
-          >All articles<ArrowUpRight size={15} aria-hidden="true" /></a
+          >Wszystkie artykuły<ArrowUpRight size={15} aria-hidden="true" /></a
         >
       </div>
       <div class="related-grid">

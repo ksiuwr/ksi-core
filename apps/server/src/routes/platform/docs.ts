@@ -10,7 +10,6 @@ import {
   associationDocsKey,
   cleanDocTranslations,
   docLineChanges,
-  docTranslationLocales,
   outdatedTranslations,
   docLinkCandidates,
   docNameKey,
@@ -27,7 +26,13 @@ import {
   type DocLinkTarget,
   type DocTranslations
 } from 'shared/docs';
-import { contentLocale, localizeContent, type ContentLocale } from 'shared/content-locales';
+import {
+  contentLocale,
+  localizeContent,
+  primaryContentLocale,
+  translationLocales,
+  type ContentLocale
+} from 'shared/content-locales';
 import { renderMarkdown, type ResolvedDocLink } from 'shared/markdown';
 import { and, desc, eq, ilike, inArray, isNull, or, sql, type SQL } from 'drizzle-orm';
 import { status, t } from 'elysia';
@@ -45,7 +50,7 @@ const reason = t.String({ maxLength: 1000 });
 const folder = t.String({ maxLength: 200 });
 const translations = t.Object(
   Object.fromEntries(
-    docTranslationLocales.map((locale) => [
+    translationLocales.map((locale) => [
       locale,
       t.Optional(
         t.Object(
@@ -57,11 +62,19 @@ const translations = t.Object(
   ),
   { additionalProperties: false }
 );
+const folderTranslations = t.Object(
+  Object.fromEntries(
+    translationLocales.map((locale) => [
+      locale,
+      t.Optional(t.Object({ name: t.String({ maxLength: 80 }) }))
+    ])
+  )
+);
 const locale = t.Optional(t.String({ maxLength: 20 }));
 const projectQuery = t.Object({ projectId: t.Optional(t.String()), locale });
 const escapeLike = (value: string) => value.replace(/[%_\\]/g, '\\$&');
 const translatedTitleMatches = (pattern: string) =>
-  docTranslationLocales.map((locale) =>
+  translationLocales.map((locale) =>
     ilike(sql<string>`${docPages.translations}->${locale}->>'title'`, pattern)
   );
 
@@ -73,7 +86,7 @@ type DocContent = {
   translations: DocTranslations;
   public: boolean;
 };
-/** Normalizes submitted content; translations need the English text they translate. */
+/** Normalizes submitted content; translations need the Polish text they translate. */
 function docContent(
   body: {
     title: string;
@@ -88,7 +101,7 @@ function docContent(
   const cleaned = cleanDocTranslations(body.translations ?? baseline?.translations);
   if (!body.title.trim()) throw status(422, { code: 'TITLE_REQUIRED' });
   if (!body.markdown.trim() && Object.values(cleaned).some((fields) => fields?.markdown))
-    throw status(422, { code: 'ENGLISH_SOURCE_REQUIRED' });
+    throw status(422, { code: 'PRIMARY_SOURCE_REQUIRED' });
   return {
     title: body.title.trim(),
     markdown: body.markdown,
@@ -107,19 +120,21 @@ function sameContent(page: DocContent | typeof docPages.$inferSelect, next: DocC
     JSON.stringify(cleanDocTranslations(page.translations)) === JSON.stringify(next.translations)
   );
 }
-/** The title and text a reader sees in their language, falling back to English per field. */
+/** The title and text a reader sees in their language, falling back to Polish per field. */
 function readable(
   page: { title: string; markdown: string; translations: unknown },
   requested: string | null | undefined
 ) {
   const shown = contentLocale(requested);
   const translation =
-    shown === 'en' ? undefined : cleanDocTranslations(page.translations as DocTranslations)[shown];
+    shown === primaryContentLocale
+      ? undefined
+      : cleanDocTranslations(page.translations as DocTranslations)[shown];
   const localized = localizeContent(
     { title: page.title, markdown: page.markdown, translations: { [shown]: translation ?? {} } },
     shown
   );
-  return { ...localized, locale: (translation ? shown : 'en') as ContentLocale };
+  return { ...localized, locale: (translation ? shown : primaryContentLocale) as ContentLocale };
 }
 
 type Person = { id: string; name: string; image: string | null };
@@ -479,9 +494,7 @@ export default createElysia({ prefix: '/platform' })
         projectId: t.Optional(t.String()),
         parentId: t.Nullable(t.String()),
         name: t.String({ minLength: 1, maxLength: 80 }),
-        translations: t.Optional(
-          t.Object({ pl: t.Optional(t.Object({ name: t.String({ maxLength: 80 }) })) })
-        )
+        translations: t.Optional(folderTranslations)
       })
     }
   )
@@ -521,9 +534,7 @@ export default createElysia({ prefix: '/platform' })
       body: t.Object({
         parentId: t.Nullable(t.String()),
         name: t.String({ minLength: 1, maxLength: 80 }),
-        translations: t.Optional(
-          t.Object({ pl: t.Optional(t.Object({ name: t.String({ maxLength: 80 }) })) })
-        )
+        translations: t.Optional(folderTranslations)
       })
     }
   )
@@ -771,7 +782,10 @@ export default createElysia({ prefix: '/platform' })
         folder: docFolderPath(folders, page.folderId, query.locale),
         access,
         locale: shown.locale,
-        locales: ['en', ...Object.keys(cleanDocTranslations(page.translations))] as ContentLocale[],
+        locales: [
+          primaryContentLocale,
+          ...Object.keys(cleanDocTranslations(page.translations))
+        ] as ContentLocale[],
         outdatedLocales: outdatedTranslations(history),
         displayTitle: shown.title,
         blocks: await renderDocMarkdown(db, shown.markdown, projectId, true, query.locale),
@@ -1417,7 +1431,10 @@ export default createElysia({ prefix: '/platform' })
           query.locale
         ),
         locale: shown.locale,
-        locales: ['en', ...Object.keys(cleanDocTranslations(page.translations))] as ContentLocale[],
+        locales: [
+          primaryContentLocale,
+          ...Object.keys(cleanDocTranslations(page.translations))
+        ] as ContentLocale[],
         outdatedLocales: outdatedTranslations(history),
         createdAt: page.createdAt,
         updatedAt: page.updatedAt,

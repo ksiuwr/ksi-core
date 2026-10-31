@@ -15,7 +15,7 @@
 
 <div class="workspace-header">
   <div>
-    <h1>Activity</h1>
+    <h1>Aktywność</h1>
   </div>
 </div>
 {#if events.length}<ul class="list-group">
@@ -28,8 +28,8 @@
                   href={`/members/${encodeURIComponent(event.event.actorId)}`}
                   >{event.firstName
                     ? `${event.firstName} ${event.lastName}`
-                    : event.actorName || 'System'}</a
-                >{:else}System{/if}</strong
+                    : event.actorName || 'Systemowy'}</a
+                >{:else}Systemowy{/if}</strong
             >
             {#if linkForAction(event.event.action, event.event.targetId, event.projectSlug)}
               <a
@@ -67,12 +67,12 @@
 {#if events.length > shown}
   <div class="show-more">
     <button class="btn btn-outline" onclick={() => (shown += PAGE_SIZE)}
-      >{'Show more'} · {events.length - shown}</button
+      >Pokaż więcej · {events.length - shown}</button
     >
   </div>
 {/if}
 {#if !events.length}
-  <p class="list-empty">No activity yet.</p>
+  <p class="list-empty">Brak aktywności.</p>
 {/if}
 
 <style>

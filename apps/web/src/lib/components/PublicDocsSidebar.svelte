@@ -39,7 +39,11 @@
       onclick={closePicker}
     >
       <FileText size={14} aria-hidden="true" /><TreeLabel value={doc.title} />
-      {#if !doc.public}<Lock class="doc-nav-private" size={12} aria-label={'Members only'} />{/if}
+      {#if !doc.public}<Lock
+          class="doc-nav-private"
+          size={12}
+          aria-label={'Tylko dla członków'}
+        />{/if}
     </a>
   {/each}
   {#each node.folders as folder (folder.id)}
@@ -55,7 +59,7 @@
 {/snippet}
 
 {#snippet navigation()}
-  <nav aria-label={'Documentation pages'}>
+  <nav aria-label={'Strony dokumentacji'}>
     <a
       href="/docs"
       class="doc-nav-home"
@@ -63,9 +67,9 @@
       aria-current={!workspace ? 'page' : undefined}
       onclick={closePicker}
     >
-      <BookOpen size={15} aria-hidden="true" />{'All documentation'}
+      <BookOpen size={15} aria-hidden="true" />Cała dokumentacja
     </a>
-    <p class="doc-nav-label">{'Workspaces'}</p>
+    <p class="doc-nav-label">Przestrzenie</p>
     {#each workspaces as owner (owner.slug)}
       <details class="doc-nav-workspace" open={!workspace || workspace === owner.slug}>
         <summary title={owner.name}>
@@ -75,14 +79,14 @@
         <div class="doc-nav-files">{@render files(owner, owner.slug, 1, '')}</div>
       </details>
     {/each}
-    {#if !workspaces.length}<p class="doc-nav-empty">{'No public documentation yet.'}</p>{/if}
+    {#if !workspaces.length}<p class="doc-nav-empty">Brak publicznej dokumentacji.</p>{/if}
   </nav>
 {/snippet}
 
 <div class="desktop-navigation">{@render navigation()}</div>
 <details class="mobile-navigation" bind:this={mobilePicker}>
   <summary
-    ><BookOpen size={16} aria-hidden="true" /><span>{current?.title ?? 'Documentation pages'}</span
+    ><BookOpen size={16} aria-hidden="true" /><span>{current?.title ?? 'Strony dokumentacji'}</span
     ><ChevronDown size={16} aria-hidden="true" /></summary
   >
   {@render navigation()}

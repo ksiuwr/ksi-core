@@ -15,7 +15,11 @@
   } from '@lucide/svelte';
   import { formatDateTime } from 'shared/format';
   import { docsPath } from 'shared/docs';
-  import { contentLocaleName, type ContentLocale } from 'shared/content-locales';
+  import {
+    contentLocaleName,
+    primaryContentLocale,
+    type ContentLocale
+  } from 'shared/content-locales';
   import { slider } from '@ksi-core/ui/platform/slider';
   import { preferences } from '$lib/preferences.svelte';
   import DocDiff from './DocDiff.svelte';
@@ -61,13 +65,15 @@
   const before = $derived(suggestion.state === 'pending' ? suggestion.page : suggestion.base);
   const locales = $derived(languagesOf(before, suggestion));
   const locale = $derived(
-    editing && locales.includes(editing) ? editing : (locales.find(languageChanged) ?? 'en')
+    editing && locales.includes(editing)
+      ? editing
+      : (locales.find(languageChanged) ?? primaryContentLocale)
   );
   const beforeText = $derived(textIn(before, locale));
   const afterText = $derived(textIn(suggestion, locale));
   const beforeLabel = $derived(
     suggestion.state === 'pending' || !suggestion.baseVersion
-      ? 'Current version'
+      ? 'Obecna wersja'
       : `v${suggestion.baseVersion}`
   );
   function languageChanged(value: ContentLocale) {
@@ -79,13 +85,13 @@
 
 <div class="workspace-header">
   <div>
-    <p class="workspace-eyebrow">{'Suggestion'}</p>
+    <p class="workspace-eyebrow">Propozycja</p>
     <h1>
-      {#if suggestion.page}{suggestion.page.title}{:else}{'New page'}: {suggestion.title}{/if}
+      {#if suggestion.page}{suggestion.page.title}{:else}Nowa strona: {suggestion.title}{/if}
     </h1>
   </div>
   <a class="btn btn-outline" href={docsPath(slug, 'suggestions')}
-    ><ArrowLeft size={15} aria-hidden="true" />{'All suggestions'}</a
+    ><ArrowLeft size={15} aria-hidden="true" />Wszystkie propozycje</a
   >
 </div>
 <DocError code={error} />
@@ -98,11 +104,10 @@
           size={32}
         />{/if}
       <time datetime={suggestion.createdAt}>{when(suggestion.createdAt)}</time>
-      {#if suggestion.state === 'pending'}<span class="tag tag-lavender"
-          >{'Waiting for review'}</span
-        >{:else if suggestion.state === 'accepted'}<span class="tag tag-mint">{'Accepted'}</span
-        >{:else if suggestion.state === 'rejected'}<span class="tag">{'Declined'}</span>{:else}<span
-          class="tag">{'Withdrawn'}</span
+      {#if suggestion.state === 'pending'}<span class="tag tag-lavender">Czeka na ocenę</span
+        >{:else if suggestion.state === 'accepted'}<span class="tag tag-mint">Zaakceptowana</span
+        >{:else if suggestion.state === 'rejected'}<span class="tag">Odrzucona</span>{:else}<span
+          class="tag">Wycofana</span
         >{/if}
     </div>
     <blockquote class="review-reason">{suggestion.reason}</blockquote>
@@ -110,20 +115,20 @@
       {#if !suggestion.page}
         <li>
           <FilePlus size={15} aria-hidden="true" />
-          <span>{'Creates a new page at'} <code>{suggestion.slug}</code></span>
+          <span>Tworzy nową stronę pod adresem <code>{suggestion.slug}</code></span>
         </li>
       {/if}
       {#if (before?.folder ?? '') !== suggestion.folder}
         <li>
           <Folder size={15} aria-hidden="true" />
           <span
-            >{'Folder'}:
+            >Folder:
             <del
-              >{#if before?.folder}{before.folder}{:else}{'Top level'}{/if}</del
+              >{#if before?.folder}{before.folder}{:else}Najwyższy poziom{/if}</del
             >
             →
             <ins
-              >{#if suggestion.folder}{suggestion.folder}{:else}{'Top level'}{/if}</ins
+              >{#if suggestion.folder}{suggestion.folder}{:else}Najwyższy poziom{/if}</ins
             ></span
           >
         </li>
@@ -131,9 +136,9 @@
       {#if visibilityChange}
         <li class="review-visibility">
           {#if suggestion.public}<Globe size={15} aria-hidden="true" /><span
-              >{'Asks to publish this page on the KSI website.'}</span
+              >Prosi o publikację tej strony na stronie KSI.</span
             >{:else}<Lock size={15} aria-hidden="true" /><span
-              >{'Asks to make this page visible to members only.'}</span
+              >Prosi o ograniczenie widoczności strony do członków.</span
             >{/if}
         </li>
       {/if}
@@ -141,15 +146,16 @@
         <li class="review-warning">
           <TriangleAlert size={15} aria-hidden="true" />
           <span
-            >{'The page changed after this suggestion was written'} (v{suggestion.baseVersion} → v{suggestion
-              .page.version}). {'Accepting replaces the current text with the suggested one, so check the comparison below.'}</span
+            >Strona zmieniła się po napisaniu tej propozycji (v{suggestion.baseVersion} → v{suggestion
+              .page.version}). Akceptacja zastąpi obecną treść proponowaną, więc sprawdź porównanie
+            poniżej.</span
           >
         </li>
       {/if}
     </ul>
     {#if suggestion.state !== 'pending' && suggestion.reviewer}
       <p class="review-outcome">
-        {#if suggestion.state === 'accepted'}{'Accepted by'}{:else}{'Declined by'}{/if}
+        {#if suggestion.state === 'accepted'}Zaakceptował(a){:else}Odrzucił(a){/if}
         <strong>{suggestion.reviewer.name}</strong>
         {#if suggestion.reviewedAt}· <time datetime={suggestion.reviewedAt}
             >{when(suggestion.reviewedAt)}</time
@@ -159,14 +165,14 @@
     {/if}
     {#if suggestion.state === 'accepted' && pageSlug}
       <a class="btn btn-outline review-open" href={docsPath(slug, pageSlug)}
-        ><ArrowUpRight size={15} aria-hidden="true" />{'Open page'}</a
+        ><ArrowUpRight size={15} aria-hidden="true" />Otwórz stronę</a
       >
     {/if}
   </section>
 
-  <section class="review-comparison" aria-label={'Changes'}>
+  <section class="review-comparison" aria-label={'Zmiany'}>
     {#if locales.length > 1}
-      <div class="segmented-control" role="group" aria-label={'Language'} use:slider>
+      <div class="segmented-control" role="group" aria-label={'Język'} use:slider>
         {#each locales as item (item)}
           <button
             type="button"
@@ -175,8 +181,8 @@
             onclick={() => (editing = item)}
           >
             {contentLocaleName(item, language)}
-            {#if languageChanged(item)}<span class="review-language-change" title={'Changed'}
-                ><span class="sr-only">{'Changed'}</span></span
+            {#if languageChanged(item)}<span class="review-language-change" title={'Zmieniono'}
+                ><span class="sr-only">Zmieniono</span></span
               >{/if}
           </button>
         {/each}
@@ -184,11 +190,11 @@
     {/if}
     {#if beforeText.title !== afterText.title}
       <p class="review-title-change">
-        {'Title'}: <del>{beforeText.title || '—'}</del> → <ins>{afterText.title || '—'}</ins>
+        Tytuł: <del>{beforeText.title || '—'}</del> → <ins>{afterText.title || '—'}</ins>
       </p>
     {/if}
-    {#if locale !== 'en' && (!afterText.title || !afterText.markdown)}
-      <p class="review-fallback">{'Empty translated fields show the English text to readers.'}</p>
+    {#if locale !== primaryContentLocale && (!afterText.title || !afterText.markdown)}
+      <p class="review-fallback">Puste pola tłumaczenia są zastępowane tekstem polskim.</p>
     {/if}
     <DocDiff
       before={beforeText.markdown}
@@ -196,19 +202,19 @@
       {projectId}
       {locale}
       {beforeLabel}
-      afterLabel={'Suggested version'}
+      afterLabel={'Proponowana wersja'}
     />
   </section>
 
   {#if suggestion.state === 'pending' && suggestion.access.canReview}
     <section class="review-actions card" aria-labelledby="review-heading">
-      <h2 id="review-heading">{'Your review'}</h2>
-      <label for="review-note">{'Note for the author (optional)'}</label>
+      <h2 id="review-heading">Twoja ocena</h2>
+      <label for="review-note">Uwaga dla autora (opcjonalnie)</label>
       <textarea id="review-note" bind:value={note} rows="3" maxlength="1000"></textarea>
       {#if blockedByVisibility}
         <p class="review-warning-text">
           <TriangleAlert size={14} aria-hidden="true" />
-          {'Only workspace leaders can accept a change of visibility.'}
+          Tylko liderzy przestrzeni mogą zaakceptować zmianę widoczności.
         </p>
       {/if}
       <div class="row">
@@ -216,20 +222,20 @@
           class="btn"
           disabled={busy || blockedByVisibility}
           onclick={() => act('resolve', { accept: true, note })}
-          ><Check size={15} aria-hidden="true" />{'Accept changes'}</button
+          ><Check size={15} aria-hidden="true" />Akceptuj zmiany</button
         >
         <button
           class="btn btn-outline"
           disabled={busy}
           onclick={() => act('resolve', { accept: false, note })}
-          ><X size={15} aria-hidden="true" />{'Decline'}</button
+          ><X size={15} aria-hidden="true" />Odrzuć</button
         >
       </div>
     </section>
   {:else if suggestion.state === 'pending' && suggestion.isAuthor}
     <div class="row">
       <button class="btn btn-outline" disabled={busy} onclick={() => act('withdraw')}
-        ><Undo2 size={15} aria-hidden="true" />{'Withdraw suggestion'}</button
+        ><Undo2 size={15} aria-hidden="true" />Wycofaj propozycję</button
       >
     </div>
   {/if}
