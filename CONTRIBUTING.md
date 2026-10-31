@@ -167,6 +167,7 @@ Wuchale is compile-time i18n. Strings are extracted from source at build time an
 - Each app has a `wuchale.config.js`.
 - Locales come from `packages/shared/content-locales.ts` (`frontendLocales`: `pl`, `en-us`). Visitors without a saved preference get `defaultFrontendLocale` (`pl`).
 - The source language of UI strings is Polish and must stay first in `frontendLocales`; in `pl.po`, `msgstr` should equal `msgid`. English translations live in `en-us.po`.
+- The chosen UI locale is shared across KSI frontends through the `locale` cookie (`Domain=ksi.edu.pl`) and a `locale` localStorage entry. Every app re-reads it on focus, visibility, and storage changes, so switching in one app switches the others. Outside KSI domains the cookie stays host-only.
 - Generated files (`.wuchale/`, `data.js`, `*.loader.svelte.js`) are gitignored. Only `*.po` files are committed.
 
 ### How to write translatable strings

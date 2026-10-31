@@ -1,3 +1,5 @@
+import { preferenceCookieDomain } from './preference-cookie.ts';
+
 export type ThemePreference = 'system' | 'light' | 'dark';
 export function validTheme(value: string | null | undefined): value is ThemePreference {
   return value === 'system' || value === 'light' || value === 'dark';
@@ -10,6 +12,4 @@ export function themeFromCookie(cookies: string): ThemePreference | null {
     ?.slice(10);
   return validTheme(value) ? value : null;
 }
-export function themeCookieDomain(hostname: string) {
-  return hostname === 'ksi.edu.pl' || hostname.endsWith('.ksi.edu.pl') ? 'ksi.edu.pl' : null;
-}
+export const themeCookieDomain = preferenceCookieDomain;

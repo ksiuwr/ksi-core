@@ -1,7 +1,20 @@
+import { readCookie } from './preference-cookie.ts';
+
 // The same locale list drives Wuchale and editable public content.
 /** Wuchale treats the first configured locale as its source: UI strings are written in Polish. */
 export const frontendLocales = ['pl', 'en-us'] as const;
 export type FrontendLocale = (typeof frontendLocales)[number];
+/** Normalize a stored UI locale; the legacy `en` value keeps meaning `en-us`. */
+export function frontendLocale(value: string | null | undefined): FrontendLocale | null {
+  const normalized = value === 'en' ? 'en-us' : value;
+  return normalized && (frontendLocales as readonly string[]).includes(normalized)
+    ? (normalized as FrontendLocale)
+    : null;
+}
+/** The shared `locale` cookie is written by every KSI frontend. */
+export function frontendLocaleFromCookie(cookies: string): FrontendLocale | null {
+  return frontendLocale(readCookie(cookies, 'locale'));
+}
 /** The UI language until a visitor chooses another one. */
 export const defaultFrontendLocale: FrontendLocale = 'pl';
 export const contentLocales = ['pl', 'en'] as const;
