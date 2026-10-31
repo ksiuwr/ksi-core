@@ -1,7 +1,12 @@
 <script lang="ts">
   import { docFolderName, type DocFolder } from 'shared/doc-folders';
-  import { contentLocaleName } from 'shared/content-locales';
-  import type { ContentLocale } from 'shared/content-locales';
+  import {
+    contentLocaleName,
+    contentLocales,
+    primaryContentLocale,
+    translationLocales,
+    type ContentLocale
+  } from 'shared/content-locales';
   import ContentLocaleEditor from '$lib/ContentLocaleEditor.svelte';
   import { Trash2 } from '@lucide/svelte';
   import DocFolderSelect from './DocFolderSelect.svelte';
@@ -32,8 +37,20 @@
   } = $props();
   const uid = $props.id();
   let dialog = $state<HTMLDialogElement>();
-  let names = $state<Record<ContentLocale, string>>({ en: '', pl: '' });
-  let editing = $state<ContentLocale>('en');
+  const savedNames = (): Record<ContentLocale, string> =>
+    ({
+      [primaryContentLocale]: folder?.name ?? '',
+      ...Object.fromEntries(
+        translationLocales.map((locale) => [locale, folder?.translations[locale]?.name ?? ''])
+      )
+    }) as Record<ContentLocale, string>;
+  let names = $state(
+    Object.fromEntries(contentLocales.map((locale) => [locale, ''])) as Record<
+      ContentLocale,
+      string
+    >
+  );
+  let editing = $state<ContentLocale>(primaryContentLocale);
   let parent = $state('');
   let busy = $state(false);
   let error = $state('');
@@ -43,17 +60,16 @@
       (folders.some((item) => item.parentId === folder.id) ||
         pages.some((page) => page.folderId === folder.id))
   );
-  const dirty = $derived(
-    names[editing] !==
-      (editing === 'en' ? (folder?.name ?? '') : (folder?.translations[editing]?.name ?? ''))
+  const dirty = $derived(names[editing] !== savedNames()[editing]);
+  const added = $derived<ContentLocale[]>(
+    translationLocales.filter((locale) => names[locale].trim())
   );
-  const added = $derived<ContentLocale[]>(names.pl.trim() ? ['pl'] : []);
 
   $effect(() => {
     if (!dialog) return;
     if (open && !dialog.open) {
-      names = { en: folder?.name ?? '', pl: folder?.translations.pl?.name ?? '' };
-      editing = 'en';
+      names = savedNames();
+      editing = primaryContentLocale;
       parent = (folder ? folder.parentId : parentId) ?? '';
       error = '';
       confirmingDelete = false;
@@ -63,7 +79,7 @@
 
   async function save(event: SubmitEvent) {
     event.preventDefault();
-    if (busy || !names.en.trim() || confirmingDelete) return;
+    if (busy || !names[primaryContentLocale].trim() || confirmingDelete) return;
     busy = true;
     error = '';
     try {
@@ -72,9 +88,13 @@
         folder ? 'PUT' : 'POST',
         {
           ...(folder || !projectId ? {} : { projectId }),
-          name: names.en.trim(),
+          name: names[primaryContentLocale].trim(),
           parentId: parent || null,
-          translations: names.pl.trim() ? { pl: { name: names.pl.trim() } } : {}
+          translations: Object.fromEntries(
+            translationLocales
+              .filter((locale) => names[locale].trim())
+              .map((locale) => [locale, { name: names[locale].trim() }])
+          )
         }
       );
       await onsaved(result);
@@ -149,11 +169,11 @@
         {busy}
         saveHint={'All language versions are saved together with the folder.'}
         onremove={() => {
-          if (editing !== 'en') names[editing] = '';
+          if (editing !== primaryContentLocale) names[editing] = '';
         }}
       >
-        {#snippet reference()}<p class="folder-reference" lang="en">
-            {names.en || 'No content'}
+        {#snippet reference()}<p class="folder-reference" lang={primaryContentLocale}>
+            {names[primaryContentLocale] || 'No content'}
           </p>{/snippet}
       </ContentLocaleEditor>
       <div>
@@ -163,10 +183,10 @@
         <input
           id={`${uid}-name`}
           bind:value={names[editing]}
-          required={editing === 'en'}
+          required={editing === primaryContentLocale}
           maxlength="80"
           pattern="[^\/]+"
-          placeholder={editing === 'en' ? '' : names.en}
+          placeholder={editing === primaryContentLocale ? '' : names[primaryContentLocale]}
           disabled={busy}
         />
       </div>
@@ -195,7 +215,7 @@
         <button type="button" class="btn btn-outline" disabled={busy} onclick={onclose}
           >{'Cancel'}</button
         >
-        <button class="btn" disabled={busy || !names.en.trim()}
+        <button class="btn" disabled={busy || !names[primaryContentLocale].trim()}
           >{#if folder}{'Save changes'}{:else}{'Create folder'}{/if}</button
         >
       </div>

@@ -5,7 +5,8 @@
   import SettingsNav from './SettingsNav.svelte';
   import {
     contentLocaleName,
-    contentLocales,
+    translationLocales,
+    primaryContentLocale,
     type ContentLocale,
     type ContentTranslations as TranslationData
   } from 'shared/content-locales';
@@ -55,7 +56,7 @@
     notice = $state('');
 
   let generation = 0;
-  let contentLocale = $state<ContentLocale>('en');
+  let contentLocale = $state<ContentLocale>(primaryContentLocale);
   let translationDraft = $state<Record<string, string>>({});
   const projectFields = {
     research: 'Research',
@@ -65,11 +66,11 @@
 
   type LocalizedProjectField = 'name' | 'description' | 'tags';
   function localized(key: LocalizedProjectField) {
-    const english = key === 'name' ? name : key === 'description' ? description : tags;
-    return contentLocale === 'en' ? english : (translationDraft[key] ?? '');
+    const primary = key === 'name' ? name : key === 'description' ? description : tags;
+    return contentLocale === primaryContentLocale ? primary : (translationDraft[key] ?? '');
   }
   function setLocalized(key: LocalizedProjectField, value: string) {
-    if (contentLocale !== 'en') translationDraft[key] = value;
+    if (contentLocale !== primaryContentLocale) translationDraft[key] = value;
     else if (key === 'name') name = value;
     else if (key === 'description') description = value;
     else tags = value;
@@ -190,7 +191,7 @@
             class="card settings-card"
             onsubmit={(e) => {
               e.preventDefault();
-              if (contentLocale !== 'en') return;
+              if (contentLocale !== primaryContentLocale) return;
               void action(() =>
                 api('', 'PATCH', {
                   version: project.version,
@@ -228,7 +229,7 @@
               <input
                 id="project-name"
                 bind:value={() => localized('name'), (value) => setLocalized('name', value)}
-                required={contentLocale === 'en'}
+                required={contentLocale === primaryContentLocale}
                 maxlength="200"
               />
             </div>
@@ -248,7 +249,7 @@
                 bind:value={() => localized('tags'), (value) => setLocalized('tags', value)}
               />
             </div>
-            {#if contentLocale === 'en'}<fieldset>
+            {#if contentLocale === primaryContentLocale}<fieldset>
                 <legend>Fields</legend>
                 <div class="check-row">
                   {#each Object.entries(projectFields) as [field, label]}<label class="check"
@@ -361,7 +362,7 @@
         <section id="links" class="settings-section" aria-labelledby="links-heading">
           <header>
             <h2 id="links-heading">Public links</h2>
-            <p>English labels are required. Other language labels are optional.</p>
+            <p>Polish labels are required. Other language labels are optional.</p>
           </header>
           <form
             class="card settings-card"
@@ -381,7 +382,7 @@
             {#each links as link, index}<div class="link-fields">
                 <div>
                   <label for={`link-label-${index}`}
-                    >Label · {contentLocaleName('en', language)}</label
+                    >Label · {contentLocaleName(primaryContentLocale, language)}</label
                   ><input
                     id={`link-label-${index}`}
                     bind:value={link.label}
@@ -398,7 +399,7 @@
                     maxlength="2000"
                   />
                 </div>
-                {#each contentLocales.filter((locale) => locale !== 'en') as locale}
+                {#each translationLocales as locale}
                   <div>
                     <label for={`link-${locale}-${index}`}
                       >Label · {contentLocaleName(locale, language)}</label

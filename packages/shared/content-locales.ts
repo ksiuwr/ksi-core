@@ -1,14 +1,24 @@
 // The same locale list drives Wuchale and editable public content.
+/** Wuchale treats the first configured locale as its source: UI strings are written in English. */
 export const frontendLocales = ['en-us', 'pl'] as const;
-/** Wuchale treats the first configured locale as its source and default locale. */
-export const defaultFrontendLocale = frontendLocales[0];
 export type FrontendLocale = (typeof frontendLocales)[number];
-export const contentLocales = ['en', 'pl'] as const;
+/** The UI language until a visitor chooses another one. */
+export const defaultFrontendLocale: FrontendLocale = 'pl';
+export const contentLocales = ['pl', 'en'] as const;
 export type ContentLocale = (typeof contentLocales)[number];
-export type ContentTranslations = Partial<Record<ContentLocale, Record<string, string | string[]>>>;
+/** User content is written in Polish: the ordinary content fields hold it and it is required. */
+export const primaryContentLocale = 'pl' satisfies ContentLocale;
+export type TranslationLocale = Exclude<ContentLocale, typeof primaryContentLocale>;
+/** Optional translations of the primary content, stored in `translations`. */
+export const translationLocales = contentLocales.filter(
+  (locale): locale is TranslationLocale => locale !== primaryContentLocale
+);
+export type ContentTranslations = Partial<
+  Record<TranslationLocale, Record<string, string | string[]>>
+>;
 
 const localeNames = new Map<string, Intl.DisplayNames>();
-export function contentLocaleName(locale: ContentLocale, displayLocale: string = 'en'): string {
+export function contentLocaleName(locale: ContentLocale, displayLocale: string): string {
   const key = `${displayLocale}:${locale}`;
   let names = localeNames.get(key);
   if (!names) {
@@ -18,20 +28,22 @@ export function contentLocaleName(locale: ContentLocale, displayLocale: string =
   const name = names.of(locale) ?? locale;
   return name.charAt(0).toLocaleUpperCase(displayLocale) + name.slice(1);
 }
+/** Unknown or missing locales read the primary content. */
 export function contentLocale(locale: string | null | undefined): ContentLocale {
-  if (!locale) return 'en';
+  if (!locale) return primaryContentLocale;
   try {
     const language = new Intl.Locale(locale).language as ContentLocale;
-    return contentLocales.includes(language) ? language : 'en';
+    return contentLocales.includes(language) ? language : primaryContentLocale;
   } catch {
-    return 'en';
+    return primaryContentLocale;
   }
 }
 export function localizeContent<T extends object>(
   value: T & { translations?: ContentTranslations },
   locale: string | null | undefined
 ): T {
-  const translated = value.translations?.[contentLocale(locale)];
+  const language = contentLocale(locale);
+  const translated = language === primaryContentLocale ? undefined : value.translations?.[language];
   if (!translated) return value;
   const fields = Object.fromEntries(
     Object.entries(translated).filter(([, text]) =>
@@ -54,7 +66,8 @@ export function articleFileContent(value: {
   ].join('\n');
 }
 
-export function hasEnglishSources(
+/** Translations need the primary text they translate: blank translated fields are always fine. */
+export function hasPrimarySources(
   baseline: Record<string, unknown>,
   fields: Record<string, string | string[]>
 ): boolean {

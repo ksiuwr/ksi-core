@@ -15,7 +15,11 @@
   } from '@lucide/svelte';
   import { formatDateTime } from 'shared/format';
   import { docsPath } from 'shared/docs';
-  import { contentLocaleName, type ContentLocale } from 'shared/content-locales';
+  import {
+    contentLocaleName,
+    primaryContentLocale,
+    type ContentLocale
+  } from 'shared/content-locales';
   import { slider } from '@ksi-core/ui/platform/slider';
   import { preferences } from '$lib/preferences.svelte';
   import DocDiff from './DocDiff.svelte';
@@ -61,7 +65,9 @@
   const before = $derived(suggestion.state === 'pending' ? suggestion.page : suggestion.base);
   const locales = $derived(languagesOf(before, suggestion));
   const locale = $derived(
-    editing && locales.includes(editing) ? editing : (locales.find(languageChanged) ?? 'en')
+    editing && locales.includes(editing)
+      ? editing
+      : (locales.find(languageChanged) ?? primaryContentLocale)
   );
   const beforeText = $derived(textIn(before, locale));
   const afterText = $derived(textIn(suggestion, locale));
@@ -187,8 +193,8 @@
         {'Title'}: <del>{beforeText.title || '—'}</del> → <ins>{afterText.title || '—'}</ins>
       </p>
     {/if}
-    {#if locale !== 'en' && (!afterText.title || !afterText.markdown)}
-      <p class="review-fallback">{'Empty translated fields show the English text to readers.'}</p>
+    {#if locale !== primaryContentLocale && (!afterText.title || !afterText.markdown)}
+      <p class="review-fallback">{'Empty translated fields show the Polish text to readers.'}</p>
     {/if}
     <DocDiff
       before={beforeText.markdown}

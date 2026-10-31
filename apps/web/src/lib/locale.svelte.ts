@@ -3,6 +3,7 @@ import { loadLocale } from 'wuchale/load-utils';
 import '../locales/main.loader.svelte.js';
 import { locales } from '../locales/data.js';
 import type { Locale } from '../locales/data.js';
+import { defaultFrontendLocale } from 'shared/content-locales';
 
 function getInitialLocale(): Locale {
   if (typeof window !== 'undefined') {
@@ -14,7 +15,7 @@ function getInitialLocale(): Locale {
       return cookieMatch[1] as Locale;
     }
   }
-  return 'pl';
+  return defaultFrontendLocale;
 }
 
 export const locale = $state({ current: getInitialLocale() });

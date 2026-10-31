@@ -114,24 +114,24 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
   test('translation suggestions preserve folders, pass review, and keep their full history', async () => {
     const camp = await request(leader, '/platform/docs/folders', 'POST', {
       projectId,
-      name: 'Camp',
+      name: 'Obóz',
       parentId: null,
-      translations: { pl: { name: 'Obóz' } }
+      translations: { en: { name: 'Camp' } }
     });
     expect(camp.status).toBe(200);
     const schedule = await request(leader, '/platform/docs/folders', 'POST', {
       projectId,
-      name: 'Schedule',
+      name: 'Plan dnia',
       parentId: camp.body.id,
-      translations: { pl: { name: 'Plan dnia' } }
+      translations: { en: { name: 'Schedule' } }
     });
     expect(schedule.status).toBe(200);
     const source = {
-      title: 'Day plan',
-      markdown: '## Morning\n\nBreakfast.',
+      title: 'Plan dnia',
+      markdown: '## Rano\n\nŚniadanie.',
       folderId: schedule.body.id,
       public: true,
-      reason: 'First version'
+      reason: 'Pierwsza wersja'
     };
     const created = await request(leader, '/platform/docs', 'POST', {
       ...source,
@@ -140,18 +140,18 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
     });
     expect(created.status).toBe(200);
     const pageId = created.body.id;
-    expect(created.body.folder).toBe('Camp/Schedule');
+    expect(created.body.folder).toBe('Obóz/Plan dnia');
     expect(
       (await request(member, `/platform/docs/${pageId}`, 'PUT', { ...source, version: 1 })).status
     ).toBe(403);
 
-    const translations = { pl: { title: 'Plan dnia', markdown: '## Rano\n\nŚniadanie.' } };
+    const translations = { en: { title: 'Day plan', markdown: '## Morning\n\nBreakfast.' } };
     const proposed = await request(member, '/platform/docs/proposals', 'POST', {
       ...source,
       translations,
       pageId,
       baseVersion: 1,
-      reason: 'Add Polish for our members'
+      reason: 'Dodaj angielski dla gości'
     });
     expect(proposed.status).toBe(200);
     expect(
@@ -163,68 +163,82 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
     ).toBe(200);
     const detail = await request(
       member,
-      `/platform/docs/page?projectId=${projectId}&slug=day-plan&locale=pl`
+      `/platform/docs/page?projectId=${projectId}&slug=day-plan&locale=en`
     );
     expect(detail.status).toBe(200);
     expect(detail.body).toMatchObject({
-      folder: 'Obóz/Plan dnia',
+      folder: 'Camp/Schedule',
       folderId: schedule.body.id,
-      title: 'Day plan',
-      displayTitle: 'Plan dnia',
-      locale: 'pl',
-      locales: ['en', 'pl'],
+      title: 'Plan dnia',
+      displayTitle: 'Day plan',
+      locale: 'en',
+      locales: ['pl', 'en'],
       outdatedLocales: [],
       version: 2
     });
-    expect(detail.body.headings[0].id).toBe('rano');
+    expect(detail.body.headings[0].id).toBe('morning');
+    for (const query of ['&locale=pl', '&locale=de', ''])
+      expect(
+        (await request(member, `/platform/docs/page?projectId=${projectId}&slug=day-plan${query}`))
+          .body
+      ).toMatchObject({
+        folder: 'Obóz/Plan dnia',
+        displayTitle: 'Plan dnia',
+        locale: 'pl',
+        locales: ['pl', 'en']
+      });
     const revision = await request(member, `/platform/docs/${pageId}/revisions/2`);
     expect(revision.body).toMatchObject({
-      folder: 'Camp/Schedule',
+      folder: 'Obóz/Plan dnia',
       translations,
-      previous: { folder: 'Camp/Schedule', translations: {} }
+      previous: { folder: 'Obóz/Plan dnia', translations: {} }
     });
     const credits = detail.body.contributors.find((row: any) => row.user.id === member);
     expect(credits.additions).toBeGreaterThan(0);
 
     const search = await request(
       member,
-      `/platform/docs/search?scope=${projectId}&q=Plan&locale=pl`
+      `/platform/docs/search?scope=${projectId}&q=Day&locale=en`
     );
     expect(search.status).toBe(200);
     expect(search.body).toContainEqual(
-      expect.objectContaining({ reference: 'day-plan', title: 'Plan dnia' })
+      expect.objectContaining({ reference: 'day-plan', title: 'Day plan' })
     );
+    // References to the Polish outline resolve within the translated outline.
     const links = await request(member, '/platform/docs/links', 'POST', {
       scope: projectId,
-      targets: ['Plan dnia#morning'],
-      locale: 'pl'
+      targets: ['Day plan#rano'],
+      locale: 'en'
     });
-    expect(links.body['Plan dnia#morning'].href).toBe(
-      `/projects/${projectId}/docs/day-plan?lang=pl#rano`
+    expect(links.body['Day plan#rano'].href).toBe(
+      `/projects/${projectId}/docs/day-plan?lang=en#morning`
     );
     const sections = await request(
       member,
-      `/platform/docs/search?scope=${projectId}&q=day-plan%23&locale=pl`
+      `/platform/docs/search?scope=${projectId}&q=day-plan%23&locale=en`
     );
     expect(sections.body).toContainEqual(
-      expect.objectContaining({ reference: 'day-plan#rano', title: 'Rano' })
+      expect.objectContaining({ reference: 'day-plan#morning', title: 'Morning' })
     );
 
-    const publicPage = await request(null, `/platform/public/docs/${projectId}/day-plan?locale=pl`);
+    const publicPage = await request(null, `/platform/public/docs/${projectId}/day-plan?locale=en`);
     expect(publicPage.body).toMatchObject({
-      title: 'Plan dnia',
-      folder: 'Obóz/Plan dnia',
-      locale: 'pl',
-      locales: ['en', 'pl']
+      title: 'Day plan',
+      folder: 'Camp/Schedule',
+      locale: 'en',
+      locales: ['pl', 'en']
     });
     expect(publicPage.body).not.toHaveProperty('translations');
-    const publicIndex = await request(null, '/platform/public/docs?locale=pl');
+    expect(
+      (await request(null, `/platform/public/docs/${projectId}/day-plan?locale=pl`)).body
+    ).toMatchObject({ title: 'Plan dnia', folder: 'Obóz/Plan dnia', locale: 'pl' });
+    const publicIndex = await request(null, '/platform/public/docs?locale=en');
     const publicSummary = publicIndex.body.find(
       (page: any) => page.projectSlug === projectId && page.slug === 'day-plan'
     );
     expect(publicSummary.folderTrail).toEqual([
-      { id: camp.body.id, name: 'Obóz' },
-      { id: schedule.body.id, name: 'Plan dnia' }
+      { id: camp.body.id, name: 'Camp' },
+      { id: schedule.body.id, name: 'Schedule' }
     ]);
     expect(publicSummary).not.toHaveProperty('markdown');
     expect(publicSummary).not.toHaveProperty('translations');
@@ -233,33 +247,44 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
         await request(leader, `/platform/docs/${pageId}`, 'PUT', {
           title: source.title,
           public: source.public,
-          reason: 'Add coffee to the schedule',
+          reason: 'Dodaj kawę do planu',
           version: 2,
-          markdown: `${source.markdown}\n\nBring coffee.`
+          markdown: `${source.markdown}\n\nZabierz kawę.`
         })
       ).status
     ).toBe(200);
     const outdated = await request(
       member,
-      `/platform/docs/page?projectId=${projectId}&slug=day-plan&locale=pl`
+      `/platform/docs/page?projectId=${projectId}&slug=day-plan&locale=en`
     );
-    expect(outdated.body.outdatedLocales).toEqual(['pl']);
+    expect(outdated.body.outdatedLocales).toEqual(['en']);
     expect(outdated.body).toMatchObject({
-      folder: 'Obóz/Plan dnia',
+      folder: 'Camp/Schedule',
       folderId: schedule.body.id,
       translations
     });
   });
 
-  test('title-only translations select their language while the body falls back to English', async () => {
+  test('title-only translations select their language while the body falls back to Polish', async () => {
+    const untranslatable = await request(leader, '/platform/docs', 'POST', {
+      projectId,
+      slug: 'fallback',
+      title: 'Poradnik',
+      markdown: ' ',
+      translations: { en: { title: 'Guide', markdown: 'English body.' } },
+      public: false,
+      reason: ''
+    });
+    expect(untranslatable.status).toBe(422);
+    expect(untranslatable.body.code).toBe('PRIMARY_SOURCE_REQUIRED');
     expect(
       (
         await request(leader, '/platform/docs', 'POST', {
           projectId,
           slug: 'fallback',
-          title: 'Guide',
-          markdown: 'English body.',
-          translations: { pl: { title: 'Poradnik' } },
+          title: 'Poradnik',
+          markdown: 'Polska treść.',
+          translations: { en: { title: 'Guide' } },
           public: false,
           reason: ''
         })
@@ -267,39 +292,44 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
     ).toBe(200);
     const page = await request(
       member,
-      `/platform/docs/page?projectId=${projectId}&slug=fallback&locale=pl`
+      `/platform/docs/page?projectId=${projectId}&slug=fallback&locale=en-us`
     );
     expect(page.body).toMatchObject({
-      displayTitle: 'Poradnik',
-      locale: 'pl',
-      locales: ['en', 'pl']
+      displayTitle: 'Guide',
+      locale: 'en',
+      locales: ['pl', 'en']
     });
-    expect(JSON.stringify(page.body.blocks)).toContain('English body.');
+    expect(JSON.stringify(page.body.blocks)).toContain('Polska treść.');
     expect(
-      (await request(null, `/platform/public/docs/${projectId}/fallback?locale=pl`)).status
+      (await request(null, `/platform/public/docs/${projectId}/fallback?locale=en`)).status
     ).toBe(404);
-    const index = await request(null, '/platform/public/docs?locale=pl');
+    const index = await request(null, '/platform/public/docs?locale=en');
     expect(
       index.body.some((page: any) => page.projectSlug === projectId && page.slug === 'fallback')
     ).toBe(false);
   });
   test('the website shows members-only pages and editing rights to active members alone', async () => {
     for (const page of [
-      { slug: 'handbook', title: 'Handbook', markdown: 'Read [internal-notes].', public: true },
-      { slug: 'internal-notes', title: 'Internal notes', markdown: 'Keys.', public: false }
+      {
+        slug: 'handbook',
+        title: 'Podręcznik',
+        markdown: 'Przeczytaj [internal-notes].',
+        public: true
+      },
+      { slug: 'internal-notes', title: 'Notatki wewnętrzne', markdown: 'Klucze.', public: false }
     ])
       expect(
         (await request(leader, '/platform/docs', 'POST', { ...page, projectId, reason: '' })).status
       ).toBe(200);
-    const internal = `/platform/public/docs/${projectId}/internal-notes?locale=en`;
-    const handbook = `/platform/public/docs/${projectId}/handbook?locale=en`;
+    const internal = `/platform/public/docs/${projectId}/internal-notes?locale=pl`;
+    const handbook = `/platform/public/docs/${projectId}/handbook?locale=pl`;
     const listed = async (actor: string | null) =>
-      ((await request(actor, '/platform/public/docs?locale=en')).body as PublicDocSummary[])
+      ((await request(actor, '/platform/public/docs?locale=pl')).body as PublicDocSummary[])
         .filter((page) => page.projectSlug === projectId)
         .map((page) => [page.slug, page.public]);
     const linked = async (actor: string | null) =>
       JSON.stringify((await request(actor, handbook)).body.blocks).includes(
-        `/docs/${projectId}/internal-notes?lang=en`
+        `/docs/${projectId}/internal-notes?lang=pl`
       );
 
     for (const actor of [null, pending]) {
@@ -310,7 +340,7 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
       expect((await request(actor, handbook)).body.access).toBeNull();
     }
     expect((await request(member, internal)).body).toMatchObject({
-      title: 'Internal notes',
+      title: 'Notatki wewnętrzne',
       public: false
     });
     expect(await listed(member)).toContainEqual(['internal-notes', false]);
@@ -324,16 +354,16 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
   test('folder tree supports empty bilingual folders, nesting and moves without changing page content', async () => {
     const folder = await request(leader, '/platform/docs/folders', 'POST', {
       projectId,
-      name: 'Operations',
+      name: 'Organizacja',
       parentId: null,
-      translations: { pl: { name: 'Organizacja' } }
+      translations: { en: { name: 'Operations' } }
     });
     expect(folder.status).toBe(200);
     expect(
       (
         await request(member, '/platform/docs/folders', 'POST', {
           projectId,
-          name: 'Denied',
+          name: 'Odmowa',
           parentId: null
         })
       ).status
@@ -342,21 +372,21 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
       (
         await request(leader, '/platform/docs/folders', 'POST', {
           projectId,
-          name: 'operations',
+          name: 'organizacja',
           parentId: null
         })
       ).status
     ).toBe(409);
     const child = await request(leader, '/platform/docs/folders', 'POST', {
       projectId,
-      name: 'Equipment',
+      name: 'Sprzęt',
       parentId: folder.body.id
     });
     expect(child.status).toBe(200);
     expect(
       (
         await request(leader, `/platform/docs/folders/${folder.body.id}`, 'PUT', {
-          name: 'Operations',
+          name: 'Organizacja',
           parentId: child.body.id
         })
       ).body.code
@@ -364,21 +394,21 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
     expect(
       (
         await request(leader, `/platform/docs/folders/${child.body.id}`, 'PUT', {
-          name: 'Equipment',
+          name: 'Sprzęt',
           parentId: child.body.id
         })
       ).body.code
     ).toBe('FOLDER_CYCLE');
-    const index = await request(member, `/platform/docs?projectId=${projectId}&locale=pl`);
+    const index = await request(member, `/platform/docs?projectId=${projectId}&locale=en`);
     expect(index.body.folders).toContainEqual(
       expect.objectContaining({ id: child.body.id, parentId: folder.body.id })
     );
     const source = {
       projectId,
       slug: 'movable',
-      title: 'Move me',
-      markdown: 'The exact text.',
-      translations: { pl: { title: 'Przenieś mnie', markdown: 'Dokładna treść.' } },
+      title: 'Przenieś mnie',
+      markdown: 'Dokładna treść.',
+      translations: { en: { title: 'Move me', markdown: 'The exact text.' } },
       public: true,
       reason: ''
     };
@@ -422,7 +452,7 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
         await request(leader, '/platform/docs/folders', 'POST', {
           projectId,
           parentId: foreignFolderId,
-          name: 'Invalid parent'
+          name: 'Nieprawidłowy rodzic'
         })
       ).body.code
     ).toBe('FOLDER_NOT_FOUND');
@@ -430,7 +460,7 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
       (
         await request(leader, `/platform/docs/folders/${foreignFolderId}`, 'PUT', {
           parentId: null,
-          name: 'Not permitted'
+          name: 'Niedozwolone'
         })
       ).status
     ).toBe(403);
@@ -448,27 +478,33 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
     });
     const revision = await request(member, `/platform/docs/${pageId}/revisions/2`);
     expect(revision.body).toMatchObject({
-      folder: 'Operations/Equipment',
+      folder: 'Organizacja/Sprzęt',
       previous: { folder: '' }
     });
     // Renaming and nesting the folder changes current breadcrumbs, preserving identity and historical paths.
     expect(
       (
         await request(leader, `/platform/docs/folders/${child.body.id}`, 'PUT', {
-          name: 'Kit',
-          translations: { pl: { name: 'Sprzęt' } },
+          name: 'Wyposażenie',
+          translations: { en: { name: 'Kit' } },
           parentId: null
         })
       ).status
     ).toBe(200);
     const detail = await request(
       member,
-      `/platform/docs/page?projectId=${projectId}&slug=movable&locale=pl`
+      `/platform/docs/page?projectId=${projectId}&slug=movable&locale=en`
     );
-    expect(detail.body).toMatchObject({ folderId: child.body.id, folder: 'Sprzęt', version: 2 });
+    expect(detail.body).toMatchObject({ folderId: child.body.id, folder: 'Kit', version: 2 });
+    expect(
+      (await request(null, `/platform/public/docs/${projectId}/movable?locale=en`)).body.folder
+    ).toBe('Kit');
     expect(
       (await request(null, `/platform/public/docs/${projectId}/movable?locale=pl`)).body.folder
-    ).toBe('Sprzęt');
+    ).toBe('Wyposażenie');
+    expect((await request(member, `/platform/docs/${pageId}/revisions/2`)).body.folder).toBe(
+      'Organizacja/Sprzęt'
+    );
     expect(
       (
         await request(leader, `/platform/docs/${pageId}/move`, 'POST', {
@@ -482,7 +518,7 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
         await request(leader, '/platform/docs', 'POST', {
           ...source,
           slug: 'implicit-folder',
-          folder: 'New/Implicit'
+          folder: 'Nowy/Ukryty'
         })
       ).body.code
     ).toBe('FOLDER_NOT_FOUND');
@@ -491,7 +527,7 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
         await request(leader, '/platform/docs/folders', 'POST', {
           projectId,
           parentId: null,
-          name: 'New/Implicit'
+          name: 'Nowy/Ukryty'
         })
       ).body.code
     ).toBe('FOLDER_NAME_INVALID');
@@ -500,12 +536,12 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
     const parent = await request(leader, '/platform/docs/folders', 'POST', {
       projectId,
       parentId: null,
-      name: 'Deletion parent'
+      name: 'Do usunięcia'
     });
     const child = await request(leader, '/platform/docs/folders', 'POST', {
       projectId,
       parentId: parent.body.id,
-      name: 'Archive'
+      name: 'Archiwum'
     });
     const path = `/platform/docs/folders/${child.body.id}`;
     expect((await request(null, path, 'DELETE')).status).toBe(401);
@@ -520,11 +556,11 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
       projectId,
       slug: 'deletion-history',
       folderId: child.body.id,
-      title: 'Preserve this page',
-      markdown: 'Original English text.',
-      translations: { pl: { markdown: 'Oryginalna treść.' } },
+      title: 'Zachowaj tę stronę',
+      markdown: 'Oryginalna treść.',
+      translations: { en: { markdown: 'Original English text.' } },
       public: false,
-      reason: 'Keep history'
+      reason: 'Zachowaj historię'
     };
     const proposal = await request(member, '/platform/docs/proposals', 'POST', source);
     expect(proposal.status).toBe(200);
@@ -553,7 +589,7 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
     expect(index.body.folders.some((folder: any) => folder.id === child.body.id)).toBe(false);
     const revision = await request(member, `/platform/docs/${page.body.id}/revisions/1`);
     expect(revision.body).toMatchObject({
-      folder: 'Deletion parent/Archive',
+      folder: 'Do usunięcia/Archiwum',
       markdown: source.markdown,
       translations: source.translations
     });
@@ -569,7 +605,7 @@ describe.skipIf(!safe)('documentation folders and translations', () => {
       .where(eq(docProposals.id, proposal.body.id));
     expect(storedProposal).toMatchObject({
       folderId: null,
-      folder: 'Deletion parent/Archive',
+      folder: 'Do usunięcia/Archiwum',
       state: 'rejected'
     });
     expect(

@@ -8,14 +8,18 @@
   import {
     cleanDocTranslations,
     docSlugPattern,
-    docTranslationLocales,
     docsPath,
     reservedDocSlugs,
     type DocTranslations
   } from 'shared/docs';
   import type { DocFolder } from 'shared/doc-folders';
   import DocFolderSelect from './DocFolderSelect.svelte';
-  import { contentLocaleName, type ContentLocale } from 'shared/content-locales';
+  import {
+    contentLocaleName,
+    primaryContentLocale,
+    translationLocales,
+    type ContentLocale
+  } from 'shared/content-locales';
   import { preferences } from '$lib/preferences.svelte';
   import { invalidateAll } from '$app/navigation';
   import DocFolderDialog from './DocFolderDialog.svelte';
@@ -49,7 +53,7 @@
   } = $props();
 
   const language = $derived(preferences.language);
-  const locales: ContentLocale[] = ['en', ...docTranslationLocales];
+  const locales: ContentLocale[] = [primaryContentLocale, ...translationLocales];
   // Live updates refresh the page data; the editor keeps the version it started from,
   // so saving over someone else's change is still reported as a conflict.
   const original = untrack(() =>
@@ -67,13 +71,13 @@
         }
       : null
   );
-  // English is the page itself; other languages are optional translations of it.
+  // Polish is the page itself; other languages are optional translations of it.
   let texts = $state(
     Object.fromEntries(
       locales.map((locale) => [locale, { ...textIn(original, locale) }])
     ) as Record<ContentLocale, { title: string; markdown: string }>
   );
-  let editing = $state<ContentLocale>('en');
+  let editing = $state<ContentLocale>(primaryContentLocale);
   let folderId = $state(original?.folderId ?? '');
   let addingFolder = $state(false);
   let address = $state('');
@@ -87,28 +91,28 @@
   const translations = $derived(
     cleanDocTranslations(
       Object.fromEntries(
-        docTranslationLocales.map((locale) => [locale, texts[locale]])
+        translationLocales.map((locale) => [locale, texts[locale]])
       ) as DocTranslations
     )
   );
   const localeDirty = $derived(
     JSON.stringify(texts[editing]) !== JSON.stringify(textIn(original, editing))
   );
-  const addedLocales = $derived(docTranslationLocales.filter((locale) => !!translations[locale]));
+  const addedLocales = $derived(translationLocales.filter((locale) => !!translations[locale]));
   const direct = $derived(access.canReview);
   const addressValid = $derived(
     new RegExp(docSlugPattern).test(address) && !reservedDocSlugs.includes(address)
   );
   const changed = $derived(
     !original ||
-      texts.en.title.trim() !== original.title ||
-      texts.en.markdown !== original.markdown ||
+      texts[primaryContentLocale].title.trim() !== original.title ||
+      texts[primaryContentLocale].markdown !== original.markdown ||
       (folderId || null) !== original.folderId ||
       visible !== original.public ||
       JSON.stringify(translations) !== JSON.stringify(original.translations)
   );
   const ready = $derived(
-    !!texts.en.title.trim() &&
+    !!texts[primaryContentLocale].title.trim() &&
       changed &&
       (!!original || addressValid) &&
       (direct || reason.trim().length >= 3)
@@ -121,8 +125,8 @@
     busy = true;
     error = '';
     const content = {
-      title: texts.en.title.trim(),
-      markdown: texts.en.markdown,
+      title: texts[primaryContentLocale].title.trim(),
+      markdown: texts[primaryContentLocale].markdown,
       folderId: folderId || null,
       translations,
       public: visible,
@@ -226,13 +230,17 @@
       {busy}
       saveHint={'All language versions are saved together with the document.'}
       onremove={() => {
-        if (editing !== 'en') texts[editing] = { title: '', markdown: '' };
+        if (editing !== primaryContentLocale) texts[editing] = { title: '', markdown: '' };
       }}
     >
       {#snippet reference()}
-        <div class="docs-editor-source" lang="en">
-          <h3>{texts.en.title || 'No content'}</h3>
-          <MarkdownContent value={texts.en.markdown} docs docLocale="en" />
+        <div class="docs-editor-source" lang={primaryContentLocale}>
+          <h3>{texts[primaryContentLocale].title || 'No content'}</h3>
+          <MarkdownContent
+            value={texts[primaryContentLocale].markdown}
+            docs
+            docLocale={primaryContentLocale}
+          />
         </div>
       {/snippet}
     </ContentLocaleEditor>
@@ -244,11 +252,11 @@
           id="doc-title"
           bind:value={texts[editing].title}
           maxlength="200"
-          required={editing === 'en'}
-          placeholder={editing === 'en' ? '' : texts.en.title}
+          required={editing === primaryContentLocale}
+          placeholder={editing === primaryContentLocale ? '' : texts[primaryContentLocale].title}
           oninput={() => {
-            if (editing === 'en' && !original && !addressEdited)
-              address = slugFromTitle(texts.en.title);
+            if (editing === primaryContentLocale && !original && !addressEdited)
+              address = slugFromTitle(texts[primaryContentLocale].title);
           }}
         />
       </div>

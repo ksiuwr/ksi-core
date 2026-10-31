@@ -1,5 +1,10 @@
 import { contentChanges } from 'shared/activity';
-import { localizeContent, articleFileContent } from 'shared/content-locales';
+import {
+  localizeContent,
+  articleFileContent,
+  primaryContentLocale,
+  translationLocales
+} from 'shared/content-locales';
 import { relatedArticles } from '../../domain/related-articles';
 import { and, eq, inArray, desc, sql, or } from 'drizzle-orm';
 import { status, t } from 'elysia';
@@ -694,14 +699,17 @@ export default createElysia({ prefix: '/platform' })
             url: t.String({ maxLength: 2000 }),
             translations: t.Optional(
               t.Object(
-                {
-                  pl: t.Optional(
-                    t.Object(
-                      { label: t.Optional(t.String({ maxLength: 200 })) },
-                      { additionalProperties: false }
+                Object.fromEntries(
+                  translationLocales.map((locale) => [
+                    locale,
+                    t.Optional(
+                      t.Object(
+                        { label: t.Optional(t.String({ maxLength: 200 })) },
+                        { additionalProperties: false }
+                      )
                     )
-                  )
-                },
+                  ])
+                ),
                 { additionalProperties: false }
               )
             )
@@ -1175,7 +1183,7 @@ export default createElysia({ prefix: '/platform' })
         thumbnailFileId: t.Optional(
           t.Union([t.Null(), t.String({ pattern: '^[A-Za-z0-9_-]{8,64}$' })])
         ),
-        language: t.Optional(t.Literal('en'))
+        language: t.Optional(t.Literal(primaryContentLocale))
       })
     }
   )

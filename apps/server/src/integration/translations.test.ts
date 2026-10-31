@@ -48,10 +48,10 @@ describe.skipIf(!safe)('public content translations', () => {
     for (const id of [leader, outsider]) {
       await db.insert(users).values({
         id,
-        name: 'John Smith',
-        firstName: 'John',
-        lastName: 'Smith',
-        bio: 'Engineering',
+        name: 'Jan Kowalski',
+        firstName: 'Jan',
+        lastName: 'Kowalski',
+        bio: 'Inżynieria',
         email: `${id}@example.test`,
         membershipStatus: 'active'
       });
@@ -74,17 +74,17 @@ describe.skipIf(!safe)('public content translations', () => {
     await db.insert(projects).values({
       id: projectId,
       slug: projectId,
-      name: 'Robotics',
-      description: 'Robots',
-      tags: ['engineering']
+      name: 'Robotyka',
+      description: 'Roboty',
+      tags: ['inżynieria']
     });
     await db.insert(projectMembers).values({ projectId, userId: leader, leader: true });
     await db.insert(articles).values({
       id: articleId,
       projectId,
       slug: articleId,
-      title: 'Project guide',
-      markdown: 'English guide',
+      title: 'Poradnik projektu',
+      markdown: 'Polski poradnik',
       createdBy: leader,
       state: 'published',
       mainArticle: true
@@ -122,43 +122,44 @@ describe.skipIf(!safe)('public content translations', () => {
     await db.delete(projects).where(eq(projects.id, projectId));
     await db.delete(users).where(inArray(users.id, [leader, outsider]));
   });
-  test('leaders translate public projects with conflict checks and English fallback', async () => {
-    const path = `/platform/translations/project/${projectId}/pl`;
+  test('leaders translate public projects with conflict checks and Polish fallback', async () => {
+    const path = `/platform/translations/project/${projectId}/en`;
     expect(
-      (await request(outsider, path, 'PUT', { version: 1, fields: { name: 'Robotyka' } })).status
+      (await request(outsider, path, 'PUT', { version: 1, fields: { name: 'Robotics' } })).status
     ).toBe(403);
-    expect(
-      (
-        await request(leader, path.replace(/\/pl$/, '/fr'), 'PUT', {
+    // Polish is the primary content, so only English is a translation locale.
+    for (const locale of ['pl', 'fr'])
+      expect(
+        await request(leader, path.replace(/\/en$/, `/${locale}`), 'PUT', {
           version: 1,
           fields: { name: 'Robotique' }
         })
-      ).status
-    ).toBe(422);
+      ).toMatchObject({ status: 422, body: { code: 'UNSUPPORTED_TRANSLATION_LOCALE' } });
     expect(
       (
         await request(leader, path, 'PUT', {
           version: 1,
-          fields: { name: 'Robotyka', tags: ['inżynieria'] }
+          fields: { name: 'Robotics', tags: ['engineering'] }
         })
       ).status
     ).toBe(200);
     expect(
       (await request(leader, path, 'PUT', { version: 1, fields: { name: 'Stale' } })).status
     ).toBe(409);
-    const page = await request(outsider, `/platform/public/projects/${projectId}?locale=pl`);
+    const page = await request(outsider, `/platform/public/projects/${projectId}?locale=en-us`);
     expect(page.body).toMatchObject({
-      name: 'Robotyka',
-      description: 'Robots',
-      tags: ['inżynieria']
+      name: 'Robotics',
+      description: 'Roboty',
+      tags: ['engineering']
     });
-    expect(
-      (await request(leader, `/platform/public/projects/${projectId}?locale=en-us`)).body.name
-    ).toBe('Robotics');
+    for (const query of ['?locale=pl', '?locale=fr', ''])
+      expect(
+        (await request(leader, `/platform/public/projects/${projectId}${query}`)).body
+      ).toMatchObject({ name: 'Robotyka', description: 'Roboty', tags: ['inżynieria'] });
   });
   test('profile translations retain privacy and cannot mutate protected account fields', async () => {
-    const path = `/platform/translations/profile/${leader}/pl`;
-    expect((await request(outsider, path, 'PUT', { fields: { firstName: 'Jan' } })).status).toBe(
+    const path = `/platform/translations/profile/${leader}/en`;
+    expect((await request(outsider, path, 'PUT', { fields: { firstName: 'John' } })).status).toBe(
       403
     );
     expect(
@@ -167,36 +168,39 @@ describe.skipIf(!safe)('public content translations', () => {
     expect(
       (
         await request(leader, path, 'PUT', {
-          fields: { firstName: 'Jan', lastName: 'Kowalski', bio: 'Inżynieria' }
+          fields: { firstName: 'John', lastName: 'Smith', bio: 'Engineering' }
         })
       ).status
     ).toBe(200);
-    const publicMember = (await request(outsider, `/platform/public/members/${leader}?locale=pl`))
+    const publicMember = (await request(outsider, `/platform/public/members/${leader}?locale=en`))
       .body;
-    expect(publicMember).toMatchObject({ name: 'Jan K.', bio: 'Inżynieria' });
+    expect(publicMember).toMatchObject({ name: 'John S.', bio: 'Engineering' });
     expect(publicMember).not.toHaveProperty('email');
     expect(publicMember).not.toHaveProperty('translations');
-    expect((await request(leader, '/users/me')).body.user.firstName).toBe('John');
+    expect(
+      (await request(outsider, `/platform/public/members/${leader}?locale=pl`)).body
+    ).toMatchObject({ name: 'Jan K.', bio: 'Inżynieria' });
+    expect((await request(leader, '/users/me')).body.user.firstName).toBe('Jan');
   });
   test('article translations keep revision and file references through ordinary publishing', async () => {
-    const path = `/platform/translations/article/${articleId}/pl`;
+    const path = `/platform/translations/article/${articleId}/en`;
     expect(
-      (await request(outsider, path, 'PUT', { version: 1, fields: { title: 'Poradnik' } })).status
+      (await request(outsider, path, 'PUT', { version: 1, fields: { title: 'Guide' } })).status
     ).toBe(403);
     const translated = await request(leader, path, 'PUT', {
       version: 1,
-      fields: { title: 'Poradnik', markdown: `Polski tekst ![Ilustracja](file:${fileId})` }
+      fields: { title: 'Guide', markdown: `English text ![Illustration](file:${fileId})` }
     });
     expect(translated.status).toBe(200);
     const [revision] = await db
       .select()
       .from(articleRevisions)
       .where(eq(articleRevisions.articleId, articleId));
-    expect(revision!.translations.pl!.title).toBe('Poradnik');
+    expect(revision!.translations.en!.title).toBe('Guide');
     const saved = await request(leader, `/platform/articles/${articleId}`, 'PUT', {
       version: 2,
-      title: 'Project guide',
-      markdown: 'Updated English',
+      title: 'Poradnik projektu',
+      markdown: 'Zaktualizowany polski poradnik',
       state: 'published',
       mainArticle: true,
       projectFeed: false,
@@ -210,14 +214,14 @@ describe.skipIf(!safe)('public content translations', () => {
         .where(and(eq(fileReferences.fileId, fileId), eq(fileReferences.ownerType, 'article')))
     ).toHaveLength(1);
     expect(
-      (await request(outsider, `/platform/public/articles/${articleId}?locale=pl`)).body.title
-    ).toBe('Poradnik');
+      (await request(outsider, `/platform/public/articles/${articleId}?locale=en`)).body.title
+    ).toBe('Guide');
     expect((await request(leader, path, 'PUT', { version: 3, fields: {} })).status).toBe(200);
     const [removed] = await db.select().from(articles).where(eq(articles.id, articleId));
-    expect(removed!.translations).not.toHaveProperty('pl');
+    expect(removed!.translations).not.toHaveProperty('en');
     expect(
-      (await request(outsider, `/platform/public/articles/${articleId}?locale=pl`)).body.title
-    ).toBe('Project guide');
+      (await request(outsider, `/platform/public/articles/${articleId}?locale=en`)).body.title
+    ).toBe('Poradnik projektu');
     // Historical translations keep their attachment alive after removal from the current article.
     expect(
       (await db.select().from(fileReferences).where(eq(fileReferences.fileId, fileId))).some(
@@ -228,12 +232,12 @@ describe.skipIf(!safe)('public content translations', () => {
   test('translation events retain changed content and the edited locale', async () => {
     const events = await db.select().from(auditEvents).where(eq(auditEvents.actorId, leader));
     for (const [action, expected] of [
-      ['projects.translation.updated', { field: 'name', before: null, after: 'Robotyka' }],
-      ['articles.translation.updated', { field: 'title', before: null, after: 'Poradnik' }]
+      ['projects.translation.updated', { field: 'name', before: null, after: 'Robotics' }],
+      ['articles.translation.updated', { field: 'title', before: null, after: 'Guide' }]
     ] as const) {
       const matching = events.filter((record) => record.action === action);
       expect(matching.length).toBeGreaterThan(0);
-      expect(matching.every((event) => event.metadata.locale === 'pl')).toBe(true);
+      expect(matching.every((event) => event.metadata.locale === 'en')).toBe(true);
       expect(matching.flatMap((event) => event.metadata.changes)).toContainEqual(expected);
     }
   });

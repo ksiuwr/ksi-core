@@ -7,7 +7,7 @@
   import { api, errorMessage } from '$lib/api';
   import { dashboardPath, type Workspace } from '$lib/navigation';
   import type { Article } from '$lib/types';
-  import type { ContentLocale } from 'shared/content-locales';
+  import { primaryContentLocale, type ContentLocale } from 'shared/content-locales';
   import { untrack } from 'svelte';
   import { ArrowLeft, ArrowUpRight, Save } from '@lucide/svelte';
 
@@ -44,15 +44,15 @@
   let busy = $state(false);
   let error = $state('');
   let notice = $state('');
-  let contentLocale = $state<ContentLocale>('en');
+  let contentLocale = $state<ContentLocale>(primaryContentLocale);
   let translationDraft = $state<Record<string, string>>({});
 
-  function localized(key: 'title' | 'markdown', english: string) {
-    return contentLocale === 'en' ? english : (translationDraft[key] ?? '');
+  function localized(key: 'title' | 'markdown', primary: string) {
+    return contentLocale === primaryContentLocale ? primary : (translationDraft[key] ?? '');
   }
 
   function setLocalized(key: 'title' | 'markdown', value: string) {
-    if (contentLocale === 'en') {
+    if (contentLocale === primaryContentLocale) {
       if (key === 'title') title = value;
       else markdown = value;
     } else translationDraft[key] = value;
@@ -152,7 +152,7 @@
         aria-label={'Title'}
         placeholder={'Title'}
         bind:value={() => localized('title', title), (value) => setLocalized('title', value)}
-        required={contentLocale === 'en'}
+        required={contentLocale === primaryContentLocale}
       />
     {:else}
       <h1 class="detail-title">{draft.title}</h1>
@@ -190,7 +190,7 @@
           >
         {/if}
       </div>
-      {#if contentLocale === 'en'}<div class="action-stack">
+      {#if contentLocale === primaryContentLocale}<div class="action-stack">
           {#if permissions.canPublish}
             <button
               class="btn btn-coral"
@@ -218,7 +218,7 @@
         </div>{:else}<p class="muted">Save the translation from the language bar above.</p>{/if}
     </section>
 
-    {#if contentLocale === 'en'}<section class="aside-section">
+    {#if contentLocale === primaryContentLocale}<section class="aside-section">
         <dl class="metadata-list">
           <div>
             <dt>Slug</dt>
@@ -227,7 +227,7 @@
         </dl>
       </section>{/if}
 
-    {#if contentLocale === 'en'}<section class="aside-section">
+    {#if contentLocale === primaryContentLocale}<section class="aside-section">
         {#key draft.id}
           <ArticleThumbnail
             bind:fileId={thumbnailFileId}
@@ -237,7 +237,7 @@
         {/key}
       </section>{/if}
 
-    {#if permissions.canManage && contentLocale === 'en'}
+    {#if permissions.canManage && contentLocale === primaryContentLocale}
       <section class="aside-section">
         <h2>Publishing</h2>
         {#if workspace === 'project'}
@@ -271,7 +271,7 @@
       </section>
     {/if}
 
-    {#if draft.canManageCredit && contentLocale === 'en'}
+    {#if draft.canManageCredit && contentLocale === primaryContentLocale}
       <section class="aside-section">
         <label class="check">
           <input

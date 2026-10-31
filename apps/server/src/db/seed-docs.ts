@@ -178,8 +178,10 @@ Tak, do dowolnie wielu.
 
 Zimowy Obóz Studentów Informatyki: wykłady, warsztaty i mnóstwo czasu spędzonego razem. Zobacz [zosia/day-plan], jak wygląda dzień na obozie.`;
 
-// Translated before the clicker batteries were added, so it shows as outdated.
-const dayPlanPolish = `Jak wygląda typowy dzień obozu, żeby kolejni organizatorzy nie musieli odtwarzać planu z pamięci. Wszystko, co z nami jedzie, jest na liście [bus-packing], a ogólne pytania opisuje [association/faq].
+// The English translation predates the clicker batteries, so it shows as outdated.
+const dayPlanPolish = (
+  version: number
+) => `Jak wygląda typowy dzień obozu, żeby kolejni organizatorzy nie musieli odtwarzać planu z pamięci. Wszystko, co z nami jedzie, jest na liście [bus-packing], a ogólne pytania opisuje [association/faq].
 
 ## Rano
 
@@ -196,6 +198,7 @@ Dwa bloki wykładów z przerwą na kawę.
 - [ ] Projektor i przejściówki HDMI/USB-C sprawdzone
 - [ ] Mikrofony naładowane
 - [ ] Laptop do transmisji zalogowany
+${version > 1 ? '- [ ] Zapasowe baterie do pilota\n' : ''}
 
 ## Po południu
 
@@ -343,13 +346,13 @@ type Version = {
   reason: string;
 };
 
-const folderPolishNames: Record<string, string> = {
-  Camp: 'Obóz',
-  Schedule: 'Plan dnia',
-  Logistics: 'Logistyka',
-  Speakers: 'Prelegenci',
-  Guides: 'Poradniki',
-  'About KSI': 'O KSI'
+const folderEnglishNames: Record<string, string> = {
+  Obóz: 'Camp',
+  'Plan dnia': 'Schedule',
+  Logistyka: 'Logistics',
+  Prelegenci: 'Speakers',
+  Poradniki: 'Guides',
+  'O KSI': 'About KSI'
 };
 async function seedFolderPath(projectId: string | null, path: string): Promise<string | null> {
   const folders = await workspaceFolders(db, projectId);
@@ -365,7 +368,7 @@ async function seedFolderPath(projectId: string | null, path: string): Promise<s
           projectId,
           parentId,
           name,
-          translations: folderPolishNames[name] ? { pl: { name: folderPolishNames[name] } } : {}
+          translations: folderEnglishNames[name] ? { en: { name: folderEnglishNames[name] } } : {}
         })
         .returning();
       folder = created!;
@@ -455,18 +458,18 @@ export async function seedDocs([anna, jan, ewa]: string[], projectIds: Record<st
     projectId: null,
     slug: 'dashboard-guide',
     title: 'Dashboard guide',
-    folder: 'Guides',
+    folder: 'Poradniki',
     versions: [{ markdown: dashboardGuide, authorId: jan!, reason: 'First version of the guide.' }]
   });
   await seedPage({
     projectId: null,
     slug: 'statute',
-    title: 'Statute',
-    folder: 'About KSI',
+    title: 'Statut',
+    folder: 'O KSI',
     versions: [
       {
         markdown: statute,
-        translations: { pl: { title: 'Statut' } },
+        translations: { en: { title: 'Statute' } },
         authorId: anna!,
         reason: 'Summary of the statute adopted in 2025.'
       }
@@ -475,17 +478,22 @@ export async function seedDocs([anna, jan, ewa]: string[], projectIds: Record<st
   await seedPage({
     projectId: null,
     slug: 'faq',
-    title: 'Frequently asked questions',
-    folder: 'About KSI',
+    title: 'Najczęściej zadawane pytania',
+    folder: 'O KSI',
     public: true,
     versions: [
-      { markdown: faq, authorId: ewa!, reviewerId: jan, reason: 'Collected at the open meeting.' },
       {
-        markdown: faq,
-        translations: { pl: { title: 'Najczęściej zadawane pytania', markdown: faqPolish } },
+        markdown: faqPolish,
         authorId: ewa!,
         reviewerId: jan,
-        reason: 'Polish version for first-year students.'
+        reason: 'Collected at the open meeting.'
+      },
+      {
+        markdown: faqPolish,
+        translations: { en: { title: 'Frequently asked questions', markdown: faq } },
+        authorId: ewa!,
+        reviewerId: jan,
+        reason: 'English version for exchange students.'
       }
     ]
   });
@@ -493,18 +501,18 @@ export async function seedDocs([anna, jan, ewa]: string[], projectIds: Record<st
   const dayPlanId = await seedPage({
     projectId: zosia,
     slug: 'day-plan',
-    title: 'A day at ZOSIA',
-    folder: 'Camp/Schedule',
+    title: 'Dzień na ZOSI',
+    folder: 'Obóz/Plan dnia',
     versions: [
       {
-        markdown: dayPlan(1),
-        translations: { pl: { title: 'Dzień na ZOSI', markdown: dayPlanPolish } },
+        markdown: dayPlanPolish(1),
+        translations: { en: { title: 'A day at ZOSIA', markdown: dayPlan(1) } },
         authorId: jan!,
-        reason: 'Schedule from ZOSIA 2025, also in Polish.'
+        reason: 'Schedule from ZOSIA 2025, also in English.'
       },
       {
-        markdown: dayPlan(2),
-        translations: { pl: { title: 'Dzień na ZOSI', markdown: dayPlanPolish } },
+        markdown: dayPlanPolish(2),
+        translations: { en: { title: 'A day at ZOSIA', markdown: dayPlan(1) } },
         authorId: anna!,
         reason: 'Clickers ran out of batteries on the second day.'
       }
@@ -514,7 +522,7 @@ export async function seedDocs([anna, jan, ewa]: string[], projectIds: Record<st
     projectId: zosia,
     slug: 'bus-packing',
     title: 'Bus packing checklist',
-    folder: 'Camp/Logistics',
+    folder: 'Obóz/Logistyka',
     versions: [
       { markdown: busPacking(1), authorId: anna!, reason: 'Checklist used for ZOSIA 2025.' },
       {
@@ -534,15 +542,23 @@ export async function seedDocs([anna, jan, ewa]: string[], projectIds: Record<st
     projectId: zosia,
     pageId: dayPlanId,
     baseVersion: 2,
-    folder: 'Camp/Schedule',
-    translations: { pl: { title: 'Dzień na ZOSI', markdown: dayPlanPolish } },
-    title: 'A day at ZOSIA',
-    markdown: dayPlan(2)
-      .replace(
-        '### 9:00 Lectures',
-        '### 8:40 Morning stretch\n\nTen minutes of stretching in the lecture room, led by a volunteer.\n\n### 9:00 Lectures'
-      )
-      .replace('### 17:00 Free time', '### 17:00 Free time\n\nThe sauna is open until 19:00.'),
+    folder: 'Obóz/Plan dnia',
+    translations: {
+      en: {
+        title: 'A day at ZOSIA',
+        markdown: dayPlan(2)
+          .replace(
+            '### 9:00 Lectures',
+            '### 8:40 Morning stretch\n\nTen minutes of stretching in the lecture room, led by a volunteer.\n\n### 9:00 Lectures'
+          )
+          .replace('### 17:00 Free time', '### 17:00 Free time\n\nThe sauna is open until 19:00.')
+      }
+    },
+    title: 'Dzień na ZOSI',
+    markdown: dayPlanPolish(2).replace(
+      '### 9:00 Wykłady',
+      '### 8:40 Poranne rozciąganie\n\nDziesięć minut rozciągania w sali wykładowej, prowadzi je wolontariusz.\n\n### 9:00 Wykłady'
+    ),
     public: true,
     reason:
       'Many people asked for a short warm-up before lectures. Also asking to publish this page so participants can check the schedule.',
@@ -551,7 +567,7 @@ export async function seedDocs([anna, jan, ewa]: string[], projectIds: Record<st
   await seedProposal({
     projectId: zosia,
     slug: 'speaker-invitation',
-    folder: 'Camp/Speakers',
+    folder: 'Obóz/Prelegenci',
     title: 'Speaker invitation template',
     markdown:
       'A template for inviting speakers. Send it at least two months before the camp and add the speaker to the [day-plan].\n\n## E-mail\n\n> Dear …,\n>\n> We would like to invite you to give a talk at ZOSIA, the winter camp of computer science students.\n\n## Follow-up\n\n- [ ] Confirm the talk title\n- [ ] Ask about AV needs\n- [ ] Book accommodation',
@@ -568,20 +584,20 @@ export async function seedDocs([anna, jan, ewa]: string[], projectIds: Record<st
         .where(and(isNull(docPages.projectId), eq(docPages.slug, 'faq')))
     )[0]!.id,
     baseVersion: 2,
-    folder: 'About KSI',
+    folder: 'O KSI',
     translations: {
-      pl: {
-        title: 'Najczęściej zadawane pytania',
-        markdown: faqPolish.replace(
-          '## Projekty',
-          '### Czy jest składka członkowska?\n\nNie, członkostwo w KSI jest bezpłatne.\n\n## Projekty'
+      en: {
+        title: 'Frequently asked questions',
+        markdown: faq.replace(
+          '## Projects',
+          '### Is there a membership fee?\n\nNo, membership in KSI is free.\n\n## Projects'
         )
       }
     },
-    title: 'Frequently asked questions',
-    markdown: faq.replace(
-      '## Projects',
-      '### Is there a membership fee?\n\nNo, membership in KSI is free.\n\n## Projects'
+    title: 'Najczęściej zadawane pytania',
+    markdown: faqPolish.replace(
+      '## Projekty',
+      '### Czy jest składka członkowska?\n\nNie, członkostwo w KSI jest bezpłatne.\n\n## Projekty'
     ),
     public: true,
     reason: 'Asked twice at the last open meeting.',

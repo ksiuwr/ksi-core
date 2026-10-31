@@ -146,10 +146,10 @@ packages/
 ### Data and content
 
 - Database schema and migrations live in `apps/server/src/db`. Use `bun db:generate` and `bun db:migrate`.
-- English is the source language for user-editable content. Profiles, projects, and articles store normal fields plus `translations`.
-- `packages/shared/content-locales.ts` provides `localizeContent`, `contentLocale`, and `hasEnglishSources`.
-- UI locales are `frontendLocales` (`en-us`, `pl`); content locales are `contentLocales` (`en`, `pl`).
-- Translation writes require the English source to exist and pass `hasEnglishSources`. Project and article translation writes also check version conflicts.
+- Polish is the primary language for user-editable content. Profiles, projects, articles, alerts and docs store Polish in their normal fields plus optional English in `translations`.
+- `packages/shared/content-locales.ts` provides `localizeContent`, `contentLocale`, `primaryContentLocale`, `translationLocales`, and `hasPrimarySources`.
+- UI locales are `frontendLocales` (`en-us`, `pl`) with `defaultFrontendLocale` `pl`; content locales are `contentLocales` (`pl`, `en`).
+- Translation writes require the Polish source to exist and pass `hasPrimarySources`. Project and article translation writes also check version conflicts.
 - Markdown parsing and its sanitization policy live in `packages/shared`. Dashboard content and editor previews render locally through the browser entry of `shared/markdown`; public pages and the compatibility `/markdown` endpoint use its server entry. Reference targets and `/media` URLs are inferred locally; previews and file access are resolved by the backend.
 
 ### Permissions
@@ -165,8 +165,8 @@ Wuchale is compile-time i18n. Strings are extracted from source at build time an
 ### Configuration
 
 - Each app has a `wuchale.config.js`.
-- Locales come from `packages/shared/content-locales.ts` (`frontendLocales`: `en-us`, `pl`).
-- The source language is `en-us`; in `en-us.po`, `msgstr` should equal `msgid`.
+- Locales come from `packages/shared/content-locales.ts` (`frontendLocales`: `en-us`, `pl`). Visitors without a saved preference get `defaultFrontendLocale` (`pl`).
+- The source language of UI strings is `en-us` and must stay first in `frontendLocales`; in `en-us.po`, `msgstr` should equal `msgid`.
 - Generated files (`.wuchale/`, `data.js`, `*.loader.svelte.js`) are gitignored. Only `*.po` files are committed.
 
 ### How to write translatable strings
@@ -246,11 +246,11 @@ Shared UI strings must be listed in each app's Wuchale `files` array, for exampl
 
 ## Content translations
 
-Backend content translations are stored in JSON alongside English source fields. They are managed through the platform translation endpoints and localized with `localizeContent` from `packages/shared/content-locales.ts`.
+Backend content translations are stored in JSON alongside the Polish source fields. They are managed through the platform translation endpoints and localized with `localizeContent` from `packages/shared/content-locales.ts`.
 
-- Supported content locales are `en` and `pl`.
-- English source fields are required before a translation can be saved.
-- `hasEnglishSources` prevents saving translations when the English source is missing.
+- Supported content locales are `pl` (primary, required) and `en` (optional translation in `translations.en`).
+- Polish source fields are required before a translation can be saved.
+- `hasPrimarySources` prevents saving translations when the Polish source is missing.
 - Translation updates are versioned for projects and articles.
 
 ## Development and testing

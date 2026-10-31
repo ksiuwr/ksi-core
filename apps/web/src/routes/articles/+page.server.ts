@@ -8,7 +8,7 @@ export const load: PageServerLoad = async (event) => {
   const response = await backendFetch(
     event,
     env,
-    `/platform/public/articles?locale=${contentLocale(event.cookies.get('locale') ?? 'pl')}`
+    `/platform/public/articles?locale=${contentLocale(event.cookies.get('locale'))}`
   );
   if (!response.ok) error(response.status, 'Articles unavailable');
   return { articles: await response.json() };

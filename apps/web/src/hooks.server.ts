@@ -2,6 +2,7 @@ import { redirect, type Handle } from '@sveltejs/kit';
 import { env } from '$lib/server/environment';
 import { locales } from './locales/data.js';
 import { backendFetch, startSso, sessionCookie } from 'shared/server';
+import { defaultFrontendLocale } from 'shared/content-locales';
 export const handle: Handle = async ({ event, resolve }) => {
   event.locals.user = null;
   event.locals.session = null;
@@ -28,7 +29,9 @@ export const handle: Handle = async ({ event, resolve }) => {
     redirect(303, startSso(event, env, event.url.pathname + event.url.search, true));
   const cookieLocale = event.cookies.get('locale');
   const locale =
-    cookieLocale && (locales as readonly string[]).includes(cookieLocale) ? cookieLocale : 'pl';
+    cookieLocale && (locales as readonly string[]).includes(cookieLocale)
+      ? cookieLocale
+      : defaultFrontendLocale;
   return resolve(event, {
     transformPageChunk: ({ html }) => html.replace('%paraglide.lang%', locale)
   });

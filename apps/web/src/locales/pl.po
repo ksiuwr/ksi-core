@@ -397,12 +397,6 @@ msgstr "Koło Studentów Informatyki Uniwersytetu Wrocławskiego."
 msgid "Institute of Computer Science<0/> 15 Fryderyka Joliot-Curie St.<1/> 50-383 Wrocław · Room 24"
 msgstr "Instytut Informatyki<0/> ul. Fryderyka Joliot-Curie 15<1/> 50-383 Wrocław · pokój 24"
 
-#~ msgid "Footer navigation"
-#~ msgstr "Nawigacja w stopce"
-
-#~ msgid "About us"
-#~ msgstr "O nas"
-
 #: src/components/Footer.svelte
 msgid "Contact"
 msgstr "Kontakt"
@@ -410,9 +404,6 @@ msgstr "Kontakt"
 #: src/components/Footer.svelte
 msgid "Explore"
 msgstr "Odkrywaj"
-
-#~ msgid "Find us online"
-#~ msgstr "Znajdź nas w sieci"
 
 #: src/components/Navbar.svelte
 msgid "Change language"
@@ -491,9 +482,6 @@ msgstr "Nasz zimowy obóz dla studentów informatyki na Dolnym Śląsku."
 #: src/components/Navbar.svelte
 msgid "A summer version of ZOSIA, in preparation."
 msgstr "Letnia wersja ZOSI. W przygotowaniu."
-
-#~ msgid "Soon"
-#~ msgstr "Wkrótce"
 
 #: src/components/Navbar.svelte
 msgid "The code behind this website."
@@ -881,9 +869,6 @@ msgstr "Skopiowano link"
 msgid "Updated"
 msgstr "Zaktualizowano"
 
-#~ msgid "Document language"
-#~ msgstr "Język dokumentu"
-
 #: src/lib/components/PublicDocsSidebar.svelte
 msgid "All documentation"
 msgstr "Cała dokumentacja"
@@ -908,12 +893,12 @@ msgid "<0/> Docs"
 msgstr "<0/> Dokumentacja"
 
 #: src/routes/docs/[workspace]/[slug]/+page.svelte
-msgid "The English version changed after this translation was written."
-msgstr "Wersja angielska zmieniła się po przygotowaniu tego tłumaczenia."
+msgid "The Polish version changed after this translation was written."
+msgstr "Wersja polska zmieniła się po przygotowaniu tego tłumaczenia."
 
 #: src/routes/docs/[workspace]/[slug]/+page.svelte
-msgid "Read the English version"
-msgstr "Czytaj wersję angielską"
+msgid "Read the Polish version"
+msgstr "Czytaj wersję polską"
 
 #: src/routes/docs/[workspace]/[slug]/+page.svelte
 msgid "More pages"

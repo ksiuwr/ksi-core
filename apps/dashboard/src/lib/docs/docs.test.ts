@@ -18,26 +18,26 @@ function page(id: string, title: string, folderId: string | null = null): DocSum
   };
 }
 
-const english: DocText = {
-  folder: 'Camp/Logistics',
-  title: 'Packing the bus',
-  markdown: '## Equipment\n\n- [ ] Extension cords',
+const polish: DocText = {
+  folder: 'Obóz/Logistyka',
+  title: 'Pakowanie autobusu',
+  markdown: '## Sprzęt\n\n- [ ] Przedłużacze',
   translations: {}
 };
 
 describe('documentation folders', () => {
   test('builds a localized tree by identity including empty folders and distinct same-name children', () => {
     const folders = [
-      { id: 'camp', parentId: null, name: 'Camp', translations: { pl: { name: 'Obóz' } } },
+      { id: 'camp', parentId: null, name: 'Obóz', translations: { en: { name: 'Camp' } } },
       {
         id: 'logistics',
         parentId: 'camp',
-        name: 'Logistics',
-        translations: { pl: { name: 'Logistyka' } }
+        name: 'Logistyka',
+        translations: { en: { name: 'Logistics' } }
       },
-      { id: 'association', parentId: null, name: 'Association', translations: {} },
-      { id: 'other-logistics', parentId: 'association', name: 'Logistics', translations: {} },
-      { id: 'empty', parentId: 'logistics', name: 'Empty', translations: {} }
+      { id: 'association', parentId: null, name: 'Stowarzyszenie', translations: {} },
+      { id: 'other-logistics', parentId: 'association', name: 'Logistyka', translations: {} },
+      { id: 'empty', parentId: 'logistics', name: 'Pusty', translations: {} }
     ];
     const pages = [
       page('bus', 'Packing', 'logistics'),
@@ -45,17 +45,17 @@ describe('documentation folders', () => {
       page('kit', 'Equipment', 'logistics'),
       page('archive', 'Archive', 'other-logistics')
     ];
-    const tree = folderTree(pages, folders, 'pl');
+    const tree = folderTree(pages, folders, 'en');
     expect(tree.pages.map((item) => item.id)).toEqual(['welcome']);
-    expect(tree.folders.map((item) => item.name)).toEqual(['Association', 'Obóz']);
+    expect(tree.folders.map((item) => item.name)).toEqual(['Camp', 'Stowarzyszenie']);
     const camp = tree.folders.find((item) => item.id === 'camp')!;
-    expect(camp.folders[0]!.path).toBe('Obóz/Logistyka');
+    expect(camp.folders[0]!.path).toBe('Camp/Logistics');
     expect(camp.folders[0]!.pages.map((item) => item.id)).toEqual(['kit', 'bus']);
     expect(camp.folders[0]!.folders[0]!.pages).toEqual([]);
-    expect(tree.folders[0]!.folders[0]!.pages.map((item) => item.id)).toEqual(['archive']);
+    expect(tree.folders[1]!.folders[0]!.pages.map((item) => item.id)).toEqual(['archive']);
     expect(pages.map((item) => item.id)).toEqual(['bus', 'welcome', 'kit', 'archive']);
     const renamed = folders.map((folder) =>
-      folder.id === 'logistics' ? { ...folder, name: 'Equipment' } : folder
+      folder.id === 'logistics' ? { ...folder, name: 'Sprzęt' } : folder
     );
     expect(
       folderTree(pages, renamed).folders.find((item) => item.id === 'camp')!.folders[0]!.pages
@@ -67,29 +67,29 @@ describe('documentation folders', () => {
 });
 
 describe('documentation translation editing and review', () => {
-  test('keeps absent and removed translated fields empty instead of filling them from English', () => {
+  test('keeps absent and removed translated fields empty instead of filling them from Polish', () => {
     const translated: DocText = {
-      ...english,
-      translations: { pl: { title: 'Pakowanie autobusu' } }
+      ...polish,
+      translations: { en: { title: 'Packing the bus' } }
     };
-    expect(textIn(translated, 'en')).toEqual({
-      title: english.title,
-      markdown: english.markdown
+    expect(textIn(translated, 'pl')).toEqual({
+      title: polish.title,
+      markdown: polish.markdown
     });
-    expect(textIn(translated, 'pl')).toEqual({ title: 'Pakowanie autobusu', markdown: '' });
-    expect(textIn(english, 'pl')).toEqual({ title: '', markdown: '' });
-    expect(textIn(null, 'en')).toEqual({ title: '', markdown: '' });
-    expect(textIn(undefined, 'pl')).toEqual({ title: '', markdown: '' });
+    expect(textIn(translated, 'en')).toEqual({ title: 'Packing the bus', markdown: '' });
+    expect(textIn(polish, 'en')).toEqual({ title: '', markdown: '' });
+    expect(textIn(null, 'pl')).toEqual({ title: '', markdown: '' });
+    expect(textIn(undefined, 'en')).toEqual({ title: '', markdown: '' });
   });
 
   test('includes a removed translation in comparison languages and deduplicates shared locales', () => {
     const before: DocText = {
-      ...english,
-      translations: { pl: { title: 'Pakowanie autobusu', markdown: '## Sprzęt' } }
+      ...polish,
+      translations: { en: { title: 'Packing the bus', markdown: '## Equipment' } }
     };
-    expect(languagesOf(before, english)).toEqual(['en', 'pl']);
-    expect(languagesOf(before, before, null, undefined)).toEqual(['en', 'pl']);
-    expect(languagesOf(english)).toEqual(['en']);
-    expect(languagesOf()).toEqual(['en']);
+    expect(languagesOf(before, polish)).toEqual(['pl', 'en']);
+    expect(languagesOf(before, before, null, undefined)).toEqual(['pl', 'en']);
+    expect(languagesOf(polish)).toEqual(['pl']);
+    expect(languagesOf()).toEqual(['pl']);
   });
 });

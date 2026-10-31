@@ -7,7 +7,12 @@
   import { ArrowLeft, Globe, GitPullRequestArrow, History, ChevronUp, X } from '@lucide/svelte';
   import { formatDateTime } from 'shared/format';
   import { docsPath } from 'shared/docs';
-  import { contentLocale, contentLocaleName, type ContentLocale } from 'shared/content-locales';
+  import {
+    contentLocale,
+    contentLocaleName,
+    primaryContentLocale,
+    type ContentLocale
+  } from 'shared/content-locales';
   import { slider } from '@ksi-core/ui/platform/slider';
   import { preferences } from '$lib/preferences.svelte';
   import Skeleton from '$lib/Skeleton.svelte';
@@ -56,7 +61,7 @@
       ? chosenLocale
       : locales.includes(contentLocale(language))
         ? contentLocale(language)
-        : 'en'
+        : primaryContentLocale
   );
   const after = $derived(textIn(snapshot, locale));
   const before = $derived(textIn(snapshot?.previous, locale));
@@ -172,9 +177,9 @@
           {#if previewTitle !== page.displayTitle}
             <h1 class="history-preview-title">{previewTitle}</h1>
           {/if}
-          {#if locale !== 'en' && !after.markdown}
+          {#if locale !== primaryContentLocale && !after.markdown}
             <p class="history-language-fallback">
-              {'This version has no translation in this language. Showing the English text.'}
+              {'This version has no translation in this language. Showing the Polish text.'}
             </p>
           {/if}
           <MarkdownContent value={after.markdown || snapshot.markdown} docs docLocale={locale} />

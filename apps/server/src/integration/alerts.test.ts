@@ -17,8 +17,8 @@ const tokens = Object.fromEntries(roles.map((role) => [role, createId()])) as Re
 const created: string[] = [];
 const path = '/dashboard/admin/alerts';
 const body = {
-  title: 'Scheduled announcement',
-  description: 'Details',
+  title: 'Zaplanowane ogłoszenie',
+  description: 'Szczegóły',
   color: 'info',
   link: '/projects',
   startDate: new Date(Date.now() - 3600000).toISOString(),
@@ -175,15 +175,15 @@ describe.skipIf(!safe)('association alert scheduling and permissions', () => {
       low.id
     );
   });
-  test('alerts reuse the translation permissions, locale, field and English-source rules', async () => {
+  test('alerts reuse the translation permissions, locale, field and Polish-source rules', async () => {
     const row = await create('board');
-    const route = `/platform/translations/alert/${row.id}/pl`;
-    const translation = { version: 1, fields: { title: 'Ogłoszenie' } };
+    const route = `/platform/translations/alert/${row.id}/en`;
+    const translation = { version: 1, fields: { title: 'Announcement' } };
     for (const actor of [null, 'member', 'denied', 'pending'] as const)
       expect((await request(actor, route, 'PUT', translation)).status).toBe(
         actor === null ? 401 : 403
       );
-    for (const locale of ['en', 'de'])
+    for (const locale of ['pl', 'de'])
       expect(
         (
           await request(
@@ -210,40 +210,44 @@ describe.skipIf(!safe)('association alert scheduling and permissions', () => {
       (await request('board', `${path}/${row.id}`, 'PUT', { ...body, version: 1 })).status
     ).toBe(409);
     const empty = await create('board', { description: '', link: '' });
-    for (const fields of [{ description: 'Opis' }, { link: '/projekty' }])
-      expect(
-        (
-          await request('board', `/platform/translations/alert/${empty.id}/pl`, 'PUT', {
-            version: 1,
-            fields
-          })
-        ).status
-      ).toBe(422);
+    for (const fields of [{ description: 'Description' }, { link: '/projects?lang=en' }]) {
+      const response = await request(
+        'board',
+        `/platform/translations/alert/${empty.id}/en`,
+        'PUT',
+        { version: 1, fields }
+      );
+      expect(response.status).toBe(422);
+      expect(await response.json()).toMatchObject({ code: 'PRIMARY_CONTENT_REQUIRED' });
+    }
   });
-  test('public banners localize title, content and link, and fall back to English per field', async () => {
+  test('public banners localize title, content and link, and fall back to Polish per field', async () => {
     const row = await create('administrator', { priority: 2000000 });
-    const route = `/platform/translations/alert/${row.id}/pl`;
-    const fields = { title: 'Ogłoszenie', description: 'Polska treść', link: '/projects?lang=pl' };
+    const route = `/platform/translations/alert/${row.id}/en`;
+    const fields = {
+      title: 'Announcement',
+      description: 'English content',
+      link: '/projects?lang=en'
+    };
     const saved = await request('administrator', route, 'PUT', { version: 1, fields });
     expect(saved.status).toBe(200);
     const result = (await saved.json()) as { version: number; translations: unknown };
     expect(result.version).toBe(2);
-    expect(result.translations).toEqual({ pl: fields });
-    const localized = (await (await request(null, '/alerts/current?locale=pl')).json()) as Record<
-      string,
-      unknown
-    >;
+    expect(result.translations).toEqual({ en: fields });
+    const localized = (await (
+      await request(null, '/alerts/current?locale=en-us')
+    ).json()) as Record<string, unknown>;
     expect(localized).toMatchObject({
       id: row.id,
       ...fields,
       color: row.color,
       startDate: row.startDate.toISOString()
     });
-    for (const locale of ['en-us', 'de']) {
-      const english = (await (
+    for (const locale of ['pl', 'de']) {
+      const polish = (await (
         await request(null, `/alerts/current?locale=${locale}`)
       ).json()) as Record<string, unknown>;
-      expect(english).toMatchObject({
+      expect(polish).toMatchObject({
         title: row.title,
         description: body.description,
         link: body.link
@@ -254,23 +258,22 @@ describe.skipIf(!safe)('association alert scheduling and permissions', () => {
     };
     expect(listed.results.find((alert) => alert.id === row.id)).toMatchObject({
       title: row.title,
-      translations: { pl: fields }
+      translations: { en: fields }
     });
     expect(
-      (await request('board', route, 'PUT', { version: 2, fields: { title: 'Tylko tytuł' } }))
-        .status
+      (await request('board', route, 'PUT', { version: 2, fields: { title: 'Title only' } })).status
     ).toBe(200);
-    const partial = (await (await request(null, '/alerts/current?locale=pl')).json()) as Record<
+    const partial = (await (await request(null, '/alerts/current?locale=en')).json()) as Record<
       string,
       unknown
     >;
     expect(partial).toMatchObject({
-      title: 'Tylko tytuł',
+      title: 'Title only',
       description: body.description,
       link: body.link
     });
     expect((await request('board', route, 'PUT', { version: 3, fields: {} })).status).toBe(200);
-    const removed = (await (await request(null, '/alerts/current?locale=pl')).json()) as Record<
+    const removed = (await (await request(null, '/alerts/current?locale=en')).json()) as Record<
       string,
       unknown
     >;
@@ -284,7 +287,7 @@ describe.skipIf(!safe)('association alert scheduling and permissions', () => {
     expect(events.filter((event) => event.action === 'alerts.translation.updated')).toHaveLength(3);
     expect(
       events.find((event) => event.action === 'alerts.translation.updated')?.metadata
-    ).toMatchObject({ locale: 'pl', version: 2 });
+    ).toMatchObject({ locale: 'en', version: 2 });
     expect(
       (
         await request('board', `${path}/${row.id}`, 'PUT', {

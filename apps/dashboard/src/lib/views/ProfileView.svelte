@@ -7,7 +7,7 @@
   import { untrack } from 'svelte';
   import { validProfileLink } from 'shared/profile-links';
   import { summarizeUserAgent } from 'shared/user-agent';
-  import type { ContentLocale } from 'shared/content-locales';
+  import { primaryContentLocale, type ContentLocale } from 'shared/content-locales';
   import type { Profile } from 'shared/types';
   import {
     ArrowUpRight,
@@ -51,15 +51,17 @@
   let saved = $state(false);
   let dirty = $state(false);
   let error = $state('');
-  let contentLocale = $state<ContentLocale>('en');
+  let contentLocale = $state<ContentLocale>(primaryContentLocale);
   let translationDraft = $state<Record<string, string>>({});
 
   type LocalizedProfileField = 'firstName' | 'lastName' | 'nickname' | 'bio';
   function localized(key: LocalizedProfileField) {
-    return contentLocale === 'en' ? (draft[key] ?? '') : (translationDraft[key] ?? '');
+    return contentLocale === primaryContentLocale
+      ? (draft[key] ?? '')
+      : (translationDraft[key] ?? '');
   }
   function setLocalized(key: LocalizedProfileField, value: string) {
-    if (contentLocale === 'en') draft[key] = value;
+    if (contentLocale === primaryContentLocale) draft[key] = value;
     else translationDraft[key] = value;
   }
 
@@ -158,12 +160,12 @@
       class="settings-main"
       onsubmit={(event) => {
         event.preventDefault();
-        if (contentLocale !== 'en') return;
+        if (contentLocale !== primaryContentLocale) return;
         saveProfile();
       }}
       oninput={(event) => {
         if (
-          contentLocale !== 'en' &&
+          contentLocale !== primaryContentLocale &&
           event.target instanceof Element &&
           event.target.closest('.localized-profile-fields')
         )
@@ -228,7 +230,7 @@
                 bind:value={
                   () => localized('firstName'), (value) => setLocalized('firstName', value)
                 }
-                required={contentLocale === 'en'}
+                required={contentLocale === primaryContentLocale}
               />
             </div>
             <div>
@@ -252,7 +254,7 @@
                 placeholder={'Interests, projects, and things you enjoy…'}
               ></textarea>
             </div>
-            {#if contentLocale === 'en'}<div class="field-wide">
+            {#if contentLocale === primaryContentLocale}<div class="field-wide">
                 <label for="p-priv">Name visibility</label>
                 <Dropdown
                   id="p-priv"
@@ -317,7 +319,7 @@
         </div>
       </section>
 
-      {#if contentLocale === 'en' && (dirty || saved)}
+      {#if contentLocale === primaryContentLocale && (dirty || saved)}
         <div class="save-bar">
           <span role="status"
             >{#if saved}<Check size={15} aria-hidden="true" />{'Saved'}{:else}Unsaved changes{/if}</span

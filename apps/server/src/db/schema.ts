@@ -236,7 +236,7 @@ export const articles = snakeCase.table('articles', {
   title: text().notNull(),
   markdown: text().notNull().default(''),
   thumbnailFileId: text().references(() => files.id),
-  language: text().notNull().default('en'),
+  language: text().notNull().default('pl'),
   state: text().notNull().default('draft'),
   mainArticle: boolean().notNull().default(false),
   projectFeed: boolean().notNull().default(false),
@@ -548,7 +548,7 @@ export const docPages = snakeCase.table(
     projectId: text().references(() => projects.id),
     slug: text().notNull(),
     folderId: text().references(() => docFolders.id),
-    /** English path snapshot for revision history and older API clients. */
+    /** Polish path snapshot for revision history and older API clients. */
     folder: text().notNull().default(''),
     title: text().notNull(),
     markdown: text().notNull().default(''),

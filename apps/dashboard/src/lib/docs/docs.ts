@@ -1,13 +1,11 @@
-import {
-  docTranslationLocales,
-  headingSlug,
-  type DocHeading,
-  type DocTranslations,
-  type WordSegment
-} from 'shared/docs';
+import { headingSlug, type DocHeading, type DocTranslations, type WordSegment } from 'shared/docs';
 import { docFolderName, docFolderPath, type DocFolder } from 'shared/doc-folders';
 export type { DocFolder } from 'shared/doc-folders';
-import type { ContentLocale } from 'shared/content-locales';
+import {
+  primaryContentLocale,
+  translationLocales,
+  type ContentLocale
+} from 'shared/content-locales';
 import type { MarkdownBlock } from 'shared/markdown';
 
 export type Person = { id: string; name: string; image: string | null };
@@ -98,7 +96,7 @@ export type DiffRow = {
   words: { before: WordSegment[]; after: WordSegment[] } | null;
 };
 export type DocDiffResult = { additions: number; deletions: number; rows: DiffRow[] };
-/** The text a page has at one point: its English source plus translations. */
+/** The text a page has at one point: its Polish source plus translations. */
 export type DocText = {
   folder: string;
   title: string;
@@ -185,17 +183,18 @@ export const workspaceQuery = (projectId: string) =>
 /** Suggests a page address from its title while the author has not chosen one. */
 export const slugFromTitle = (title: string) => (/[a-z0-9]/i.test(title) ? headingSlug(title) : '');
 
-/** The title and text of one language; translations fall back to nothing, not English. */
+/** The title and text of one language; translations fall back to nothing, not Polish. */
 export function textIn(text: DocText | null | undefined, locale: ContentLocale) {
-  if (locale === 'en') return { title: text?.title ?? '', markdown: text?.markdown ?? '' };
+  if (locale === primaryContentLocale)
+    return { title: text?.title ?? '', markdown: text?.markdown ?? '' };
   const translation = text?.translations[locale];
   return { title: translation?.title ?? '', markdown: translation?.markdown ?? '' };
 }
 
-/** English plus every language any of the given versions is translated into. */
+/** Polish plus every language any of the given versions is translated into. */
 export function languagesOf(...texts: (DocText | null | undefined)[]): ContentLocale[] {
   const translated = new Set(texts.flatMap((text) => Object.keys(text?.translations ?? {})));
-  return ['en', ...docTranslationLocales.filter((locale) => translated.has(locale))];
+  return [primaryContentLocale, ...translationLocales.filter((locale) => translated.has(locale))];
 }
 
 export type FolderNode = {
@@ -209,7 +208,7 @@ export type FolderNode = {
 export function folderTree(
   pages: DocSummary[],
   folders: DocFolder[],
-  locale: ContentLocale = 'en'
+  locale: ContentLocale = primaryContentLocale
 ): FolderNode {
   const root: FolderNode = { id: null, name: '', path: '', folders: [], pages: [] };
   const nodes = new Map(

@@ -72,9 +72,9 @@
       <p class="doc-outdated" role="note">
         <TriangleAlert size={15} aria-hidden="true" />
         <span>
-          {'The English version changed after this translation was written.'}
-          <button type="button" onclick={() => setLanguage('en-us')}
-            >{'Read the English version'}</button
+          {'The Polish version changed after this translation was written.'}
+          <button type="button" onclick={() => setLanguage('pl')}
+            >{'Read the Polish version'}</button
           >
         </span>
       </p>

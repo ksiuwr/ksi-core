@@ -8,7 +8,7 @@ export const load: PageServerLoad = async (event) => {
   const response = await backendFetch(
     event,
     env,
-    `/platform/public/members/${encodeURIComponent(event.params.id)}?locale=${contentLocale(event.cookies.get('locale') ?? 'pl')}`
+    `/platform/public/members/${encodeURIComponent(event.params.id)}?locale=${contentLocale(event.cookies.get('locale'))}`
   );
   if (!response.ok) error(response.status, 'Member not found');
   return { member: await response.json() };

@@ -12,7 +12,7 @@ export const load: PageServerLoad = async (event) => {
   const response = await backendFetch(
     event,
     environment,
-    `/platform/public/projects/${encodeURIComponent(event.params.slug)}?locale=${contentLocale(event.cookies.get('locale') ?? 'pl')}`
+    `/platform/public/projects/${encodeURIComponent(event.params.slug)}?locale=${contentLocale(event.cookies.get('locale'))}`
   );
   if (!response.ok) {
     error(
@@ -45,7 +45,7 @@ export const actions: Actions = {
     const projectResponse = await backendFetch(
       event,
       environment,
-      `/platform/public/projects/${encodeURIComponent(event.params.slug)}?locale=${contentLocale(event.cookies.get('locale') ?? 'pl')}`
+      `/platform/public/projects/${encodeURIComponent(event.params.slug)}?locale=${contentLocale(event.cookies.get('locale'))}`
     );
     if (!projectResponse.ok) {
       return fail(projectResponse.status, {

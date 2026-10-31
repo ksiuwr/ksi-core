@@ -10,7 +10,7 @@
   import MemberPreview from './MemberPreview.svelte';
   import { Search, ArrowLeft, Trash2, Save, ChevronLeft, ChevronRight } from '@lucide/svelte';
   import type { Profile } from 'shared/types';
-  import type { ContentLocale } from 'shared/content-locales';
+  import { primaryContentLocale, type ContentLocale } from 'shared/content-locales';
   let {
     administrator,
     memberId,
@@ -40,14 +40,16 @@
     search = $state('');
   let emailDraft = $state('');
   let resetConfirmation = $state(false);
-  let contentLocale = $state<ContentLocale>('en');
+  let contentLocale = $state<ContentLocale>(primaryContentLocale);
   let translationDraft = $state<Record<string, string>>({});
   type LocalizedMemberField = 'firstName' | 'lastName' | 'nickname' | 'bio';
   function localizedMember(key: LocalizedMemberField) {
-    return contentLocale === 'en' ? (member?.[key] ?? '') : (translationDraft[key] ?? '');
+    return contentLocale === primaryContentLocale
+      ? (member?.[key] ?? '')
+      : (translationDraft[key] ?? '');
   }
   function setLocalizedMember(key: LocalizedMemberField, value: string) {
-    if (contentLocale !== 'en') translationDraft[key] = value;
+    if (contentLocale !== primaryContentLocale) translationDraft[key] = value;
     else if (member) member[key] = value;
   }
   async function resetPassword() {
@@ -117,7 +119,7 @@
     records = [];
     total = 0;
     confirmDelete = false;
-    contentLocale = 'en';
+    contentLocale = primaryContentLocale;
     translationDraft = {};
     try {
       const result = await api(id ? `/${encodeURIComponent(id)}` : `?${query}`);
@@ -234,7 +236,7 @@
             class="card settings-card"
             onsubmit={(event) => {
               event.preventDefault();
-              if (contentLocale !== 'en') return;
+              if (contentLocale !== primaryContentLocale) return;
               void mutate(`/${member!.id}/profile`, 'PATCH', {
                 firstName: member!.firstName,
                 lastName: member!.lastName,
@@ -269,7 +271,7 @@
                     () => localizedMember('firstName'),
                     (value) => setLocalizedMember('firstName', value)
                   }
-                  required={contentLocale === 'en'}
+                  required={contentLocale === primaryContentLocale}
                   maxlength="100"
                 />
               </div>
@@ -303,7 +305,7 @@
                   maxlength="5000"
                 ></textarea>
               </div>
-              {#if contentLocale === 'en'}<div>
+              {#if contentLocale === primaryContentLocale}<div>
                   <label for="m-gh">GitHub</label><input
                     id="m-gh"
                     type="url"
@@ -320,7 +322,7 @@
                   />
                 </div>{/if}
             </div>
-            {#if contentLocale === 'en'}<div class="card-footer">
+            {#if contentLocale === primaryContentLocale}<div class="card-footer">
                 <button class="btn" disabled={busy}
                   ><Save size={15} aria-hidden="true" />{'Save profile'}</button
                 >

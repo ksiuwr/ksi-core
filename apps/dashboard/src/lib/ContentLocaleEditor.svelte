@@ -2,11 +2,16 @@
   import type { Snippet } from 'svelte';
   import { ChevronDown, Eye, Languages, Save, Trash2, X } from '@lucide/svelte';
   import Dropdown, { type DropdownOption } from '@ksi-core/ui/platform/Dropdown.svelte';
-  import { contentLocaleName, contentLocales, type ContentLocale } from 'shared/content-locales';
+  import {
+    contentLocaleName,
+    contentLocales,
+    primaryContentLocale,
+    type ContentLocale
+  } from 'shared/content-locales';
   import { preferences } from './preferences.svelte';
 
   let {
-    selected = $bindable<ContentLocale>('en'),
+    selected = $bindable<ContentLocale>(primaryContentLocale),
     added = [],
     busy = false,
     dirty = false,
@@ -40,12 +45,13 @@
       value: locale,
       label: contentLocaleName(locale, locale),
       description:
-        locale === 'en'
+        locale === primaryContentLocale
           ? 'Primary language'
           : added.includes(locale)
             ? 'Translation added'
             : 'Not added',
-      indicator: locale === 'en' ? 'Primary' : added.includes(locale) ? 'Added' : undefined
+      indicator:
+        locale === primaryContentLocale ? 'Primary' : added.includes(locale) ? 'Added' : undefined
     }))
   );
   function selectLanguage(value: string) {
@@ -66,9 +72,9 @@
     <div class="language-actions">
       <div
         class="translation-tools-reveal"
-        class:open={selected !== 'en'}
-        aria-hidden={selected === 'en'}
-        inert={selected === 'en'}
+        class:open={selected !== primaryContentLocale}
+        aria-hidden={selected === primaryContentLocale}
+        inert={selected === primaryContentLocale}
       >
         <div class="translation-tools">
           <button
@@ -77,7 +83,7 @@
             aria-expanded={referenceOpen}
             onclick={() => (referenceOpen = !referenceOpen)}
           >
-            <Eye size={15} aria-hidden="true" />{'English reference'}
+            <Eye size={15} aria-hidden="true" />{'Polish reference'}
             <ChevronDown size={14} aria-hidden="true" class={referenceOpen ? 'open' : ''} />
           </button>
           {#if confirmingRemoval}
@@ -137,15 +143,15 @@
 
   <div
     class="translation-context-reveal"
-    class:open={selected !== 'en'}
-    aria-hidden={selected === 'en'}
+    class:open={selected !== primaryContentLocale}
+    aria-hidden={selected === primaryContentLocale}
   >
     <div>
       <div class="translation-context">
         <span class="tag">{translationExists ? 'Added' : 'New'}</span>
         <p>
-          You are editing the {localeLabel(selected)} translation. Blank fields use the English value
-          shown in the reference.
+          You are editing the {localeLabel(selected)} translation. Blank fields use the Polish value shown
+          in the reference.
         </p>
         {#if dirty}<span class="dirty"><span></span>{'Unsaved changes'}</span>{/if}
       </div>
@@ -157,14 +163,14 @@
 
   <div
     class="reference-reveal"
-    class:open={selected !== 'en' && referenceOpen}
-    aria-hidden={selected === 'en' || !referenceOpen}
-    inert={selected === 'en' || !referenceOpen}
+    class:open={selected !== primaryContentLocale && referenceOpen}
+    aria-hidden={selected === primaryContentLocale || !referenceOpen}
+    inert={selected === primaryContentLocale || !referenceOpen}
   >
     <div>
       <div class="reference-panel">
         <header>
-          <div><strong>English reference</strong><span>Read only</span></div>
+          <div><strong>Polish reference</strong><span>Read only</span></div>
           <p>Use this as context while writing the translation.</p>
         </header>
         {@render reference()}

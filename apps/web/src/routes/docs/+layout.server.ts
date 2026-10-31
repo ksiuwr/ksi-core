@@ -7,7 +7,7 @@ import { env } from '$lib/server/environment';
 
 export const load: LayoutServerLoad = async (event) => {
   event.depends('ksi:localized-content');
-  const locale = contentLocale(event.cookies.get('locale') ?? 'pl');
+  const locale = contentLocale(event.cookies.get('locale'));
   const response = await backendFetch(event, env, `/platform/public/docs?locale=${locale}`);
   if (!response.ok) error(response.status, 'Documentation unavailable');
   return {

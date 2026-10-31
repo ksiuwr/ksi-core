@@ -1,6 +1,7 @@
 <script lang="ts">
   import { preferences } from '$lib/preferences.svelte';
   import { goto } from '$app/navigation';
+  import { primaryContentLocale } from 'shared/content-locales';
   import ArticleThumbnail from '$lib/ArticleThumbnail.svelte';
   import { api, errorMessage } from '$lib/api';
   import { articlePath, dashboardPath, type Workspace } from '$lib/navigation';
@@ -54,7 +55,7 @@
         title: title.trim(),
         markdown,
         ...(projectId ? { projectId } : {}),
-        language: 'en',
+        language: primaryContentLocale,
         thumbnailFileId
       });
       await goto(articlePath(result.slug));

@@ -23,6 +23,7 @@
   import ContentTranslations from './ContentTranslations.svelte';
   import {
     localizeContent,
+    primaryContentLocale,
     type ContentLocale,
     type ContentTranslations as TranslationData
   } from 'shared/content-locales';
@@ -39,7 +40,7 @@
 
   let editing = $state(false);
   let editingId = $state<string | null>(null);
-  let contentLocale = $state<ContentLocale>('en');
+  let contentLocale = $state<ContentLocale>(primaryContentLocale);
   let translationDraft = $state<Record<string, string>>({});
   let translations = $state<TranslationData>({});
   let version = $state<number>();
@@ -66,7 +67,8 @@
         title,
         description,
         link,
-        translations: contentLocale === 'en' ? {} : { [contentLocale]: translationDraft }
+        translations:
+          contentLocale === primaryContentLocale ? {} : { [contentLocale]: translationDraft }
       },
       contentLocale
     )
@@ -74,11 +76,11 @@
 
   type AlertTextField = 'title' | 'description' | 'link';
   function localized(key: AlertTextField) {
-    const english = { title, description, link }[key];
-    return contentLocale === 'en' ? english : (translationDraft[key] ?? '');
+    const primary = { title, description, link }[key];
+    return contentLocale === primaryContentLocale ? primary : (translationDraft[key] ?? '');
   }
   function setLocalized(key: AlertTextField, value: string) {
-    if (contentLocale !== 'en') translationDraft[key] = value;
+    if (contentLocale !== primaryContentLocale) translationDraft[key] = value;
     else if (key === 'title') title = value;
     else if (key === 'description') description = value;
     else link = value;
@@ -110,7 +112,7 @@
 
   async function edit(alert?: AssociationAlert) {
     editingId = alert?.id ?? null;
-    contentLocale = 'en';
+    contentLocale = primaryContentLocale;
     translationDraft = {};
     translations = alert?.translations ?? {};
     version = alert?.version;
@@ -134,13 +136,13 @@
     if (!(form instanceof HTMLFormElement)) return;
     event.preventDefault();
     if (busy || event.repeat) return;
-    if (contentLocale === 'en') form.requestSubmit();
+    if (contentLocale === primaryContentLocale) form.requestSubmit();
     else void translationEditor?.saveTranslation();
   }
 
   async function save(event: SubmitEvent) {
     event.preventDefault();
-    if (contentLocale !== 'en' || busy || !validInterval || !title.trim()) return;
+    if (contentLocale !== primaryContentLocale || busy || !validInterval || !title.trim()) return;
     busy = true;
     error = '';
     saved = false;
@@ -252,14 +254,14 @@
               />
             {/key}
           {:else}
-            <p class="muted field-help">Save the English alert before adding translations.</p>
+            <p class="muted field-help">Save the Polish alert before adding translations.</p>
           {/if}
           <fieldset disabled={busy} class="editor-fields">
             <label for={`${uid}-title`}>Title</label>
             <input
               id={`${uid}-title`}
               bind:value={() => localized('title'), (value) => setLocalized('title', value)}
-              required={contentLocale === 'en'}
+              required={contentLocale === primaryContentLocale}
               maxlength="200"
             />
             <label for={`${uid}-content`}>Content</label>
@@ -271,7 +273,7 @@
               maxlength="2000"
               rows="3"
             ></textarea>
-            {#if contentLocale === 'en'}
+            {#if contentLocale === primaryContentLocale}
               <div class="editor-row">
                 <div>
                   <label for={`${uid}-style`}>Style</label>
@@ -312,14 +314,14 @@
               aria-describedby={`${uid}-link-help`}
             />
             <p id={`${uid}-link-help`} class="muted field-help">
-              {#if contentLocale === 'en'}
+              {#if contentLocale === primaryContentLocale}
                 Use a website path, an HTTP(S) URL, or a mailto link. Leave empty for a banner
                 without a link.
               {:else}
-                Leave blank to use the English link.
+                Leave blank to use the Polish link.
               {/if}
             </p>
-            {#if contentLocale === 'en'}
+            {#if contentLocale === primaryContentLocale}
               <DateTimeRangePicker bind:start bind:end disabled={busy} />
               <p class="muted field-help">
                 Dates use your local time zone. They are saved as absolute instants.
@@ -343,7 +345,7 @@
               disabled={busy}
               onclick={() => (editing = false)}>Cancel</button
             >
-            {#if contentLocale === 'en'}
+            {#if contentLocale === primaryContentLocale}
               <button
                 class="btn"
                 aria-keyshortcuts="Control+Enter"

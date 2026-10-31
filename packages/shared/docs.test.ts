@@ -10,7 +10,8 @@ import {
   markdownHeadings,
   parseDocLinkTarget,
   translatedDocHeading,
-  wordDiff
+  wordDiff,
+  type DocTranslations
 } from './docs';
 import type { WindowLike } from 'dompurify';
 import { JSDOM } from 'jsdom';
@@ -148,44 +149,44 @@ test('browsers render documentation links, anchors and checkboxes like the serve
   expect(server).toContain('<a class="doc-link" rel="noopener noreferrer external">e</a>');
 });
 
-test('English and translated section references reach the translated outline', () => {
-  const source = '## Membership\n\n### How to join?\n\n## Events';
-  const translated = '## Członkostwo\n\n### Jak dołączyć?\n\n## Wydarzenia';
-  expect(translatedDocHeading(source, translated, 'how-to-join')).toMatchObject({
-    id: 'jak-dolaczyc',
-    text: 'Jak dołączyć?'
-  });
+test('Polish and translated section references reach the translated outline', () => {
+  const source = '## Członkostwo\n\n### Jak dołączyć?\n\n## Wydarzenia';
+  const translated = '## Membership\n\n### How to join?\n\n## Events';
   expect(translatedDocHeading(source, translated, 'jak-dolaczyc')).toMatchObject({
-    id: 'jak-dolaczyc'
+    id: 'how-to-join',
+    text: 'How to join?'
   });
-  expect(translatedDocHeading(source, `${translated}\n\n## Extra`, 'events')).toBeUndefined();
+  expect(translatedDocHeading(source, translated, 'how-to-join')).toMatchObject({
+    id: 'how-to-join'
+  });
+  expect(translatedDocHeading(source, `${translated}\n\n## Extra`, 'wydarzenia')).toBeUndefined();
   expect(translatedDocHeading(source, translated, 'missing')).toBeUndefined();
 });
 
 test('translations keep meaningful fields and count toward contributions', () => {
-  expect(
-    cleanDocTranslations({ pl: { title: '  Plan dnia ', markdown: '  ' }, en: { title: 'x' } })
-  ).toEqual({ pl: { title: 'Plan dnia' } });
+  // Stored JSON can carry keys outside the type, such as the former `pl` translations.
+  const stored = { en: { title: '  Day plan ', markdown: '  ' }, pl: { title: 'x' } };
+  expect(cleanDocTranslations(stored as DocTranslations)).toEqual({ en: { title: 'Day plan' } });
   expect(
     docLineChanges(
       { markdown: 'a', translations: {} },
-      { markdown: 'a\nb', translations: { pl: { markdown: 'x\ny' } } }
+      { markdown: 'a\nb', translations: { en: { markdown: 'x\ny' } } }
     )
   ).toEqual({ additions: 3, deletions: 0 });
 });
 
-test('a translation is outdated once the English page changes after it', () => {
-  const pl = (markdown: string) => ({ pl: { markdown } });
+test('a translation is outdated once the Polish page changes after it', () => {
+  const en = (markdown: string) => ({ en: { markdown } });
   expect(
     outdatedTranslations([
-      { version: 1, title: 'A', markdown: 'one', translations: {} },
-      { version: 2, title: 'A', markdown: 'one', translations: pl('jeden') }
+      { version: 1, title: 'A', markdown: 'jeden', translations: {} },
+      { version: 2, title: 'A', markdown: 'jeden', translations: en('one') }
     ])
   ).toEqual([]);
   expect(
     outdatedTranslations([
-      { version: 1, title: 'A', markdown: 'one', translations: pl('jeden') },
-      { version: 2, title: 'A', markdown: 'one two', translations: pl('jeden') }
+      { version: 1, title: 'A', markdown: 'jeden', translations: en('one') },
+      { version: 2, title: 'A', markdown: 'jeden dwa', translations: en('one') }
     ])
-  ).toEqual(['pl']);
+  ).toEqual(['en']);
 });

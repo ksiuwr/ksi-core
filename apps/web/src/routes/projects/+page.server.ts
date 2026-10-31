@@ -8,7 +8,7 @@ export const load: PageServerLoad = async (event) => {
   const projectsReq = await backendFetch(
     event,
     env,
-    `/platform/public/projects?locale=${contentLocale(event.cookies.get('locale') ?? 'pl')}`
+    `/platform/public/projects?locale=${contentLocale(event.cookies.get('locale'))}`
   );
   let projects = [];
   if (projectsReq.ok) {

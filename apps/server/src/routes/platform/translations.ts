@@ -8,16 +8,16 @@ import { safeAlertLink } from '../../domain/content-policy';
 import { active, scopeFor, requireLeader } from './content';
 import { syncFileReferences } from './files';
 import {
-  contentLocales,
   articleFileContent,
-  hasEnglishSources,
-  type ContentLocale,
-  type ContentTranslations
+  hasPrimarySources,
+  translationLocales,
+  type ContentTranslations,
+  type TranslationLocale
 } from 'shared/content-locales';
 
 function setTranslation(
   current: ContentTranslations,
-  locale: ContentLocale,
+  locale: TranslationLocale,
   fields: Record<string, string | string[]>
 ) {
   const translations = { ...current };
@@ -34,8 +34,8 @@ export const translationRoutes = createElysia({
   '/:kind/:id/:locale',
   async ({ db, user, params, body }) => {
     const actor = active(user);
-    // English lives in the ordinary, required content fields. Optional translations never replace it.
-    if (params.locale === 'en' || !(contentLocales as readonly string[]).includes(params.locale))
+    // Polish lives in the ordinary, required content fields. Optional translations never replace it.
+    if (!(translationLocales as readonly string[]).includes(params.locale))
       throw status(422, { code: 'UNSUPPORTED_TRANSLATION_LOCALE' });
     const allowed =
       params.kind === 'profile'
@@ -86,7 +86,7 @@ export const translationRoutes = createElysia({
         .for('share');
       active(currentActor ?? null);
       const principal = currentActor!;
-      const locale = params.locale as ContentLocale;
+      const locale = params.locale as TranslationLocale;
       if (params.kind === 'alert') {
         requirePermission(principal, 'association.alerts.manage');
         const [alert] = await tx
@@ -96,8 +96,8 @@ export const translationRoutes = createElysia({
           .for('update');
         if (!alert) throw status(404, { code: 'ALERT_NOT_FOUND' });
         if (body.version !== alert.version) throw status(409, { code: 'REVISION_CONFLICT' });
-        if (!alert.title.trim() || !hasEnglishSources(alert, translatedFields))
-          throw status(422, { code: 'ENGLISH_CONTENT_REQUIRED' });
+        if (!alert.title.trim() || !hasPrimarySources(alert, translatedFields))
+          throw status(422, { code: 'PRIMARY_CONTENT_REQUIRED' });
         const translations = setTranslation(alert.translations, locale, translatedFields);
         const [updated] = await tx
           .update(alerts)
@@ -141,9 +141,9 @@ export const translationRoutes = createElysia({
         if (!profile) throw status(404, { code: 'USER_NOT_FOUND' });
         if (profile.membershipStatus === 'deleted') throw status(409, { code: 'ACCOUNT_DELETED' });
         if (!profile.firstName.trim() && !profile.name.trim())
-          throw status(422, { code: 'ENGLISH_CONTENT_REQUIRED' });
-        if (!hasEnglishSources(profile, translatedFields))
-          throw status(422, { code: 'ENGLISH_CONTENT_REQUIRED' });
+          throw status(422, { code: 'PRIMARY_CONTENT_REQUIRED' });
+        if (!hasPrimarySources(profile, translatedFields))
+          throw status(422, { code: 'PRIMARY_CONTENT_REQUIRED' });
         const translations = setTranslation(profile.translations, locale, translatedFields);
         await tx.update(users).set({ translations }).where(eq(users.id, params.id));
         await recordEvent(tx, {
@@ -167,15 +167,15 @@ export const translationRoutes = createElysia({
         if (!project) throw status(404, { code: 'PROJECT_NOT_FOUND' });
         requireLeader(principal, await scopeFor(tx, project.id), 'projects.catalog.edit');
         if (body.version !== project.version) throw status(409, { code: 'REVISION_CONFLICT' });
-        if (!project.name.trim()) throw status(422, { code: 'ENGLISH_CONTENT_REQUIRED' });
+        if (!project.name.trim()) throw status(422, { code: 'PRIMARY_CONTENT_REQUIRED' });
         if (
           Array.isArray(translatedFields.tags) &&
           translatedFields.tags.length &&
           translatedFields.tags.length !== project.tags.length
         )
           throw status(422, { code: 'TRANSLATED_TAG_COUNT' });
-        if (!hasEnglishSources(project, translatedFields))
-          throw status(422, { code: 'ENGLISH_CONTENT_REQUIRED' });
+        if (!hasPrimarySources(project, translatedFields))
+          throw status(422, { code: 'PRIMARY_CONTENT_REQUIRED' });
         const translations = setTranslation(project.translations, locale, translatedFields);
         const [updated] = await tx
           .update(projects)
@@ -204,9 +204,9 @@ export const translationRoutes = createElysia({
       requireLeader(principal, await scopeFor(tx, article.projectId), 'articles.content.publish');
       if (body.version !== article.version) throw status(409, { code: 'REVISION_CONFLICT' });
       if (!article.title.trim() || !article.markdown.trim())
-        throw status(422, { code: 'ENGLISH_CONTENT_REQUIRED' });
-      if (!hasEnglishSources(article, translatedFields))
-        throw status(422, { code: 'ENGLISH_CONTENT_REQUIRED' });
+        throw status(422, { code: 'PRIMARY_CONTENT_REQUIRED' });
+      if (!hasPrimarySources(article, translatedFields))
+        throw status(422, { code: 'PRIMARY_CONTENT_REQUIRED' });
       const translations = setTranslation(article.translations, locale, translatedFields);
       const [updated] = await tx
         .update(articles)

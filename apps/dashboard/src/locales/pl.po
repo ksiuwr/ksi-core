@@ -1281,18 +1281,10 @@ msgstr "Zobacz publiczny profil"
 msgid "Biography"
 msgstr "Opis"
 
-#: src/lib/ContentTranslations.svelte
-msgid "Save the English content before adding its translation."
-msgstr "Zapisz treść angielską przed dodaniem tłumaczenia."
-
 #: src/lib/AssociationAlerts.svelte
 #: src/lib/ContentTranslations.svelte
 msgid "This content changed. Reload before saving."
 msgstr "Treść została zmieniona. Odśwież przed zapisaniem."
-
-#: src/lib/ContentTranslations.svelte
-msgid "Translate every tag in the same order as the English tags."
-msgstr "Przetłumacz wszystkie tagi w kolejności tagów angielskich."
 
 #: src/lib/ContentTranslations.svelte
 #: src/lib/docs/DocEditor.svelte
@@ -1495,9 +1487,6 @@ msgstr "Nie udało się zapisać uprawnień projektu."
 #: src/lib/ProjectPermissions.svelte
 msgid "Project permissions"
 msgstr "Uprawnienia projektu"
-
-#~ msgid "Choose article access defaults and create named groups for additional project permissions."
-#~ msgstr "Wybierz domyślny dostęp do artykułów i utwórz nazwane grupy z dodatkowymi uprawnieniami w projekcie."
 
 #: src/lib/ProjectPermissions.svelte
 msgid "Save permissions"
@@ -2424,11 +2413,6 @@ msgid "Save the translation from the language bar above."
 msgstr "Zapisz tłumaczenie na pasku języka powyżej."
 
 #: src/lib/ContentLocaleEditor.svelte
-#: src/lib/ContentLocaleEditor.svelte
-msgid "English reference"
-msgstr "Angielski tekst źródłowy"
-
-#: src/lib/ContentLocaleEditor.svelte
 msgid "Confirm remove"
 msgstr "Potwierdź usunięcie"
 
@@ -2460,26 +2444,12 @@ msgstr "Usuń tłumaczenie: {0}"
 msgid "{0} translation saved."
 msgstr "Zapisano tłumaczenie: {0}."
 
-#. 0: localeLabel( selected )
-#: src/lib/ContentTranslations.svelte
-msgid "{0} was removed. Visitors will now see English."
-msgstr "Usunięto tłumaczenie: {0}. Odwiedzający zobaczą teraz wersję angielską."
-
-#: src/lib/ProjectSettings.svelte
-msgid "English labels are required. Other language labels are optional."
-msgstr "Etykiety angielskie są wymagane. Etykiety w innych językach są opcjonalne."
-
-#. 0: contentLocaleName('en', language)
+#. 0: contentLocaleName(primaryContentLocale, language)
 #. 0: contentLocaleName(locale, language)
 #: src/lib/ProjectSettings.svelte
 #: src/lib/ProjectSettings.svelte
 msgid "Label · {0}"
 msgstr "Etykieta · {0}"
-
-#. 0: localeLabel(selected)
-#: src/lib/ContentLocaleEditor.svelte
-msgid "You are editing the {0} translation. Blank fields use the English value shown in the reference."
-msgstr "Edytujesz tłumaczenie: {0}. Puste pola użyją angielskiej wartości widocznej w podglądzie."
 
 #: src/lib/KanbanFilters.svelte
 #: src/lib/KanbanFilters.svelte
@@ -2796,17 +2766,9 @@ msgstr "Priorytet: {0}"
 msgid "Control+Enter"
 msgstr "Control+Enter"
 
-#: src/lib/AssociationAlerts.svelte
-msgid "Save the English alert before adding translations."
-msgstr "Zapisz angielską wersję alertu przed dodaniem tłumaczeń."
-
 #: src/lib/ContentTranslations.svelte
 msgid "Link"
 msgstr "Link"
-
-#: src/lib/AssociationAlerts.svelte
-msgid "Leave blank to use the English link."
-msgstr "Pozostaw puste, aby użyć angielskiego linku."
 
 #: src/lib/ProjectPermissions.svelte
 msgid "Review documentation"
@@ -3262,9 +3224,6 @@ msgstr "Strony dokumentacji"
 msgid "No pages yet."
 msgstr "Brak stron."
 
-#~ msgid "Collaboration"
-#~ msgstr "Współpraca"
-
 #: src/lib/docs/DocTree.svelte
 #: src/lib/docs/Docs.svelte
 msgid "Suggest a page"
@@ -3286,9 +3245,6 @@ msgstr "Brak dokumentacji"
 msgid "Write down how things work here, so the next team does not have to start from scratch."
 msgstr "Zapisz, jak tu wszystko działa, żeby kolejny zespół nie zaczynał od zera."
 
-#~ msgid "Page info"
-#~ msgstr ""
-
 #: src/lib/docs/DocInfo.svelte
 #: src/lib/docs/DocInfo.svelte
 #: src/lib/docs/DocInfo.svelte
@@ -3298,18 +3254,6 @@ msgstr "Szczegóły strony"
 #: src/lib/docs/DocInfo.svelte
 msgid "Details"
 msgstr "Szczegóły"
-
-#: src/lib/docs/DocError.svelte
-msgid "Write the English text first; translations translate it."
-msgstr "Najpierw dodaj tekst po angielsku, a następnie jego tłumaczenia."
-
-#: src/lib/docs/DocPage.svelte
-msgid "The English version changed after this translation was written."
-msgstr "Wersja angielska zmieniła się po przygotowaniu tego tłumaczenia."
-
-#: src/lib/docs/DocPage.svelte
-msgid "Read the English version"
-msgstr "Czytaj wersję angielską"
 
 #: src/lib/docs/DocEditor.svelte
 #: src/lib/docs/DocEditor.svelte
@@ -3323,25 +3267,6 @@ msgstr "Folder"
 msgid "Languages"
 msgstr "Języki"
 
-#~ msgid "For example: Camp/Logistics"
-#~ msgstr "Na przykład: Obóz/Logistyka"
-
-#~ msgid "Separate nested folders with “/”. Leave empty to keep the page at the top."
-#~ msgstr "Oddziel zagnieżdżone foldery znakiem „/”. Pozostaw puste, aby umieścić stronę na najwyższym poziomie."
-
-#~ msgid "Original"
-#~ msgstr "Oryginał"
-
-#~ msgid "Readers who use this language see the translation. Anything left empty shows the English text."
-#~ msgstr "Czytelnicy używający tego języka zobaczą tłumaczenie. Puste pola zostaną zastąpione tekstem angielskim."
-
-#~ msgid "Show the English text"
-#~ msgstr "Pokaż tekst angielski"
-
-#: src/lib/docs/DocHistory.svelte
-msgid "This version has no translation in this language. Showing the English text."
-msgstr "Ta wersja nie ma tłumaczenia na ten język. Wyświetlany jest tekst angielski."
-
 #: src/lib/docs/DocFolderSelect.svelte
 #: src/lib/docs/DocSuggestion.svelte
 #: src/lib/docs/DocSuggestion.svelte
@@ -3353,10 +3278,6 @@ msgstr "Najwyższy poziom"
 #: src/lib/docs/DocSuggestion.svelte
 msgid "Changed"
 msgstr "Zmieniono"
-
-#: src/lib/docs/DocSuggestion.svelte
-msgid "Empty translated fields show the English text to readers."
-msgstr "Puste pola tłumaczenia są zastępowane tekstem angielskim."
 
 #: src/lib/docs/DocEditor.svelte
 #: src/lib/docs/DocFolderDialog.svelte
@@ -3371,15 +3292,6 @@ msgstr "Nowy folder"
 msgid "Edit folder"
 msgstr "Edytuj folder"
 
-#~ msgid "English name"
-#~ msgstr "Nazwa angielska"
-
-#~ msgid "Polish name"
-#~ msgstr "Nazwa polska"
-
-#~ msgid "Optional. Falls back to the English name."
-#~ msgstr "Opcjonalnie. W razie braku tłumaczenia wyświetlana jest nazwa angielska."
-
 #: src/lib/docs/DocFolderDialog.svelte
 #: src/lib/docs/DocFolderDialog.svelte
 msgid "Parent folder"
@@ -3392,10 +3304,6 @@ msgstr "Utwórz folder"
 #: src/lib/docs/DocError.svelte
 msgid "This folder is unavailable in this workspace. Refresh and choose another folder."
 msgstr "Ten folder nie jest dostępny w tej przestrzeni. Odśwież stronę i wybierz inny folder."
-
-#: src/lib/docs/DocError.svelte
-msgid "A folder with this English name already exists inside the selected parent folder."
-msgstr "Folder o tej angielskiej nazwie już istnieje w wybranym folderze nadrzędnym."
 
 #: src/lib/docs/DocError.svelte
 msgid "Enter a folder name without “/”. Choose its parent folder separately."
@@ -3419,9 +3327,6 @@ msgstr "Dodaj podfolder"
 #: src/lib/docs/DocTree.svelte
 msgid "Empty folder"
 msgstr "Pusty folder"
-
-#~ msgid "Do you want to move"
-#~ msgstr ""
 
 #: src/lib/docs/DocTree.svelte
 #: src/lib/docs/DocTree.svelte
@@ -3492,3 +3397,62 @@ msgstr "Nazwa folderu"
 #: src/lib/docs/DocTree.svelte
 msgid "Move to top level"
 msgstr "Przenieś na najwyższy poziom"
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Save the Polish alert before adding translations."
+msgstr "Zapisz polską wersję alertu przed dodaniem tłumaczeń."
+
+#: src/lib/AssociationAlerts.svelte
+msgid "Leave blank to use the Polish link."
+msgstr "Pozostaw puste, aby użyć polskiego linku."
+
+#: src/lib/ContentLocaleEditor.svelte
+#: src/lib/ContentLocaleEditor.svelte
+msgid "Polish reference"
+msgstr "Polski tekst źródłowy"
+
+#. 0: localeLabel(selected)
+#: src/lib/ContentLocaleEditor.svelte
+msgid "You are editing the {0} translation. Blank fields use the Polish value shown in the reference."
+msgstr "Edytujesz tłumaczenie: {0}. Puste pola użyją polskiej wartości widocznej w podglądzie."
+
+#: src/lib/ContentTranslations.svelte
+msgid "Save the Polish content before adding its translation."
+msgstr "Zapisz treść polską przed dodaniem tłumaczenia."
+
+#: src/lib/ContentTranslations.svelte
+msgid "Translate every tag in the same order as the Polish tags."
+msgstr "Przetłumacz wszystkie tagi w kolejności tagów polskich."
+
+#. 0: localeLabel( selected )
+#: src/lib/ContentTranslations.svelte
+msgid "{0} was removed. Visitors will now see Polish."
+msgstr "Usunięto tłumaczenie: {0}. Odwiedzający zobaczą teraz wersję polską."
+
+#: src/lib/ProjectSettings.svelte
+msgid "Polish labels are required. Other language labels are optional."
+msgstr "Etykiety polskie są wymagane. Etykiety w innych językach są opcjonalne."
+
+#: src/lib/docs/DocError.svelte
+msgid "Write the Polish text first; translations translate it."
+msgstr "Najpierw dodaj tekst po polsku, a następnie jego tłumaczenia."
+
+#: src/lib/docs/DocError.svelte
+msgid "A folder with this Polish name already exists inside the selected parent folder."
+msgstr "Folder o tej polskiej nazwie już istnieje w wybranym folderze nadrzędnym."
+
+#: src/lib/docs/DocHistory.svelte
+msgid "This version has no translation in this language. Showing the Polish text."
+msgstr "Ta wersja nie ma tłumaczenia na ten język. Wyświetlany jest tekst polski."
+
+#: src/lib/docs/DocPage.svelte
+msgid "The Polish version changed after this translation was written."
+msgstr "Wersja polska zmieniła się po przygotowaniu tego tłumaczenia."
+
+#: src/lib/docs/DocPage.svelte
+msgid "Read the Polish version"
+msgstr "Czytaj wersję polską"
+
+#: src/lib/docs/DocSuggestion.svelte
+msgid "Empty translated fields show the Polish text to readers."
+msgstr "Puste pola tłumaczenia są zastępowane tekstem polskim."

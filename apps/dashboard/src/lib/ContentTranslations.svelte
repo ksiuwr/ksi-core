@@ -5,6 +5,7 @@
   import {
     contentLocaleName,
     contentLocales,
+    primaryContentLocale,
     type ContentLocale,
     type ContentTranslations
   } from 'shared/content-locales';
@@ -16,7 +17,7 @@
     version,
     translations = {},
     baseline,
-    selected = $bindable<ContentLocale>('en'),
+    selected = $bindable<ContentLocale>(primaryContentLocale),
     draft = $bindable<Record<string, string>>({}),
     onsaved
   }: {
@@ -44,6 +45,8 @@
   };
   const uiLanguage = $derived(preferences.language);
   const localeLabel = (locale: ContentLocale) => contentLocaleName(locale, uiLanguage);
+  const fieldsIn = (source: ContentTranslations, locale: ContentLocale) =>
+    locale === primaryContentLocale ? undefined : source[locale];
   const hasFields = (fields?: Record<string, string | string[]>) =>
     Boolean(fields && Object.keys(fields).length);
   const toDraft = (fields: Record<string, string | string[]> = {}) =>
@@ -58,7 +61,7 @@
   const initialDrafts = untrack(
     () =>
       Object.fromEntries(
-        contentLocales.map((locale) => [locale, toDraft(initial.translations[locale])])
+        contentLocales.map((locale) => [locale, toDraft(fieldsIn(initial.translations, locale))])
       ) as Record<ContentLocale, Record<string, string>>
   );
   let workingTranslations = $state<ContentTranslations>({ ...initial.translations });
@@ -72,7 +75,7 @@
   let notice = $state<'saved' | 'removed' | ''>('');
 
   const hasTranslation = (locale: ContentLocale) =>
-    locale !== 'en' && hasFields(workingTranslations[locale]);
+    hasFields(fieldsIn(workingTranslations, locale));
   const dirty = $derived(JSON.stringify(draft) !== JSON.stringify(savedDraft));
   const hasDraftContent = $derived(Object.values(draft).some((value) => value.trim()));
   $effect(() => {
@@ -84,7 +87,7 @@
     if (next === selected) return;
     drafts[selected] = draft;
     selected = next;
-    const nextDraft = drafts[selected] ?? toDraft(workingTranslations[selected]);
+    const nextDraft = drafts[selected] ?? toDraft(fieldsIn(workingTranslations, selected));
     drafts[selected] = nextDraft;
     savedDraft = savedDrafts[selected] ?? { ...nextDraft };
     draft = nextDraft;
@@ -113,7 +116,7 @@
   }
 
   async function save(remove = false) {
-    if (selected === 'en') return;
+    if (selected === primaryContentLocale) return;
     busy = true;
     error = '';
     notice = '';
@@ -134,9 +137,9 @@
       const result = await response.json();
       if (!response.ok) {
         const messages: Record<string, string> = {
-          ENGLISH_CONTENT_REQUIRED: 'Save the English content before adding its translation.',
+          PRIMARY_CONTENT_REQUIRED: 'Save the Polish content before adding its translation.',
           REVISION_CONFLICT: 'This content changed. Reload before saving.',
-          TRANSLATED_TAG_COUNT: 'Translate every tag in the same order as the English tags.'
+          TRANSLATED_TAG_COUNT: 'Translate every tag in the same order as the Polish tags.'
         };
         throw new Error(messages[result.code] ?? result.code ?? 'Request failed');
       }
@@ -179,7 +182,7 @@
     {#if notice}<p class="message success" role="status">
         <Check size={14} />{#if notice === 'saved'}{localeLabel(selected)} translation saved.{:else}{localeLabel(
             selected
-          )} was removed. Visitors will now see English.{/if}
+          )} was removed. Visitors will now see Polish.{/if}
       </p>{/if}
   {/snippet}
   {#snippet reference()}
