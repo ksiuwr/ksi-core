@@ -233,7 +233,6 @@ msgstr "Ciemny"
 msgid "Logowanie · KSI"
 msgstr "Logowanie · KSI"
 
-#: src/routes/+page.svelte
 #: src/routes/reset-password/+page.svelte
 msgid "EN"
 msgstr "EN"

@@ -7,7 +7,7 @@ import {
   frontendLocale,
   frontendLocaleFromCookie
 } from 'shared/content-locales';
-import { preferenceCookie } from 'shared/preference-cookie';
+import { preferenceCookie, preferenceCookieRemoval } from 'shared/preference-cookie';
 
 const languageEvents = ['storage', 'focus', 'pageshow', 'ksi-locale-change'] as const;
 
@@ -21,13 +21,22 @@ function storedLocale(): Locale | null {
 
 /** The shared cookie wins so every KSI frontend follows the last chosen locale. */
 function preferredLocale(): Locale {
-  return frontendLocaleFromCookie(document.cookie) ?? storedLocale() ?? defaultFrontendLocale;
+  const removal = preferenceCookieRemoval('locale', location.hostname);
+  if (!removal)
+    return frontendLocaleFromCookie(document.cookie) ?? storedLocale() ?? defaultFrontendLocale;
+  const seen = frontendLocaleFromCookie(document.cookie);
+  document.cookie = removal;
+  return (
+    frontendLocaleFromCookie(document.cookie) ?? seen ?? storedLocale() ?? defaultFrontendLocale
+  );
 }
 
 function persist(newLocale: Locale) {
   try {
     localStorage.setItem('locale', newLocale);
   } catch {}
+  const removal = preferenceCookieRemoval('locale', location.hostname);
+  if (removal) document.cookie = removal;
   document.cookie = preferenceCookie(
     'locale',
     newLocale,

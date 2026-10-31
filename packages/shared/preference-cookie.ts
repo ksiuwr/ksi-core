@@ -22,3 +22,12 @@ export function preferenceCookie(
   const domain = preferenceCookieDomain(hostname);
   return `${name}=${encodeURIComponent(value)}; Path=/; Max-Age=31536000; SameSite=Lax${domain ? `; Domain=${domain}` : ''}${secure ? '; Secure' : ''}`;
 }
+
+/**
+ * Legacy builds wrote a host-only cookie, which shadows the shared domain cookie
+ * even after the shared one changes. Removing it lets the domain cookie win.
+ */
+export function preferenceCookieRemoval(name: string, hostname: string): string | null {
+  if (!preferenceCookieDomain(hostname)) return null;
+  return `${name}=; Path=/; Max-Age=0; SameSite=Lax`;
+}
