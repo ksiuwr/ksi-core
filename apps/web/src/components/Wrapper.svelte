@@ -47,7 +47,7 @@
   <section class="page-hero bg-base-100 relative w-full">
     <div class="page-gutter page-stack-hero relative mx-auto w-full max-w-[100rem]">
       <nav
-        aria-label="Breadcrumb"
+        aria-label="Okruszki nawigacyjne"
         class="text-base-content/45 mb-10 flex items-center gap-3 text-xs font-bold tracking-[0.16em] uppercase"
       >
         <span aria-hidden="true">[</span>

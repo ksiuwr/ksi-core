@@ -19,7 +19,7 @@
     error = '';
     fetch(path, { signal: controller.signal })
       .then(async (response) => {
-        if (!response.ok) throw new Error('Unable to load subscription');
+        if (!response.ok) throw new Error('Nie udało się wczytać subskrypcji');
         const result = await response.json();
         if (!controller.signal.aborted) watching = result.watching;
       })
@@ -40,7 +40,7 @@
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ watching: !watching })
       });
-      if (!response.ok) throw new Error('Unable to change subscription');
+      if (!response.ok) throw new Error('Nie udało się zmienić subskrypcji');
       watching = (await response.json()).watching;
     } catch (cause) {
       error = (cause as Error).message;
@@ -55,17 +55,17 @@
   class="watch-button"
   class:with-label={showLabel}
   aria-pressed={watching}
-  aria-label={watching ? 'Unwatch' : 'Watch'}
+  aria-label={watching ? 'Przestań obserwować' : 'Obserwuj'}
   disabled={busy}
   onclick={toggle}
 >
-  {#if busy}<span class="sr-only">Loading…</span>
+  {#if busy}<span class="sr-only">Wczytywanie…</span>
   {:else if watching}<BellOff size={13} aria-hidden="true" />
   {:else}<Bell size={13} aria-hidden="true" />
   {/if}
   {#if showLabel}
     <span class="watch-label"
-      >{#if watching}Unwatch{:else}Watch{/if}</span
+      >{#if watching}Przestań obserwować{:else}Obserwuj{/if}</span
     >
   {/if}
 </button>

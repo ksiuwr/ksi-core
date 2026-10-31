@@ -11,12 +11,12 @@
 <div class="theme-selector">
   <Dropdown
     variant="compact"
-    label={'Appearance'}
+    label={'Wygląd'}
     value={preference}
     options={[
-      { value: 'system', label: 'System' },
-      { value: 'light', label: 'Light' },
-      { value: 'dark', label: 'Dark' }
+      { value: 'system', label: 'Systemowy' },
+      { value: 'light', label: 'Jasny' },
+      { value: 'dark', label: 'Ciemny' }
     ]}
     onselect={(value) => setThemePreference(value as ThemePreference)}
     >{#snippet leading()}<SunMoon size={15} aria-hidden="true" />{/snippet}</Dropdown

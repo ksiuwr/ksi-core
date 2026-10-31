@@ -19,8 +19,8 @@
   let visibleLines = $state<Record<number, number>>({});
   let layout = $state('split');
   const options = $derived([
-    { value: 'split', label: language === 'pl' ? 'Obok siebie' : 'Side by side' },
-    { value: 'unified', label: language === 'pl' ? 'Widok łączony' : 'Unified' }
+    { value: 'split', label: 'Obok siebie' },
+    { value: 'unified', label: 'Widok łączony' }
   ]);
   const validChanges = $derived(
     changes.filter(
@@ -28,68 +28,68 @@
         change && typeof change.field === 'string' && hasContentChange(change.before, change.after)
     )
   );
-  const names: Record<string, [string, string]> = {
-    statuses: ['Statusy tablicy', 'Board statuses'],
-    layout: ['Układ strony', 'Page layout'],
-    links: ['Linki', 'Links'],
-    leaderIds: ['Liderzy', 'Leaders'],
-    member: ['Członkostwo', 'Membership'],
-    leader: ['Lider', 'Leader'],
-    memberPermissions: ['Uprawnienia członków', 'Member permissions'],
-    nonMemberPermissions: ['Uprawnienia pozostałych osób', 'Non-member permissions'],
-    groups: ['Grupy uprawnień', 'Permission groups'],
-    visibility: ['Widoczność', 'Visibility'],
-    invitedIds: ['Zaproszone osoby', 'Invited members'],
-    archivedAt: ['Archiwizacja', 'Archived at'],
-    deletedAt: ['Usunięcie', 'Deleted at'],
-    publicCredit: ['Publiczne autorstwo', 'Public author credit'],
-    image: ['Awatar', 'Avatar'],
-    fileId: ['Plik awatara', 'Avatar file'],
-    emailVerified: ['Potwierdzony adres e-mail', 'Email verified'],
-    emailChanged: ['Zmiana adresu e-mail', 'Email changed'],
-    active: ['Aktywna sesja', 'Active session'],
-    reference: ['Powiązanie pliku', 'File reference'],
-    filename: ['Nazwa pliku', 'Filename'],
-    mime: ['Typ pliku', 'File type'],
-    size: ['Rozmiar pliku', 'File size'],
-    branch: ['Gałąź', 'Branch'],
-    commit: ['Wersja kodu', 'Commit'],
-    previewUrl: ['Adres podglądu', 'Preview URL'],
-    available: ['Dostępność', 'Availability'],
-    priority: ['Priorytet', 'Priority'],
-    link: ['Link', 'Link'],
-    color: ['Kolor', 'Color'],
-    startDate: ['Data początku', 'Start date'],
-    endDate: ['Data końca', 'End date'],
-    title: ['Tytuł', 'Title'],
-    markdown: ['Treść', 'Description'],
-    column: ['Status', 'Status'],
-    labels: ['Etykiety', 'Labels'],
-    assigneeIds: ['Przypisane osoby', 'Assignees'],
-    label: ['Etykieta', 'Label'],
-    dueAt: ['Termin', 'Deadline'],
-    tags: ['Tagi projektu', 'Project tags'],
-    name: ['Nazwa', 'Name'],
-    description: ['Opis', 'Description'],
-    firstName: ['Imię', 'First name'],
-    lastName: ['Nazwisko', 'Last name'],
-    nickname: ['Pseudonim', 'Nickname'],
-    bio: ['Biografia', 'Biography'],
-    github: ['GitHub', 'GitHub'],
-    linkedin: ['LinkedIn', 'LinkedIn'],
-    publicPrivacy: ['Prywatność profilu', 'Profile privacy'],
-    role: ['Rola', 'Role'],
-    membershipStatus: ['Status członkostwa', 'Membership status'],
-    flags: ['Uprawnienia', 'Permissions'],
-    position: ['Pozycja', 'Position'],
-    order: ['Kolejność zadań', 'Task order'],
-    state: ['Stan publikacji', 'Publication state'],
-    locked: ['Projekt zamknięty', 'Project locked'],
-    fields: ['Obszary projektu', 'Project fields'],
-    mainArticle: ['Główny artykuł', 'Main article'],
-    projectFeed: ['Aktualności projektu', 'Project feed'],
-    websiteFeed: ['Aktualności strony', 'Website feed'],
-    thumbnailFileId: ['Miniatura', 'Thumbnail']
+  const names: Record<string, string> = {
+    statuses: 'Statusy tablicy',
+    layout: 'Układ strony',
+    links: 'Linki',
+    leaderIds: 'Liderzy',
+    member: 'Członkostwo',
+    leader: 'Lider',
+    memberPermissions: 'Uprawnienia członków',
+    nonMemberPermissions: 'Uprawnienia pozostałych osób',
+    groups: 'Grupy uprawnień',
+    visibility: 'Widoczność',
+    invitedIds: 'Zaproszone osoby',
+    archivedAt: 'Archiwizacja',
+    deletedAt: 'Usunięcie',
+    publicCredit: 'Publiczne autorstwo',
+    image: 'Awatar',
+    fileId: 'Plik awatara',
+    emailVerified: 'Potwierdzony adres e-mail',
+    emailChanged: 'Zmiana adresu e-mail',
+    active: 'Aktywna sesja',
+    reference: 'Powiązanie pliku',
+    filename: 'Nazwa pliku',
+    mime: 'Typ pliku',
+    size: 'Rozmiar pliku',
+    branch: 'Gałąź',
+    commit: 'Wersja kodu',
+    previewUrl: 'Adres podglądu',
+    available: 'Dostępność',
+    priority: 'Priorytet',
+    link: 'Link',
+    color: 'Kolor',
+    startDate: 'Data początku',
+    endDate: 'Data końca',
+    title: 'Tytuł',
+    markdown: 'Treść',
+    column: 'Status',
+    labels: 'Etykiety',
+    assigneeIds: 'Przypisane osoby',
+    label: 'Etykieta',
+    dueAt: 'Termin',
+    tags: 'Tagi projektu',
+    name: 'Nazwa',
+    description: 'Opis',
+    firstName: 'Imię',
+    lastName: 'Nazwisko',
+    nickname: 'Pseudonim',
+    bio: 'Biografia',
+    github: 'GitHub',
+    linkedin: 'LinkedIn',
+    publicPrivacy: 'Prywatność profilu',
+    role: 'Rola',
+    membershipStatus: 'Status członkostwa',
+    flags: 'Uprawnienia',
+    position: 'Pozycja',
+    order: 'Kolejność zadań',
+    state: 'Stan publikacji',
+    locked: 'Projekt zamknięty',
+    fields: 'Obszary projektu',
+    mainArticle: 'Główny artykuł',
+    projectFeed: 'Aktualności projektu',
+    websiteFeed: 'Aktualności strony',
+    thumbnailFileId: 'Miniatura'
   };
   function display(field: string, value: unknown): string {
     if (
@@ -98,9 +98,8 @@
       value === '' ||
       (Array.isArray(value) && !value.length)
     )
-      return language === 'pl' ? 'Brak wartości' : 'Not set';
-    if (typeof value === 'boolean')
-      return value ? (language === 'pl' ? 'Tak' : 'Yes') : language === 'pl' ? 'Nie' : 'No';
+      return 'Brak wartości';
+    if (typeof value === 'boolean') return value ? 'Tak' : 'Nie';
     if (typeof value === 'string') {
       if (/^\d{4}-\d{2}-\d{2}T/.test(value) && !Number.isNaN(new Date(value).getTime()))
         return formatDateTime(value, language, { dateStyle: 'medium', timeStyle: 'short' });
@@ -118,17 +117,12 @@
   <div class="changes">
     <div class="changes-toolbar">
       <span class="changes-caption"
-        ><FileDiff size={14} aria-hidden="true" />{language === 'pl' ? 'Zmiany' : 'Changes'}<span
-          class="change-count">{validChanges.length}</span
+        ><FileDiff size={14} aria-hidden="true" />Zmiany<span class="change-count"
+          >{validChanges.length}</span
         ></span
       >
       <div class="layout-picker">
-        <Dropdown
-          label={language === 'pl' ? 'Układ porównania' : 'Diff layout'}
-          bind:value={layout}
-          {options}
-          variant="compact"
-        />
+        <Dropdown label={'Układ porównania'} bind:value={layout} {options} variant="compact" />
       </div>
     </div>
     {#each validChanges as change, index}
@@ -147,7 +141,7 @@
             size={15}
             aria-hidden="true"
           />
-          <strong>{names[change.field]?.[language === 'pl' ? 0 : 1] ?? change.field}</strong>
+          <strong>{names[change.field] ?? change.field}</strong>
           <span class="change-summary"
             ><span>{summary(change.field, change.before)}</span><ArrowRight
               size={12}
@@ -163,21 +157,15 @@
             )}
             {@const limit = visibleLines[index] ?? 120}
             <div class="diff-headings" class:unified={layout === 'unified'}>
-              <span class="before-heading"
-                ><Minus size={12} aria-hidden="true" />{language === 'pl'
-                  ? 'Przed'
-                  : 'Before'}</span
-              >
-              <span class="after-heading"
-                ><Plus size={12} aria-hidden="true" />{language === 'pl' ? 'Po' : 'After'}</span
-              >
+              <span class="before-heading"><Minus size={12} aria-hidden="true" />Przed</span>
+              <span class="after-heading"><Plus size={12} aria-hidden="true" />Po</span>
             </div>
             <!-- svelte-ignore a11y_no_noninteractive_tabindex (Keyboard users need to focus and scroll long diffs.) -->
             <div
               class="diff-scroll"
               tabindex="0"
               role="region"
-              aria-label={names[change.field]?.[language === 'pl' ? 0 : 1] ?? change.field}
+              aria-label={names[change.field] ?? change.field}
             >
               {#each rows.slice(0, limit) as row}
                 {#if layout === 'split'}
@@ -223,8 +211,7 @@
                 type="button"
                 class="show-more"
                 onclick={() => (visibleLines[index] = limit + 120)}
-                >{language === 'pl' ? 'Pokaż więcej wierszy' : 'Show more lines'} ({rows.length -
-                  limit})</button
+                >Pokaż więcej wierszy ({rows.length - limit})</button
               >{/if}
           {/if}
         </div>

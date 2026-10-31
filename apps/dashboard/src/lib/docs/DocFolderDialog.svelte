@@ -131,18 +131,18 @@
 >
   <form onsubmit={save}>
     <h2 id={`${uid}-title`}>
-      {#if confirmingDelete}{'Delete folder?'}{:else if folder}{'Edit folder'}{:else}{'New folder'}{/if}
+      {#if confirmingDelete}Usunąć folder?{:else if folder}Edytuj folder{:else}Nowy folder{/if}
     </h2>
     <DocError code={error} />
     {#if confirmingDelete && folder}
       <p class="delete-summary">
-        {`Delete folder “${docFolderName(folder, preferences.language)}”?`}
+        {`Usunąć folder „${docFolderName(folder, preferences.language)}”?`}
       </p>
       {#if hasContents}<p class="delete-note">
-          {'Move pages and subfolders out before deleting this folder.'}
+          Przed usunięciem folderu przenieś z niego strony i podfoldery.
         </p>
       {:else}<p class="delete-note">
-          {'This cannot be undone. Existing version history will be preserved.'}
+          Tej czynności nie można cofnąć. Dotychczasowa historia wersji zostanie zachowana.
         </p>{/if}
       <div class="folder-actions">
         <button
@@ -152,13 +152,13 @@
           onclick={() => {
             confirmingDelete = false;
             error = '';
-          }}>{'Cancel'}</button
+          }}>Anuluj</button
         >
         <button
           type="button"
           class="btn danger-button"
           disabled={busy || hasContents}
-          onclick={remove}><Trash2 size={15} aria-hidden="true" />{'Delete folder'}</button
+          onclick={remove}><Trash2 size={15} aria-hidden="true" />Usuń folder</button
         >
       </div>
     {:else}
@@ -167,18 +167,18 @@
         {added}
         {dirty}
         {busy}
-        saveHint={'All language versions are saved together with the folder.'}
+        saveHint={'Wszystkie wersje językowe są zapisywane razem z folderem.'}
         onremove={() => {
           if (editing !== primaryContentLocale) names[editing] = '';
         }}
       >
         {#snippet reference()}<p class="folder-reference" lang={primaryContentLocale}>
-            {names[primaryContentLocale] || 'No content'}
+            {names[primaryContentLocale] || 'Brak treści'}
           </p>{/snippet}
       </ContentLocaleEditor>
       <div>
         <label for={`${uid}-name`}
-          >{'Folder name'} · {contentLocaleName(editing, preferences.language)}</label
+          >Nazwa folderu · {contentLocaleName(editing, preferences.language)}</label
         >
         <input
           id={`${uid}-name`}
@@ -191,12 +191,12 @@
         />
       </div>
       <div>
-        <label for={`${uid}-parent`}>{'Parent folder'}</label>
+        <label for={`${uid}-parent`}>Folder nadrzędny</label>
         <DocFolderSelect
           id={`${uid}-parent`}
           bind:value={parent}
           {folders}
-          label={'Parent folder'}
+          label={'Folder nadrzędny'}
           locale={preferences.language}
           excludeId={folder?.id}
           disabled={busy}
@@ -210,13 +210,13 @@
             onclick={() => {
               confirmingDelete = true;
               error = '';
-            }}><Trash2 size={15} aria-hidden="true" />{'Delete folder'}</button
+            }}><Trash2 size={15} aria-hidden="true" />Usuń folder</button
           >{/if}
         <button type="button" class="btn btn-outline" disabled={busy} onclick={onclose}
-          >{'Cancel'}</button
+          >Anuluj</button
         >
         <button class="btn" disabled={busy || !names[primaryContentLocale].trim()}
-          >{#if folder}{'Save changes'}{:else}{'Create folder'}{/if}</button
+          >{#if folder}Zapisz zmiany{:else}Utwórz folder{/if}</button
         >
       </div>
     {/if}

@@ -103,23 +103,23 @@
     values.includes(value) ? values.filter((item) => item !== value) : [...values, value];
 </script>
 
-<div class="kanban-filters" role="search" aria-label={'Filter tasks'}>
+<div class="kanban-filters" role="search" aria-label={'Filtruj zadania'}>
   <div class="filter-search">
     <Search size={15} aria-hidden="true" />
     <input
       bind:this={searchInput}
       type="search"
       bind:value={() => filters.query, onquery}
-      placeholder={'Search tasks…'}
-      aria-label={'Search tasks'}
+      placeholder={'Szukaj zadań…'}
+      aria-label={'Szukaj zadań'}
       enterkeyhint="search"
     />
     {#if filters.query}
       <button
         type="button"
         class="filter-icon-button"
-        aria-label={'Clear search'}
-        title={'Clear search'}
+        aria-label={'Wyczyść wyszukiwanie'}
+        title={'Wyczyść wyszukiwanie'}
         onclick={() => {
           onchange({ ...filters, query: '' });
           searchInput?.focus();
@@ -134,42 +134,46 @@
     aria-expanded={expanded}
     aria-controls={`${uid}-facets`}
     onclick={() => (expanded = !expanded)}
-    ><SlidersHorizontal size={15} aria-hidden="true" />{'Filters'}{#if facetCount}<span
+    ><SlidersHorizontal size={15} aria-hidden="true" />Filtry{#if facetCount}<span
         class="filter-count">{facetCount}</span
       >{/if}</button
   >
   <div id={`${uid}-facets`} class="filter-facets" class:expanded>
     <div class="filter-field" class:active={!!filters.scope}>
       <Dropdown
-        label={'Show tasks'}
+        label={'Pokaż zadania'}
         value={filters.scope ?? ''}
         leading={scopeIcon}
         onselect={(value) => onchange({ ...filters, scope: (value || null) as TaskScope | null })}
         options={[
-          { value: '', label: 'All tasks' },
+          { value: '', label: 'Wszystkie zadania' },
           {
             value: 'assigned',
-            label: 'Assigned to you',
-            description: 'You are one of the assignees'
+            label: 'Przypisane do Ciebie',
+            description: 'Jesteś wśród przypisanych osób'
           },
-          { value: 'authored', label: 'Authored by you', description: 'You created the task' },
+          {
+            value: 'authored',
+            label: 'Utworzone przez Ciebie',
+            description: 'Zadanie utworzone przez Ciebie'
+          },
           {
             value: 'involves',
-            label: 'Involves you',
+            label: 'Z Twoim udziałem',
             description:
-              'Assigned to or created by you, or you commented, were mentioned or watch it'
+              'Przypisane do Ciebie lub utworzone przez Ciebie, z Twoim komentarzem, wzmianką o Tobie lub obserwowane przez Ciebie'
           },
           {
             value: 'relevant',
-            label: 'Relevant',
-            description: 'Involves you, or is still open with nobody assigned'
+            label: 'Istotne',
+            description: 'Z Twoim udziałem lub otwarte i wciąż bez przypisanej osoby'
           }
         ]}
       />
     </div>
     <div class="filter-field" class:active={assigneeActive}>
       <Dropdown
-        label={'Assignee'}
+        label={'Osoba przypisana'}
         valueContent={assigneeSummary}
         options={[]}
         leading={assigneeIcon}
@@ -178,7 +182,7 @@
     </div>
     <div class="filter-field" class:active={labelActive}>
       <Dropdown
-        label={'Label'}
+        label={'Etykieta'}
         valueContent={labelSummary}
         options={[]}
         leading={labelIcon}
@@ -188,34 +192,39 @@
     </div>
     <div class="filter-field" class:active={!!filters.deadline}>
       <Dropdown
-        label={'Deadline'}
+        label={'Termin zadania'}
         value={filters.deadline ?? ''}
         leading={deadlineIcon}
         onselect={(value) =>
           onchange({ ...filters, deadline: (value || null) as DeadlineFilter | null })}
         options={[
-          { value: '', label: 'Any deadline' },
-          { value: 'overdue', label: 'Overdue', description: 'Past the deadline and not done' },
-          { value: 'today', label: 'Due today' },
-          { value: 'week', label: 'Due in the next 7 days' },
-          { value: 'month', label: 'Due in the next 30 days' },
-          { value: 'dated', label: 'Has a deadline' },
-          { value: 'undated', label: 'No deadline' }
+          { value: '', label: 'Dowolny termin' },
+          {
+            value: 'overdue',
+            label: 'Po terminie',
+            description: 'Termin minął, a zadanie nie jest ukończone'
+          },
+          { value: 'today', label: 'Termin dzisiaj' },
+          { value: 'week', label: 'Termin w ciągu 7 dni' },
+          { value: 'month', label: 'Termin w ciągu 30 dni' },
+          { value: 'dated', label: 'Z terminem' },
+          { value: 'undated', label: 'Bez terminu' }
         ]}
       />
     </div>
   </div>
   <div class="filter-summary" class:active>
     <span role="status"
-      >{#if active && visibleCount === 0}No tasks match these filters.{:else if active}Showing {visibleCount}
-        of {totalCount}{/if}</span
+      >{#if active && visibleCount === 0}Żadne zadanie nie pasuje do tych filtrów.{:else if active}Wyświetlane:
+        {visibleCount}
+        z {totalCount}{/if}</span
     >
     {#if active}
       <button
         type="button"
         class="btn btn-outline btn-sm filter-clear"
         onclick={() => onchange({ ...emptyTaskFilters })}
-        ><X size={14} aria-hidden="true" />{'Clear filters'}</button
+        ><X size={14} aria-hidden="true" />Wyczyść filtry</button
       >
     {/if}
   </div>
@@ -223,23 +232,23 @@
 
 {#snippet assigneeSummary()}
   {#if filters.unassigned}
-    <span>Unassigned</span>{#if filters.assignees.length}
+    <span>Bez przypisania</span>{#if filters.assignees.length}
       +{filters.assignees.length}{/if}
   {:else if assigneeNames.length}
     {summarize(assigneeNames)}
   {:else}
-    Assignee
+    Osoba przypisana
   {/if}
 {/snippet}
 
 {#snippet labelSummary()}
   {#if filters.unlabeled}
-    <span>No label</span>{#if filters.labels.length}
+    <span>Bez etykiety</span>{#if filters.labels.length}
       +{filters.labels.length}{/if}
   {:else if filters.labels.length}
     {summarize(filters.labels)}
   {:else}
-    Label
+    Etykieta
   {/if}
 {/snippet}
 
@@ -255,11 +264,11 @@
       <input
         type="search"
         bind:value={assigneeQuery}
-        placeholder={'Search people…'}
-        aria-label={'Search people'}
+        placeholder={'Szukaj osób…'}
+        aria-label={'Szukaj osób'}
       />
     </label>
-    <div class="facet-options" role="group" aria-label={'Assignee'}>
+    <div class="facet-options" role="group" aria-label={'Osoba przypisana'}>
       {#if !assigneeQuery.trim()}
         <label class="facet-option">
           <input
@@ -268,7 +277,7 @@
             onchange={() => onchange({ ...filters, unassigned: !filters.unassigned })}
           />
           <span class="facet-placeholder-avatar" aria-hidden="true"><UserRoundX size={12} /></span>
-          <span class="facet-text">Unassigned</span>
+          <span class="facet-text">Bez przypisania</span>
         </label>
       {/if}
       {#each matchingPeople as person (person.id)}
@@ -280,10 +289,10 @@
               onchange({ ...filters, assignees: toggle(filters.assignees, person.id) })}
           />
           <Assignees value={[person.id]} {members} readonly showLabel={false} />
-          {#if person.id === userId}<small class="facet-hint">You</small>{/if}
+          {#if person.id === userId}<small class="facet-hint">Ty</small>{/if}
         </label>
       {:else}
-        <p class="facet-empty" role="status">No matching members.</p>
+        <p class="facet-empty" role="status">Brak pasujących osób.</p>
       {/each}
     </div>
   </div>
@@ -296,11 +305,11 @@
       <input
         type="search"
         bind:value={labelQuery}
-        placeholder={'Search labels…'}
-        aria-label={'Search labels'}
+        placeholder={'Szukaj etykiet…'}
+        aria-label={'Szukaj etykiet'}
       />
     </label>
-    <div class="facet-options" role="group" aria-label={'Label'}>
+    <div class="facet-options" role="group" aria-label={'Etykieta'}>
       {#if !labelQuery.trim()}
         <label class="facet-option">
           <input
@@ -308,7 +317,7 @@
             checked={filters.unlabeled}
             onchange={() => onchange({ ...filters, unlabeled: !filters.unlabeled })}
           />
-          <span class="facet-text">No label</span>
+          <span class="facet-text">Bez etykiety</span>
         </label>
       {/if}
       {#each matchingLabels as label (label.name)}
@@ -325,7 +334,7 @@
           {#if label.description}<small class="facet-hint">{label.description}</small>{/if}
         </label>
       {:else}
-        <p class="facet-empty" role="status">No matching labels.</p>
+        <p class="facet-empty" role="status">Brak pasujących etykiet.</p>
       {/each}
     </div>
   </div>

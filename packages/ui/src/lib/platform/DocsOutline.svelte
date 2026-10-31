@@ -31,7 +31,7 @@
 {#if headings.length}
   <details class="docs-outline" bind:this={details}>
     <summary
-      ><TextAlignStart size={15} aria-hidden="true" />{'On this page'}<ChevronDown
+      ><TextAlignStart size={15} aria-hidden="true" />Na tej stronie<ChevronDown
         class="docs-outline-chevron"
         size={15}
         aria-hidden="true"

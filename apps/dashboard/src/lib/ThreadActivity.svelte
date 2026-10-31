@@ -68,16 +68,10 @@
   );
   const visibilityName = (value: string) =>
     value === 'leaders'
-      ? pl
-        ? 'liderów'
-        : 'leaders'
+      ? 'liderów'
       : value === 'members'
-        ? pl
-          ? 'członków projektu'
-          : 'project members'
-        : pl
-          ? 'członków stowarzyszenia'
-          : 'association members';
+        ? 'członków projektu'
+        : 'członków stowarzyszenia';
   const personPlural = (count: number) =>
     count === 1
       ? 'osobę'
@@ -104,40 +98,24 @@
     {#if event.authorId}<a
         class="activity-author"
         href={`/members/${encodeURIComponent(event.authorId)}`}
-        >{event.authorName || (pl ? 'Członek stowarzyszenia' : 'Association member')}</a
-      >{:else}<strong class="activity-author">{event.authorName || 'System'}</strong>{/if}
+        >{event.authorName || 'Członek stowarzyszenia'}</a
+      >{:else}<strong class="activity-author">{event.authorName || 'Systemowy'}</strong>{/if}
     {' '}
     {#each summaries as summary, index}
       {#if index > 0}{' '}<span class="activity-separator">·</span>{' '}{/if}
-      {#if summary.kind === 'created'}{pl ? 'utworzył(a) ten wątek' : 'created this thread'}
-      {:else if summary.kind === 'archived'}{pl
-          ? 'zarchiwizował(a) ten wątek'
-          : 'archived this thread'}
-      {:else if summary.kind === 'restored'}{pl
-          ? 'przywrócił(a) ten wątek'
-          : 'restored this thread'}
-      {:else if summary.kind === 'comment-added'}{pl ? 'dodał(a) komentarz' : 'added a comment'}
-      {:else if summary.kind === 'comment-edited'}{pl
-          ? 'edytował(a) komentarz'
-          : 'edited a comment'}
-      {:else if summary.kind === 'comment-removed'}{pl
-          ? 'usunął(a) komentarz'
-          : 'removed a comment'}
-      {:else if summary.kind === 'access'}{pl
-          ? 'zmienił(a) dostęp do wątku'
-          : 'changed thread access'}
+      {#if summary.kind === 'created'}utworzył(a) ten wątek
+      {:else if summary.kind === 'archived'}zarchiwizował(a) ten wątek
+      {:else if summary.kind === 'restored'}przywrócił(a) ten wątek
+      {:else if summary.kind === 'comment-added'}dodał(a) komentarz
+      {:else if summary.kind === 'comment-edited'}edytował(a) komentarz
+      {:else if summary.kind === 'comment-removed'}usunął(a) komentarz
+      {:else if summary.kind === 'access'}zmienił(a) dostęp do wątku
       {:else if summary.kind === 'visibility'}
-        {pl ? 'zmienił(a) widoczność z' : 'changed visibility from'}
+        zmienił(a) widoczność z
         <span class="thread-value">{visibilityName(summary.before)}</span>
-        {pl ? 'na' : 'to'} <span class="thread-value">{visibilityName(summary.after)}</span>
+        na <span class="thread-value">{visibilityName(summary.after)}</span>
       {:else if summary.kind === 'assignee-added' || summary.kind === 'assignee-removed'}
-        {summary.kind === 'assignee-added'
-          ? pl
-            ? 'przypisał(a)'
-            : 'assigned'
-          : pl
-            ? 'usunął(a) przypisanie'
-            : 'unassigned'}
+        {summary.kind === 'assignee-added' ? 'przypisał(a)' : 'usunął(a) przypisanie'}
         {' '}{#each summary.ids as id, personIndex}{#if personIndex > 0}{', '}{/if}<MemberPreview
             member={person(id)}
             href={`/members/${encodeURIComponent(id)}`}
@@ -152,7 +130,7 @@
         {pl
           ? `usunął(a) ${summary.count} ${invitationPlural(summary.count)}`
           : `removed ${summary.count} ${summary.count === 1 ? 'invitation' : 'invitations'}`}
-      {:else}{pl ? 'zaktualizował(a) ten wątek' : 'updated this thread'}{/if}
+      {:else}zaktualizował(a) ten wątek{/if}
     {/each}
     {' '}<time datetime={event.createdAt} title={absoluteTime} aria-label={absoluteTime}
       >{relativeTime}</time

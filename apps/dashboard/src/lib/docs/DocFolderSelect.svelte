@@ -28,7 +28,7 @@
     excludeId ? docFolderDescendants(folders, excludeId) : new Set<string>()
   );
   const options = $derived<DropdownOption[]>([
-    { value: '', label: 'Top level' },
+    { value: '', label: 'Najwyższy poziom' },
     ...docFolderOptions(folders, locale)
       .filter((option) => !excluded.has(option.id))
       .map((option) => {
@@ -52,8 +52,8 @@
   {id}
   {disabled}
   searchable
-  searchPlaceholder={'Search folders'}
-  emptyLabel={'No folders found'}
+  searchPlaceholder={'Szukaj folderów'}
+  emptyLabel={'Nie znaleziono folderów'}
 >
   {#snippet valueContent()}<span title={selectedPath}>{selectedPath}</span>{/snippet}
 </Dropdown>

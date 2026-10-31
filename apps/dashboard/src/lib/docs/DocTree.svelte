@@ -123,14 +123,14 @@
       }}
     >
       <FileText size={14} aria-hidden="true" /><TreeLabel value={page.title} />
-      {#if page.public}<Globe class="tree-public" size={12} aria-label={'Public'} />{/if}
+      {#if page.public}<Globe class="tree-public" size={12} aria-label={'Publiczna'} />{/if}
     </a>
     {#if index.access.canReview}
       <button
         type="button"
         class="tree-tool"
-        title={'Move page'}
-        aria-label={`${'Move page'}: ${page.title}`}
+        title={'Przenieś stronę'}
+        aria-label={`${'Przenieś stronę'}: ${page.title}`}
         onclick={() => askMove(page, page.folderId)}
         ><ArrowRightLeft size={13} aria-hidden="true" /></button
       >
@@ -161,8 +161,8 @@
             <button
               type="button"
               class="tree-tool"
-              title={'Add subfolder'}
-              aria-label={`${'Add subfolder'}: ${folder.name}`}
+              title={'Dodaj podfolder'}
+              aria-label={`${'Dodaj podfolder'}: ${folder.name}`}
               onclick={(event) => {
                 event.preventDefault();
                 folderForm(null, folder.id);
@@ -171,8 +171,8 @@
             <button
               type="button"
               class="tree-tool"
-              title={'Edit folder'}
-              aria-label={`${'Edit folder'}: ${folder.name}`}
+              title={'Edytuj folder'}
+              aria-label={`${'Edytuj folder'}: ${folder.name}`}
               onclick={(event) => {
                 event.preventDefault();
                 folderForm(index.folders.find((item) => item.id === folder.id)!, null);
@@ -186,7 +186,7 @@
           class="tree-empty"
           style:--depth={depth + 1}
         >
-          {'Empty folder'}
+          Pusty folder
         </p>{/if}
     </details>
   {/each}
@@ -197,18 +197,18 @@
   class:drop-zone={liftable}
   class:drop-target={over === null}
   role="group"
-  aria-label={liftable ? 'Top level' : undefined}
+  aria-label={liftable ? 'Najwyższy poziom' : undefined}
   ondragover={(event) => dragOver(event, null)}
   ondragleave={() => (over = undefined)}
   ondrop={(event) => drop(event, null)}
 >
   {#if liftable}
-    <FolderOpen size={14} aria-hidden="true" /><span>{'Move to top level'}</span>
+    <FolderOpen size={14} aria-hidden="true" /><span>Przenieś na najwyższy poziom</span>
   {:else}
-    <span>{'Pages'}</span>
+    <span>Strony</span>
     <span class="tree-heading-tools">
       {#if index.access.canPropose}
-        {@const newPage = index.access.canReview ? 'New page' : 'Suggest a page'}
+        {@const newPage = index.access.canReview ? 'Nowa strona' : 'Zaproponuj stronę'}
         <a class="tree-tool" href={docsPath(slug, 'new')} title={newPage} aria-label={newPage}
           ><FilePlus size={15} aria-hidden="true" /></a
         >
@@ -217,17 +217,17 @@
         <button
           type="button"
           class="tree-tool"
-          title={'New folder'}
-          aria-label={'New folder'}
+          title={'Nowy folder'}
+          aria-label={'Nowy folder'}
           onclick={() => folderForm(null, null)}><FolderPlus size={15} aria-hidden="true" /></button
         >
       {/if}
     </span>
   {/if}
 </div>
-<div class="page-tree" role="group" aria-label={'Documentation pages'}>
+<div class="page-tree" role="group" aria-label={'Strony dokumentacji'}>
   {@render branch(tree, 0)}
-  {#if !index.pages.length && !index.folders.length}<p class="tree-empty">{'No pages yet.'}</p>{/if}
+  {#if !index.pages.length && !index.folders.length}<p class="tree-empty">Brak stron.</p>{/if}
 </div>
 <DocFolderDialog
   open={folderOpen}
@@ -256,22 +256,22 @@
   }}
 >
   <form onsubmit={move}>
-    <h2 id={`${uid}-move-title`}>{'Move page'}</h2>
+    <h2 id={`${uid}-move-title`}>Przenieś stronę</h2>
     <DocError code={error} />
     {#if moving}
       <p>
         {#if destinationName}
-          {`Do you want to move “${moving.title}” into folder “${destinationName}”?`}
+          {`Czy chcesz przenieść „${moving.title}” do folderu „${destinationName}”?`}
         {:else}
-          {`Do you want to move “${moving.title}” to the top level?`}
+          {`Czy chcesz przenieść „${moving.title}” na najwyższy poziom?`}
         {/if}
       </p>
-      <label for={`${uid}-destination`}>{'Destination folder'}</label>
+      <label for={`${uid}-destination`}>Folder docelowy</label>
       <DocFolderSelect
         id={`${uid}-destination`}
         bind:value={destination}
         folders={index.folders}
-        label={'Destination folder'}
+        label={'Folder docelowy'}
         locale={index.locale}
         disabled={busy}
       />
@@ -280,10 +280,10 @@
           type="button"
           class="btn btn-outline"
           disabled={busy}
-          onclick={() => moveDialog?.close()}>{'Cancel'}</button
+          onclick={() => moveDialog?.close()}>Anuluj</button
         >
         <button class="btn" disabled={busy || (destination || null) === moving.folderId}
-          >{'Move'}</button
+          >Przenieś</button
         >
       </div>
     {/if}

@@ -81,8 +81,8 @@
       return terms.every((term) => haystack.includes(term));
     });
   });
-  const personLabel = (person: AssignmentMember) => `Assign ${fullName(person)}`;
-  const removeLabel = (person: AssignmentMember) => `Remove ${fullName(person)}`;
+  const personLabel = (person: AssignmentMember) => `Przypisz ${fullName(person)}`;
+  const removeLabel = (person: AssignmentMember) => `Usuń ${fullName(person)}`;
   $effect(() => {
     if (!available.length) open = false;
   });
@@ -188,7 +188,7 @@
     loading = true;
     fetch(`/api/platform${path}`, { signal: controller.signal })
       .then(async (response) => {
-        if (!response.ok) throw new Error('Unable to load members');
+        if (!response.ok) throw new Error('Nie udało się wczytać osób');
         const result = await response.json();
         if (!controller.signal.aborted) loaded = result;
       })
@@ -240,7 +240,7 @@
 
 {#if readonly}
   <span class="assigned" class:stacked>
-    {#if selected.length && showLabel}<span class="readonly-label">Assigned to</span>{/if}
+    {#if selected.length && showLabel}<span class="readonly-label">Przypisane do</span>{/if}
     {#each selected as person (person.id)}
       <span class="person-chip compact" title={fullName(person)}
         >{@render avatar(person)}<span class="person-name">{fullName(person)}</span></span
@@ -249,7 +249,7 @@
   </span>
 {:else}
   <div class="assignees">
-    {#if showLabel}<span class="label" id={`${uid}-label`}>Assigned to</span>{/if}
+    {#if showLabel}<span class="etykieta" id={`${uid}-label`}>Przypisane do</span>{/if}
     {#if selected.length}
       <span class="selected-chips">
         {#each selected as person (person.id)}
@@ -275,7 +275,7 @@
         type="button"
         class="trigger"
         {disabled}
-        aria-label={showLabel ? undefined : 'Add assignees'}
+        aria-label={showLabel ? undefined : 'Dodaj osoby'}
         aria-labelledby={showLabel ? `${uid}-label` : undefined}
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -289,7 +289,7 @@
         }}
       >
         <UserRoundPlus size={15} aria-hidden="true" />
-        <span class="trigger-label">Add assignees</span>
+        <span class="trigger-label">Dodaj osoby</span>
         <ChevronsUpDown size={14} aria-hidden="true" />
       </button>
       <div
@@ -298,7 +298,7 @@
         class="panel"
         role="dialog"
         tabindex="-1"
-        aria-label={'Choose assignees'}
+        aria-label={'Wybierz osoby'}
         style:left="{position.left}px"
         style:top="{position.top}px"
         style:width="{position.width}px"
@@ -312,8 +312,8 @@
             bind:this={search}
             type="search"
             role="combobox"
-            aria-label={'Search people'}
-            placeholder={'Search people…'}
+            aria-label={'Szukaj osób'}
+            placeholder={'Szukaj osób…'}
             aria-autocomplete="list"
             aria-expanded={open}
             aria-controls={`${uid}-list`}
@@ -325,7 +325,7 @@
             }}
           />
         </div>
-        <div id={`${uid}-list`} class="options" role="listbox" aria-label={'Project members'}>
+        <div id={`${uid}-list`} class="options" role="listbox" aria-label={'Członkowie projektu'}>
           {#each filtered as member, index (member.id)}
             <button
               type="button"
@@ -349,14 +349,14 @@
             </button>
           {:else}
             <p class="empty" role="status">
-              {#if loading}Loading members…{:else if error}Unable to load members{:else}No matching
-                members.{/if}
+              {#if loading}Wczytywanie osób…{:else if error}Nie udało się wczytać osób{:else}Brak
+                pasujących osób.{/if}
             </p>
           {/each}
         </div>
       </div>
     {/if}
-    {#if error && !open}<p class="error" role="alert">Unable to load members</p>{/if}
+    {#if error && !open}<p class="error" role="alert">Nie udało się wczytać osób</p>{/if}
   </div>
 {/if}
 

@@ -24,24 +24,24 @@
   ];
   const info = $derived<Record<string, [string, string]>>({
     'articles.content.propose': [
-      'Create and propose articles',
-      'Create project articles and suggest changes to existing articles.'
+      'Twórz i proponuj artykuły',
+      'Twórz artykuły w projekcie i proponuj zmiany w istniejących.'
     ],
     'articles.content.publish': [
-      'Publish articles',
-      'Review and publish project articles and proposed changes.'
+      'Publikuj artykuły',
+      'Oceniaj i publikuj artykuły projektu oraz proponowane zmiany.'
     ],
     'articles.content.edit-any': [
-      'Edit articles created by anyone',
-      'Edit any project article, but publishing still requires publish permission.'
+      'Edytuj artykuły utworzone przez dowolną osobę',
+      'Edytuj dowolny artykuł w projekcie; do publikacji potrzebne jest dodatkowe uprawnienie.'
     ],
     'docs.pages.review': [
-      'Review documentation',
-      'Accept or decline suggested documentation changes and edit pages directly. Making pages public still requires a project leader.'
+      'Oceniaj dokumentację',
+      'Akceptuj lub odrzucaj propozycje zmian w dokumentacji i edytuj strony bezpośrednio. Upublicznienie strony nadal wymaga lidera projektu.'
     ],
     'projects.preview-credentials.read': [
-      'View preview sign-in credentials',
-      'Show generated sample account passwords for this project’s previews.'
+      'Wyświetlanie danych logowania do podglądu',
+      'Pokazuj wygenerowane hasła kont testowych dla podglądów tego projektu.'
     ]
   });
   const groupPermissions = $derived(
@@ -59,14 +59,14 @@
         fetch(`/api/platform/projects/${encodeURIComponent(project.id)}/permissions`)
       ]);
       if (!membersResponse.ok || !permissionsResponse.ok)
-        throw new Error('Unable to load project permissions.');
+        throw new Error('Nie udało się wczytać uprawnień projektu.');
       members = await membersResponse.json();
       const data = await permissionsResponse.json();
       groups = data.groups;
       memberPermissions = data.memberPermissions;
       nonMemberPermissions = data.nonMemberPermissions;
     } catch {
-      error = 'Unable to load project permissions.';
+      error = 'Nie udało się wczytać uprawnień projektu.';
     } finally {
       loading = false;
     }
@@ -85,12 +85,12 @@
           body: JSON.stringify({ groups, memberPermissions, nonMemberPermissions })
         }
       );
-      if (!response.ok) throw new Error('Unable to save project permissions.');
-      notice = 'Project permissions saved.';
+      if (!response.ok) throw new Error('Nie udało się zapisać uprawnień projektu.');
+      notice = 'Zapisano ustawienia projektu.';
       await load();
       await onrefresh();
     } catch {
-      error = 'Unable to save project permissions.';
+      error = 'Nie udało się zapisać uprawnień projektu.';
     } finally {
       busy = false;
     }
@@ -101,36 +101,36 @@
 
 <div class="workspace-header">
   <div>
-    <h1>Project permissions</h1>
+    <h1>Uprawnienia projektu</h1>
     <p class="muted">
-      Choose article and documentation access defaults and create named groups for additional
-      project permissions.
+      Wybierz domyślny dostęp do artykułów i dokumentacji oraz utwórz nazwane grupy z dodatkowymi
+      uprawnieniami w projekcie.
     </p>
   </div>
   <button
     class="btn"
     disabled={busy || loading || groups.some((group) => !group.name.trim())}
-    onclick={() => void save()}><Save size={15} />{'Save permissions'}</button
+    onclick={() => void save()}><Save size={15} />Zapisz uprawnienia</button
   >
 </div>
 {#if error}<p class="error" role="alert">{error}</p>{/if}
 {#if notice}<p class="notice" role="status">{notice}</p>{/if}
-{#if loading}<p class="muted">Loading project permissions…</p>
+{#if loading}<p class="muted">Wczytywanie uprawnień projektu…</p>
 {:else}
   <div class="settings-main">
     <section class="settings-section">
       <header>
-        <h2>Default project access</h2>
+        <h2>Domyślny dostęp w projekcie</h2>
         <p>
-          {'These permissions apply to everyone in the selected category. They are additional to existing account-role permissions.'}
-          {'Active KSI members who are not members of this project.'}
+          Te uprawnienia dotyczą wszystkich osób w wybranej kategorii i uzupełniają uprawnienia
+          wynikające z roli konta. Aktywni członkowie KSI, którzy nie należą do tego projektu.
         </p>
       </header>
       <div class="card matrix">
         <div class="matrix-row matrix-head">
           <span></span>
-          <span>Project members</span>
-          <span>Non-members</span>
+          <span>Członkowie projektu</span>
+          <span>Osoby spoza projektu</span>
         </div>
         {#each articlePermissions as permission}
           <div class="matrix-row">
@@ -143,7 +143,7 @@
                 type="checkbox"
                 value={permission}
                 bind:group={memberPermissions}
-                aria-label={`${'Project members'}: ${info[permission]?.[0]}`}
+                aria-label={`${'Członkowie projektu'}: ${info[permission]?.[0]}`}
               />
             </label>
             <label class="matrix-cell">
@@ -151,7 +151,7 @@
                 type="checkbox"
                 value={permission}
                 bind:group={nonMemberPermissions}
-                aria-label={`${'Non-members'}: ${info[permission]?.[0]}`}
+                aria-label={`${'Osoby spoza projektu'}: ${info[permission]?.[0]}`}
               />
             </label>
           </div>
@@ -162,27 +162,27 @@
     <section class="settings-section">
       <header class="group-header">
         <div>
-          <h2>Named groups</h2>
-          <p>Only active project members can be assigned to a group.</p>
+          <h2>Nazwane grupy</h2>
+          <p>Do grupy można przypisać tylko aktywnych członków projektu.</p>
         </div>
         <button
           type="button"
           class="btn btn-outline"
           disabled={busy || groups.length >= 30}
           onclick={() => (groups = [...groups, { name: '', permissions: [], userIds: [] }])}
-          ><Plus size={15} aria-hidden="true" />{'Add group'}</button
+          ><Plus size={15} aria-hidden="true" />Dodaj grupę</button
         >
       </header>
       {#each groups as group, index (index)}
         <div class="card group-card">
           <div class="group-top">
             <div class="group-name">
-              <label for={`group-name-${index}`}>Group name</label>
+              <label for={`group-name-${index}`}>Nazwa grupy</label>
               <input
                 id={`group-name-${index}`}
                 bind:value={group.name}
                 maxlength="60"
-                placeholder="Example: Maintainers"
+                placeholder="Na przykład: Opiekunowie"
                 required
               />
             </div>
@@ -191,12 +191,12 @@
               class="btn btn-outline danger-button"
               disabled={busy}
               onclick={() => (groups = groups.filter((_, i) => i !== index))}
-              ><Trash2 size={15} aria-hidden="true" />{'Remove group'}</button
+              ><Trash2 size={15} aria-hidden="true" />Usuń grupę</button
             >
           </div>
           <div class="group-columns">
             <fieldset>
-              <legend>Members</legend>
+              <legend>Członkowie</legend>
               {#each members as member}
                 <label class="check"
                   ><input
@@ -209,7 +209,7 @@
               {/each}
             </fieldset>
             <fieldset>
-              <legend>Permissions</legend>
+              <legend>Uprawnienia</legend>
               {#each groupPermissions as permission}
                 <label class="check permission-option">
                   <input type="checkbox" value={permission} bind:group={group.permissions} />
@@ -223,7 +223,7 @@
           </div>
         </div>
       {:else}
-        <p class="list-empty">No groups yet.</p>
+        <p class="list-empty">Brak grup.</p>
       {/each}
     </section>
   </div>

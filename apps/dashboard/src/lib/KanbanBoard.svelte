@@ -198,9 +198,9 @@
         const code = error instanceof Error ? error.message : '';
         labelFormError =
           code === 'LABEL_ALREADY_EXISTS'
-            ? 'A label with this name already exists.'
+            ? 'Etykieta o tej nazwie już istnieje.'
             : code === 'INVALID_BOARD_LABELS'
-              ? 'Invalid label or name already in use.'
+              ? 'Nieprawidłowa etykieta lub nazwa jest już używana.'
               : code;
         throw new Error(labelFormError);
       }
@@ -219,7 +219,7 @@
         const msg = err?.message || '';
         if (msg === 'LABEL_IN_USE') {
           manageLabelError =
-            'Cannot delete label because it is assigned to tasks on the board. Remove it from tasks first.';
+            'Nie można usunąć etykiety, ponieważ jest przypisana do zadań na tablicy. Usuń ją najpierw z zadań.';
           throw new Error(manageLabelError);
         }
         throw err;
@@ -243,7 +243,7 @@
     const path = projectId ? `/projects/${encodeURIComponent(projectId)}/members` : '/members';
     fetch(`/api/platform${path}`, { signal: controller.signal })
       .then(async (response) => {
-        if (!response.ok) throw new Error('Unable to load members');
+        if (!response.ok) throw new Error('Nie udało się wczytać osób');
         const result = await response.json();
         if (!controller.signal.aborted) members = result;
       })
@@ -252,11 +252,11 @@
   });
   const label = (s: BoardStatus) =>
     s.id === 'todo' && s.name === 'To do'
-      ? 'To do'
+      ? 'Do zrobienia'
       : s.id === 'progress' && s.name === 'In progress'
-        ? 'In progress'
+        ? 'W trakcie'
         : s.id === 'done' && s.name === 'Done'
-          ? 'Done'
+          ? 'Gotowe'
           : s.name;
   const color = (s: BoardStatus) => colorForStatus(s);
   const activeStatuses = $derived(statuses.filter((s) => !s.deleted));
@@ -397,7 +397,8 @@
       try {
         result = JSON.parse(text);
       } catch {}
-    if (!response.ok) throw new Error(result?.code ?? result?.message ?? 'Request failed.');
+    if (!response.ok)
+      throw new Error(result?.code ?? result?.message ?? 'Żądanie nie powiodło się.');
     return result;
   }
   async function run(work: () => Promise<void>): Promise<boolean> {
@@ -409,7 +410,7 @@
       await refresh();
       return true;
     } catch (error) {
-      reportError(error instanceof Error ? error.message : 'Request failed');
+      reportError(error instanceof Error ? error.message : 'Żądanie nie powiodło się');
       return false;
     } finally {
       busy = false;
@@ -453,12 +454,12 @@
       await refresh();
       closeStatus();
     } catch (e) {
-      const message = e instanceof Error ? e.message : 'Error';
+      const message = e instanceof Error ? e.message : 'Błąd';
       statusError =
         message === 'STATUS_HAS_LIVE_ITEMS'
-          ? 'Move or remove all live tasks from this status first.'
+          ? 'Przenieś lub usuń najpierw wszystkie aktywne zadania z tego statusu.'
           : message === 'INVALID_BOARD_STATUSES'
-            ? 'A board must have between 1 and 20 active statuses.'
+            ? 'Tablica musi mieć od 1 do 20 aktywnych statusów.'
             : message;
     } finally {
       busy = false;
@@ -617,7 +618,7 @@
       onclick={() => (managingLabels = !managingLabels)}
     >
       <Settings2 size={15} aria-hidden="true" />
-      {#if managingLabels}Filter by label{:else}Manage labels{/if}
+      {#if managingLabels}Filtruj według etykiety{:else}Zarządzaj etykietami{/if}
     </button>
     <button
       type="button"
@@ -629,20 +630,20 @@
       }}
     >
       <Plus size={15} aria-hidden="true" />
-      {'New label'}
+      Nowa etykieta
     </button>
   </div>
 {/snippet}
 
 {#snippet labelManagement(close: () => void)}
-  <section class="manage-labels-panel" aria-label={'Manage labels'}>
+  <section class="manage-labels-panel" aria-label={'Zarządzaj etykietami'}>
     <div class="manage-labels-header">
-      <h4>Board labels</h4>
+      <h4>Etykiety tablicy</h4>
       <button
         type="button"
         class="icon-button"
         onclick={() => (managingLabels = false)}
-        aria-label={'Close'}
+        aria-label={'Zamknij'}
       >
         <X size={16} aria-hidden="true" />
       </button>
@@ -650,10 +651,10 @@
     {#if manageLabelError}
       <p class="manage-label-error" role="alert">{manageLabelError}</p>
     {/if}
-    <p class="manage-labels-hint">Remove a label from tasks before deleting it from the board.</p>
+    <p class="manage-labels-hint">Usuń etykietę z zadań przed usunięciem jej z tablicy.</p>
 
     {#if normalizedLabels.length === 0}
-      <p class="muted">No labels on this board yet.</p>
+      <p class="muted">Brak etykiet na tej tablicy.</p>
     {:else}
       <div class="manage-labels-list">
         {#each normalizedLabels as label}
@@ -676,7 +677,7 @@
                   close();
                   openLabelDialog(label);
                 }}
-                aria-label={'Edit label'}
+                aria-label={'Edytuj etykietę'}
               >
                 <Pencil size={14} aria-hidden="true" />
               </button>
@@ -685,7 +686,7 @@
                 class="icon-button danger-button"
                 disabled={busy}
                 onclick={() => void deleteLabel(label.name)}
-                aria-label={'Delete label'}
+                aria-label={'Usuń etykietę'}
               >
                 <Trash2 size={14} aria-hidden="true" />
               </button>
@@ -736,7 +737,7 @@
         {#if canManage}<button
             type="button"
             class="icon-button"
-            aria-label={`${'Edit status'}: ${label(status)}`}
+            aria-label={`${'Edytuj status'}: ${label(status)}`}
             disabled={busy}
             onclick={(event) => openStatus(status, event)}
             ><Pencil size={15} aria-hidden="true" /></button
@@ -744,7 +745,7 @@
         <a
           id={`add-${status.id}`}
           class="icon-button"
-          aria-label={`${'Add task to'} ${label(status)}`}
+          aria-label={`${'Dodaj zadanie do'} ${label(status)}`}
           href={newTaskHref(status.id)}><Plus size={17} aria-hidden="true" /></a
         >
       </div>
@@ -828,12 +829,12 @@
                     title={formatTaskDateTime(item.dueAt)}
                   >
                     <CalendarClock size={13} aria-hidden="true" />
-                    {#if urgency === 'overdue'}<span class="sr-only">Overdue</span>{:else}<span
-                        class="sr-only">Due</span
+                    {#if urgency === 'overdue'}<span class="sr-only">Po terminie</span>{:else}<span
+                        class="sr-only">Termin</span
                       >{/if}
                     <time datetime={item.dueAt}>{formatShortDue(item.dueAt)}</time>
                   </span>{/if}
-                {#if item.assigneeIds?.length}<span class="task-assignees" title={'Assigned to'}>
+                {#if item.assigneeIds?.length}<span class="task-assignees" title={'Przypisane do'}>
                     <Assignees
                       value={item.assigneeIds}
                       {members}
@@ -847,16 +848,16 @@
         {/each}
       </div>
       <a class="column-add" href={newTaskHref(status.id)}
-        ><Plus size={16} aria-hidden="true" />{'Add task'}</a
+        ><Plus size={16} aria-hidden="true" />Dodaj zadanie</a
       >
     </section>
   {/each}
 </div>
 {#if mobileMoveItem}
-  <div class="mobile-move-tray" role="group" aria-label={'Move task to a status'}>
+  <div class="mobile-move-tray" role="group" aria-label={'Przenieś zadanie do kategorii'}>
     <div class="mobile-move-heading">
-      <span>{'Move task to'} <strong>{mobileMoveItem.title}</strong></span>
-      <button type="button" class="icon-button" aria-label={'Close'} onclick={cancelMobileMove}
+      <span>Przenieś zadanie do <strong>{mobileMoveItem.title}</strong></span>
+      <button type="button" class="icon-button" aria-label={'Zamknij'} onclick={cancelMobileMove}
         ><X size={18} aria-hidden="true" /></button
       >
     </div>
@@ -888,17 +889,19 @@
     }}
   >
     <div class="issue-heading">
-      <h2 id="label-heading">{editingLabelName === null ? 'Create new label' : 'Edit label'}</h2>
-      <button type="button" class="icon-button" aria-label={'Close'} onclick={closeLabelDialog}>
+      <h2 id="label-heading">
+        {editingLabelName === null ? 'Utwórz nową etykietę' : 'Edytuj etykietę'}
+      </h2>
+      <button type="button" class="icon-button" aria-label={'Zamknij'} onclick={closeLabelDialog}>
         <X size={20} aria-hidden="true" />
       </button>
     </div>
 
     <div class="label-preview-card">
-      <span class="preview-title">{'Preview'}:</span>
+      <span class="preview-title">Podgląd:</span>
       <span class="label-badge" style={labelColorStyle(labelDraftColor)}>
         <span class="label-dot"></span>
-        <span class="label-name">{labelDraftName.trim() || 'Label name'}</span>
+        <span class="label-name">{labelDraftName.trim() || 'Nazwa etykiety'}</span>
       </span>
       {#if labelDraftDescription.trim()}
         <span class="preview-desc muted">{labelDraftDescription.trim()}</span>
@@ -916,7 +919,7 @@
         void submitLabel();
       }}
     >
-      <label for="label-name">Label name</label>
+      <label for="label-name">Nazwa etykiety</label>
       <input
         id="label-name"
         bind:value={labelDraftName}
@@ -925,15 +928,15 @@
         placeholder={'e.g. bug, docs'}
       />
 
-      <label for="label-desc">Description (optional)</label>
+      <label for="label-desc">Opis (opcjonalny)</label>
       <input
         id="label-desc"
         bind:value={labelDraftDescription}
         maxlength="200"
-        placeholder={'Brief description'}
+        placeholder={'Krótki opis przeznaczenia etykiety'}
       />
 
-      <label for="label-color">Color</label>
+      <label for="label-color">Kolor</label>
       <div class="color-picker-row">
         <input id="label-color" type="color" bind:value={labelDraftColor} />
         <div class="preset-swatches">
@@ -954,10 +957,10 @@
 
       <div class="row">
         <button class="btn" disabled={busy || !labelDraftName.trim()}>
-          {editingLabelName === null ? 'Create label' : 'Save'}
+          {editingLabelName === null ? 'Utwórz etykietę' : 'Zapisz'}
         </button>
         <button type="button" class="btn btn-outline" disabled={busy} onclick={closeLabelDialog}>
-          Cancel
+          Anuluj
         </button>
       </div>
     </form>
@@ -971,19 +974,19 @@
           void addStatus();
         }}
       >
-        <label for="status-name" class="sr-only">Status name</label><input
+        <label for="status-name" class="sr-only">Nazwa statusu</label><input
           id="status-name"
           bind:value={statusName}
-          placeholder={'Status name'}
+          placeholder={'Nazwa statusu'}
           maxlength="60"
           required
-        /><input type="color" aria-label={'Status color'} bind:value={statusColor} /><button
+        /><input type="color" aria-label={'Kolor statusu'} bind:value={statusColor} /><button
           class="btn btn-outline"
-          disabled={busy || !statusName.trim()}>Add status</button
+          disabled={busy || !statusName.trim()}>Dodaj status</button
         ><button
           type="button"
           class="icon-button"
-          aria-label={'Cancel'}
+          aria-label={'Anuluj'}
           onclick={() => (addingStatus = false)}><X size={16} aria-hidden="true" /></button
         >
       </form>
@@ -995,11 +998,11 @@
           addingStatus = true;
           await tick();
           document.getElementById('status-name')?.focus();
-        }}><Plus size={15} aria-hidden="true" />{'Add status'}</button
+        }}><Plus size={15} aria-hidden="true" />Dodaj status</button
       >{/if}
   </div>{/if}
 {#if canManage && statuses.some((s) => s.deleted)}<details class="deleted-statuses">
-    <summary>Deleted statuses</summary>{#each statuses.filter((s) => s.deleted) as status}<button
+    <summary>Usunięte statusy</summary>{#each statuses.filter((s) => s.deleted) as status}<button
         class="btn btn-outline"
         onclick={(event) => openStatus(status, event)}
         ><Pencil size={14} aria-hidden="true" />{label(status)}</button
@@ -1015,8 +1018,8 @@
     }}
   >
     <div class="issue-heading">
-      <h2 id="status-heading">Edit status</h2>
-      <button class="icon-button" aria-label={'Close'} onclick={closeStatus}
+      <h2 id="status-heading">Edytuj status</h2>
+      <button class="icon-button" aria-label={'Zamknij'} onclick={closeStatus}
         ><X size={18} aria-hidden="true" /></button
       >
     </div>
@@ -1027,33 +1030,33 @@
         void saveStatus();
       }}
     >
-      <label for="edit-status-name">Name</label><input
+      <label for="edit-status-name">Nazwa</label><input
         id="edit-status-name"
         bind:value={editingStatus.name}
         required
         maxlength="60"
       />
-      <label for="edit-status-color">Color</label><input
+      <label for="edit-status-color">Kolor</label><input
         id="edit-status-color"
         type="color"
         value={color(editingStatus)}
         oninput={(event) => (editingStatus!.color = event.currentTarget.value)}
       />
       <label class="status-state"
-        ><input type="checkbox" bind:checked={editingStatus.deleted} />{'Deleted'}</label
+        ><input type="checkbox" bind:checked={editingStatus.deleted} />Usunięty</label
       >
       {#if statusError}<p role="alert" class="error">{statusError}</p>{/if}
       <div class="row">
         <button class="btn" disabled={busy || !editingStatus.name.trim()}
-          ><Save size={14} aria-hidden="true" />{'Save'}</button
+          ><Save size={14} aria-hidden="true" />Zapisz</button
         ><button type="button" class="btn btn-outline" disabled={busy} onclick={closeStatus}
-          >Cancel</button
+          >Anuluj</button
         >{#if !editingStatus.deleted}<button
             type="button"
             class="btn btn-outline danger-button"
             disabled={busy}
             onclick={() => saveStatus(true)}
-            ><Trash2 size={14} aria-hidden="true" />{'Delete status'}</button
+            ><Trash2 size={14} aria-hidden="true" />Usuń status</button
           >{/if}
       </div>
     </form>

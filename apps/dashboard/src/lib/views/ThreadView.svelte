@@ -94,7 +94,7 @@
   );
   const hiddenTimelineItems = $derived(Math.max(0, timeline.length - TIMELINE_TAIL - timelineHead));
   const showTimelineGap = $derived(hiddenTimelineItems > 0 || nextPage !== null);
-  const remainingTimelineLabel = $derived(`${hiddenTimelineItems} remaining items`);
+  const remainingTimelineLabel = $derived(`Pozostało: ${hiddenTimelineItems}`);
   const visibleTimeline = $derived.by(() => {
     if (!showTimelineGap) return timeline;
     const tailStart = Math.max(timelineHead, timeline.length - TIMELINE_TAIL);
@@ -227,7 +227,7 @@
 
 <DetailLayout
   backHref={dashboardPath(workspace, projectSlug, 'forum')}
-  backLabel={'All threads'}
+  backLabel={'Wszystkie wątki'}
   title={thread.title}
   referenceNumber={thread.referenceNumber}
   canEditTitle={(canManage || thread.authorId === userId) && !archived}
@@ -239,9 +239,9 @@
   {/snippet}
 
   {#if error}<p class="error" role="alert">{error}</p>{/if}
-  {#if archived}<p class="notice">This thread is archived.</p>{/if}
+  {#if archived}<p class="notice">Ten wątek jest zarchiwizowany.</p>{/if}
 
-  <section class="issue-discussion" aria-label={'Discussion'}>
+  <section class="issue-discussion" aria-label={'Dyskusja'}>
     <div class="discussion-timeline">
       {#each visibleTimeline as entry (`${entry.kind}-${entry.id}`)}
         {#if entry.kind === 'event'}
@@ -252,7 +252,7 @@
                 {remainingTimelineLabel}
               </p>{/if}
             {#if loadActivityError}<p class="timeline-gap-error" role="alert">
-                Could not load activity.
+                Nie udało się wczytać aktywności.
               </p>{/if}
             <button
               type="button"
@@ -261,7 +261,8 @@
               onclick={() => void revealTimeline()}
             >
               {#if loadActivityError}<RotateCcw size={13} aria-hidden="true" />{/if}
-              {#if activityLoading}Loading…{:else if loadActivityError}Try again{:else}Load more{/if}
+              {#if activityLoading}Wczytywanie…{:else if loadActivityError}Spróbuj ponownie{:else}Wczytaj
+                więcej{/if}
             </button>
           </div>
         {:else}
@@ -279,10 +280,10 @@
             <div class="comment-card">
               <header class="comment-header">
                 <a class="comment-author" href={`/members/${encodeURIComponent(author.id)}`}
-                  >{#if memberName(author)}{memberName(author)}{:else}Association member{/if}</a
+                  >{#if memberName(author)}{memberName(author)}{:else}Członek koła{/if}</a
                 >
                 <span class="comment-verb"
-                  >{#if entry.first}opened this thread{:else}commented{/if}</span
+                  >{#if entry.first}utworzył(a) ten wątek{:else}skomentował(a){/if}</span
                 >
                 <time
                   datetime={comment.createdAt}
@@ -298,7 +299,7 @@
                     <button
                       type="button"
                       class="icon-action-btn"
-                      title="Edit"
+                      title="Edytuj"
                       onclick={() => {
                         editingCommentId = comment.id;
                         editingCommentMarkdown = comment.markdown;
@@ -309,7 +310,7 @@
                     <button
                       type="button"
                       class="icon-action-btn danger"
-                      title="Delete"
+                      title="Usuń"
                       onclick={() => (pendingCommentDelete = comment.id)}
                     >
                       <Trash2 size={13} aria-hidden="true" />
@@ -329,12 +330,12 @@
                     <Editor bind:value={editingCommentMarkdown} rows={4} allowReferences />
                     <div class="comment-composer-actions">
                       <button class="btn" disabled={busy || !editingCommentMarkdown.trim()}
-                        >Save</button
+                        >Zapisz</button
                       >
                       <button
                         type="button"
                         class="btn ghost"
-                        onclick={() => (editingCommentId = null)}>Cancel</button
+                        onclick={() => (editingCommentId = null)}>Anuluj</button
                       >
                     </div>
                   </form>
@@ -356,9 +357,9 @@
           submitReply();
         }}
       >
-        <h2><MessagesSquare size={17} aria-hidden="true" />{'Reply'}</h2>
+        <h2><MessagesSquare size={17} aria-hidden="true" />Dodaj odpowiedź</h2>
         <Editor bind:value={reply} rows={4} allowReferences />
-        <button class="btn" disabled={busy || !reply.trim()}>Reply</button>
+        <button class="btn" disabled={busy || !reply.trim()}>Dodaj odpowiedź</button>
       </form>
     {/if}
   </section>
@@ -366,10 +367,10 @@
 
 <ConfirmDialog
   open={pendingCommentDelete !== null}
-  title={'Delete comment?'}
-  message={'This action cannot be undone.'}
-  confirmLabel={'Delete'}
-  cancelLabel={'Cancel'}
+  title={'Usunąć komentarz?'}
+  message={'Tej operacji nie można cofnąć.'}
+  confirmLabel={'Usuń'}
+  cancelLabel={'Anuluj'}
   {busy}
   onconfirm={deleteComment}
   onclose={() => (pendingCommentDelete = null)}

@@ -35,8 +35,8 @@
         class="sidebar-toggle"
         aria-controls="docs-navigation"
         aria-expanded={!sidebarCollapsed}
-        aria-label="Toggle sidebar"
-        title="Toggle sidebar"
+        aria-label="Przełącz panel boczny"
+        title="Przełącz panel boczny"
         onclick={toggleSidebar}
       >
         {#if sidebarCollapsed}<PanelLeftOpen size={18} aria-hidden="true" />{:else}<PanelLeftClose

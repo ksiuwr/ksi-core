@@ -18,12 +18,12 @@
 
 <div class="workspace-header">
   <div>
-    <h1>Articles</h1>
-    <p class="workspace-description">Write publications and propose changes.</p>
+    <h1>Artykuły</h1>
+    <p class="workspace-description">Pisz publikacje i proponuj zmiany.</p>
   </div>
   {#if canCreate}
     <a class="btn" href={newArticlePath(workspace, projectSlug)}
-      ><Plus size={16} aria-hidden="true" />{'New article'}</a
+      ><Plus size={16} aria-hidden="true" />Nowy artykuł</a
     >
   {/if}
 </div>
@@ -38,14 +38,14 @@
             <span class="list-row-title">{article.title}</span>
             <span class="list-row-meta">{article.slug}</span>
           </span>
-          {#if article.mainArticle}<span class="tag tag-mint">Main project article</span>{/if}
-          <span class="tag">{article.state === 'published' ? 'Published' : 'Draft'}</span>
+          {#if article.mainArticle}<span class="tag tag-mint">Główny artykuł projektu</span>{/if}
+          <span class="tag">{article.state === 'published' ? 'Opublikowany' : 'Szkic'}</span>
         </a>
       </li>
     {/each}
   </ul>
 {:else}
-  <p class="list-empty">No articles yet. Create the first article in this workspace.</p>
+  <p class="list-empty">Brak artykułów. Utwórz pierwszy artykuł w tym obszarze roboczym.</p>
 {/if}
 
 <style>

@@ -21,7 +21,7 @@
       !['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif'].includes(file.type) ||
       file.size > 5 * 1024 * 1024
     ) {
-      reportError('Choose a JPEG, PNG, WebP, AVIF or GIF image up to 5 MiB.');
+      reportError('Wybierz obraz JPEG, PNG, WebP, AVIF lub GIF do 5 MiB.');
       return;
     }
     busy = true;
@@ -35,7 +35,7 @@
         try {
           result = JSON.parse(text);
         } catch {}
-      if (!response.ok) throw new Error(result.code ?? 'Upload failed');
+      if (!response.ok) throw new Error(result.code ?? 'Przesyłanie nie powiodło się');
       const proposal = await fetch('/api/users/me/avatar-request', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -47,10 +47,10 @@
         try {
           data = JSON.parse(textData);
         } catch {}
-      if (!proposal.ok) throw new Error(data.code ?? 'Request failed');
+      if (!proposal.ok) throw new Error(data.code ?? 'Żądanie nie powiodło się');
       await onchange();
     } catch (error) {
-      reportError(error instanceof Error ? error.message : 'Upload failed');
+      reportError(error instanceof Error ? error.message : 'Przesyłanie nie powiodło się');
     } finally {
       busy = false;
       if (input) input.value = '';
@@ -60,10 +60,10 @@
     busy = true;
     try {
       const response = await fetch('/api/users/me/avatar-request', { method: 'DELETE' });
-      if (!response.ok) throw new Error('Request failed');
+      if (!response.ok) throw new Error('Żądanie nie powiodło się');
       await onchange();
     } catch (error) {
-      reportError(error instanceof Error ? error.message : 'Request failed');
+      reportError(error instanceof Error ? error.message : 'Żądanie nie powiodło się');
     } finally {
       busy = false;
     }
@@ -71,19 +71,19 @@
 </script>
 
 <div class="avatar-upload">
-  <h3>Profile picture</h3>
+  <h3>Zdjęcie profilowe</h3>
   {#if request?.state === 'pending' && request.fileId}<div class="avatar-pending">
-      <img src={`/media/${request.fileId}`} alt={'Picture awaiting approval'} />
+      <img src={`/media/${request.fileId}`} alt={'Zdjęcie oczekujące na akceptację'} />
       <div>
-        <strong>Awaiting approval</strong>
-        <p>Your current picture remains visible until an administrator decides.</p>
+        <strong>Oczekuje na akceptację</strong>
+        <p>Twoje obecne zdjęcie pozostaje widoczne, dopóki administrator nie podejmie decyzji.</p>
         <button type="button" class="btn btn-outline" disabled={busy} onclick={cancel}
-          ><X size={14} aria-hidden="true" />{'Withdraw request'}</button
+          ><X size={14} aria-hidden="true" />Wycofaj prośbę</button
         >
       </div>
     </div>
   {:else if request?.state === 'declined'}<p class="avatar-feedback" role="status">
-      The picture was declined. You can submit another.
+      Zdjęcie zostało odrzucone. Możesz przesłać inne.
     </p>{/if}
   <input
     bind:this={input}
@@ -111,12 +111,12 @@
       void upload(event.dataTransfer?.files[0]);
     }}
     ><UploadCloud size={21} aria-hidden="true" /><span
-      >{busy ? 'Uploading…' : 'Drop a picture or choose a file'}<small
+      >{busy ? 'Przesyłanie…' : 'Przeciągnij zdjęcie lub wybierz plik'}<small
         >JPEG · PNG · WebP · AVIF · GIF · 5 MiB</small
       ></span
     ></button
   >
-  <p class="avatar-help">Every new picture requires administrator approval.</p>
+  <p class="avatar-help">Każde nowe zdjęcie wymaga zatwierdzenia przez administratora.</p>
 </div>
 
 <style>

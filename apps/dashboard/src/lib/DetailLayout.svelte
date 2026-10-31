@@ -69,7 +69,7 @@
         class="detail-title-input"
         bind:value={draft}
         maxlength="200"
-        aria-label={'Title'}
+        aria-label={'Tytuł'}
         disabled={busy}
         onkeydown={onKeydown}
         onblur={commit}
@@ -80,8 +80,8 @@
           >{/if}{#if canEditTitle}<button
             type="button"
             class="icon-button title-edit"
-            aria-label={'Edit title'}
-            title={'Edit title'}
+            aria-label={'Edytuj tytuł'}
+            title={'Edytuj tytuł'}
             disabled={busy}
             onclick={startEditing}><Pencil size={14} aria-hidden="true" /></button
           >{/if}

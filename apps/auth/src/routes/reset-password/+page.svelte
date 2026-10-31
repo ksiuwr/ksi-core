@@ -23,16 +23,16 @@
     try {
       const result = await client.resetPassword({ newPassword: password, token });
       changed = !result.error;
-      message = result.error?.message ?? 'Password changed. You can sign in now.';
+      message = result.error?.message ?? 'Hasło zmienione. Możesz się zalogować.';
     } catch {
-      message = 'Server unavailable.';
+      message = 'Nie można połączyć się z serwerem.';
     } finally {
       busy = false;
     }
   }
 </script>
 
-<svelte:head><title>{'New password'} · KSI</title></svelte:head>
+<svelte:head><title>Nowe hasło · KSI</title></svelte:head>
 <main class="auth-shell">
   <div class="auth-frame">
     <header class="auth-topbar">
@@ -40,22 +40,19 @@
       <div class="auth-preferences">
         <ThemeSelector /><button
           class="btn btn-outline language-button"
-          aria-label={'Change language'}
-          onclick={() => setLanguage(language === 'pl' ? 'en-us' : 'pl')}
-          >{language === 'pl' ? 'EN' : 'PL'}</button
+          aria-label={'Zmień język'}
+          onclick={() => setLanguage('en-us')}>EN</button
         >
       </div>
     </header>
     <section class="auth-card" aria-labelledby="reset-title">
-      <h1 id="reset-title">{'New password'}</h1>
-      <p class="auth-intro">
-        {'Choose a new password for your KSI account.'}
-      </p>
+      <h1 id="reset-title">Nowe hasło</h1>
+      <p class="auth-intro">Wybierz nowe hasło dla swojego konta KSI.</p>
       {#if !token}<p role="alert" class="auth-message">
-          {'Recovery link missing. Request a new link on the sign-in page.'}
+          Brak linku odzyskiwania. Poproś o nowy link na stronie logowania.
         </p>{:else if !changed}<form class="auth-form" onsubmit={submit}>
           <div class="auth-field">
-            <label for="password">{'Password'}</label><input
+            <label for="password">Hasło</label><input
               id="password"
               type="password"
               autocomplete="new-password"
@@ -66,22 +63,23 @@
             />
           </div>
           <button class="btn submit-button" disabled={busy}
-            >{busy ? 'Saving…' : 'Save password'}</button
+            >{busy ? 'Zapisywanie…' : 'Zapisz hasło'}</button
           >
         </form>{/if}{#if message}<p role="status" class="auth-message">{message}</p>{/if}<a
         class="btn btn-outline auth-back"
-        href="/"><ArrowLeft size={15} aria-hidden="true" />{'Back to sign in'}</a
+        href="/"><ArrowLeft size={15} aria-hidden="true" />Wróć do logowania</a
       >
     </section>
     <footer class="auth-footer">
-      <a href="/">{'Back to KSI'}</a><span class="right-col">KSI · {'University of Wrocław'}</span
+      <a href="/">Wróć na stronę KSI</a><span class="right-col">KSI · Uniwersytet Wrocławski</span
       ><span>v{import.meta.env.PUBLIC_APP_VERSION}</span><a
         class="right-col"
         href={import.meta.env.PUBLIC_COMMIT_HASH
           ? `https://github.com/ksiuwr/ksi-core/commit/${import.meta.env.PUBLIC_COMMIT_HASH}`
           : 'https://github.com/ksiuwr/ksi-core'}
         target="_blank"
-        rel="noopener noreferrer">{import.meta.env.PUBLIC_COMMIT_HASH?.slice(0, 7) || 'Source'}</a
+        rel="noopener noreferrer"
+        >{import.meta.env.PUBLIC_COMMIT_HASH?.slice(0, 7) || 'Kod źródłowy'}</a
       >
     </footer>
   </div>

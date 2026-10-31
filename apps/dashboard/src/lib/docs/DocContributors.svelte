@@ -16,23 +16,23 @@
 <div class="workspace-header">
   <div>
     <p class="workspace-eyebrow">{workspaceName}</p>
-    <h1>{'Contributors'}</h1>
+    <h1>Autorzy</h1>
     <p class="workspace-description">
-      {'Who keeps this documentation alive. Changes count accepted edits, including accepted suggestions.'}
+      Kto dba o tę dokumentację. Zmiany obejmują zaakceptowane edycje, również z propozycji.
     </p>
   </div>
 </div>
 <dl class="contributors-totals">
   <div>
-    <dt>{'Pages'}</dt>
+    <dt>Strony</dt>
     <dd>{insights.pages}</dd>
   </div>
   <div>
-    <dt>{'Changes'}</dt>
+    <dt>Zmiany</dt>
     <dd>{insights.revisions}</dd>
   </div>
   <div>
-    <dt>{'Contributors'}</dt>
+    <dt>Autorzy</dt>
     <dd>{insights.contributors.length}</dd>
   </div>
 </dl>
@@ -41,12 +41,12 @@
     <table>
       <thead>
         <tr>
-          <th scope="col">{'Member'}</th>
-          <th scope="col">{'Changes'}</th>
-          <th scope="col">{'Pages'}</th>
-          <th scope="col">{'Lines'}</th>
-          <th scope="col">{'Suggestions'}</th>
-          <th scope="col">{'Last change'}</th>
+          <th scope="col">Członek</th>
+          <th scope="col">Zmiany</th>
+          <th scope="col">Strony</th>
+          <th scope="col">Wiersze</th>
+          <th scope="col">Propozycje zmian</th>
+          <th scope="col">Ostatnia zmiana</th>
         </tr>
       </thead>
       <tbody>
@@ -76,13 +76,13 @@
             <td>
               <!-- Flex lives inside the cell; a flex cell drops out of the table's row layout. -->
               <span class="contributors-suggestions">
-                <span class:none={!row.accepted} title={'Accepted'}
+                <span class:none={!row.accepted} title={'Zaakceptowana'}
                   ><Check size={12} aria-hidden="true" />{row.accepted}</span
                 >
-                <span class:none={!row.pending} title={'Waiting for review'}
+                <span class:none={!row.pending} title={'Czeka na ocenę'}
                   ><Clock size={12} aria-hidden="true" />{row.pending}</span
                 >
-                <span class:none={!row.rejected} title={'Declined'}
+                <span class:none={!row.rejected} title={'Odrzucona'}
                   ><X size={12} aria-hidden="true" />{row.rejected}</span
                 >
               </span>
@@ -98,7 +98,7 @@
 {:else}
   <div class="empty-state">
     <UsersRound size={28} strokeWidth={1.4} aria-hidden="true" />
-    <h2>{'No contributions yet'}</h2>
+    <h2>Brak wkładu</h2>
   </div>
 {/if}
 

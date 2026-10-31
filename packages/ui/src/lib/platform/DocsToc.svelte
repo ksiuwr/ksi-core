@@ -134,7 +134,7 @@
 {#if headings.length}
   <nav class="docs-toc" aria-labelledby={`${uid}-title`}>
     <p class="docs-toc-title" id={`${uid}-title`}>
-      <TextAlignStart size={15} aria-hidden="true" />{'On this page'}
+      <TextAlignStart size={15} aria-hidden="true" />Na tej stronie
     </p>
     <div class="docs-toc-scroller" bind:this={scroller}>
       <div class="docs-toc-body">

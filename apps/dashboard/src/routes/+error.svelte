@@ -3,19 +3,19 @@
 </script>
 
 <svelte:head>
-  <title>{page.status} · KSI Dashboard</title>
+  <title>{page.status} · Panel KSI</title>
 </svelte:head>
 
 <div class="pending-screen">
   <div class="pending-card">
     <div class="eyebrow" style="justify-content: center; margin-bottom: 16px;">
       <span class="dot" style="background: var(--coral);"></span>
-      Error {page.status}
+      Błąd {page.status}
     </div>
-    <h1>{page.status === 401 || page.status === 403 ? 'Authentication Failed' : 'Error'}</h1>
+    <h1>{page.status === 401 || page.status === 403 ? 'Błąd uwierzytelniania' : 'Błąd'}</h1>
     <p>
-      {page.error?.message || 'An unexpected error occurred during your request.'}
+      {page.error?.message || 'Wystąpił nieoczekiwany błąd podczas żądania.'}
     </p>
-    <a href="/" class="btn" style="text-decoration: none;">Return to Dashboard</a>
+    <a href="/" class="btn" style="text-decoration: none;">Wróć do Panelu</a>
   </div>
 </div>

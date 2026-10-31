@@ -148,7 +148,7 @@ packages/
 - Database schema and migrations live in `apps/server/src/db`. Use `bun db:generate` and `bun db:migrate`.
 - Polish is the primary language for user-editable content. Profiles, projects, articles, alerts and docs store Polish in their normal fields plus optional English in `translations`.
 - `packages/shared/content-locales.ts` provides `localizeContent`, `contentLocale`, `primaryContentLocale`, `translationLocales`, and `hasPrimarySources`.
-- UI locales are `frontendLocales` (`en-us`, `pl`) with `defaultFrontendLocale` `pl`; content locales are `contentLocales` (`pl`, `en`).
+- UI locales are `frontendLocales` (`pl`, `en-us`) with `defaultFrontendLocale` `pl`; content locales are `contentLocales` (`pl`, `en`).
 - Translation writes require the Polish source to exist and pass `hasPrimarySources`. Project and article translation writes also check version conflicts.
 - Markdown parsing and its sanitization policy live in `packages/shared`. Dashboard content and editor previews render locally through the browser entry of `shared/markdown`; public pages and the compatibility `/markdown` endpoint use its server entry. Reference targets and `/media` URLs are inferred locally; previews and file access are resolved by the backend.
 
@@ -165,33 +165,33 @@ Wuchale is compile-time i18n. Strings are extracted from source at build time an
 ### Configuration
 
 - Each app has a `wuchale.config.js`.
-- Locales come from `packages/shared/content-locales.ts` (`frontendLocales`: `en-us`, `pl`). Visitors without a saved preference get `defaultFrontendLocale` (`pl`).
-- The source language of UI strings is `en-us` and must stay first in `frontendLocales`; in `en-us.po`, `msgstr` should equal `msgid`.
+- Locales come from `packages/shared/content-locales.ts` (`frontendLocales`: `pl`, `en-us`). Visitors without a saved preference get `defaultFrontendLocale` (`pl`).
+- The source language of UI strings is Polish and must stay first in `frontendLocales`; in `pl.po`, `msgstr` should equal `msgid`. English translations live in `en-us.po`.
 - Generated files (`.wuchale/`, `data.js`, `*.loader.svelte.js`) are gitignored. Only `*.po` files are committed.
 
 ### How to write translatable strings
 
-Write plain English string literals directly in Svelte markup or attributes:
+Write plain Polish string literals directly in Svelte markup or attributes:
 
 ```svelte
-<h2>Create alert</h2>
-<button title="Logout">...</button>
+<h2>Utwórz alert</h2>
+<button title="Wyloguj">...</button>
 ```
 
 Text inside an element is extracted directly by Wuchale, so do not wrap it in a JavaScript string expression:
 
 ```svelte
 <!-- Bad -->
-<p>{'No articles yet.'}</p>
+<p>{'Brak artykułów.'}</p>
 
 <!-- Good -->
-<p>No articles yet.</p>
+<p>Brak artykułów.</p>
 ```
 
 Keep an explicit expression when the text shares its element with icons or other dynamic content, so it remains a separate catalog entry:
 
 ```svelte
-<button><Icon />{'Save'}</button>
+<button><Icon />{'Zapisz'}</button>
 ```
 
 Mixed text and expressions are supported and become placeholders:
@@ -204,26 +204,26 @@ Do not use ternary operators to choose translatable strings:
 
 ```svelte
 <!-- Bad: both branches become catalog entries and bypass locale selection -->
-{editingId ? 'Edit alert' : 'Create alert'}
+{editingId ? 'Edytuj alert' : 'Utwórz alert'}
 ```
 
-In particular, never select copy based on the active UI locale. Write only the English source string; Wuchale supplies the selected locale at runtime:
+In particular, never select copy based on the active UI locale. Write only the Polish source string; Wuchale supplies the selected locale at runtime:
 
 ```svelte
 <!-- Bad -->
 {language === 'pl' ? 'Zapisano.' : 'Saved.'}
 
 <!-- Good -->
-Saved.
+Zapisano.
 ```
 
 For genuinely conditional UI, use plain text in separate template branches instead:
 
 ```svelte
 {#if editingId}
-  Edit alert
+  Edytuj alert
 {:else}
-  Create alert
+  Utwórz alert
 {/if}
 ```
 
@@ -237,9 +237,9 @@ Shared UI strings must be listed in each app's Wuchale `files` array, for exampl
 
 ### Workflow
 
-1. Add or edit plain English text in components.
+1. Add or edit plain Polish text in components.
 2. Run the app dev server or `bunx wuchale` to regenerate `.po` files.
-3. Translate new `msgid` entries in `pl.po`.
+3. Translate new `msgid` entries in `en-us.po`.
 4. Run `bunx wuchale check`.
 5. Commit only `.po` changes; never commit generated Wuchale files.
 6. Use `bunx wuchale --clean` occasionally to remove stale catalog entries.

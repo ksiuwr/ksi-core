@@ -91,23 +91,23 @@
     <span class="doc-diff-stats">
       <FileDiff size={15} aria-hidden="true" />
       {#if result}
-        {'Changed lines'}:
+        Zmienione wiersze:
         <span class="added-count">+{result.additions}</span>
         <span class="removed-count">−{result.deletions}</span>
       {/if}
     </span>
-    <div class="segmented-control" role="group" aria-label={'Comparison view'} use:slider>
+    <div class="segmented-control" role="group" aria-label={'Widok porównania'} use:slider>
       <button
         type="button"
         class:active={mode === 'rendered'}
         aria-pressed={mode === 'rendered'}
-        onclick={() => (mode = 'rendered')}>{'Rendered'}</button
+        onclick={() => (mode = 'rendered')}>Wyrenderowany</button
       >
       <button
         type="button"
         class:active={mode === 'source'}
         aria-pressed={mode === 'source'}
-        onclick={() => (mode = 'source')}>{'Markdown'}</button
+        onclick={() => (mode = 'source')}>Markdown</button
       >
     </div>
   </div>
@@ -115,7 +115,7 @@
   {#if loading && !result}
     <div class="doc-diff-loading"><span></span><span></span><span></span></div>
   {:else if result && !changed}
-    <p class="muted doc-diff-empty">{'The content is the same in both versions.'}</p>
+    <p class="muted doc-diff-empty">Treść jest taka sama w obu wersjach.</p>
   {:else if result}
     {#if mode === 'rendered'}
       <div class="doc-diff-head" aria-hidden="true">
@@ -127,7 +127,7 @@
         {#if item.type === 'fold'}
           <button type="button" class="doc-diff-fold" onclick={() => expanded.add(item.key)}>
             <ChevronsUpDown size={14} aria-hidden="true" />
-            {'Show unchanged sections'} ({item.count})
+            Pokaż niezmienione fragmenty ({item.count})
           </button>
         {:else if mode === 'rendered'}
           <div class={['doc-diff-row', item.row.kind]}>

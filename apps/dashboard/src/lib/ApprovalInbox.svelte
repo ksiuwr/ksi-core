@@ -38,10 +38,10 @@
         try {
           result = JSON.parse(text);
         } catch {}
-      if (!response.ok) throw new Error(result.code ?? 'Request failed');
+      if (!response.ok) throw new Error(result.code ?? 'Żądanie nie powiodło się');
       await refresh();
     } catch (error) {
-      reportError(error instanceof Error ? error.message : 'Request failed');
+      reportError(error instanceof Error ? error.message : 'Żądanie nie powiodło się');
     } finally {
       busy = false;
     }
@@ -50,13 +50,13 @@
 
 <div class="workspace-header">
   <div>
-    <h1>Approval inbox</h1>
-    <p class="workspace-description">New accounts and profile pictures awaiting a decision.</p>
+    <h1>Skrzynka akceptacji</h1>
+    <p class="workspace-description">Nowe konta i zdjęcia profilowe oczekujące na decyzję.</p>
   </div>
 </div>
 {#if inbox.memberships.length}<section class="approval-section">
     <h2>
-      <UserPlus size={19} aria-hidden="true" />{'New accounts'}<span class="tag"
+      <UserPlus size={19} aria-hidden="true" />Nowe konta<span class="tag"
         >{inbox.memberships.length}</span
       >
     </h2>
@@ -68,19 +68,19 @@
         </div>
         <div class="approval-actions">
           <button class="btn" disabled={busy} onclick={() => review('members', member.id, true)}
-            ><Check size={15} aria-hidden="true" />{'Activate'}</button
+            ><Check size={15} aria-hidden="true" />Aktywuj</button
           >{#if administrator}<button
               class="btn btn-outline"
               disabled={busy}
               onclick={() => review('members', member.id, false)}
-              ><X size={15} aria-hidden="true" />{'Decline'}</button
+              ><X size={15} aria-hidden="true" />Odrzuć</button
             >{/if}
         </div>
       </article>{/each}
   </section>{/if}
 {#if inbox.avatars.length}<section class="approval-section">
     <h2>
-      <Image size={19} aria-hidden="true" />{'Profile pictures'}<span class="tag"
+      <Image size={19} aria-hidden="true" />Zdjęcia profilowe<span class="tag"
         >{inbox.avatars.length}</span
       >
     </h2>
@@ -88,31 +88,31 @@
         <img
           class="approval-avatar"
           src={`/media/${avatar.fileId}`}
-          alt={`Proposed avatar: ${avatar.name}`}
+          alt={`Zaproponowany awatar: ${avatar.name}`}
         />
         <div class="approval-info">
           <h3>{avatar.name}</h3>
-          <p>The new picture becomes public after approval.</p>
+          <p>Nowe zdjęcie staje się publiczne po zatwierdzeniu.</p>
         </div>
         <div class="approval-actions">
           <button
             class="btn"
             disabled={busy}
             onclick={() => review('avatars', avatar.userId, true, avatar.version)}
-            ><Check size={15} aria-hidden="true" />{'Approve'}</button
+            ><Check size={15} aria-hidden="true" />Zatwierdź</button
           ><button
             class="btn btn-outline"
             disabled={busy}
             onclick={() => review('avatars', avatar.userId, false, avatar.version)}
-            ><X size={15} aria-hidden="true" />{'Decline'}</button
+            ><X size={15} aria-hidden="true" />Odrzuć</button
           >
         </div>
       </article>{/each}
   </section>{/if}
 {#if !inbox.memberships.length && !inbox.avatars.length}<div class="empty-state">
     <Inbox size={30} aria-hidden="true" />
-    <h2>All caught up</h2>
-    <p>New requests will appear here automatically.</p>
+    <h2>Wszystko sprawdzone</h2>
+    <p>Nowe prośby pojawią się tu automatycznie.</p>
   </div>{/if}
 
 <style>

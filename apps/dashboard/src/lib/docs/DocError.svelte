@@ -4,40 +4,42 @@
 
 {#if code}<p class="error" role="alert">
     {#if code === 'REVISION_CONFLICT'}
-      {'This page changed while you were editing. Copy your text, reload the page and apply your changes again.'}
+      Strona zmieniła się podczas edycji. Skopiuj swój tekst, odśwież stronę i wprowadź zmiany
+      ponownie.
     {:else if code === 'DOC_SLUG_TAKEN'}
-      {'A page with this address already exists in this workspace.'}
+      W tej przestrzeni istnieje już strona o tym adresie.
     {:else if code === 'DOC_SLUG_RESERVED'}
-      {'This address is reserved. Choose another one.'}
+      Ten adres jest zarezerwowany. Wybierz inny.
     {:else if code === 'DOC_NOT_FOUND' || code === '404'}
-      {'This page does not exist or was moved.'}
+      Ta strona nie istnieje lub została przeniesiona.
     {:else if code === 'PROPOSAL_NOT_FOUND'}
-      {'This suggestion does not exist.'}
+      Ta propozycja nie istnieje.
     {:else if code === 'PROPOSAL_ALREADY_RESOLVED'}
-      {'Someone has already reviewed this suggestion.'}
+      Ktoś już ocenił tę propozycję.
     {:else if code === 'PUBLISH_FORBIDDEN'}
-      {'Only workspace leaders can change whether a page is public.'}
+      Tylko liderzy przestrzeni mogą zmieniać widoczność publiczną strony.
     {:else if code === 'NO_CHANGES'}
-      {'Nothing changed yet. Edit the page before saving.'}
+      Nic się jeszcze nie zmieniło. Edytuj stronę przed zapisaniem.
     {:else if code === 'REASON_REQUIRED'}
-      {'Describe why you are suggesting this change.'}
+      Opisz, dlaczego proponujesz tę zmianę.
     {:else if code === 'PRIMARY_SOURCE_REQUIRED'}
-      {'Write the Polish text first; translations translate it.'}
+      Najpierw dodaj tekst po polsku, a następnie jego tłumaczenia.
     {:else if code === 'FOLDER_NOT_FOUND'}
-      {'This folder is unavailable in this workspace. Refresh and choose another folder.'}
+      Ten folder nie jest dostępny w tej przestrzeni. Odśwież stronę i wybierz inny folder.
     {:else if code === 'FOLDER_NOT_EMPTY'}
-      {'Move pages and subfolders out before deleting this folder.'}
+      Przed usunięciem folderu przenieś z niego strony i podfoldery.
     {:else if code === 'FOLDER_IN_USE'}
-      {'This folder is used by a pending suggestion. Review or withdraw that suggestion before deleting it.'}
+      Ten folder jest używany w oczekującej propozycji. Przed jego usunięciem rozpatrz lub wycofaj
+      tę propozycję.
     {:else if code === 'FOLDER_NAME_TAKEN'}
-      {'A folder with this Polish name already exists inside the selected parent folder.'}
+      Folder o tej polskiej nazwie już istnieje w wybranym folderze nadrzędnym.
     {:else if code === 'FOLDER_NAME_INVALID'}
-      {'Enter a folder name without “/”. Choose its parent folder separately.'}
+      Wpisz nazwę folderu bez znaku „/”. Folder nadrzędny wybierz osobno.
     {:else if code === 'FOLDER_CYCLE'}
-      {'A folder cannot be placed inside itself or one of its subfolders.'}
+      Nie można umieścić folderu w nim samym ani w jednym z jego podfolderów.
     {:else if code === 'FORBIDDEN'}
-      {'You do not have permission to do this.'}
+      Nie masz uprawnień do tej operacji.
     {:else}
-      {'Something went wrong. Try again.'}
+      Coś poszło nie tak. Spróbuj ponownie.
     {/if}
   </p>{/if}

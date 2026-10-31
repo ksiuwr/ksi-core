@@ -1,6 +1,6 @@
 // The same locale list drives Wuchale and editable public content.
-/** Wuchale treats the first configured locale as its source: UI strings are written in English. */
-export const frontendLocales = ['en-us', 'pl'] as const;
+/** Wuchale treats the first configured locale as its source: UI strings are written in Polish. */
+export const frontendLocales = ['pl', 'en-us'] as const;
 export type FrontendLocale = (typeof frontendLocales)[number];
 /** The UI language until a visitor chooses another one. */
 export const defaultFrontendLocale: FrontendLocale = 'pl';

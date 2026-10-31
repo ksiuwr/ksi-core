@@ -210,16 +210,16 @@
   onfocusin={handleFocusIn}
   onfocusout={handleFocusOut}
   onmouseleave={scheduleHide}
-  use:imageResize={{ language, onresize, blocks }}
+  use:imageResize={{ onresize, blocks }}
 >
   {#each blocks as block}{#if block.type === 'html'}{@html block.html}{:else}<div class="gallery">
         {#each block.ids.slice(0, block.preview) as id, index}<button
             type="button"
             onclick={() => (active = { ids: block.ids, index })}
-            aria-label={`${'Open image'} ${index + 1}`}
+            aria-label={`${'Otwórz zdjęcie'} ${index + 1}`}
             ><img
               src={`/media/${id}`}
-              alt={`${'Gallery image'} ${index + 1}`}
+              alt={`${'Zdjęcie w galerii'} ${index + 1}`}
               loading="lazy"
             /></button
           >{/each}{#if block.ids.length > block.preview}<button
@@ -240,20 +240,20 @@
       role="tooltip"
     >
       {#if previewLoading && !previewData}
-        <p class="reference-preview-loading">Loading…</p>
+        <p class="reference-preview-loading">Wczytywanie…</p>
       {:else if previewNotFound}
-        <p class="reference-preview-error">Reference not found</p>
+        <p class="reference-preview-error">Nie znaleziono odwołania</p>
       {:else if previewError}
-        <p class="reference-preview-error">Preview unavailable</p>
+        <p class="reference-preview-error">Podgląd niedostępny</p>
       {:else if previewData}
         <div class="reference-preview-header">
           <p class="reference-preview-context">
             <span
-              >{#if previewData.workspace}{previewData.workspace}{:else}Association{/if}</span
+              >{#if previewData.workspace}{previewData.workspace}{:else}Całe koło{/if}</span
             >
             <span class="reference-preview-separator" aria-hidden="true">·</span>
             <span
-              >{#if previewData.type === 'item'}Task{:else}Thread{/if}</span
+              >{#if previewData.type === 'item'}Zadanie{:else}Wątek{/if}</span
             >
             <span class="reference-preview-separator" aria-hidden="true">·</span>
             <time datetime={previewData.createdAt}>{formatDate(previewData.createdAt)}</time>
@@ -273,7 +273,7 @@
         </div>
         {#if previewData.type === 'item'}
           <p class="reference-preview-excerpt" class:empty={!previewData.excerpt}>
-            {#if previewData.excerpt}{previewData.excerpt}{:else}No description.{/if}
+            {#if previewData.excerpt}{previewData.excerpt}{:else}Brak opisu.{/if}
           </p>
         {/if}
         {#if previewData.labels.length}
@@ -290,10 +290,10 @@
             >
             <span>
               <strong
-                >{#if previewData.author}{previewData.author}{:else}Association member{/if}</strong
+                >{#if previewData.author}{previewData.author}{:else}Członek koła{/if}</strong
               >
               <span class="reference-preview-muted"
-                >{#if previewData.type === 'item'}opened this task{:else}opened this thread{/if}</span
+                >{#if previewData.type === 'item'}utworzył(a) to zadanie{:else}utworzył(a) ten wątek{/if}</span
               >
             </span>
           </p>
@@ -311,14 +311,14 @@
             <p class="reference-preview-person">
               <CalendarClock size={14} aria-hidden="true" />
               <span>
-                {'Due'}:
+                Termin:
                 <time datetime={previewData.dueAt}>{formatDate(previewData.dueAt)}</time>
               </span>
             </p>
           {/if}
         </div>
         <a class="reference-preview-link" href={previewData.href}>
-          <span>Open</span>
+          <span>Otwórz</span>
           <ArrowUpRight size={13} aria-hidden="true" />
         </a>
       {/if}
@@ -327,14 +327,14 @@
 </div>
 {#if active}<dialog
     bind:this={dialog}
-    aria-label={'Gallery'}
+    aria-label={'Galeria'}
     class="lightbox"
     oncancel={(event) => {
       event.preventDefault();
       close();
     }}
   >
-    <button type="button" onclick={close}><X size={16} aria-hidden="true" />{'Close'}</button>
+    <button type="button" onclick={close}><X size={16} aria-hidden="true" />Zamknij</button>
     <div class="row">
       <button
         type="button"
@@ -343,10 +343,10 @@
             ids: active!.ids,
             index: (active!.index - 1 + active!.ids.length) % active!.ids.length
           })}
-        aria-label={'Previous image'}><ChevronLeft size={20} aria-hidden="true" /></button
+        aria-label={'Poprzednie zdjęcie'}><ChevronLeft size={20} aria-hidden="true" /></button
       ><img
         src={`/media/${active.ids[active.index]}`}
-        alt={`${'Gallery image'} ${active.index + 1}`}
+        alt={`${'Zdjęcie w galerii'} ${active.index + 1}`}
       /><button
         type="button"
         onclick={() =>
@@ -354,7 +354,7 @@
             ids: active!.ids,
             index: (active!.index + 1) % active!.ids.length
           })}
-        aria-label={'Next image'}><ChevronRight size={20} aria-hidden="true" /></button
+        aria-label={'Następne zdjęcie'}><ChevronRight size={20} aria-hidden="true" /></button
       >
     </div>
   </dialog>{/if}

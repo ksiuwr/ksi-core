@@ -86,10 +86,10 @@
 
 <div class="docs-layout" class:docs-history={view === 'history'}>
   {#if view !== 'history'}
-    <FloatingDocsNavigation label={'Documentation'} docked={data.navigationDocked}>
-      <nav aria-label={'Documentation'}>
+    <FloatingDocsNavigation label={'Dokumentacja'} docked={data.navigationDocked}>
+      <nav aria-label={'Dokumentacja'}>
         <a class="docs-nav-link" class:active={view === 'index'} href={home}
-          ><BookOpen size={15} aria-hidden="true" />{'Overview'}</a
+          ><BookOpen size={15} aria-hidden="true" />Przegląd</a
         >
         <DocTree {index} {projectId} {slug} selected={first} />
         <!-- Collaboration tools stay below the pages, quieter than the reading links. -->
@@ -98,7 +98,7 @@
             class="docs-nav-link minor"
             class:active={view === 'suggestions' || view === 'suggestion'}
             href={hrefFor('suggestions')}
-            ><GitPullRequestArrow size={14} aria-hidden="true" /><span>{'Suggestions'}</span
+            ><GitPullRequestArrow size={14} aria-hidden="true" /><span>Propozycje zmian</span
             >{#if index.pendingSuggestions}<span class="docs-nav-count"
                 >{index.pendingSuggestions}</span
               >{/if}</a
@@ -106,8 +106,7 @@
           <a
             class="docs-nav-link minor"
             class:active={view === 'contributors'}
-            href={hrefFor('contributors')}
-            ><UsersRound size={14} aria-hidden="true" />{'Contributors'}</a
+            href={hrefFor('contributors')}><UsersRound size={14} aria-hidden="true" />Autorzy</a
           >
         </div>
       </nav>
@@ -121,17 +120,15 @@
         <div class="workspace-header">
           <div>
             <p class="workspace-eyebrow">{workspaceName}</p>
-            <h1>{'Documentation'}</h1>
+            <h1>Dokumentacja</h1>
             <p class="workspace-description">
-              {'How this workspace works, written down for everyone who comes next.'}
+              Jak działa ta przestrzeń — spisane dla wszystkich, którzy przyjdą po nas.
             </p>
           </div>
           {#if index.access.canPropose}
             <a class="btn" href={hrefFor('new')}
-              ><Plus
-                size={15}
-                aria-hidden="true"
-              />{#if index.access.canReview}{'New page'}{:else}{'Suggest a page'}{/if}</a
+              ><Plus size={15} aria-hidden="true" />{#if index.access.canReview}Nowa strona{:else}Zaproponuj
+                stronę{/if}</a
             >
           {/if}
         </div>
@@ -139,7 +136,7 @@
           <a class="docs-callout" href={hrefFor('suggestions')}>
             <GitPullRequestArrow size={18} aria-hidden="true" />
             <span
-              >{'Suggestions waiting for your review'}:
+              >Propozycje czekające na Twoją ocenę:
               <strong>{index.pendingSuggestions}</strong></span
             >
             <ArrowRight size={16} aria-hidden="true" />
@@ -161,7 +158,7 @@
                       >{#if page.public}<Globe
                           class="docs-card-public"
                           size={14}
-                          aria-label={'Public'}
+                          aria-label={'Publiczna'}
                         />{/if}</span
                     >
                     {#if page.excerpt}<span class="docs-card-excerpt">{page.excerpt}</span>{/if}
@@ -172,7 +169,7 @@
                         {/each}
                       </span>
                       <span
-                        >{'Updated'}
+                        >Zaktualizowano
                         <time datetime={page.updatedAt}>{updated(page.updatedAt)}</time></span
                       >
                     </span>
@@ -184,10 +181,8 @@
         {:else}
           <div class="empty-state">
             <BookOpen size={28} strokeWidth={1.4} aria-hidden="true" />
-            <h2>{'No documentation yet'}</h2>
-            <p>
-              {'Write down how things work here, so the next team does not have to start from scratch.'}
-            </p>
+            <h2>Brak dokumentacji</h2>
+            <p>Zapisz, jak tu wszystko działa, żeby kolejny zespół nie zaczynał od zera.</p>
           </div>
         {/if}
       {:else if view === 'page' && data.page}

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { Check, GripVertical, UploadCloud, LoaderCircle, X } from '@lucide/svelte';
-  import { preferences } from './preferences.svelte.js';
   import GalleryImage from './GalleryImage.svelte';
   import {
     moveGalleryImage,
@@ -26,44 +25,26 @@
     onupload: (files: FileList | null) => void;
     onremove: () => void;
   } = $props();
-  const language = $derived(preferences.language);
   const uid = $props.id();
   let input = $state<HTMLInputElement>();
   let dropping = $state(false);
   let dragged = $state<string | null>(null);
   let dropTarget = $state<string | null>(null);
   let pointer: { id: number; x: number; y: number; moved: boolean } | undefined;
-  const labels = $derived(
-    language === 'pl'
-      ? {
-          title: 'Galeria',
-          help: 'Kliknij zdjęcie, aby pokazać je w podglądzie. Przeciągnij uchwyt, aby zmienić kolejność w grupie.',
-          preview: 'Zdjęcia w podglądzie',
-          upload: 'Upuść zdjęcia tutaj lub wybierz pliki',
-          removeGallery: 'Usuń galerię',
-          image: 'Zdjęcie',
-          remove: 'Usuń zdjęcie',
-          reorder: 'Zmień kolejność zdjęcia',
-          keyboard: 'Użyj klawiszy strzałek, aby zmienić kolejność.',
-          limit: 'W podglądzie można pokazać do 30 zdjęć.',
-          uploading: 'Przesyłanie…',
-          queued: 'Oczekiwanie…'
-        }
-      : {
-          title: 'Gallery',
-          help: 'Click an image to include it in the preview. Drag its handle to reorder within its group.',
-          preview: 'Images in preview',
-          upload: 'Drop images here or choose files',
-          removeGallery: 'Remove gallery',
-          image: 'Image',
-          remove: 'Remove image',
-          reorder: 'Reorder image',
-          keyboard: 'Use arrow keys to change the order.',
-          limit: 'The preview can show up to 30 images.',
-          uploading: 'Uploading…',
-          queued: 'Waiting…'
-        }
-  );
+  const labels = $derived({
+    title: 'Galeria',
+    help: 'Kliknij zdjęcie, aby pokazać je w podglądzie. Przeciągnij uchwyt, aby zmienić kolejność w grupie.',
+    preview: 'Zdjęcia w podglądzie',
+    upload: 'Upuść zdjęcia tutaj lub wybierz pliki',
+    removeGallery: 'Usuń galerię',
+    image: 'Zdjęcie',
+    remove: 'Usuń zdjęcie',
+    reorder: 'Zmień kolejność zdjęcia',
+    keyboard: 'Użyj klawiszy strzałek, aby zmienić kolejność.',
+    limit: 'W podglądzie można pokazać do 30 zdjęć.',
+    uploading: 'Przesyłanie…',
+    queued: 'Oczekiwanie…'
+  });
   // @wc-ignore
   const keys = { left: 'ArrowLeft', right: 'ArrowRight', up: 'ArrowUp', down: 'ArrowDown' };
 

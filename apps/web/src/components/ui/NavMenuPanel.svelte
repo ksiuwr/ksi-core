@@ -24,7 +24,7 @@
     columns = 3,
     compact = false,
     moreHref,
-    moreLabel = 'See more',
+    moreLabel = 'Zobacz więcej',
     onNavigate
   }: {
     items: NavMenuItem[];

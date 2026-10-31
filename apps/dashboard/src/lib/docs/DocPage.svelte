@@ -24,7 +24,7 @@
   let content = $state<HTMLDivElement>();
   const language = $derived(preferences.language);
   const onhash = (url: URL) => replaceState(url, {});
-  const anchorLabels = { copyLabel: 'Copy link to this section', copiedLabel: 'Link copied' };
+  const anchorLabels = { copyLabel: 'Skopiuj link do tej sekcji', copiedLabel: 'Skopiowano link' };
   const date = (value: string) =>
     formatDate(value, language, { day: 'numeric', month: 'long', year: 'numeric' });
   const publicUrl = $derived(
@@ -40,7 +40,7 @@
       <div class="doc-byline">
         <span class="doc-updated"
           ><CalendarDays size={14} aria-hidden="true" /><span
-            >{'Updated'}
+            >Zaktualizowano
             <time
               datetime={page.updatedAt}
               title={formatDateTime(page.updatedAt, language, {
@@ -51,16 +51,16 @@
           ></span
         >
         {#if page.public}<span class="doc-public"
-            ><Globe size={13} aria-hidden="true" />{'Public'}</span
+            ><Globe size={13} aria-hidden="true" />Publiczna</span
           >{/if}
         <span class="doc-tools">
           {#if page.access.canReview}
             <a class="btn ghost btn-sm" href={docsPath(slug, page.slug, 'edit')}
-              ><SquarePen aria-hidden="true" />{'Edit'}</a
+              ><SquarePen aria-hidden="true" />Edytuj</a
             >
           {:else if page.access.canPropose}
             <a class="btn ghost btn-sm" href={docsPath(slug, page.slug, 'edit')}
-              ><SquarePen aria-hidden="true" />{'Suggest changes'}</a
+              ><SquarePen aria-hidden="true" />Zaproponuj zmiany</a
             >
           {/if}
           <DocInfo {page} {slug} {publicUrl} />
@@ -72,10 +72,8 @@
       <p class="doc-outdated" role="note">
         <TriangleAlert size={15} aria-hidden="true" />
         <span>
-          {'The Polish version changed after this translation was written.'}
-          <button type="button" onclick={() => setLanguage('pl')}
-            >{'Read the Polish version'}</button
-          >
+          Wersja polska zmieniła się po przygotowaniu tego tłumaczenia.
+          <button type="button" onclick={() => setLanguage('pl')}>Czytaj wersję polską</button>
         </span>
       </p>
     {/if}
@@ -90,7 +88,7 @@
       {#if page.markdown.trim()}
         <Markdown blocks={page.blocks} {language} />
       {:else}
-        <p class="muted">{'This page is empty.'}</p>
+        <p class="muted">Ta strona jest pusta.</p>
       {/if}
     </div>
   </article>

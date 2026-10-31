@@ -22,7 +22,7 @@
       !['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif'].includes(file.type) ||
       file.size > 20 * 1024 * 1024
     ) {
-      error = 'Choose a JPEG, PNG, WebP, AVIF or GIF image up to 20 MiB.';
+      error = 'Wybierz obraz JPEG, PNG, WebP, AVIF lub GIF o rozmiarze do 20 MiB.';
       input.value = '';
       return;
     }
@@ -32,10 +32,10 @@
       body.set('file', file);
       const response = await fetch('/api/files', { method: 'POST', body });
       const result = await response.json();
-      if (!response.ok) throw new Error(result.code ?? 'Upload failed.');
+      if (!response.ok) throw new Error(result.code ?? 'Nie udało się przesłać pliku.');
       if (active) fileId = result.id;
     } catch (e) {
-      if (active) error = e instanceof Error ? e.message : 'Upload failed.';
+      if (active) error = e instanceof Error ? e.message : 'Nie udało się przesłać pliku.';
     } finally {
       if (active) uploading = false;
       input.value = '';
@@ -44,13 +44,17 @@
 </script>
 
 <div class="article-thumbnail">
-  <label for={uid}>Thumbnail (optional)</label>
-  <p class="muted">Shown in article lists. Choose an image separately from the article content.</p>
-  {#if fileId}<img src={`/media/${encodeURIComponent(fileId)}`} alt={'Thumbnail preview'} />{/if}
+  <label for={uid}>Miniatura (opcjonalnie)</label>
+  <p class="muted">
+    Wyświetlana na listach artykułów. Wybierz obraz niezależnie od treści artykułu.
+  </p>
+  {#if fileId}<img src={`/media/${encodeURIComponent(fileId)}`} alt={'Podgląd miniatury'} />{/if}
   {#if !disabled}
     <div class="controls">
       <label class="btn btn-outline upload" class:disabled={uploading}>
-        <UploadCloud size={16} aria-hidden="true" />{uploading ? 'Uploading…' : 'Choose thumbnail'}
+        <UploadCloud size={16} aria-hidden="true" />{uploading
+          ? 'Przesyłanie…'
+          : 'Wybierz miniaturę'}
         <input
           id={uid}
           type="file"
@@ -63,8 +67,7 @@
           type="button"
           class="btn btn-outline"
           disabled={uploading}
-          onclick={() => (fileId = null)}
-          ><X size={16} aria-hidden="true" />{'Remove thumbnail'}</button
+          onclick={() => (fileId = null)}><X size={16} aria-hidden="true" />Usuń miniaturę</button
         >{/if}
     </div>
   {/if}

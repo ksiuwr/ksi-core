@@ -98,11 +98,11 @@
 
 <div class="workspace-header">
   <div>
-    <p class="workspace-eyebrow">{'Version history'}</p>
+    <p class="workspace-eyebrow">Historia wersji</p>
     <h1>{page.displayTitle}</h1>
   </div>
   <a class="btn btn-outline" href={docsPath(slug, page.slug)}
-    ><ArrowLeft size={15} aria-hidden="true" />{'Back to page'}</a
+    ><ArrowLeft size={15} aria-hidden="true" />Wróć do strony</a
   >
 </div>
 <DocError code={error} />
@@ -114,27 +114,27 @@
   aria-expanded={open}
   aria-controls={`${uid}-versions`}
 >
-  <History size={16} aria-hidden="true" />{'Versions'}
+  <History size={16} aria-hidden="true" />Wersje
   {#if selected !== null}<span class="history-version">v{selected}</span>{/if}
   <ChevronUp size={14} aria-hidden="true" />
 </button>
 <div class="history">
   <section class="history-detail" aria-live="polite">
     {#if loading}
-      <Skeleton label={'Loading version'} />
+      <Skeleton label={'Wczytywanie wersji'} />
     {:else if snapshot}
       <div class="history-detail-head">
         <h2>
-          {'Version'}
+          Wersja
           {snapshot.version}{#if snapshot.public}<span class="history-public"
-              ><Globe size={13} aria-hidden="true" />{'Public'}</span
+              ><Globe size={13} aria-hidden="true" />Publiczna</span
             >{/if}
         </h2>
         <div class="history-controls">
           {#if locales.length > 1}
             <div class="history-language">
               <Dropdown
-                label={'Language'}
+                label={'Język'}
                 value={locale}
                 options={locales.map((option) => ({
                   value: option,
@@ -145,30 +145,30 @@
               />
             </div>
           {/if}
-          <div class="segmented-control" role="group" aria-label={'Version view'} use:slider>
+          <div class="segmented-control" role="group" aria-label={'Widok wersji'} use:slider>
             <button
               type="button"
               class:active={mode === 'changes'}
               aria-pressed={mode === 'changes'}
-              onclick={() => (mode = 'changes')}>{'Changes'}</button
+              onclick={() => (mode = 'changes')}>Zmiany</button
             >
             <button
               type="button"
               class:active={mode === 'preview'}
               aria-pressed={mode === 'preview'}
-              onclick={() => (mode = 'preview')}>{'Full page'}</button
+              onclick={() => (mode = 'preview')}>Cała strona</button
             >
           </div>
         </div>
       </div>
       {#if mode === 'changes' && snapshot.previous && before.title !== after.title}
         <p class="history-title-change">
-          {'Title'}: <del>{before.title}</del> → <ins>{after.title}</ins>
+          Tytuł: <del>{before.title}</del> → <ins>{after.title}</ins>
         </p>
       {/if}
       {#if mode === 'changes' && snapshot.previous && snapshot.previous.folder !== snapshot.folder}
         <p class="history-title-change">
-          {'Folder'}: <del>{snapshot.previous.folder || '—'}</del> →
+          Folder: <del>{snapshot.previous.folder || '—'}</del> →
           <ins>{snapshot.folder || '—'}</ins>
         </p>
       {/if}
@@ -179,7 +179,7 @@
           {/if}
           {#if locale !== primaryContentLocale && !after.markdown}
             <p class="history-language-fallback">
-              {'This version has no translation in this language. Showing the Polish text.'}
+              Ta wersja nie ma tłumaczenia na ten język. Wyświetlany jest tekst polski.
             </p>
           {/if}
           <MarkdownContent value={after.markdown || snapshot.markdown} docs docLocale={locale} />
@@ -198,7 +198,7 @@
       <button
         type="button"
         class="btn btn-outline history-retry"
-        onclick={() => selected !== null && select(selected)}>{'Try again'}</button
+        onclick={() => selected !== null && select(selected)}>Spróbuj ponownie</button
       >
     {/if}
   </section>
@@ -211,16 +211,16 @@
     ontoggle={(event) => (open = event.newState === 'open')}
   >
     <header class="history-picker-head">
-      <h2 id={`${uid}-versions-title`}>{'Version history'}</h2>
+      <h2 id={`${uid}-versions-title`}>Historia wersji</h2>
       <button
         type="button"
         class="btn ghost icon-btn btn-sm"
         popovertarget={`${uid}-versions`}
         popovertargetaction="hide"
-        aria-label={'Close'}><X size={16} aria-hidden="true" /></button
+        aria-label={'Zamknij'}><X size={16} aria-hidden="true" /></button
       >
     </header>
-    <ol class="history-list" aria-label={'Versions'}>
+    <ol class="history-list" aria-label={'Wersje'}>
       {#each revisions as revision (revision.id)}
         <li>
           <a
@@ -240,11 +240,11 @@
             <span class="history-item-head">
               <span class="history-version">v{revision.version}</span>
               <time datetime={revision.createdAt}>{when(revision.createdAt)}</time>
-              {#if revision.version === page.version}<span class="tag tag-mint">{'Current'}</span
-                >{/if}
+              {#if revision.version === page.version}<span class="tag tag-mint">Bieżąca</span>{/if}
             </span>
             <span class="history-reason">
-              {#if revision.reason}{revision.reason}{:else}<span class="muted">{'No summary'}</span
+              {#if revision.reason}{revision.reason}{:else}<span class="muted"
+                  >Brak podsumowania</span
                 >{/if}
             </span>
             <span class="history-item-meta">
@@ -258,7 +258,7 @@
             </span>
             {#if revision.reviewer}
               <span class="history-review"
-                ><GitPullRequestArrow size={12} aria-hidden="true" />{'Suggestion accepted by'}
+                ><GitPullRequestArrow size={12} aria-hidden="true" />Propozycję zaakceptował(a)
                 {revision.reviewer.name}</span
               >
             {/if}

@@ -37,36 +37,36 @@
         <span class="font-display text-2xl font-semibold tracking-[-0.04em]">KSI UWr</span>
       </a>
       <p class="text-muted mt-4 max-w-sm text-sm leading-relaxed">
-        Computer Science Students’ Association at the University of Wrocław.
+        Koło Studentów Informatyki Uniwersytetu Wrocławskiego.
       </p>
       <address class="text-muted mt-5 text-xs leading-relaxed not-italic">
-        Institute of Computer Science<br />
-        15 Fryderyka Joliot-Curie St.<br />
-        50-383 Wrocław · Room 24
+        Instytut Informatyki<br />
+        ul. Fryderyka Joliot-Curie 15<br />
+        50-383 Wrocław · pokój 24
       </address>
     </div>
 
     <nav aria-labelledby="footer-projects">
-      <p id="footer-projects" class="eyebrow mb-4">Our projects</p>
+      <p id="footer-projects" class="eyebrow mb-4">Nasze projekty</p>
       <ul class="space-y-2.5 text-sm">
         {#each featuredProjects as project (project.href)}
           <li><a href={project.href} class="footer-link">{project.label}</a></li>
         {/each}
-        <li><a href="/projects" class="footer-link">All projects</a></li>
+        <li><a href="/projects" class="footer-link">Wszystkie projekty</a></li>
       </ul>
     </nav>
 
     <nav aria-labelledby="footer-explore">
-      <p id="footer-explore" class="eyebrow mb-4">Explore</p>
+      <p id="footer-explore" class="eyebrow mb-4">Odkrywaj</p>
       <ul class="space-y-2.5 text-sm">
-        <li><a href="/articles" class="footer-link">Articles</a></li>
-        <li><a href="/docs" class="footer-link">Docs</a></li>
-        <li><a href="mailto:ksi@cs.uni.wroc.pl" class="footer-link">Contact</a></li>
+        <li><a href="/articles" class="footer-link">Artykuły</a></li>
+        <li><a href="/docs" class="footer-link">Dokumentacja</a></li>
+        <li><a href="mailto:ksi@cs.uni.wroc.pl" class="footer-link">Kontakt</a></li>
       </ul>
     </nav>
 
     <div>
-      <p class="eyebrow mb-4">Follow us</p>
+      <p class="eyebrow mb-4">Obserwuj nas</p>
       <ul class="space-y-2.5 text-sm">
         {#each socialLinks as social (social.href)}
           <li>
@@ -103,7 +103,7 @@
           class="footer-link group"
         >
           <Github class="size-3.5" aria-hidden="true" />
-          Source code
+          Kod źródłowy
         </a>
         {#if commitHash}
           <a
@@ -111,7 +111,7 @@
             target="_blank"
             rel="noreferrer"
             class="footer-link font-mono"
-            title="Commit {commitHash}"
+            title="Rewizja {commitHash}"
           >
             <GitCommitHorizontal class="size-3.5" aria-hidden="true" />
             {shortCommitHash}

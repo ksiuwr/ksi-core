@@ -40,9 +40,9 @@
 </script>
 
 <div class="workspace-header">
-  <h1>Task board</h1>
+  <h1>Tablica zadań</h1>
   <a class="btn btn-outline" href={`${dashboardPath(workspace, projectSlug, 'board')}/graveyard`}
-    ><Trash2 size={15} aria-hidden="true" />{'Removed tasks'}</a
+    ><Trash2 size={15} aria-hidden="true" />Usunięte zadania</a
   >
 </div>
 {#if error}<p class="error" role="alert">{error}</p>{/if}

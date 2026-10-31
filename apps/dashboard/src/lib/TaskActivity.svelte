@@ -88,54 +88,54 @@
     {#if event.authorId}<a
         class="activity-author"
         href={`/members/${encodeURIComponent(event.authorId)}`}
-        >{event.authorName || (pl ? 'Członek stowarzyszenia' : 'Association member')}</a
-      >{:else}<strong class="activity-author">{event.authorName || 'System'}</strong>{/if}
+        >{event.authorName || 'Członek stowarzyszenia'}</a
+      >{:else}<strong class="activity-author">{event.authorName || 'Systemowy'}</strong>{/if}
     {' '}
     {#each summaries as summary, index}
       {#if index > 0}{' '}<span class="activity-separator">·</span>{' '}{/if}
-      {#if summary.kind === 'created'}{pl ? 'utworzył(a) to zadanie' : 'created this task'}
-      {:else if summary.kind === 'archived'}archived this task
-      {:else if summary.kind === 'deleted'}{pl ? 'usunął(a) to zadanie' : 'deleted this task'}
-      {:else if summary.kind === 'restored'}{pl ? 'przywrócił(a) to zadanie' : 'restored this task'}
-      {:else if summary.kind === 'description'}{pl ? 'edytował(a) opis' : 'edited the description'}
+      {#if summary.kind === 'created'}utworzył(a) to zadanie
+      {:else if summary.kind === 'archived'}zarchiwizował to zadanie
+      {:else if summary.kind === 'deleted'}usunął(a) to zadanie
+      {:else if summary.kind === 'restored'}przywrócił(a) to zadanie
+      {:else if summary.kind === 'description'}edytował(a) opis
       {:else if summary.kind === 'deadline'}
         {#if summary.before && summary.after}
-          {pl ? 'zmienił(a) termin z' : 'changed the deadline from'}
+          zmienił(a) termin z
           <del class="title-value">{deadlineText(summary.before)}</del>
-          {' '}{pl ? 'na' : 'to'}
+          {' '}na
           <time class="title-value" datetime={summary.after}>{deadlineText(summary.after)}</time>
         {:else if summary.after}
-          {pl ? 'ustawił termin na' : 'set the deadline to'}
+          ustawił termin na
           <time class="title-value" datetime={summary.after}>{deadlineText(summary.after)}</time>
         {:else}
-          {pl ? 'usunął(a) termin' : 'removed the deadline'}
+          usunął(a) termin
         {/if}
       {:else if summary.kind === 'renamed'}
-        {pl ? 'zmienił(a) tytuł' : 'changed the title'}
-        {#if summary.before}{' '}{pl ? 'z' : 'from'}
+        zmienił(a) tytuł
+        {#if summary.before}{' '}z
           <del class="title-value">{summary.before}</del>{/if}
-        {' '}{pl ? 'na' : 'to'} <span class="title-value">{summary.after}</span>
+        {' '}na <span class="title-value">{summary.after}</span>
       {:else if summary.kind === 'moved'}
-        {pl ? 'przeniósł(a) zadanie' : 'moved this task'}
-        {#if summary.before}{' '}{pl ? 'z' : 'from'}
+        przeniósł(a) zadanie
+        {#if summary.before}{' '}z
           <span class="status-name">{statusName(summary.before)}</span>{/if}
-        {' '}{pl ? 'do' : 'to'} <span class="status-name">{statusName(summary.after)}</span>
+        {' '}do <span class="status-name">{statusName(summary.after)}</span>
       {:else if summary.kind === 'label-renamed'}
-        {pl ? 'zmienił(a) nazwę etykiety z' : 'renamed the label from'}
+        zmienił(a) nazwę etykiety z
         <del class="title-value">{summary.before}</del>
-        {pl ? 'na' : 'to'}
+        na
         <span class="activity-label" style={labelColorStyle(labelInfo(summary.after)?.color)}
           >{summary.after}</span
         >
       {:else if summary.kind === 'label-color'}
-        {pl ? 'zmienił(a) kolor etykiety' : 'changed the color of the'}
+        zmienił(a) kolor etykiety
         <span class="activity-label" style={labelColorStyle(summary.after)}>{summary.label}</span>
-        {pl ? 'z' : 'label from'}
+        z
         <span class="color-value"
           ><span class="color-swatch" style:background={summary.before}
           ></span>{summary.before}</span
         >
-        {pl ? 'na' : 'to'}
+        na
         <span class="color-value"
           ><span class="color-swatch" style:background={summary.after}></span>{summary.after}</span
         >
@@ -154,15 +154,9 @@
         <span class="activity-label" style={labelColorStyle(labelInfo(summary.label)?.color)}
           >{summary.label}</span
         >{#if !pl}
-          label{/if}
+          etykieta{/if}
       {:else if summary.kind === 'assignee-added' || summary.kind === 'assignee-removed'}
-        {summary.kind === 'assignee-added'
-          ? pl
-            ? 'przypisał(a)'
-            : 'assigned'
-          : pl
-            ? 'usunął(a) przypisanie'
-            : 'unassigned'}
+        {summary.kind === 'assignee-added' ? 'przypisał(a)' : 'usunął(a) przypisanie'}
         {' '}{#each summary.ids as id, personIndex}{#if personIndex > 0}{', '}{/if}<MemberPreview
             member={person(id)}
             href={`/members/${encodeURIComponent(id)}`}
@@ -170,13 +164,7 @@
             size={18}
           />{/each}
       {:else if summary.kind === 'label-added' || summary.kind === 'label-removed'}
-        {summary.kind === 'label-added'
-          ? pl
-            ? 'dodał(a)'
-            : 'added'
-          : pl
-            ? 'usunął(a)'
-            : 'removed'}
+        {summary.kind === 'label-added' ? 'dodał(a)' : 'usunął(a)'}
         {' '}{pl
           ? summary.labels.length === 1
             ? 'etykietę'
@@ -186,8 +174,8 @@
             style={labelColorStyle(label?.color)}
             title={label?.description || name}>{name}</span
           >{' '}{/each}
-        {#if !pl}{summary.labels.length === 1 ? 'label' : 'labels'}{/if}
-      {:else}{pl ? 'zaktualizował(a) to zadanie' : 'updated this task'}{/if}
+        {#if !pl}{summary.labels.length === 1 ? 'etykieta' : 'labels'}{/if}
+      {:else}zaktualizował(a) to zadanie{/if}
     {/each}
     {' '}<time datetime={event.createdAt} title={absoluteTime} aria-label={absoluteTime}
       >{relativeTime}</time

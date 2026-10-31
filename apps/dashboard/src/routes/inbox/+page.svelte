@@ -7,8 +7,8 @@
 
 <div class="workspace-header">
   <div>
-    <h1>Notifications</h1>
-    <p class="workspace-description">Catch up on what you missed.</p>
+    <h1>Powiadomienia</h1>
+    <p class="workspace-description">Zobacz, co Cię ominęło.</p>
   </div>
 </div>
 <NotificationInbox

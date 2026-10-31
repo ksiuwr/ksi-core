@@ -46,12 +46,12 @@
       label: contentLocaleName(locale, locale),
       description:
         locale === primaryContentLocale
-          ? 'Primary language'
+          ? 'Język główny'
           : added.includes(locale)
-            ? 'Translation added'
-            : 'Not added',
+            ? 'Tłumaczenie dodane'
+            : 'Nie dodano',
       indicator:
-        locale === primaryContentLocale ? 'Primary' : added.includes(locale) ? 'Added' : undefined
+        locale === primaryContentLocale ? 'Główny' : added.includes(locale) ? 'Dodano' : undefined
     }))
   );
   function selectLanguage(value: string) {
@@ -66,7 +66,7 @@
   <div class="language-bar">
     <div class="language-title">
       <Languages size={17} aria-hidden="true" />
-      <strong>Content language</strong>
+      <strong>Język treści</strong>
     </div>
 
     <div class="language-actions">
@@ -83,7 +83,7 @@
             aria-expanded={referenceOpen}
             onclick={() => (referenceOpen = !referenceOpen)}
           >
-            <Eye size={15} aria-hidden="true" />{'Polish reference'}
+            <Eye size={15} aria-hidden="true" />Polski tekst źródłowy
             <ChevronDown size={14} aria-hidden="true" class={referenceOpen ? 'open' : ''} />
           </button>
           {#if confirmingRemoval}
@@ -96,14 +96,14 @@
                 confirmingRemoval = false;
               }}
             >
-              <Trash2 size={15} aria-hidden="true" />{'Confirm remove'}
+              <Trash2 size={15} aria-hidden="true" />Usuń trwale
             </button>
             <button
               type="button"
               class="btn btn-outline"
               disabled={busy}
               onclick={() => (confirmingRemoval = false)}
-              ><X size={15} aria-hidden="true" />{'Cancel'}</button
+              ><X size={15} aria-hidden="true" />Anuluj</button
             >
           {:else}
             {#if translationExists && onremove}
@@ -111,8 +111,8 @@
                 type="button"
                 class="btn btn-outline remove-button"
                 disabled={busy}
-                aria-label={`Remove ${localeLabel(selected)} translation`}
-                title={`Remove ${localeLabel(selected)} translation`}
+                aria-label={`Usuń tłumaczenie: ${localeLabel(selected)}`}
+                title={`Usuń tłumaczenie: ${localeLabel(selected)}`}
                 onclick={() => (confirmingRemoval = true)}
                 ><Trash2 size={15} aria-hidden="true" /></button
               >
@@ -123,7 +123,7 @@
                 class="btn"
                 disabled={busy || !canSave}
                 onclick={() => onsave?.()}
-                ><Save size={15} aria-hidden="true" />{'Save translation'}</button
+                ><Save size={15} aria-hidden="true" />Zapisz tłumaczenie</button
               >
             {/if}
           {/if}
@@ -131,7 +131,7 @@
       </div>
 
       <Dropdown
-        label={'Content language'}
+        label={'Język treści'}
         value={selected}
         options={languageOptions}
         onselect={selectLanguage}
@@ -148,12 +148,12 @@
   >
     <div>
       <div class="translation-context">
-        <span class="tag">{translationExists ? 'Added' : 'New'}</span>
+        <span class="tag">{translationExists ? 'Dodano' : 'Nowe'}</span>
         <p>
-          You are editing the {localeLabel(selected)} translation. Blank fields use the Polish value shown
-          in the reference.
+          Edytujesz tłumaczenie: {localeLabel(selected)}. Puste pola użyją polskiej wartości
+          widocznej w podglądzie.
         </p>
-        {#if dirty}<span class="dirty"><span></span>{'Unsaved changes'}</span>{/if}
+        {#if dirty}<span class="dirty"><span></span>Niezapisane zmiany</span>{/if}
       </div>
       {#if saveHint}<p class="save-hint">{saveHint}</p>{/if}
     </div>
@@ -170,8 +170,8 @@
     <div>
       <div class="reference-panel">
         <header>
-          <div><strong>Polish reference</strong><span>Read only</span></div>
-          <p>Use this as context while writing the translation.</p>
+          <div><strong>Polski tekst źródłowy</strong><span>Tylko do odczytu</span></div>
+          <p>Użyj tego tekstu jako kontekstu podczas pisania tłumaczenia.</p>
         </header>
         {@render reference()}
       </div>

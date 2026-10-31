@@ -29,7 +29,7 @@
     ) {
       return error.value.message;
     }
-    return 'An unknown error occurred.';
+    return 'Wystąpił nieznany błąd.';
   }
 
   async function fetchCache(showLoading = true) {
@@ -61,7 +61,7 @@
 
     await fetchCache(false);
     refreshingKeys = refreshingKeys.filter((item) => item !== key);
-    toast.success(`Refreshed cache key “${key}”`);
+    toast.success(`Odświeżono klucz pamięci podręcznej „${key}”`);
   }
 
   function formatLocalDate(date: Date | number | string) {
@@ -78,11 +78,14 @@
 
 {#snippet hero()}
   <header class="border-base-content/15 border-b pb-10 md:pb-14">
-    <p class="text-primary mb-4 text-xs font-bold tracking-[0.2em] uppercase">Storage operations</p>
-    <h1 class="mb-0! text-4xl tracking-[-0.04em] sm:text-5xl">S3 cache</h1>
+    <p class="text-primary mb-4 text-xs font-bold tracking-[0.2em] uppercase">
+      Operacje na magazynie danych
+    </p>
+    <h1 class="mb-0! text-4xl tracking-[-0.04em] sm:text-5xl">Pamięć podręczna S3</h1>
     <p class="text-base-content/65 mt-4 max-w-3xl text-lg leading-relaxed">
-      The website caches lists of object URLs from Cloudflare R2 to avoid repeatedly scanning
-      storage. Inspect each cached group below or refresh a key after its bucket contents change.
+      Witryna zapisuje w pamięci podręcznej listy adresów URL obiektów z Cloudflare R2, aby uniknąć
+      wielokrotnego skanowania magazynu. Przejrzyj poniżej każdą zapisaną grupę lub odśwież klucz po
+      zmianie zawartości jego zasobnika.
     </p>
   </header>
 {/snippet}
@@ -92,38 +95,39 @@
     <div class="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
       <div>
         <p class="text-primary mb-3 text-xs font-bold tracking-[0.2em] uppercase">
-          01 / Cached groups
+          01 / Grupy w pamięci podręcznej
         </p>
         <h2 id="cache-list-heading" class="mb-0! text-2xl tracking-tight sm:text-3xl">
-          Object listings
+          Listy obiektów
         </h2>
       </div>
       {#if !loading && !loadError}
         <span class="text-base-content/45 font-mono text-xs">
-          {cacheEntries.length}
-          {cacheEntries.length === 1 ? 'key' : 'keys'} cached
+          Zapisano w pamięci podręcznej: {cacheEntries.length}
         </span>
       {/if}
     </div>
 
     {#if loading}
       <div class="border-base-content/15 border p-8 text-center" role="status">
-        <p class="text-base-content/55 font-mono text-sm">Loading cached object listings…</p>
+        <p class="text-base-content/55 font-mono text-sm">
+          Ładowanie list obiektów z pamięci podręcznej…
+        </p>
       </div>
     {:else if loadError}
       <div class="border-error/30 bg-error/5 border p-6">
-        <p class="text-error font-bold">The S3 cache could not be loaded.</p>
+        <p class="text-error font-bold">Nie udało się załadować pamięci podręcznej S3.</p>
         <p class="text-base-content/65 mt-1 text-sm">{loadError}</p>
         <button class="btn btn-outline btn-sm mt-4" type="button" onclick={() => void fetchCache()}>
-          Try again
+          Spróbuj ponownie
         </button>
       </div>
     {:else if cacheEntries.length === 0}
       <div class="border-base-content/25 border border-dashed px-6 py-14 text-center">
         <TableProperties class="text-base-content/30 mx-auto mb-4 size-8" strokeWidth={1.5} />
-        <h3 class="mb-2! text-xl">No cache keys found</h3>
+        <h3 class="mb-2! text-xl">Nie znaleziono kluczy pamięci podręcznej</h3>
         <p class="text-base-content/55">
-          Cached object listings will appear here after they are used.
+          Listy obiektów pojawią się tutaj po zapisaniu ich w pamięci podręcznej.
         </p>
       </div>
     {:else}
@@ -137,11 +141,11 @@
                   <p
                     class="text-base-content/40 mb-2 font-mono text-xs tracking-[0.16em] uppercase"
                   >
-                    Cache key
+                    Klucz pamięci podręcznej
                   </p>
                   <h3 class="mb-2! text-xl tracking-tight wrap-anywhere">{key}</h3>
                   <p class="text-base-content/50 font-mono text-xs">
-                    Updated {formatLocalDate(cache.time)}
+                    Zaktualizowano {formatLocalDate(cache.time)}
                   </p>
                 </div>
                 <button
@@ -149,10 +153,10 @@
                   type="button"
                   onclick={() => void refetch(key)}
                   disabled={refreshing}
-                  aria-label={`Refresh cache key ${key}`}
+                  aria-label={`Odśwież klucz pamięci podręcznej ${key}`}
                 >
                   <RefreshCw class="size-4" />
-                  {refreshing ? 'Refreshing…' : 'Refresh'}
+                  {refreshing ? 'Odświeżanie…' : 'Odśwież'}
                 </button>
               </div>
             </div>
@@ -182,7 +186,7 @@
                   </li>
                 {:else}
                   <li class="text-base-content/50 font-mono text-xs">
-                    This cache key contains no URLs.
+                    Ten klucz pamięci podręcznej nie zawiera żadnych adresów URL.
                   </li>
                 {/each}
               </ul>

@@ -29,7 +29,7 @@
   <a
     href="/projects"
     class="text-muted hover:text-ink inline-flex items-center gap-2 py-1.5 text-[13px]"
-    ><ArrowLeft class="size-4" aria-hidden="true" />All projects</a
+    ><ArrowLeft class="size-4" aria-hidden="true" />Wszystkie projekty</a
   >
 
   <header class="surface-card mt-4 overflow-hidden">
@@ -64,17 +64,17 @@
           {#if data.access.canEdit || data.access.canManageMembers}
             <a
               href={`${data.dashboardOrigin}/projects/${encodeURIComponent(project.slug)}/settings`}
-              class="btn btn-outline"><Shield /> Project settings</a
+              class="btn btn-outline"><Shield /> Ustawienia projektu</a
             >
           {/if}
           {#if !data.access.isMember && !form?.joined}
             <form method="POST" action="?/join">
-              <button class="btn"><Plus /> Join project</button>
+              <button class="btn"><Plus /> Dołącz do projektu</button>
             </form>
           {:else if data.access.isMember}
             <a
               href={`${data.dashboardOrigin}/projects/${encodeURIComponent(project.slug)}`}
-              class="btn"><LayoutDashboard /> Open project workspace</a
+              class="btn"><LayoutDashboard /> Otwórz przestrzeń projektu</a
             >
           {/if}
         </div>
@@ -89,9 +89,9 @@
     >
       <CircleCheck class="text-muted size-4 shrink-0" aria-hidden="true" />
       {#if form.requested}
-        Your join request has been sent.
+        Prośba o dołączenie została wysłana.
       {:else}
-        You have joined the project.
+        Dołączono do projektu.
       {/if}
     </p>
   {/if}
@@ -112,25 +112,21 @@
             <Markdown blocks={data.mainArticleBlocks} {language} />
           </div>
         {:else if section === 'articles'}
-          <h2 class="mb-6 text-2xl tracking-tight">Articles</h2>
+          <h2 class="mb-6 text-2xl tracking-tight">Artykuły</h2>
           <ArticleList articles={project.articles} />
         {:else if section === 'leaders' || section === 'members'}
           <h2 class="mb-6 text-2xl tracking-tight">
-            {#if section === 'leaders'}Project leaders{:else}Members{/if}
+            {#if section === 'leaders'}Liderzy projektu{:else}Członkowie{/if}
           </h2>
           <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {#each section === 'leaders' ? project.leaders : project.members as member (member.id)}
               <div class="surface-card px-4 py-3">
-                <MemberPreview
-                  {member}
-                  href={`/members/${encodeURIComponent(member.id)}`}
-                  {language}
-                />
+                <MemberPreview {member} href={`/members/${encodeURIComponent(member.id)}`} />
               </div>
             {/each}
           </div>
         {:else if section === 'links'}
-          <h2 class="mb-6 text-2xl tracking-tight">Links</h2>
+          <h2 class="mb-6 text-2xl tracking-tight">Linki</h2>
           <div class="flex flex-wrap gap-2">
             {#each project.links as link (link.id)}<a
                 class="btn btn-outline group"

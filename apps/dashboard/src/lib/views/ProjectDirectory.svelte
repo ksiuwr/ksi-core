@@ -10,12 +10,12 @@
 
 <div class="workspace-header">
   <div>
-    <h1>Projects</h1>
-    <p class="workspace-description">Choose a project and start collaborating.</p>
+    <h1>Projekty</h1>
+    <p class="workspace-description">Wybierz projekt i rozpocznij współpracę.</p>
   </div>
   {#if role !== 'member'}
     <a class="btn" href="/projects/new">
-      <Plus size={16} aria-hidden="true" />{'New project'}
+      <Plus size={16} aria-hidden="true" />Nowy projekt
     </a>
   {/if}
 </div>
@@ -28,14 +28,14 @@
           <span class="tag" style="background: var(--mint);">{field}</span>
         {/each}
         {#if project.locked}
-          <span class="tag">Locked</span>
+          <span class="tag">Zamknięty</span>
         {/if}
       </div>
       <h2>{project.name}</h2>
       <MarkdownContent value={project.description} />
       <div class="project-card-actions">
         <a class="btn" href={`/projects/${encodeURIComponent(project.slug)}`}>
-          {'Open project'}
+          Otwórz projekt
           <ArrowUpRight size={15} aria-hidden="true" />
         </a>
       </div>
@@ -45,7 +45,7 @@
 
 {#if !projects.length}
   <div class="empty-state">
-    <h2>No projects yet</h2>
-    <p>New projects will appear here.</p>
+    <h2>Jeszcze nie ma projektów</h2>
+    <p>Nowe projekty pojawią się tutaj.</p>
   </div>
 {/if}

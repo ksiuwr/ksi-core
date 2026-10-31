@@ -102,7 +102,7 @@
       );
       draft = { ...result, publicCredit: showCredit, canManageCredit: draft.canManageCredit };
       await refresh();
-      notice = 'Saved.';
+      notice = 'Zapisano.';
     });
   }
 
@@ -113,7 +113,7 @@
         title,
         markdown
       });
-      notice = 'Your proposed edit was submitted.';
+      notice = 'Twoja propozycja zmian została wysłana.';
     });
   }
 
@@ -128,7 +128,7 @@
 </script>
 
 <a class="btn btn-outline detail-back" href={dashboardPath(workspace, projectSlug, 'articles')}
-  ><ArrowLeft size={15} aria-hidden="true" />{'All articles'}</a
+  ><ArrowLeft size={15} aria-hidden="true" />Wszystkie artykuły</a
 >
 
 {#if permissions.canManage}
@@ -149,8 +149,8 @@
     {#if permissions.canEdit}
       <input
         class="article-title-input"
-        aria-label={'Title'}
-        placeholder={'Title'}
+        aria-label={'Tytuł'}
+        placeholder={'Tytuł'}
         bind:value={() => localized('title', title), (value) => setLocalized('title', value)}
         required={contentLocale === primaryContentLocale}
       />
@@ -172,7 +172,7 @@
     </div>
   </div>
 
-  <aside class="detail-aside" aria-label={'Settings'}>
+  <aside class="detail-aside" aria-label={'Ustawienia'}>
     {#if error}<p class="error" role="alert">{error}</p>{/if}
     {#if notice}<p class="notice" role="status">{notice}</p>{/if}
 
@@ -180,13 +180,13 @@
       <h2>Status</h2>
       <div class="status-line">
         <span class="tag" class:tag-mint={draft.state === 'published'}
-          >{draft.state === 'published' ? 'Published' : 'Draft'}</span
+          >{draft.state === 'published' ? 'Opublikowany' : 'Szkic'}</span
         >
         {#if draft.state === 'published'}
           <a
             class="status-link"
             href={`${websiteOrigin}/articles/${encodeURIComponent(draft.slug)}`}
-            >{'View public article'}<ArrowUpRight size={13} aria-hidden="true" /></a
+            >Zobacz publiczny artykuł<ArrowUpRight size={13} aria-hidden="true" /></a
           >
         {/if}
       </div>
@@ -195,7 +195,7 @@
             <button
               class="btn btn-coral"
               disabled={busy || thumbnailUploading}
-              onclick={() => save(true)}>Publish</button
+              onclick={() => save(true)}>Opublikuj</button
             >
           {/if}
           {#if permissions.canSave}
@@ -206,16 +206,16 @@
             >
               <Save size={15} aria-hidden="true" />
               {draft.state === 'published' && !permissions.canPublish
-                ? 'Save changes'
-                : 'Save draft'}
+                ? 'Zapisz zmiany'
+                : 'Zapisz szkic'}
             </button>
           {/if}
           {#if permissions.canPropose}
             <button class="btn btn-outline" disabled={busy || thumbnailUploading} onclick={propose}
-              >Propose edit</button
+              >Zaproponuj zmianę</button
             >
           {/if}
-        </div>{:else}<p class="muted">Save the translation from the language bar above.</p>{/if}
+        </div>{:else}<p class="muted">Zapisz tłumaczenie na pasku języka powyżej.</p>{/if}
     </section>
 
     {#if contentLocale === primaryContentLocale}<section class="aside-section">
@@ -239,34 +239,25 @@
 
     {#if permissions.canManage && contentLocale === primaryContentLocale}
       <section class="aside-section">
-        <h2>Publishing</h2>
+        <h2>Publikacja</h2>
         {#if workspace === 'project'}
           <label class="check"
-            ><input
-              type="checkbox"
-              bind:checked={draft.mainArticle}
-            />{'Main project article'}</label
+            ><input type="checkbox" bind:checked={draft.mainArticle} />Główny artykuł projektu</label
           >
           <p class="muted">
-            When published, this article appears on the public project home page. It replaces the
-            previous main article. Save or publish to apply this setting.
+            Po opublikowaniu ten artykuł pojawi się na publicznej stronie projektu i zastąpi
+            poprzedni główny artykuł. Zapisz lub opublikuj, aby zastosować ustawienie.
           </p>
           <label class="check"
-            ><input
-              type="checkbox"
-              bind:checked={draft.projectFeed}
-            />{'Show in project articles'}</label
+            ><input type="checkbox" bind:checked={draft.projectFeed} />Pokaż w artykułach projektu</label
           >
         {/if}
         <label class="check"
-          ><input
-            type="checkbox"
-            bind:checked={draft.websiteFeed}
-          />{'Show in website articles'}</label
+          ><input type="checkbox" bind:checked={draft.websiteFeed} />Pokaż w artykułach na stronie</label
         >
         <p class="muted">
-          These settings apply when the article is published. The main article is displayed
-          separately from the project articles list.
+          Te ustawienia obowiązują po opublikowaniu artykułu. Artykuł główny jest wyświetlany
+          oddzielnie od listy artykułów projektu.
         </p>
       </section>
     {/if}
@@ -279,7 +270,7 @@
             checked={showCredit}
             onchange={(event) => updateCredit(event.currentTarget.checked)}
           />
-          {'Show my author credit'}
+          Pokaż mnie jako autora
         </label>
       </section>
     {/if}

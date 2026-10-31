@@ -1,9 +1,7 @@
-import type { FrontendLocale } from 'shared/content-locales';
 import { clampImageWidth, minimumImageWidth } from 'shared/markdown-images';
 
 type ResizeOptions = {
   blocks?: unknown;
-  language: FrontendLocale;
   onresize?: (index: number, width: number) => void;
 };
 /** Enhance only editable previews. Published Markdown has no editing controls. */
@@ -26,12 +24,7 @@ export function imageResize(node: HTMLElement, options: ResizeOptions) {
         const handle = document.createElement('button');
         handle.type = 'button';
         handle.className = 'image-resize-handle';
-        handle.setAttribute(
-          'aria-label',
-          current.language === 'pl'
-            ? 'Zmień szerokość obrazu (strzałki w lewo i w prawo)'
-            : 'Resize image (left and right arrow keys)'
-        );
+        handle.setAttribute('aria-label', 'Zmień szerokość obrazu (strzałki w lewo i w prawo)');
         handle.title = handle.getAttribute('aria-label')!;
         wrapper.append(handle);
         if (focusAfterResize === index) {

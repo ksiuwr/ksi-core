@@ -7,7 +7,7 @@
 <Docs
   projectId=""
   projectSlug=""
-  workspaceName={'Association'}
+  workspaceName={'Całe koło'}
   data={data.docs}
   websiteOrigin={data.websiteOrigin}
 />

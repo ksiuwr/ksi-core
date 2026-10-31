@@ -48,7 +48,7 @@
     error = '';
     try {
       const response = await work();
-      if (!response.ok) throw new Error('Unable to update members.');
+      if (!response.ok) throw new Error('Nie udało się zaktualizować członków.');
       removing = null;
       reloadKey++;
     } catch (cause) {
@@ -85,12 +85,12 @@
   );
   function role(m: Member) {
     return m.leader
-      ? 'Project leader'
+      ? 'Lider projektu'
       : m.role === 'administrator'
         ? 'Administrator'
         : m.role === 'board'
-          ? 'Board member'
-          : 'Member';
+          ? 'Członek zarządu'
+          : 'Członek';
   }
   $effect(() => {
     const path = memberId
@@ -104,7 +104,7 @@
     error = '';
     void fetch(`/api/platform${path}`)
       .then(async (response) => {
-        if (!response.ok) throw new Error('Unable to load members.');
+        if (!response.ok) throw new Error('Nie udało się wczytać członków.');
         const result = await response.json();
         if (current !== generation) return;
         if (memberId) person = result;
@@ -119,16 +119,16 @@
   });
 </script>
 
-{#if loading}<Skeleton label="Loading members" />{:else if error}<p class="error" role="alert">
+{#if loading}<Skeleton label="Ładowanie członków" />{:else if error}<p class="error" role="alert">
     {error}
   </p>{:else if person}
-  <a class="btn btn-outline" href="/association/members"><ArrowLeft size={15} />{'Members'}</a>
+  <a class="btn btn-outline" href="/association/members"><ArrowLeft size={15} />Członkowie</a>
   <section class="card person">
     {#if person.image}<img class="portrait" src={person.image} alt="" />{/if}
     <div>
       <h1>{person.firstName} {person.lastName}</h1>
       <a class="btn btn-outline" href={`${websiteOrigin}/members/${encodeURIComponent(person.id)}`}
-        >View public profile</a
+        >Zobacz publiczny profil</a
       >
       {#if person.nickname}<p>aka. {person.nickname}</p>{/if}
       <p class="muted">{role(person)}</p>
@@ -146,25 +146,25 @@
             target="_blank"><Linkedin size={16} />LinkedIn</a
           >{/if}
         {#if elevated}<a class="btn btn-outline" href={`/members/${encodeURIComponent(person.id)}`}
-            >Manage account</a
+            >Zarządzaj kontem</a
           >{/if}
       </div>
     </div>
   </section>
 {:else}
   <div class="workspace-header">
-    <h1>Members</h1>
+    <h1>Członkowie</h1>
     <label class="search"
       ><Search size={16} /><input
-        aria-label="Search members"
-        placeholder="Name or nickname…"
+        aria-label="Szukaj członków"
+        placeholder="Imię, nazwisko lub pseudonim…"
         bind:value={search}
       /></label
     >
   </div>
   {#if manageable && requests.length}
     <section class="card requests">
-      <h2>Join requests</h2>
+      <h2>Prośby o dołączenie</h2>
       {#each requests as request (request.request.id)}
         <div class="request">
           <a href={`/people/${encodeURIComponent(request.request.userId)}`}
@@ -177,14 +177,14 @@
               onclick={() =>
                 manage(() =>
                   projectApi(`/join-requests/${request.request.id}`, 'POST', { accept: true })
-                )}>Accept</button
+                )}>Akceptuj</button
             ><button
               class="btn btn-outline btn-sm"
               disabled={busy}
               onclick={() =>
                 manage(() =>
                   projectApi(`/join-requests/${request.request.id}`, 'POST', { accept: false })
-                )}>Decline</button
+                )}>Odrzuć</button
             >
           </div>
         </div>
@@ -195,7 +195,7 @@
     <table>
       <thead
         ><tr
-          ><th>Person</th><th>Role</th><th class="bio-cell">About</th>{#if manageable}<th
+          ><th>Osoba</th><th>Rola</th><th class="bio-cell">O osobie</th>{#if manageable}<th
             ></th>{/if}</tr
         ></thead
       ><tbody>
@@ -212,25 +212,25 @@
                     class="btn btn-outline btn-sm danger-button"
                     disabled={busy}
                     onclick={() => manage(() => projectApi(`/members/${member.id}`, 'DELETE'))}
-                    >Confirm removal</button
+                    >Tak, usuń</button
                   ><button class="btn btn-outline btn-sm" onclick={() => (removing = null)}
-                    >Cancel</button
+                    >Anuluj</button
                   >{:else}<button
                     class="btn btn-outline btn-sm"
                     disabled={busy || (member.leader && leaderIds.length <= 1)}
                     onclick={() => setLeader(member.id, !member.leader)}
-                    >{member.leader ? 'Remove leader' : 'Make leader'}</button
+                    >{member.leader ? 'Odbierz rolę lidera' : 'Mianuj liderem'}</button
                   ><button
                     class="btn btn-outline btn-sm"
                     disabled={busy}
-                    onclick={() => (removing = member.id)}>Remove from project</button
+                    onclick={() => (removing = member.id)}>Usuń z projektu</button
                   >{/if}</td
               >{/if}</tr
           >{/each}
       </tbody>
     </table>
   </div>
-  {#if !filtered.length}<p class="muted">No matching members.</p>{/if}
+  {#if !filtered.length}<p class="muted">Brak pasujących osób.</p>{/if}
 {/if}
 
 <style>

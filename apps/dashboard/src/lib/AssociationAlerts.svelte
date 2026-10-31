@@ -193,51 +193,52 @@
 
 <div class="workspace-header">
   <div>
-    <h1>Association settings</h1>
-    <p>Manage announcements on the public website.</p>
+    <h1>Ustawienia koła</h1>
+    <p>Zarządzaj ogłoszeniami na stronie publicznej.</p>
   </div>
   <a class="btn btn-outline" href={websiteOrigin} target="_blank" rel="noopener noreferrer">
-    <ArrowUpRight size={15} aria-hidden="true" />{'View website'}
+    <ArrowUpRight size={15} aria-hidden="true" />Zobacz stronę
   </a>
 </div>
 
 <div class="settings-layout">
   <SettingsNav
-    label="Association settings"
-    items={[{ id: 'alerts', label: 'Website alerts', icon: Megaphone }]}
+    label="Ustawienia koła"
+    items={[{ id: 'alerts', label: 'Alerty na stronie', icon: Megaphone }]}
   />
   <div class="settings-main">
     <section id="alerts" class="settings-section" aria-labelledby={`${uid}-heading`}>
       <header class="alerts-heading">
         <div>
-          <h2 id={`${uid}-heading`}>Website alerts</h2>
+          <h2 id={`${uid}-heading`}>Alerty na stronie</h2>
           <p class="muted">
-            Alerts appear only during their display interval. When intervals overlap, the highest
-            priority wins; ties show the most recently started alert.
+            Alerty są widoczne tylko w wybranym przedziale czasu. Gdy przedziały się nakładają,
+            wygrywa najwyższy priorytet; przy równym priorytecie wyświetlany jest alert z późniejszą
+            datą rozpoczęcia.
           </p>
         </div>
         <button class="btn" disabled={busy} onclick={() => void edit()}
-          ><Plus size={15} aria-hidden="true" />{'New alert'}</button
+          ><Plus size={15} aria-hidden="true" />Nowy alert</button
         >
       </header>
 
       {#if error}
         <p class="error" role="alert">
-          {#if error === 'INVALID_ALERT_INTERVAL'}The end must be after the start.
-          {:else if error === 'REVISION_CONFLICT'}This content changed. Reload before saving.
-          {:else}Could not save the changes. Check the link and try again.{/if}
+          {#if error === 'INVALID_ALERT_INTERVAL'}Koniec musi przypadać po początku.
+          {:else if error === 'REVISION_CONFLICT'}Treść została zmieniona. Odśwież przed zapisaniem.
+          {:else}Nie udało się zapisać zmian. Sprawdź link i spróbuj ponownie.{/if}
         </p>
       {/if}
       {#if saved}
         <p class="save-notice" role="status">
-          <Check size={16} aria-hidden="true" />{'Alert saved.'}
+          <Check size={16} aria-hidden="true" />Zapisano alert.
         </p>
       {/if}
 
       {#if editing}
         <form class="card settings-card alert-editor" onsubmit={save}>
           <h3>
-            {#if editingId}Edit alert{:else}Create alert{/if}
+            {#if editingId}Edytuj alert{:else}Utwórz alert{/if}
           </h3>
           {#if editingId}
             {#key editingId}
@@ -254,17 +255,17 @@
               />
             {/key}
           {:else}
-            <p class="muted field-help">Save the Polish alert before adding translations.</p>
+            <p class="muted field-help">Zapisz polską wersję alertu przed dodaniem tłumaczeń.</p>
           {/if}
           <fieldset disabled={busy} class="editor-fields">
-            <label for={`${uid}-title`}>Title</label>
+            <label for={`${uid}-title`}>Tytuł</label>
             <input
               id={`${uid}-title`}
               bind:value={() => localized('title'), (value) => setLocalized('title', value)}
               required={contentLocale === primaryContentLocale}
               maxlength="200"
             />
-            <label for={`${uid}-content`}>Content</label>
+            <label for={`${uid}-content`}>Treść</label>
             <textarea
               id={`${uid}-content`}
               bind:value={
@@ -276,23 +277,23 @@
             {#if contentLocale === primaryContentLocale}
               <div class="editor-row">
                 <div>
-                  <label for={`${uid}-style`}>Style</label>
+                  <label for={`${uid}-style`}>Styl</label>
                   <Dropdown
                     id={`${uid}-style`}
-                    label="Style"
+                    label="Styl"
                     value={color}
                     options={[
-                      { value: 'info', label: 'Info' },
-                      { value: 'danger', label: 'Danger' },
-                      { value: 'warning', label: 'Warning' },
-                      { value: 'neutral', label: 'Neutral' }
+                      { value: 'info', label: 'Informacja' },
+                      { value: 'danger', label: 'Niebezpieczeństwo' },
+                      { value: 'warning', label: 'Ostrzeżenie' },
+                      { value: 'neutral', label: 'Neutralny' }
                     ]}
                     disabled={busy}
                     onselect={(value) => (color = value as AssociationAlert['color'])}
                   />
                 </div>
                 <div>
-                  <label for={`${uid}-priority`}>Priority</label>
+                  <label for={`${uid}-priority`}>Priorytet</label>
                   <input
                     id={`${uid}-priority`}
                     type="number"
@@ -305,7 +306,7 @@
                 </div>
               </div>
             {/if}
-            <label for={`${uid}-link`}>Link (optional)</label>
+            <label for={`${uid}-link`}>Link (opcjonalny)</label>
             <input
               id={`${uid}-link`}
               bind:value={() => localized('link'), (value) => setLocalized('link', value)}
@@ -315,24 +316,25 @@
             />
             <p id={`${uid}-link-help`} class="muted field-help">
               {#if contentLocale === primaryContentLocale}
-                Use a website path, an HTTP(S) URL, or a mailto link. Leave empty for a banner
-                without a link.
+                Użyj ścieżki strony, adresu HTTP(S) lub linku mailto. Pozostaw puste, aby baner nie
+                zawierał linku.
               {:else}
-                Leave blank to use the Polish link.
+                Pozostaw puste, aby użyć polskiego linku.
               {/if}
             </p>
             {#if contentLocale === primaryContentLocale}
               <DateTimeRangePicker bind:start bind:end disabled={busy} />
               <p class="muted field-help">
-                Dates use your local time zone. They are saved as absolute instants.
+                Daty są wyświetlane w Twojej lokalnej strefie czasowej i zapisywane jako
+                jednoznaczne momenty w czasie.
               </p>
             {/if}
-            <div class="preview-label">Preview</div>
+            <div class="preview-label">Podgląd</div>
             <div class="alert-preview" data-color={color}>
               <Icon size={18} class="preview-icon" aria-hidden="true" />
               <p>
                 <strong
-                  >{#if preview.title.trim()}{preview.title}{:else}Your alert title{/if}</strong
+                  >{#if preview.title.trim()}{preview.title}{:else}Tytuł Twojego alertu{/if}</strong
                 ><span>{preview.description}</span>
               </p>
               {#if preview.link.trim()}<ArrowUpRight size={17} aria-hidden="true" />{/if}
@@ -343,14 +345,14 @@
               type="button"
               class="btn btn-outline"
               disabled={busy}
-              onclick={() => (editing = false)}>Cancel</button
+              onclick={() => (editing = false)}>Anuluj</button
             >
             {#if contentLocale === primaryContentLocale}
               <button
                 class="btn"
                 aria-keyshortcuts="Control+Enter"
                 disabled={busy || !validInterval || !title.trim()}
-                ><Save size={15} aria-hidden="true" />{#if busy}Saving…{:else}Save alert{/if}</button
+                ><Save size={15} aria-hidden="true" />{#if busy}Zapisywanie…{:else}Zapisz alert{/if}</button
               >
             {/if}
           </div>
@@ -364,11 +366,11 @@
               <div class="alert-title">
                 <h3>{alert.title}</h3>
                 <span class="tag"
-                  >{#if new Date(alert.startDate).getTime() > now}Scheduled{:else if new Date(alert.endDate).getTime() <= now}Expired{:else}Active
-                    interval{/if}</span
+                  >{#if new Date(alert.startDate).getTime() > now}Zaplanowany{:else if new Date(alert.endDate).getTime() <= now}Zakończony{:else}Aktywny
+                    okres{/if}</span
                 >
                 <span class="tag"
-                  >{#if alert.color === 'info'}Info{:else if alert.color === 'danger'}Danger{:else if alert.color === 'warning'}Warning{:else}Neutral{/if}</span
+                  >{#if alert.color === 'info'}Informacja{:else if alert.color === 'danger'}Niebezpieczeństwo{:else if alert.color === 'warning'}Ostrzeżenie{:else}Neutralny{/if}</span
                 >
               </div>
               {#if alert.description}<p class="alert-description">{alert.description}</p>{/if}
@@ -380,7 +382,7 @@
                 </span><time datetime={alert.endDate}>{formatDate(alert.endDate)}</time>
               </p>
               <p class="muted alert-meta">
-                <span>Priority: {alert.priority ?? 0}</span>{#if alert.link}<span
+                <span>Priorytet: {alert.priority ?? 0}</span>{#if alert.link}<span
                     aria-hidden="true"
                   >
                     ·
@@ -389,12 +391,12 @@
             </div>
             <div class="alert-actions">
               <button class="btn btn-outline" disabled={busy} onclick={() => void edit(alert)}
-                ><Pencil size={14} aria-hidden="true" />{'Edit'}</button
+                ><Pencil size={14} aria-hidden="true" />Edytuj</button
               >
               <button
                 class="btn btn-outline"
                 disabled={busy}
-                aria-label="Delete alert"
+                aria-label="Usuń alert"
                 onclick={() => (removing = alert)}><Trash2 size={14} aria-hidden="true" /></button
               >
             </div>
@@ -402,16 +404,17 @@
         {:else}
           <div class="empty-alerts">
             <Megaphone size={24} aria-hidden="true" />
-            <h3>No alerts yet</h3>
-            <p class="muted">Create an announcement and choose when it appears on the website.</p>
+            <h3>Brak alertów</h3>
+            <p class="muted">Utwórz ogłoszenie i wybierz, kiedy pojawi się na stronie.</p>
           </div>
         {/each}
       </div>
       {#if alerts.pages > 1}
-        <nav class="pagination" aria-label="Alert pages">
-          {#if page > 0}<a class="btn btn-outline" href={`?page=${page - 1}`}>Previous</a>{/if}
+        <nav class="pagination" aria-label="Strony alertów">
+          {#if page > 0}<a class="btn btn-outline" href={`?page=${page - 1}`}>Poprzednia</a>{/if}
           <span>{page + 1} / {alerts.pages}</span>
-          {#if page + 1 < alerts.pages}<a class="btn btn-outline" href={`?page=${page + 1}`}>Next</a
+          {#if page + 1 < alerts.pages}<a class="btn btn-outline" href={`?page=${page + 1}`}
+              >Następna</a
             >{/if}
         </nav>
       {/if}
@@ -421,8 +424,8 @@
 
 <ConfirmDialog
   open={!!removing}
-  title="Delete alert?"
-  message="This removes the announcement from the schedule and the public website."
+  title="Usunąć alert?"
+  message="Ogłoszenie zostanie usunięte z harmonogramu i strony publicznej."
   {busy}
   onconfirm={() => void remove()}
   onclose={() => (removing = null)}

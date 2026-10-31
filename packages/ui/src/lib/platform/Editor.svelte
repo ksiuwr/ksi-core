@@ -44,57 +44,30 @@
   } = $props();
   const language = $derived(preferences.language);
   const uid = $props.id();
-  const labels = $derived(
-    language === 'pl'
-      ? {
-          uploading: 'Przesyłanie…',
-          queued: 'Oczekiwanie…',
-          write: 'Edytuj',
-          preview: 'Podgląd',
-          gallery: 'Dodaj galerię',
-          galleryName: 'Galeria',
-          newGallery: 'Nowa galeria',
-          images: 'Zdjęcia',
-          drop: 'Upuść pliki w polu tekstowym lub wybierz załączniki',
-          insert: 'Wstaw galerię',
-          imagesOnly: 'Do galerii można dodać tylko obrazy JPEG, PNG, WebP, AVIF lub GIF.',
-          placeholder: 'Napisz treść w Markdown…',
-          attachments: 'Załącz pliki',
-          referenceHint: 'Wpisz #, aby odwołać się do zadania lub wątku.',
-          referenceTask: 'Zadanie',
-          referenceThread: 'Wątek',
-          referenceAssociation: 'Ogólne',
-          referenceArchived: 'Zarchiwizowane',
-          referenceEmpty: 'Brak pasujących zadań lub wątków.',
-          docHint: 'Wpisz [, aby podlinkować stronę dokumentacji.',
-          docPage: 'Strona',
-          docSection: 'Sekcja'
-        }
-      : {
-          uploading: 'Uploading…',
-          queued: 'Waiting…',
-          write: 'Write',
-          preview: 'Preview',
-          gallery: 'Add gallery',
-          galleryName: 'Gallery',
-          newGallery: 'New gallery',
-          images: 'Images',
-          drop: 'Drop files into the text field or choose attachments',
-          insert: 'Insert gallery',
-          imagesOnly: 'Galleries accept JPEG, PNG, WebP, AVIF or GIF images only.',
-          placeholder: 'Write a Markdown description…',
-          attachments: 'Attach files',
-          referenceHint: 'Type # to reference a task or thread.',
-          referenceTask: 'Task',
-          referenceThread: 'Thread',
-          referenceAssociation: 'Association',
-          referenceArchived: 'Archived',
-          referenceEmpty: 'No matching tasks or threads.',
-          docHint: 'Type [ to link a documentation page.',
-          docPage: 'Page',
-          docSection: 'Section'
-        }
-  );
+  const labels = $derived({
+    uploading: 'Przesyłanie…',
+    queued: 'Oczekiwanie…',
+    write: 'Edytuj',
+    preview: 'Podgląd',
+    gallery: 'Dodaj galerię',
+    galleryName: 'Galeria',
+    newGallery: 'Nowa galeria',
+    images: 'Zdjęcia',
+    drop: 'Upuść pliki w polu tekstowym lub wybierz załączniki',
+    insert: 'Wstaw galerię',
+    imagesOnly: 'Do galerii można dodać tylko obrazy JPEG, PNG, WebP, AVIF lub GIF.',
+    placeholder: 'Napisz treść w Markdown…',
+    attachments: 'Załącz pliki',
+    referenceHint: 'Wpisz #, aby odwołać się do zadania lub wątku.',
+    referenceTask: 'Zadanie',
+    referenceThread: 'Wątek',
+    referenceAssociation: 'Ogólne',
+    referenceArchived: 'Zarchiwizowane',
+    referenceEmpty: 'Brak pasujących zadań lub wątków.',
+    docHint: 'Wpisz [, aby podlinkować stronę dokumentacji.',
+    docPage: 'Strona',
+    docSection: 'Sekcja'
+  });
 
   let message = $state(''),
     preview = $state(false),
@@ -249,7 +222,8 @@
           body.set('file', file);
           const response = await fetch('/api/files', { method: 'POST', body });
           const data = await response.json();
-          if (!response.ok) throw new Error(`${file.name}: ${data.code ?? 'Upload failed.'}`);
+          if (!response.ok)
+            throw new Error(`${file.name}: ${data.code ?? 'Nie udało się przesłać pliku.'}`);
           if (file.type.startsWith('image/'))
             uploadedImages = [...uploadedImages, { id: data.id, name: file.name }];
           if (target !== 'content') {
@@ -267,7 +241,7 @@
             else value += markdown;
           }
         } catch (error) {
-          message = error instanceof Error ? error.message : 'Upload failed.';
+          message = error instanceof Error ? error.message : 'Nie udało się przesłać pliku.';
         } finally {
           pendingUploads = pendingUploads.filter((upload) => upload.key !== key);
           if (insertion && !uploadQueue.some((upload) => upload.insertion === insertion))
@@ -528,7 +502,7 @@
 
 <div class="editor">
   <div class="editor-toolbar">
-    <div class="editor-tabs" role="group" aria-label={'Editor mode'} use:slider>
+    <div class="editor-tabs" role="group" aria-label={'Tryb edytora'} use:slider>
       <button
         type="button"
         class:active={!preview}

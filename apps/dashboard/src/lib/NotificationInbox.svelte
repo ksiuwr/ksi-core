@@ -217,10 +217,7 @@
       headers: { 'content-type': 'application/json' },
       body: body === undefined ? undefined : JSON.stringify(body)
     });
-    if (!response.ok)
-      throw new Error(
-        language === 'pl' ? 'Nie udało się pobrać powiadomień.' : 'Unable to update notifications.'
-      );
+    if (!response.ok) throw new Error('Nie udało się pobrać powiadomień.');
     return response.json();
   }
   async function load() {
@@ -266,10 +263,10 @@
         try {
           result = JSON.parse(text);
         } catch {}
-      if (!response.ok) throw new Error(result.code ?? 'Request failed');
+      if (!response.ok) throw new Error(result.code ?? 'Żądanie nie powiodło się');
       await refresh?.();
     } catch (cause) {
-      error = cause instanceof Error ? cause.message : 'Request failed';
+      error = cause instanceof Error ? cause.message : 'Żądanie nie powiodło się';
       reportError?.(error);
     } finally {
       busy = false;
@@ -287,9 +284,9 @@
     };
   });
   function reasonLabel(reason: string) {
-    if (reason === 'mention') return language === 'pl' ? 'Wzmianka' : 'Mention';
-    if (reason === 'assignment') return language === 'pl' ? 'Przypisanie' : 'Assignment';
-    return language === 'pl' ? 'Aktualizacja' : 'Update';
+    if (reason === 'mention') return 'Wzmianka';
+    if (reason === 'assignment') return 'Przypisanie';
+    return 'Aktualizacja';
   }
 </script>
 
@@ -310,8 +307,8 @@
     type="button"
     class="topbar-control notification-trigger"
     class:active={open}
-    aria-label={`${language === 'pl' ? 'Powiadomienia' : 'Notifications'}${totalUnread ? ` (${totalUnread})` : ''}`}
-    title={language === 'pl' ? 'Powiadomienia' : 'Notifications'}
+    aria-label={`${'Powiadomienia'}${totalUnread ? ` (${totalUnread})` : ''}`}
+    title={'Powiadomienia'}
     aria-expanded={open}
     aria-controls={open ? `${uid}-panel` : undefined}
     aria-haspopup="dialog"
@@ -342,20 +339,19 @@
     class="notification-panel"
     class:full-page={fullPage}
     role={fullPage ? 'region' : 'dialog'}
-    aria-label={language === 'pl' ? 'Powiadomienia' : 'Notifications'}
+    aria-label={'Powiadomienia'}
     tabindex="-1"
   >
     <header class="panel-header">
-      <h2>{language === 'pl' ? 'Powiadomienia' : 'Notifications'}</h2>
+      <h2>Powiadomienia</h2>
       <div class="header-actions">
         <button
           class="menu-icon"
           type="button"
           disabled={busy || !unread}
           onclick={() => read()}
-          aria-label={language === 'pl' ? 'Oznacz wszystkie jako przeczytane' : 'Mark all as read'}
-          title={language === 'pl' ? 'Oznacz wszystkie jako przeczytane' : 'Mark all as read'}
-          ><CheckCheck size={17} /></button
+          aria-label={'Oznacz wszystkie jako przeczytane'}
+          title={'Oznacz wszystkie jako przeczytane'}><CheckCheck size={17} /></button
         >
       </div>
     </header>
@@ -364,7 +360,7 @@
       class="filter-bar"
       use:filterIndicator={filter}
       role="group"
-      aria-label={language === 'pl' ? 'Filtr powiadomień' : 'Filter notifications'}
+      aria-label={'Filtr powiadomień'}
     >
       <button
         type="button"
@@ -372,15 +368,14 @@
         class:selected={filter === 'unread'}
         aria-pressed={filter === 'unread'}
         onclick={() => (filter = 'unread')}
-        >{language === 'pl' ? 'Nieprzeczytane' : 'Unread'}<span class="count">{totalUnread}</span
-        ></button
+        >Nieprzeczytane<span class="count">{totalUnread}</span></button
       >
       <button
         type="button"
         data-filter="all"
         class:selected={filter === 'all'}
         aria-pressed={filter === 'all'}
-        onclick={() => (filter = 'all')}>{language === 'pl' ? 'Wszystkie' : 'All'}</button
+        onclick={() => (filter = 'all')}>Wszystkie</button
       >
       <span class="filter-indicator" aria-hidden="true"></span>
     </div>
@@ -428,36 +423,28 @@
                   >
                 {:else}<span class="entry-description"
                     >{entry.kind === 'members'
-                      ? language === 'pl'
-                        ? 'Prośba o aktywację konta'
-                        : 'Account activation request'
-                      : language === 'pl'
-                        ? 'Nowe zdjęcie profilowe'
-                        : 'New profile picture'}</span
+                      ? 'Prośba o aktywację konta'
+                      : 'Nowe zdjęcie profilowe'}</span
                   >{/if}
               </a>
               <div class="entry-actions">
                 {#if entry.kind === 'activity'}
                   {#if entry.unread}
-                    <span class="unread-dot" title={language === 'pl' ? 'Nieprzeczytane' : 'Unread'}
-                    ></span>
+                    <span class="unread-dot" title={'Nieprzeczytane'}></span>
                     <button
                       class="menu-icon read-action"
                       type="button"
                       disabled={busy}
                       onclick={() => read(entry.id)}
-                      aria-label={language === 'pl' ? 'Oznacz jako przeczytane' : 'Mark as read'}
-                      title={language === 'pl' ? 'Oznacz jako przeczytane' : 'Mark as read'}
-                      ><Check size={16} /></button
+                      aria-label={'Oznacz jako przeczytane'}
+                      title={'Oznacz jako przeczytane'}><Check size={16} /></button
                     >
                   {/if}
                 {:else}
                   {#if entry.kind === 'avatars'}<img
                       class="approval-avatar"
                       src={`/media/${entry.fileId}`}
-                      alt={language === 'pl'
-                        ? 'Proponowane zdjęcie profilowe'
-                        : 'Proposed profile picture'}
+                      alt={'Proponowane zdjęcie profilowe'}
                     />{/if}
                   <div class="review-actions">
                     <button
@@ -471,9 +458,8 @@
                           true,
                           entry.kind === 'avatars' ? entry.version : undefined
                         )}
-                      aria-label={language === 'pl' ? 'Zatwierdź' : 'Approve'}
-                      title={language === 'pl' ? 'Zatwierdź' : 'Approve'}
-                      ><Check size={16} /></button
+                      aria-label={'Zatwierdź'}
+                      title={'Zatwierdź'}><Check size={16} /></button
                     >
                     {#if entry.kind === 'avatars' || administrator}<button
                         class="menu-icon decline-action"
@@ -486,8 +472,8 @@
                             false,
                             entry.kind === 'avatars' ? entry.version : undefined
                           )}
-                        aria-label={language === 'pl' ? 'Odrzuć' : 'Decline'}
-                        title={language === 'pl' ? 'Odrzuć' : 'Decline'}><X size={16} /></button
+                        aria-label={'Odrzuć'}
+                        title={'Odrzuć'}><X size={16} /></button
                       >{/if}
                   </div>
                 {/if}
@@ -496,30 +482,22 @@
           {/each}
         </ul>
       {:else if !loaded && !error}
-        <p class="loading" role="status">
-          {language === 'pl' ? 'Ładowanie powiadomień…' : 'Loading notifications…'}
-        </p>
+        <p class="loading" role="status">Ładowanie powiadomień…</p>
       {:else if !error}
         <div
           class="inbox-empty"
           transition:fly|global={{ y: 6, duration: prefersReducedMotion.current ? 0 : 180 }}
         >
           <Inbox size={32} strokeWidth={1.5} aria-hidden="true" />
-          <h3>{language === 'pl' ? 'Wszystko na bieżąco' : 'You’re all caught up'}</h3>
-          <p>
-            {language === 'pl'
-              ? 'Nowe wzmianki, przypisania i prośby pojawią się tutaj.'
-              : 'New mentions, assignments, and requests will appear here.'}
-          </p>
+          <h3>Wszystko na bieżąco</h3>
+          <p>Nowe wzmianki, przypisania i prośby pojawią się tutaj.</p>
         </div>
       {/if}
     </div>
     {#if !fullPage}
       <a class="inbox-footer" href="/inbox" onclick={() => close()}
-        ><span
-          >{language === 'pl' ? 'Zobacz wszystkie powiadomienia' : 'View all notifications'}</span
-        >{#if filtered.length > preview.length}<span class="count"
-            >+{filtered.length - preview.length}</span
+        ><span>Zobacz wszystkie powiadomienia</span>{#if filtered.length > preview.length}<span
+            class="count">+{filtered.length - preview.length}</span
           >{/if}<ArrowRight size={16} aria-hidden="true" /></a
       >
     {/if}

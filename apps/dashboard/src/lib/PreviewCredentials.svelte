@@ -28,17 +28,20 @@
       if (!response.ok) {
         const code =
           typeof result === 'object' && result !== null && 'code' in result ? result.code : null;
-        throw new Error(typeof code === 'string' ? code : 'Unable to load preview credentials');
+        throw new Error(
+          typeof code === 'string' ? code : 'Nie udało się wczytać danych logowania podglądu'
+        );
       }
-      if (!Array.isArray(result)) throw new Error('Unable to load preview credentials');
+      if (!Array.isArray(result))
+        throw new Error('Nie udało się wczytać danych logowania podglądu');
       credentials = result;
     } catch (cause) {
       error =
         cause instanceof Error && cause.message === 'FORBIDDEN'
-          ? 'You are not in a project group with access to preview credentials.'
+          ? 'Nie należysz do grupy projektu z dostępem do danych logowania podglądu.'
           : cause instanceof Error
             ? cause.message
-            : 'Unable to load preview credentials';
+            : 'Nie udało się wczytać danych logowania podglądu';
     } finally {
       loading = false;
     }
@@ -49,15 +52,14 @@
 </script>
 
 <div class="workspace-header">
-  <h1>{'Preview credentials'}</h1>
-  <button class="btn btn-outline" onclick={() => void load()} disabled={loading}>{'Refresh'}</button
-  >
+  <h1>Dane logowania podglądu</h1>
+  <button class="btn btn-outline" onclick={() => void load()} disabled={loading}>Odśwież</button>
 </div>
-{#if loading}<p class="muted">{'Loading credentials…'}</p>
+{#if loading}<p class="muted">Wczytywanie danych logowania…</p>
 {:else if error}<p class="error" role="alert">{error}</p>
 {:else if !credentials.length}<section class="card">
-    <h2>{'No preview credentials yet'}</h2>
-    <p class="muted">{'Credentials appear here after a preview deployment has completed.'}</p>
+    <h2>Brak danych logowania dla podglądów</h2>
+    <p class="muted">Dane logowania pojawią się tutaj po zakończeniu wdrażania podglądu.</p>
   </section>
 {:else}{#each credentials as deployment (deployment.previewId)}<section
       class="card credential-card"
@@ -67,7 +69,7 @@
         <a href={deployment.previewUrl} target="_blank" rel="noreferrer">{deployment.previewUrl}</a>
       </p>
       <p class="muted">
-        {'Commit'} <code>{deployment.commit.slice(0, 12)}</code> · {'Updated'}
+        Commit <code>{deployment.commit.slice(0, 12)}</code> · Zaktualizowano
         {formatDateTime(deployment.updatedAt, preferences.language)}
       </p>
       <div class="account-list">
@@ -76,7 +78,7 @@
           </article>{/each}
       </div>
       <p class="muted">
-        {'These are shared sample accounts for this preview. Keep the passwords within the project group.'}
+        To wspólne konta testowe dla tego podglądu. Nie udostępniaj haseł poza grupą projektu.
       </p>
     </section>{/each}{/if}
 

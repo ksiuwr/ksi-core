@@ -17,16 +17,20 @@
       >
         {page.status}
       </p>
-      <h1 class="mt-4 text-[clamp(28px,5vw,40px)] tracking-tight">We couldn't load this page.</h1>
-      <p class="text-muted mt-3 text-lg leading-relaxed">Try again or return to the home page.</p>
+      <h1 class="mt-4 text-[clamp(28px,5vw,40px)] tracking-tight">
+        Nie udało się wczytać tej strony.
+      </h1>
+      <p class="text-muted mt-3 text-lg leading-relaxed">
+        Spróbuj ponownie lub wróć na stronę główną.
+      </p>
       <a href={resolve('/')} class="btn btn-lg mt-8">
-        <ArrowLeft /> Return home
+        <ArrowLeft /> Wróć na stronę główną
       </a>
       <p
         class="border-line bg-surface text-muted mt-10 rounded-lg border px-3 py-2 font-mono text-xs wrap-anywhere"
       >
         {page.error?.message ||
-          'The page may have moved, or something went wrong while loading it.'}
+          'Strona mogła zostać przeniesiona lub wystąpił błąd podczas jej wczytywania.'}
       </p>
     </div>
   </div>
