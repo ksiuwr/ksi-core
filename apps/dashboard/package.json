@@ -13,7 +13,7 @@
     "@ksi-core/ui": "workspace:*",
     "@lucide/svelte": "0.548.0",
     "@wuchale/svelte": "^0.20.5",
-    "better-auth": "^1.6.25",
+    "better-auth": "^1.7.18",
     "shared": "workspace:*",
     "wuchale": "^0.25.6"
   },
