@@ -2,42 +2,60 @@
   import { resolve } from '$app/paths';
   import { page } from '$app/state';
   import { ArrowLeft } from '@lucide/svelte';
+  import { Button, Card, Heading, Icon, Text, VStack } from '@astryx-sv/core';
 </script>
 
 <svelte:head>
   <title>{page.status} · KSI UWr</title>
 </svelte:head>
 
-<main class="error-page relative isolate flex flex-1 items-center overflow-hidden">
-  <div class="page-container py-20">
-    <div class="mx-auto flex max-w-xl flex-col items-center text-center">
-      <p
-        class="status font-display text-[clamp(7rem,20vw,11rem)] leading-none font-bold tracking-[-0.06em]"
+{#snippet backIcon()}
+  <Icon icon={ArrowLeft} size="sm" />
+{/snippet}
+
+<VStack
+  as="main"
+  gap={0}
+  paddingBlock={10}
+  class="error-page relative isolate flex-1 items-center justify-center overflow-hidden"
+>
+  <VStack gap={0} class="page-container w-full">
+    <VStack gap={4} hAlign="center" maxWidth={576} class="mx-auto">
+      <Text
+        as="p"
+        type="display-1"
+        justify="center"
+        class="status font-display w-full leading-none font-bold"
         aria-hidden="true"
       >
         {page.status}
-      </p>
-      <h1 class="mt-4 text-[clamp(28px,5vw,40px)] tracking-tight">
+      </Text>
+      <Heading level={1} type="display-2" textWrap="balance" justify="center" class="mt-4">
         Nie udało się wczytać tej strony.
-      </h1>
-      <p class="text-muted mt-3 text-lg leading-relaxed">
+      </Heading>
+      <Text type="large" color="secondary" justify="center">
         Spróbuj ponownie lub wróć na stronę główną.
-      </p>
-      <a href={resolve('/')} class="btn btn-lg mt-8">
-        <ArrowLeft /> Wróć na stronę główną
-      </a>
-      <p
-        class="border-line bg-surface text-muted mt-10 rounded-lg border px-3 py-2 font-mono text-xs wrap-anywhere"
-      >
-        {page.error?.message ||
-          'Strona mogła zostać przeniesiona lub wystąpił błąd podczas jej wczytywania.'}
-      </p>
-    </div>
-  </div>
-</main>
+      </Text>
+      <Button
+        href={resolve('/')}
+        variant="primary"
+        size="lg"
+        label="Wróć na stronę główną"
+        icon={backIcon}
+        class="mt-4"
+      />
+      <Card variant="muted" padding={3} width="100%" class="mt-6">
+        <Text type="code" color="secondary" justify="center" class="wrap-anywhere">
+          {page.error?.message ||
+            'Strona mogła zostać przeniesiona lub wystąpił błąd podczas jej wczytywania.'}
+        </Text>
+      </Card>
+    </VStack>
+  </VStack>
+</VStack>
 
 <style>
-  .error-page::before {
+  :global(.error-page)::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -49,13 +67,13 @@
     background-size: 22px 22px;
     mask-image: radial-gradient(ellipse 50% 50% at 50% 40%, #000, transparent 80%);
   }
-  .status {
-    background: linear-gradient(
-      to bottom,
-      var(--ink),
-      color-mix(in oklch, var(--ink) 8%, transparent)
-    );
-    background-clip: text;
-    color: transparent;
+  :global(.status) {
+    width: 100%;
+    color: var(--color-text-primary);
+    font-size: clamp(4.5rem, 16vw, 9rem);
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    text-align: center;
+    overflow: visible;
   }
 </style>

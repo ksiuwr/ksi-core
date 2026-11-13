@@ -1,35 +1,29 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { SunMoon } from '@lucide/svelte';
-  import Dropdown from './Dropdown.svelte';
+  import { DropdownMenu } from '@astryx-sv/core';
   import { observeTheme, setThemePreference, type ThemePreference } from './theme.js';
+
   let preference = $state<ThemePreference>('system');
 
   onMount(() => observeTheme((theme) => (preference = theme)));
+
+  const labels: Record<ThemePreference, string> = {
+    system: 'Systemowy',
+    light: 'Jasny',
+    dark: 'Ciemny'
+  };
 </script>
 
-<div class="theme-selector">
-  <Dropdown
-    variant="compact"
-    label={'Wygląd'}
-    value={preference}
-    options={[
-      { value: 'system', label: 'Systemowy' },
-      { value: 'light', label: 'Jasny' },
-      { value: 'dark', label: 'Ciemny' }
-    ]}
-    onselect={(value) => setThemePreference(value as ThemePreference)}
-    >{#snippet leading()}<SunMoon size={15} aria-hidden="true" />{/snippet}</Dropdown
-  >
-</div>
-
-<style>
-  .theme-selector {
-    min-width: 108px;
-  }
-  @media (max-width: 480px) {
-    .theme-selector {
-      min-width: 90px;
-    }
-  }
-</style>
+<DropdownMenu
+  button={{
+    label: labels[preference],
+    tooltip: 'Wygląd',
+    variant: 'secondary',
+    size: 'sm'
+  }}
+  items={[
+    { label: 'Systemowy', onClick: () => setThemePreference('system') },
+    { label: 'Jasny', onClick: () => setThemePreference('light') },
+    { label: 'Ciemny', onClick: () => setThemePreference('dark') }
+  ]}
+/>

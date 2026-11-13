@@ -2,6 +2,7 @@
   import { page } from '$app/state';
   import { onMount } from 'svelte';
   import Markdown from './Markdown.svelte';
+  import { Skeleton, Text, VStack } from '@astryx-sv/core';
   import { preferences } from './preferences.svelte.js';
   import { renderMarkdown, type ResolvedDocLink } from 'shared/markdown';
   import { referenceScopeForPath } from 'shared/markdown-references';
@@ -83,24 +84,14 @@
   );
 </script>
 
-{#if !mounted}<div class="markdown-skeleton" aria-hidden="true">
-    <span></span><span></span><span></span>
-  </div>
-{:else if !value.trim()}<p class="muted">Brak opisu.</p>
-{:else}<Markdown {blocks} {language} {onresize} />{/if}
-
-<style>
-  .markdown-skeleton {
-    display: grid;
-    gap: 10px;
-    padding: 8px 0;
-  }
-  .markdown-skeleton span {
-    height: 12px;
-    background: var(--surface-muted);
-    border-radius: var(--radius-sm, 4px);
-  }
-  .markdown-skeleton span:last-child {
-    width: 65%;
-  }
-</style>
+{#if !mounted}
+  <VStack gap={2} paddingBlock={2} aria-hidden="true">
+    <Skeleton height={12} index={0} />
+    <Skeleton height={12} index={1} />
+    <Skeleton height={12} width="65%" index={2} />
+  </VStack>
+{:else if !value.trim()}
+  <Text color="secondary">Brak opisu.</Text>
+{:else}
+  <Markdown {blocks} {language} {onresize} />
+{/if}

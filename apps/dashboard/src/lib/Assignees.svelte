@@ -1,6 +1,16 @@
 <script lang="ts">
   import { onMount, tick } from 'svelte';
-  import { ChevronsUpDown, Search, UserRoundPlus, X } from '@lucide/svelte';
+  import { Search, UserRoundPlus, ChevronsUpDown } from '@lucide/svelte';
+  import {
+    Avatar,
+    AvatarGroup,
+    Button,
+    HStack,
+    Text,
+    TextInput,
+    Token,
+    VStack
+  } from '@astryx-sv/core';
 
   export type AssignmentMember = {
     id: string;
@@ -38,10 +48,7 @@
   let loaded = $state<AssignmentMember[]>([]),
     loading = $state(false),
     error = $state(false);
-  let broken = $state<string[]>([]);
-  let trigger = $state<HTMLButtonElement>();
-  let panel = $state<HTMLDivElement>();
-  let search = $state<HTMLInputElement>();
+  let panel = $state<HTMLElement>();
   let open = $state(false);
   let query = $state('');
   let active = $state(0);
@@ -57,10 +64,6 @@
   });
   const fullName = (person: AssignmentMember) =>
     [person.firstName, person.lastName].filter(Boolean).join(' ') || person.nickname || person.id;
-  const initials = (person: AssignmentMember) =>
-    `${person.firstName?.[0] ?? ''}${person.lastName?.[0] ?? ''}`.toUpperCase() ||
-    fullName(person).slice(0, 2).toUpperCase() ||
-    '?';
   const selected = $derived(
     value.map((id) => choices.find((person) => person.id === id) ?? fallback(id))
   );
@@ -81,16 +84,15 @@
       return terms.every((term) => haystack.includes(term));
     });
   });
-  const personLabel = (person: AssignmentMember) => `Przypisz ${fullName(person)}`;
   const removeLabel = (person: AssignmentMember) => `Usuń ${fullName(person)}`;
+  const triggerElement = () =>
+    document.getElementById(`${uid}-trigger`) as HTMLButtonElement | null;
   $effect(() => {
     if (!available.length) open = false;
   });
 
-  function breakImage(id: string) {
-    if (!broken.includes(id)) broken = [...broken, id];
-  }
   function place() {
+    const trigger = triggerElement();
     if (!trigger || !panel) return;
     const rect = trigger.getBoundingClientRect();
     const width = Math.min(Math.max(rect.width, 320), window.innerWidth - 24);
@@ -115,12 +117,12 @@
     open = true;
     await tick();
     place();
-    search?.focus();
+    document.getElementById(`${uid}-search`)?.focus();
   }
   function close(focus = false) {
     if (panel?.matches(':popover-open')) panel.hidePopover();
     open = false;
-    if (focus) trigger?.focus();
+    if (focus) triggerElement()?.focus();
   }
   function toggle(member: AssignmentMember) {
     if (disabled) return;
@@ -130,7 +132,7 @@
     onchange?.(value);
     query = '';
     active = 0;
-    void tick().then(() => search?.focus());
+    void tick().then(() => document.getElementById(`${uid}-search`)?.focus());
   }
   function remove(id: string) {
     if (disabled) return;
@@ -210,7 +212,7 @@
     const dismiss = (event: PointerEvent) => {
       if (!open) return;
       const target = event.target as Node;
-      if (panel?.contains(target) || trigger?.contains(target)) return;
+      if (panel?.contains(target) || triggerElement()?.contains(target)) return;
       close();
     };
     window.addEventListener('resize', update);
@@ -225,56 +227,63 @@
 </script>
 
 {#snippet avatar(person: AssignmentMember)}
-  {#if person.image && !broken.includes(person.id)}
-    <img
-      class="avatar"
-      src={person.image}
-      alt=""
-      loading="lazy"
-      onerror={() => breakImage(person.id)}
-    />
-  {:else}
-    <span class="avatar fallback" aria-hidden="true">{initials(person)}</span>
-  {/if}
+  <Avatar src={person.image ?? undefined} name={fullName(person)} size={20} alt="" />
 {/snippet}
 
 {#if readonly}
-  <span class="assigned" class:stacked>
-    {#if selected.length && showLabel}<span class="readonly-label">Przypisane do</span>{/if}
-    {#each selected as person (person.id)}
-      <span class="person-chip compact" title={fullName(person)}
-        >{@render avatar(person)}<span class="person-name">{fullName(person)}</span></span
-      >
-    {/each}
-  </span>
-{:else}
-  <div class="assignees">
-    {#if showLabel}<span class="etykieta" id={`${uid}-label`}>Przypisane do</span>{/if}
-    {#if selected.length}
-      <span class="selected-chips">
+  {#if stacked}
+    <HStack gap={1.5} vAlign="center">
+      {#if selected.length && showLabel}
+        <Text type="supporting" color="secondary">Przypisane do</Text>
+      {/if}
+      <AvatarGroup size="sm">
         {#each selected as person (person.id)}
-          <span class="person-chip" title={fullName(person)}>
-            <a class="person-link" href={`/members/${encodeURIComponent(person.id)}`}>
-              {@render avatar(person)}
-              <span class="person-name">{fullName(person)}</span>
-            </a>
-            {#if !disabled}<button
-                type="button"
-                class="remove"
-                aria-label={removeLabel(person)}
-                title={removeLabel(person)}
-                onclick={() => remove(person.id)}><X size={12} aria-hidden="true" /></button
-              >{/if}</span
-          >
+          <Avatar
+            src={person.image ?? undefined}
+            name={fullName(person)}
+            href={`/members/${encodeURIComponent(person.id)}`}
+          />
         {/each}
-      </span>
+      </AvatarGroup>
+    </HStack>
+  {:else}
+    <HStack gap={1.5} vAlign="center" wrap="wrap">
+      {#if selected.length && showLabel}
+        <Text type="supporting" color="secondary">Przypisane do</Text>
+      {/if}
+      {#each selected as person (person.id)}
+        <Token label={fullName(person)} size="sm" description={fullName(person)}>
+          {#snippet icon()}{@render avatar(person)}{/snippet}
+        </Token>
+      {/each}
+    </HStack>
+  {/if}
+{:else}
+  <VStack gap={2} class="assignees">
+    {#if showLabel}<Text type="supporting" color="secondary" id={`${uid}-label`}>Przypisane do</Text
+      >{/if}
+    {#if selected.length}
+      <HStack gap={1.5} wrap="wrap">
+        {#each selected as person (person.id)}
+          <Token
+            label={fullName(person)}
+            href={`/members/${encodeURIComponent(person.id)}`}
+            size="sm"
+            onRemove={disabled ? undefined : () => remove(person.id)}
+            description={removeLabel(person)}
+          >
+            {#snippet icon()}{@render avatar(person)}{/snippet}
+          </Token>
+        {/each}
+      </HStack>
     {/if}
     {#if available.length}
-      <button
-        bind:this={trigger}
-        type="button"
-        class="trigger"
-        {disabled}
+      <Button
+        id={`${uid}-trigger`}
+        variant="secondary"
+        label="Dodaj osoby"
+        width="100%"
+        isDisabled={disabled}
         aria-label={showLabel ? undefined : 'Dodaj osoby'}
         aria-labelledby={showLabel ? `${uid}-label` : undefined}
         aria-haspopup="listbox"
@@ -288,17 +297,19 @@
           }
         }}
       >
-        <UserRoundPlus size={15} aria-hidden="true" />
-        <span class="trigger-label">Dodaj osoby</span>
-        <ChevronsUpDown size={14} aria-hidden="true" />
-      </button>
-      <div
+        {#snippet icon()}<UserRoundPlus size={15} aria-hidden="true" />{/snippet}
+        {#snippet endContent()}
+          <ChevronsUpDown size={14} aria-hidden="true" />
+        {/snippet}
+      </Button>
+      <!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
+      <section
         bind:this={panel}
         popover="manual"
         class="panel"
         role="dialog"
         tabindex="-1"
-        aria-label={'Wybierz osoby'}
+        aria-label="Wybierz osoby"
         style:left="{position.left}px"
         style:top="{position.top}px"
         style:width="{position.width}px"
@@ -306,215 +317,72 @@
         ontoggle={(event) => (open = event.newState === 'open')}
         onkeydown={keys}
       >
-        <div class="panel-search">
-          <Search size={15} aria-hidden="true" />
-          <input
-            bind:this={search}
-            type="search"
+        <VStack gap={2} class="panel-inner">
+          <TextInput
+            id={`${uid}-search`}
+            label="Szukaj osób"
+            isLabelHidden
+            type="text"
+            placeholder="Szukaj osób…"
+            bind:value={query}
+            onChange={() => {
+              active = 0;
+              place();
+            }}
             role="combobox"
-            aria-label={'Szukaj osób'}
-            placeholder={'Szukaj osób…'}
             aria-autocomplete="list"
             aria-expanded={open}
             aria-controls={`${uid}-list`}
             aria-activedescendant={filtered.length ? `${uid}-option-${active}` : undefined}
-            bind:value={query}
-            oninput={() => {
-              active = 0;
-              place();
-            }}
-          />
-        </div>
-        <div id={`${uid}-list`} class="options" role="listbox" aria-label={'Członkowie projektu'}>
-          {#each filtered as member, index (member.id)}
-            <button
-              type="button"
-              id={`${uid}-option-${index}`}
-              class="option"
-              class:highlighted={active === index}
-              role="option"
-              aria-selected="false"
-              tabindex="-1"
-              title={personLabel(member)}
-              onpointermove={() => (active = index)}
-              onclick={() => toggle(member)}
-            >
-              {@render avatar(member)}
-              <span class="option-text">
-                <span class="person-name">{fullName(member)}</span>
-                {#if member.nickname && member.nickname !== fullName(member)}<small
-                    >@{member.nickname}</small
-                  >{/if}
-              </span>
-            </button>
-          {:else}
-            <p class="empty" role="status">
-              {#if loading}Wczytywanie osób…{:else if error}Nie udało się wczytać osób{:else}Brak
-                pasujących osób.{/if}
-            </p>
-          {/each}
-        </div>
-      </div>
+          >
+            {#snippet startIcon()}<Search size={15} aria-hidden="true" />{/snippet}
+          </TextInput>
+          <VStack
+            gap={0}
+            id={`${uid}-list`}
+            role="listbox"
+            aria-label="Członkowie projektu"
+            class="options"
+          >
+            {#each filtered as member, index (member.id)}
+              <button
+                type="button"
+                id={`${uid}-option-${index}`}
+                class="option"
+                class:highlighted={active === index}
+                role="option"
+                aria-selected="false"
+                tabindex="-1"
+                title={fullName(member)}
+                onpointermove={() => (active = index)}
+                onclick={() => toggle(member)}
+              >
+                {@render avatar(member)}
+                <VStack gap={0}>
+                  <Text as="span">{fullName(member)}</Text>
+                  {#if member.nickname && member.nickname !== fullName(member)}
+                    <Text as="span" type="supporting" color="secondary">@{member.nickname}</Text>
+                  {/if}
+                </VStack>
+              </button>
+            {:else}
+              <Text type="supporting" color="secondary" role="status">
+                {#if loading}Wczytywanie osób…{:else if error}Nie udało się wczytać osób{:else}Brak
+                  pasujących osób.{/if}
+              </Text>
+            {/each}
+          </VStack>
+        </VStack>
+      </section>
     {/if}
-    {#if error && !open}<p class="error" role="alert">Nie udało się wczytać osób</p>{/if}
-  </div>
+    {#if error && !open}<Text type="supporting" role="alert" class="error-text"
+        >Nie udało się wczytać osób</Text
+      >{/if}
+  </VStack>
 {/if}
 
 <style>
-  .assignees {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    min-width: 0;
-  }
-  .label,
-  .readonly-label {
-    color: var(--muted);
-    font-size: 12px;
-    font-weight: 400;
-  }
-  .readonly-label {
-    margin-right: 2px;
-  }
-  .assigned,
-  .selected-chips {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
-    min-width: 0;
-  }
-  .person-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    min-width: 0;
-    max-width: 100%;
-    padding: 2px 7px 2px 3px;
-    border: 1px solid var(--line, #dcd8d0);
-    border-radius: 999px;
-    background: var(--surface-muted, #f0ede4);
-    color: var(--ink, #272638);
-    font-size: 12px;
-    line-height: 1.5;
-  }
-  .person-chip.compact {
-    padding: 0;
-    border: 0;
-    background: transparent;
-  }
-  .person-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    min-width: 0;
-    color: inherit;
-    text-decoration: none;
-  }
-  .person-link:hover .person-name,
-  .person-link:focus-visible .person-name {
-    text-decoration: underline;
-  }
-  .person-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .avatar {
-    width: 20px;
-    height: 20px;
-    flex: 0 0 20px;
-    border: 1px solid var(--line, #dcd8d0);
-    border-radius: 50%;
-    object-fit: cover;
-  }
-  .avatar.fallback {
-    display: grid;
-    place-items: center;
-    background: var(--surface, #fffefa);
-    color: var(--muted);
-    font-size: 9px;
-    font-weight: 700;
-    line-height: 1;
-  }
-  .compact .avatar {
-    width: 18px;
-    height: 18px;
-    flex-basis: 18px;
-  }
-  .stacked {
-    flex-wrap: nowrap;
-    gap: 0;
-  }
-  .stacked .person-chip + .person-chip {
-    margin-left: -5px;
-  }
-  .stacked .avatar {
-    box-shadow: 0 0 0 2px var(--surface, #fffefa);
-  }
-  .stacked .person-name {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-  .remove {
-    display: grid;
-    place-items: center;
-    width: 18px;
-    height: 18px;
-    padding: 0;
-    border: 0;
-    border-radius: 50%;
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-  }
-  .remove:hover,
-  .remove:focus-visible {
-    background: var(--surface);
-    color: var(--ink);
-  }
-  .trigger {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    min-height: 36px;
-    padding: 7px 10px;
-    border: 1px dashed var(--input, var(--line));
-    border-radius: var(--radius-md);
-    background: transparent;
-    color: var(--muted);
-    font: inherit;
-    font-size: 13px;
-    text-align: left;
-    cursor: pointer;
-    transition:
-      border-color var(--dur-fast) ease,
-      background-color var(--dur-fast) ease,
-      color var(--dur-fast) ease;
-  }
-  .trigger:hover,
-  .trigger[aria-expanded='true'] {
-    border-color: var(--control-border-hover, var(--muted));
-    background: var(--surface);
-    color: var(--ink);
-  }
-  .trigger:focus-visible {
-    outline: none;
-    border-color: var(--ring-strong);
-    box-shadow: 0 0 0 3px var(--ring);
-    color: var(--ink);
-  }
-  .trigger:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-  .trigger-label {
-    flex: 1;
+  :global(.assignees) {
     min-width: 0;
   }
   .panel {
@@ -523,95 +391,43 @@
     display: none;
     flex-direction: column;
     margin: 0;
-    padding: 4px;
+    padding: var(--spacing-1);
     overflow: hidden;
-    border: 1px solid var(--line, #dcd8d0);
-    border-radius: var(--radius-lg);
-    background: var(--surface, #fffefa);
-    color: var(--ink, #272638);
-    box-shadow: var(--shadow-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-element);
+    background: var(--color-background-surface);
+    color: var(--color-text-primary);
+    box-shadow: var(--shadow-med);
   }
   .panel:popover-open {
     display: flex;
   }
-  .panel-search {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 8px;
-    border-bottom: 1px solid var(--line, #dcd8d0);
-    color: var(--muted);
-  }
-  .panel-search input {
-    width: 100%;
-    min-width: 0;
-    margin: 0;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: var(--ink);
-    font: inherit;
-    font-size: 13px;
-    outline: none;
-  }
-  .panel-search input:hover,
-  .panel-search input:focus {
-    border: 0;
-    box-shadow: none;
-  }
-  .options {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
+  :global(.panel-inner) {
     min-height: 0;
-    padding-top: 5px;
+  }
+  :global(.options) {
+    min-height: 0;
     overflow-y: auto;
   }
   .option {
     display: flex;
     align-items: center;
-    gap: 9px;
+    gap: var(--spacing-2);
     width: 100%;
     min-height: 36px;
-    padding: 6px 8px;
+    padding: var(--spacing-1-5) var(--spacing-2);
     border: 0;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-inner);
     background: transparent;
-    color: var(--ink, #272638);
+    color: var(--color-text-primary);
     font: inherit;
-    font-size: 13px;
     text-align: left;
     cursor: pointer;
   }
   .option.highlighted {
-    background: var(--surface-muted, #f0ede4);
+    background: var(--color-background-muted);
   }
-  .option-text {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    min-width: 0;
-  }
-  .option-text small {
-    overflow: hidden;
-    color: var(--muted);
-    font-size: 11px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .empty,
-  .error {
-    margin: 0;
-    padding: 10px 8px;
-    color: var(--muted);
-    font-size: 12px;
-  }
-  .error {
-    color: var(--danger, #b42318);
-  }
-  @media (max-width: 600px) {
-    .person-chip:not(.compact) {
-      font-size: 11px;
-    }
+  :global(.error-text) {
+    color: var(--color-error);
   }
 </style>

@@ -4,7 +4,7 @@
   import Editor from '@ksi-core/ui/platform/Editor.svelte';
   import MarkdownContent from '@ksi-core/ui/platform/MarkdownContent.svelte';
   import ContentLocaleEditor from '$lib/ContentLocaleEditor.svelte';
-  import { ArrowLeft, FileDiff, FolderPlus, Save, Send, Info } from '@lucide/svelte';
+  import { ArrowLeft, FileDiff, FolderPlus, Save, Send } from '@lucide/svelte';
   import {
     cleanDocTranslations,
     docSlugPattern,
@@ -33,6 +33,20 @@
     type DocAccess,
     type DocDetail
   } from './docs';
+  import {
+    Button,
+    Card,
+    CheckboxInput,
+    Grid,
+    Heading,
+    HStack,
+    Icon,
+    StackItem,
+    Text,
+    TextArea,
+    TextInput,
+    VStack
+  } from '@astryx-sv/core';
 
   let {
     projectId,
@@ -103,6 +117,7 @@
   const addressValid = $derived(
     new RegExp(docSlugPattern).test(address) && !reservedDocSlugs.includes(address)
   );
+  const addressHint = $derived(`Inne strony linkują tutaj, wpisując [${address || 'address'}]`);
   const changed = $derived(
     !original ||
       texts[primaryContentLocale].title.trim() !== original.title ||
@@ -160,172 +175,166 @@
   }
 </script>
 
-<div class="workspace-header">
-  <div>
-    <p class="workspace-eyebrow">{workspaceName}</p>
-    <h1>
+<HStack class="workspace-header" hAlign="between" vAlign="start" wrap="wrap" gap={4}>
+  <VStack gap={1}>
+    <Text type="supporting" class="workspace-eyebrow">{workspaceName}</Text>
+    <Heading level={1}>
       {#if original && direct}Edytuj stronę{:else if original}Zaproponuj zmiany{:else if direct}Nowa
         strona{:else}Zaproponuj nową stronę{/if}
-    </h1>
+    </Heading>
     {#if !direct}
-      <p class="workspace-description">
+      <Text as="p" class="workspace-description">
         Liderzy i recenzenci tej przestrzeni porównają Twoją wersję z obecną i ją zaakceptują lub
         odrzucą.
-      </p>
+      </Text>
     {/if}
-  </div>
-  <a class="btn btn-outline" href={back}><ArrowLeft size={15} aria-hidden="true" />Anuluj</a>
-</div>
+  </VStack>
+  <Button href={back} variant="secondary" label="Anuluj">
+    {#snippet icon()}<Icon icon={ArrowLeft} size="sm" />{/snippet}
+  </Button>
+</HStack>
 <DocError code={error} />
 {#if !access.canPropose}
   <DocError code="FORBIDDEN" />
 {:else}
-  <form class="docs-editor card" onsubmit={submit}>
-    <div class="docs-editor-fields">
-      {#if !original}
-        <div>
-          <label for="doc-address">Adres</label>
-          <input
+  <Card padding={6}>
+    <VStack as="form" gap={5} onsubmit={submit}>
+      <Grid columns={{ minWidth: 240, max: 2 }} gap={5}>
+        {#if !original}
+          <TextInput
             id="doc-address"
-            bind:value={address}
-            maxlength="100"
-            required
-            aria-describedby="doc-address-help"
-            oninput={() => (addressEdited = true)}
+            label="Adres"
+            value={address}
+            isRequired
+            description={address && !addressValid ? undefined : addressHint}
+            status={address && !addressValid
+              ? {
+                  type: 'error',
+                  message:
+                    'Użyj małych liter, cyfr i pojedynczych myślników. Adresy „new”, „suggestions” i „contributors” są zarezerwowane.'
+                }
+              : undefined}
+            onChange={(next) => {
+              address = next.slice(0, 100);
+              addressEdited = true;
+            }}
           />
-          <p id="doc-address-help" class="field-help">
-            {#if address && !addressValid}
-              <span class="field-error"
-                >Użyj małych liter, cyfr i pojedynczych myślników. Adresy „new”, „suggestions” i
-                „contributors” są zarezerwowane.</span
-              >
-            {:else}
-              <span>Inne strony linkują tutaj, wpisując <code>[{address || 'address'}]</code></span>
-            {/if}
-          </p>
-        </div>
-      {/if}
-      <div>
-        <label for="doc-folder">Folder</label>
-        <div class="docs-folder-choice">
-          <DocFolderSelect
-            id="doc-folder"
-            bind:value={folderId}
-            {folders}
-            label={'Folder'}
-            locale={language}
-            disabled={busy}
-          />
+        {/if}
+        <HStack gap={2} vAlign="end">
+          <StackItem size="fill">
+            <DocFolderSelect
+              id="doc-folder"
+              bind:value={folderId}
+              {folders}
+              label={'Folder'}
+              locale={language}
+              disabled={busy}
+            />
+          </StackItem>
           {#if access.canReview}
-            <button type="button" class="btn btn-outline" onclick={() => (addingFolder = true)}
-              ><FolderPlus size={15} aria-hidden="true" />Nowy folder</button
-            >
+            <Button variant="secondary" label="Nowy folder" onclick={() => (addingFolder = true)}>
+              {#snippet icon()}<Icon icon={FolderPlus} size="sm" />{/snippet}
+            </Button>
           {/if}
-        </div>
-      </div>
-    </div>
+        </HStack>
+      </Grid>
 
-    <ContentLocaleEditor
-      bind:selected={editing}
-      added={addedLocales}
-      dirty={localeDirty}
-      {busy}
-      saveHint={'Wszystkie wersje językowe są zapisywane razem z dokumentem.'}
-      onremove={() => {
-        if (editing !== primaryContentLocale) texts[editing] = { title: '', markdown: '' };
-      }}
-    >
-      {#snippet reference()}
-        <div class="docs-editor-source" lang={primaryContentLocale}>
-          <h3>{texts[primaryContentLocale].title || 'Brak treści'}</h3>
-          <MarkdownContent
-            value={texts[primaryContentLocale].markdown}
-            docs
-            docLocale={primaryContentLocale}
-          />
-        </div>
-      {/snippet}
-    </ContentLocaleEditor>
+      <ContentLocaleEditor
+        bind:selected={editing}
+        added={addedLocales}
+        dirty={localeDirty}
+        {busy}
+        saveHint={'Wszystkie wersje językowe są zapisywane razem z dokumentem.'}
+        onremove={() => {
+          if (editing !== primaryContentLocale) texts[editing] = { title: '', markdown: '' };
+        }}
+      >
+        {#snippet reference()}
+          <div class="docs-editor-source" lang={primaryContentLocale}>
+            <Heading level={3}>{texts[primaryContentLocale].title || 'Brak treści'}</Heading>
+            <MarkdownContent
+              value={texts[primaryContentLocale].markdown}
+              docs
+              docLocale={primaryContentLocale}
+            />
+          </div>
+        {/snippet}
+      </ContentLocaleEditor>
 
-    {#key editing}
-      <div>
-        <label for="doc-title">Tytuł</label>
-        <input
+      {#key editing}
+        <TextInput
           id="doc-title"
-          bind:value={texts[editing].title}
-          maxlength="200"
-          required={editing === primaryContentLocale}
+          label="Tytuł"
+          value={texts[editing].title}
+          isRequired={editing === primaryContentLocale}
           placeholder={editing === primaryContentLocale ? '' : texts[primaryContentLocale].title}
-          oninput={() => {
+          onChange={(next) => {
+            texts[editing].title = next.slice(0, 200);
             if (editing === primaryContentLocale && !original && !addressEdited)
               address = slugFromTitle(texts[primaryContentLocale].title);
           }}
         />
-      </div>
-      <div class="docs-editor-content">
-        <Editor
-          bind:value={texts[editing].markdown}
-          rows={22}
-          allowGallery
-          docs
-          docLocale={editing}
-        />
-      </div>
-    {/key}
+        <VStack gap={0}>
+          <Editor
+            bind:value={texts[editing].markdown}
+            rows={22}
+            allowGallery
+            docs
+            docLocale={editing}
+          />
+        </VStack>
+      {/key}
 
-    <div class="docs-editor-fields">
-      <div class="docs-editor-reason">
-        <label for="doc-reason">
-          {#if direct}Podsumowanie zmian (opcjonalnie){:else}Powód zmiany{/if}
-        </label>
-        <textarea
+      <Grid columns={{ minWidth: 240, max: 2 }} gap={5}>
+        <TextArea
           id="doc-reason"
-          bind:value={reason}
-          rows="3"
-          maxlength="1000"
-          required={!direct}
+          label={direct ? 'Podsumowanie zmian (opcjonalnie)' : 'Powód zmiany'}
+          value={reason}
+          rows={3}
+          maxLength={1000}
+          isRequired={!direct}
           placeholder={'Co się zmieniło i dlaczego? Na przykład: „Uzupełnione po ZOSI 2026, zabrakło przedłużaczy”.'}
-        ></textarea>
-      </div>
-      <div class="docs-editor-visibility">
-        <label class="docs-check">
-          <input type="checkbox" bind:checked={visible} disabled={direct && !access.canPublish} />
-          {#if direct}Publiczna na stronie KSI{:else}Poproś o publikację na stronie KSI{/if}
-        </label>
-        <p class="field-help">
-          <Info size={13} aria-hidden="true" />
-          <span>
-            {#if direct && !access.canPublish}
-              Tylko liderzy przestrzeni mogą zmieniać widoczność publiczną strony.
-            {:else}
-              Strony publiczne może czytać każdy. Linki do stron wewnętrznych pokazują tylko ich
-              tytuły.
-            {/if}
-          </span>
-        </p>
-      </div>
-    </div>
-    <div class="docs-editor-actions">
-      <button
-        type="button"
-        class="btn btn-outline"
-        disabled={!changed}
-        onclick={() => (compared = { locale: editing, markdown: texts[editing].markdown })}
-        ><FileDiff
-          size={15}
-          aria-hidden="true"
-        />{#if compared && (compared.locale !== editing || compared.markdown !== texts[editing].markdown)}Odśwież
-          porównanie{:else}Przejrzyj zmiany{/if}</button
-      >
-      <button class="btn" disabled={!ready || busy}>
-        {#if direct}<Save size={15} aria-hidden="true" />{#if original}Zapisz zmiany{:else}Utwórz
-            stronę{/if}{:else}<Send size={15} aria-hidden="true" />Wyślij propozycję{/if}
-      </button>
-    </div>
-  </form>
+          onChange={(next) => (reason = next)}
+        />
+        <VStack gap={2} class="docs-editor-visibility">
+          <CheckboxInput
+            label={direct ? 'Publiczna na stronie KSI' : 'Poproś o publikację na stronie KSI'}
+            value={visible}
+            isDisabled={direct && !access.canPublish}
+            onChange={(checked) => (visible = checked)}
+            description={direct && !access.canPublish
+              ? 'Tylko liderzy przestrzeni mogą zmieniać widoczność publiczną strony.'
+              : 'Strony publiczne może czytać każdy. Linki do stron wewnętrznych pokazują tylko ich tytuły.'}
+          />
+        </VStack>
+      </Grid>
+      <HStack hAlign="end" gap={2} wrap="wrap">
+        <Button
+          variant="secondary"
+          label={compared &&
+          (compared.locale !== editing || compared.markdown !== texts[editing].markdown)
+            ? 'Odśwież porównanie'
+            : 'Przejrzyj zmiany'}
+          isDisabled={!changed}
+          onclick={() => (compared = { locale: editing, markdown: texts[editing].markdown })}
+        >
+          {#snippet icon()}<Icon icon={FileDiff} size="sm" />{/snippet}
+        </Button>
+        <Button
+          type="submit"
+          label={direct ? (original ? 'Zapisz zmiany' : 'Utwórz stronę') : 'Wyślij propozycję'}
+          isDisabled={!ready || busy}
+        >
+          {#snippet icon()}
+            <Icon icon={direct ? Save : Send} size="sm" />
+          {/snippet}
+        </Button>
+      </HStack>
+    </VStack>
+  </Card>
   {#if compared}
-    <section class="docs-editor-compare" aria-label={'Zmiany'}>
-      <h2>Twoje zmiany · {contentLocaleName(compared.locale, language)}</h2>
+    <VStack as="section" gap={3} class="docs-editor-compare" aria-label={'Zmiany'}>
+      <Heading level={2}>Twoje zmiany · {contentLocaleName(compared.locale, language)}</Heading>
       <DocDiff
         before={textIn(original, compared.locale).markdown}
         after={compared.markdown}
@@ -334,7 +343,7 @@
         beforeLabel={'Obecna wersja'}
         afterLabel={'Twoja wersja'}
       />
-    </section>
+    </VStack>
   {/if}
 {/if}
 
@@ -352,90 +361,21 @@
 />
 
 <style>
-  .docs-folder-choice {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-  .docs-folder-choice :global(.dropdown) {
-    flex: 1;
-    min-width: 0;
-  }
-  .docs-editor {
-    display: grid;
-    gap: 20px;
-  }
-  .docs-editor-fields {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
-  }
-  .docs-editor-fields input,
-  .docs-editor-fields textarea {
-    margin-bottom: 6px;
-  }
-  .docs-editor-fields textarea {
-    min-height: 90px;
-  }
-  .docs-editor-content {
-    min-width: 0;
-  }
   .docs-editor-source {
-    padding: 14px 16px;
+    padding: var(--spacing-3) var(--spacing-4);
     max-height: 400px;
     overflow: auto;
-    font-size: 14px;
+    font-size: var(--font-size-base);
     line-height: 1.7;
   }
-  .docs-editor-source h3 {
-    margin: 0 0 12px;
-    font-size: 18px;
+  :global(.docs-editor-visibility) {
+    padding-top: var(--spacing-4);
   }
-  .docs-editor-visibility {
-    display: grid;
-    align-content: start;
-    gap: 8px;
-    padding-top: 18px;
-  }
-  .docs-check {
-    font-size: 13px;
-    color: var(--ink);
-  }
-  .field-help {
-    display: flex;
-    gap: 6px;
-    align-items: baseline;
-    margin: 0;
-    color: var(--muted);
-    font-size: 12px;
-  }
-  .field-help :global(svg) {
-    flex-shrink: 0;
-    align-self: center;
-  }
-  .field-help code {
-    font-family: var(--mono);
-    font-size: 11px;
-  }
-  .docs-editor-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .docs-editor-compare {
-    display: grid;
-    gap: 14px;
-    margin-top: 28px;
-  }
-  .docs-editor-compare h2 {
-    font-size: 18px;
+  :global(.docs-editor-compare) {
+    margin-top: var(--spacing-7);
   }
   @media (max-width: 760px) {
-    .docs-editor-fields {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    .docs-editor-visibility {
+    :global(.docs-editor-visibility) {
       padding-top: 0;
     }
   }

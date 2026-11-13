@@ -4,14 +4,21 @@
   import DocsOutline from '@ksi-core/ui/platform/DocsOutline.svelte';
   import DocsToc from '@ksi-core/ui/platform/DocsToc.svelte';
   import { headingAnchors } from '@ksi-core/ui/platform/heading-anchors';
+  import { ArrowLeft, ArrowRight, Lock, SquarePen } from '@lucide/svelte';
   import {
-    ArrowLeft,
-    ArrowRight,
-    ChevronRight,
-    Lock,
-    SquarePen,
-    TriangleAlert
-  } from '@lucide/svelte';
+    Banner,
+    BreadcrumbItem,
+    Breadcrumbs,
+    Button,
+    ClickableCard,
+    Grid,
+    HStack,
+    Heading,
+    Icon,
+    Text,
+    Token,
+    VStack
+  } from '@astryx-sv/core';
   import { associationDocsKey, docsPath } from 'shared/docs';
   import { publicDocNeighbors, publicDocPath } from 'shared/public-docs';
   import { locale, setLocale } from '$lib/locale.svelte';
@@ -34,54 +41,84 @@
 </script>
 
 <svelte:head><title>{data.page.title} · KSI UWr</title></svelte:head>
-<main class="doc-page">
+
+{#snippet lockIcon()}
+  <Icon icon={Lock} size="xsm" />
+{/snippet}
+
+{#snippet editIcon()}
+  <Icon icon={SquarePen} size="sm" />
+{/snippet}
+
+{#snippet previousIcon()}
+  <Icon icon={ArrowLeft} size="sm" />
+{/snippet}
+
+{#snippet nextIcon()}
+  <Icon icon={ArrowRight} size="sm" />
+{/snippet}
+
+<VStack as="main" gap={0} class="doc-page flex-1">
   <div class="doc-layout">
-    <article lang={data.page.locale}>
-      <header class="doc-heading">
-        <nav class="doc-breadcrumb" aria-label={'Okruszki nawigacyjne'}>
-          <a href="/docs">Dokumentacja</a>
-          <ChevronRight size={13} aria-hidden="true" />
+    <article>
+      <VStack gap={4} paddingBlockEnd={5} class="doc-heading border-line border-b">
+        <Breadcrumbs label="Okruszki nawigacyjne" variant="supporting" separator="›">
+          <BreadcrumbItem href="/docs">Dokumentacja</BreadcrumbItem>
           {#if data.page.workspace.slug}
-            <a href={`/projects/${encodeURIComponent(data.page.workspace.slug)}`}
-              >{data.page.workspace.name}</a
-            >
+            <BreadcrumbItem href={`/projects/${encodeURIComponent(data.page.workspace.slug)}`}>
+              {data.page.workspace.name}
+            </BreadcrumbItem>
           {:else}
-            <span>KSI</span>
+            <BreadcrumbItem>KSI</BreadcrumbItem>
           {/if}
           {#each folders as folder, index (index)}
-            <ChevronRight size={13} aria-hidden="true" />
-            <span>{folder}</span>
+            <BreadcrumbItem>{folder}</BreadcrumbItem>
           {/each}
-        </nav>
-        <h1>{data.page.title}</h1>
-        <div class="doc-meta">
-          <p>
+        </Breadcrumbs>
+        <Heading level={1} type="display-1" textWrap="balance">{data.page.title}</Heading>
+        <HStack gap={3} wrap="wrap" vAlign="center">
+          <Text type="supporting" color="secondary">
             Zaktualizowano
-            <time datetime={data.page.updatedAt}
-              >{formatter.format(new Date(data.page.updatedAt))}</time
-            >
-          </p>
-          {#if !data.page.public}<span class="doc-private"
-              ><Lock size={13} aria-hidden="true" />Tylko dla członków</span
-            >{/if}
-          {#if data.page.access?.canReview}
-            <a class="doc-edit" href={editUrl}><SquarePen size={13} aria-hidden="true" />Edytuj</a>
-          {:else if data.page.access?.canPropose}
-            <a class="doc-edit" href={editUrl}
-              ><SquarePen size={13} aria-hidden="true" />Zaproponuj zmiany</a
-            >
+            <time datetime={data.page.updatedAt}>
+              {formatter.format(new Date(data.page.updatedAt))}
+            </time>
+          </Text>
+          {#if !data.page.public}
+            <Token label="Tylko dla członków" color="gray" icon={lockIcon} size="sm" />
           {/if}
-        </div>
-      </header>
+          {#if data.page.access?.canReview}
+            <Button href={editUrl} variant="ghost" size="sm" label="Edytuj" icon={editIcon} />
+          {:else if data.page.access?.canPropose}
+            <Button
+              href={editUrl}
+              variant="ghost"
+              size="sm"
+              label="Zaproponuj zmiany"
+              icon={editIcon}
+            />
+          {/if}
+        </HStack>
+      </VStack>
+
       {#if data.page.outdatedLocales.includes(data.page.locale)}
-        <p class="doc-outdated" role="note">
-          <TriangleAlert size={15} aria-hidden="true" />
-          <span>
-            Wersja polska zmieniła się po przygotowaniu tego tłumaczenia.
-            <button type="button" onclick={() => setLocale('pl')}>Czytaj wersję polską</button>
-          </span>
-        </p>
+        <Banner
+          status="warning"
+          title="Wersja polska zmieniła się po przygotowaniu tego tłumaczenia."
+          collapsible={false}
+          role="note"
+          class="mt-5"
+        >
+          {#snippet endContent()}
+            <Button
+              variant="secondary"
+              size="sm"
+              label="Czytaj wersję polską"
+              onclick={() => setLocale('pl')}
+            />
+          {/snippet}
+        </Banner>
       {/if}
+
       <div class="doc-outline">
         <DocsOutline headings={data.page.headings} {content} {onhash} />
       </div>
@@ -92,32 +129,44 @@
       >
         <Markdown blocks={data.page.blocks} {language} />
       </div>
+
       {#if neighbors.previous || neighbors.next}
-        <nav class="doc-pager" aria-label={'Więcej stron'}>
-          {#if neighbors.previous}
-            <a
-              class="surface-card surface-card-link"
-              rel="prev"
-              href={publicDocPath(workspace, neighbors.previous.slug)}
-            >
-              <span class="doc-pager-label"
-                ><ArrowLeft size={14} aria-hidden="true" />Poprzednia</span
+        <nav class="doc-pager" aria-label="Więcej stron">
+          <Grid columns={{ minWidth: 260, max: 2 }} gap={3}>
+            {#if neighbors.previous}
+              <ClickableCard
+                href={publicDocPath(workspace, neighbors.previous.slug)}
+                label={neighbors.previous.title}
+                padding={4}
+                elevation="low"
               >
-              <strong>{neighbors.previous.title}</strong>
-            </a>
-          {/if}
-          {#if neighbors.next}
-            <a
-              class="surface-card surface-card-link doc-pager-next"
-              rel="next"
-              href={publicDocPath(workspace, neighbors.next.slug)}
-            >
-              <span class="doc-pager-label"
-                >Następna<ArrowRight size={14} aria-hidden="true" /></span
+                <VStack gap={1}>
+                  <HStack gap={1.5} vAlign="center">
+                    {@render previousIcon()}
+                    <Text type="supporting" color="secondary">Poprzednia</Text>
+                  </HStack>
+                  <Text weight="medium">{neighbors.previous.title}</Text>
+                </VStack>
+              </ClickableCard>
+            {/if}
+            {#if neighbors.next}
+              <ClickableCard
+                href={publicDocPath(workspace, neighbors.next.slug)}
+                label={neighbors.next.title}
+                padding={4}
+                elevation="low"
+                class="doc-pager-next"
               >
-              <strong>{neighbors.next.title}</strong>
-            </a>
-          {/if}
+                <VStack gap={1} hAlign="end" class="text-right">
+                  <HStack gap={1.5} vAlign="center">
+                    <Text type="supporting" color="secondary">Następna</Text>
+                    {@render nextIcon()}
+                  </HStack>
+                  <Text weight="medium">{neighbors.next.title}</Text>
+                </VStack>
+              </ClickableCard>
+            {/if}
+          </Grid>
         </nav>
       {/if}
     </article>
@@ -125,13 +174,9 @@
       <DocsToc headings={data.page.headings} {content} {onhash} />
     </aside>
   </div>
-</main>
+</VStack>
 
 <style>
-  .doc-page {
-    flex: 1;
-    padding: 0;
-  }
   .doc-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 220px;
@@ -141,96 +186,6 @@
   article {
     min-width: 0;
     max-width: 760px;
-  }
-  .doc-heading {
-    padding-bottom: 22px;
-    border-bottom: 1px solid var(--line);
-  }
-  .doc-breadcrumb {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 2px 6px;
-    margin-bottom: 18px;
-    color: var(--muted);
-    font-size: 13px;
-    overflow-wrap: anywhere;
-  }
-  .doc-breadcrumb a {
-    color: inherit;
-    text-decoration: none;
-  }
-  .doc-breadcrumb a:hover {
-    color: var(--ink);
-  }
-  .doc-breadcrumb :global(svg) {
-    flex-shrink: 0;
-    opacity: 0.6;
-  }
-  h1 {
-    margin: 0 0 14px;
-    font-size: clamp(30px, 4vw, 46px);
-    font-weight: 700;
-    line-height: 1.1;
-    letter-spacing: -0.045em;
-    text-wrap: balance;
-    overflow-wrap: anywhere;
-  }
-  .doc-meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px 14px;
-    color: var(--muted);
-    font-size: 12px;
-  }
-  .doc-meta p {
-    margin: 0;
-  }
-  .doc-private {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-  /* Quiet like the rest of the byline: most visits only read, and editing happens in the
-     dashboard. */
-  .doc-edit {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin: -4px -8px -4px auto;
-    padding: 4px 8px;
-    border-radius: var(--radius-md);
-    color: inherit;
-    text-decoration: none;
-  }
-  .doc-edit:hover {
-    color: var(--ink);
-    background: var(--surface-muted);
-  }
-  .doc-outdated {
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
-    margin: 20px 0 0;
-    padding: 10px 12px;
-    border-radius: var(--radius-lg);
-    background: var(--coral);
-    font-size: 13px;
-  }
-  .doc-outdated :global(svg) {
-    flex-shrink: 0;
-    margin-top: 3px;
-  }
-  .doc-outdated button {
-    margin-left: 4px;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: var(--accent);
-    font: inherit;
-    text-decoration: underline;
-    cursor: pointer;
   }
   .doc-outline {
     display: none;
@@ -244,37 +199,12 @@
     scroll-margin-top: 76px;
   }
   .doc-pager {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
     margin-top: 48px;
     padding-top: 24px;
     border-top: 1px solid var(--line);
   }
-  .doc-pager a {
-    display: grid;
-    gap: 4px;
-    padding: 14px 16px;
-    color: var(--ink);
-  }
-  .doc-pager-next {
+  .doc-pager :global(.doc-pager-next) {
     grid-column: 2;
-    text-align: right;
-  }
-  .doc-pager-label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--muted);
-    font-size: 12px;
-  }
-  .doc-pager-next .doc-pager-label {
-    justify-content: flex-end;
-  }
-  .doc-pager strong {
-    font-size: 14px;
-    font-weight: 500;
-    overflow-wrap: anywhere;
   }
   .doc-toc {
     position: sticky;
@@ -292,10 +222,7 @@
     }
   }
   @media (max-width: 520px) {
-    .doc-pager {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    .doc-pager-next {
+    .doc-pager :global(.doc-pager-next) {
       grid-column: 1;
     }
   }

@@ -1,45 +1,44 @@
 <script lang="ts">
-  import '@ksi-core/ui/platform.css';
-  import '@ksi-core/ui/platform-theme.css';
-  import '@ksi-core/ui/platform-kit.css';
+  import '../app.css';
   import '$lib/dashboard.css';
   import '../locales/main.loader.svelte.js';
   import { goto, invalidateAll } from '$app/navigation';
   import { page } from '$app/state';
-  import { onMount, tick, untrack } from 'svelte';
+  import { onMount, untrack } from 'svelte';
+  import { Theme } from '@astryx-sv/core/theme';
+  import { InternationalizationProvider } from '@astryx-sv/core/i18n';
+  import en from '@astryx-sv/core/locales/en.json';
+  import pl from '@astryx-sv/core/locales/pl-PL.json';
+  import { neutralTheme } from '@astryx-sv/theme-neutral';
+  import {
+    AppShell,
+    Avatar,
+    Banner,
+    Button,
+    Card,
+    DropdownMenu,
+    Heading,
+    HStack,
+    IconButton,
+    SideNav,
+    SideNavHeading,
+    SideNavItem,
+    SideNavSection,
+    Text,
+    TopNav,
+    VStack
+  } from '@astryx-sv/core';
+  import { LogOut, UserRound } from '@lucide/svelte';
   import { initializePreferences, preferences } from '$lib/preferences.svelte';
-  import { loadLocale } from 'wuchale/load-utils';
   import AppearanceMenu from '$lib/AppearanceMenu.svelte';
   import NotificationInbox from '$lib/NotificationInbox.svelte';
-  import Dropdown from '@ksi-core/ui/platform/Dropdown.svelte';
   import { dashboardPath, tabFromPath, type Workspace } from '$lib/navigation';
   import { emptyProjectAccess, type Project } from '$lib/types';
-  import {
-    X,
-    Menu,
-    Folder,
-    Columns3,
-    MessagesSquare,
-    FileText,
-    BookOpen,
-    Activity,
-    LayoutDashboard,
-    Users,
-    UserRound,
-    LogOut,
-    ArrowUpRight,
-    ChevronDown,
-    Settings,
-    Shield,
-    PanelLeftClose,
-    PanelLeftOpen
-  } from '@lucide/svelte';
+  import { loadLocale } from 'wuchale/load-utils';
 
   let { data, children } = $props();
 
-  let mobileNavigation = $state(false);
   let sidebarCollapsed = $state(untrack(() => data.sidebarCollapsed ?? false));
-  let accountMenu = $state<HTMLDetailsElement>();
   let error = $state('');
 
   const user = $derived(data.user);
@@ -112,10 +111,9 @@
       : [])
   ] as [string, string][]);
   const pickerOptions = $derived([
-    { value: 'directory', label: 'Wszystkie projekty', href: '/projects' },
-    { value: 'association', label: 'Całe koło', href: '/association' },
+    { label: 'Wszystkie projekty', href: '/projects' },
+    { label: 'Całe koło', href: '/association' },
     ...projects.map((item) => ({
-      value: item.id,
       label: item.name,
       href: dashboardPath(
         'project',
@@ -124,127 +122,24 @@
       )
     }))
   ]);
-  const navigationIcons: Record<string, typeof LayoutDashboard> = {
-    overview: LayoutDashboard,
-    board: Columns3,
-    forum: MessagesSquare,
-    articles: FileText,
-    docs: BookOpen,
-    events: Activity,
-    roster: Users,
-    settings: Settings,
-    permissions: Shield,
-    previews: Shield
-  };
-  const initials = $derived(
-    `${(user?.firstName || user?.name || '')[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase() ||
-      'U'
+  const pickerItems = $derived(
+    pickerOptions.map((option) => ({
+      label: option.label,
+      href: option.href
+    }))
   );
 
   function changeTab(next: string) {
     void goto(dashboardPath(workspace, projectSlug, next));
   }
 
-  function toggleSidebar() {
-    sidebarCollapsed = !sidebarCollapsed;
-    document.cookie = `ksi-sidebar=${sidebarCollapsed ? '1' : '0'}; Path=/; Max-Age=31536000; SameSite=Lax`;
-  }
-
-  async function openNavigation() {
-    mobileNavigation = !mobileNavigation;
-    if (mobileNavigation) {
-      await tick();
-      document.querySelector<HTMLButtonElement>('.mobile-close')?.focus();
-    }
-  }
-
-  function closeMenus(event: KeyboardEvent) {
-    if (
-      event.key === 'Tab' &&
-      mobileNavigation &&
-      window.matchMedia('(max-width: 760px)').matches
-    ) {
-      const controls = [
-        ...document.querySelectorAll<HTMLElement>(
-          '#dashboard-navigation button:not(:disabled), #dashboard-navigation a[href]'
-        )
-      ];
-      const first = controls[0];
-      const last = controls.at(-1);
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last?.focus();
-      }
-      if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first?.focus();
-      }
-    }
-    if (event.key !== 'Escape') return;
-    if (mobileNavigation) {
-      mobileNavigation = false;
-      document.getElementById('navigation-toggle')?.focus();
-    }
-    if (accountMenu?.open) {
-      accountMenu.open = false;
-      accountMenu.querySelector('summary')?.focus();
-    }
-  }
-
-  function closeOutsideMenus(event: PointerEvent) {
-    if (!(event.target instanceof Node)) return;
-    if (accountMenu?.open && !accountMenu.contains(event.target)) accountMenu.open = false;
-  }
-
-  // Press, drag to a menu item and release to pick it, like the shared Dropdown.
-  const ACCOUNT_HOLD_MS = 220;
-  let suppressAccountClick = false;
-
-  function pressAccountMenu(event: PointerEvent) {
-    if (event.button !== 0 || event.pointerType === 'touch' || accountMenu?.open) return;
-    let held = false;
-    const holdTimer = window.setTimeout(() => {
-      held = true;
-      suppressAccountClick = true;
-      if (accountMenu) accountMenu.open = true;
-    }, ACCOUNT_HOLD_MS);
-    const cleanup = () => {
-      window.clearTimeout(holdTimer);
-      window.removeEventListener('pointerup', release, true);
-      window.removeEventListener('pointercancel', cancel, true);
-    };
-    const release = (up: PointerEvent) => {
-      cleanup();
-      if (!held) return;
-      const target = document.elementFromPoint(up.clientX, up.clientY);
-      const action = target?.closest<HTMLElement>('.account-action');
-      if (action && accountMenu?.contains(action)) {
-        accountMenu.open = false;
-        action.click();
-      }
-      window.setTimeout(() => (suppressAccountClick = false), 0);
-    };
-    const cancel = () => {
-      cleanup();
-      suppressAccountClick = false;
-    };
-    window.addEventListener('pointerup', release, true);
-    window.addEventListener('pointercancel', cancel, true);
-  }
-
-  function ignoreHoldClick(event: MouseEvent) {
-    if (!suppressAccountClick) return;
-    event.preventDefault();
-    suppressAccountClick = false;
+  function setSidebarCollapsed(collapsed: boolean) {
+    sidebarCollapsed = collapsed;
+    document.cookie = `ksi-sidebar=${collapsed ? '1' : '0'}; Path=/; Max-Age=31536000; SameSite=Lax`;
   }
 
   onMount(() => {
     if (data.user?.membershipStatus !== 'active') return;
-    const viewport = window.matchMedia('(max-width: 760px)');
-    const syncViewport = () => {
-      if (!viewport.matches) mobileNavigation = false;
-    };
-    viewport.addEventListener('change', syncViewport);
     let socket: WebSocket | null = null;
     let retry: ReturnType<typeof setTimeout> | null = null;
     let stopped = false;
@@ -268,7 +163,6 @@
 
     void connect();
     return () => {
-      viewport.removeEventListener('change', syncViewport);
       stopped = true;
       if (retry) clearTimeout(retry);
       socket?.close();
@@ -282,241 +176,173 @@
 </script>
 
 <svelte:head><title>{viewName} · KSI</title></svelte:head>
-<svelte:window onkeydown={closeMenus} onpointerdown={closeOutsideMenus} />
 
-{#if isolated || !user}
-  {@render children()}
-{:else if user.membershipStatus !== 'active'}
-  <div class="pending-screen">
-    <div class="pending-card">
-      <h1>Konto wymaga aktywacji</h1>
-      <p>
-        Twoje konto musi najpierw zostać aktywowane przez administratora. Zapytaj bezpośrednio:
-        {data.activationContact}.
-      </p>
-      <form method="POST" action="/logout">
-        <button class="btn" style="margin: 0 auto;">Wyloguj się</button>
-      </form>
-    </div>
-  </div>
-{:else}
-  <div class="dash-shell" class:sidebar-collapsed={sidebarCollapsed}>
-    {#if mobileNavigation}
-      <button
-        class="navigation-backdrop"
-        tabindex="-1"
-        aria-hidden="true"
-        aria-label={'Zamknij nawigację'}
-        onclick={() => {
-          mobileNavigation = false;
-          document.getElementById('navigation-toggle')?.focus();
-        }}
-      ></button>
-    {/if}
-    <aside
-      id="dashboard-navigation"
-      class="dash-sidebar"
-      class:mobile-open={mobileNavigation}
-      role={mobileNavigation ? 'dialog' : undefined}
-      aria-modal={mobileNavigation ? true : undefined}
-      aria-label={'Nawigacja'}
-    >
-      <div class="sidebar-controls">
-        <button
-          class="sidebar-collapse"
-          aria-controls="dashboard-navigation"
-          aria-expanded={!sidebarCollapsed}
-          aria-label={sidebarCollapsed ? 'Pokaż panel boczny' : 'Ukryj panel boczny'}
-          title={sidebarCollapsed ? 'Pokaż panel boczny' : 'Ukryj panel boczny'}
-          onclick={toggleSidebar}
-        >
-          {#if sidebarCollapsed}<PanelLeftOpen size={16} aria-hidden="true" />{:else}<PanelLeftClose
-              size={16}
-              aria-hidden="true"
-            />{/if}
-        </button>
-        <button
-          class="mobile-close"
-          onclick={() => {
-            mobileNavigation = false;
-            document.getElementById('navigation-toggle')?.focus();
-          }}
-          aria-label={'Zamknij nawigację'}><X size={20} aria-hidden="true" /></button
-        >
-      </div>
-      <div class="sidebar-brand">
-        <span class="sidebar-logo">KSI<span class="sidebar-brand-suffix"> / core</span></span>
-      </div>
-      {#if workspace !== 'directory'}
-        <nav aria-label={workspaceName}>
-          {#each tabs as [key, label] (key)}
-            {@const Icon = navigationIcons[key] ?? LayoutDashboard}
-            <a
-              class="sidebar-btn"
-              class:active={tab === key}
-              aria-current={tab === key ? 'page' : undefined}
-              href={dashboardPath(workspace, projectSlug, key)}
-              title={label}
-            >
-              <span class="navigation-label"
-                ><Icon size={16} strokeWidth={1.7} aria-hidden="true" /><span
-                  class="navigation-text">{label}</span
-                ></span
-              >
-            </a>
-          {/each}
-        </nav>
-      {:else}
-        <a
-          class="sidebar-btn"
-          class:active={tab === 'projects' || tab === '__create_project__'}
-          href="/projects"
-          aria-current={tab === 'projects' ? 'page' : undefined}
-          title={'Projekty'}
-          ><span class="navigation-label"
-            ><Folder size={16} aria-hidden="true" /><span class="navigation-text">Projekty</span
-            ></span
-          ></a
-        >
-        <a class="sidebar-btn" href="/association" title={'Całe koło'}>
-          <span class="navigation-label"
-            ><Users size={16} aria-hidden="true" /><span class="navigation-text">Całe koło</span
-            ></span
-          ><ArrowUpRight size={14} aria-hidden="true" />
-        </a>
-        <p class="sidebar-hint">Wybierz projekt, aby otworzyć jego tablicę, forum i artykuły.</p>
-      {/if}
-      <div class="sidebar-global">
-        {#if workspace === 'project'}
-          <a class="sidebar-btn" href="/association" title={'Całe koło'}
-            ><span class="navigation-label"
-              ><Users size={16} aria-hidden="true" /><span class="navigation-text">Całe koło</span
-              ></span
-            ><ArrowUpRight size={14} aria-hidden="true" /></a
+<Theme theme={neutralTheme} mode={preferences.theme}>
+  <InternationalizationProvider
+    locale={preferences.language}
+    messages={{ en, 'en-us': en, pl, 'pl-PL': pl }}
+  >
+    {#if isolated || !user}
+      {@render children()}
+    {:else if user.membershipStatus !== 'active'}
+      <VStack minHeight="100dvh" vAlign="center" hAlign="center" padding={4}>
+        <Card padding={6} maxWidth={460}>
+          <VStack gap={4}>
+            <Heading level={1}>Konto wymaga aktywacji</Heading>
+            <Text color="secondary">
+              Twoje konto musi najpierw zostać aktywowane przez administratora. Zapytaj
+              bezpośrednio:
+              {data.activationContact}.
+            </Text>
+            <form method="POST" action="/logout">
+              <Button type="submit" variant="secondary" label="Wyloguj się" width="100%" />
+            </form>
+          </VStack>
+        </Card>
+      </VStack>
+    {:else}
+      <AppShell height="fill" contentPadding={0} variant="section">
+        {#snippet sideNav()}
+          <SideNav
+            collapsible={{
+              isCollapsed: sidebarCollapsed,
+              onCollapsedChange: setSidebarCollapsed
+            }}
           >
-        {/if}
-        {#if role !== 'member'}
-          <span class="sidebar-section">Administracja koła</span>
-          <a
-            class="sidebar-btn"
-            class:active={tab === 'users'}
-            aria-current={tab === 'users' ? 'page' : undefined}
-            href="/members"
-            title={'Członkowie'}
-            ><span class="navigation-label"
-              ><UserRound size={16} aria-hidden="true" /><span class="navigation-text"
-                >Członkowie</span
-              ></span
-            ></a
-          >
-        {/if}
-        <a class="sidebar-btn" href={data.websiteOrigin} title={'Strona KSI'}
-          ><span class="navigation-label"
-            ><ArrowUpRight size={16} aria-hidden="true" /><span class="navigation-text"
-              >Strona KSI</span
-            ></span
-          ></a
-        >
-        <div class="sidebar-footnote">
-          KSI · Uniwersytet Wrocławski
-          <div class="build-details">
-            v{import.meta.env.PUBLIC_APP_VERSION} ·
-            <a
-              href={import.meta.env.PUBLIC_COMMIT_HASH
-                ? `https://github.com/ksiuwr/ksi-core/commit/${import.meta.env.PUBLIC_COMMIT_HASH}`
-                : 'https://github.com/ksiuwr/ksi-core'}
-              target="_blank"
-              rel="noopener noreferrer"
-              >{import.meta.env.PUBLIC_COMMIT_HASH?.slice(0, 7) || 'Kod źródłowy'}</a
-            >
-          </div>
-        </div>
-      </div>
-    </aside>
+            {#snippet header()}
+              <SideNavHeading heading="KSI" subheading="core" headingHref="/" />
+            {/snippet}
+            {#snippet children()}
+              {#if workspace !== 'directory'}
+                <SideNavSection title={workspaceName}>
+                  {#each tabs as [key, label] (key)}
+                    <SideNavItem
+                      {label}
+                      href={dashboardPath(workspace, projectSlug, key)}
+                      isSelected={tab === key}
+                    />
+                  {/each}
+                </SideNavSection>
+              {:else}
+                <SideNavSection title="Projekty">
+                  <SideNavItem
+                    label="Wszystkie projekty"
+                    href="/projects"
+                    isSelected={tab === 'projects' || tab === '__create_project__'}
+                  />
+                  <SideNavItem label="Całe koło" href="/association" />
+                </SideNavSection>
+              {/if}
+              <SideNavSection title="Koło">
+                {#if workspace === 'project'}
+                  <SideNavItem label="Całe koło" href="/association" />
+                {/if}
+                {#if role !== 'member'}
+                  <SideNavItem label="Członkowie" href="/members" isSelected={tab === 'users'} />
+                {/if}
+                <SideNavItem label="Strona KSI" href={data.websiteOrigin} />
+              </SideNavSection>
+            {/snippet}
+            {#snippet footer()}
+              <VStack gap={1} padding={3}>
+                <Text type="supporting" color="secondary">KSI · Uniwersytet Wrocławski</Text>
+                <Text type="supporting" color="secondary">
+                  v{import.meta.env.PUBLIC_APP_VERSION} ·
+                  {#if import.meta.env.PUBLIC_COMMIT_HASH}
+                    <a
+                      href={`https://github.com/ksiuwr/ksi-core/commit/${import.meta.env.PUBLIC_COMMIT_HASH}`}
+                      target="_blank"
+                      rel="noopener noreferrer">{import.meta.env.PUBLIC_COMMIT_HASH.slice(0, 7)}</a
+                    >
+                  {:else}
+                    <a
+                      href="https://github.com/ksiuwr/ksi-core"
+                      target="_blank"
+                      rel="noopener noreferrer">Kod źródłowy</a
+                    >
+                  {/if}
+                </Text>
+              </VStack>
+            {/snippet}
+          </SideNav>
+        {/snippet}
 
-    <div class="dash-body" inert={mobileNavigation}>
-      <header class="dash-topbar">
-        <button
-          id="navigation-toggle"
-          class="navigation-toggle"
-          aria-controls="dashboard-navigation"
-          aria-expanded={mobileNavigation}
-          onclick={openNavigation}
-        >
-          <Menu size={20} strokeWidth={1.7} aria-hidden="true" /><span class="sr-only"
-            >Nawigacja</span
-          >
-        </button>
-        <div class="workspace-picker">
-          <Dropdown
-            label={'Wybierz przestrzeń'}
-            value={workspace === 'project'
-              ? scope
-              : workspace === 'association'
-                ? 'association'
-                : 'directory'}
-            options={pickerOptions}
-            placeholder={workspaceName}
-            searchable
-            variant="bar"
-            searchPlaceholder={'Szukaj projektu…'}
-            emptyLabel={'Nie znaleziono projektu.'}
-          >
-            {#snippet leading()}<Folder size={16} strokeWidth={1.7} aria-hidden="true" />{/snippet}
-          </Dropdown>
-        </div>
-        <nav class="workspace-breadcrumb" aria-label={'Bieżąca strona'}>
-          <span aria-hidden="true">/</span><strong>{viewName}</strong>
-        </nav>
-        <div class="topbar-controls">
-          <NotificationInbox
-            admin={inbox}
-            administrator={role === 'administrator'}
-            refresh={invalidateAll}
-            reportError={(message) => (error = message)}
-          />
-          <AppearanceMenu />
-          <details class="topbar-menu" bind:this={accountMenu}>
-            <summary
-              aria-label={'Moje konto'}
-              onpointerdown={pressAccountMenu}
-              onclick={ignoreHoldClick}
-              ><span class="account-avatar"
-                >{#if user.image}<img src={user.image} alt="" />{:else}{initials}{/if}</span
-              ><span class="account-name">{user.firstName || user.name}</span><ChevronDown
-                size={14}
-                aria-hidden="true"
-              /></summary
-            >
-            <div class="menu-panel account-panel">
-              <strong>{user.firstName || user.name} {user.lastName}</strong>
-              <span class="muted">Ustawienia konta</span>
-              <button
-                class="account-action"
-                onclick={() => {
-                  if (accountMenu) accountMenu.open = false;
-                  changeTab('profile');
-                }}><UserRound size={16} aria-hidden="true" />Mój profil</button
-              >
-              <form
-                method="POST"
-                action="/logout"
-                onsubmit={() => {
-                  if (accountMenu) accountMenu.open = false;
-                }}
-              >
-                <button class="account-action sign-out"
-                  ><LogOut size={16} aria-hidden="true" />Wyloguj się</button
+        {#snippet topNav()}
+          <TopNav label="Nawigacja panelu">
+            {#snippet heading()}
+              <HStack gap={2} vAlign="center">
+                <Text type="label" weight="semibold">KSI</Text>
+              </HStack>
+            {/snippet}
+            {#snippet startContent()}
+              <HStack gap={2} vAlign="center" minHeight={40}>
+                <DropdownMenu
+                  button={{
+                    label: workspaceName,
+                    variant: 'secondary',
+                    size: 'sm'
+                  }}
+                  items={pickerItems}
+                  menuWidth={260}
+                />
+                <Text type="supporting" color="secondary" maxLines={1}>{viewName}</Text>
+              </HStack>
+            {/snippet}
+            {#snippet endContent()}
+              <HStack gap={2} vAlign="center">
+                <NotificationInbox
+                  admin={inbox}
+                  administrator={role === 'administrator'}
+                  refresh={invalidateAll}
+                  reportError={(message) => (error = message)}
+                />
+                <AppearanceMenu />
+                {#if user.image}
+                  <Avatar
+                    src={user.image}
+                    name={user.name ?? undefined}
+                    size={32}
+                    href={dashboardPath(workspace, projectSlug, 'profile')}
+                  />
+                {:else}
+                  <IconButton
+                    label="Mój profil"
+                    tooltip="Mój profil"
+                    variant="ghost"
+                    size="sm"
+                    href={dashboardPath(workspace, projectSlug, 'profile')}
+                  >
+                    {#snippet icon()}<UserRound size={18} aria-hidden="true" />{/snippet}
+                  </IconButton>
+                {/if}
+                <IconButton
+                  label="Wyloguj się"
+                  tooltip="Wyloguj się"
+                  variant="ghost"
+                  size="sm"
+                  onclick={() => {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/logout';
+                    document.body.append(form);
+                    form.submit();
+                    form.remove();
+                  }}
                 >
-              </form>
-            </div>
-          </details>
-        </div>
-      </header>
-      <main class="dash-workspace">
-        {#if error}<p class="error" role="alert">{error}</p>{/if}
-        {@render children()}
-      </main>
-    </div>
-  </div>
-{/if}
+                  {#snippet icon()}<LogOut size={16} aria-hidden="true" />{/snippet}
+                </IconButton>
+              </HStack>
+            {/snippet}
+          </TopNav>
+        {/snippet}
+
+        <VStack gap={4} padding={6} class="dash-workspace">
+          {#if error}
+            <Banner status="error" title={error} />
+          {/if}
+          {@render children()}
+        </VStack>
+      </AppShell>
+    {/if}
+  </InternationalizationProvider>
+</Theme>

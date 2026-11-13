@@ -1,11 +1,32 @@
 <script lang="ts">
   import { page } from '$app/state';
   import { goto } from '$app/navigation';
-  import Dropdown from '@ksi-core/ui/platform/Dropdown.svelte';
   import Skeleton from './Skeleton.svelte';
   import ContentTranslations from './ContentTranslations.svelte';
   import SettingsNav from './SettingsNav.svelte';
   import { ArrowUpRight, KeyRound, Shield, UserRound } from '@lucide/svelte';
+  import {
+    Avatar,
+    Banner,
+    Button,
+    Card,
+    EmptyState,
+    Grid,
+    Heading,
+    HStack,
+    Selector,
+    Section,
+    Table,
+    TableBody,
+    TableCell,
+    TableHeader,
+    TableHeaderCell,
+    TableRow,
+    Text,
+    TextArea,
+    TextInput,
+    VStack
+  } from '@astryx-sv/core';
   import PermissionFlags from './PermissionFlags.svelte';
   import MemberPreview from './MemberPreview.svelte';
   import { Search, ArrowLeft, Trash2, Save, ChevronLeft, ChevronRight } from '@lucide/svelte';
@@ -49,8 +70,10 @@
       : (translationDraft[key] ?? '');
   }
   function setLocalizedMember(key: LocalizedMemberField, value: string) {
-    if (contentLocale !== primaryContentLocale) translationDraft[key] = value;
-    else if (member) member[key] = value;
+    const limit = key === 'bio' ? 5000 : 100;
+    const next = value.slice(0, limit);
+    if (contentLocale !== primaryContentLocale) translationDraft[key] = next;
+    else if (member) member[key] = next;
   }
   async function resetPassword() {
     if (!member) return;
@@ -191,31 +214,48 @@
   }
 </script>
 
-{#if notice}<p class="notice" role="status">{notice}</p>{/if}
-{#if error}<p class="error" role="alert">{error}</p>{/if}
-{#if loading}<Skeleton label={'Ładowanie członków'} />{:else if member}
+{#if notice}<Banner status="success" title={notice} role="status" />{/if}
+{#if error}<Banner status="error" title={error} role="alert" />{/if}
+{#if loading}
+  <Skeleton label="Ładowanie członków" />
+{:else if member}
   {@const editable = member.membershipStatus !== 'deleted'}
-  <a class="btn btn-outline detail-back" href="/members"
-    ><ArrowLeft size={15} aria-hidden="true" />Wszyscy członkowie</a
-  >
-  <div class="workspace-header">
-    <div class="member-heading">
-      {#if member.image}<img class="member-avatar" src={member.image} alt="" />{/if}
-      <div>
-        <h1>{member.firstName || member.name} {member.lastName}</h1>
-        <p>{member.email}</p>
-      </div>
-    </div>
-    {#if member.membershipStatus === 'active'}<a
-        class="btn btn-outline"
+  <HStack>
+    <Button variant="secondary" label="Wszyscy członkowie" href="/members">
+      {#snippet icon()}<ArrowLeft size={15} aria-hidden="true" />{/snippet}
+    </Button>
+  </HStack>
+  <HStack gap={4} vAlign="start" justify="between" wrap="wrap">
+    <HStack gap={3} vAlign="center">
+      {#if member.image}
+        <Avatar
+          src={member.image}
+          name={member.firstName || member.name}
+          size={96}
+          shape="rounded"
+        />
+      {/if}
+      <VStack gap={1}>
+        <Heading level={1}>{member.firstName || member.name} {member.lastName}</Heading>
+        <Text color="secondary">{member.email}</Text>
+      </VStack>
+    </HStack>
+    {#if member.membershipStatus === 'active'}
+      <Button
+        variant="secondary"
+        label="Zobacz publiczny profil"
         href={`${websiteOrigin}/members/${encodeURIComponent(member.id)}`}
-        ><ArrowUpRight size={15} aria-hidden="true" />Zobacz publiczny profil</a
-      >{/if}
-  </div>
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {#snippet icon()}<ArrowUpRight size={15} aria-hidden="true" />{/snippet}
+      </Button>
+    {/if}
+  </HStack>
 
-  <div class="settings-layout">
+  <VStack gap={6} class="settings-layout">
     <SettingsNav
-      label={'Sekcje członka'}
+      label="Sekcje członka"
       items={[
         { id: 'profile', label: 'Profil', icon: UserRound },
         { id: 'access', label: 'Dostęp', icon: Shield },
@@ -228,269 +268,286 @@
       ]}
     />
 
-    <div class="settings-main">
-      <section id="profile" class="settings-section" aria-labelledby="profile-heading">
-        <header><h2 id="profile-heading">Profil</h2></header>
-        {#if administrator && editable}
+    <VStack gap={6} class="settings-main">
+      <Section id="profile" aria-labelledby="profile-heading">
+        <VStack gap={4}>
+          <Heading level={2} id="profile-heading">Profil</Heading>
+          {#if administrator && editable}
+            <form
+              onsubmit={(event) => {
+                event.preventDefault();
+                if (contentLocale !== primaryContentLocale) return;
+                void mutate(`/${member!.id}/profile`, 'PATCH', {
+                  firstName: member!.firstName,
+                  lastName: member!.lastName,
+                  nickname: member!.nickname ?? '',
+                  bio: member!.bio ?? '',
+                  github: member!.github || null,
+                  linkedin: member!.linkedin || null
+                });
+              }}
+            >
+              <Card>
+                <VStack gap={4}>
+                  <ContentTranslations
+                    kind="profile"
+                    id={member.id}
+                    translations={member.translations}
+                    baseline={{
+                      firstName: member.firstName,
+                      lastName: member.lastName,
+                      nickname: member.nickname,
+                      bio: member.bio
+                    }}
+                    bind:selected={contentLocale}
+                    bind:draft={translationDraft}
+                    onsaved={(result) => {
+                      if (member) member.translations = result.translations;
+                    }}
+                  />
+                  <Grid columns={{ minWidth: 220, max: 2 }} gap={3}>
+                    <TextInput
+                      id="m-first"
+                      label="Imię"
+                      value={localizedMember('firstName')}
+                      onChange={(value) => setLocalizedMember('firstName', value)}
+                      isRequired={contentLocale === primaryContentLocale}
+                    />
+                    <TextInput
+                      id="m-last"
+                      label="Nazwisko"
+                      value={localizedMember('lastName')}
+                      onChange={(value) => setLocalizedMember('lastName', value)}
+                    />
+                    <TextInput
+                      id="m-nick"
+                      label="Pseudonim"
+                      value={localizedMember('nickname')}
+                      onChange={(value) => setLocalizedMember('nickname', value)}
+                    />
+                    <TextArea
+                      id="m-bio"
+                      label="Bio"
+                      rows={5}
+                      value={localizedMember('bio')}
+                      onChange={(value) => setLocalizedMember('bio', value)}
+                    />
+                    {#if contentLocale === primaryContentLocale}
+                      <TextInput
+                        id="m-gh"
+                        label="GitHub"
+                        value={member.github ?? ''}
+                        onChange={(value) => (member!.github = value || null)}
+                        placeholder="https://github.com/username"
+                      />
+                      <TextInput
+                        id="m-li"
+                        label="LinkedIn"
+                        value={member.linkedin ?? ''}
+                        onChange={(value) => (member!.linkedin = value || null)}
+                        placeholder="https://linkedin.com/in/username"
+                      />
+                    {/if}
+                  </Grid>
+                  {#if contentLocale === primaryContentLocale}
+                    <HStack gap={2} justify="end">
+                      <Button type="submit" label="Zapisz profil" isDisabled={busy}>
+                        {#snippet icon()}<Save size={15} aria-hidden="true" />{/snippet}
+                      </Button>
+                    </HStack>
+                  {/if}
+                </VStack>
+              </Card>
+            </form>
+          {:else}
+            <Card>
+              <Text>{member.bio}</Text>
+            </Card>
+          {/if}
+        </VStack>
+      </Section>
+
+      <Section id="access" aria-labelledby="access-heading">
+        <VStack gap={4}>
+          <VStack gap={1}>
+            <Heading level={2} id="access-heading">Dostęp</Heading>
+            <Text type="supporting" color="secondary">
+              Zmiany dostępu zaczną obowiązywać po zapisaniu.
+            </Text>
+          </VStack>
           <form
-            class="card settings-card"
             onsubmit={(event) => {
               event.preventDefault();
-              if (contentLocale !== primaryContentLocale) return;
-              void mutate(`/${member!.id}/profile`, 'PATCH', {
-                firstName: member!.firstName,
-                lastName: member!.lastName,
-                nickname: member!.nickname ?? '',
-                bio: member!.bio ?? '',
-                github: member!.github || null,
-                linkedin: member!.linkedin || null
-              });
+              if (!canSaveAccess) return;
+              void mutate(
+                `/${member!.id}/access`,
+                'PATCH',
+                administrator
+                  ? { role: accessRole, membershipStatus: accessStatus, flags: accessFlags }
+                  : { membershipStatus: accessStatus }
+              );
             }}
           >
-            <ContentTranslations
-              kind="profile"
-              id={member.id}
-              translations={member.translations}
-              baseline={{
-                firstName: member.firstName,
-                lastName: member.lastName,
-                nickname: member.nickname,
-                bio: member.bio
-              }}
-              bind:selected={contentLocale}
-              bind:draft={translationDraft}
-              onsaved={(result) => {
-                if (member) member.translations = result.translations;
-              }}
-            />
-            <div class="field-grid">
-              <div>
-                <label for="m-first">Imię</label><input
-                  id="m-first"
-                  bind:value={
-                    () => localizedMember('firstName'),
-                    (value) => setLocalizedMember('firstName', value)
-                  }
-                  required={contentLocale === primaryContentLocale}
-                  maxlength="100"
-                />
-              </div>
-              <div>
-                <label for="m-last">Nazwisko</label><input
-                  id="m-last"
-                  bind:value={
-                    () => localizedMember('lastName'),
-                    (value) => setLocalizedMember('lastName', value)
-                  }
-                  maxlength="100"
-                />
-              </div>
-              <div class="field-wide">
-                <label for="m-nick">Pseudonim</label><input
-                  id="m-nick"
-                  bind:value={
-                    () => localizedMember('nickname'),
-                    (value) => setLocalizedMember('nickname', value)
-                  }
-                  maxlength="100"
-                />
-              </div>
-              <div class="field-wide">
-                <label for="m-bio">Bio</label><textarea
-                  id="m-bio"
-                  bind:value={
-                    () => localizedMember('bio'), (value) => setLocalizedMember('bio', value)
-                  }
-                  rows="5"
-                  maxlength="5000"
-                ></textarea>
-              </div>
-              {#if contentLocale === primaryContentLocale}<div>
-                  <label for="m-gh">GitHub</label><input
-                    id="m-gh"
-                    type="url"
-                    bind:value={member.github}
-                    placeholder="https://github.com/username"
+            <Card>
+              <VStack gap={4}>
+                <Grid columns={{ minWidth: 220, max: 2 }} gap={3}>
+                  <Selector
+                    label="Status konta"
+                    value={accessStatus}
+                    options={statuses.filter(
+                      (s) =>
+                        s.value !== 'deleted' &&
+                        (administrator || s.value === 'active' || s.value === 'pending')
+                    )}
+                    isDisabled={busy || !canSaveAccess}
+                    onChange={(value: string) =>
+                      (accessStatus = value as Profile['membershipStatus'])}
                   />
-                </div>
-                <div>
-                  <label for="m-li">LinkedIn</label><input
-                    id="m-li"
-                    type="url"
-                    bind:value={member.linkedin}
-                    placeholder="https://linkedin.com/in/username"
+                  <Selector
+                    label="Rola"
+                    value={accessRole}
+                    options={roles}
+                    isDisabled={busy || !administrator || !editable}
+                    onChange={(value: string) => (accessRole = value as Profile['role'])}
                   />
-                </div>{/if}
-            </div>
-            {#if contentLocale === primaryContentLocale}<div class="card-footer">
-                <button class="btn" disabled={busy}
-                  ><Save size={15} aria-hidden="true" />Zapisz profil</button
-                >
-              </div>{/if}
+                </Grid>
+                {#if administrator && editable}
+                  <PermissionFlags bind:flags={accessFlags} disabled={busy} />
+                {/if}
+                {#if canSaveAccess}
+                  <HStack gap={2} justify="end">
+                    <Button type="submit" label="Zapisz dostęp" isDisabled={busy}>
+                      {#snippet icon()}<Save size={15} aria-hidden="true" />{/snippet}
+                    </Button>
+                  </HStack>
+                {/if}
+              </VStack>
+            </Card>
           </form>
-        {:else}
-          <div class="card settings-card"><p>{member.bio}</p></div>
-        {/if}
-      </section>
-
-      <section id="access" class="settings-section" aria-labelledby="access-heading">
-        <header>
-          <h2 id="access-heading">Dostęp</h2>
-          <p>Zmiany dostępu zaczną obowiązywać po zapisaniu.</p>
-        </header>
-        <form
-          class="card settings-card"
-          onsubmit={(event) => {
-            event.preventDefault();
-            if (!canSaveAccess) return;
-            void mutate(
-              `/${member!.id}/access`,
-              'PATCH',
-              administrator
-                ? { role: accessRole, membershipStatus: accessStatus, flags: accessFlags }
-                : { membershipStatus: accessStatus }
-            );
-          }}
-        >
-          <div class="field-grid">
-            <div>
-              <label for="member-status">Status konta</label>
-              <Dropdown
-                id="member-status"
-                label={'Status konta'}
-                value={accessStatus}
-                options={statuses.filter(
-                  (s) =>
-                    s.value !== 'deleted' &&
-                    (administrator || s.value === 'active' || s.value === 'pending')
-                )}
-                disabled={busy || !canSaveAccess}
-                onselect={(value) => (accessStatus = value as Profile['membershipStatus'])}
-              />
-            </div>
-            <div>
-              <label for="member-role">Rola</label>
-              <Dropdown
-                id="member-role"
-                label={'Rola'}
-                value={accessRole}
-                options={roles}
-                disabled={busy || !administrator || !editable}
-                onselect={(value) => (accessRole = value as Profile['role'])}
-              />
-            </div>
-          </div>
-          {#if administrator && editable}<PermissionFlags
-              bind:flags={accessFlags}
-              disabled={busy}
-            />{/if}
-          {#if canSaveAccess}
-            <div class="card-footer">
-              <button class="btn" disabled={busy}
-                ><Save size={15} aria-hidden="true" />Zapisz dostęp</button
-              >
-            </div>
-          {/if}
-        </form>
-      </section>
+        </VStack>
+      </Section>
 
       {#if administrator && editable}
-        <section id="authentication" class="settings-section" aria-labelledby="auth-heading">
-          <header><h2 id="auth-heading">Uwierzytelnianie</h2></header>
-          <form
-            class="card settings-card"
-            onsubmit={(event) => {
-              event.preventDefault();
-              void mutate(`/${member!.id}/email`, 'PATCH', { email: emailDraft.trim() });
-            }}
-          >
-            <div>
-              <label for="m-email">Adres e-mail</label><input
-                id="m-email"
-                type="email"
-                bind:value={emailDraft}
-                required
-                maxlength="254"
-              />
-              <p class="field-help">
-                Zmiana adresu e-mail unieważnia sesje i wysyła link weryfikacyjny na nowy adres.
-              </p>
-            </div>
-            <div class="card-footer">
-              <button
-                class="btn"
-                disabled={busy || emailDraft.trim().toLowerCase() === member.email.toLowerCase()}
-                ><Save size={15} aria-hidden="true" />Zapisz e-mail</button
-              >
-            </div>
-          </form>
-          <div class="card settings-card">
-            <p class="muted">
-              Wyślij link do odzyskania hasła na zapisany adres e-mail. Hasła nie są tutaj
-              wyświetlane.
-            </p>
-            {#if resetConfirmation}
-              <p>Wysłać temu członkowi wiadomość do odzyskania hasła?</p>
-              <div class="row">
-                <button class="btn" disabled={busy} onclick={resetPassword}
-                  >Wyślij link do odzyskania hasła</button
-                ><button
-                  class="btn btn-outline"
-                  disabled={busy}
-                  onclick={() => (resetConfirmation = false)}>Anuluj</button
-                >
-              </div>
-            {:else}
-              <div>
-                <button
-                  class="btn btn-outline"
-                  disabled={busy}
-                  onclick={() => (resetConfirmation = true)}>Resetuj hasło</button
-                >
-              </div>
-            {/if}
-          </div>
-        </section>
+        <Section id="authentication" aria-labelledby="auth-heading">
+          <VStack gap={4}>
+            <Heading level={2} id="auth-heading">Uwierzytelnianie</Heading>
+            <form
+              onsubmit={(event) => {
+                event.preventDefault();
+                void mutate(`/${member!.id}/email`, 'PATCH', { email: emailDraft.trim() });
+              }}
+            >
+              <Card>
+                <VStack gap={4}>
+                  <TextInput
+                    id="m-email"
+                    type="email"
+                    label="Adres e-mail"
+                    value={emailDraft}
+                    onChange={(value) => (emailDraft = value.slice(0, 254))}
+                    isRequired
+                    description="Zmiana adresu e-mail unieważnia sesje i wysyła link weryfikacyjny na nowy adres."
+                  />
+                  <HStack gap={2} justify="end">
+                    <Button
+                      type="submit"
+                      label="Zapisz e-mail"
+                      isDisabled={busy ||
+                        emailDraft.trim().toLowerCase() === member.email.toLowerCase()}
+                    >
+                      {#snippet icon()}<Save size={15} aria-hidden="true" />{/snippet}
+                    </Button>
+                  </HStack>
+                </VStack>
+              </Card>
+            </form>
+            <Card>
+              <VStack gap={3}>
+                <Text type="supporting" color="secondary">
+                  Wyślij link do odzyskania hasła na zapisany adres e-mail. Hasła nie są tutaj
+                  wyświetlane.
+                </Text>
+                {#if resetConfirmation}
+                  <Text>Wysłać temu członkowi wiadomość do odzyskania hasła?</Text>
+                  <HStack gap={2} wrap="wrap">
+                    <Button
+                      label="Wyślij link do odzyskania hasła"
+                      isDisabled={busy}
+                      onclick={resetPassword}
+                    />
+                    <Button
+                      variant="secondary"
+                      label="Anuluj"
+                      isDisabled={busy}
+                      onclick={() => (resetConfirmation = false)}
+                    />
+                  </HStack>
+                {:else}
+                  <HStack>
+                    <Button
+                      variant="secondary"
+                      label="Resetuj hasło"
+                      isDisabled={busy}
+                      onclick={() => (resetConfirmation = true)}
+                    />
+                  </HStack>
+                {/if}
+              </VStack>
+            </Card>
+          </VStack>
+        </Section>
 
-        <section id="danger" class="settings-section" aria-labelledby="danger-heading">
-          <header><h2 id="danger-heading">Usuń konto</h2></header>
-          <div class="card settings-card danger">
-            <p class="muted">Dane osobowe zostaną zanonimizowane. Treści koła pozostaną.</p>
-            {#if confirmDelete}
-              <div role="alert" class="settings-card">
-                <p>Usunąć konto? Dane osobowe zostaną zanonimizowane. Treści pozostaną.</p>
-                <div class="row">
-                  <button
-                    type="button"
-                    class="btn danger-button"
-                    disabled={busy}
-                    onclick={() => mutate(`/${member!.id}`, 'DELETE')}>Potwierdź usunięcie</button
-                  >
-                  <button
-                    type="button"
-                    class="btn btn-outline"
-                    disabled={busy}
-                    onclick={() => (confirmDelete = false)}>Anuluj</button
-                  >
-                </div>
-              </div>
-            {:else}
-              <div>
-                <button
-                  type="button"
-                  class="btn btn-outline danger-button"
-                  disabled={busy}
-                  onclick={() => (confirmDelete = true)}>Usuń konto</button
-                >
-              </div>
-            {/if}
-          </div>
-        </section>
+        <Section id="danger" aria-labelledby="danger-heading">
+          <VStack gap={4}>
+            <Heading level={2} id="danger-heading">Usuń konto</Heading>
+            <Card>
+              <VStack gap={3}>
+                <Text type="supporting" color="secondary">
+                  Dane osobowe zostaną zanonimizowane. Treści koła pozostaną.
+                </Text>
+                {#if confirmDelete}
+                  <VStack gap={3} role="alert">
+                    <Text>Usunąć konto? Dane osobowe zostaną zanonimizowane. Treści pozostaną.</Text
+                    >
+                    <HStack gap={2} wrap="wrap">
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        label="Potwierdź usunięcie"
+                        isDisabled={busy}
+                        onclick={() => mutate(`/${member!.id}`, 'DELETE')}
+                      />
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        label="Anuluj"
+                        isDisabled={busy}
+                        onclick={() => (confirmDelete = false)}
+                      />
+                    </HStack>
+                  </VStack>
+                {:else}
+                  <HStack>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      label="Usuń konto"
+                      isDisabled={busy}
+                      onclick={() => (confirmDelete = true)}
+                    />
+                  </HStack>
+                {/if}
+              </VStack>
+            </Card>
+          </VStack>
+        </Section>
       {/if}
-    </div>
-  </div>
+    </VStack>
+  </VStack>
 {:else if memberId}
-  <a class="btn btn-outline" href="/members">Wszyscy członkowie</a>
+  <HStack>
+    <Button variant="secondary" label="Wszyscy członkowie" href="/members" />
+  </HStack>
 {:else}
   <form
     class="member-filters"
@@ -499,181 +556,123 @@
       filter('search', search);
     }}
   >
-    <div class="search">
-      <label for="member-search" class="sr-only">Szukaj członków</label><Search
-        size={16}
-        aria-hidden="true"
-      /><input
-        id="member-search"
-        bind:value={search}
-        placeholder={'Imię, pseudonim lub email…'}
-      /><button class="btn btn-outline">Szukaj</button>
-    </div>
-    <Dropdown
-      label={'Filtr statusu'}
-      value={page.url.searchParams.get('status') ?? ''}
-      indicator={pendingCount > 0 ? 'Członkostwa oczekujące na zatwierdzenie' : undefined}
-      options={[
-        { value: '', label: 'Aktywni i zawieszeni' },
-        ...statuses.map((status) => ({
-          ...status,
-          indicator:
-            status.value === 'pending' && pendingCount > 0
-              ? 'Członkostwa oczekujące na zatwierdzenie'
-              : undefined
-        }))
-      ]}
-      onselect={(v) => filter('status', v)}
-    />
-    <Dropdown
-      label={'Filtr roli'}
-      value={page.url.searchParams.get('role') ?? ''}
-      options={[{ value: '', label: 'Wszystkie role' }, ...roles]}
-      onselect={(v) => filter('role', v)}
-    />
+    <HStack gap={3} wrap="wrap" vAlign="end">
+      <VStack gap={0} class="member-search">
+        <TextInput
+          id="member-search"
+          label="Szukaj członków"
+          isLabelHidden
+          bind:value={search}
+          placeholder="Imię, pseudonim lub email…"
+        />
+      </VStack>
+      <Button type="submit" variant="secondary" label="Szukaj" />
+      <Selector
+        label="Filtr statusu"
+        value={page.url.searchParams.get('status') ?? ''}
+        options={[
+          { value: '', label: 'Aktywni i zawieszeni' },
+          ...statuses.map((status) => ({
+            ...status,
+            description:
+              status.value === 'pending' && pendingCount > 0
+                ? 'Członkostwa oczekujące na zatwierdzenie'
+                : undefined
+          }))
+        ]}
+        onChange={(value: string) => filter('status', value)}
+      />
+      <Selector
+        label="Filtr roli"
+        value={page.url.searchParams.get('role') ?? ''}
+        options={[{ value: '', label: 'Wszystkie role' }, ...roles]}
+        onChange={(value: string) => filter('role', value)}
+      />
+    </HStack>
   </form>
-  <section class="member-directory" aria-label="Lista członków">
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Osoba</th><th>Email</th><th>Status</th><th>Rola</th></tr></thead><tbody
-          >{#each records as record}<tr
-              ><td
-                ><MemberPreview
-                  member={record}
-                  href={`/members/${encodeURIComponent(record.id)}`}
-                  role={roles.find((role) => role.value === record.role)?.label ?? record.role}
-                /></td
-              ><td>{record.email}</td><td
-                >{statuses.find((s) => s.value === record.membershipStatus)?.label}</td
-              ><td>{roles.find((r) => r.value === record.role)?.label}</td></tr
-            >{/each}</tbody
-        >
-      </table>
-    </div>
-    {#if !records.length}<p>Brak pasujących osób.</p>{/if}
-    <footer class="directory-footer">
-      <p class="muted">
-        {firstResult}–{lastResult} / {total} <span>członków</span>
-      </p>
-      <nav class="pagination" aria-label="Strony listy członków">
-        <button
-          type="button"
-          class="btn btn-outline page-button"
-          disabled={currentPage === 0 || loading}
+  <Section padding={0} aria-label="Lista członków">
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHeaderCell>Osoba</TableHeaderCell>
+          <TableHeaderCell>Email</TableHeaderCell>
+          <TableHeaderCell>Status</TableHeaderCell>
+          <TableHeaderCell>Rola</TableHeaderCell>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {#each records as record (record.id)}
+          <TableRow>
+            <TableCell>
+              <MemberPreview
+                member={record}
+                href={`/members/${encodeURIComponent(record.id)}`}
+                role={roles.find((role) => role.value === record.role)?.label ?? record.role}
+              />
+            </TableCell>
+            <TableCell>{record.email}</TableCell>
+            <TableCell>
+              {statuses.find((s) => s.value === record.membershipStatus)?.label}
+            </TableCell>
+            <TableCell>{roles.find((r) => r.value === record.role)?.label}</TableCell>
+          </TableRow>
+        {/each}
+      </TableBody>
+    </Table>
+    {#if !records.length}
+      <EmptyState title="Brak pasujących osób" description="Zmień wyszukiwanie lub filtry." />
+    {/if}
+    <HStack gap={4} vAlign="center" justify="between" padding={4} wrap="wrap">
+      <Text type="supporting" color="secondary">
+        {firstResult}–{lastResult} / {total} członków
+      </Text>
+      <HStack gap={2} vAlign="center" as="nav" aria-label="Strony listy członków">
+        <Button
+          variant="secondary"
+          size="sm"
+          label="Poprzednia strona"
+          isDisabled={currentPage === 0 || loading}
           onclick={() => paginate(-1)}
-          aria-label="Poprzednia strona"
-          ><ChevronLeft size={16} aria-hidden="true" /><span>Poprzednia</span></button
         >
-        <span class="page-number">{currentPage + 1} / {Math.max(1, Math.ceil(total / 50))}</span>
-        <button
-          type="button"
-          class="btn btn-outline page-button"
-          disabled={(currentPage + 1) * 50 >= total || loading}
+          {#snippet icon()}<ChevronLeft size={16} aria-hidden="true" />{/snippet}
+        </Button>
+        <Text type="supporting" color="secondary">
+          {currentPage + 1} / {Math.max(1, Math.ceil(total / 50))}
+        </Text>
+        <Button
+          variant="secondary"
+          size="sm"
+          label="Następna strona"
+          isDisabled={(currentPage + 1) * 50 >= total || loading}
           onclick={() => paginate(1)}
-          aria-label="Następna strona"
-          ><span>Następna</span><ChevronRight size={16} aria-hidden="true" /></button
         >
-      </nav>
-    </footer>
-  </section>
+          {#snippet endContent()}<ChevronRight size={16} aria-hidden="true" />{/snippet}
+        </Button>
+      </HStack>
+    </HStack>
+  </Section>
 {/if}
 
 <style>
-  .member-directory {
-    border: 1px solid var(--line);
-    border-radius: var(--radius-xl);
-    background: var(--surface);
+  :global(.settings-layout) {
+    display: grid !important;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: var(--spacing-8);
+    align-items: start;
   }
-  .member-directory table {
-    width: max-content;
-    min-width: 100%;
-  }
-  .member-directory th,
-  .member-directory td {
-    white-space: nowrap;
-  }
-  .member-directory :global(.identity-text) {
-    overflow-wrap: normal;
-  }
-  .member-directory :global(td) {
-    vertical-align: middle;
-  }
-  .directory-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 16px 20px;
-    border-top: 1px solid var(--line);
-  }
-  .directory-footer p {
-    margin: 0;
-    font-size: 12px;
-  }
-  .pagination {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .page-number {
-    min-width: 44px;
-    text-align: center;
-    font-size: 12px;
-    color: var(--muted);
-  }
-  .page-button {
-    min-height: 36px;
-    padding: 8px 12px;
-    font-size: 12px;
-    gap: 6px;
-  }
-  @media (max-width: 540px) {
-    .directory-footer {
-      padding: 14px 12px;
-      gap: 8px;
-    }
-    .page-button span {
-      display: none;
-    }
-    .pagination {
-      gap: 8px;
-    }
-    .directory-footer p span {
-      display: none;
-    }
-  }
-  .member-avatar {
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 8px;
-  }
-  .member-filters {
-    display: grid;
-    grid-template-columns: minmax(250px, 2fr) 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-  .search {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .search input {
-    margin: 0;
+  :global(.settings-main) {
     min-width: 0;
   }
-  .search button {
-    flex-shrink: 0;
+  :global(.member-filters) {
+    margin-bottom: var(--spacing-5);
   }
-  a {
-    color: var(--ink);
+  :global(.member-search) {
+    flex: 1 1 260px;
+    min-width: 0;
   }
   @media (max-width: 900px) {
-    .member-filters {
-      grid-template-columns: 1fr;
+    :global(.settings-layout) {
+      grid-template-columns: minmax(0, 1fr) !important;
     }
-  }
-  @media (max-width: 600px) {
   }
 </style>

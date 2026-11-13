@@ -3,9 +3,22 @@
   import { formatDate } from 'shared/format';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
-  import { slider } from '@ksi-core/ui/platform/slider';
   import { newThreadPath, threadPath, type Workspace } from '$lib/navigation';
   import type { Thread } from '$lib/types';
+  import {
+    Button,
+    EmptyState,
+    Heading,
+    HStack,
+    Icon,
+    List,
+    ListItem,
+    SegmentedControl,
+    SegmentedControlItem,
+    Text,
+    Token,
+    VStack
+  } from '@astryx-sv/core';
   import { Plus, Archive, MessagesSquare } from '@lucide/svelte';
 
   let {
@@ -27,56 +40,62 @@
   }
 </script>
 
-<div class="workspace-header">
-  <div>
-    <h1>Forum</h1>
-  </div>
-  <div class="row">
-    <a class="btn" href={newThreadPath(workspace, projectSlug)}
-      ><Plus size={16} aria-hidden="true" />Nowy wątek</a
-    >
-    <div class="segmented-control" role="group" aria-label={'Widok forum'} use:slider>
-      <button
-        type="button"
-        class:active={!archived}
-        aria-pressed={!archived}
-        onclick={() => setArchived(false)}>Aktywne</button
+<VStack gap={4}>
+  <HStack class="workspace-header" hAlign="between" vAlign="start" wrap="wrap" gap={4}>
+    <Heading level={1}>Forum</Heading>
+    <HStack gap={2} vAlign="center" wrap="wrap">
+      <Button href={newThreadPath(workspace, projectSlug)} variant="primary" label="Nowy wątek">
+        {#snippet icon()}<Plus size={16} aria-hidden="true" />{/snippet}
+      </Button>
+      <SegmentedControl
+        value={archived ? 'archived' : 'active'}
+        onChange={(value) => setArchived(value === 'archived')}
+        label={'Widok forum'}
+        size="sm"
       >
-      <button
-        type="button"
-        class:active={archived}
-        aria-pressed={archived}
-        onclick={() => setArchived(true)}><Archive size={14} aria-hidden="true" />Archiwum</button
-      >
-    </div>
-  </div>
-</div>
-{#if threads.length}
-  <ul class="list-group">
-    {#each threads as thread (thread.id)}
-      <li>
-        <a
-          class="list-row"
+        <SegmentedControlItem value="active" label="Aktywne" />
+        <SegmentedControlItem value="archived" label="Archiwum">
+          {#snippet icon()}<Archive size={14} aria-hidden="true" />{/snippet}
+        </SegmentedControlItem>
+      </SegmentedControl>
+    </HStack>
+  </HStack>
+
+  {#if threads.length}
+    <List hasDividers edge="outset">
+      {#each threads as thread (thread.id)}
+        <ListItem
           href={threadPath(workspace, projectSlug, thread.referenceNumber ?? thread.id)}
+          label={thread.title}
         >
-          <MessagesSquare size={15} aria-hidden="true" />
-          <span class="list-row-title">{thread.title}</span>
-          {#if thread.referenceNumber}<span class="list-row-ref">#{thread.referenceNumber}</span
-            >{/if}
-          <span class="tag"
-            >{thread.visibility === 'leaders'
-              ? 'Liderzy'
-              : thread.visibility === 'members'
-                ? 'Członkowie projektu'
-                : 'Członkowie koła'}</span
-          >
-          {#if thread.createdAt}<time class="list-row-meta" datetime={thread.createdAt}
-              >{formatDate(thread.createdAt, language)}</time
-            >{/if}
-        </a>
-      </li>
-    {/each}
-  </ul>
-{:else}
-  <p class="list-empty">Brak wątków.</p>
-{/if}
+          {#snippet startContent()}
+            <Icon icon={MessagesSquare} size="sm" color="secondary" />
+          {/snippet}
+          {#snippet endContent()}
+            <HStack gap={2} vAlign="center" wrap="wrap">
+              {#if thread.referenceNumber}
+                <Text type="code">#{thread.referenceNumber}</Text>
+              {/if}
+              <Token
+                label={thread.visibility === 'leaders'
+                  ? 'Liderzy'
+                  : thread.visibility === 'members'
+                    ? 'Członkowie projektu'
+                    : 'Członkowie koła'}
+              />
+              {#if thread.createdAt}
+                <Text type="supporting">
+                  <time datetime={thread.createdAt}>{formatDate(thread.createdAt, language)}</time>
+                </Text>
+              {/if}
+            </HStack>
+          {/snippet}
+        </ListItem>
+      {/each}
+    </List>
+  {:else}
+    <EmptyState title="Brak wątków" headingLevel={2}>
+      {#snippet icon()}<Icon icon={MessagesSquare} size="lg" color="secondary" />{/snippet}
+    </EmptyState>
+  {/if}
+</VStack>

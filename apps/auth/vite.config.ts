@@ -1,4 +1,5 @@
 import { execSync } from 'node:child_process';
+import { astryx } from '@astryx-sv/core/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import { wuchale } from 'wuchale/vite';
@@ -13,7 +14,7 @@ if (!commit) {
 }
 export default defineConfig({
   envDir: '../..',
-  plugins: [wuchale(), sveltekit()],
+  plugins: [astryx({ rootDir: '../..' }), wuchale(), sveltekit()],
   define: {
     'import.meta.env.PUBLIC_COMMIT_HASH': JSON.stringify(commit),
     'import.meta.env.PUBLIC_APP_VERSION': JSON.stringify(manifest.version)

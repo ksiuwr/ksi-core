@@ -18,6 +18,8 @@
   import { labelColorStyle } from 'shared/label-colors';
   import type { AssignmentMember } from './Assignees.svelte';
   import MemberPreview from '@ksi-core/ui/platform/MemberPreview.svelte';
+  import { Center, HStack, Link, Text } from '@astryx-sv/core';
+
   let {
     event,
     statuses,
@@ -80,19 +82,26 @@
     formatDateTime(iso, language, { dateStyle: 'medium', timeStyle: 'short' });
 </script>
 
-<div class="task-activity" id={`activity-${event.id}`}>
-  <span class="activity-marker" class:restored={kind === 'restored'}
-    ><Icon size={15} aria-hidden="true" /></span
+<HStack gap={3} align="start" class="task-activity" id={`activity-${event.id}`}>
+  <Center
+    width={30}
+    height={30}
+    class={kind === 'restored' ? 'activity-marker restored' : 'activity-marker'}
   >
-  <div class="activity-text">
-    {#if event.authorId}<a
-        class="activity-author"
+    <Icon size={15} aria-hidden="true" />
+  </Center>
+  <Text type="body" color="secondary" as="p" class="activity-text">
+    {#if event.authorId}<Link
         href={`/members/${encodeURIComponent(event.authorId)}`}
-        >{event.authorName || 'Członek stowarzyszenia'}</a
-      >{:else}<strong class="activity-author">{event.authorName || 'Systemowy'}</strong>{/if}
+        color="primary"
+        weight="semibold">{event.authorName || 'Członek stowarzyszenia'}</Link
+      >{:else}<Text as="span" weight="semibold" color="primary"
+        >{event.authorName || 'Systemowy'}</Text
+      >{/if}
     {' '}
     {#each summaries as summary, index}
-      {#if index > 0}{' '}<span class="activity-separator">·</span>{' '}{/if}
+      {#if index > 0}{' '}<span class="activity-separator">·</span>
+      {/if}
       {#if summary.kind === 'created'}utworzył(a) to zadanie
       {:else if summary.kind === 'archived'}zarchiwizował to zadanie
       {:else if summary.kind === 'deleted'}usunął(a) to zadanie
@@ -101,7 +110,7 @@
       {:else if summary.kind === 'deadline'}
         {#if summary.before && summary.after}
           zmienił(a) termin z
-          <del class="title-value">{deadlineText(summary.before)}</del>
+          <Text as="span" hasStrikethrough color="secondary">{deadlineText(summary.before)}</Text>
           {' '}na
           <time class="title-value" datetime={summary.after}>{deadlineText(summary.after)}</time>
         {:else if summary.after}
@@ -113,16 +122,16 @@
       {:else if summary.kind === 'renamed'}
         zmienił(a) tytuł
         {#if summary.before}{' '}z
-          <del class="title-value">{summary.before}</del>{/if}
-        {' '}na <span class="title-value">{summary.after}</span>
+          <Text as="span" hasStrikethrough color="secondary">{summary.before}</Text>{/if}
+        {' '}na <Text as="span" weight="medium" color="primary">{summary.after}</Text>
       {:else if summary.kind === 'moved'}
         przeniósł(a) zadanie
         {#if summary.before}{' '}z
-          <span class="status-name">{statusName(summary.before)}</span>{/if}
-        {' '}do <span class="status-name">{statusName(summary.after)}</span>
+          <Text as="span" weight="medium" color="primary">{statusName(summary.before)}</Text>{/if}
+        {' '}do <Text as="span" weight="medium" color="primary">{statusName(summary.after)}</Text>
       {:else if summary.kind === 'label-renamed'}
         zmienił(a) nazwę etykiety z
-        <del class="title-value">{summary.before}</del>
+        <Text as="span" hasStrikethrough color="secondary">{summary.before}</Text>
         na
         <span class="activity-label" style={labelColorStyle(labelInfo(summary.after)?.color)}
           >{summary.after}</span
@@ -180,99 +189,62 @@
     {' '}<time datetime={event.createdAt} title={absoluteTime} aria-label={absoluteTime}
       >{relativeTime}</time
     >
-  </div>
-</div>
+  </Text>
+</HStack>
 
 <style>
-  .task-activity {
-    position: relative;
-    padding: 13px 0 13px 44px;
-    color: var(--muted);
-    font-size: 13px;
-    line-height: 1.8;
+  :global(.task-activity) {
     min-height: 50px;
   }
-  .activity-marker {
-    position: absolute;
-    top: 10px;
-    left: 0;
-    width: 30px;
-    height: 30px;
-    border: 3px solid var(--surface);
-    border-radius: 50%;
-    background: var(--surface-muted);
-    display: grid;
-    place-items: center;
-    color: var(--muted);
+  :global(.activity-marker) {
+    flex-shrink: 0;
+    border-radius: var(--radius-full);
+    background: var(--color-background-muted);
+    color: var(--color-text-secondary);
   }
-  .activity-marker.restored {
-    color: var(--diff-added, #328152);
+  :global(.activity-marker.restored) {
+    color: var(--color-success);
   }
-  .activity-text {
-    margin: 0;
+  :global(.activity-text) {
     overflow-wrap: anywhere;
-  }
-  .activity-author {
-    color: var(--ink);
-    font-weight: 600;
-    text-decoration: none;
-    margin-right: 0.25em;
-  }
-  a.activity-author:hover {
-    text-decoration: underline;
-  }
-  .title-value,
-  .status-name {
-    color: var(--ink);
-    font-weight: 500;
-  }
-  del.title-value {
-    color: var(--muted);
-    font-weight: 400;
   }
   .activity-label {
     display: inline;
     padding: 1px 7px;
-    border-radius: 12px;
-    background: var(--label-bg, color-mix(in srgb, var(--label-color) 14%, var(--surface)));
     border: 1px solid color-mix(in srgb, var(--label-color) 45%, transparent);
-    color: var(--label-fg, var(--ink));
-    font-weight: 500;
-    font-size: 12px;
+    border-radius: var(--radius-full);
+    background: var(--label-bg);
+    color: var(--label-fg);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--text-supporting-size);
     box-decoration-break: clone;
     -webkit-box-decoration-break: clone;
   }
   time {
     margin-left: 0.25em;
-    color: var(--muted);
-    text-decoration: underline;
-    text-decoration-style: dotted;
+    color: var(--color-text-secondary);
+    text-decoration: underline dotted;
     text-underline-offset: 3px;
     white-space: nowrap;
-    font-size: 12px;
+    font-size: var(--text-supporting-size);
+  }
+  .title-value {
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-medium);
   }
   .color-value {
     white-space: nowrap;
-    font-size: 12px;
+    font-size: var(--text-supporting-size);
   }
   .color-swatch {
     display: inline-block;
     width: 9px;
     height: 9px;
+    border: 1px solid var(--color-border);
     border-radius: 50%;
-    border: 1px solid var(--line);
     margin-right: 4px;
   }
   .activity-separator {
-    color: var(--muted);
-  }
-  @media (max-width: 600px) {
-    .task-activity {
-      padding-left: 36px;
-      font-size: 12px;
-    }
-    .activity-marker {
-      left: -3px;
-    }
+    color: var(--color-text-secondary);
   }
 </style>

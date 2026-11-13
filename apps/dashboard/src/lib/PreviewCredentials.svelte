@@ -2,6 +2,23 @@
   import { onMount } from 'svelte';
   import { preferences } from '$lib/preferences.svelte';
   import { formatDateTime } from 'shared/format';
+  import {
+    Banner,
+    Button,
+    Card,
+    Code,
+    EmptyState,
+    Heading,
+    HStack,
+    Link,
+    List,
+    ListItem,
+    Spinner,
+    Text,
+    VStack
+  } from '@astryx-sv/core';
+  import { KeyRound } from '@lucide/svelte';
+
   let { projectSlug }: { projectSlug: string } = $props();
   let credentials = $state<
     {
@@ -51,59 +68,60 @@
   });
 </script>
 
-<div class="workspace-header">
-  <h1>Dane logowania podglądu</h1>
-  <button class="btn btn-outline" onclick={() => void load()} disabled={loading}>Odśwież</button>
-</div>
-{#if loading}<p class="muted">Wczytywanie danych logowania…</p>
-{:else if error}<p class="error" role="alert">{error}</p>
-{:else if !credentials.length}<section class="card">
-    <h2>Brak danych logowania dla podglądów</h2>
-    <p class="muted">Dane logowania pojawią się tutaj po zakończeniu wdrażania podglądu.</p>
-  </section>
-{:else}{#each credentials as deployment (deployment.previewId)}<section
-      class="card credential-card"
-    >
-      <h2>{deployment.branch}</h2>
-      <p>
-        <a href={deployment.previewUrl} target="_blank" rel="noreferrer">{deployment.previewUrl}</a>
-      </p>
-      <p class="muted">
-        Commit <code>{deployment.commit.slice(0, 12)}</code> · Zaktualizowano
-        {formatDateTime(deployment.updatedAt, preferences.language)}
-      </p>
-      <div class="account-list">
-        {#each deployment.accounts as account}<article class="account">
-            <strong>{account.email}</strong><code>{account.password}</code>
-          </article>{/each}
-      </div>
-      <p class="muted">
-        To wspólne konta testowe dla tego podglądu. Nie udostępniaj haseł poza grupą projektu.
-      </p>
-    </section>{/each}{/if}
+<HStack gap={4} vAlign="center" justify="between" wrap="wrap">
+  <Heading level={1}>Dane logowania podglądu</Heading>
+  <Button
+    variant="secondary"
+    label="Odśwież"
+    isDisabled={loading}
+    isLoading={loading}
+    onclick={() => void load()}
+  />
+</HStack>
 
-<style>
-  .credential-card {
-    display: grid;
-    gap: 12px;
-  }
-  .credential-card h2,
-  .credential-card p {
-    margin: 0;
-  }
-  .account-list {
-    display: grid;
-    gap: 10px;
-  }
-  .account {
-    display: grid;
-    gap: 6px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px;
-  }
-  code {
-    overflow-wrap: anywhere;
-    user-select: all;
-  }
-</style>
+{#if loading}
+  <HStack gap={2} vAlign="center">
+    <Spinner size="sm" />
+    <Text color="secondary">Wczytywanie danych logowania…</Text>
+  </HStack>
+{:else if error}
+  <Banner status="error" title={error} role="alert" />
+{:else if !credentials.length}
+  <Card>
+    <EmptyState
+      title="Brak danych logowania dla podglądów"
+      description="Dane logowania pojawią się tutaj po zakończeniu wdrażania podglądu."
+    >
+      {#snippet icon()}<KeyRound size={28} aria-hidden="true" />{/snippet}
+    </EmptyState>
+  </Card>
+{:else}
+  <VStack gap={4}>
+    {#each credentials as deployment (deployment.previewId)}
+      <Card>
+        <VStack gap={3}>
+          <Heading level={2}>{deployment.branch}</Heading>
+          <Text>
+            <Link href={deployment.previewUrl} isExternalLink>{deployment.previewUrl}</Link>
+          </Text>
+          <Text type="supporting" color="secondary">
+            Commit <Code>{deployment.commit.slice(0, 12)}</Code> · Zaktualizowano
+            {formatDateTime(deployment.updatedAt, preferences.language)}
+          </Text>
+          <List hasDividers>
+            {#each deployment.accounts as account (account.email)}
+              <ListItem label={account.email}>
+                {#snippet description()}
+                  <Text type="code">{account.password}</Text>
+                {/snippet}
+              </ListItem>
+            {/each}
+          </List>
+          <Text type="supporting" color="secondary">
+            To wspólne konta testowe dla tego podglądu. Nie udostępniaj haseł poza grupą projektu.
+          </Text>
+        </VStack>
+      </Card>
+    {/each}
+  </VStack>
+{/if}

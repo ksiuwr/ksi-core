@@ -1,11 +1,20 @@
-@import 'tailwindcss';
+@layer reset, theme, base, legacy, astryx-base, astryx-theme, product, utilities;
+
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/preflight.css' layer(base);
+@import '@astryx-sv/core/base.css';
+@import '@astryx-sv/core/astryx.css';
+@import '@astryx-sv/theme-neutral/theme.css';
 /*
- * The same platform layers as apps/auth and apps/dashboard. They are placed in
- * the base layer so Tailwind utilities can still override them.
+ * The shared KSI platform styles now sit below Astryx in the cascade. Surfaces
+ * that are still being migrated keep working, while every Astryx component
+ * wins over the legacy element selectors.
  */
-@import '@ksi-core/ui/platform.css' layer(base);
-@import '@ksi-core/ui/platform-theme.css' layer(base);
-@import '@ksi-core/ui/platform-kit.css' layer(base);
+@import '@ksi-core/ui/platform.css' layer(legacy);
+@import '@ksi-core/ui/platform-theme.css' layer(legacy);
+@import '@ksi-core/ui/platform-kit.css' layer(legacy);
+@import '@ksi-core/ui/astryx-bridge.css' layer(product);
+@import 'tailwindcss/utilities.css' layer(utilities);
 
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 

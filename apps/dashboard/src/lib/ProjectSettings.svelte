@@ -12,6 +12,22 @@
   } from 'shared/content-locales';
   import { Save, ArrowUpRight, Plus, Trash2, Info, Users, Link2 } from '@lucide/svelte';
   import Skeleton from './Skeleton.svelte';
+  import {
+    Banner,
+    Button,
+    Card,
+    CheckboxInput,
+    Grid,
+    Heading,
+    HStack,
+    Link,
+    List,
+    ListItem,
+    Section,
+    Text,
+    TextInput,
+    VStack
+  } from '@astryx-sv/core';
 
   let {
     project,
@@ -70,10 +86,11 @@
     return contentLocale === primaryContentLocale ? primary : (translationDraft[key] ?? '');
   }
   function setLocalized(key: LocalizedProjectField, value: string) {
-    if (contentLocale !== primaryContentLocale) translationDraft[key] = value;
-    else if (key === 'name') name = value;
-    else if (key === 'description') description = value;
-    else tags = value;
+    const next = key === 'name' ? value.slice(0, 200) : value;
+    if (contentLocale !== primaryContentLocale) translationDraft[key] = next;
+    else if (key === 'name') name = next;
+    else if (key === 'description') description = next;
+    else tags = next;
   }
 
   async function api(path: string, method = 'GET', body?: unknown) {
@@ -158,24 +175,33 @@
   let removing = $state<string | null>(null);
 </script>
 
-<div class="workspace-header">
-  <div>
-    <h1>Ustawienia projektu</h1>
-    <p>{project.name}</p>
-  </div>
-  <a class="btn btn-outline" href={`${websiteOrigin}/projects/${encodeURIComponent(project.slug)}`}
-    ><ArrowUpRight size={15} aria-hidden="true" />Zobacz publiczny projekt</a
+{#snippet plusIcon()}<Plus size={15} aria-hidden="true" />{/snippet}
+
+<HStack gap={4} vAlign="start" justify="between" wrap="wrap">
+  <VStack gap={1}>
+    <Heading level={1}>Ustawienia projektu</Heading>
+    <Text color="secondary">{project.name}</Text>
+  </VStack>
+  <Button
+    variant="secondary"
+    label="Zobacz publiczny projekt"
+    href={`${websiteOrigin}/projects/${encodeURIComponent(project.slug)}`}
+    target="_blank"
+    rel="noopener noreferrer"
   >
-</div>
-{#if error}<p class="error" role="alert">{error}</p>{/if}{#if notice}<p role="status">
-    {notice}
-  </p>{/if}
-{#if !canEdit && !canManageMembers}<p role="alert">
-    Nie masz uprawnień do zarządzania tym projektem.
-  </p>{:else}
-  <div class="settings-layout">
+    {#snippet icon()}<ArrowUpRight size={15} aria-hidden="true" />{/snippet}
+  </Button>
+</HStack>
+
+{#if error}<Banner status="error" title={error} role="alert" />{/if}
+{#if notice}<Banner status="success" title={notice} role="status" />{/if}
+
+{#if !canEdit && !canManageMembers}
+  <Banner status="warning" title="Nie masz uprawnień do zarządzania tym projektem." role="alert" />
+{:else}
+  <VStack gap={6} class="settings-layout">
     <SettingsNav
-      label={'Ustawienia projektu'}
+      label="Ustawienia projektu"
       items={[
         ...(canEdit ? [{ id: 'details', label: 'Dane projektu', icon: Info }] : []),
         ...(canManageMembers ? [{ id: 'members', label: 'Członkowie', icon: Users }] : []),
@@ -183,344 +209,379 @@
       ]}
     />
 
-    <div class="settings-main">
+    <VStack gap={6} class="settings-main">
       {#if canEdit}
-        <section id="details" class="settings-section" aria-labelledby="details-heading">
-          <header><h2 id="details-heading">Dane projektu</h2></header>
-          <form
-            class="card settings-card"
-            onsubmit={(e) => {
-              e.preventDefault();
-              if (contentLocale !== primaryContentLocale) return;
-              void action(() =>
-                api('', 'PATCH', {
-                  version: project.version,
-                  name,
-                  description,
-                  locked,
-                  tags: tags
-                    .split(',')
-                    .map((t) => t.trim())
-                    .filter(Boolean),
-                  fields
-                })
-              );
-            }}
-          >
-            <ContentTranslations
-              kind="project"
-              id={project.id}
-              version={project.version}
-              translations={project.translations}
-              baseline={{
-                name,
-                description,
-                tags: tags
-                  .split(',')
-                  .map((tag) => tag.trim())
-                  .filter(Boolean)
+        <Section id="details" aria-labelledby="details-heading">
+          <VStack gap={4}>
+            <Heading level={2} id="details-heading">Dane projektu</Heading>
+            <form
+              onsubmit={(e) => {
+                e.preventDefault();
+                if (contentLocale !== primaryContentLocale) return;
+                void action(() =>
+                  api('', 'PATCH', {
+                    version: project.version,
+                    name,
+                    description,
+                    locked,
+                    tags: tags
+                      .split(',')
+                      .map((t) => t.trim())
+                      .filter(Boolean),
+                    fields
+                  })
+                );
               }}
-              bind:selected={contentLocale}
-              bind:draft={translationDraft}
-              onsaved={onrefresh}
-            />
-            <div>
-              <label for="project-name">Nazwa</label>
-              <input
-                id="project-name"
-                bind:value={() => localized('name'), (value) => setLocalized('name', value)}
-                required={contentLocale === primaryContentLocale}
-                maxlength="200"
-              />
-            </div>
-            <div>
-              <label for="project-description">Opis</label>
-              <Editor
-                bind:value={
-                  () => localized('description'), (value) => setLocalized('description', value)
-                }
-                rows={6}
-              />
-            </div>
-            <div>
-              <label for="project-tags">Tagi (oddzielone przecinkami)</label>
-              <input
-                id="project-tags"
-                bind:value={() => localized('tags'), (value) => setLocalized('tags', value)}
-              />
-            </div>
-            {#if contentLocale === primaryContentLocale}<fieldset>
-                <legend>Obszary</legend>
-                <div class="check-row">
-                  {#each Object.entries(projectFields) as [field, label]}<label class="check"
-                      ><input type="checkbox" value={field} bind:group={fields} />{label}</label
-                    >{/each}
-                </div>
-              </fieldset>
-              <label class="check"
-                ><input type="checkbox" bind:checked={locked} />Dołączenie wymaga akceptacji</label
-              >
-              <div class="card-footer">
-                <button class="btn" disabled={busy || !fields.length}
-                  ><Save size={15} aria-hidden="true" />Zapisz projekt</button
-                >
-              </div>
-            {/if}
-          </form>
-        </section>
+            >
+              <Card>
+                <VStack gap={4}>
+                  <ContentTranslations
+                    kind="project"
+                    id={project.id}
+                    version={project.version}
+                    translations={project.translations}
+                    baseline={{
+                      name,
+                      description,
+                      tags: tags
+                        .split(',')
+                        .map((tag) => tag.trim())
+                        .filter(Boolean)
+                    }}
+                    bind:selected={contentLocale}
+                    bind:draft={translationDraft}
+                    onsaved={onrefresh}
+                  />
+                  <TextInput
+                    id="project-name"
+                    label="Nazwa"
+                    value={localized('name')}
+                    onChange={(value) => setLocalized('name', value)}
+                    isRequired={contentLocale === primaryContentLocale}
+                  />
+                  <VStack gap={1}>
+                    <Text type="label" weight="medium">Opis</Text>
+                    <Editor
+                      bind:value={
+                        () => localized('description'),
+                        (value) => setLocalized('description', value)
+                      }
+                      rows={6}
+                    />
+                  </VStack>
+                  <TextInput
+                    id="project-tags"
+                    label="Tagi (oddzielone przecinkami)"
+                    value={localized('tags')}
+                    onChange={(value) => setLocalized('tags', value)}
+                  />
+                  {#if contentLocale === primaryContentLocale}
+                    <fieldset>
+                      <legend>Obszary</legend>
+                      <HStack gap={3} wrap="wrap">
+                        {#each Object.entries(projectFields) as [field, label] (field)}
+                          <CheckboxInput
+                            {label}
+                            value={fields.includes(field)}
+                            onChange={() =>
+                              (fields = fields.includes(field)
+                                ? fields.filter((value) => value !== field)
+                                : [...fields, field])}
+                          />
+                        {/each}
+                      </HStack>
+                    </fieldset>
+                    <CheckboxInput
+                      label="Dołączenie wymaga akceptacji"
+                      value={locked}
+                      onChange={(checked) => (locked = checked)}
+                    />
+                    <HStack gap={2} justify="end">
+                      <Button
+                        type="submit"
+                        label="Zapisz projekt"
+                        isDisabled={busy || !fields.length}
+                      >
+                        {#snippet icon()}<Save size={15} aria-hidden="true" />{/snippet}
+                      </Button>
+                    </HStack>
+                  {/if}
+                </VStack>
+              </Card>
+            </form>
+          </VStack>
+        </Section>
       {/if}
 
       {#if canManageMembers}
-        <section id="members" class="settings-section" aria-labelledby="members-heading">
-          <header><h2 id="members-heading">Członkowie</h2></header>
-          {#if loading}<Skeleton label="Ładowanie członków projektu" />{:else}
-            <form
-              class="card settings-card"
-              onsubmit={(e) => {
-                e.preventDefault();
-                void action(() => api('/leaders', 'PUT', { userIds: leaders }));
-              }}
-            >
-              <div>
-                <h3>Liderzy projektu</h3>
-                <p class="muted">Wybierz co najmniej jednego lidera spośród członków projektu.</p>
-              </div>
-              <div class="check-list">
-                {#each members as member}<label class="check"
-                    ><input
-                      type="checkbox"
-                      value={member.id}
-                      bind:group={leaders}
-                    />{member.firstName}
-                    {member.lastName}</label
-                  >{/each}
-              </div>
-              <div class="card-footer">
-                <button class="btn btn-outline" disabled={busy || !leaders.length}
-                  >Zapisz liderów</button
-                >
-              </div>
-            </form>
+        <Section id="members" aria-labelledby="members-heading">
+          <VStack gap={4}>
+            <Heading level={2} id="members-heading">Członkowie</Heading>
+            {#if loading}
+              <Skeleton label="Ładowanie członków projektu" />
+            {:else}
+              <form
+                onsubmit={(e) => {
+                  e.preventDefault();
+                  void action(() => api('/leaders', 'PUT', { userIds: leaders }));
+                }}
+              >
+                <Card>
+                  <VStack gap={4}>
+                    <VStack gap={1}>
+                      <Heading level={3}>Liderzy projektu</Heading>
+                      <Text type="supporting" color="secondary">
+                        Wybierz co najmniej jednego lidera spośród członków projektu.
+                      </Text>
+                    </VStack>
+                    <VStack gap={2}>
+                      {#each members as member (member.id)}
+                        <CheckboxInput
+                          label={`${member.firstName} ${member.lastName}`}
+                          value={leaders.includes(member.id)}
+                          onChange={() =>
+                            (leaders = leaders.includes(member.id)
+                              ? leaders.filter((value) => value !== member.id)
+                              : [...leaders, member.id])}
+                        />
+                      {/each}
+                    </VStack>
+                    <HStack gap={2} justify="end">
+                      <Button
+                        type="submit"
+                        variant="secondary"
+                        label="Zapisz liderów"
+                        isDisabled={busy || !leaders.length}
+                      />
+                    </HStack>
+                  </VStack>
+                </Card>
+              </form>
 
-            <section class="card settings-card">
-              <h3>Prośby o dołączenie</h3>
-              {#each requests as request}<div class="request">
-                  <a href={`/people/${encodeURIComponent(request.request.userId)}`}
-                    >{request.firstName} {request.lastName}</a
-                  >
-                  <div class="row">
-                    <button
-                      class="btn btn-outline btn-sm"
-                      disabled={busy}
-                      onclick={() =>
-                        action(() =>
-                          api(`/join-requests/${request.request.id}`, 'POST', { accept: true })
-                        )}>Akceptuj</button
-                    ><button
-                      class="btn btn-outline btn-sm"
-                      disabled={busy}
-                      onclick={() =>
-                        action(() =>
-                          api(`/join-requests/${request.request.id}`, 'POST', { accept: false })
-                        )}>Odrzuć</button
-                    >
-                  </div>
-                </div>{:else}<p class="muted">Brak oczekujących próśb.</p>{/each}
-            </section>
+              <Card>
+                <VStack gap={3}>
+                  <Heading level={3}>Prośby o dołączenie</Heading>
+                  {#if requests.length}
+                    <List hasDividers>
+                      {#each requests as request (request.request.id)}
+                        <ListItem>
+                          {#snippet label()}
+                            <Link href={`/people/${encodeURIComponent(request.request.userId)}`}>
+                              {request.firstName}
+                              {request.lastName}
+                            </Link>
+                          {/snippet}
+                          {#snippet endContent()}
+                            <HStack gap={2}>
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                label="Akceptuj"
+                                isDisabled={busy}
+                                onclick={() =>
+                                  action(() =>
+                                    api(`/join-requests/${request.request.id}`, 'POST', {
+                                      accept: true
+                                    })
+                                  )}
+                              />
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                label="Odrzuć"
+                                isDisabled={busy}
+                                onclick={() =>
+                                  action(() =>
+                                    api(`/join-requests/${request.request.id}`, 'POST', {
+                                      accept: false
+                                    })
+                                  )}
+                              />
+                            </HStack>
+                          {/snippet}
+                        </ListItem>
+                      {/each}
+                    </List>
+                  {:else}
+                    <Text type="supporting" color="secondary">Brak oczekujących próśb.</Text>
+                  {/if}
+                </VStack>
+              </Card>
 
-            <section class="card settings-card">
-              <h3>Członkostwo</h3>
-              <div class="request-list">
-                {#each members as member}<div class="request">
-                    <a href={`/people/${encodeURIComponent(member.id)}`}
-                      >{member.firstName} {member.lastName}</a
-                    >{#if removing === member.id}<div class="row">
-                        <button
-                          class="btn btn-outline btn-sm danger-button"
-                          disabled={busy}
-                          onclick={() =>
-                            action(async () => {
-                              await api(`/members/${member.id}`, 'DELETE');
-                              removing = null;
-                            })}>Tak, usuń</button
-                        ><button class="btn btn-outline btn-sm" onclick={() => (removing = null)}
-                          >Anuluj</button
-                        >
-                      </div>{:else}<button
-                        class="btn btn-outline btn-sm"
-                        disabled={busy}
-                        onclick={() => (removing = member.id)}>Usuń z projektu</button
-                      >{/if}
-                  </div>{/each}
-              </div>
-            </section>
-          {/if}
-        </section>
+              <Card>
+                <VStack gap={3}>
+                  <Heading level={3}>Członkostwo</Heading>
+                  <List hasDividers>
+                    {#each members as member (member.id)}
+                      <ListItem>
+                        {#snippet label()}
+                          <Link href={`/people/${encodeURIComponent(member.id)}`}>
+                            {member.firstName}
+                            {member.lastName}
+                          </Link>
+                        {/snippet}
+                        {#snippet endContent()}
+                          {#if removing === member.id}
+                            <HStack gap={2}>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                label="Tak, usuń"
+                                isDisabled={busy}
+                                onclick={() =>
+                                  action(async () => {
+                                    await api(`/members/${member.id}`, 'DELETE');
+                                    removing = null;
+                                  })}
+                              />
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                label="Anuluj"
+                                onclick={() => (removing = null)}
+                              />
+                            </HStack>
+                          {:else}
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              label="Usuń z projektu"
+                              isDisabled={busy}
+                              onclick={() => (removing = member.id)}
+                            />
+                          {/if}
+                        {/snippet}
+                      </ListItem>
+                    {/each}
+                  </List>
+                </VStack>
+              </Card>
+            {/if}
+          </VStack>
+        </Section>
       {/if}
 
       {#if canEdit}
-        <section id="links" class="settings-section" aria-labelledby="links-heading">
-          <header>
-            <h2 id="links-heading">Linki publiczne</h2>
-            <p>Etykiety polskie są wymagane. Etykiety w innych językach są opcjonalne.</p>
-          </header>
-          <form
-            class="card settings-card"
-            onsubmit={(e) => {
-              e.preventDefault();
-              void action(() =>
-                api('/links', 'PUT', {
-                  links: links.map(({ label, url, translations }) => ({
-                    label,
-                    url,
-                    translations
-                  }))
-                })
-              );
-            }}
-          >
-            {#each links as link, index}<div class="link-fields">
-                <div>
-                  <label for={`link-label-${index}`}
-                    >Etykieta · {contentLocaleName(primaryContentLocale, language)}</label
-                  ><input
-                    id={`link-label-${index}`}
-                    bind:value={link.label}
-                    required
-                    maxlength="200"
-                  />
-                </div>
-                <div>
-                  <label for={`link-url-${index}`}>URL</label><input
-                    id={`link-url-${index}`}
-                    type="url"
-                    bind:value={link.url}
-                    required
-                    maxlength="2000"
-                  />
-                </div>
-                {#each translationLocales as locale}
-                  <div>
-                    <label for={`link-${locale}-${index}`}
-                      >Etykieta · {contentLocaleName(locale, language)}</label
-                    ><input
-                      id={`link-${locale}-${index}`}
-                      value={link.translations?.[locale]?.label ?? ''}
-                      maxlength="200"
-                      oninput={(e) =>
-                        (link.translations = {
-                          ...link.translations,
-                          [locale]: { label: e.currentTarget.value }
-                        })}
-                    />
-                  </div>
-                {/each}
-                <button
-                  class="btn btn-outline"
-                  type="button"
-                  onclick={() => (links = links.filter((_, i) => i !== index))}
-                  ><Trash2 size={15} aria-hidden="true" />Usuń link</button
-                >
-              </div>{/each}
-            <div class="card-footer">
-              <button
-                class="btn btn-outline"
-                type="button"
-                disabled={links.length >= 50}
-                onclick={() => (links = [...links, { label: '', url: '' }])}
-                ><Plus size={15} aria-hidden="true" />Dodaj link</button
-              ><button class="btn" disabled={busy}
-                ><Save size={15} aria-hidden="true" />Zapisz linki</button
-              >
-            </div>
-          </form>
-        </section>
+        <Section id="links" aria-labelledby="links-heading">
+          <VStack gap={4}>
+            <VStack gap={1}>
+              <Heading level={2} id="links-heading">Linki publiczne</Heading>
+              <Text type="supporting" color="secondary">
+                Etykiety polskie są wymagane. Etykiety w innych językach są opcjonalne.
+              </Text>
+            </VStack>
+            <form
+              onsubmit={(e) => {
+                e.preventDefault();
+                void action(() =>
+                  api('/links', 'PUT', {
+                    links: links.map(({ label, url, translations }) => ({
+                      label,
+                      url,
+                      translations
+                    }))
+                  })
+                );
+              }}
+            >
+              <Card>
+                <VStack gap={4}>
+                  {#each links as link, index (index)}
+                    <VStack gap={3} class="link-fields">
+                      <Grid columns={{ minWidth: 220, max: 2 }} gap={3}>
+                        <TextInput
+                          id={`link-label-${index}`}
+                          label={`Etykieta · ${contentLocaleName(primaryContentLocale, language)}`}
+                          value={link.label}
+                          onChange={(value) => (link.label = value.slice(0, 200))}
+                          isRequired
+                        />
+                        <TextInput
+                          id={`link-url-${index}`}
+                          label="URL"
+                          value={link.url}
+                          onChange={(value) => (link.url = value.slice(0, 2000))}
+                          isRequired
+                        />
+                        {#each translationLocales as locale (locale)}
+                          <TextInput
+                            id={`link-${locale}-${index}`}
+                            label={`Etykieta · ${contentLocaleName(locale, language)}`}
+                            value={typeof link.translations?.[locale]?.label === 'string'
+                              ? (link.translations[locale].label as string)
+                              : ''}
+                            onChange={(value) =>
+                              (link.translations = {
+                                ...link.translations,
+                                [locale]: { label: value.slice(0, 200) }
+                              })}
+                          />
+                        {/each}
+                      </Grid>
+                      <HStack>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          label="Usuń link"
+                          onclick={() => (links = links.filter((_, i) => i !== index))}
+                        >
+                          {#snippet icon()}<Trash2 size={15} aria-hidden="true" />{/snippet}
+                        </Button>
+                      </HStack>
+                    </VStack>
+                  {/each}
+                  <HStack gap={2} wrap="wrap" justify="end">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      label="Dodaj link"
+                      isDisabled={links.length >= 50}
+                      onclick={() => (links = [...links, { label: '', url: '' }])}
+                    >
+                      {#snippet icon()}{@render plusIcon()}{/snippet}
+                    </Button>
+                    <Button type="submit" label="Zapisz linki" isDisabled={busy}>
+                      {#snippet icon()}<Save size={15} aria-hidden="true" />{/snippet}
+                    </Button>
+                  </HStack>
+                </VStack>
+              </Card>
+            </form>
+          </VStack>
+        </Section>
       {/if}
-    </div>
-  </div>
+    </VStack>
+  </VStack>
 {/if}
 
 <style>
-  .link-fields {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: end;
-    gap: 12px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--line);
+  :global(.settings-layout) {
+    display: grid !important;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: var(--spacing-8);
+    align-items: start;
   }
-  .link-fields input {
-    margin: 0;
-  }
-  .link-fields > button {
-    width: fit-content;
-  }
-  .settings-card input,
-  .settings-card :global(.editor) {
-    margin: 0;
-  }
-  .settings-card label:not(.check) {
-    display: block;
-  }
-  .card-footer {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding-top: 16px;
-    margin-top: 2px;
-    border-top: 1px solid var(--line);
-  }
-  .card-footer:first-child {
-    padding-top: 0;
-    border-top: 0;
-  }
-  .check {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .check-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 24px;
-  }
-  .check-list {
-    display: grid;
-    gap: 10px;
+  :global(.settings-main) {
+    min-width: 0;
   }
   fieldset {
     margin: 0;
-    padding: 12px 14px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    display: grid;
-    gap: 10px;
+    padding: var(--spacing-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-element);
   }
   legend {
-    padding: 0 6px;
-    color: var(--muted);
-    font-size: 12px;
+    padding-inline: var(--spacing-1);
+    color: var(--color-text-secondary);
+    font-size: var(--text-supporting-size);
   }
-  .request-list {
-    display: grid;
+  :global(.link-fields) {
+    padding-bottom: var(--spacing-4);
+    border-bottom: 1px solid var(--color-border);
   }
-  .request {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-    padding: 8px 0;
-  }
-  .request-list .request + .request {
-    border-top: 1px solid var(--line);
-  }
-  .request a {
-    color: var(--ink);
-  }
-  @media (max-width: 600px) {
-    .link-fields {
-      grid-template-columns: 1fr;
+  @media (max-width: 900px) {
+    :global(.settings-layout) {
+      grid-template-columns: minmax(0, 1fr) !important;
     }
   }
 </style>

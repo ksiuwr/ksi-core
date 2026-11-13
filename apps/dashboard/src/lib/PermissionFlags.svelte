@@ -1,7 +1,8 @@
 <script lang="ts">
   import { preferences } from '$lib/preferences.svelte';
-  import Dropdown from '@ksi-core/ui/platform/Dropdown.svelte';
+  import { Selector, Text, TextArea, VStack } from '@astryx-sv/core';
   import { permissions, permissionKeys, polishPermissionDescriptions } from 'shared/permissions';
+
   let { flags = $bindable([]), disabled = false }: { flags: string[]; disabled?: boolean } =
     $props();
   const language = $derived(preferences.language);
@@ -24,82 +25,50 @@
     }))
   ]);
   function add(pattern: string) {
+    if (!pattern) return;
     const flag = mode + pattern;
     if (!flags.includes(flag)) flags = [...flags, flag];
   }
 </script>
 
-<div class="permission-editor">
-  <div class="permission-picker">
-    <Dropdown
-      label={'Działanie uprawnienia'}
-      value={mode}
-      options={[
-        { value: '+', label: 'Nadaj (+)' },
-        { value: '-', label: 'Odmów (−)' }
-      ]}
-      disabled={disabled || flags.length >= 100}
-      onselect={(value) => (mode = value)}
-    />
-    <Dropdown
-      label={'Znajdź uprawnienie'}
-      placeholder={'Dodaj uprawnienie…'}
-      {options}
-      searchable
-      searchPlaceholder={'Szukaj nazw lub opisów…'}
-      emptyLabel={'Brak pasujących uprawnień'}
-      disabled={disabled || flags.length >= 100}
-      onselect={add}
-    />
-  </div>
-  <p class="muted help">
+<VStack gap={3} class="permission-editor">
+  <Selector
+    label="Działanie uprawnienia"
+    value={mode}
+    options={[
+      { value: '+', label: 'Nadaj (+)' },
+      { value: '-', label: 'Odmów (−)' }
+    ]}
+    isDisabled={disabled || flags.length >= 100}
+    onChange={(value: string) => (mode = value)}
+  />
+  <Selector
+    label="Znajdź uprawnienie"
+    placeholder="Dodaj uprawnienie…"
+    {options}
+    hasSearch
+    searchPlaceholder="Szukaj nazw lub opisów…"
+    isDisabled={disabled || flags.length >= 100}
+    onChange={(value: string) => add(value)}
+  />
+  <Text type="supporting" color="secondary">
     Wyszukaj uprawnienia i ich opisy. Nadania dodają dostęp; odmowy mają pierwszeństwo. Nadal
     obowiązują ograniczenia statusu konta i przestrzeni.
-  </p>
-  <label for="member-flags">Wyjątki uprawnień (jeden na linię)</label>
-  <textarea
-    id="member-flags"
-    rows="6"
-    {disabled}
-    spellcheck="false"
+  </Text>
+  <TextArea
+    label="Wyjątki uprawnień (jeden na linię)"
+    rows={6}
+    isDisabled={disabled}
+    hasSpellCheck={false}
     value={flags.join('\n')}
-    oninput={(event) =>
-      (flags = event.currentTarget.value
+    onChange={(value) =>
+      (flags = value
         .split('\n')
         .map((flag) => flag.trim())
         .filter(Boolean))}
-  ></textarea>
-  <p class="muted help">
+  />
+  <Text type="supporting" color="secondary">
     Możesz też wpisać wzorzec, np. -users.profile.edit*. Odmawia on wszystkich pasujących uprawnień,
     również przyszłych.
-  </p>
-</div>
-
-<style>
-  .permission-editor {
-    display: grid;
-    gap: 10px;
-    min-width: 0;
-  }
-  .permission-picker {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  .help {
-    font-size: 12px;
-    line-height: 1.6;
-    margin: 0;
-  }
-  textarea {
-    margin: 0;
-    font-family: var(--font-mono, monospace);
-    font-size: 12px;
-    overflow-wrap: anywhere;
-  }
-  @media (max-width: 540px) {
-    .permission-picker {
-      grid-template-columns: 1fr;
-    }
-  }
-</style>
+  </Text>
+</VStack>

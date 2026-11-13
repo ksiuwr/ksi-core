@@ -1,21 +1,20 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
   import { UploadCloud, X } from '@lucide/svelte';
+  import { Button, FileInput, HStack, Text, VStack } from '@astryx-sv/core';
 
   let {
     fileId = $bindable<string | null>(null),
     uploading = $bindable(false),
     disabled = false
   }: { fileId?: string | null; uploading?: boolean; disabled?: boolean } = $props();
-  const uid = $props.id();
   let error = $state('');
   let active = true;
   onDestroy(() => {
     active = false;
   });
 
-  async function upload(input: HTMLInputElement) {
-    const file = input.files?.[0];
+  async function upload(file: File | undefined) {
     if (!file || uploading || disabled) return;
     error = '';
     if (
@@ -23,7 +22,6 @@
       file.size > 20 * 1024 * 1024
     ) {
       error = 'Wybierz obraz JPEG, PNG, WebP, AVIF lub GIF o rozmiarze do 20 MiB.';
-      input.value = '';
       return;
     }
     uploading = true;
@@ -38,49 +36,49 @@
       if (active) error = e instanceof Error ? e.message : 'Nie udało się przesłać pliku.';
     } finally {
       if (active) uploading = false;
-      input.value = '';
     }
   }
 </script>
 
-<div class="article-thumbnail">
-  <label for={uid}>Miniatura (opcjonalnie)</label>
-  <p class="muted">
-    Wyświetlana na listach artykułów. Wybierz obraz niezależnie od treści artykułu.
-  </p>
-  {#if fileId}<img src={`/media/${encodeURIComponent(fileId)}`} alt={'Podgląd miniatury'} />{/if}
-  {#if !disabled}
-    <div class="controls">
-      <label class="btn btn-outline upload" class:disabled={uploading}>
-        <UploadCloud size={16} aria-hidden="true" />{uploading
-          ? 'Przesyłanie…'
-          : 'Wybierz miniaturę'}
-        <input
-          id={uid}
-          type="file"
-          accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
-          disabled={uploading}
-          onchange={(event) => void upload(event.currentTarget)}
-        />
-      </label>
-      {#if fileId}<button
-          type="button"
-          class="btn btn-outline"
-          disabled={uploading}
-          onclick={() => (fileId = null)}><X size={16} aria-hidden="true" />Usuń miniaturę</button
-        >{/if}
-    </div>
+<VStack gap={3} class="article-thumbnail">
+  {#if fileId}
+    <img src={`/media/${encodeURIComponent(fileId)}`} alt="Podgląd miniatury" />
   {/if}
-  {#if error}<p class="error" role="alert">{error}</p>{/if}
-</div>
+  {#if !disabled}
+    <FileInput
+      label="Miniatura (opcjonalnie)"
+      isOptional
+      description="Wyświetlana na listach artykułów. Wybierz obraz niezależnie od treści artykułu."
+      accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
+      mode="dropzone"
+      placeholder="Wybierz miniaturę"
+      value={null}
+      isLoading={uploading}
+      status={error ? { type: 'error', message: error } : undefined}
+      onChange={(files) => {
+        if (files instanceof File) void upload(files);
+      }}
+    />
+    <HStack gap={2} wrap="wrap">
+      {#if fileId}
+        <Button
+          variant="secondary"
+          label="Usuń miniaturę"
+          isDisabled={uploading}
+          onclick={() => (fileId = null)}
+        >
+          {#snippet icon()}<X size={16} aria-hidden="true" />{/snippet}
+        </Button>
+      {/if}
+    </HStack>
+  {:else if error}
+    <Text role="alert" class="error-text">{error}</Text>
+  {/if}
+</VStack>
 
 <style>
-  .article-thumbnail {
-    margin: 20px 0;
-  }
-  p {
-    margin: 8px 0 12px;
-    font-size: 12px;
+  :global(.article-thumbnail) {
+    margin-block: var(--spacing-5);
   }
   img {
     display: block;
@@ -89,34 +87,9 @@
     max-height: 240px;
     aspect-ratio: 16 / 9;
     object-fit: cover;
-    border-radius: var(--radius-md);
-    margin-bottom: 12px;
+    border-radius: var(--radius-element);
   }
-  .controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .upload {
-    position: relative;
-    overflow: hidden;
-    text-transform: none;
-    letter-spacing: normal;
-  }
-  .upload input {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-    margin: 0;
-  }
-  .upload:focus-within {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-  .disabled {
-    opacity: 0.5;
+  :global(.error-text) {
+    color: var(--color-error);
   }
 </style>

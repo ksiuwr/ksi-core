@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount, untrack } from 'svelte';
   import { replaceState } from '$app/navigation';
-  import Dropdown from '@ksi-core/ui/platform/Dropdown.svelte';
   import MarkdownContent from '@ksi-core/ui/platform/MarkdownContent.svelte';
   import DocPerson from './DocPerson.svelte';
   import { ArrowLeft, Globe, GitPullRequestArrow, History, ChevronUp, X } from '@lucide/svelte';
@@ -13,9 +12,7 @@
     primaryContentLocale,
     type ContentLocale
   } from 'shared/content-locales';
-  import { slider } from '@ksi-core/ui/platform/slider';
   import { preferences } from '$lib/preferences.svelte';
-  import Skeleton from '$lib/Skeleton.svelte';
   import DocDiff from './DocDiff.svelte';
   import DocError from './DocError.svelte';
   import {
@@ -27,6 +24,22 @@
     type DocRevision,
     type DocSnapshot
   } from './docs';
+  import {
+    Badge,
+    Button,
+    Heading,
+    HStack,
+    Icon,
+    IconButton,
+    List,
+    ListItem,
+    SegmentedControl,
+    SegmentedControlItem,
+    Selector,
+    Skeleton,
+    Text,
+    VStack
+  } from '@astryx-sv/core';
 
   type Snapshot = DocSnapshot & { previous: DocSnapshot | null };
   let {
@@ -46,7 +59,6 @@
   let selected = $state<number | null>(null);
   let snapshot = $state<Snapshot | null>(null);
   const uid = $props.id();
-  let trigger = $state<HTMLButtonElement>();
   let picker = $state<HTMLElement>();
   let open = $state(false);
   let mode = $state<'preview' | 'changes'>('preview');
@@ -96,94 +108,101 @@
     formatDateTime(value, language, { dateStyle: 'medium', timeStyle: 'short' });
 </script>
 
-<div class="workspace-header">
-  <div>
-    <p class="workspace-eyebrow">Historia wersji</p>
-    <h1>{page.displayTitle}</h1>
-  </div>
-  <a class="btn btn-outline" href={docsPath(slug, page.slug)}
-    ><ArrowLeft size={15} aria-hidden="true" />Wróć do strony</a
-  >
-</div>
+<HStack class="workspace-header" hAlign="between" vAlign="start" wrap="wrap" gap={4}>
+  <VStack gap={1}>
+    <Text type="supporting" class="workspace-eyebrow">Historia wersji</Text>
+    <Heading level={1}>{page.displayTitle}</Heading>
+  </VStack>
+  <Button href={docsPath(slug, page.slug)} variant="secondary" label="Wróć do strony">
+    {#snippet icon()}<Icon icon={ArrowLeft} size="sm" />{/snippet}
+  </Button>
+</HStack>
 <DocError code={error} />
-<button
-  bind:this={trigger}
+<Button
+  id={`${uid}-trigger`}
   type="button"
-  class="btn btn-outline history-trigger"
+  variant="secondary"
+  label="Wersje"
+  class="history-trigger"
   popovertarget={`${uid}-versions`}
   aria-expanded={open}
   aria-controls={`${uid}-versions`}
 >
-  <History size={16} aria-hidden="true" />Wersje
-  {#if selected !== null}<span class="history-version">v{selected}</span>{/if}
-  <ChevronUp size={14} aria-hidden="true" />
-</button>
-<div class="history">
-  <section class="history-detail" aria-live="polite">
+  {#snippet icon()}<Icon icon={History} size="sm" />{/snippet}
+  {#snippet endContent()}
+    {#if selected !== null}<Badge variant="neutral" label={`v${selected}`} />{/if}
+    <Icon icon={ChevronUp} size="xsm" />
+  {/snippet}
+</Button>
+<VStack class="history" gap={0}>
+  <VStack as="section" gap={4} aria-live="polite">
     {#if loading}
-      <Skeleton label={'Wczytywanie wersji'} />
+      <VStack gap={2} aria-busy="true">
+        <span class="sr-only">Wczytywanie wersji</span>
+        <Skeleton height={14} />
+        <Skeleton height={14} />
+        <Skeleton height={14} width="60%" />
+      </VStack>
     {:else if snapshot}
-      <div class="history-detail-head">
-        <h2>
-          Wersja
-          {snapshot.version}{#if snapshot.public}<span class="history-public"
-              ><Globe size={13} aria-hidden="true" />Publiczna</span
-            >{/if}
-        </h2>
-        <div class="history-controls">
-          {#if locales.length > 1}
-            <div class="history-language">
-              <Dropdown
-                label={'Język'}
-                value={locale}
-                options={locales.map((option) => ({
-                  value: option,
-                  label: contentLocaleName(option, language)
-                }))}
-                onselect={(value) => (chosenLocale = value as ContentLocale)}
-                variant="compact"
-              />
-            </div>
+      <HStack hAlign="between" vAlign="center" gap={3} wrap="wrap">
+        <HStack gap={2} vAlign="center" wrap="wrap">
+          <Heading level={2}>Wersja {snapshot.version}</Heading>
+          {#if snapshot.public}
+            <Badge variant="success" label="Publiczna">
+              {#snippet icon()}<Icon icon={Globe} size="xsm" />{/snippet}
+            </Badge>
           {/if}
-          <div class="segmented-control" role="group" aria-label={'Widok wersji'} use:slider>
-            <button
-              type="button"
-              class:active={mode === 'changes'}
-              aria-pressed={mode === 'changes'}
-              onclick={() => (mode = 'changes')}>Zmiany</button
-            >
-            <button
-              type="button"
-              class:active={mode === 'preview'}
-              aria-pressed={mode === 'preview'}
-              onclick={() => (mode = 'preview')}>Cała strona</button
-            >
-          </div>
-        </div>
-      </div>
+        </HStack>
+        <HStack gap={3} vAlign="center" wrap="wrap">
+          {#if locales.length > 1}
+            <Selector
+              label={'Język'}
+              value={locale}
+              options={locales.map((option) => ({
+                value: option,
+                label: contentLocaleName(option, language)
+              }))}
+              onChange={(value: string) => (chosenLocale = value as ContentLocale)}
+              variant="secondary"
+              size="sm"
+              isLabelHidden
+              width={140}
+            />
+          {/if}
+          <SegmentedControl
+            value={mode}
+            onChange={(next) => (mode = next as 'preview' | 'changes')}
+            label={'Widok wersji'}
+            size="sm"
+          >
+            <SegmentedControlItem value="changes" label="Zmiany" />
+            <SegmentedControlItem value="preview" label="Cała strona" />
+          </SegmentedControl>
+        </HStack>
+      </HStack>
       {#if mode === 'changes' && snapshot.previous && before.title !== after.title}
-        <p class="history-title-change">
+        <Text as="p" class="history-title-change">
           Tytuł: <del>{before.title}</del> → <ins>{after.title}</ins>
-        </p>
+        </Text>
       {/if}
       {#if mode === 'changes' && snapshot.previous && snapshot.previous.folder !== snapshot.folder}
-        <p class="history-title-change">
+        <Text as="p" class="history-title-change">
           Folder: <del>{snapshot.previous.folder || '—'}</del> →
           <ins>{snapshot.folder || '—'}</ins>
-        </p>
+        </Text>
       {/if}
       {#if mode === 'preview'}
-        <div class="history-preview doc-prose">
+        <VStack gap={0} class="history-preview doc-prose">
           {#if previewTitle !== page.displayTitle}
-            <h1 class="history-preview-title">{previewTitle}</h1>
+            <Heading level={1} class="history-preview-title">{previewTitle}</Heading>
           {/if}
           {#if locale !== primaryContentLocale && !after.markdown}
-            <p class="history-language-fallback">
+            <Text as="p" type="supporting" class="history-language-fallback">
               Ta wersja nie ma tłumaczenia na ten język. Wyświetlany jest tekst polski.
-            </p>
+            </Text>
           {/if}
           <MarkdownContent value={after.markdown || snapshot.markdown} docs docLocale={locale} />
-        </div>
+        </VStack>
       {:else}
         <DocDiff
           before={before.markdown}
@@ -195,13 +214,14 @@
         />
       {/if}
     {:else if error && selected !== null}
-      <button
-        type="button"
-        class="btn btn-outline history-retry"
-        onclick={() => selected !== null && select(selected)}>Spróbuj ponownie</button
-      >
+      <Button
+        variant="secondary"
+        label="Spróbuj ponownie"
+        class="history-retry"
+        onclick={() => selected !== null && select(selected)}
+      />
     {/if}
-  </section>
+  </VStack>
   <aside
     bind:this={picker}
     id={`${uid}-versions`}
@@ -210,78 +230,89 @@
     aria-labelledby={`${uid}-versions-title`}
     ontoggle={(event) => (open = event.newState === 'open')}
   >
-    <header class="history-picker-head">
-      <h2 id={`${uid}-versions-title`}>Historia wersji</h2>
-      <button
-        type="button"
-        class="btn ghost icon-btn btn-sm"
+    <HStack class="history-picker-head" hAlign="between" vAlign="center" gap={3}>
+      <Heading level={2} id={`${uid}-versions-title`} class="history-picker-title">
+        Historia wersji
+      </Heading>
+      <IconButton
+        label={'Zamknij'}
+        tooltip={'Zamknij'}
+        variant="ghost"
+        size="sm"
         popovertarget={`${uid}-versions`}
         popovertargetaction="hide"
-        aria-label={'Zamknij'}><X size={16} aria-hidden="true" /></button
       >
-    </header>
-    <ol class="history-list" aria-label={'Wersje'}>
+        {#snippet icon()}<Icon icon={X} size="sm" />{/snippet}
+      </IconButton>
+    </HStack>
+    <List density="compact" edge="flush" aria-label={'Wersje'}>
       {#each revisions as revision (revision.id)}
-        <li>
-          <a
-            class="history-item"
-            class:active={selected === revision.version}
-            aria-current={selected === revision.version ? 'true' : undefined}
-            href={docsPath(slug, page.slug, 'history', String(revision.version))}
-            onclick={(event) => {
-              if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-              event.preventDefault();
-              picker?.hidePopover();
-              trigger?.focus();
-              replaceState(event.currentTarget.href, {});
-              void select(revision.version);
-            }}
-          >
-            <span class="history-item-head">
-              <span class="history-version">v{revision.version}</span>
-              <time datetime={revision.createdAt}>{when(revision.createdAt)}</time>
-              {#if revision.version === page.version}<span class="tag tag-mint">Bieżąca</span>{/if}
-            </span>
-            <span class="history-reason">
-              {#if revision.reason}{revision.reason}{:else}<span class="muted"
-                  >Brak podsumowania</span
-                >{/if}
-            </span>
-            <span class="history-item-meta">
-              {#if revision.author}
-                <DocPerson person={revision.author} />
-              {/if}
-              <span class="history-lines"
-                ><span class="added">+{revision.additions}</span>
-                <span class="removed">−{revision.deletions}</span></span
-              >
-            </span>
-            {#if revision.reviewer}
-              <span class="history-review"
-                ><GitPullRequestArrow size={12} aria-hidden="true" />Propozycję zaakceptował(a)
-                {revision.reviewer.name}</span
-              >
-            {/if}
-          </a>
-        </li>
+        <ListItem align="start">
+          {#snippet label()}
+            <a
+              class="history-item"
+              class:active={selected === revision.version}
+              aria-current={selected === revision.version ? 'true' : undefined}
+              href={docsPath(slug, page.slug, 'history', String(revision.version))}
+              onclick={(event) => {
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                event.preventDefault();
+                picker?.hidePopover();
+                document.getElementById(`${uid}-trigger`)?.focus();
+                replaceState(docsPath(slug, page.slug, 'history', String(revision.version)), {});
+                void select(revision.version);
+              }}
+            >
+              <VStack gap={2}>
+                <HStack gap={2} vAlign="center" wrap="wrap" class="history-item-head">
+                  <Text type="code" weight="bold">v{revision.version}</Text>
+                  <Text type="supporting">
+                    <time datetime={revision.createdAt}>{when(revision.createdAt)}</time>
+                  </Text>
+                  {#if revision.version === page.version}
+                    <Badge variant="success" label="Bieżąca" />
+                  {/if}
+                </HStack>
+                <Text class="history-reason" color={revision.reason ? 'primary' : 'secondary'}>
+                  {#if revision.reason}{revision.reason}{:else}Brak podsumowania{/if}
+                </Text>
+                <HStack hAlign="between" vAlign="center" gap={2}>
+                  {#if revision.author}
+                    <DocPerson person={revision.author} />
+                  {/if}
+                  <HStack gap={2} class="history-lines">
+                    <Text type="supporting" class="added">+{revision.additions}</Text>
+                    <Text type="supporting" class="removed">−{revision.deletions}</Text>
+                  </HStack>
+                </HStack>
+                {#if revision.reviewer}
+                  <HStack gap={1.5} vAlign="center" class="history-review">
+                    <Icon icon={GitPullRequestArrow} size="xsm" color="secondary" />
+                    <Text type="supporting">
+                      Propozycję zaakceptował(a) {revision.reviewer.name}
+                    </Text>
+                  </HStack>
+                {/if}
+              </VStack>
+            </a>
+          {/snippet}
+        </ListItem>
       {/each}
-    </ol>
+    </List>
   </aside>
-</div>
+</VStack>
 
 <style>
-  .history {
+  :global(.history) {
     min-width: 0;
     padding-bottom: 88px;
   }
-  .history-trigger {
+  :global(.history-trigger) {
     position: fixed;
     right: 24px;
     bottom: 24px;
     z-index: 30;
-    gap: 8px;
-    background: var(--surface);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-med);
   }
   .history-picker {
     position: fixed;
@@ -291,164 +322,88 @@
     margin: 0;
     padding: 0;
     overflow: auto;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-xl);
-    background: var(--surface);
-    color: var(--ink);
-    box-shadow: var(--shadow-md);
-  }
-  .history-picker-head {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--line);
-    background: var(--surface);
-  }
-  .history-picker-head h2 {
-    margin: 0;
-    font-family: var(--font);
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0;
-  }
-  .history-list {
-    display: grid;
-    gap: 6px;
-    margin: 0;
-    padding: 8px;
-    list-style: none;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-container);
+    background: var(--color-background-surface);
+    color: var(--color-text-primary);
+    box-shadow: var(--shadow-med);
   }
   .history-item {
     display: grid;
-    gap: 8px;
-    padding: 12px 14px;
+    gap: var(--spacing-2);
+    padding: var(--spacing-3);
     border: 1px solid transparent;
-    border-radius: var(--radius-lg);
-    color: var(--ink);
-    font-size: 13px;
+    border-radius: var(--radius-container);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-base);
     text-decoration: none;
   }
   .history-item:hover {
-    background: var(--surface-muted);
+    background: var(--color-background-muted);
   }
   .history-item.active {
-    background: var(--surface-muted);
-    box-shadow: inset 2px 0 0 var(--accent);
+    background: var(--color-background-muted);
+    box-shadow: inset 2px 0 0 var(--color-accent);
   }
-  .history-item-head {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    color: var(--muted);
-    font-size: 11px;
+  .history-picker :global(.history-picker-head) {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: var(--spacing-2) var(--spacing-3);
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-background-surface);
   }
-  .history-version {
-    color: var(--ink);
-    font-family: var(--mono);
-    font-weight: 700;
+  :global(.history-picker-title) {
+    font-size: var(--font-size-base);
+    font-weight: 600;
   }
-  .history-reason {
+  :global(.history-item-head),
+  :global(.history-lines),
+  :global(.history-review) {
+    font-family: var(--font-family-code);
+  }
+  :global(.history-reason) {
     line-height: 1.45;
     overflow-wrap: anywhere;
   }
-  .history-item-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    font-size: 12px;
+  :global(.history-lines .added) {
+    color: var(--color-text-green);
+    font-family: var(--font-family-code);
   }
-  .history-lines {
-    font-family: var(--mono);
-    font-size: 11px;
+  :global(.history-lines .removed) {
+    color: var(--color-text-red);
+    font-family: var(--font-family-code);
   }
-  .added {
-    color: var(--positive);
+  :global(.history-retry) {
+    align-self: start;
   }
-  .removed {
-    color: var(--danger);
+  :global(.history-language-fallback) {
+    margin-bottom: var(--spacing-4);
   }
-  .history-review {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--muted);
-    font-size: 11px;
+  :global(.history-title-change) del {
+    color: var(--color-text-red);
   }
-  .history-detail {
-    display: grid;
-    gap: 16px;
-    min-width: 0;
-    width: 100%;
-  }
-  .history-detail-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .history-detail-head h2 {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 20px;
-  }
-  .history-controls {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .history-language {
-    width: 140px;
-  }
-  .history-retry {
-    justify-self: start;
-  }
-  .history-language-fallback {
-    margin-bottom: 16px;
-    color: var(--muted);
-    font-size: 13px;
-  }
-  .history-public {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    color: var(--positive);
-    font-family: var(--font);
-    font-size: 12px;
-    font-weight: 400;
-    letter-spacing: 0;
-  }
-  .history-title-change {
-    margin: 0;
-    font-size: 13px;
-  }
-  .history-title-change del {
-    color: var(--danger);
-  }
-  .history-title-change ins {
-    color: var(--positive);
+  :global(.history-title-change) ins {
+    color: var(--color-text-green);
     text-decoration: none;
   }
-  .history-preview {
+  :global(.history-preview) {
     max-width: 760px;
-    padding-block: 24px;
-    border-top: 1px solid var(--line);
+    padding-block: var(--spacing-6);
+    border-top: 1px solid var(--color-border);
   }
-  .history-preview-title {
-    margin-bottom: 18px;
-    font-size: 28px;
+  :global(.history-preview-title) {
+    margin-bottom: var(--spacing-5);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
   }
   @media (max-width: 600px) {
-    .history-trigger {
+    :global(.history-trigger) {
       right: 16px;
       bottom: 16px;
     }
@@ -459,15 +414,15 @@
   }
   /* With room to spare the versions are always on screen, next to what they show. */
   @media (min-width: 1280px) {
-    .history {
-      display: grid;
+    :global(.history) {
+      display: grid !important;
       grid-template-columns: minmax(0, 1fr) 320px;
       gap: 32px;
       align-items: start;
       padding-bottom: 0;
     }
-    .history-trigger,
-    .history-picker-head button {
+    :global(.history-trigger),
+    .history-picker :global(.history-picker-head button) {
       display: none;
     }
     .history-picker {
@@ -477,7 +432,7 @@
       width: auto;
       height: auto;
       max-height: calc(100dvh - 48px);
-      box-shadow: var(--shadow-xs);
+      box-shadow: var(--shadow-low);
       /* Popovers rest hidden for their entry animation; here this one is always shown. */
       opacity: 1;
       transform: none;

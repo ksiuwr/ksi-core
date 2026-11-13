@@ -2,9 +2,20 @@
   import { page } from '$app/state';
   import { onMount } from 'svelte';
   import { createAuthClient } from 'better-auth/svelte';
-  import { KeyRound, ArrowLeft } from '@lucide/svelte';
+  import {
+    Banner,
+    Button,
+    Card,
+    Heading,
+    HStack,
+    Link,
+    Text,
+    TextInput,
+    VStack
+  } from '@astryx-sv/core';
   import ThemeSelector from '@ksi-core/ui/platform/ThemeSelector.svelte';
   import { preferences, setLanguage } from '@ksi-core/ui/platform/preferences';
+
   const language = $derived(preferences.language);
 
   let password = $state(''),
@@ -33,55 +44,81 @@
 </script>
 
 <svelte:head><title>Nowe hasło · KSI</title></svelte:head>
+
 <main class="auth-shell">
-  <div class="auth-frame">
-    <header class="auth-topbar">
-      <a class="auth-brand" href="/">KSI<span>/ core</span></a>
-      <div class="auth-preferences">
-        <ThemeSelector /><button
-          class="btn btn-outline language-button"
-          aria-label={'Zmień język'}
+  <VStack width="min(100%, 460px)" gap={6}>
+    <HStack justify="between" vAlign="center" gap={3}>
+      <Link href="/" type="label" weight="bold">
+        KSI <Text as="span" type="supporting" color="secondary">/ core</Text>
+      </Link>
+      <HStack gap={2} vAlign="center">
+        <ThemeSelector />
+        <Button
+          variant="secondary"
+          size="sm"
+          label={language === 'pl' ? 'EN' : 'PL'}
+          tooltip="Zmień język"
           onclick={() => setLanguage(language === 'pl' ? 'en-us' : 'pl')}
-          >{language === 'pl' ? 'EN' : 'PL'}</button
-        >
-      </div>
-    </header>
-    <section class="auth-card" aria-labelledby="reset-title">
-      <h1 id="reset-title">Nowe hasło</h1>
-      <p class="auth-intro">Wybierz nowe hasło dla swojego konta KSI.</p>
-      {#if !token}<p role="alert" class="auth-message">
-          Brak linku odzyskiwania. Poproś o nowy link na stronie logowania.
-        </p>{:else if !changed}<form class="auth-form" onsubmit={submit}>
-          <div class="auth-field">
-            <label for="password">Hasło</label><input
-              id="password"
-              type="password"
-              autocomplete="new-password"
-              minlength="8"
-              required
-              disabled={busy}
-              bind:value={password}
-            />
-          </div>
-          <button class="btn submit-button" disabled={busy}
-            >{busy ? 'Zapisywanie…' : 'Zapisz hasło'}</button
-          >
-        </form>{/if}{#if message}<p role="status" class="auth-message">{message}</p>{/if}<a
-        class="btn btn-outline auth-back"
-        href="/"><ArrowLeft size={15} aria-hidden="true" />Wróć do logowania</a
-      >
-    </section>
-    <footer class="auth-footer">
-      <a href="/">Wróć na stronę KSI</a><span class="right-col">KSI · Uniwersytet Wrocławski</span
-      ><span>v{import.meta.env.PUBLIC_APP_VERSION}</span><a
-        class="right-col"
+        />
+      </HStack>
+    </HStack>
+
+    <Card padding={6}>
+      <VStack gap={4}>
+        <VStack gap={2}>
+          <Heading level={1}>Nowe hasło</Heading>
+          <Text color="secondary">Wybierz nowe hasło dla swojego konta KSI.</Text>
+        </VStack>
+
+        {#if !token}
+          <Banner
+            status="error"
+            title="Brak linku odzyskiwania. Poproś o nowy link na stronie logowania."
+          />
+        {:else if !changed}
+          <form onsubmit={submit}>
+            <VStack gap={3}>
+              <TextInput
+                label="Hasło"
+                type="password"
+                isRequired
+                isDisabled={busy}
+                value={password}
+                onChange={(value) => (password = value)}
+              />
+              <Button
+                type="submit"
+                variant="primary"
+                label={busy ? 'Zapisywanie…' : 'Zapisz hasło'}
+                isLoading={busy}
+                width="100%"
+              />
+            </VStack>
+          </form>
+        {/if}
+
+        {#if message}
+          <Banner status="info" title={message} />
+        {/if}
+
+        <Button variant="secondary" label="Wróć do logowania" href="/" width="100%" />
+      </VStack>
+    </Card>
+
+    <HStack justify="between" vAlign="center" gap={2} wrap="wrap">
+      <Link href="/" type="supporting" color="secondary">Wróć na stronę KSI</Link>
+      <Text type="supporting" color="secondary">KSI · Uniwersytet Wrocławski</Text>
+      <Text type="supporting" color="secondary">v{import.meta.env.PUBLIC_APP_VERSION}</Text>
+      <Link
         href={import.meta.env.PUBLIC_COMMIT_HASH
           ? `https://github.com/ksiuwr/ksi-core/commit/${import.meta.env.PUBLIC_COMMIT_HASH}`
-          : 'https://github.com/ksiuwr/ksi-core'}
-        target="_blank"
-        rel="noopener noreferrer"
-        >{import.meta.env.PUBLIC_COMMIT_HASH?.slice(0, 7) || 'Kod źródłowy'}</a
+          : `https://github.com/ksiuwr/ksi-core`}
+        type="supporting"
+        color="secondary"
+        isExternalLink
       >
-    </footer>
-  </div>
+        {import.meta.env.PUBLIC_COMMIT_HASH?.slice(0, 7) || 'Kod źródłowy'}
+      </Link>
+    </HStack>
+  </VStack>
 </main>

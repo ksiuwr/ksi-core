@@ -1,8 +1,25 @@
 <script lang="ts">
-  import { ChevronDown, RefreshCw, TableProperties } from '@lucide/svelte';
+  import { RefreshCw, TableProperties } from '@lucide/svelte';
   import Wrapper from '../../../components/Wrapper.svelte';
   import { api } from '$lib/backend';
   import { toast } from 'svelte-sonner';
+  import {
+    Banner,
+    Button,
+    Card,
+    Center,
+    Collapsible,
+    EmptyState,
+    Grid,
+    HStack,
+    Heading,
+    Icon,
+    List,
+    ListItem,
+    Spinner,
+    Text,
+    VStack
+  } from '@astryx-sv/core';
 
   type CachedMap = NonNullable<Awaited<ReturnType<typeof api.dashboard.admin.s3cache.get>>['data']>;
 
@@ -72,128 +89,131 @@
   }
 </script>
 
-{#snippet icon()}
-  <TableProperties class="size-4" />
+{#snippet refreshIcon()}
+  <Icon icon={RefreshCw} size="sm" />
+{/snippet}
+
+{#snippet emptyIcon()}
+  <Icon icon={TableProperties} size="lg" color="secondary" />
 {/snippet}
 
 {#snippet hero()}
-  <header class="border-base-content/15 border-b pb-10 md:pb-14">
-    <p class="text-primary mb-4 text-xs font-bold tracking-[0.2em] uppercase">
+  <VStack as="header" gap={4} class="border-line border-b pb-10 md:pb-14">
+    <Text type="code" color="accent" class="tracking-wider uppercase">
       Operacje na magazynie danych
-    </p>
-    <h1 class="mb-0! text-4xl tracking-[-0.04em] sm:text-5xl">Pamięć podręczna S3</h1>
-    <p class="text-base-content/65 mt-4 max-w-3xl text-lg leading-relaxed">
+    </Text>
+    <Heading level={1} type="display-1">Pamięć podręczna S3</Heading>
+    <Text type="large" color="secondary" class="max-w-3xl">
       Witryna zapisuje w pamięci podręcznej listy adresów URL obiektów z Cloudflare R2, aby uniknąć
       wielokrotnego skanowania magazynu. Przejrzyj poniżej każdą zapisaną grupę lub odśwież klucz po
       zmianie zawartości jego zasobnika.
-    </p>
-  </header>
+    </Text>
+  </VStack>
 {/snippet}
 
-<Wrapper name="dashboard / s3 cache" {icon} {hero}>
-  <section class="py-10 md:py-14" aria-labelledby="cache-list-heading" aria-busy={loading}>
-    <div class="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-      <div>
-        <p class="text-primary mb-3 text-xs font-bold tracking-[0.2em] uppercase">
+<Wrapper name="dashboard / s3 cache" {hero}>
+  <VStack
+    as="section"
+    gap={8}
+    paddingBlock={10}
+    aria-labelledby="cache-list-heading"
+    aria-busy={loading}
+  >
+    <HStack gap={4} justify="between" vAlign="end" wrap="wrap">
+      <VStack gap={3}>
+        <Text type="code" color="accent" class="tracking-wider uppercase">
           01 / Grupy w pamięci podręcznej
-        </p>
-        <h2 id="cache-list-heading" class="mb-0! text-2xl tracking-tight sm:text-3xl">
-          Listy obiektów
-        </h2>
-      </div>
+        </Text>
+        <Heading level={2} id="cache-list-heading">Listy obiektów</Heading>
+      </VStack>
       {#if !loading && !loadError}
-        <span class="text-base-content/45 font-mono text-xs">
+        <Text type="code" color="secondary">
           Zapisano w pamięci podręcznej: {cacheEntries.length}
-        </span>
+        </Text>
       {/if}
-    </div>
+    </HStack>
 
     {#if loading}
-      <div class="border-base-content/15 border p-8 text-center" role="status">
-        <p class="text-base-content/55 font-mono text-sm">
-          Ładowanie list obiektów z pamięci podręcznej…
-        </p>
-      </div>
+      <Card variant="muted" padding={8}>
+        <Center>
+          <HStack gap={2} vAlign="center" role="status">
+            <Spinner size="sm" />
+            <Text type="code" color="secondary">Ładowanie list obiektów z pamięci podręcznej…</Text>
+          </HStack>
+        </Center>
+      </Card>
     {:else if loadError}
-      <div class="border-error/30 bg-error/5 border p-6">
-        <p class="text-error font-bold">Nie udało się załadować pamięci podręcznej S3.</p>
-        <p class="text-base-content/65 mt-1 text-sm">{loadError}</p>
-        <button class="btn btn-outline btn-sm mt-4" type="button" onclick={() => void fetchCache()}>
-          Spróbuj ponownie
-        </button>
-      </div>
+      <Banner
+        status="error"
+        title="Nie udało się załadować pamięci podręcznej S3."
+        description={loadError}
+        collapsible={false}
+      >
+        {#snippet endContent()}
+          <Button
+            variant="secondary"
+            size="sm"
+            label="Spróbuj ponownie"
+            onclick={() => void fetchCache()}
+          />
+        {/snippet}
+      </Banner>
     {:else if cacheEntries.length === 0}
-      <div class="border-base-content/25 border border-dashed px-6 py-14 text-center">
-        <TableProperties class="text-base-content/30 mx-auto mb-4 size-8" strokeWidth={1.5} />
-        <h3 class="mb-2! text-xl">Nie znaleziono kluczy pamięci podręcznej</h3>
-        <p class="text-base-content/55">
-          Listy obiektów pojawią się tutaj po zapisaniu ich w pamięci podręcznej.
-        </p>
-      </div>
+      <EmptyState
+        title="Nie znaleziono kluczy pamięci podręcznej"
+        description="Listy obiektów pojawią się tutaj po zapisaniu ich w pamięci podręcznej."
+        icon={emptyIcon}
+      />
     {:else}
-      <div class="grid gap-5 lg:grid-cols-2">
+      <Grid columns={{ minWidth: 360, max: 2 }} gap={5}>
         {#each cacheEntries as [key, cache] (key)}
           {@const refreshing = refreshingKeys.includes(key)}
-          <article class="border-base-content/20 bg-base-100 flex min-w-0 flex-col border">
-            <div class="border-base-content/15 border-b p-5 md:p-6">
-              <div class="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-                <div class="min-w-0">
-                  <p
-                    class="text-base-content/40 mb-2 font-mono text-xs tracking-[0.16em] uppercase"
-                  >
+          <Card padding={0} elevation="low" class="min-w-0">
+            <VStack gap={5} padding={5} class="border-line border-b md:p-6">
+              <HStack gap={5} justify="between" vAlign="start" wrap="wrap">
+                <VStack gap={2} class="min-w-0 flex-1">
+                  <Text type="code" color="secondary" class="tracking-wider uppercase">
                     Klucz pamięci podręcznej
-                  </p>
-                  <h3 class="mb-2! text-xl tracking-tight wrap-anywhere">{key}</h3>
-                  <p class="text-base-content/50 font-mono text-xs">
+                  </Text>
+                  <Heading level={3} class="wrap-anywhere">{key}</Heading>
+                  <Text type="supporting" color="secondary">
                     Zaktualizowano {formatLocalDate(cache.time)}
-                  </p>
-                </div>
-                <button
-                  class="btn btn-outline btn-sm shrink-0 gap-2"
-                  type="button"
+                  </Text>
+                </VStack>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  label={refreshing ? 'Odświeżanie…' : 'Odśwież'}
+                  icon={refreshIcon}
+                  isLoading={refreshing}
                   onclick={() => void refetch(key)}
-                  disabled={refreshing}
-                  aria-label={`Odśwież klucz pamięci podręcznej ${key}`}
-                >
-                  <RefreshCw class="size-4" />
-                  {refreshing ? 'Odświeżanie…' : 'Odśwież'}
-                </button>
-              </div>
-            </div>
+                />
+              </HStack>
+            </VStack>
 
-            <details class="group/details flex-1">
-              <summary
-                class="flex cursor-pointer list-none items-center justify-between gap-4 p-5 md:px-6"
+            <VStack padding={5} class="md:px-6">
+              <Collapsible
+                trigger={`${cache.data.length} ${cache.data.length === 1 ? 'object URL' : 'object URLs'}`}
+                defaultIsOpen={false}
               >
-                <span class="font-mono text-xs font-bold tracking-[0.14em] uppercase">
-                  {cache.data.length}
-                  {cache.data.length === 1 ? 'object URL' : 'object URLs'}
-                </span>
-                <ChevronDown class="size-4 shrink-0 group-open/details:rotate-180" />
-              </summary>
-              <ul class="border-base-content/15 bg-base-200/35 border-t p-5 md:p-6">
-                {#each [...cache.data].sort((left, right) => left.localeCompare(right)) as url}
-                  <li
-                    class="border-base-content/10 border-b py-3 first:pt-0 last:border-0 last:pb-0"
-                  >
-                    <a
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="link link-primary block font-mono text-xs leading-relaxed break-all"
-                      >{url}</a
-                    >
-                  </li>
-                {:else}
-                  <li class="text-base-content/50 font-mono text-xs">
-                    Ten klucz pamięci podręcznej nie zawiera żadnych adresów URL.
-                  </li>
-                {/each}
-              </ul>
-            </details>
-          </article>
+                <List hasDividers density="compact">
+                  {#each [...cache.data].sort( (left, right) => left.localeCompare(right) ) as url (url)}
+                    <ListItem href={url} target="_blank" rel="noopener noreferrer">
+                      {#snippet label()}
+                        <Text type="code">{url}</Text>
+                      {/snippet}
+                    </ListItem>
+                  {:else}
+                    <ListItem
+                      label="Ten klucz pamięci podręcznej nie zawiera żadnych adresów URL."
+                    />
+                  {/each}
+                </List>
+              </Collapsible>
+            </VStack>
+          </Card>
         {/each}
-      </div>
+      </Grid>
     {/if}
-  </section>
+  </VStack>
 </Wrapper>

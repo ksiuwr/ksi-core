@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ArrowUpRight } from '@lucide/svelte';
+  import { ClickableCard, HStack, Text, VStack } from '@astryx-sv/core';
   import FieldTag from './FieldTag.svelte';
   import ProjectCover from './ProjectCover.svelte';
 
@@ -16,36 +16,31 @@
   } = $props();
 </script>
 
-<a
+<ClickableCard
   href={`/projects/${encodeURIComponent(project.slug)}`}
-  class="group surface-card surface-card-link text-ink flex min-w-0 flex-col overflow-hidden"
+  label={project.name}
+  padding={0}
+  elevation="low"
 >
-  <ProjectCover
-    slug={project.slug}
-    fields={project.fields}
-    class="border-line aspect-[5/3] border-b"
-  />
-  <div class="flex flex-1 flex-col p-5">
-    {#if project.fields?.length}
-      <div class="mb-3 flex flex-wrap gap-1.5">
-        {#each project.fields as field (field)}<FieldTag {field} />{/each}
-      </div>
-    {/if}
-    <h3 class="text-xl tracking-tight wrap-anywhere">{project.name}</h3>
-    {#if project.description}
-      <p class="text-muted mt-2 line-clamp-3 text-[13.5px] leading-relaxed wrap-anywhere">
-        {project.description}
-      </p>
-    {/if}
-    <div class="mt-auto flex items-end justify-between gap-4 pt-5">
-      <span class="text-muted min-w-0 truncate font-mono text-[11px]">
+  <VStack gap={0}>
+    <ProjectCover
+      slug={project.slug}
+      fields={project.fields}
+      class="border-line aspect-[5/3] border-b"
+    />
+    <VStack gap={3} padding={5}>
+      {#if project.fields?.length}
+        <HStack gap={1.5} wrap="wrap">
+          {#each project.fields as field}<FieldTag {field} />{/each}
+        </HStack>
+      {/if}
+      <Text type="large" weight="semibold" maxLines={2}>{project.name}</Text>
+      {#if project.description}
+        <Text type="supporting" color="secondary" maxLines={3}>{project.description}</Text>
+      {/if}
+      <Text type="code" color="secondary" maxLines={1}>
         {project.tags?.map((tag) => `#${tag}`).join(' ')}
-      </span>
-      <span
-        class="border-line group-hover:bg-ink group-hover:text-paper grid size-8 shrink-0 place-items-center rounded-full border transition-colors"
-      >
-        <ArrowUpRight class="size-4" aria-hidden="true" />
-      </span>
-    </div>
-  </div>
-</a>
+      </Text>
+    </VStack>
+  </VStack>
+</ClickableCard>

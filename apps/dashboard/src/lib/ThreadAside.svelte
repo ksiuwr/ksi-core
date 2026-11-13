@@ -6,6 +6,15 @@
   import { api, errorMessage } from '$lib/api';
   import type { AssignmentMember, Thread } from '$lib/types';
   import { Archive, RotateCcw } from '@lucide/svelte';
+  import {
+    Banner,
+    Button,
+    Divider,
+    MetadataList,
+    MetadataListItem,
+    Text,
+    VStack
+  } from '@astryx-sv/core';
 
   let {
     thread,
@@ -59,32 +68,28 @@
   }
 </script>
 
-<aside class="detail-aside" aria-label={'Szczegóły wątku'}>
-  {#if error}<p class="error" role="alert">{error}</p>{/if}
+<VStack as="aside" class="detail-aside" gap={4} aria-label="Szczegóły wątku">
+  {#if error}<Banner status="error" title={error} role="alert" />{/if}
 
-  <section class="aside-section">
-    <dl class="metadata-list">
-      <div>
-        <dt>Widoczność</dt>
-        <dd>
-          {thread.visibility === 'leaders'
-            ? 'Liderzy'
-            : thread.visibility === 'members'
-              ? 'Członkowie projektu'
-              : 'Członkowie koła'}
-        </dd>
-      </div>
-      {#if created}
-        <div>
-          <dt>Utworzono</dt>
-          <dd><time datetime={thread.createdAt}>{created}</time></dd>
-        </div>
-      {/if}
-    </dl>
-  </section>
+  <Divider />
+  <MetadataList>
+    <MetadataListItem label="Widoczność">
+      {thread.visibility === 'leaders'
+        ? 'Liderzy'
+        : thread.visibility === 'members'
+          ? 'Członkowie projektu'
+          : 'Członkowie koła'}
+    </MetadataListItem>
+    {#if created}
+      <MetadataListItem label="Utworzono">
+        <time datetime={thread.createdAt}>{created}</time>
+      </MetadataListItem>
+    {/if}
+  </MetadataList>
 
-  <section class="aside-section">
-    <h2>Przypisane osoby</h2>
+  <Divider />
+  <VStack gap={2}>
+    <Text type="label" weight="semibold" color="secondary">Przypisane osoby</Text>
     <Assignees
       value={thread.assigneeIds ?? []}
       {members}
@@ -92,23 +97,30 @@
       disabled={busy || archived}
       onchange={updateAssignees}
     />
-  </section>
+  </VStack>
 
-  <section class="aside-section">
-    <h2>Powiadomienia</h2>
+  <Divider />
+  <VStack gap={2}>
+    <Text type="label" weight="semibold" color="secondary">Powiadomienia</Text>
     {#key (thread.assigneeIds ?? []).join(',')}
       <WatchButton type="thread" id={thread.id} showLabel />
     {/key}
-  </section>
+  </VStack>
 
-  <section class="aside-section aside-actions">
-    {#if canManage}
-      <button class="btn btn-outline" disabled={busy} onclick={toggleArchive}>
-        {#if archived}<RotateCcw size={15} aria-hidden="true" />Przywróć wątek{:else}<Archive
+  {#if canManage}
+    <Divider />
+    <Button
+      variant="secondary"
+      label={archived ? 'Przywróć wątek' : 'Zarchiwizuj wątek'}
+      isDisabled={busy}
+      onclick={toggleArchive}
+    >
+      {#snippet icon()}
+        {#if archived}<RotateCcw size={15} aria-hidden="true" />{:else}<Archive
             size={15}
             aria-hidden="true"
-          />Zarchiwizuj wątek{/if}
-      </button>
-    {/if}
-  </section>
-</aside>
+          />{/if}
+      {/snippet}
+    </Button>
+  {/if}
+</VStack>

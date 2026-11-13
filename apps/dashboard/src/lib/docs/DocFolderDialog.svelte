@@ -13,6 +13,16 @@
   import { preferences } from '$lib/preferences.svelte';
   import { docsRequest, errorCode } from './docs';
   import DocError from './DocError.svelte';
+  import {
+    Button,
+    Dialog,
+    DialogHeader,
+    HStack,
+    Icon,
+    Text,
+    TextInput,
+    VStack
+  } from '@astryx-sv/core';
 
   let {
     open,
@@ -36,7 +46,6 @@
     ondeleted?: () => void | Promise<void>;
   } = $props();
   const uid = $props.id();
-  let dialog = $state<HTMLDialogElement>();
   const savedNames = (): Record<ContentLocale, string> =>
     ({
       [primaryContentLocale]: folder?.name ?? '',
@@ -55,6 +64,7 @@
   let busy = $state(false);
   let error = $state('');
   let confirmingDelete = $state(false);
+  let wasOpen = false;
   const hasContents = $derived(
     !!folder &&
       (folders.some((item) => item.parentId === folder.id) ||
@@ -64,17 +74,19 @@
   const added = $derived<ContentLocale[]>(
     translationLocales.filter((locale) => names[locale].trim())
   );
+  const title = $derived(
+    confirmingDelete ? 'Usunąć folder?' : folder ? 'Edytuj folder' : 'Nowy folder'
+  );
 
   $effect(() => {
-    if (!dialog) return;
-    if (open && !dialog.open) {
+    if (open && !wasOpen) {
       names = savedNames();
       editing = primaryContentLocale;
       parent = (folder ? folder.parentId : parentId) ?? '';
       error = '';
       confirmingDelete = false;
-      dialog.showModal();
-    } else if (!open && dialog.open) dialog.close();
+    }
+    wasOpen = open;
   });
 
   async function save(event: SubmitEvent) {
@@ -120,78 +132,75 @@
   }
 </script>
 
-<dialog
-  bind:this={dialog}
-  class="folder-dialog"
-  aria-labelledby={`${uid}-title`}
-  oncancel={(event) => {
-    event.preventDefault();
-    if (!busy) onclose();
+<Dialog
+  isOpen={open}
+  onOpenChange={(next) => {
+    if (!next && !busy) onclose();
   }}
+  purpose="form"
+  width={520}
+  padding={6}
 >
-  <form onsubmit={save}>
-    <h2 id={`${uid}-title`}>
-      {#if confirmingDelete}Usunąć folder?{:else if folder}Edytuj folder{:else}Nowy folder{/if}
-    </h2>
+  <VStack gap={4}>
+    <DialogHeader {title} hasDivider={false} />
     <DocError code={error} />
     {#if confirmingDelete && folder}
-      <p class="delete-summary">
+      <Text as="p" class="delete-summary">
         {`Usunąć folder „${docFolderName(folder, preferences.language)}”?`}
-      </p>
-      {#if hasContents}<p class="delete-note">
+      </Text>
+      {#if hasContents}
+        <Text as="p" type="supporting" class="delete-note">
           Przed usunięciem folderu przenieś z niego strony i podfoldery.
-        </p>
-      {:else}<p class="delete-note">
+        </Text>
+      {:else}
+        <Text as="p" type="supporting" class="delete-note">
           Tej czynności nie można cofnąć. Dotychczasowa historia wersji zostanie zachowana.
-        </p>{/if}
-      <div class="folder-actions">
-        <button
-          type="button"
-          class="btn btn-outline"
-          disabled={busy}
+        </Text>
+      {/if}
+      <HStack hAlign="end" gap={2} wrap="wrap">
+        <Button
+          variant="secondary"
+          label="Anuluj"
+          isDisabled={busy}
           onclick={() => {
             confirmingDelete = false;
             error = '';
-          }}>Anuluj</button
-        >
-        <button
-          type="button"
-          class="btn danger-button"
-          disabled={busy || hasContents}
-          onclick={remove}><Trash2 size={15} aria-hidden="true" />Usuń folder</button
-        >
-      </div>
-    {:else}
-      <ContentLocaleEditor
-        bind:selected={editing}
-        {added}
-        {dirty}
-        {busy}
-        saveHint={'Wszystkie wersje językowe są zapisywane razem z folderem.'}
-        onremove={() => {
-          if (editing !== primaryContentLocale) names[editing] = '';
-        }}
-      >
-        {#snippet reference()}<p class="folder-reference" lang={primaryContentLocale}>
-            {names[primaryContentLocale] || 'Brak treści'}
-          </p>{/snippet}
-      </ContentLocaleEditor>
-      <div>
-        <label for={`${uid}-name`}
-          >Nazwa folderu · {contentLocaleName(editing, preferences.language)}</label
-        >
-        <input
-          id={`${uid}-name`}
-          bind:value={names[editing]}
-          required={editing === primaryContentLocale}
-          maxlength="80"
-          pattern="[^\/]+"
-          placeholder={editing === primaryContentLocale ? '' : names[primaryContentLocale]}
-          disabled={busy}
+          }}
         />
-      </div>
-      <div>
-        <label for={`${uid}-parent`}>Folder nadrzędny</label>
+        <Button
+          variant="destructive"
+          label="Usuń folder"
+          isDisabled={busy || hasContents}
+          onclick={remove}
+        >
+          {#snippet icon()}<Icon icon={Trash2} size="sm" />{/snippet}
+        </Button>
+      </HStack>
+    {:else}
+      <VStack as="form" gap={4} onsubmit={save}>
+        <ContentLocaleEditor
+          bind:selected={editing}
+          {added}
+          {dirty}
+          {busy}
+          saveHint={'Wszystkie wersje językowe są zapisywane razem z folderem.'}
+          onremove={() => {
+            if (editing !== primaryContentLocale) names[editing] = '';
+          }}
+        >
+          {#snippet reference()}<p class="folder-reference" lang={primaryContentLocale}>
+              {names[primaryContentLocale] || 'Brak treści'}
+            </p>{/snippet}
+        </ContentLocaleEditor>
+        <TextInput
+          id={`${uid}-name`}
+          label={`Nazwa folderu · ${contentLocaleName(editing, preferences.language)}`}
+          value={names[editing]}
+          isRequired={editing === primaryContentLocale}
+          placeholder={editing === primaryContentLocale ? '' : names[primaryContentLocale]}
+          isDisabled={busy}
+          onChange={(next) => (names[editing] = next.replaceAll('/', '').slice(0, 80))}
+        />
         <DocFolderSelect
           id={`${uid}-parent`}
           bind:value={parent}
@@ -201,76 +210,48 @@
           excludeId={folder?.id}
           disabled={busy}
         />
-      </div>
-      <div class="folder-actions">
-        {#if folder}<button
-            type="button"
-            class="btn ghost delete-folder"
-            disabled={busy}
-            onclick={() => {
-              confirmingDelete = true;
-              error = '';
-            }}><Trash2 size={15} aria-hidden="true" />Usuń folder</button
-          >{/if}
-        <button type="button" class="btn btn-outline" disabled={busy} onclick={onclose}
-          >Anuluj</button
-        >
-        <button class="btn" disabled={busy || !names[primaryContentLocale].trim()}
-          >{#if folder}Zapisz zmiany{:else}Utwórz folder{/if}</button
-        >
-      </div>
+        <HStack hAlign={folder ? 'between' : 'end'} vAlign="center" gap={2} wrap="wrap">
+          {#if folder}
+            <Button
+              variant="ghost"
+              label="Usuń folder"
+              isDisabled={busy}
+              onclick={() => {
+                confirmingDelete = true;
+                error = '';
+              }}
+            >
+              {#snippet icon()}<Icon icon={Trash2} size="sm" />{/snippet}
+            </Button>
+          {/if}
+          <HStack gap={2} wrap="wrap">
+            <Button variant="secondary" label="Anuluj" isDisabled={busy} onclick={onclose} />
+            <Button
+              type="submit"
+              label={folder ? 'Zapisz zmiany' : 'Utwórz folder'}
+              isDisabled={busy || !names[primaryContentLocale].trim()}
+            />
+          </HStack>
+        </HStack>
+      </VStack>
     {/if}
-  </form>
-</dialog>
+  </VStack>
+</Dialog>
 
 <style>
-  .folder-dialog {
-    width: min(520px, calc(100vw - 32px));
-    max-height: calc(100dvh - 32px);
-    padding: 24px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-xl);
-    background: var(--surface);
-    color: var(--ink);
-    box-shadow: var(--shadow-lg);
-  }
-  .folder-dialog::backdrop {
-    background: rgb(12 13 15 / 0.42);
-    backdrop-filter: blur(2px);
-  }
-  form {
-    display: grid;
-    gap: 18px;
-  }
-  h2 {
-    margin: 0;
-    font-size: 20px;
-  }
   .folder-reference {
-    padding: 12px;
+    padding: var(--spacing-3);
     margin: 0;
     overflow-wrap: anywhere;
-    font-size: 13px;
+    font-size: var(--font-size-base);
   }
-  .folder-actions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: 8px;
-  }
-  .delete-folder {
-    margin-right: auto;
-    color: var(--danger);
-  }
-  .delete-summary {
+  :global(.delete-summary) {
     margin: 0;
     overflow-wrap: anywhere;
-    font-size: 14px;
+    font-size: var(--font-size-base);
   }
-  .delete-note {
+  :global(.delete-note) {
     margin: 0;
-    color: var(--muted);
-    font-size: 13px;
     line-height: 1.6;
   }
 </style>

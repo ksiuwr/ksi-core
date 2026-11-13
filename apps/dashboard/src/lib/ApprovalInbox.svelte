@@ -2,6 +2,18 @@
   import { preferences } from '$lib/preferences.svelte';
   import { formatDate } from 'shared/format';
   import { Check, X, UserPlus, Image, Inbox } from '@lucide/svelte';
+  import {
+    Badge,
+    Button,
+    EmptyState,
+    Heading,
+    HStack,
+    List,
+    ListItem,
+    Text,
+    Thumbnail,
+    VStack
+  } from '@astryx-sv/core';
   import type { InboxData } from './types';
   export type { InboxData } from './types';
   let {
@@ -48,135 +60,103 @@
   }
 </script>
 
-<div class="workspace-header">
-  <div>
-    <h1>Skrzynka akceptacji</h1>
-    <p class="workspace-description">Nowe konta i zdjęcia profilowe oczekujące na decyzję.</p>
-  </div>
-</div>
-{#if inbox.memberships.length}<section class="approval-section">
-    <h2>
-      <UserPlus size={19} aria-hidden="true" />Nowe konta<span class="tag"
-        >{inbox.memberships.length}</span
-      >
-    </h2>
-    {#each inbox.memberships as member (member.id)}<article class="approval-card">
-        <div>
-          <h3>{member.name || member.email}</h3>
-          <p>{member.email}</p>
-          <time datetime={member.createdAt}>{formatDate(member.createdAt, language)}</time>
-        </div>
-        <div class="approval-actions">
-          <button class="btn" disabled={busy} onclick={() => review('members', member.id, true)}
-            ><Check size={15} aria-hidden="true" />Aktywuj</button
-          >{#if administrator}<button
-              class="btn btn-outline"
-              disabled={busy}
-              onclick={() => review('members', member.id, false)}
-              ><X size={15} aria-hidden="true" />Odrzuć</button
-            >{/if}
-        </div>
-      </article>{/each}
-  </section>{/if}
-{#if inbox.avatars.length}<section class="approval-section">
-    <h2>
-      <Image size={19} aria-hidden="true" />Zdjęcia profilowe<span class="tag"
-        >{inbox.avatars.length}</span
-      >
-    </h2>
-    {#each inbox.avatars as avatar (avatar.userId)}<article class="approval-card">
-        <img
-          class="approval-avatar"
-          src={`/media/${avatar.fileId}`}
-          alt={`Zaproponowany awatar: ${avatar.name}`}
-        />
-        <div class="approval-info">
-          <h3>{avatar.name}</h3>
-          <p>Nowe zdjęcie staje się publiczne po zatwierdzeniu.</p>
-        </div>
-        <div class="approval-actions">
-          <button
-            class="btn"
-            disabled={busy}
-            onclick={() => review('avatars', avatar.userId, true, avatar.version)}
-            ><Check size={15} aria-hidden="true" />Zatwierdź</button
-          ><button
-            class="btn btn-outline"
-            disabled={busy}
-            onclick={() => review('avatars', avatar.userId, false, avatar.version)}
-            ><X size={15} aria-hidden="true" />Odrzuć</button
-          >
-        </div>
-      </article>{/each}
-  </section>{/if}
-{#if !inbox.memberships.length && !inbox.avatars.length}<div class="empty-state">
-    <Inbox size={30} aria-hidden="true" />
-    <h2>Wszystko sprawdzone</h2>
-    <p>Nowe prośby pojawią się tu automatycznie.</p>
-  </div>{/if}
+<VStack gap={1}>
+  <Heading level={1}>Skrzynka akceptacji</Heading>
+  <Text color="secondary">Nowe konta i zdjęcia profilowe oczekujące na decyzję.</Text>
+</VStack>
 
-<style>
-  .approval-section {
-    margin-bottom: 32px;
-  }
-  .approval-section h2 {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 17px;
-    margin-bottom: 16px;
-  }
-  .approval-card {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 20px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-xl);
-    background: var(--surface);
-    margin-bottom: 12px;
-  }
-  .approval-card h3 {
-    font-size: 15px;
-  }
-  .approval-card p,
-  .approval-card time {
-    color: var(--muted);
-    font-size: 12px;
-    overflow-wrap: anywhere;
-  }
-  .approval-card time {
-    display: block;
-    margin-top: 8px;
-  }
-  .approval-info {
-    flex: 1;
-  }
-  .approval-actions {
-    margin-left: auto;
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    flex-shrink: 0;
-  }
-  .approval-avatar {
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-md);
-  }
-  @media (max-width: 760px) {
-    .approval-card {
-      flex-wrap: wrap;
-      padding: 16px;
-    }
-    .approval-actions {
-      margin: 0;
-      width: 100%;
-    }
-    .approval-info {
-      min-width: 160px;
-    }
-  }
-</style>
+{#if inbox.memberships.length}
+  <VStack gap={3}>
+    <HStack gap={2} vAlign="center">
+      <UserPlus size={19} aria-hidden="true" />
+      <Heading level={2}>Nowe konta</Heading>
+      <Badge label={String(inbox.memberships.length)} variant="neutral" />
+    </HStack>
+    <List hasDividers edge="bleed">
+      {#each inbox.memberships as member (member.id)}
+        <ListItem label={member.name || member.email}>
+          {#snippet description()}
+            <VStack gap={0}>
+              <Text type="supporting" color="secondary">{member.email}</Text>
+              <Text type="supporting" color="secondary">
+                <time datetime={member.createdAt}>{formatDate(member.createdAt, language)}</time>
+              </Text>
+            </VStack>
+          {/snippet}
+          {#snippet endContent()}
+            <HStack gap={2} wrap="wrap">
+              <Button
+                label="Aktywuj"
+                isDisabled={busy}
+                onclick={() => review('members', member.id, true)}
+              >
+                {#snippet icon()}<Check size={15} aria-hidden="true" />{/snippet}
+              </Button>
+              {#if administrator}
+                <Button
+                  variant="secondary"
+                  label="Odrzuć"
+                  isDisabled={busy}
+                  onclick={() => review('members', member.id, false)}
+                >
+                  {#snippet icon()}<X size={15} aria-hidden="true" />{/snippet}
+                </Button>
+              {/if}
+            </HStack>
+          {/snippet}
+        </ListItem>
+      {/each}
+    </List>
+  </VStack>
+{/if}
+
+{#if inbox.avatars.length}
+  <VStack gap={3}>
+    <HStack gap={2} vAlign="center">
+      <Image size={19} aria-hidden="true" />
+      <Heading level={2}>Zdjęcia profilowe</Heading>
+      <Badge label={String(inbox.avatars.length)} variant="neutral" />
+    </HStack>
+    <List hasDividers edge="bleed">
+      {#each inbox.avatars as avatar (avatar.userId)}
+        <ListItem
+          label={avatar.name}
+          description="Nowe zdjęcie staje się publiczne po zatwierdzeniu."
+        >
+          {#snippet startContent()}
+            <Thumbnail
+              src={`/media/${avatar.fileId}`}
+              alt={`Zaproponowany awatar: ${avatar.name}`}
+              label={`Zaproponowany awatar: ${avatar.name}`}
+            />
+          {/snippet}
+          {#snippet endContent()}
+            <HStack gap={2} wrap="wrap">
+              <Button
+                label="Zatwierdź"
+                isDisabled={busy}
+                onclick={() => review('avatars', avatar.userId, true, avatar.version)}
+              >
+                {#snippet icon()}<Check size={15} aria-hidden="true" />{/snippet}
+              </Button>
+              <Button
+                variant="secondary"
+                label="Odrzuć"
+                isDisabled={busy}
+                onclick={() => review('avatars', avatar.userId, false, avatar.version)}
+              >
+                {#snippet icon()}<X size={15} aria-hidden="true" />{/snippet}
+              </Button>
+            </HStack>
+          {/snippet}
+        </ListItem>
+      {/each}
+    </List>
+  </VStack>
+{/if}
+
+{#if !inbox.memberships.length && !inbox.avatars.length}
+  <EmptyState title="Wszystko sprawdzone" description="Nowe prośby pojawią się tu automatycznie.">
+    {#snippet icon()}<Inbox size={30} aria-hidden="true" />{/snippet}
+  </EmptyState>
+{/if}

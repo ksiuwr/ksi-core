@@ -2,6 +2,7 @@
   import { onMount, untrack } from 'svelte';
   import { slider } from '@ksi-core/ui/platform/slider';
   import type { Component } from 'svelte';
+  import { List, ListItem, Text } from '@astryx-sv/core';
 
   type Item = { id: string; label: string; icon?: Component<{ size?: number }>; danger?: boolean };
 
@@ -27,15 +28,32 @@
 </script>
 
 <nav class="settings-nav" aria-label={label} use:slider>
-  {#each items as item (item.id)}
-    <a
-      href={`#${item.id}`}
-      class:active={active === item.id}
-      class:danger={item.danger}
-      aria-current={active === item.id ? 'location' : undefined}
-      onclick={() => (active = item.id)}
-    >
-      {#if item.icon}<item.icon size={15} />{/if}{item.label}
-    </a>
-  {/each}
+  <List>
+    {#each items as item (item.id)}
+      <ListItem
+        href={`#${item.id}`}
+        class={active === item.id ? 'active' : ''}
+        isSelected={active === item.id}
+        onclick={() => (active = item.id)}
+      >
+        {#snippet label()}
+          <Text as="span" class={item.danger ? 'danger' : ''} color="inherit">
+            {item.label}
+          </Text>
+        {/snippet}
+        {#snippet startContent()}
+          {#if item.icon}
+            {@const ItemIcon = item.icon}
+            <ItemIcon size={15} />
+          {/if}
+        {/snippet}
+      </ListItem>
+    {/each}
+  </List>
 </nav>
+
+<style>
+  :global(.danger) {
+    color: var(--color-error);
+  }
+</style>

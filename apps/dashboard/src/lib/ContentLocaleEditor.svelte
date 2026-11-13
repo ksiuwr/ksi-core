@@ -1,7 +1,18 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import { ChevronDown, Eye, Languages, Save, Trash2, X } from '@lucide/svelte';
-  import Dropdown, { type DropdownOption } from '@ksi-core/ui/platform/Dropdown.svelte';
+  import {
+    Badge,
+    Button,
+    Card,
+    Heading,
+    HStack,
+    IconButton,
+    Selector,
+    StatusDot,
+    Text,
+    VStack
+  } from '@astryx-sv/core';
   import {
     contentLocaleName,
     contentLocales,
@@ -40,7 +51,8 @@
   const uiLanguage = $derived(preferences.language);
   const localeLabel = (locale: ContentLocale) => contentLocaleName(locale, uiLanguage);
   const translationExists = $derived(added.includes(selected));
-  const languageOptions = $derived<DropdownOption[]>(
+  const translating = $derived(selected !== primaryContentLocale);
+  const languageOptions = $derived(
     contentLocales.map((locale) => ({
       value: locale,
       label: contentLocaleName(locale, locale),
@@ -49,9 +61,7 @@
           ? 'Język główny'
           : added.includes(locale)
             ? 'Tłumaczenie dodane'
-            : 'Nie dodano',
-      indicator:
-        locale === primaryContentLocale ? 'Główny' : added.includes(locale) ? 'Dodano' : undefined
+            : 'Nie dodano'
     }))
   );
   function selectLanguage(value: string) {
@@ -62,352 +72,143 @@
   }
 </script>
 
-<div class="localization">
-  <div class="language-bar">
-    <div class="language-title">
-      <Languages size={17} aria-hidden="true" />
-      <strong>Język treści</strong>
-    </div>
+<VStack gap={3} class="localization">
+  <Card>
+    <HStack gap={3} vAlign="center" justify="between" wrap="wrap">
+      <HStack gap={2} vAlign="center">
+        <Languages size={17} aria-hidden="true" />
+        <Text type="label" weight="semibold">Język treści</Text>
+      </HStack>
 
-    <div class="language-actions">
-      <div
-        class="translation-tools-reveal"
-        class:open={selected !== primaryContentLocale}
-        aria-hidden={selected === primaryContentLocale}
-        inert={selected === primaryContentLocale}
-      >
-        <div class="translation-tools">
-          <button
-            type="button"
-            class="btn btn-outline reference-button"
+      <HStack gap={2} vAlign="center" wrap="wrap">
+        {#if translating}
+          <Button
+            variant="secondary"
+            label="Polski tekst źródłowy"
             aria-expanded={referenceOpen}
             onclick={() => (referenceOpen = !referenceOpen)}
           >
-            <Eye size={15} aria-hidden="true" />Polski tekst źródłowy
-            <ChevronDown size={14} aria-hidden="true" class={referenceOpen ? 'open' : ''} />
-          </button>
+            {#snippet icon()}<Eye size={15} aria-hidden="true" />{/snippet}
+            {#snippet endContent()}
+              <ChevronDown
+                size={14}
+                aria-hidden="true"
+                class={referenceOpen ? 'chevron open' : 'chevron'}
+              />
+            {/snippet}
+          </Button>
           {#if confirmingRemoval}
-            <button
-              type="button"
-              class="btn danger-button"
-              disabled={busy}
+            <Button
+              variant="destructive"
+              label="Usuń trwale"
+              isDisabled={busy}
               onclick={async () => {
                 await onremove?.();
                 confirmingRemoval = false;
               }}
             >
-              <Trash2 size={15} aria-hidden="true" />Usuń trwale
-            </button>
-            <button
-              type="button"
-              class="btn btn-outline"
-              disabled={busy}
+              {#snippet icon()}<Trash2 size={15} aria-hidden="true" />{/snippet}
+            </Button>
+            <Button
+              variant="secondary"
+              label="Anuluj"
+              isDisabled={busy}
               onclick={() => (confirmingRemoval = false)}
-              ><X size={15} aria-hidden="true" />Anuluj</button
             >
+              {#snippet icon()}<X size={15} aria-hidden="true" />{/snippet}
+            </Button>
           {:else}
             {#if translationExists && onremove}
-              <button
-                type="button"
-                class="btn btn-outline remove-button"
-                disabled={busy}
-                aria-label={`Usuń tłumaczenie: ${localeLabel(selected)}`}
-                title={`Usuń tłumaczenie: ${localeLabel(selected)}`}
+              <IconButton
+                label={`Usuń tłumaczenie: ${localeLabel(selected)}`}
+                tooltip={`Usuń tłumaczenie: ${localeLabel(selected)}`}
+                variant="secondary"
+                isDisabled={busy}
                 onclick={() => (confirmingRemoval = true)}
-                ><Trash2 size={15} aria-hidden="true" /></button
               >
+                {#snippet icon()}<Trash2 size={15} aria-hidden="true" />{/snippet}
+              </IconButton>
             {/if}
             {#if onsave}
-              <button
-                type="button"
-                class="btn"
-                disabled={busy || !canSave}
+              <Button
+                label="Zapisz tłumaczenie"
+                isDisabled={busy || !canSave}
+                isLoading={busy}
                 onclick={() => onsave?.()}
-                ><Save size={15} aria-hidden="true" />Zapisz tłumaczenie</button
               >
+                {#snippet icon()}<Save size={15} aria-hidden="true" />{/snippet}
+              </Button>
             {/if}
           {/if}
-        </div>
-      </div>
+        {/if}
+        <VStack class="language-selector" gap={0}>
+          <Selector
+            label="Język treści"
+            isLabelHidden
+            value={selected}
+            options={languageOptions}
+            isDisabled={busy}
+            onChange={selectLanguage}
+          />
+        </VStack>
+      </HStack>
+    </HStack>
+  </Card>
 
-      <Dropdown
-        label={'Język treści'}
-        value={selected}
-        options={languageOptions}
-        onselect={selectLanguage}
-        disabled={busy}
-        variant="compact"
+  {#if translating}
+    <HStack gap={2} vAlign="center" wrap="wrap">
+      <Badge
+        label={translationExists ? 'Dodano' : 'Nowe'}
+        variant={translationExists ? 'success' : 'neutral'}
       />
-    </div>
-  </div>
-
-  <div
-    class="translation-context-reveal"
-    class:open={selected !== primaryContentLocale}
-    aria-hidden={selected === primaryContentLocale}
-  >
-    <div>
-      <div class="translation-context">
-        <span class="tag">{translationExists ? 'Dodano' : 'Nowe'}</span>
-        <p>
-          Edytujesz tłumaczenie: {localeLabel(selected)}. Puste pola użyją polskiej wartości
-          widocznej w podglądzie.
-        </p>
-        {#if dirty}<span class="dirty"><span></span>Niezapisane zmiany</span>{/if}
-      </div>
-      {#if saveHint}<p class="save-hint">{saveHint}</p>{/if}
-    </div>
-  </div>
+      <Text type="supporting" color="secondary">
+        Edytujesz tłumaczenie: {localeLabel(selected)}. Puste pola użyją polskiej wartości widocznej
+        w podglądzie.
+      </Text>
+      {#if dirty}
+        <HStack gap={1} vAlign="center">
+          <StatusDot variant="warning" label="Niezapisane zmiany" />
+          <Text type="supporting" color="secondary">Niezapisane zmiany</Text>
+        </HStack>
+      {/if}
+    </HStack>
+    {#if saveHint}<Text type="supporting" color="secondary">{saveHint}</Text>{/if}
+  {/if}
 
   {#if messages}{@render messages()}{/if}
 
-  <div
-    class="reference-reveal"
-    class:open={selected !== primaryContentLocale && referenceOpen}
-    aria-hidden={selected === primaryContentLocale || !referenceOpen}
-    inert={selected === primaryContentLocale || !referenceOpen}
-  >
-    <div>
-      <div class="reference-panel">
-        <header>
-          <div><strong>Polski tekst źródłowy</strong><span>Tylko do odczytu</span></div>
-          <p>Użyj tego tekstu jako kontekstu podczas pisania tłumaczenia.</p>
-        </header>
+  {#if translating && referenceOpen}
+    <Card variant="muted">
+      <VStack gap={3}>
+        <HStack gap={2} vAlign="center" justify="between" wrap="wrap">
+          <VStack gap={0}>
+            <Heading level={3}>Polski tekst źródłowy</Heading>
+            <Text type="supporting" color="secondary">Tylko do odczytu</Text>
+          </VStack>
+          <Text type="supporting" color="secondary">
+            Użyj tego tekstu jako kontekstu podczas pisania tłumaczenia.
+          </Text>
+        </HStack>
         {@render reference()}
-      </div>
-    </div>
-  </div>
-</div>
+      </VStack>
+    </Card>
+  {/if}
+</VStack>
 
 <style>
-  .localization {
-    margin-bottom: 16px;
-    container-type: inline-size;
-  }
-  .language-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 8px 16px;
-    padding: 10px 12px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    background: var(--surface);
-  }
-  .language-title,
-  .language-actions {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-  }
-  .language-title > :global(svg) {
-    color: var(--muted);
-    flex-shrink: 0;
-  }
-  .language-title strong {
-    font-size: 12px;
-    white-space: nowrap;
-  }
-  .language-actions {
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-  .language-actions :global(.dropdown) {
-    flex: 0 0 165px;
+  :global(.language-selector) {
     width: 165px;
+    min-width: 0;
   }
-  .translation-tools-reveal {
-    flex: 0 0 auto;
-    max-width: 0;
-    max-height: 60px;
-    margin-inline-end: -9px;
-    overflow: hidden;
-    opacity: 0;
-    transform: translateX(-7px);
-    transition:
-      max-width var(--dur, 180ms) var(--ease-out),
-      max-height var(--dur, 180ms) var(--ease-out),
-      margin var(--dur, 180ms) var(--ease-out),
-      opacity var(--dur-fast, 140ms) ease,
-      transform var(--dur, 180ms) var(--ease-out);
+  :global(.chevron) {
+    transition: transform var(--duration-fast) ease;
   }
-  .translation-tools-reveal.open {
-    max-width: 650px;
-    margin-inline-end: 0;
-    opacity: 1;
-    transform: translateX(0);
-  }
-  .translation-tools {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    width: max-content;
-  }
-  .reference-button :global(svg:last-child) {
-    transition: transform var(--dur-fast, 140ms) var(--ease-out);
-  }
-  .reference-button :global(svg:last-child.open) {
+  :global(.chevron.open) {
     transform: rotate(180deg);
   }
-  .remove-button {
-    width: 34px;
-    padding: 0;
-    color: var(--danger);
-  }
-  .translation-context-reveal {
-    display: grid;
-    grid-template-rows: 0fr;
-    opacity: 0;
-    transform: translateY(-4px);
-    transition:
-      grid-template-rows var(--dur, 180ms) var(--ease-out),
-      opacity var(--dur-fast, 140ms) ease,
-      transform var(--dur, 180ms) var(--ease-out);
-  }
-  .translation-context-reveal.open {
-    grid-template-rows: 1fr;
-    opacity: 1;
-    transform: translateY(0);
-  }
-  .translation-context-reveal > div {
-    min-height: 0;
-    overflow: hidden;
-  }
-  .translation-context {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 9px 12px 0;
-  }
-  .translation-context p {
-    flex: 1;
-    margin: 0;
-    color: var(--muted);
-    font-size: 12px;
-  }
-  .dirty {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    color: var(--muted);
-    font-size: 11px;
-  }
-  .dirty > span {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-  }
-  .reference-reveal {
-    display: grid;
-    grid-template-rows: 0fr;
-    opacity: 0;
-    transform: translateY(-5px);
-    transition:
-      grid-template-rows var(--dur, 180ms) var(--ease-out),
-      opacity var(--dur-fast, 140ms) ease,
-      transform var(--dur, 180ms) var(--ease-out);
-  }
-  .reference-reveal.open {
-    grid-template-rows: 1fr;
-    opacity: 1;
-    transform: translateY(0);
-  }
-  .reference-reveal > div {
-    min-height: 0;
-    overflow: hidden;
-  }
-  .reference-panel {
-    margin-top: 10px;
-    overflow: hidden;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    background: var(--surface-muted);
-  }
-  .reference-panel > header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--line);
-  }
-  .reference-panel header div {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-  }
-  .reference-panel header span,
-  .reference-panel header p {
-    color: var(--muted);
-    font-size: 11px;
-  }
-  .reference-panel header p {
-    margin: 0;
-  }
-  .save-hint {
-    margin: 8px 12px 0;
-    color: var(--muted);
-    font-size: 12px;
-  }
-  @container (max-width: 460px) {
-    .language-bar,
-    .language-actions {
-      align-items: stretch;
-      flex-direction: column;
-    }
-    .language-actions :global(.dropdown) {
-      order: -1;
-      flex: none;
+  @media (max-width: 460px) {
+    :global(.language-selector) {
       width: 100%;
-    }
-    .language-actions .btn {
-      width: 100%;
-    }
-    .translation-tools-reveal,
-    .translation-tools-reveal.open {
-      width: 100%;
-      max-width: none;
-      margin: 0;
-      transform: translateY(-4px);
-    }
-    .translation-tools-reveal {
-      max-height: 0;
-    }
-    .translation-tools-reveal.open {
-      max-height: 220px;
-      transform: translateY(0);
-    }
-    .translation-tools {
-      flex-direction: column;
-      width: 100%;
-    }
-    .translation-context {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 8px;
-      align-items: center;
-    }
-    .translation-context > .tag {
-      justify-self: start;
-    }
-    .translation-context p {
-      grid-column: 1 / -1;
-      grid-row: 2;
-    }
-    .reference-panel > header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 4px;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .reference-reveal,
-    .translation-context-reveal,
-    .translation-tools-reveal,
-    .reference-button :global(svg:last-child) {
-      transition: none;
     }
   }
 </style>

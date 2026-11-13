@@ -2,10 +2,6 @@
   import { preferences } from '$lib/preferences.svelte';
   import { formatDateTime, formatRelativeTime } from 'shared/format';
   import { onMount } from 'svelte';
-  import { flip } from 'svelte/animate';
-  import { fade, fly, scale } from 'svelte/transition';
-  import { backOut } from 'svelte/easing';
-  import { prefersReducedMotion } from 'svelte/motion';
   import { notificationAction, type NotificationContext } from 'shared/notifications';
   import {
     Bell,
@@ -19,6 +15,21 @@
     CircleDot,
     MessageSquare
   } from '@lucide/svelte';
+  import {
+    Avatar,
+    Divider,
+    EmptyState,
+    HStack,
+    IconButton,
+    Link,
+    List,
+    ListItem,
+    SegmentedControl,
+    SegmentedControlItem,
+    Text,
+    Thumbnail,
+    VStack
+  } from '@astryx-sv/core';
   import type { InboxData } from './types';
   let {
     fullPage = false,
@@ -45,8 +56,7 @@
   const uid = $props.id();
   let open = $state(false);
   let filter = $state<'all' | 'unread'>('unread');
-  let trigger = $state<HTMLButtonElement>();
-  let panel = $state<HTMLDivElement>();
+  let panel = $state<HTMLElement>();
   let loaded = $state(false);
   let now = $state(Date.now());
   let items = $state<Notification[]>([]),
@@ -105,80 +115,13 @@
   const filtered = $derived(entries.filter((entry) => filter === 'all' || entry.unread));
   const preview = $derived(fullPage ? filtered : filtered.slice(0, 8));
 
-  function filterIndicator(node: HTMLDivElement, selected: 'all' | 'unread') {
-    let selection = selected;
-    const measure = () => {
-      const button = node.querySelector<HTMLButtonElement>(`[data-filter="${selection}"]`);
-      if (!button) return;
-      node.style.setProperty('--filter-left', `${button.offsetLeft}px`);
-      node.style.setProperty('--filter-width', `${button.offsetWidth}px`);
-    };
-    const observer = new ResizeObserver(measure);
-    observer.observe(node);
-    for (const button of node.querySelectorAll('button')) observer.observe(button);
-    measure();
-    return {
-      update(next: 'all' | 'unread') {
-        selection = next;
-        measure();
-      },
-      destroy() {
-        observer.disconnect();
-      }
-    };
-  }
-
-  function resizePanel(node: HTMLDivElement) {
-    if (fullPage) return;
-    const measure = () => {
-      const content = node.querySelector<HTMLElement>('.notification-content');
-      if (!content) return;
-      const contentHeight = Array.from(content.children).reduce(
-        (height, child) => height + (child as HTMLElement).offsetHeight,
-        0
-      );
-      const fixedHeight = Array.from(node.children).reduce(
-        (height, child) => height + (child === content ? 0 : (child as HTMLElement).offsetHeight),
-        0
-      );
-      const style = getComputedStyle(node);
-      const naturalHeight =
-        contentHeight +
-        fixedHeight +
-        parseFloat(style.borderTopWidth) +
-        parseFloat(style.borderBottomWidth);
-      node.style.height = `${Math.min(naturalHeight, parseFloat(style.maxHeight) || naturalHeight)}px`;
-    };
-    const observer = new ResizeObserver(measure);
-    const observe = () => {
-      observer.disconnect();
-      for (const child of node.children) {
-        if (child.classList.contains('notification-content')) {
-          for (const body of child.children) observer.observe(body);
-        } else observer.observe(child);
-      }
-      measure();
-    };
-    const mutations = new MutationObserver(observe);
-    mutations.observe(node, { childList: true, subtree: true });
-    observe();
-    window.addEventListener('resize', measure);
-    return {
-      destroy() {
-        observer.disconnect();
-        mutations.disconnect();
-        window.removeEventListener('resize', measure);
-      }
-    };
-  }
-
-  function close(restoreFocus = false) {
+  function close() {
     open = false;
-    if (restoreFocus) trigger?.focus();
   }
-  function positionPanel(node: HTMLDivElement) {
+  function positionPanel(node: HTMLElement) {
     if (fullPage) return;
     const position = () => {
+      const trigger = document.getElementById(`${uid}-trigger`);
       if (!trigger) return;
       const rect = trigger.getBoundingClientRect();
       const width = Math.min(420, window.innerWidth - 24);
@@ -199,13 +142,9 @@
     };
   }
   function outside(event: Event) {
-    if (
-      open &&
-      event.target instanceof Node &&
-      !panel?.contains(event.target) &&
-      !trigger?.contains(event.target)
-    )
-      close();
+    if (!open || !(event.target instanceof Node)) return;
+    const trigger = document.getElementById(`${uid}-trigger`);
+    if (!panel?.contains(event.target) && !trigger?.contains(event.target)) close();
   }
   function relativeTime(date: string) {
     return formatRelativeTime(date, language, now, 'short');
@@ -296,22 +235,29 @@
   onkeydown={(event) => {
     if (open && event.key === 'Escape') {
       event.preventDefault();
-      close(true);
+      close();
     }
   }}
 />
 
+{#snippet bellIcon()}
+  <span class="bell-wrap">
+    <Bell size={18} aria-hidden="true" />
+    {#if totalUnread}<span class="notification-dot" aria-hidden="true"></span>{/if}
+  </span>
+{/snippet}
+
 {#if !fullPage}
-  <button
-    bind:this={trigger}
-    type="button"
-    class="topbar-control notification-trigger"
-    class:active={open}
-    aria-label={`${'Powiadomienia'}${totalUnread ? ` (${totalUnread})` : ''}`}
-    title={'Powiadomienia'}
+  <IconButton
+    id={`${uid}-trigger`}
+    label={`Powiadomienia${totalUnread ? ` (${totalUnread})` : ''}`}
+    tooltip="Powiadomienia"
+    variant={open ? 'secondary' : 'ghost'}
+    size="sm"
     aria-expanded={open}
     aria-controls={open ? `${uid}-panel` : undefined}
     aria-haspopup="dialog"
+    icon={bellIcon}
     onclick={() => {
       open = !open;
       if (open) {
@@ -319,194 +265,199 @@
         void load();
       }
     }}
-  >
-    <Bell size={18} aria-hidden="true" />
-    {#if totalUnread}<span class="notification-dot" aria-hidden="true"></span>{/if}
-  </button>
+  />
 {/if}
 
 {#if open || fullPage}
-  <div
+  <section
     bind:this={panel}
     use:positionPanel
-    use:resizePanel
-    transition:scale={{
-      start: 0.98,
-      duration: fullPage || prefersReducedMotion.current ? 0 : 180,
-      easing: backOut
-    }}
     id={`${uid}-panel`}
     class="notification-panel"
     class:full-page={fullPage}
     role={fullPage ? 'region' : 'dialog'}
-    aria-label={'Powiadomienia'}
+    aria-label="Powiadomienia"
     tabindex="-1"
   >
-    <header class="panel-header">
-      <h2>Powiadomienia</h2>
-      <div class="header-actions">
-        <button
-          class="menu-icon"
-          type="button"
-          disabled={busy || !unread}
-          onclick={() => read()}
-          aria-label={'Oznacz wszystkie jako przeczytane'}
-          title={'Oznacz wszystkie jako przeczytane'}><CheckCheck size={17} /></button
+    <VStack gap={0}>
+      <HStack gap={2} vAlign="center" padding={3}>
+        <Text type="label" weight="semibold">Powiadomienia</Text>
+        <HStack gap={0} justify="end" class="header-actions">
+          <IconButton
+            label="Oznacz wszystkie jako przeczytane"
+            tooltip="Oznacz wszystkie jako przeczytane"
+            variant="ghost"
+            size="sm"
+            isDisabled={busy || !unread}
+            onclick={() => void read()}
+          >
+            {#snippet icon()}<CheckCheck size={17} aria-hidden="true" />{/snippet}
+          </IconButton>
+        </HStack>
+      </HStack>
+      {#if error}
+        <Text role="alert" class="notification-error">{error}</Text>
+      {/if}
+      <HStack paddingInline={3} paddingBlock={2}>
+        <SegmentedControl
+          value={filter}
+          onChange={(value) => (filter = value as 'all' | 'unread')}
+          label="Filtr powiadomień"
+          size="sm"
         >
-      </div>
-    </header>
-    {#if error}<p role="alert" class="notification-error">{error}</p>{/if}
-    <div
-      class="filter-bar"
-      use:filterIndicator={filter}
-      role="group"
-      aria-label={'Filtr powiadomień'}
-    >
-      <button
-        type="button"
-        data-filter="unread"
-        class:selected={filter === 'unread'}
-        aria-pressed={filter === 'unread'}
-        onclick={() => (filter = 'unread')}
-        >Nieprzeczytane<span class="count">{totalUnread}</span></button
-      >
-      <button
-        type="button"
-        data-filter="all"
-        class:selected={filter === 'all'}
-        aria-pressed={filter === 'all'}
-        onclick={() => (filter = 'all')}>Wszystkie</button
-      >
-      <span class="filter-indicator" aria-hidden="true"></span>
-    </div>
-    <div class="notification-content" aria-busy={busy}>
-      {#if preview.length}
-        <ul class="notification-list">
-          {#each preview as entry (`${entry.kind}-${entry.id}`)}
-            <li
-              class:unread={entry.unread}
-              animate:flip={{ duration: prefersReducedMotion.current ? 0 : 180 }}
-              transition:fly|global={{ y: 6, duration: prefersReducedMotion.current ? 0 : 180 }}
-            >
-              <span class="entry-icon" aria-hidden="true">
-                {#if entry.kind === 'members'}<UserPlus size={18} />
-                {:else if entry.kind === 'avatars'}<Image size={18} />
-                {:else if entry.notification.ownerType === 'item'}<CircleDot size={18} />
-                {:else}<MessageSquare size={18} />{/if}
-              </span>
-              <a
-                class="entry-link"
-                href={entry.kind === 'activity' ? entry.notification.href : '/inbox'}
-                onclick={() => {
-                  if (entry.kind === 'activity' && entry.unread) void read(entry.id);
-                  close();
-                }}
-              >
-                <span class="entry-meta"
-                  >{entry.kind === 'activity'
-                    ? entry.notification.projectName || 'KSI'
-                    : 'KSI'}<span aria-hidden="true"> · </span><time
-                    datetime={entry.createdAt}
-                    title={formatDateTime(entry.createdAt, language)}
-                    >{relativeTime(entry.createdAt)}</time
-                  ></span
-                >
-                <span class="entry-title">{entry.title}</span>
-                {#if entry.kind === 'activity'}
-                  <span class="entry-description"
-                    >{notificationAction(
-                      entry.notification,
-                      language
-                    )}{#if entry.notification.reason === 'mention'}<span aria-hidden="true">
-                        ·
-                      </span>{reasonLabel(entry.notification.reason)}{/if}</span
-                  >
-                {:else}<span class="entry-description"
-                    >{entry.kind === 'members'
-                      ? 'Prośba o aktywację konta'
-                      : 'Nowe zdjęcie profilowe'}</span
-                  >{/if}
-              </a>
-              <div class="entry-actions">
-                {#if entry.kind === 'activity'}
-                  {#if entry.unread}
-                    <span class="unread-dot" title={'Nieprzeczytane'}></span>
-                    <button
-                      class="menu-icon read-action"
-                      type="button"
-                      disabled={busy}
-                      onclick={() => read(entry.id)}
-                      aria-label={'Oznacz jako przeczytane'}
-                      title={'Oznacz jako przeczytane'}><Check size={16} /></button
+          <SegmentedControlItem value="unread" label={`Nieprzeczytane (${totalUnread})`} />
+          <SegmentedControlItem value="all" label="Wszystkie" />
+        </SegmentedControl>
+      </HStack>
+      <Divider />
+      <VStack gap={0} class="notification-content" aria-busy={busy}>
+        {#if preview.length}
+          <List hasDividers>
+            {#each preview as entry (`${entry.kind}-${entry.id}`)}
+              <ListItem>
+                {#snippet startContent()}
+                  <span class="entry-icon" aria-hidden="true">
+                    {#if entry.kind === 'members'}<UserPlus size={18} />
+                    {:else if entry.kind === 'avatars'}<Image size={18} />
+                    {:else if entry.notification.ownerType === 'item'}<CircleDot size={18} />
+                    {:else}<MessageSquare size={18} />{/if}
+                  </span>
+                {/snippet}
+                {#snippet label()}
+                  <VStack gap={0.5}>
+                    <Text type="supporting" color="secondary">
+                      {entry.kind === 'activity'
+                        ? entry.notification.projectName || 'KSI'
+                        : 'KSI'}<span aria-hidden="true"> · </span><time
+                        datetime={entry.createdAt}
+                        title={formatDateTime(entry.createdAt, language)}
+                        >{relativeTime(entry.createdAt)}</time
+                      >
+                    </Text>
+                    <Link
+                      href={entry.kind === 'activity' ? entry.notification.href : '/inbox'}
+                      color="primary"
+                      weight={entry.unread ? 'semibold' : 'normal'}
+                      onclick={() => {
+                        if (entry.kind === 'activity' && entry.unread) void read(entry.id);
+                        close();
+                      }}
                     >
-                  {/if}
-                {:else}
-                  {#if entry.kind === 'avatars'}<img
-                      class="approval-avatar"
-                      src={`/media/${entry.fileId}`}
-                      alt={'Proponowane zdjęcie profilowe'}
-                    />{/if}
-                  <div class="review-actions">
-                    <button
-                      class="menu-icon"
-                      type="button"
-                      disabled={busy}
-                      onclick={() =>
-                        reviewAdmin(
-                          entry.kind,
-                          entry.id,
-                          true,
-                          entry.kind === 'avatars' ? entry.version : undefined
-                        )}
-                      aria-label={'Zatwierdź'}
-                      title={'Zatwierdź'}><Check size={16} /></button
-                    >
-                    {#if entry.kind === 'avatars' || administrator}<button
-                        class="menu-icon decline-action"
-                        type="button"
-                        disabled={busy}
+                      {entry.title}
+                    </Link>
+                    <Text type="supporting" color="secondary">
+                      {#if entry.kind === 'activity'}
+                        {notificationAction(
+                          entry.notification,
+                          language
+                        )}{#if entry.notification.reason === 'mention'}<span aria-hidden="true">
+                            ·
+                          </span>{reasonLabel(entry.notification.reason)}{/if}
+                      {:else}
+                        {entry.kind === 'members'
+                          ? 'Prośba o aktywację konta'
+                          : 'Nowe zdjęcie profilowe'}
+                      {/if}
+                    </Text>
+                  </VStack>
+                {/snippet}
+                {#snippet endContent()}
+                  <HStack gap={1} vAlign="center">
+                    {#if entry.kind === 'activity'}
+                      {#if entry.unread}
+                        <span class="unread-dot" title="Nieprzeczytane"></span>
+                        <IconButton
+                          label="Oznacz jako przeczytane"
+                          tooltip="Oznacz jako przeczytane"
+                          variant="ghost"
+                          size="sm"
+                          isDisabled={busy}
+                          onclick={() => void read(entry.id)}
+                        >
+                          {#snippet icon()}<Check size={16} aria-hidden="true" />{/snippet}
+                        </IconButton>
+                      {/if}
+                    {:else}
+                      {#if entry.kind === 'avatars'}
+                        <Thumbnail
+                          src={`/media/${entry.fileId}`}
+                          alt="Proponowane zdjęcie profilowe"
+                          label="Proponowane zdjęcie profilowe"
+                        />
+                      {:else}
+                        <Avatar name={entry.title} size="sm" alt="" />
+                      {/if}
+                      <IconButton
+                        label="Zatwierdź"
+                        tooltip="Zatwierdź"
+                        variant="ghost"
+                        size="sm"
+                        isDisabled={busy}
                         onclick={() =>
                           reviewAdmin(
                             entry.kind,
                             entry.id,
-                            false,
+                            true,
                             entry.kind === 'avatars' ? entry.version : undefined
                           )}
-                        aria-label={'Odrzuć'}
-                        title={'Odrzuć'}><X size={16} /></button
-                      >{/if}
-                  </div>
-                {/if}
-              </div>
-            </li>
-          {/each}
-        </ul>
-      {:else if !loaded && !error}
-        <p class="loading" role="status">Ładowanie powiadomień…</p>
-      {:else if !error}
-        <div
-          class="inbox-empty"
-          transition:fly|global={{ y: 6, duration: prefersReducedMotion.current ? 0 : 180 }}
-        >
-          <Inbox size={32} strokeWidth={1.5} aria-hidden="true" />
-          <h3>Wszystko na bieżąco</h3>
-          <p>Nowe wzmianki, przypisania i prośby pojawią się tutaj.</p>
-        </div>
+                      >
+                        {#snippet icon()}<Check size={16} aria-hidden="true" />{/snippet}
+                      </IconButton>
+                      {#if entry.kind === 'avatars' || administrator}
+                        <IconButton
+                          label="Odrzuć"
+                          tooltip="Odrzuć"
+                          variant="ghost"
+                          size="sm"
+                          isDisabled={busy}
+                          onclick={() =>
+                            reviewAdmin(
+                              entry.kind,
+                              entry.id,
+                              false,
+                              entry.kind === 'avatars' ? entry.version : undefined
+                            )}
+                        >
+                          {#snippet icon()}<X size={16} aria-hidden="true" />{/snippet}
+                        </IconButton>
+                      {/if}
+                    {/if}
+                  </HStack>
+                {/snippet}
+              </ListItem>
+            {/each}
+          </List>
+        {:else if !loaded && !error}
+          <Text type="supporting" color="secondary" role="status">Ładowanie powiadomień…</Text>
+        {:else if !error}
+          <EmptyState
+            title="Wszystko na bieżąco"
+            description="Nowe wzmianki, przypisania i prośby pojawią się tutaj."
+          >
+            {#snippet icon()}<Inbox size={32} strokeWidth={1.5} aria-hidden="true" />{/snippet}
+          </EmptyState>
+        {/if}
+      </VStack>
+      {#if !fullPage}
+        <Divider />
+        <Link href="/inbox" onclick={() => close()} class="inbox-footer">
+          <HStack gap={2} vAlign="center" justify="center" padding={3}>
+            <span>Zobacz wszystkie powiadomienia</span>
+            {#if filtered.length > preview.length}
+              <Text type="supporting" color="secondary">+{filtered.length - preview.length}</Text>
+            {/if}
+            <ArrowRight size={16} aria-hidden="true" />
+          </HStack>
+        </Link>
       {/if}
-    </div>
-    {#if !fullPage}
-      <a class="inbox-footer" href="/inbox" onclick={() => close()}
-        ><span>Zobacz wszystkie powiadomienia</span>{#if filtered.length > preview.length}<span
-            class="count">+{filtered.length - preview.length}</span
-          >{/if}<ArrowRight size={16} aria-hidden="true" /></a
-      >
-    {/if}
-  </div>
+    </VStack>
+  </section>
 {/if}
 
 <style>
-  .notification-trigger {
+  .bell-wrap {
     position: relative;
+    display: inline-flex;
   }
   .notification-dot {
     position: absolute;
@@ -514,320 +465,63 @@
     right: -3px;
     width: 10px;
     height: 10px;
-    border: 2px solid var(--surface);
-    border-radius: 50%;
-    background: var(--accent);
     box-sizing: content-box;
+    border: 2px solid var(--color-background-surface);
+    border-radius: 50%;
+    background: var(--color-accent);
   }
   .notification-panel {
-    transition: height 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
-    transform-origin: top right;
     position: fixed;
     z-index: 100;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    color: var(--ink);
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
-    font-family: var(--font);
-    font-size: 13px;
-    line-height: 1.5;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-container);
+    background: var(--color-background-surface);
+    box-shadow: var(--shadow-high);
     outline: none;
+    color: var(--color-text-primary);
+    font-family: var(--font-family-body);
+    font-size: var(--text-supporting-size);
+  }
+  .notification-panel > :global(*) {
+    min-height: 0;
   }
   .notification-panel.full-page {
-    transition: none;
     position: static;
-    z-index: auto;
     width: 100%;
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-xs);
+    border-radius: var(--radius-container);
+    box-shadow: var(--shadow-low);
   }
-  .full-page .entry-title {
-    display: block;
-    overflow: visible;
-  }
-  .panel-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 14px;
-    flex-shrink: 0;
-  }
-  .panel-header h2 {
-    margin: 0;
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: normal;
-  }
-  .count {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    padding: 0 6px;
-    height: 20px;
-    border-radius: 10px;
-    background: var(--surface-muted);
-    color: var(--muted);
-    font-size: 11px;
-    font-weight: 500;
-    font-variant-numeric: tabular-nums;
-  }
-  .header-actions {
+  :global(.header-actions) {
     margin-left: auto;
-    display: flex;
-    gap: 2px;
   }
-  .menu-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    border: 0;
-    border-radius: var(--radius-md);
-    color: var(--muted);
-    background: transparent;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-  .menu-icon:hover:not(:disabled) {
-    color: var(--ink);
-    background: var(--surface-muted);
-  }
-  .menu-icon:disabled {
-    opacity: 0.4;
-    cursor: default;
-  }
-  .notification-panel :global(:focus-visible) {
-    outline: 2px solid var(--accent);
-    outline-offset: 3px;
-  }
-  .filter-bar {
-    position: relative;
-    display: flex;
-    gap: 16px;
-    padding: 0 16px;
-    border-bottom: 1px solid var(--line);
-    flex-shrink: 0;
-  }
-  .filter-bar button {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin: 0;
-    padding: 8px 0 11px;
-    border: 0;
-    background: transparent;
-    color: var(--muted);
-    font: inherit;
-    cursor: pointer;
-  }
-  .filter-bar button:hover,
-  .filter-bar button.selected {
-    color: var(--ink);
-  }
-  .filter-bar button.selected {
-    font-weight: 600;
-  }
-  .filter-indicator {
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: var(--filter-width, 0px);
-    transform: translateX(var(--filter-left, 16px));
-    transition:
-      transform 180ms ease,
-      width 180ms ease;
-    pointer-events: none;
-    height: 2px;
-    background: var(--accent);
-    border-radius: 2px;
-  }
-  .notification-content {
+  :global(.notification-content) {
     overflow-y: auto;
     overscroll-behavior: contain;
     min-height: 0;
   }
-  .notification-list {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .notification-list li {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 13px 14px;
-    border-bottom: 1px solid var(--line);
-  }
-  .notification-list li:last-child {
-    border-bottom: 0;
-  }
-  .notification-list li.unread {
-    background: color-mix(in srgb, var(--accent) 4%, var(--surface));
-  }
-  .notification-list li:hover {
-    background: var(--surface-muted);
-  }
   .entry-icon {
-    display: flex;
-    color: var(--muted);
-    margin-top: 3px;
-    flex-shrink: 0;
-  }
-  .entry-link {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    flex: 1;
-    min-width: 0;
-    text-decoration: none;
-    color: inherit;
-  }
-  .entry-meta {
-    overflow-wrap: anywhere;
-    color: var(--muted);
-    font-size: 11px;
-  }
-  .entry-meta > span {
-    margin-inline: 4px;
-  }
-  time {
-    white-space: nowrap;
-  }
-  .entry-title {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    overflow: hidden;
-    overflow-wrap: anywhere;
-    font-size: 13px;
-    line-height: 1.45;
-  }
-  .unread .entry-title {
-    font-weight: 600;
-  }
-  .entry-link:hover .entry-title {
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
-  .entry-description {
-    overflow-wrap: anywhere;
-    color: var(--muted);
-    font-size: 12px;
-  }
-  .entry-description > span {
-    margin-inline: 4px;
-  }
-  .entry-actions {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    align-self: center;
-    flex-shrink: 0;
-    min-width: 30px;
+    display: inline-flex;
+    margin-top: var(--spacing-1);
+    color: var(--color-text-secondary);
   }
   .unread-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--accent);
-    margin: 11px;
+    background: var(--color-accent);
   }
-  .read-action {
-    display: none;
+  :global(.notification-error) {
+    padding-inline: var(--spacing-4);
+    padding-block: var(--spacing-2);
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-error);
+    font-size: var(--text-supporting-size);
   }
-  li:hover .unread-dot,
-  li:focus-within .unread-dot {
-    display: none;
-  }
-  li:hover .read-action,
-  li:focus-within .read-action {
-    display: inline-flex;
-  }
-  .review-actions {
-    display: flex;
-  }
-  .decline-action:hover:enabled {
-    color: var(--danger);
-  }
-  .approval-avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: var(--radius-md);
-    object-fit: cover;
-    margin-bottom: 4px;
-  }
-  .inbox-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 36px 28px;
-    text-align: center;
-    color: var(--muted);
-  }
-  .inbox-empty h3 {
-    margin: 14px 0 5px;
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--ink);
-  }
-  .inbox-empty p {
-    margin: 0;
-    max-width: 270px;
-    font-size: 12px;
-  }
-  .inbox-footer {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 13px 16px;
-    border-top: 1px solid var(--line);
-    color: var(--ink);
+  :global(.inbox-footer) {
+    display: block;
     text-decoration: none;
-    font-size: 12px;
-    font-weight: 500;
-    flex-shrink: 0;
-  }
-  .inbox-footer:hover {
-    background: var(--surface-muted);
-  }
-  .notification-error {
-    margin: 0;
-    padding: 10px 16px;
-    font-size: 12px;
-    color: var(--danger);
-    border-bottom: 1px solid var(--line);
-  }
-  .loading {
-    margin: 0;
-    padding: 32px 16px;
-    text-align: center;
-    color: var(--muted);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .filter-indicator,
-    .notification-panel {
-      transition: none;
-    }
-  }
-  @media (hover: none) {
-    .read-action {
-      display: inline-flex;
-    }
-    .unread-dot {
-      display: none;
-    }
   }
 </style>

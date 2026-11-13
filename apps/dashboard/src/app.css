@@ -1,0 +1,9 @@
+@layer reset, legacy, astryx-base, astryx-theme, product;
+
+@import '@astryx-sv/core/base.css';
+@import '@astryx-sv/core/astryx.css';
+@import '@astryx-sv/theme-neutral/theme.css';
+@import '@ksi-core/ui/platform.css' layer(legacy);
+@import '@ksi-core/ui/platform-theme.css' layer(legacy);
+@import '@ksi-core/ui/platform-kit.css' layer(legacy);
+@import '@ksi-core/ui/astryx-bridge.css' layer(product);

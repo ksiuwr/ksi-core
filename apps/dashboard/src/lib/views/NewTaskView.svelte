@@ -14,9 +14,21 @@
     type Item
   } from '$lib/types';
   import DateTimePicker from '@ksi-core/ui/platform/DateTimePicker.svelte';
-  import Dropdown from '@ksi-core/ui/platform/Dropdown.svelte';
   import Editor from '@ksi-core/ui/platform/Editor.svelte';
-  import { ArrowLeft, Check, Plus } from '@lucide/svelte';
+  import {
+    Banner,
+    Button,
+    Divider,
+    Heading,
+    HStack,
+    Section,
+    Selector,
+    Text,
+    TextInput,
+    ToggleButton,
+    VStack
+  } from '@astryx-sv/core';
+  import { ArrowLeft, Plus } from '@lucide/svelte';
 
   let {
     workspace,
@@ -44,7 +56,7 @@
     )
   );
   const statusOptions = $derived(
-    statuses.map((status) => ({ value: status.id, label: status.name, color: status.color }))
+    statuses.map((status) => ({ value: status.id, label: status.name }))
   );
   const requestedStatus = page.url.searchParams.get('status') ?? '';
   let title = $state('');
@@ -93,118 +105,149 @@
   }
 </script>
 
-<a class="btn btn-outline detail-back" href={dashboardPath(workspace, projectSlug, 'board')}
-  ><ArrowLeft size={15} aria-hidden="true" />Tablica zadań</a
->
-<header class="create-heading">
-  <h1>Nowe zadanie</h1>
-  <p>Dodaj szczegóły teraz; po utworzeniu zadania możesz kontynuować dyskusję.</p>
-</header>
+<VStack gap={4}>
+  <Button
+    href={dashboardPath(workspace, projectSlug, 'board')}
+    variant="secondary"
+    label="Tablica zadań"
+  >
+    {#snippet icon()}<ArrowLeft size={15} aria-hidden="true" />{/snippet}
+  </Button>
 
-{#if error}<p class="error" role="alert">{error}</p>{/if}
-<form
-  class="detail-layout create-form"
-  onsubmit={(event) => {
-    event.preventDefault();
-    void create();
-  }}
->
-  <section class="card create-main">
-    <div>
-      <label for="new-task-title">Tytuł zadania</label>
-      <input
-        id="new-task-title"
-        bind:value={title}
-        required
-        maxlength="200"
-        placeholder={'Co trzeba zrobić?'}
-      />
-    </div>
-    <div>
-      <span class="create-label">Opis</span>
-      <Editor bind:value={markdown} rows={18} allowReferences />
-    </div>
-  </section>
+  <VStack as="header" gap={1}>
+    <Heading level={1}>Nowe zadanie</Heading>
+    <Text as="p" class="workspace-description">
+      Dodaj szczegóły teraz; po utworzeniu zadania możesz kontynuować dyskusję.
+    </Text>
+  </VStack>
 
-  <aside class="card create-aside">
-    <section class="create-section">
-      <label for="new-task-status">Status</label>
-      <Dropdown
-        id="new-task-status"
-        label={'Status zadania'}
-        bind:value={status}
-        options={statusOptions}
-      />
-    </section>
-    {#if labels.length}
-      <section class="create-section">
-        <span class="create-label">Etykiety</span>
-        <div class="label-chips">
-          {#each labels as label (label.name)}
-            {@const selected = selectedLabels.includes(label.name)}
-            <button
-              type="button"
-              class="label-chip"
-              class:selected
-              aria-pressed={selected}
-              style={labelColorStyle(label.color)}
-              onclick={() => {
-                selectedLabels = selected
-                  ? selectedLabels.filter((name) => name !== label.name)
-                  : [...selectedLabels, label.name];
-              }}
-            >
-              <span class="label-dot"></span>{label.name}{#if selected}<Check
-                  size={12}
+  {#if error}<Banner status="error" title={error} role="alert" />{/if}
+
+  <form
+    onsubmit={(event) => {
+      event.preventDefault();
+      void create();
+    }}
+  >
+    <HStack vAlign="start" gap={5} wrap="wrap">
+      <Section padding={5} class="form-main">
+        <VStack gap={5}>
+          <TextInput
+            id="new-task-title"
+            label="Tytuł zadania"
+            value={title}
+            onChange={(value) => (title = value)}
+            isRequired
+            placeholder={'Co trzeba zrobić?'}
+          />
+          <VStack gap={2}>
+            <Text type="label" weight="semibold">Opis</Text>
+            <Editor bind:value={markdown} rows={18} allowReferences />
+          </VStack>
+        </VStack>
+      </Section>
+
+      <Section padding={5} class="form-aside">
+        <VStack gap={4}>
+          <Selector
+            id="new-task-status"
+            label="Status"
+            value={status}
+            options={statusOptions}
+            width="100%"
+            onChange={(value: string | null) => {
+              if (value !== null) status = value;
+            }}
+          >
+            {#snippet renderOption(option)}
+              <HStack gap={2} vAlign="center">
+                <span
+                  class="status-dot"
+                  style:--dot={statuses.find((status) => status.id === option.value)?.color ??
+                    'var(--muted)'}
                   aria-hidden="true"
-                />{/if}
-            </button>
-          {/each}
-        </div>
-      </section>
-    {/if}
-    <section class="create-section">
-      <Assignees {projectId} bind:value={assignees} disabled={busy} />
-    </section>
-    <section class="create-section">
-      <DateTimePicker bind:value={dueAt} disabled={busy} />
-    </section>
-    <div class="create-actions">
-      <button class="btn" disabled={busy || !title.trim() || !status}
-        ><Plus size={15} aria-hidden="true" />{busy ? 'Tworzenie…' : 'Utwórz zadanie'}</button
-      >
-      <a class="btn btn-outline" href={dashboardPath(workspace, projectSlug, 'board')}>Anuluj</a>
-    </div>
-  </aside>
-</form>
+                ></span>
+                <Text type="inherit">{option.label}</Text>
+              </HStack>
+            {/snippet}
+          </Selector>
+
+          {#if labels.length}
+            <VStack gap={2}>
+              <Text type="label" weight="semibold">Etykiety</Text>
+              <HStack gap={1.5} wrap="wrap">
+                {#each labels as label (label.name)}
+                  {@const selected = selectedLabels.includes(label.name)}
+                  <ToggleButton
+                    label={label.name}
+                    size="sm"
+                    isPressed={selected}
+                    style={labelColorStyle(label.color)}
+                    onPressedChange={(pressed) => {
+                      selectedLabels = pressed
+                        ? [...selectedLabels, label.name]
+                        : selectedLabels.filter((name) => name !== label.name);
+                    }}
+                  >
+                    {#snippet children()}
+                      <span class="label-dot" aria-hidden="true"></span>{label.name}
+                    {/snippet}
+                  </ToggleButton>
+                {/each}
+              </HStack>
+            </VStack>
+          {/if}
+
+          <Divider />
+          <Assignees {projectId} bind:value={assignees} disabled={busy} />
+          <Divider />
+          <DateTimePicker bind:value={dueAt} disabled={busy} />
+          <Divider />
+          <VStack gap={2}>
+            <Button
+              type="submit"
+              variant="primary"
+              width="100%"
+              label={busy ? 'Tworzenie…' : 'Utwórz zadanie'}
+              isDisabled={busy || !title.trim() || !status}
+            >
+              {#snippet icon()}<Plus size={15} aria-hidden="true" />{/snippet}
+            </Button>
+            <Button
+              href={dashboardPath(workspace, projectSlug, 'board')}
+              variant="secondary"
+              width="100%"
+              label="Anuluj"
+            />
+          </VStack>
+        </VStack>
+      </Section>
+    </HStack>
+  </form>
+</VStack>
 
 <style>
-  .label-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+  :global(.form-main) {
+    flex: 1 1 32rem;
+    min-width: 0;
   }
-  .label-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 8px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-full);
-    background: var(--label-bg-base, transparent);
-    color: var(--label-fg, var(--muted));
-    font-size: 11px;
-    cursor: pointer;
+  :global(.form-aside) {
+    flex: 0 1 20rem;
+    min-width: 0;
+    position: sticky;
+    top: 5.625rem;
   }
-  .label-chip.selected {
-    border-color: color-mix(in srgb, var(--label-color) 55%, var(--line));
-    background: var(--label-bg-soft, color-mix(in srgb, var(--label-color) 12%, var(--surface)));
-    color: var(--label-fg, var(--ink));
+  @media (max-width: 61.25rem) {
+    :global(.form-aside) {
+      flex-basis: 100%;
+      position: static;
+    }
   }
-  .label-dot {
+  :global(.label-dot) {
     width: 8px;
     height: 8px;
-    border-radius: 50%;
+    border-radius: var(--radius-full);
     background: var(--label-color);
+    box-shadow: 0 0 0 1px var(--label-fg);
   }
 </style>

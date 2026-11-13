@@ -3,6 +3,7 @@
   import { MediaQuery } from 'svelte/reactivity';
   import { afterNavigate } from '$app/navigation';
   import { PanelLeftClose, PanelLeftOpen, X } from '@lucide/svelte';
+  import { HStack, Icon, IconButton, Text, VStack } from '@astryx-sv/core';
 
   let {
     label,
@@ -12,8 +13,7 @@
   const uid = $props.id();
   // Phones keep the bar above the content; a docked tree would push every page down.
   const narrow = new MediaQuery('(max-width: 760px)');
-  let root = $state<HTMLDivElement>();
-  let trigger = $state<HTMLButtonElement>();
+  let root = $state<HTMLElement>();
   let docked = $state(untrack(() => savedDocked));
   let hovered = $state(false);
   let pinned = $state(false);
@@ -36,7 +36,7 @@
     clearTimeout(hoverTimer);
     hovered = false;
     pinned = false;
-    if (restoreFocus) trigger?.focus();
+    if (restoreFocus) document.getElementById(`${uid}-trigger`)?.focus();
   }
   function outside(event: PointerEvent) {
     if (open && event.target instanceof Node && !root?.contains(event.target)) close();
@@ -67,8 +67,8 @@
 
 <!-- Lives in its own rail so it stays reachable without ever covering the text; docked, the
      rail widens into a column beside it. -->
-<div class="docs-navigation-anchor" class:docked>
-  <div
+<VStack class={`docs-navigation-anchor${docked ? ' docked' : ''}`} gap={0}>
+  <aside
     bind:this={root}
     class="floating-docs-navigation"
     class:open
@@ -84,54 +84,63 @@
     }}
     ondragstart={() => (dragging = true)}
   >
-    <div class="floating-docs-header">
-      <button
-        bind:this={trigger}
-        type="button"
-        class="docs-navigation-trigger"
-        aria-label={label}
+    <HStack class="floating-docs-header" gap={0} vAlign="center">
+      <IconButton
+        id={`${uid}-trigger`}
+        {label}
+        tooltip={shown ? 'Ukryj panel boczny' : 'Pokaż panel boczny'}
         aria-controls={`${uid}-content`}
         aria-expanded={expanded}
-        title={shown ? 'Ukryj panel boczny' : 'Pokaż panel boczny'}
+        variant="ghost"
+        size="lg"
+        class="docs-navigation-trigger"
         onclick={toggle}
       >
-        {#if shown}<PanelLeftClose size={18} aria-hidden="true" />{:else}<PanelLeftOpen
-            size={18}
-            aria-hidden="true"
-          />{/if}
-      </button>
-      <span class="floating-docs-title" aria-hidden="true">{label}</span>
-      {#if open}<button
-          type="button"
+        {#snippet icon()}
+          <Icon icon={shown ? PanelLeftClose : PanelLeftOpen} size="md" />
+        {/snippet}
+      </IconButton>
+      <Text class="floating-docs-title" type="supporting" maxLines={1} aria-hidden="true">
+        {label}
+      </Text>
+      {#if open}
+        <IconButton
+          label={'Zamknij nawigację'}
+          tooltip={'Zamknij nawigację'}
+          variant="ghost"
+          size="sm"
           class="docs-navigation-close"
-          aria-label={'Zamknij nawigację'}
-          onclick={() => close(true)}><X size={16} aria-hidden="true" /></button
-        >{/if}
-    </div>
-    <div
+          onclick={() => close(true)}
+        >
+          {#snippet icon()}<Icon icon={X} size="sm" />{/snippet}
+        </IconButton>
+      {/if}
+    </HStack>
+    <VStack
       id={`${uid}-content`}
       class="floating-docs-content"
+      gap={0}
       inert={!expanded}
       aria-hidden={!expanded}
     >
-      <div class="floating-docs-scroll">{@render children()}</div>
-    </div>
-  </div>
-</div>
+      <VStack class="floating-docs-scroll" gap={0} isScrollable>{@render children()}</VStack>
+    </VStack>
+  </aside>
+</VStack>
 
 <style>
-  .docs-navigation-anchor {
+  :global(.docs-navigation-anchor) {
     --navigation-width: 320px;
     --docked-width: 264px;
     position: sticky;
-    top: 16px;
+    top: var(--spacing-4);
     /* Above the article, below the dashboard sidebar (35), which opens over the page. */
     z-index: 30;
     width: 44px;
     height: 44px;
     transition:
-      width 240ms var(--ease-out),
-      margin 240ms var(--ease-out);
+      width 240ms var(--ease-standard),
+      margin 240ms var(--ease-standard);
   }
   .floating-docs-navigation {
     position: absolute;
@@ -141,15 +150,15 @@
     grid-template-rows: 42px 0fr;
     width: 44px;
     overflow: hidden;
-    border: 1px solid var(--line);
+    border: 1px solid var(--color-border);
     border-radius: 22px;
-    background: var(--surface);
-    color: var(--ink);
-    box-shadow: var(--shadow-sm);
+    background: var(--color-background-surface);
+    color: var(--color-text-primary);
+    box-shadow: var(--shadow-low);
     transition:
-      width 220ms var(--ease-out),
-      grid-template-rows 240ms var(--ease-out),
-      border-radius 220ms var(--ease-out),
+      width 220ms var(--ease-standard),
+      grid-template-rows 240ms var(--ease-standard),
+      border-radius 220ms var(--ease-standard),
       border-color 180ms ease,
       background-color 180ms ease,
       box-shadow 180ms ease;
@@ -157,96 +166,58 @@
   .floating-docs-navigation.open {
     width: var(--navigation-width);
     grid-template-rows: 42px 1fr;
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
+    border-radius: var(--radius-container);
+    box-shadow: var(--shadow-high);
   }
-  .floating-docs-header {
-    display: flex;
-    align-items: center;
+  :global(.floating-docs-header) {
     min-width: 0;
   }
-  .docs-navigation-trigger {
-    display: grid;
-    place-items: center;
-    flex: 0 0 42px;
+  :global(.docs-navigation-trigger) {
     width: 42px;
     height: 42px;
-    padding: 0;
-    border: 0;
     border-radius: 50%;
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
   }
-  .docs-navigation-trigger:hover,
-  .docs-navigation-trigger[aria-expanded='true'] {
-    color: var(--ink);
-  }
-  .docs-navigation-trigger:focus-visible {
-    outline: 2px solid var(--ring-strong);
-    outline-offset: -7px;
-    border-radius: var(--radius-xl);
-  }
-  .docs-navigation-close:focus-visible {
-    outline: 2px solid var(--ring-strong);
-    outline-offset: -2px;
-  }
-  .floating-docs-title {
+  :global(.floating-docs-title) {
     flex: 1;
     min-width: 0;
     overflow: hidden;
     opacity: 0;
     white-space: nowrap;
     text-overflow: ellipsis;
-    font-size: 13px;
+    font-size: var(--font-size-base);
     font-weight: 500;
     transition: opacity 120ms ease;
   }
-  .open .floating-docs-title {
+  :global(.floating-docs-navigation.open .floating-docs-title) {
     opacity: 1;
     transition-delay: 60ms;
   }
-  .docs-navigation-close {
+  :global(.docs-navigation-close) {
     display: none;
-    place-items: center;
-    flex: 0 0 28px;
-    width: 28px;
-    height: 28px;
-    margin-right: 7px;
-    padding: 0;
-    border: 0;
-    border-radius: var(--radius-md);
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-  }
-  .docs-navigation-close:hover {
-    color: var(--ink);
-    background: var(--surface-muted);
+    margin-right: var(--spacing-1-5);
   }
   /* With a mouse the button itself closes the panel; a touch target needs an explicit one. */
   @media (hover: none) {
-    .docs-navigation-close {
+    :global(.docs-navigation-close) {
       display: grid;
     }
   }
-  .floating-docs-content {
+  :global(.floating-docs-content) {
     min-height: 0;
     overflow: hidden;
     visibility: hidden;
     opacity: 0;
     transition: opacity 120ms ease;
   }
-  .open .floating-docs-content {
+  :global(.floating-docs-navigation.open .floating-docs-content) {
     visibility: visible;
     opacity: 1;
     transition-delay: 60ms;
   }
-  .floating-docs-scroll {
+  :global(.floating-docs-scroll) {
     width: calc(var(--navigation-width) - 2px);
     /* Fits below the top bar at the top of a page, which is the lowest this panel starts. */
     max-height: max(0px, calc(100dvh - 160px));
-    overflow: auto;
     overscroll-behavior: contain;
     scrollbar-width: thin;
     padding: 2px 8px 8px;
@@ -254,53 +225,53 @@
   /* Docked, the panel becomes the plain column: it grows to the tree's height and drops
      its border, shadow and fill, while the button stays where the rail had it. */
   @media (min-width: 761px) {
-    .docs-navigation-anchor.docked {
+    :global(.docs-navigation-anchor.docked) {
       width: var(--docked-width);
       height: auto;
-      margin-right: 12px;
+      margin-right: var(--spacing-3);
     }
-    .docked .floating-docs-navigation {
+    :global(.docs-navigation-anchor.docked) .floating-docs-navigation {
       position: relative;
       width: var(--docked-width);
       grid-template-rows: 42px 1fr;
       border-color: transparent;
-      border-radius: var(--radius-xl);
+      border-radius: var(--radius-container);
       background-color: transparent;
       box-shadow: none;
     }
-    .docked .floating-docs-title,
-    .docked .floating-docs-content {
+    :global(.docs-navigation-anchor.docked) :global(.floating-docs-title),
+    :global(.docs-navigation-anchor.docked) :global(.floating-docs-content) {
       visibility: visible;
       opacity: 1;
       transition-delay: 60ms;
     }
-    .docked .floating-docs-scroll {
+    :global(.docs-navigation-anchor.docked) :global(.floating-docs-scroll) {
       width: calc(var(--docked-width) - 2px);
     }
   }
   /* Too narrow for a rail: the button becomes a full-width bar above the content. */
   @media (max-width: 760px) {
-    .docs-navigation-anchor {
+    :global(.docs-navigation-anchor) {
       --navigation-width: calc(100vw - 32px);
       position: relative;
       top: 0;
       width: auto;
-      margin-bottom: 20px;
+      margin-bottom: var(--spacing-5);
     }
     .floating-docs-navigation,
     .floating-docs-navigation.open {
       width: 100%;
-      border-radius: var(--radius-lg);
+      border-radius: var(--radius-container);
     }
-    .floating-docs-title {
+    :global(.floating-docs-title) {
       opacity: 1;
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .docs-navigation-anchor,
+    :global(.docs-navigation-anchor),
     .floating-docs-navigation,
-    .floating-docs-title,
-    .floating-docs-content {
+    :global(.floating-docs-title),
+    :global(.floating-docs-content) {
       transition: none;
     }
   }

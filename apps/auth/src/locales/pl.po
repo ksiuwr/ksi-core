@@ -45,7 +45,6 @@ msgid "Odzyskaj dostęp"
 msgstr "Odzyskaj dostęp"
 
 #: src/routes/+page.svelte
-#: src/routes/+page.svelte
 msgid "Witaj w KSI"
 msgstr "Witaj w KSI"
 
@@ -54,7 +53,6 @@ msgstr "Witaj w KSI"
 msgid "Zmień język"
 msgstr "Zmień język"
 
-#: src/routes/+page.svelte
 #: src/routes/reset-password/+page.svelte
 msgid "KSI<0>/ core</0>"
 msgstr "KSI<0>/ core</0>"
@@ -71,9 +69,8 @@ msgstr "Opcje konta"
 msgid "Zapamiętane konta"
 msgstr "Zapamiętane konta"
 
-#: src/routes/+page.svelte
-msgid "Zapomnij konto"
-msgstr "Zapomnij konto"
+#~ msgid "Zapomnij konto"
+#~ msgstr "Zapomnij konto"
 
 #: src/routes/+page.svelte
 msgid "Zapomnij"
@@ -87,9 +84,8 @@ msgstr "Kontynuuj z GitHub"
 msgid "Kontynuuj z Google"
 msgstr "Kontynuuj z Google"
 
-#: src/routes/+page.svelte
-msgid "G"
-msgstr "G"
+#~ msgid "G"
+#~ msgstr "G"
 
 #: src/routes/+page.svelte
 msgid "Pełne imię i nazwisko"
@@ -124,6 +120,7 @@ msgstr "Wróć do logowania"
 msgid "Nowe konta wymagają aktywacji przez zarząd KSI."
 msgstr "Nowe konta wymagają aktywacji przez zarząd KSI."
 
+#: src/routes/+page.svelte
 #: src/routes/reset-password/+page.svelte
 msgid "Wróć na stronę KSI"
 msgstr "Wróć na stronę KSI"
@@ -168,9 +165,8 @@ msgstr "Zapisz hasło"
 msgid "Wyloguj się"
 msgstr "Wyloguj się"
 
-#: src/routes/+page.svelte
-msgid "lub użyj adresu e-mail"
-msgstr "lub użyj adresu e-mail"
+#~ msgid "lub użyj adresu e-mail"
+#~ msgstr "lub użyj adresu e-mail"
 
 #: ../../packages/ui/src/lib/platform/Dropdown.svelte
 msgid "Szukaj…"
@@ -218,13 +214,16 @@ msgid "Wygląd"
 msgstr "Wygląd"
 
 #: ../../packages/ui/src/lib/platform/ThemeSelector.svelte
+#: ../../packages/ui/src/lib/platform/ThemeSelector.svelte
 msgid "Systemowy"
 msgstr "Systemowy"
 
 #: ../../packages/ui/src/lib/platform/ThemeSelector.svelte
+#: ../../packages/ui/src/lib/platform/ThemeSelector.svelte
 msgid "Jasny"
 msgstr "Jasny"
 
+#: ../../packages/ui/src/lib/platform/ThemeSelector.svelte
 #: ../../packages/ui/src/lib/platform/ThemeSelector.svelte
 msgid "Ciemny"
 msgstr "Ciemny"
@@ -233,21 +232,18 @@ msgstr "Ciemny"
 msgid "Logowanie · KSI"
 msgstr "Logowanie · KSI"
 
-#: src/routes/+page.svelte
-msgid "Przejdź do Panelu<0/>"
-msgstr "Przejdź do Panelu<0/>"
+#~ msgid "Przejdź do Panelu<0/>"
+#~ msgstr "Przejdź do Panelu<0/>"
 
 #: src/routes/+page.svelte
 msgid "Jesteś zalogowany(a) jako <0/>."
 msgstr "Jesteś zalogowany(a) jako <0/>."
 
-#: src/routes/+page.svelte
-msgid "<0/>Zapamiętaj konto na tym urządzeniu"
-msgstr "<0/>Zapamiętaj konto na tym urządzeniu"
+#~ msgid "<0/>Zapamiętaj konto na tym urządzeniu"
+#~ msgstr "<0/>Zapamiętaj konto na tym urządzeniu"
 
-#: src/routes/+page.svelte
-msgid "Wróć na stronę KSI<0/>"
-msgstr "Wróć na stronę KSI<0/>"
+#~ msgid "Wróć na stronę KSI<0/>"
+#~ msgstr "Wróć na stronę KSI<0/>"
 
 #: src/routes/+page.svelte
 #: src/routes/reset-password/+page.svelte
@@ -261,3 +257,18 @@ msgstr "Nowe hasło · KSI"
 #: src/routes/reset-password/+page.svelte
 msgid "<0/>Wróć do logowania"
 msgstr "<0/>Wróć do logowania"
+
+#: src/routes/+page.svelte
+msgid "KSI <0>/ core</0>"
+msgstr "KSI <0>/ core</0>"
+
+#: src/routes/+page.svelte
+msgid "Przejdź do Panelu"
+msgstr "Przejdź do Panelu"
+
+#: src/routes/+page.svelte
+msgid "Zapamiętaj konto na tym urządzeniu"
+msgstr "Zapamiętaj konto na tym urządzeniu"
+
+#~ msgid "Wygląd: {0}"
+#~ msgstr "Wygląd: {0}"

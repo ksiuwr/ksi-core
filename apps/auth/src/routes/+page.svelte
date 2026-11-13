@@ -1,12 +1,27 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { createAuthClient } from 'better-auth/svelte';
+  import {} from '@lucide/svelte';
+  import {
+    Banner,
+    Button,
+    Card,
+    CheckboxInput,
+    Divider,
+    Heading,
+    HStack,
+    Link,
+    SegmentedControl,
+    SegmentedControlItem,
+    Text,
+    TextInput,
+    VStack
+  } from '@astryx-sv/core';
+  import ThemeSelector from '@ksi-core/ui/platform/ThemeSelector.svelte';
+  import { preferences, setLanguage } from '@ksi-core/ui/platform/preferences';
 
   let { data } = $props();
-  import { Github, ArrowUpRight, ArrowRight, UserRound, KeyRound } from '@lucide/svelte';
-  import ThemeSelector from '@ksi-core/ui/platform/ThemeSelector.svelte';
-  import { slider } from '@ksi-core/ui/platform/slider';
-  import { preferences, setLanguage } from '@ksi-core/ui/platform/preferences';
+
   const language = $derived(preferences.language);
   let mode = $state<'login' | 'signup' | 'reset'>('login');
   let email = $state(''),
@@ -88,6 +103,7 @@
       busy = false;
     }
   }
+
   function forget(e: string) {
     hints = hints.filter((h) => h.email !== e);
     localStorage.setItem('ksi-account-hints', JSON.stringify(hints));
@@ -107,192 +123,214 @@
 </svelte:head>
 
 <main class="auth-shell">
-  <div class="auth-frame">
-    <header class="auth-topbar">
-      <a class="auth-brand" href={data.websiteOrigin}>KSI<span>/ core</span></a>
-      <div class="auth-preferences">
-        <ThemeSelector /><button
-          class="btn btn-outline language-button"
-          aria-label={'Zmień język'}
+  <VStack width="min(100%, 460px)" gap={6}>
+    <HStack justify="between" vAlign="center" gap={3}>
+      <Link href={data.websiteOrigin} type="label" weight="bold">
+        KSI <Text as="span" type="supporting" color="secondary">/ core</Text>
+      </Link>
+      <HStack gap={2} vAlign="center">
+        <ThemeSelector />
+        <Button
+          variant="secondary"
+          size="sm"
+          label={language === 'pl' ? 'EN' : 'PL'}
+          tooltip="Zmień język"
           onclick={() => setLanguage(language === 'pl' ? 'en-us' : 'pl')}
-          >{language === 'pl' ? 'EN' : 'PL'}</button
-        >
-      </div>
-    </header>
-    <section class="auth-card" aria-labelledby="auth-title">
-      {#if data.user}
-        <h1 id="auth-title">Witaj w KSI</h1>
-        <p class="auth-intro">
-          Jesteś zalogowany(a) jako <strong>{data.user.name || data.user.email}</strong>.
-        </p>
-        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
-          <a class="btn submit-button" href={data.dashboardOrigin} style="text-decoration: none;">
-            Przejdź do Panelu<ArrowRight size={16} aria-hidden="true" />
-          </a>
-          <button
-            type="button"
-            class="btn btn-outline"
-            disabled={busy}
-            onclick={async () => {
-              busy = true;
-              await client.signOut();
-              location.reload();
-            }}
-          >
-            Wyloguj się
-          </button>
-        </div>
-      {:else}
-        <h1 id="auth-title">{titleLabel}</h1>
-        <p class="auth-intro">Jedno konto. Wszystkie projekty i rozmowy KSI.</p>
-        {#if mode !== 'reset'}<div
-            class="auth-mode"
-            role="group"
-            aria-label={'Opcje konta'}
-            use:slider
-          >
-            <button
-              class:active={mode === 'login'}
-              aria-pressed={mode === 'login'}
-              disabled={busy}
+        />
+      </HStack>
+    </HStack>
+
+    <Card padding={6}>
+      <VStack gap={4}>
+        {#if data.user}
+          <Heading level={1}>{titleLabel}</Heading>
+          <Text color="secondary">
+            Jesteś zalogowany(a) jako <strong>{data.user.name || data.user.email}</strong>.
+          </Text>
+          <VStack gap={2}>
+            <Button href={data.dashboardOrigin} variant="primary" label="Przejdź do Panelu" />
+            <Button
+              variant="secondary"
+              label="Wyloguj się"
+              isDisabled={busy}
+              clickAction={async () => {
+                busy = true;
+                await client.signOut();
+                location.reload();
+              }}
+            />
+          </VStack>
+        {:else}
+          <VStack gap={2}>
+            <Heading level={1}>{titleLabel}</Heading>
+            <Text color="secondary">Jedno konto. Wszystkie projekty i rozmowy KSI.</Text>
+          </VStack>
+
+          {#if mode !== 'reset'}
+            <SegmentedControl
+              value={mode}
+              label="Opcje konta"
+              layout="fill"
+              onChange={(value) => {
+                mode = value as 'login' | 'signup';
+                message = '';
+              }}
+            >
+              <SegmentedControlItem value="login" label="Logowanie" />
+              <SegmentedControlItem value="signup" label="Nowe konto" />
+            </SegmentedControl>
+          {/if}
+
+          {#if hints.length && mode === 'login'}
+            <VStack gap={2}>
+              <Text type="supporting" color="secondary">Zapamiętane konta</Text>
+              {#each hints as hint (hint.email)}
+                <HStack justify="between" vAlign="center" gap={2}>
+                  <Button
+                    variant="ghost"
+                    label={hint.name}
+                    isDisabled={busy}
+                    onclick={() => {
+                      email = hint.email;
+                      document.getElementById('auth-password')?.focus();
+                    }}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    label="Zapomnij"
+                    isDisabled={busy}
+                    onclick={() => forget(hint.email)}
+                  />
+                </HStack>
+              {/each}
+            </VStack>
+          {/if}
+
+          {#if mode !== 'reset'}
+            <VStack gap={2}>
+              <Button
+                variant="secondary"
+                label="Kontynuuj z GitHub"
+                isDisabled={busy}
+                width="100%"
+                onclick={() => provider('github')}
+              />
+              <Button
+                variant="secondary"
+                label="Kontynuuj z Google"
+                isDisabled={busy}
+                width="100%"
+                onclick={() => provider('google')}
+              />
+            </VStack>
+            <Divider label="lub użyj adresu e-mail" />
+          {/if}
+
+          <form onsubmit={submit}>
+            <VStack gap={3}>
+              {#if mode === 'signup'}
+                <TextInput
+                  label="Pełne imię i nazwisko"
+                  value={name}
+                  placeholder="Anna Kowalska"
+                  isRequired
+                  isDisabled={busy}
+                  onChange={(value) => (name = value)}
+                />
+              {/if}
+              <TextInput
+                label="E-mail"
+                type="email"
+                value={email}
+                placeholder="anna@example.com"
+                isRequired
+                isDisabled={busy}
+                onChange={(value) => (email = value)}
+              />
+              {#if mode !== 'reset'}
+                <VStack gap={1}>
+                  <TextInput
+                    label="Hasło"
+                    type="password"
+                    value={password}
+                    isRequired
+                    isDisabled={busy}
+                    width="100%"
+                    onChange={(value) => (password = value)}
+                  />
+                  {#if mode === 'login'}
+                    <HStack justify="end">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        label="Nie pamiętam hasła"
+                        isDisabled={busy}
+                        onclick={() => {
+                          mode = 'reset';
+                          message = '';
+                        }}
+                      />
+                    </HStack>
+                  {/if}
+                </VStack>
+              {/if}
+              {#if mode === 'login'}
+                <CheckboxInput
+                  label="Zapamiętaj konto na tym urządzeniu"
+                  value={consent}
+                  isDisabled={busy}
+                  onChange={(checked) => (consent = checked)}
+                />
+              {/if}
+              <Button
+                type="submit"
+                variant="primary"
+                label={busy ? 'Proszę czekać…' : modeLabel}
+                isLoading={busy}
+                width="100%"
+              />
+            </VStack>
+          </form>
+
+          {#if message}
+            <Banner status="info" title={message} />
+          {/if}
+
+          {#if mode === 'reset'}
+            <Button
+              variant="secondary"
+              label="Wróć do logowania"
+              width="100%"
+              isDisabled={busy}
               onclick={() => {
                 mode = 'login';
                 message = '';
-              }}>Logowanie</button
-            ><button
-              class:active={mode === 'signup'}
-              aria-pressed={mode === 'signup'}
-              disabled={busy}
-              onclick={() => {
-                mode = 'signup';
-                message = '';
-              }}>Nowe konto</button
-            >
-          </div>{/if}
-        {#if hints.length && mode === 'login'}<div class="hint-list">
-            <p class="hint-label">Zapamiętane konta</p>
-            {#each hints as hint (hint.email)}<div class="hint-item">
-                <button
-                  class="hint-name"
-                  disabled={busy}
-                  onclick={() => {
-                    email = hint.email;
-                    document.getElementById('auth-password')?.focus();
-                  }}
-                  ><UserRound size={17} aria-hidden="true" /><span
-                    >{hint.name}<small>{hint.email}</small></span
-                  ></button
-                ><button
-                  class="hint-forget"
-                  disabled={busy}
-                  onclick={() => forget(hint.email)}
-                  aria-label={`${'Zapomnij konto'}: ${hint.email}`}>Zapomnij</button
-                >
-              </div>{/each}
-          </div>{/if}
-      {/if}
-      {#if !data.user}
-        {#if mode !== 'reset'}<div class="oauth-providers">
-            <button
-              type="button"
-              class="btn btn-outline oauth-btn"
-              disabled={busy}
-              onclick={() => provider('github')}
-              ><Github size={18} aria-hidden="true" /><span>Kontynuuj z GitHub</span><ArrowUpRight
-                size={15}
-                aria-hidden="true"
-              /></button
-            ><button
-              type="button"
-              class="btn btn-outline oauth-btn"
-              disabled={busy}
-              onclick={() => provider('google')}
-              ><span class="google-icon" aria-hidden="true">G</span><span>Kontynuuj z Google</span
-              ><ArrowUpRight size={15} aria-hidden="true" /></button
-            >
-          </div>
-          <div class="separator">lub użyj adresu e-mail</div>{/if}
-        <form class="auth-form" onsubmit={submit}>
-          {#if mode === 'signup'}<div class="auth-field">
-              <label for="auth-name">Pełne imię i nazwisko</label><input
-                id="auth-name"
-                autocomplete="name"
-                bind:value={name}
-                placeholder="Anna Kowalska"
-                required
-                disabled={busy}
-              />
-            </div>{/if}
-          <div class="auth-field">
-            <label for="auth-email">E-mail</label><input
-              id="auth-email"
-              type="email"
-              autocomplete="email"
-              bind:value={email}
-              placeholder="anna@example.com"
-              required
-              disabled={busy}
+              }}
             />
-          </div>
-          {#if mode !== 'reset'}<div class="auth-field">
-              <div class="password-label">
-                <label for="auth-password">Hasło</label>{#if mode === 'login'}<button
-                    type="button"
-                    class="text-button"
-                    disabled={busy}
-                    onclick={() => {
-                      mode = 'reset';
-                      message = '';
-                    }}>Nie pamiętam hasła</button
-                  >{/if}
-              </div>
-              <input
-                id="auth-password"
-                type="password"
-                autocomplete={mode === 'signup' ? 'new-password' : 'current-password'}
-                minlength="8"
-                bind:value={password}
-                required
-                disabled={busy}
-              />
-            </div>{/if}
-          {#if mode === 'login'}<label class="remember"
-              ><input type="checkbox" bind:checked={consent} disabled={busy} />Zapamiętaj konto na
-              tym urządzeniu</label
-            >{/if}
-          <button class="btn submit-button" disabled={busy}
-            >{busy ? 'Proszę czekać…' : modeLabel}<ArrowRight
-              size={16}
-              aria-hidden="true"
-            /></button
-          >
-        </form>
-        {#if message}<p role="status" class="auth-message">{message}</p>{/if}
-        {#if mode === 'reset'}<button
-            class="btn btn-outline auth-back"
-            disabled={busy}
-            onclick={() => {
-              mode = 'login';
-              message = '';
-            }}>Wróć do logowania</button
-          >{/if}
-        <p class="activation-note">Nowe konta wymagają aktywacji przez zarząd KSI.</p>
-      {/if}
-    </section>
-    <footer class="auth-footer">
-      <a href={data.websiteOrigin}
-        >Wróć na stronę KSI<ArrowUpRight size={13} aria-hidden="true" /></a
-      ><span class="right-col">KSI · Uniwersytet Wrocławski</span><span
-        >v{import.meta.env.PUBLIC_APP_VERSION}</span
-      ><a
-        class="right-col"
+          {/if}
+
+          <Text type="supporting" color="secondary">
+            Nowe konta wymagają aktywacji przez zarząd KSI.
+          </Text>
+        {/if}
+      </VStack>
+    </Card>
+
+    <HStack justify="between" vAlign="center" gap={2} wrap="wrap">
+      <Link href={data.websiteOrigin} type="supporting" color="secondary">Wróć na stronę KSI</Link>
+      <Text type="supporting" color="secondary">KSI · Uniwersytet Wrocławski</Text>
+      <Text type="supporting" color="secondary">v{import.meta.env.PUBLIC_APP_VERSION}</Text>
+      <Link
         href={import.meta.env.PUBLIC_COMMIT_HASH
           ? `https://github.com/ksiuwr/ksi-core/commit/${import.meta.env.PUBLIC_COMMIT_HASH}`
           : 'https://github.com/ksiuwr/ksi-core'}
-        target="_blank"
-        rel="noopener noreferrer"
-        >{import.meta.env.PUBLIC_COMMIT_HASH?.slice(0, 7) || 'Kod źródłowy'}</a
+        type="supporting"
+        color="secondary"
+        isExternalLink
       >
-    </footer>
-  </div>
+        {import.meta.env.PUBLIC_COMMIT_HASH?.slice(0, 7) || 'Kod źródłowy'}
+      </Link>
+    </HStack>
+  </VStack>
 </main>

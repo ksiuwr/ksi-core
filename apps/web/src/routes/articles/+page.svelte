@@ -1,23 +1,27 @@
 <script lang="ts">
+  import { Heading, HStack, StatusDot, Text, VStack } from '@astryx-sv/core';
   import ArticleList from '$lib/components/ArticleList.svelte';
   let { data } = $props<{ data: import('./$types').PageData }>();
 </script>
 
 <svelte:head><title>Artykuły · KSI UWr</title></svelte:head>
 
-<main class="flex-1">
-  <header class="border-line border-b">
-    <div class="page-container py-14 md:py-20">
-      <p class="eyebrow"><span class="dot"></span>Blog</p>
-      <h1 class="mt-4 text-[clamp(40px,6vw,64px)] font-bold tracking-[-0.045em]">Artykuły</h1>
-      <p class="text-muted mt-4 max-w-xl text-lg leading-relaxed">
+<VStack as="main" gap={0} class="flex-1">
+  <VStack as="header" gap={4} class="border-line border-b py-14 md:py-20">
+    <VStack gap={4} class="page-container w-full">
+      <HStack gap={2} vAlign="center">
+        <StatusDot variant="accent" label="Blog" />
+        <Text type="code" color="secondary" class="tracking-wider uppercase">Blog</Text>
+      </HStack>
+      <Heading level={1} type="display-1">Artykuły</Heading>
+      <Text type="large" color="secondary" class="max-w-xl">
         Aktualności, artykuły i relacje członków KSI.
-      </p>
-    </div>
-  </header>
-  <div class="page-container py-10 pb-20">
-    <div class="max-w-4xl">
+      </Text>
+    </VStack>
+  </VStack>
+  <VStack gap={0} paddingBlock={10} class="page-container w-full pb-20">
+    <VStack gap={0} maxWidth={896} class="w-full">
       <ArticleList articles={data.articles} />
-    </div>
-  </div>
-</main>
+    </VStack>
+  </VStack>
+</VStack>

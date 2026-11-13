@@ -34,6 +34,7 @@
     "./platform.css": "./platform.css",
     "./platform-theme.css": "./platform-theme.css",
     "./platform-kit.css": "./platform-kit.css",
+    "./astryx-bridge.css": "./astryx-bridge.css",
     "./docs-prose.css": "./docs-prose.css"
   },
   "scripts": {
@@ -46,11 +47,15 @@
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
   },
   "dependencies": {
+    "@astryx-sv/core": "^0.7.13",
+    "@astryx-sv/theme-neutral": "^0.7.13",
     "@lucide/svelte": "0.548.0",
     "@wuchale/svelte": "^0.20.5",
     "shared": "workspace:*"
   },
   "devDependencies": {
+    "@stylexjs/stylex": "^0.19.2",
+    "@stylexjs/unplugin": "^0.19.2",
     "@sveltejs/adapter-auto": "^7.0.1",
     "@sveltejs/kit": "^2.63.0",
     "@sveltejs/package": "^2.5.8",

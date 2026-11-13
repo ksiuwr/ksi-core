@@ -32,6 +32,22 @@
     SuggestionDetail,
     SuggestionSummary
   } from './docs';
+  import {
+    Badge,
+    Button,
+    Card,
+    EmptyState,
+    Grid,
+    Heading,
+    HStack,
+    Icon,
+    List,
+    ListItem,
+    SideNavItem,
+    StackItem,
+    Text,
+    VStack
+  } from '@astryx-sv/core';
 
   let {
     projectId,
@@ -84,106 +100,143 @@
     formatDate(value, language, { day: 'numeric', month: 'short', year: 'numeric' });
 </script>
 
-<div class="docs-layout" class:docs-history={view === 'history'}>
+<HStack class="docs-layout" gap={4} vAlign="start">
   {#if view !== 'history'}
-    <FloatingDocsNavigation label={'Dokumentacja'} docked={data.navigationDocked}>
-      <nav aria-label={'Dokumentacja'}>
-        <a class="docs-nav-link" class:active={view === 'index'} href={home}
-          ><BookOpen size={15} aria-hidden="true" />Przegląd</a
-        >
-        <DocTree {index} {projectId} {slug} selected={first} />
-        <!-- Collaboration tools stay below the pages, quieter than the reading links. -->
-        <div class="docs-nav-tools">
-          <a
-            class="docs-nav-link minor"
-            class:active={view === 'suggestions' || view === 'suggestion'}
-            href={hrefFor('suggestions')}
-            ><GitPullRequestArrow size={14} aria-hidden="true" /><span>Propozycje zmian</span
-            >{#if index.pendingSuggestions}<span class="docs-nav-count"
-                >{index.pendingSuggestions}</span
-              >{/if}</a
-          >
-          <a
-            class="docs-nav-link minor"
-            class:active={view === 'contributors'}
-            href={hrefFor('contributors')}><UsersRound size={14} aria-hidden="true" />Autorzy</a
-          >
-        </div>
-      </nav>
-    </FloatingDocsNavigation>
+    <StackItem size="static">
+      <FloatingDocsNavigation label={'Dokumentacja'} docked={data.navigationDocked}>
+        <nav aria-label={'Dokumentacja'}>
+          <VStack gap={0.5}>
+            <SideNavItem href={home} label="Przegląd" size="sm" isSelected={view === 'index'}>
+              {#snippet icon()}<Icon icon={BookOpen} size="sm" />{/snippet}
+            </SideNavItem>
+            <DocTree {index} {projectId} {slug} selected={first} />
+            <!-- Collaboration tools stay below the pages, quieter than the reading links. -->
+            <VStack gap={0} class="docs-nav-tools">
+              <SideNavItem
+                href={hrefFor('suggestions')}
+                label="Propozycje zmian"
+                size="sm"
+                isSelected={view === 'suggestions' || view === 'suggestion'}
+              >
+                {#snippet icon()}<Icon icon={GitPullRequestArrow} size="sm" />{/snippet}
+                {#snippet endContent()}
+                  {#if index.pendingSuggestions}
+                    <Badge variant="neutral" label={String(index.pendingSuggestions)} />
+                  {/if}
+                {/snippet}
+              </SideNavItem>
+              <SideNavItem
+                href={hrefFor('contributors')}
+                label="Autorzy"
+                size="sm"
+                isSelected={view === 'contributors'}
+              >
+                {#snippet icon()}<Icon icon={UsersRound} size="sm" />{/snippet}
+              </SideNavItem>
+            </VStack>
+          </VStack>
+        </nav>
+      </FloatingDocsNavigation>
+    </StackItem>
   {/if}
 
-  <div class="docs-main">
+  <StackItem size="fill" class="docs-main">
     <!-- Views keep editor and selection state, so each address starts fresh. -->
     {#key data.path.join('/')}
       {#if view === 'index'}
-        <div class="workspace-header">
-          <div>
-            <p class="workspace-eyebrow">{workspaceName}</p>
-            <h1>Dokumentacja</h1>
-            <p class="workspace-description">
+        <HStack class="workspace-header" hAlign="between" vAlign="start" wrap="wrap" gap={4}>
+          <VStack gap={1}>
+            <Text type="supporting" class="workspace-eyebrow">{workspaceName}</Text>
+            <Heading level={1}>Dokumentacja</Heading>
+            <Text as="p" class="workspace-description">
               Jak działa ta przestrzeń — spisane dla wszystkich, którzy przyjdą po nas.
-            </p>
-          </div>
+            </Text>
+          </VStack>
           {#if index.access.canPropose}
-            <a class="btn" href={hrefFor('new')}
-              ><Plus size={15} aria-hidden="true" />{#if index.access.canReview}Nowa strona{:else}Zaproponuj
-                stronę{/if}</a
+            <Button
+              href={hrefFor('new')}
+              label={index.access.canReview ? 'Nowa strona' : 'Zaproponuj stronę'}
             >
+              {#snippet icon()}<Icon icon={Plus} size="sm" />{/snippet}
+            </Button>
           {/if}
-        </div>
+        </HStack>
         {#if index.access.canReview && index.pendingSuggestions}
-          <a class="docs-callout" href={hrefFor('suggestions')}>
-            <GitPullRequestArrow size={18} aria-hidden="true" />
-            <span
-              >Propozycje czekające na Twoją ocenę:
-              <strong>{index.pendingSuggestions}</strong></span
-            >
-            <ArrowRight size={16} aria-hidden="true" />
-          </a>
+          <List class="docs-callout">
+            <ListItem href={hrefFor('suggestions')} align="center">
+              {#snippet startContent()}
+                <Icon icon={GitPullRequestArrow} size="md" color="accent" />
+              {/snippet}
+              {#snippet label()}
+                <Text>
+                  Propozycje czekające na Twoją ocenę:
+                  <strong>{index.pendingSuggestions}</strong>
+                </Text>
+              {/snippet}
+              {#snippet endContent()}<Icon
+                  icon={ArrowRight}
+                  size="sm"
+                  color="secondary"
+                />{/snippet}
+            </ListItem>
+          </List>
         {/if}
         {#if index.pages.length}
           {#each groups as group (group.folder)}
-            <section class="docs-group" aria-label={group.folder || undefined}>
+            <VStack as="section" gap={3} class="docs-group" aria-label={group.folder || undefined}>
               {#if group.folder}
-                <h2 class="docs-group-title">
-                  <Folder size={15} aria-hidden="true" />{group.folder.split('/').join(' / ')}
-                </h2>
+                <HStack gap={2} vAlign="center">
+                  <Icon icon={Folder} size="sm" color="secondary" />
+                  <Heading level={2} class="docs-group-title">
+                    {group.folder.split('/').join(' / ')}
+                  </Heading>
+                </HStack>
               {/if}
-              <div class="docs-cards">
+              <Grid columns={{ minWidth: 280, max: 4 }} gap={3}>
                 {#each group.pages as page (page.id)}
                   <a class="docs-card" href={hrefFor(page.slug)}>
-                    <span class="docs-card-title"
-                      ><FileText size={16} aria-hidden="true" /><span>{page.title}</span
-                      >{#if page.public}<Globe
-                          class="docs-card-public"
-                          size={14}
-                          aria-label={'Publiczna'}
-                        />{/if}</span
-                    >
-                    {#if page.excerpt}<span class="docs-card-excerpt">{page.excerpt}</span>{/if}
-                    <span class="docs-card-meta">
-                      <span class="docs-card-people">
-                        {#each page.contributors.slice(0, 4) as person (person.id)}
-                          <DocPerson {person} size={22} showName={false} />
-                        {/each}
-                      </span>
-                      <span
-                        >Zaktualizowano
-                        <time datetime={page.updatedAt}>{updated(page.updatedAt)}</time></span
-                      >
-                    </span>
+                    <Card padding={5} height="100%">
+                      <VStack gap={3} height="100%">
+                        <HStack gap={2} vAlign="start">
+                          <Icon icon={FileText} size="sm" color="accent" />
+                          <StackItem size="fill">
+                            <Text size="lg" weight="semibold" class="docs-card-title"
+                              >{page.title}</Text
+                            >
+                          </StackItem>
+                          {#if page.public}
+                            <Icon icon={Globe} size="sm" color="success" label={'Publiczna'} />
+                          {/if}
+                        </HStack>
+                        {#if page.excerpt}
+                          <Text type="supporting" class="docs-card-excerpt">{page.excerpt}</Text>
+                        {/if}
+                        <HStack class="docs-card-meta" hAlign="between" vAlign="center" gap={2}>
+                          <HStack gap={1} class="docs-card-people">
+                            {#each page.contributors.slice(0, 4) as person (person.id)}
+                              <DocPerson {person} size={22} showName={false} />
+                            {/each}
+                          </HStack>
+                          <Text type="supporting">
+                            Zaktualizowano
+                            <time datetime={page.updatedAt}>{updated(page.updatedAt)}</time>
+                          </Text>
+                        </HStack>
+                      </VStack>
+                    </Card>
                   </a>
                 {/each}
-              </div>
-            </section>
+              </Grid>
+            </VStack>
           {/each}
         {:else}
-          <div class="empty-state">
-            <BookOpen size={28} strokeWidth={1.4} aria-hidden="true" />
-            <h2>Brak dokumentacji</h2>
-            <p>Zapisz, jak tu wszystko działa, żeby kolejny zespół nie zaczynał od zera.</p>
-          </div>
+          <EmptyState
+            title="Brak dokumentacji"
+            description="Zapisz, jak tu wszystko działa, żeby kolejny zespół nie zaczynał od zera."
+            headingLevel={2}
+          >
+            {#snippet icon()}<Icon icon={BookOpen} size="lg" color="secondary" />{/snippet}
+          </EmptyState>
         {/if}
       {:else if view === 'page' && data.page}
         <DocPage page={data.page} {slug} {websiteOrigin} />
@@ -217,174 +270,59 @@
         <DocContributors insights={data.insights} {workspaceName} />
       {/if}
     {/key}
-  </div>
-</div>
+  </StackItem>
+</HStack>
 
 <style>
   /* The rail sizes its own column, so docking widens it without a second width here. */
-  .docs-layout:not(.docs-history) {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 16px;
-    align-items: start;
+  :global(.docs-main) {
+    min-width: 0;
   }
-  @media (max-width: 760px) {
-    .docs-layout:not(.docs-history) {
-      display: block;
-    }
+  :global(.docs-group) + :global(.docs-group) {
+    margin-top: var(--spacing-7);
   }
-  nav {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 2px;
-  }
-  .docs-nav-link {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 30px;
-    padding: 6px 8px 6px 6px;
-    border-radius: var(--radius-md);
-    color: var(--muted);
-    font-size: 13px;
-    line-height: 1.35;
-    text-decoration: none;
-  }
-  .docs-group + .docs-group {
-    margin-top: 28px;
-  }
-  .docs-group-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0 0 12px;
-    color: var(--muted);
-    font-family: var(--font);
-    font-size: 13px;
+  :global(.docs-group-title) {
+    font-size: var(--font-size-base);
     font-weight: 500;
-    letter-spacing: 0;
+    color: var(--color-text-secondary);
   }
-  .docs-nav-link span {
-    flex: 1;
-    min-width: 0;
-    overflow-wrap: anywhere;
-  }
-  .docs-nav-link :global(svg) {
-    flex-shrink: 0;
-  }
-  .docs-nav-link:hover {
-    color: var(--ink);
-    background: var(--surface-muted);
-  }
-  .docs-nav-link.active {
-    color: var(--ink);
-    background: var(--surface-muted);
-  }
-  .docs-nav-link.active :global(svg:first-child) {
-    color: var(--accent);
-  }
-  .docs-nav-count {
-    flex: 0 0 auto !important;
-    min-width: 20px;
-    padding: 1px 6px;
-    border-radius: var(--radius-full);
-    background: var(--primary);
-    color: var(--primary-text);
-    font-family: var(--mono);
-    font-size: 10px;
-    text-align: center;
-  }
-  .docs-nav-tools {
-    display: grid;
+  :global(.docs-nav-tools) {
     gap: 1px;
-    margin-top: 10px;
-    padding-top: 8px;
-    border-top: 1px solid var(--line);
+    margin-top: var(--spacing-2);
+    padding-top: var(--spacing-2);
+    border-top: 1px solid var(--color-border);
   }
-  .docs-nav-link.minor {
-    font-size: 12px;
-  }
-  .docs-main {
-    min-width: 0;
-  }
-  .docs-callout {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 24px;
-    padding: 14px 16px;
-    border: 1px solid var(--line);
-    border-left: 3px solid var(--accent);
-    border-radius: var(--radius-xl);
-    background: var(--surface);
-    color: var(--ink);
-    font-size: 13px;
-    text-decoration: none;
-    box-shadow: var(--shadow-xs);
-  }
-  .docs-callout span {
-    flex: 1;
-  }
-  .docs-callout:hover {
-    border-color: var(--control-border-hover);
-  }
-  .docs-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
-    gap: 14px;
+  :global(.docs-callout) {
+    margin-bottom: var(--spacing-6);
   }
   .docs-card {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 20px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-xl);
-    background: var(--surface);
-    color: var(--ink);
+    display: block;
+    height: 100%;
+    color: var(--color-text-primary);
     text-decoration: none;
-    box-shadow: var(--shadow-xs);
   }
-  .docs-card:hover {
-    border-color: var(--control-border-hover);
-  }
-  .docs-card-title {
-    display: flex;
-    align-items: flex-start;
-    gap: 9px;
-    font-family: var(--display);
-    font-size: 17px;
-    font-weight: 600;
+  :global(.docs-card-title) {
     overflow-wrap: anywhere;
   }
-  .docs-card-title > span {
-    flex: 1;
-    min-width: 0;
-  }
-  .docs-card-title :global(svg) {
-    flex-shrink: 0;
-    margin-top: 4px;
-    color: var(--accent);
-  }
-  .docs-card-title :global(.docs-card-public) {
-    color: var(--positive);
-  }
-  .docs-card-excerpt {
-    color: var(--muted);
-    font-size: 13px;
+  :global(.docs-card-excerpt) {
     line-height: 1.55;
   }
-  .docs-card-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+  :global(.docs-card-meta) {
     margin-top: auto;
-    color: var(--muted);
-    font-size: 12px;
+    gap: var(--spacing-2-5);
   }
-  .docs-card-people {
+  :global(.docs-card-people) {
     display: flex;
     gap: 3px;
+  }
+  @media (max-width: 760px) {
+    :global(.docs-layout) {
+      flex-direction: column !important;
+      align-items: stretch;
+    }
+    :global(.docs-main) {
+      flex: none;
+      width: 100%;
+    }
   }
 </style>

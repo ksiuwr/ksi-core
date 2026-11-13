@@ -4,9 +4,20 @@
   import { ChevronsUpDown, FileDiff } from '@lucide/svelte';
   import { SvelteSet } from 'svelte/reactivity';
   import DocError from './DocError.svelte';
-  import { slider } from '@ksi-core/ui/platform/slider';
   import { preferences } from '$lib/preferences.svelte';
   import { docsRequest, errorCode, type DiffRow, type DocDiffResult } from './docs';
+  import {
+    Button,
+    Card,
+    Grid,
+    HStack,
+    Icon,
+    SegmentedControl,
+    SegmentedControlItem,
+    Skeleton,
+    Text,
+    VStack
+  } from '@astryx-sv/core';
 
   let {
     before,
@@ -86,61 +97,69 @@
   const changed = $derived(result?.rows.some((row) => row.kind !== 'same') ?? false);
 </script>
 
-<section class="doc-diff" aria-busy={loading}>
-  <div class="doc-diff-toolbar">
-    <span class="doc-diff-stats">
-      <FileDiff size={15} aria-hidden="true" />
+<VStack as="section" gap={3} class="doc-diff" aria-busy={loading}>
+  <HStack hAlign="between" vAlign="center" gap={3} wrap="wrap">
+    <HStack gap={1.5} vAlign="center">
+      <Icon icon={FileDiff} size="sm" color="secondary" />
       {#if result}
-        Zmienione wiersze:
-        <span class="added-count">+{result.additions}</span>
-        <span class="removed-count">−{result.deletions}</span>
+        <Text type="supporting" class="doc-diff-mono">Zmienione wiersze:</Text>
+        <Text type="supporting" class="doc-diff-mono added-count">+{result.additions}</Text>
+        <Text type="supporting" class="doc-diff-mono removed-count">−{result.deletions}</Text>
       {/if}
-    </span>
-    <div class="segmented-control" role="group" aria-label={'Widok porównania'} use:slider>
-      <button
-        type="button"
-        class:active={mode === 'rendered'}
-        aria-pressed={mode === 'rendered'}
-        onclick={() => (mode = 'rendered')}>Wyrenderowany</button
-      >
-      <button
-        type="button"
-        class:active={mode === 'source'}
-        aria-pressed={mode === 'source'}
-        onclick={() => (mode = 'source')}>Markdown</button
-      >
-    </div>
-  </div>
+    </HStack>
+    <SegmentedControl
+      value={mode}
+      onChange={(next) => (mode = next as 'rendered' | 'source')}
+      label={'Widok porównania'}
+      size="sm"
+    >
+      <SegmentedControlItem value="rendered" label="Wyrenderowany" />
+      <SegmentedControlItem value="source" label="Markdown" />
+    </SegmentedControl>
+  </HStack>
   <DocError code={error} />
   {#if loading && !result}
-    <div class="doc-diff-loading"><span></span><span></span><span></span></div>
+    <VStack gap={2}>
+      <Skeleton height={14} />
+      <Skeleton height={14} />
+      <Skeleton height={14} width="60%" />
+    </VStack>
   {:else if result && !changed}
-    <p class="muted doc-diff-empty">Treść jest taka sama w obu wersjach.</p>
+    <Text as="p" type="supporting" class="doc-diff-empty">
+      Treść jest taka sama w obu wersjach.
+    </Text>
   {:else if result}
     {#if mode === 'rendered'}
-      <div class="doc-diff-head" aria-hidden="true">
-        <span>{beforeLabel}</span><span>{afterLabel}</span>
-      </div>
+      <Grid columns={2} gap={3} class="doc-diff-head" aria-hidden="true">
+        <Text type="supporting" class="doc-diff-mono">{beforeLabel}</Text>
+        <Text type="supporting" class="doc-diff-mono">{afterLabel}</Text>
+      </Grid>
     {/if}
-    <div class={['doc-diff-rows', mode]}>
+    <Card padding={0} class={`doc-diff-rows ${mode}`}>
       {#each items as item (item.type === 'fold' ? `fold-${item.key}` : item.key)}
         {#if item.type === 'fold'}
-          <button type="button" class="doc-diff-fold" onclick={() => expanded.add(item.key)}>
-            <ChevronsUpDown size={14} aria-hidden="true" />
-            Pokaż niezmienione fragmenty ({item.count})
-          </button>
+          <Button
+            label={`Pokaż niezmienione fragmenty (${item.count})`}
+            variant="ghost"
+            size="sm"
+            width="100%"
+            class="doc-diff-fold"
+            onclick={() => expanded.add(item.key)}
+          >
+            {#snippet icon()}<Icon icon={ChevronsUpDown} size="sm" />{/snippet}
+          </Button>
         {:else if mode === 'rendered'}
-          <div class={['doc-diff-row', item.row.kind]}>
-            <div class="doc-diff-cell before" data-label={beforeLabel}>
+          <Grid columns={2} class={`doc-diff-row ${item.row.kind}`}>
+            <VStack gap={0} class="doc-diff-cell before" data-label={beforeLabel}>
               {#if item.row.before}<Markdown blocks={item.row.before} {language} />{/if}
-            </div>
-            <div class="doc-diff-cell after" data-label={afterLabel}>
+            </VStack>
+            <VStack gap={0} class="doc-diff-cell after" data-label={afterLabel}>
               {#if item.row.kind === 'same' && item.row.before}<Markdown
                   blocks={item.row.before}
                   {language}
                 />{:else if item.row.after}<Markdown blocks={item.row.after} {language} />{/if}
-            </div>
-          </div>
+            </VStack>
+          </Grid>
         {:else if item.row.kind === 'changed' && item.row.words}
           <pre class="doc-diff-source removed"><span class="sign" aria-hidden="true">−</span><code
               >{#each item.row.words.before as part, index (index)}{#if part.changed}<del
@@ -153,141 +172,103 @@
                   >{:else}{part.text}{/if}{/each}</code
             ></pre>
         {:else}
-          <pre class={['doc-diff-source', item.row.kind]}><span class="sign" aria-hidden="true"
+          <pre class={`doc-diff-source ${item.row.kind}`}><span class="sign" aria-hidden="true"
               >{#if item.row.kind === 'added'}+{:else if item.row.kind === 'removed'}−{/if}</span
             ><code>{item.row.afterSource ?? item.row.beforeSource}</code></pre>
         {/if}
       {/each}
-    </div>
+    </Card>
   {/if}
-</section>
+</VStack>
 
 <style>
-  .doc-diff {
-    display: grid;
-    gap: 12px;
+  :global(.doc-diff) {
     min-width: 0;
   }
-  .doc-diff-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
+  :global(.doc-diff-mono) {
+    font-family: var(--font-family-code);
   }
-  .doc-diff-stats {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 12px;
-  }
-  .added-count {
-    color: var(--positive);
-  }
-  .removed-count {
-    color: var(--danger);
-  }
-  .doc-diff-head {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 11px;
+  :global(.doc-diff-head) {
     text-transform: uppercase;
     letter-spacing: 0.06em;
   }
-  .doc-diff-rows {
-    display: grid;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-xl);
+  :global(.doc-diff .added-count) {
+    color: var(--color-text-green);
+  }
+  :global(.doc-diff .removed-count) {
+    color: var(--color-text-red);
+  }
+  :global(.doc-diff-rows) {
     overflow: hidden;
-    background: var(--surface);
-    box-shadow: var(--shadow-xs);
   }
-  .doc-diff-rows.source {
-    gap: 0;
+  :global(.doc-diff-row) {
+    border-top: 1px solid var(--color-border);
   }
-  .doc-diff-row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    border-top: 1px solid var(--line);
-  }
-  .doc-diff-row:first-child {
+  :global(.doc-diff-rows > .doc-diff-row:first-child) {
     border-top: 0;
   }
-  .doc-diff-cell {
+  :global(.doc-diff-cell) {
     min-width: 0;
-    padding: 12px 16px;
+    padding: var(--spacing-3) var(--spacing-4);
   }
-  .doc-diff-cell.before {
-    border-right: 1px solid var(--line);
+  :global(.doc-diff-cell.before) {
+    border-right: 1px solid var(--color-border);
   }
-  .doc-diff-cell :global(.markdown :is(h1, h2, h3, h4, h5, h6)) {
+  :global(.doc-diff-rows.source),
+  :global(.doc-diff-rows.source .doc-diff-row) {
+    display: block !important;
+  }
+  :global(.doc-diff-cell .markdown :is(h1, h2, h3, h4, h5, h6)) {
     line-height: 1.3;
     letter-spacing: -0.02em;
   }
-  .doc-diff-cell :global(.markdown h1) {
-    font-size: 22px;
+  :global(.doc-diff-cell .markdown h1) {
+    font-size: var(--font-size-xl);
   }
-  .doc-diff-cell :global(.markdown h2) {
-    font-size: 19px;
+  :global(.doc-diff-cell .markdown h2) {
+    font-size: var(--font-size-lg);
   }
-  .doc-diff-cell :global(.markdown h3) {
-    font-size: 16px;
+  :global(.doc-diff-cell .markdown h3) {
+    font-size: var(--font-size-lg);
   }
-  .doc-diff-cell :global(.markdown :is(h4, h5, h6)) {
-    font-size: 14px;
+  :global(.doc-diff-cell .markdown :is(h4, h5, h6)) {
+    font-size: var(--font-size-base);
   }
-  .doc-diff-row.same .doc-diff-cell {
+  :global(.doc-diff-row.same .doc-diff-cell) {
     opacity: 0.62;
   }
-  .doc-diff-row:is(.removed, .changed) .before {
-    background: color-mix(in srgb, var(--danger) 9%, transparent);
-    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--danger) 70%, transparent);
+  :global(.doc-diff-row:is(.removed, .changed) .before) {
+    background: color-mix(in srgb, var(--color-error) 9%, transparent);
+    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--color-error) 70%, transparent);
   }
-  .doc-diff-row:is(.added, .changed) .after {
-    background: color-mix(in srgb, var(--positive) 10%, transparent);
-    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--positive) 75%, transparent);
+  :global(.doc-diff-row:is(.added, .changed) .after) {
+    background: color-mix(in srgb, var(--color-success) 10%, transparent);
+    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--color-success) 75%, transparent);
   }
-  .doc-diff-row.added .before,
-  .doc-diff-row.removed .after {
+  :global(.doc-diff-row.added .before),
+  :global(.doc-diff-row.removed .after) {
     background: repeating-linear-gradient(
       -45deg,
       transparent 0 6px,
-      color-mix(in srgb, var(--line) 45%, transparent) 6px 7px
+      color-mix(in srgb, var(--color-border) 45%, transparent) 6px 7px
     );
   }
-  .doc-diff-fold {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    padding: 7px;
-    border: 0;
-    border-top: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
-    background: var(--surface-muted);
-    color: var(--muted);
-    font-size: 12px;
-    cursor: pointer;
+  :global(.doc-diff-fold) {
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    border-radius: 0;
+    color: var(--color-text-secondary);
   }
-  .doc-diff-fold:first-child {
+  :global(.doc-diff-rows > .doc-diff-fold:first-child) {
     border-top: 0;
-  }
-  .doc-diff-fold:hover {
-    color: var(--ink);
   }
   .doc-diff-source {
     display: grid;
     grid-template-columns: 24px minmax(0, 1fr);
     margin: 0;
     padding: 6px 12px 6px 0;
-    font-family: var(--mono);
-    font-size: 12px;
+    font-family: var(--font-family-code);
+    font-size: var(--font-size-sm);
     line-height: 1.6;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
@@ -298,66 +279,54 @@
   }
   .doc-diff-source .sign {
     text-align: center;
-    color: var(--muted);
+    color: var(--color-text-secondary);
     user-select: none;
   }
   .doc-diff-source.same {
-    color: var(--muted);
+    color: var(--color-text-secondary);
   }
   .doc-diff-source.removed {
-    background: color-mix(in srgb, var(--danger) 9%, transparent);
+    background: color-mix(in srgb, var(--color-error) 9%, transparent);
   }
   .doc-diff-source.added {
-    background: color-mix(in srgb, var(--positive) 10%, transparent);
+    background: color-mix(in srgb, var(--color-success) 10%, transparent);
   }
   .doc-diff-source del {
-    background: color-mix(in srgb, var(--danger) 28%, transparent);
+    background: color-mix(in srgb, var(--color-error) 28%, transparent);
     text-decoration: line-through;
-    text-decoration-color: color-mix(in srgb, var(--danger) 70%, transparent);
+    text-decoration-color: color-mix(in srgb, var(--color-error) 70%, transparent);
   }
   .doc-diff-source ins {
-    background: color-mix(in srgb, var(--positive) 30%, transparent);
+    background: color-mix(in srgb, var(--color-success) 30%, transparent);
     text-decoration: none;
   }
-  .doc-diff-empty {
-    padding: 16px;
-    border: 1px dashed var(--line);
-    border-radius: var(--radius-xl);
-  }
-  .doc-diff-loading {
-    display: grid;
-    gap: 10px;
-  }
-  .doc-diff-loading span {
-    height: 14px;
-    border-radius: var(--radius-sm);
-    background: var(--surface-muted);
-  }
-  .doc-diff-loading span:last-child {
-    width: 60%;
+  :global(.doc-diff-empty) {
+    padding: var(--spacing-4);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-container);
   }
   @media (max-width: 760px) {
-    .doc-diff-head {
+    :global(.doc-diff-head) {
       display: none;
     }
-    .doc-diff-row {
-      grid-template-columns: minmax(0, 1fr);
+    :global(.doc-diff-row) {
+      grid-template-columns: minmax(0, 1fr) !important;
     }
-    .doc-diff-cell.before {
+    :global(.doc-diff-cell.before) {
       border-right: 0;
     }
-    .doc-diff-row.same .after,
-    .doc-diff-row.added .before,
-    .doc-diff-row.removed .after {
+    :global(.doc-diff-row.same .after),
+    :global(.doc-diff-row.added .before),
+    :global(.doc-diff-row.removed .after) {
       display: none;
     }
-    .doc-diff-row.changed .doc-diff-cell::before {
+    :global(.doc-diff-row.changed .doc-diff-cell::before) {
       content: attr(data-label);
       display: block;
       margin-bottom: 6px;
-      color: var(--muted);
-      font-family: var(--mono);
-      font-size: 10px;
+      color: var(--color-text-secondary);
+      font-family: var(--font-family-code);
+      font-size: var(--font-size-xs);
       text-transform: uppercase;
     }
   }

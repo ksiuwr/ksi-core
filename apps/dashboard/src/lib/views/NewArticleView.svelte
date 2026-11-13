@@ -7,6 +7,17 @@
   import { articlePath, dashboardPath, type Workspace } from '$lib/navigation';
   import type { Article } from '$lib/types';
   import Editor from '@ksi-core/ui/platform/Editor.svelte';
+  import {
+    Banner,
+    Button,
+    Divider,
+    Heading,
+    HStack,
+    Section,
+    Text,
+    TextInput,
+    VStack
+  } from '@astryx-sv/core';
   import { ArrowLeft, FilePlus2 } from '@lucide/svelte';
 
   let {
@@ -67,67 +78,106 @@
   }
 </script>
 
-<a class="btn btn-outline detail-back" href={dashboardPath(workspace, projectSlug, 'articles')}
-  ><ArrowLeft size={15} aria-hidden="true" />Artykuły</a
->
-<header class="create-heading">
-  <h1>Nowy artykuł</h1>
-  <p>Utwórz wersję roboczą. Publikację i widoczność w kanałach skonfigurujesz po zapisaniu.</p>
-</header>
+<VStack gap={4}>
+  <Button
+    href={dashboardPath(workspace, projectSlug, 'articles')}
+    variant="secondary"
+    label="Artykuły"
+  >
+    {#snippet icon()}<ArrowLeft size={15} aria-hidden="true" />{/snippet}
+  </Button>
 
-{#if error}<p class="error" role="alert">{error}</p>{/if}
-<form
-  class="detail-layout create-form"
-  onsubmit={(event) => {
-    event.preventDefault();
-    void create();
-  }}
->
-  <section class="card create-main">
-    <div>
-      <label for="new-article-title">Tytuł</label>
-      <input
-        id="new-article-title"
-        value={title}
-        oninput={(event) => updateTitle(event.currentTarget.value)}
-        required
-        maxlength="200"
-      />
-    </div>
-    <div>
-      <span class="create-label">Treść</span>
-      <Editor allowGallery rows={24} bind:value={markdown} />
-    </div>
-  </section>
+  <VStack as="header" gap={1}>
+    <Heading level={1}>Nowy artykuł</Heading>
+    <Text as="p" class="workspace-description">
+      Utwórz wersję roboczą. Publikację i widoczność w kanałach skonfigurujesz po zapisaniu.
+    </Text>
+  </VStack>
 
-  <aside class="card create-aside">
-    <section class="create-section">
-      <label for="new-article-slug">Slug</label>
-      <input
-        id="new-article-slug"
-        bind:value={slug}
-        required
-        maxlength="160"
-        pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
-        placeholder="article-url"
-        oninput={() => (slugEdited = true)}
-      />
-      <p class="muted">Używany w publicznym adresie artykułu.</p>
-    </section>
-    <section class="create-section">
-      <ArticleThumbnail
-        bind:fileId={thumbnailFileId}
-        bind:uploading={thumbnailUploading}
-        disabled={busy}
-      />
-    </section>
-    <div class="create-actions">
-      <button class="btn" disabled={busy || thumbnailUploading || !title.trim() || !slug.trim()}
-        ><FilePlus2 size={15} aria-hidden="true" />{busy
-          ? 'Tworzenie…'
-          : 'Utwórz wersję roboczą'}</button
-      >
-      <a class="btn btn-outline" href={dashboardPath(workspace, projectSlug, 'articles')}>Anuluj</a>
-    </div>
-  </aside>
-</form>
+  {#if error}<Banner status="error" title={error} role="alert" />{/if}
+
+  <form
+    onsubmit={(event) => {
+      event.preventDefault();
+      void create();
+    }}
+  >
+    <HStack vAlign="start" gap={5} wrap="wrap">
+      <Section padding={5} class="form-main">
+        <VStack gap={5}>
+          <TextInput
+            id="new-article-title"
+            label="Tytuł"
+            value={title}
+            onChange={updateTitle}
+            isRequired
+          />
+          <VStack gap={2}>
+            <Text type="label" weight="semibold">Treść</Text>
+            <Editor allowGallery rows={24} bind:value={markdown} />
+          </VStack>
+        </VStack>
+      </Section>
+
+      <Section padding={5} class="form-aside">
+        <VStack gap={4}>
+          <TextInput
+            id="new-article-slug"
+            label="Slug"
+            value={slug}
+            onChange={(value) => {
+              slug = value;
+              slugEdited = true;
+            }}
+            isRequired
+            placeholder="article-url"
+            description="Używany w publicznym adresie artykułu."
+          />
+          <Divider />
+          <ArticleThumbnail
+            bind:fileId={thumbnailFileId}
+            bind:uploading={thumbnailUploading}
+            disabled={busy}
+          />
+          <Divider />
+          <VStack gap={2}>
+            <Button
+              type="submit"
+              variant="primary"
+              width="100%"
+              label={busy ? 'Tworzenie…' : 'Utwórz wersję roboczą'}
+              isDisabled={busy || thumbnailUploading || !title.trim() || !slug.trim()}
+            >
+              {#snippet icon()}<FilePlus2 size={15} aria-hidden="true" />{/snippet}
+            </Button>
+            <Button
+              href={dashboardPath(workspace, projectSlug, 'articles')}
+              variant="secondary"
+              width="100%"
+              label="Anuluj"
+            />
+          </VStack>
+        </VStack>
+      </Section>
+    </HStack>
+  </form>
+</VStack>
+
+<style>
+  :global(.form-main) {
+    flex: 1 1 32rem;
+    min-width: 0;
+  }
+  :global(.form-aside) {
+    flex: 0 1 20rem;
+    min-width: 0;
+    position: sticky;
+    top: 5.625rem;
+  }
+  @media (max-width: 61.25rem) {
+    :global(.form-aside) {
+      flex-basis: 100%;
+      position: static;
+    }
+  }
+</style>

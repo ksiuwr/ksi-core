@@ -2,6 +2,11 @@
   import '../app.css';
   import { onMount, untrack } from 'svelte';
   import { invalidate } from '$app/navigation';
+  import { Theme } from '@astryx-sv/core/theme';
+  import { InternationalizationProvider } from '@astryx-sv/core/i18n';
+  import en from '@astryx-sv/core/locales/en.json';
+  import pl from '@astryx-sv/core/locales/pl-PL.json';
+  import { neutralTheme } from '@astryx-sv/theme-neutral';
   import Navbar from '../components/Navbar.svelte';
   import Footer from '../components/Footer.svelte';
   import { Toaster } from 'svelte-sonner';
@@ -35,16 +40,23 @@
   <title>KSI UWr</title>
 </svelte:head>
 
-<Toaster theme={$themeStore} richColors />
+<Theme theme={neutralTheme} mode={$themeStore}>
+  <InternationalizationProvider
+    locale={locale.current}
+    messages={{ en, 'en-us': en, pl, 'pl-PL': pl }}
+  >
+    <Toaster theme={$themeStore} richColors />
 
-<div class="flex min-h-screen flex-col">
-  {#if data.alert}
-    <Alert alert={data.alert} />
-  {/if}
-  <Navbar user={data.user} session={data.session} />
+    <div class="flex min-h-screen flex-col">
+      {#if data.alert}
+        <Alert alert={data.alert} />
+      {/if}
+      <Navbar user={data.user} session={data.session} />
 
-  <div class="flex flex-1 flex-col">
-    {@render children?.()}
-  </div>
-  <Footer />
-</div>
+      <div class="flex flex-1 flex-col">
+        {@render children?.()}
+      </div>
+      <Footer />
+    </div>
+  </InternationalizationProvider>
+</Theme>

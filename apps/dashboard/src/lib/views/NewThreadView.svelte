@@ -5,8 +5,19 @@
   import { api, errorMessage } from '$lib/api';
   import { dashboardPath, threadPath, type Workspace } from '$lib/navigation';
   import type { Thread } from '$lib/types';
-  import Dropdown from '@ksi-core/ui/platform/Dropdown.svelte';
   import Editor from '@ksi-core/ui/platform/Editor.svelte';
+  import {
+    Banner,
+    Button,
+    Divider,
+    Heading,
+    HStack,
+    Section,
+    Selector,
+    Text,
+    TextInput,
+    VStack
+  } from '@astryx-sv/core';
   import { ArrowLeft, MessageSquarePlus } from '@lucide/svelte';
   import { untrack } from 'svelte';
 
@@ -50,57 +61,100 @@
   }
 </script>
 
-<a class="btn btn-outline detail-back" href={dashboardPath(workspace, projectSlug, 'forum')}
-  ><ArrowLeft size={15} aria-hidden="true" />Forum</a
->
-<header class="create-heading">
-  <h1>Nowy wątek</h1>
-  <p>Rozpocznij dyskusję i wybierz, kto może ją zobaczyć.</p>
-</header>
+<VStack gap={4}>
+  <Button href={dashboardPath(workspace, projectSlug, 'forum')} variant="secondary" label="Forum">
+    {#snippet icon()}<ArrowLeft size={15} aria-hidden="true" />{/snippet}
+  </Button>
 
-{#if error}<p class="error" role="alert">{error}</p>{/if}
-<form
-  class="detail-layout create-form"
-  onsubmit={(event) => {
-    event.preventDefault();
-    void create();
-  }}
->
-  <section class="card create-main">
-    <div>
-      <label for="new-thread-title">Temat</label>
-      <input id="new-thread-title" bind:value={title} required maxlength="200" />
-    </div>
-    <div>
-      <span class="create-label">Pierwszy post</span>
-      <Editor bind:value={markdown} rows={18} allowReferences />
-    </div>
-  </section>
+  <VStack as="header" gap={1}>
+    <Heading level={1}>Nowy wątek</Heading>
+    <Text as="p" class="workspace-description">
+      Rozpocznij dyskusję i wybierz, kto może ją zobaczyć.
+    </Text>
+  </VStack>
 
-  <aside class="card create-aside">
-    <section class="create-section">
-      <label for="new-thread-visibility">Widoczność</label>
-      <Dropdown
-        id="new-thread-visibility"
-        label={'Widoczność'}
-        bind:value={visibility}
-        options={[
-          { value: 'association', label: 'Członkowie koła' },
-          ...(projectId ? [{ value: 'members', label: 'Członkowie projektu' }] : []),
-          { value: 'leaders', label: 'Liderzy' }
-        ]}
-      />
-    </section>
-    <section class="create-section">
-      <Assignees {projectId} bind:value={assignees} disabled={busy} />
-    </section>
-    <div class="create-actions">
-      <button class="btn" disabled={busy || !title.trim()}
-        ><MessageSquarePlus size={15} aria-hidden="true" />{busy
-          ? 'Tworzenie…'
-          : 'Utwórz wątek'}</button
-      >
-      <a class="btn btn-outline" href={dashboardPath(workspace, projectSlug, 'forum')}>Anuluj</a>
-    </div>
-  </aside>
-</form>
+  {#if error}<Banner status="error" title={error} role="alert" />{/if}
+
+  <form
+    onsubmit={(event) => {
+      event.preventDefault();
+      void create();
+    }}
+  >
+    <HStack vAlign="start" gap={5} wrap="wrap">
+      <Section padding={5} class="form-main">
+        <VStack gap={5}>
+          <TextInput
+            id="new-thread-title"
+            label="Temat"
+            value={title}
+            onChange={(value) => (title = value)}
+            isRequired
+          />
+          <VStack gap={2}>
+            <Text type="label" weight="semibold">Pierwszy post</Text>
+            <Editor bind:value={markdown} rows={18} allowReferences />
+          </VStack>
+        </VStack>
+      </Section>
+
+      <Section padding={5} class="form-aside">
+        <VStack gap={4}>
+          <Selector
+            id="new-thread-visibility"
+            label="Widoczność"
+            value={visibility}
+            options={[
+              { value: 'association', label: 'Członkowie koła' },
+              ...(projectId ? [{ value: 'members', label: 'Członkowie projektu' }] : []),
+              { value: 'leaders', label: 'Liderzy' }
+            ]}
+            width="100%"
+            onChange={(value: string | null) => {
+              if (value !== null) visibility = value;
+            }}
+          />
+          <Divider />
+          <Assignees {projectId} bind:value={assignees} disabled={busy} />
+          <Divider />
+          <VStack gap={2}>
+            <Button
+              type="submit"
+              variant="primary"
+              width="100%"
+              label={busy ? 'Tworzenie…' : 'Utwórz wątek'}
+              isDisabled={busy || !title.trim()}
+            >
+              {#snippet icon()}<MessageSquarePlus size={15} aria-hidden="true" />{/snippet}
+            </Button>
+            <Button
+              href={dashboardPath(workspace, projectSlug, 'forum')}
+              variant="secondary"
+              width="100%"
+              label="Anuluj"
+            />
+          </VStack>
+        </VStack>
+      </Section>
+    </HStack>
+  </form>
+</VStack>
+
+<style>
+  :global(.form-main) {
+    flex: 1 1 32rem;
+    min-width: 0;
+  }
+  :global(.form-aside) {
+    flex: 0 1 20rem;
+    min-width: 0;
+    position: sticky;
+    top: 5.625rem;
+  }
+  @media (max-width: 61.25rem) {
+    :global(.form-aside) {
+      flex-basis: 100%;
+      position: static;
+    }
+  }
+</style>

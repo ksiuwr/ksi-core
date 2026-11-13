@@ -1,5 +1,17 @@
 <script lang="ts">
   import { BookOpen, Lock } from '@lucide/svelte';
+  import {
+    ClickableCard,
+    EmptyState,
+    Grid,
+    HStack,
+    Heading,
+    Icon,
+    StatusDot,
+    Text,
+    Token,
+    VStack
+  } from '@astryx-sv/core';
   import { publicDocPages, publicDocPath, publicDocWorkspaces } from 'shared/public-docs';
   import { locale } from '$lib/locale.svelte';
   let { data } = $props<{ data: import('./$types').PageData }>();
@@ -11,143 +23,62 @@
 
 <svelte:head><title>Dokumentacja · KSI UWr</title></svelte:head>
 
-<main class="docs-index">
-  <header>
-    <p class="eyebrow"><span class="dot"></span>Dokumentacja</p>
-    <h1>Dokumentacja</h1>
-    <p class="docs-lead">
-      Jak działa KSI i jego projekty — opisane otwarcie przez naszych członków.
-    </p>
-  </header>
-  {#each workspaces as workspace (workspace.slug)}
-    <section aria-labelledby={`workspace-${workspace.slug}`}>
-      <h2 id={`workspace-${workspace.slug}`}>{workspace.name}</h2>
-      <ul class="docs-grid">
-        {#each publicDocPages(workspace) as page (page.slug)}
-          <li>
-            <a
-              class="docs-card surface-card surface-card-link"
-              href={publicDocPath(workspace.slug, page.slug)}
-            >
-              {#if page.folderTrail.length}
-                <span class="docs-folder"
-                  >{page.folderTrail.map((folder) => folder.name).join(' / ')}</span
-                >
-              {/if}
-              <span class="docs-title">{page.title}</span>
-              {#if page.excerpt}<span class="docs-excerpt">{page.excerpt}</span>{/if}
-              <span class="docs-meta">
-                <time datetime={page.updatedAt}>{formatter.format(new Date(page.updatedAt))}</time>
-                {#if !page.public}<span class="docs-private"
-                    ><Lock size={12} aria-hidden="true" />Tylko dla członków</span
-                  >{/if}
-              </span>
-            </a>
-          </li>
-        {/each}
-      </ul>
-    </section>
-  {:else}
-    <div class="docs-empty">
-      <BookOpen size={28} strokeWidth={1.4} aria-hidden="true" />
-      <p>Brak publicznej dokumentacji.</p>
-    </div>
-  {/each}
-</main>
+{#snippet lockIcon()}
+  <Icon icon={Lock} size="xsm" />
+{/snippet}
 
-<style>
-  .docs-index {
-    flex: 1;
-    max-width: 920px;
-  }
-  header {
-    margin-bottom: 40px;
-  }
-  h1 {
-    margin-top: 14px;
-    font-size: clamp(34px, 4.6vw, 48px);
-    font-weight: 700;
-    line-height: 1.1;
-    letter-spacing: -0.045em;
-  }
-  .docs-lead {
-    max-width: 36rem;
-    margin-top: 14px;
-    color: var(--muted);
-    font-size: 17px;
-    line-height: 1.6;
-  }
-  section + section {
-    margin-top: 40px;
-  }
-  h2 {
-    margin-bottom: 14px;
-    font-size: 20px;
-    font-weight: 600;
-    text-transform: none;
-    letter-spacing: -0.02em;
-  }
-  .docs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
-    gap: 14px;
-  }
-  .docs-card {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    height: 100%;
-    padding: 20px;
-    color: var(--ink);
-  }
-  .docs-folder {
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 11px;
-    overflow-wrap: anywhere;
-  }
-  .docs-title {
-    font-size: 18px;
-    font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: -0.02em;
-    overflow-wrap: anywhere;
-  }
-  .docs-excerpt {
-    display: -webkit-box;
-    overflow: hidden;
-    color: var(--muted);
-    font-size: 14px;
-    line-height: 1.55;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-  }
-  .docs-meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 6px 12px;
-    margin-top: auto;
-    padding-top: 6px;
-    color: var(--muted);
-    font-size: 12px;
-  }
-  .docs-private {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-  }
-  .docs-empty {
-    display: grid;
-    justify-items: center;
-    gap: 12px;
-    padding: 48px 24px;
-    border: 1px dashed var(--input);
-    border-radius: var(--radius-xl);
-    color: var(--muted);
-    font-size: 14px;
-    text-align: center;
-  }
-</style>
+{#snippet emptyIcon()}
+  <Icon icon={BookOpen} size="lg" color="secondary" />
+{/snippet}
+
+<VStack as="main" gap={10} maxWidth={920} class="w-full flex-1">
+  <VStack as="header" gap={4}>
+    <HStack gap={2} vAlign="center">
+      <StatusDot variant="accent" label="Dokumentacja" />
+      <Text type="code" color="secondary" class="tracking-wider uppercase">Dokumentacja</Text>
+    </HStack>
+    <Heading level={1} type="display-1">Dokumentacja</Heading>
+    <Text type="large" color="secondary" class="max-w-xl">
+      Jak działa KSI i jego projekty — opisane otwarcie przez naszych członków.
+    </Text>
+  </VStack>
+
+  {#each workspaces as workspace (workspace.slug)}
+    <VStack as="section" gap={4} aria-labelledby={`workspace-${workspace.slug}`}>
+      <Heading level={2} id={`workspace-${workspace.slug}`}>{workspace.name}</Heading>
+      <Grid columns={{ minWidth: 300, max: 3 }} gap={3}>
+        {#each publicDocPages(workspace) as page (page.slug)}
+          <ClickableCard
+            href={publicDocPath(workspace.slug, page.slug)}
+            label={page.title}
+            padding={5}
+            elevation="low"
+          >
+            <VStack gap={2} height="100%">
+              {#if page.folderTrail.length}
+                <Text type="code" color="secondary" maxLines={1}>
+                  {page.folderTrail.map((folder) => folder.name).join(' / ')}
+                </Text>
+              {/if}
+              <Heading level={3}>{page.title}</Heading>
+              {#if page.excerpt}
+                <Text type="supporting" color="secondary" maxLines={3}>{page.excerpt}</Text>
+              {/if}
+              <HStack gap={2} justify="between" vAlign="center" wrap="wrap" class="mt-auto pt-1.5">
+                <Text type="supporting" color="secondary">
+                  <time datetime={page.updatedAt}>{formatter.format(new Date(page.updatedAt))}</time
+                  >
+                </Text>
+                {#if !page.public}
+                  <Token label="Tylko dla członków" color="gray" icon={lockIcon} size="sm" />
+                {/if}
+              </HStack>
+            </VStack>
+          </ClickableCard>
+        {/each}
+      </Grid>
+    </VStack>
+  {:else}
+    <EmptyState title="Brak publicznej dokumentacji." icon={emptyIcon} />
+  {/each}
+</VStack>

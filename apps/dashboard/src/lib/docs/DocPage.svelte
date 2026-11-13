@@ -4,12 +4,23 @@
   import DocsOutline from '@ksi-core/ui/platform/DocsOutline.svelte';
   import DocsToc from '@ksi-core/ui/platform/DocsToc.svelte';
   import { headingAnchors } from '@ksi-core/ui/platform/heading-anchors';
-  import { SquarePen, Globe, CalendarDays, TriangleAlert } from '@lucide/svelte';
+  import { SquarePen, Globe, CalendarDays } from '@lucide/svelte';
   import { formatDate, formatDateTime } from 'shared/format';
   import { associationDocsKey, docsPath } from 'shared/docs';
   import { preferences, setLanguage } from '$lib/preferences.svelte';
   import DocInfo from './DocInfo.svelte';
   import type { DocDetail } from './docs';
+  import {
+    Badge,
+    Banner,
+    Button,
+    Heading,
+    HStack,
+    Icon,
+    StackItem,
+    Text,
+    VStack
+  } from '@astryx-sv/core';
 
   let {
     page,
@@ -32,168 +43,145 @@
   );
 </script>
 
-<div class="doc-page">
+<HStack class="doc-page" gap={8} vAlign="start">
   <article class="doc-article" lang={page.locale}>
-    <!-- Most visits are for reading, so details and editing stay one quiet click away. -->
-    <header class="doc-header">
-      <h1>{page.displayTitle}</h1>
-      <div class="doc-byline">
-        <span class="doc-updated"
-          ><CalendarDays size={14} aria-hidden="true" /><span
-            >Zaktualizowano
-            <time
-              datetime={page.updatedAt}
-              title={formatDateTime(page.updatedAt, language, {
-                dateStyle: 'full',
-                timeStyle: 'long'
-              })}>{date(page.updatedAt)}</time
-            ></span
-          ></span
-        >
-        {#if page.public}<span class="doc-public"
-            ><Globe size={13} aria-hidden="true" />Publiczna</span
-          >{/if}
-        <span class="doc-tools">
-          {#if page.access.canReview}
-            <a class="btn ghost btn-sm" href={docsPath(slug, page.slug, 'edit')}
-              ><SquarePen aria-hidden="true" />Edytuj</a
-            >
-          {:else if page.access.canPropose}
-            <a class="btn ghost btn-sm" href={docsPath(slug, page.slug, 'edit')}
-              ><SquarePen aria-hidden="true" />Zaproponuj zmiany</a
-            >
+    <VStack gap={0}>
+      <!-- Most visits are for reading, so details and editing stay one quiet click away. -->
+      <VStack gap={3} class="doc-header">
+        <Heading level={1} class="doc-title">{page.displayTitle}</Heading>
+        <HStack class="doc-byline" gap={3} vAlign="center" wrap="wrap">
+          <HStack gap={1.5} vAlign="center">
+            <Icon icon={CalendarDays} size="sm" color="secondary" />
+            <Text type="supporting">
+              Zaktualizowano
+              <time
+                datetime={page.updatedAt}
+                title={formatDateTime(page.updatedAt, language, {
+                  dateStyle: 'full',
+                  timeStyle: 'long'
+                })}>{date(page.updatedAt)}</time
+              >
+            </Text>
+          </HStack>
+          {#if page.public}
+            <Badge variant="success" label="Publiczna">
+              {#snippet icon()}<Icon icon={Globe} size="xsm" />{/snippet}
+            </Badge>
           {/if}
-          <DocInfo {page} {slug} {publicUrl} />
-        </span>
-      </div>
-    </header>
+          <HStack class="doc-tools" gap={0.5} vAlign="center">
+            {#if page.access.canReview}
+              <Button
+                href={docsPath(slug, page.slug, 'edit')}
+                variant="ghost"
+                size="sm"
+                label="Edytuj"
+              >
+                {#snippet icon()}<Icon icon={SquarePen} size="sm" />{/snippet}
+              </Button>
+            {:else if page.access.canPropose}
+              <Button
+                href={docsPath(slug, page.slug, 'edit')}
+                variant="ghost"
+                size="sm"
+                label="Zaproponuj zmiany"
+              >
+                {#snippet icon()}<Icon icon={SquarePen} size="sm" />{/snippet}
+              </Button>
+            {/if}
+            <DocInfo {page} {slug} {publicUrl} />
+          </HStack>
+        </HStack>
+      </VStack>
 
-    {#if page.outdatedLocales.includes(page.locale)}
-      <p class="doc-outdated" role="note">
-        <TriangleAlert size={15} aria-hidden="true" />
-        <span>
-          Wersja polska zmieniła się po przygotowaniu tego tłumaczenia.
-          <button type="button" onclick={() => setLanguage('pl')}>Czytaj wersję polską</button>
-        </span>
-      </p>
-    {/if}
-
-    <div class="doc-outline"><DocsOutline headings={page.headings} {content} {onhash} /></div>
-
-    <div
-      class="doc-content doc-prose"
-      bind:this={content}
-      use:headingAnchors={{ onhash, ...anchorLabels }}
-    >
-      {#if page.markdown.trim()}
-        <Markdown blocks={page.blocks} {language} />
-      {:else}
-        <p class="muted">Ta strona jest pusta.</p>
+      {#if page.outdatedLocales.includes(page.locale)}
+        <Banner
+          status="warning"
+          title="Wersja polska zmieniła się po przygotowaniu tego tłumaczenia."
+          container="section"
+          role="note"
+        >
+          {#snippet endContent()}
+            <Button
+              variant="ghost"
+              size="sm"
+              label="Czytaj wersję polską"
+              onclick={() => setLanguage('pl')}
+            />
+          {/snippet}
+        </Banner>
       {/if}
-    </div>
+
+      <VStack gap={0} class="doc-outline">
+        <DocsOutline headings={page.headings} {content} {onhash} />
+      </VStack>
+
+      <div
+        class="doc-content doc-prose"
+        bind:this={content}
+        use:headingAnchors={{ onhash, ...anchorLabels }}
+      >
+        {#if page.markdown.trim()}
+          <Markdown blocks={page.blocks} {language} />
+        {:else}
+          <Text as="p" type="supporting">Ta strona jest pusta.</Text>
+        {/if}
+      </div>
+    </VStack>
   </article>
-  <aside class="doc-toc">
-    <DocsToc headings={page.headings} {content} {onhash} />
-  </aside>
-</div>
+  <StackItem size="static">
+    <aside class="doc-toc">
+      <DocsToc headings={page.headings} {content} {onhash} />
+    </aside>
+  </StackItem>
+</HStack>
 
 <style>
-  .doc-page {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 220px;
-    gap: 48px;
-    align-items: start;
-  }
   .doc-article {
+    flex: 1 1 0;
     min-width: 0;
     max-width: 760px;
   }
-  .doc-header {
-    padding-bottom: 22px;
-    border-bottom: 1px solid var(--line);
+  :global(.doc-header) {
+    padding-bottom: var(--spacing-5);
+    border-bottom: 1px solid var(--color-border);
   }
-  .doc-header h1 {
-    margin: 0 0 14px;
-    font-size: clamp(30px, 4vw, 46px);
+  :global(.doc-title) {
+    font-size: clamp(var(--font-size-4xl), 4vw, var(--font-size-5xl));
     font-weight: 700;
     line-height: 1.1;
     letter-spacing: -0.045em;
     text-wrap: balance;
     overflow-wrap: anywhere;
   }
-  .doc-byline {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 6px 14px;
-    color: var(--muted);
-    font-size: 12px;
-  }
-  .doc-updated,
-  .doc-public {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .doc-public {
-    color: var(--positive);
-  }
-  .doc-outdated {
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
-    margin: 20px 0 0;
-    padding: 10px 12px;
-    border-radius: var(--radius-lg);
-    background: var(--coral);
-    font-size: 13px;
-  }
-  .doc-outdated :global(svg) {
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-  .doc-outdated button {
-    padding: 0;
-    border: 0;
-    background: transparent;
-    font: inherit;
-    cursor: pointer;
-    text-decoration: underline;
-    margin-left: 4px;
-    color: var(--accent);
-  }
-  .doc-tools {
-    display: flex;
-    align-items: center;
-    gap: 2px;
+  :global(.doc-tools) {
     margin-left: auto;
   }
-  .doc-tools > :global(.btn.ghost) {
-    color: var(--muted);
-  }
-  .doc-tools > :global(.btn.ghost:hover) {
-    color: var(--ink);
-  }
   .doc-content {
-    padding-top: 28px;
+    padding-top: var(--spacing-7);
   }
   .doc-toc {
     position: sticky;
-    top: 24px;
+    top: var(--spacing-6);
+    width: 220px;
   }
-  .doc-outline {
+  :global(.doc-outline) {
     display: none;
-    margin-top: 20px;
+    margin-top: var(--spacing-5);
   }
   @media (max-width: 1100px) {
-    .doc-page {
-      grid-template-columns: minmax(0, 1fr);
+    :global(.doc-page) {
+      flex-direction: column !important;
+      align-items: stretch;
+    }
+    .doc-article {
+      flex: none;
+      width: 100%;
     }
     .doc-toc {
       display: none;
     }
-    .doc-outline {
-      display: block;
+    :global(.doc-outline) {
+      display: flex;
     }
   }
 </style>

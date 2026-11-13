@@ -4,6 +4,16 @@
   import Editor from '@ksi-core/ui/platform/Editor.svelte';
   import UserSelect from '$lib/UserSelect.svelte';
   import { api, errorMessage } from '$lib/api';
+  import {
+    Banner,
+    Button,
+    Heading,
+    HStack,
+    Section,
+    Text,
+    TextInput,
+    VStack
+  } from '@astryx-sv/core';
   import { ArrowLeft } from '@lucide/svelte';
   import type { Project } from '$lib/types';
 
@@ -38,23 +48,49 @@
   }
 </script>
 
-<div class="workspace-header">
-  <div>
-    <h1>Nowy projekt</h1>
-  </div>
-  <a class="btn btn-outline" href="/projects"><ArrowLeft size={15} aria-hidden="true" />Wróć</a>
-</div>
-{#if error}<p class="error" role="alert">{error}</p>{/if}
-<div class="card" style="max-width: 600px;">
-  <label for="cp-title">Nazwa</label>
-  <input id="cp-title" bind:value={title} required />
-  <label for="cp-slug">Slug</label>
-  <input id="cp-slug" bind:value={slug} />
-  <label for="cp-leaders">Liderzy</label>
-  <UserSelect bind:userIds={leaderIds} {api} />
-  <label for="cp-desc">Opis</label>
-  <Editor bind:value={markdown} />
-  <button class="btn" disabled={busy || !title.trim()} onclick={create} style="margin-top: 12px;">
-    Utwórz projekt
-  </button>
-</div>
+<VStack gap={4}>
+  <HStack class="workspace-header" hAlign="between" vAlign="start" wrap="wrap" gap={4}>
+    <Heading level={1}>Nowy projekt</Heading>
+    <Button href="/projects" variant="secondary" label="Wróć">
+      {#snippet icon()}<ArrowLeft size={15} aria-hidden="true" />{/snippet}
+    </Button>
+  </HStack>
+
+  {#if error}<Banner status="error" title={error} role="alert" />{/if}
+
+  <form
+    onsubmit={(event) => {
+      event.preventDefault();
+      void create();
+    }}
+  >
+    <Section padding={5} maxWidth={600}>
+      <VStack gap={4}>
+        <TextInput
+          id="cp-title"
+          label="Nazwa"
+          value={title}
+          onChange={(value) => (title = value)}
+          isRequired
+        />
+        <TextInput id="cp-slug" label="Slug" value={slug} onChange={(value) => (slug = value)} />
+        <VStack gap={2}>
+          <Text type="label" weight="semibold">Liderzy</Text>
+          <UserSelect bind:userIds={leaderIds} {api} />
+        </VStack>
+        <VStack gap={2}>
+          <Text type="label" weight="semibold">Opis</Text>
+          <Editor bind:value={markdown} />
+        </VStack>
+        <HStack>
+          <Button
+            type="submit"
+            variant="primary"
+            label="Utwórz projekt"
+            isDisabled={busy || !title.trim()}
+          />
+        </HStack>
+      </VStack>
+    </Section>
+  </form>
+</VStack>

@@ -1,11 +1,9 @@
 <script lang="ts">
   import Members from '$lib/Members.svelte';
+  import { Heading } from '@astryx-sv/core';
+
   let { data } = $props();
 </script>
 
-<div class="workspace-header">
-  <div>
-    <h1>Członkowie</h1>
-  </div>
-</div>
+<Heading level={1}>Członkowie</Heading>
 <Members websiteOrigin={data.websiteOrigin} administrator={data.user?.role === 'administrator'} />

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Dropdown, { type DropdownOption } from '@ksi-core/ui/platform/Dropdown.svelte';
+  import { Selector, Text } from '@astryx-sv/core';
   import {
     docFolderDescendants,
     docFolderOptions,
@@ -27,7 +27,7 @@
   const excluded = $derived(
     excludeId ? docFolderDescendants(folders, excludeId) : new Set<string>()
   );
-  const options = $derived<DropdownOption[]>([
+  const options = $derived<{ value: string; label: string; description?: string }[]>([
     { value: '', label: 'Najwyższy poziom' },
     ...docFolderOptions(folders, locale)
       .filter((option) => !excluded.has(option.id))
@@ -45,15 +45,18 @@
   );
 </script>
 
-<Dropdown
-  bind:value
-  {options}
-  {label}
+<Selector
   {id}
-  {disabled}
-  searchable
+  {label}
+  {value}
+  {options}
+  onChange={(next: string) => (value = next)}
+  isDisabled={disabled}
+  hasSearch
   searchPlaceholder={'Szukaj folderów'}
-  emptyLabel={'Nie znaleziono folderów'}
+  width="100%"
 >
-  {#snippet valueContent()}<span title={selectedPath}>{selectedPath}</span>{/snippet}
-</Dropdown>
+  {#snippet renderValue()}
+    <Text type="inherit" maxLines={1}>{selectedPath}</Text>
+  {/snippet}
+</Selector>

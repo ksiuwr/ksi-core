@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Avatar, HStack, Text } from '@astryx-sv/core';
   import type { Person } from './docs';
 
   // Used inside row links, where a member preview (itself a link) would nest anchors.
@@ -7,51 +8,27 @@
     size = 20,
     showName = true
   }: { person: Person; size?: number; showName?: boolean } = $props();
-  const initials = $derived(
-    person.name
-      .split(/\s+/)
-      .filter(Boolean)
-      .filter((_, index, words) => index === 0 || index === words.length - 1)
-      .map((word) => word[0])
-      .join('')
-      .toUpperCase() || '?'
+  // Astryx avatars come in a fixed set of pixel sizes; pick the nearest one.
+  const avatarSize = $derived(
+    size <= 16 ? 16 : size <= 20 ? 20 : size <= 24 ? 24 : size <= 28 ? 32 : size <= 36 ? 36 : 40
   );
 </script>
 
-<span class="doc-person" title={person.name} style:--avatar-size={`${size}px`}>
-  {#if person.image}<img src={person.image} alt="" />{:else}<span class="doc-person-initials"
-      >{initials}</span
-    >{/if}{#if showName}<span class="doc-person-name">{person.name}</span>{:else}<span
-      class="sr-only">{person.name}</span
-    >{/if}
-</span>
+<HStack gap={1.5} vAlign="center" class="doc-person">
+  <Avatar src={person.image ?? undefined} name={person.name} alt="" size={avatarSize} />
+  {#if showName}
+    <Text type="inherit" maxLines={1} class="doc-person-name">{person.name}</Text>
+  {:else}
+    <span class="sr-only">{person.name}</span>
+  {/if}
+</HStack>
 
 <style>
-  .doc-person {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+  :global(.doc-person) {
     min-width: 0;
   }
-  img,
-  .doc-person-initials {
-    flex: 0 0 var(--avatar-size);
-    width: var(--avatar-size);
-    height: var(--avatar-size);
-    border: 1px solid var(--line);
-    border-radius: 50%;
-    object-fit: cover;
-  }
-  .doc-person-initials {
-    display: grid;
-    place-items: center;
-    background: var(--surface-muted);
-    color: var(--muted);
-    font-size: calc(var(--avatar-size) * 0.4);
-    font-weight: 600;
-    line-height: 1;
-  }
-  .doc-person-name {
+  :global(.doc-person-name) {
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

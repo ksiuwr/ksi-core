@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { BookOpen, ChevronDown, ChevronRight, FileText, Lock } from '@lucide/svelte';
+  import { BookOpen, ChevronDown, FileText, Lock } from '@lucide/svelte';
+  import { Collapsible, HStack, Icon, List, ListItem, Text, VStack } from '@astryx-sv/core';
   import TreeLabel from '@ksi-core/ui/platform/TreeLabel.svelte';
   import { associationDocsKey } from 'shared/docs';
   import {
@@ -28,164 +29,101 @@
   depth: number,
   path: string
 )}
-  {#each node.pages as doc (doc.slug)}
-    <a
-      class="doc-nav-page"
-      href={publicDocPath(owner, doc.slug)}
-      class:active={workspace === owner && slug === doc.slug}
-      aria-current={workspace === owner && slug === doc.slug ? 'page' : undefined}
-      title={doc.title}
-      style:--depth={depth}
-      onclick={closePicker}
-    >
-      <FileText size={14} aria-hidden="true" /><TreeLabel value={doc.title} />
-      {#if !doc.public}<Lock
-          class="doc-nav-private"
-          size={12}
-          aria-label={'Tylko dla członków'}
-        />{/if}
-    </a>
-  {/each}
-  {#each node.folders as folder (folder.id)}
-    {@const folderPath = path ? `${path} / ${folder.name}` : folder.name}
-    <details class="doc-nav-folder" open>
-      <summary style:--depth={depth} title={folderPath}>
-        <ChevronRight size={14} class="doc-nav-chevron" aria-hidden="true" />
-        <TreeLabel value={folder.name} tooltip={folderPath} />
-      </summary>
-      {@render files(folder, owner, depth + 1, folderPath)}
-    </details>
-  {/each}
+  <VStack gap={0.5} style={`--depth:${depth}`} class="doc-nav-level">
+    <List density="compact" edge="flush">
+      {#each node.pages as doc (doc.slug)}
+        {@const active = workspace === owner && slug === doc.slug}
+        <ListItem href={publicDocPath(owner, doc.slug)} isSelected={active} onclick={closePicker}>
+          {#snippet startContent()}
+            <Icon icon={FileText} size="sm" color={active ? 'accent' : 'secondary'} />
+          {/snippet}
+          {#snippet label()}
+            <TreeLabel value={doc.title} />
+          {/snippet}
+          {#snippet endContent()}
+            {#if !doc.public}
+              <Icon icon={Lock} size="xsm" label="Tylko dla członków" />
+            {/if}
+          {/snippet}
+        </ListItem>
+      {/each}
+    </List>
+
+    {#each node.folders as folder (folder.id)}
+      {@const folderPath = path ? `${path} / ${folder.name}` : folder.name}
+      <Collapsible trigger={folder.name} defaultIsOpen>
+        {@render files(folder, owner, depth + 1, folderPath)}
+      </Collapsible>
+    {/each}
+  </VStack>
 {/snippet}
 
 {#snippet navigation()}
-  <nav aria-label={'Strony dokumentacji'}>
-    <a
-      href="/docs"
-      class="doc-nav-home"
-      class:active={!workspace}
-      aria-current={!workspace ? 'page' : undefined}
-      onclick={closePicker}
-    >
-      <BookOpen size={15} aria-hidden="true" />Cała dokumentacja
-    </a>
-    <p class="doc-nav-label">Przestrzenie</p>
-    {#each workspaces as owner (owner.slug)}
-      <details class="doc-nav-workspace" open={!workspace || workspace === owner.slug}>
-        <summary title={owner.name}>
-          <ChevronRight size={14} class="doc-nav-chevron" aria-hidden="true" />
-          <TreeLabel value={owner.name} />
-        </summary>
-        <div class="doc-nav-files">{@render files(owner, owner.slug, 1, '')}</div>
-      </details>
-    {/each}
-    {#if !workspaces.length}<p class="doc-nav-empty">Brak publicznej dokumentacji.</p>{/if}
+  <nav aria-label="Strony dokumentacji" class="doc-nav">
+    <VStack gap={2}>
+      <List density="compact" edge="flush">
+        <ListItem href="/docs" isSelected={!workspace} onclick={closePicker}>
+          {#snippet startContent()}
+            <Icon icon={BookOpen} size="sm" />
+          {/snippet}
+          {#snippet label()}Cała dokumentacja{/snippet}
+        </ListItem>
+      </List>
+      <Text type="code" color="secondary" class="px-2 tracking-wider uppercase">Przestrzenie</Text>
+      {#each workspaces as owner (owner.slug)}
+        <Collapsible trigger={owner.name} defaultIsOpen={!workspace || workspace === owner.slug}>
+          {@render files(owner, owner.slug, 1, '')}
+        </Collapsible>
+      {/each}
+      {#if !workspaces.length}
+        <Text type="supporting" color="secondary" class="px-2">Brak publicznej dokumentacji.</Text>
+      {/if}
+    </VStack>
   </nav>
 {/snippet}
 
-<div class="desktop-navigation">{@render navigation()}</div>
-<details class="mobile-navigation" bind:this={mobilePicker}>
-  <summary
-    ><BookOpen size={16} aria-hidden="true" /><span>{current?.title ?? 'Strony dokumentacji'}</span
-    ><ChevronDown size={16} aria-hidden="true" /></summary
-  >
+<VStack class="desktop-navigation">
   {@render navigation()}
+</VStack>
+<details class="mobile-navigation" bind:this={mobilePicker}>
+  <summary>
+    <HStack gap={2} vAlign="center" width="100%">
+      <Icon icon={BookOpen} size="sm" />
+      <Text as="span" class="min-w-0 flex-1 truncate">
+        {current?.title ?? 'Strony dokumentacji'}
+      </Text>
+      <Icon icon={ChevronDown} size="sm" className="summary-chevron shrink-0" />
+    </HStack>
+  </summary>
+  <VStack padding={2}>
+    {@render navigation()}
+  </VStack>
 </details>
 
 <style>
-  nav {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 1px;
+  :global(.doc-nav-level) {
+    padding-inline-start: calc(var(--depth, 0) * 12px);
   }
-  /* A child's icon sits under its parent's name: chevron plus gap. */
-  .doc-nav-home,
-  .doc-nav-page,
-  .doc-nav-workspace > summary,
-  .doc-nav-folder > summary {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    min-width: 0;
-    min-height: 30px;
-    padding: 6px 8px 6px calc(8px + var(--depth, 0) * 20px);
-    border-radius: var(--radius-md);
-    color: var(--muted);
-    font-size: 13px;
-    line-height: 1.4;
-    text-decoration: none;
-  }
-  .doc-nav-home {
-    gap: 8px;
-  }
-  .doc-nav-workspace > summary {
-    color: var(--ink);
-    font-weight: 500;
-  }
-  .doc-nav-folder > summary {
-    font-weight: 500;
-  }
-  summary {
-    cursor: pointer;
-    list-style: none;
-  }
-  summary::-webkit-details-marker {
-    display: none;
-  }
-  nav :global(svg) {
-    flex-shrink: 0;
-  }
-  nav :global(.doc-nav-chevron) {
-    transition: transform 120ms var(--ease-out);
-  }
-  .doc-nav-workspace[open] > summary :global(.doc-nav-chevron),
-  .doc-nav-folder[open] > summary :global(.doc-nav-chevron) {
-    transform: rotate(90deg);
-  }
-  .doc-nav-folder[open],
-  .doc-nav-files {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 1px;
-  }
-  .doc-nav-files {
-    margin-bottom: 6px;
-  }
-  .doc-nav-home:hover,
-  .doc-nav-page:hover,
-  .doc-nav-folder > summary:hover,
-  .doc-nav-workspace > summary:hover {
-    color: var(--ink);
-    background: var(--surface-muted);
-  }
-  .active {
-    color: var(--ink);
-    background: var(--surface-muted);
-    font-weight: 500;
-  }
-  .doc-nav-page.active :global(svg:first-child) {
-    color: var(--accent);
-  }
-  nav :global(.doc-nav-private) {
-    opacity: 0.7;
-  }
-  .doc-nav-label {
-    margin: 20px 8px 6px;
-    color: var(--muted);
-    font: 10px var(--mono);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-  .doc-nav-empty {
-    padding: 8px;
-    color: var(--muted);
-    font-size: 13px;
+  :global(.desktop-navigation) {
+    display: block;
   }
   .mobile-navigation {
     display: none;
   }
+  .mobile-navigation > summary {
+    cursor: pointer;
+    list-style: none;
+    padding: var(--spacing-3);
+    color: var(--ink);
+  }
+  .mobile-navigation > summary::-webkit-details-marker {
+    display: none;
+  }
+  .mobile-navigation[open] :global(.summary-chevron) {
+    rotate: 180deg;
+  }
   @media (max-width: 900px) {
-    .desktop-navigation {
+    :global(.desktop-navigation) {
       display: none;
     }
     .mobile-navigation {
@@ -193,37 +131,6 @@
       border: 1px solid var(--line);
       border-radius: var(--radius-lg);
       background: var(--surface);
-    }
-    .mobile-navigation > summary {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px;
-      color: var(--ink);
-      font-size: 13px;
-    }
-    .mobile-navigation > summary span {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .mobile-navigation > summary :global(svg) {
-      flex-shrink: 0;
-    }
-    .mobile-navigation > summary :global(svg:last-child) {
-      margin-left: auto;
-    }
-    .mobile-navigation[open] > summary :global(svg:last-child) {
-      transform: rotate(180deg);
-    }
-    .mobile-navigation nav {
-      padding: 0 8px 8px;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    nav :global(.doc-nav-chevron) {
-      transition: none;
     }
   }
 </style>

@@ -1,181 +1,159 @@
 <script lang="ts">
-  import { ArrowRight, Microscope, Presentation, Lightbulb } from '@lucide/svelte';
+  import { Lightbulb, Microscope, Presentation } from '@lucide/svelte';
+  import { Badge, Button, Card, Grid, Heading, HStack, Icon, Text, VStack } from '@astryx-sv/core';
   import ProjectCard from '../components/ui/ProjectCard.svelte';
   import ContactBanner from '../components/ui/ContactBanner.svelte';
   let { data } = $props<{ data: import('./$types').PageData }>();
+
+  const research = [
+    {
+      icon: Microscope,
+      title: 'Dyskusje o pracach naukowych',
+      description: 'Spotykamy się, żeby czytać i omawiać prace naukowe.'
+    },
+    {
+      icon: Presentation,
+      title: 'Seminaria gościnne',
+      description: 'Badacze i absolwenci opowiadają o swojej pracy.'
+    },
+    {
+      icon: Lightbulb,
+      title: 'Projekty badawcze',
+      description: 'Pracujemy nad problemami badawczymi z pracownikami naukowymi.'
+    }
+  ];
 </script>
 
 <main class="flex-1">
-  <section class="hero border-line relative isolate overflow-hidden border-b">
-    <div
-      class="page-container grid items-center gap-12 pt-14 pb-24 md:pt-20 md:pb-32 lg:grid-cols-[1.05fr_1fr]"
-    >
-      <div>
-        <p
-          class="border-line bg-surface text-muted inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs shadow-xs"
-        >
-          <span class="dot"></span>
-          Koło naukowe na Uniwersytecie Wrocławskim
-        </p>
-        <h1 class="mt-6 text-[clamp(48px,8vw,84px)] leading-[0.98] font-bold tracking-[-0.05em]">
-          Jesteśmy KSI.
-        </h1>
-        <p class="text-muted mt-6 max-w-xl text-lg leading-relaxed">
-          Jesteśmy studentami informatyki na Uniwersytecie Wrocławskim. Tworzymy oprogramowanie,
-          prowadzimy warsztaty i organizujemy wydarzenia.
-        </p>
-        <div class="mt-8 flex flex-wrap gap-3">
-          <a href="#projects" class="btn btn-lg btn-accent group"
-            >Zobacz, co robimy <ArrowRight
-              class="transition-transform group-hover:translate-x-0.5"
-            /></a
-          >
-          <a href="#about" class="btn btn-lg btn-outline">O KSI</a>
-        </div>
-      </div>
-      <div class="hero-photo relative mx-auto w-full max-w-xl lg:mr-0">
-        <img
-          src="/members/0.webp"
-          class="border-line relative aspect-[4/3] w-full rounded-2xl border object-cover"
-          alt="Członkowie KSI"
-        />
-      </div>
-    </div>
-  </section>
+  <VStack gap={0}>
+    <VStack class="hero border-line relative isolate overflow-hidden border-b" paddingBlock={8}>
+      <Grid columns={{ minWidth: 320, max: 2 }} gap={8} align="center" class="page-container">
+        <VStack gap={5}>
+          <HStack>
+            <Badge variant="neutral" label="Koło naukowe na Uniwersytecie Wrocławskim" />
+          </HStack>
+          <Heading level={1} type="display-1">Jesteśmy KSI.</Heading>
+          <Text type="large" color="secondary">
+            Jesteśmy studentami informatyki na Uniwersytecie Wrocławskim. Tworzymy oprogramowanie,
+            prowadzimy warsztaty i organizujemy wydarzenia.
+          </Text>
+          <HStack gap={2} wrap="wrap">
+            <Button href="#projects" variant="primary" size="lg" label="Zobacz, co robimy" />
+            <Button href="#about" variant="secondary" size="lg" label="O KSI" />
+          </HStack>
+        </VStack>
+        <VStack class="hero-photo relative mx-auto w-full max-w-xl lg:mr-0">
+          <img
+            src="/members/0.webp"
+            class="border-line relative aspect-[4/3] w-full rounded-2xl border object-cover"
+            alt="Członkowie KSI"
+          />
+        </VStack>
+      </Grid>
+    </VStack>
 
-  <div class="page-container">
-    <dl
-      class="surface-card divide-line relative -mt-12 grid divide-y shadow-[var(--shadow-md)] sm:grid-cols-3 sm:divide-x sm:divide-y-0"
-    >
-      <div class="flex flex-col-reverse gap-1 p-6">
-        <dt class="text-muted text-sm">Dzieci uczące się programowania</dt>
-        <dd class="font-display text-4xl font-semibold tracking-tight">500+</dd>
-      </div>
-      <div class="flex flex-col-reverse gap-1 p-6">
-        <dt class="text-muted text-sm">Zorganizowane konferencje</dt>
-        <dd class="font-display text-4xl font-semibold tracking-tight">25+</dd>
-      </div>
-      <div class="flex flex-col-reverse gap-1 p-6">
-        <dt class="text-muted text-sm">Zorganizowane wykłady stacjonarne</dt>
-        <dd class="font-display text-4xl font-semibold tracking-tight">20+</dd>
-      </div>
-    </dl>
+    <VStack gap={10} class="page-container">
+      <Card elevation="low" padding={0} class="relative -mt-8">
+        <Grid columns={{ minWidth: 220, max: 3 }} gap={0}>
+          <VStack gap={1} padding={5}>
+            <Text type="display-2" weight="semibold">500+</Text>
+            <Text type="supporting" color="secondary">Dzieci uczące się programowania</Text>
+          </VStack>
+          <VStack gap={1} padding={5}>
+            <Text type="display-2" weight="semibold">25+</Text>
+            <Text type="supporting" color="secondary">Zorganizowane konferencje</Text>
+          </VStack>
+          <VStack gap={1} padding={5}>
+            <Text type="display-2" weight="semibold">20+</Text>
+            <Text type="supporting" color="secondary">Zorganizowane wykłady stacjonarne</Text>
+          </VStack>
+        </Grid>
+      </Card>
 
-    <section id="about" class="scroll-mt-20 py-20" aria-labelledby="about-heading">
-      <h2 id="about-heading" class="mb-8 text-3xl tracking-tight">Wydarzenia i warsztaty</h2>
-      <div class="grid gap-5 md:grid-cols-2">
-        <a
-          href="/projects/zosia"
-          class="group surface-card surface-card-link text-ink flex flex-col overflow-hidden"
-        >
-          <div class="border-line aspect-[16/9] overflow-hidden border-b">
-            <img
-              src="https://pub-4e8af66414434008bafa6614f6af4b22.r2.dev/zosia-2026/01.webp"
-              alt="ZOSIA"
-              class="size-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-            />
-          </div>
-          <div class="flex flex-1 flex-col p-6">
-            <h3 class="text-xl">ZOSIA</h3>
-            <p class="text-muted mt-2 flex-1 text-sm leading-relaxed">
-              Nasz zimowy obóz w górach na Dolnym Śląsku. Są wykłady o badaniach i zainteresowaniach
-              oraz czas, żeby pobyć razem.
-            </p>
-            <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-medium">
-              Czytaj dalej
-              <ArrowRight class="size-4 transition-transform group-hover:translate-x-0.5" />
-            </span>
-          </div>
-        </a>
+      <VStack gap={6} as="section" id="about">
+        <Heading level={2} id="about-heading">Wydarzenia i warsztaty</Heading>
+        <Grid columns={{ minWidth: 300, max: 2 }} gap={5}>
+          <Card padding={0} elevation="low">
+            <VStack gap={0}>
+              <img
+                src="https://pub-4e8af66414434008bafa6614f6af4b22.r2.dev/zosia-2026/01.webp"
+                alt="ZOSIA"
+                class="border-line aspect-[16/9] w-full border-b object-cover"
+              />
+              <VStack gap={2} padding={5}>
+                <Heading level={3}>ZOSIA</Heading>
+                <Text color="secondary" type="supporting">
+                  Nasz zimowy obóz w górach na Dolnym Śląsku. Są wykłady o badaniach i
+                  zainteresowaniach oraz czas, żeby pobyć razem.
+                </Text>
+                <Button href="/projects/zosia" variant="ghost" label="Czytaj dalej" />
+              </VStack>
+            </VStack>
+          </Card>
+          <Card padding={0} elevation="low">
+            <VStack gap={0}>
+              <img
+                src="https://pub-4e8af66414434008bafa6614f6af4b22.r2.dev/project-hoc-past/8.webp"
+                alt="Hour of Code"
+                class="border-line aspect-[16/9] w-full border-b object-cover"
+              />
+              <VStack gap={2} padding={5}>
+                <Heading level={3}>Hour of Code</Heading>
+                <Text color="secondary" type="supporting">
+                  Uczymy dzieci programowania na godzinnych warsztatach.
+                </Text>
+                <Button href="/projects/hoc" variant="ghost" label="Czytaj dalej" />
+              </VStack>
+            </VStack>
+          </Card>
+        </Grid>
+      </VStack>
 
-        <a
-          href="/projects/hoc"
-          class="group surface-card surface-card-link text-ink flex flex-col overflow-hidden"
-        >
-          <div class="border-line aspect-[16/9] overflow-hidden border-b">
-            <img
-              src="https://pub-4e8af66414434008bafa6614f6af4b22.r2.dev/project-hoc-past/8.webp"
-              alt="Hour of Code"
-              class="size-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-            />
-          </div>
-          <div class="flex flex-1 flex-col p-6">
-            <h3 class="text-xl">Hour of Code</h3>
-            <p class="text-muted mt-2 flex-1 text-sm leading-relaxed">
-              Uczymy dzieci programowania na godzinnych warsztatach.
-            </p>
-            <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-medium">
-              Czytaj dalej
-              <ArrowRight class="size-4 transition-transform group-hover:translate-x-0.5" />
-            </span>
-          </div>
-        </a>
-      </div>
-    </section>
+      <VStack gap={6} as="section" id="projects">
+        <HStack justify="between" vAlign="end" gap={4} wrap="wrap">
+          <Heading level={2} id="projects-heading">Nasze projekty</Heading>
+          <Button href="/projects" variant="secondary" size="sm" label="Zobacz więcej projektów" />
+        </HStack>
+        {#if data.projects.length}
+          <Grid columns={{ minWidth: 240, max: 4 }} gap={5}>
+            {#each data.projects as project}
+              <ProjectCard {project} />
+            {/each}
+          </Grid>
+        {:else}
+          <Card variant="muted" padding={8}>
+            <Text color="secondary" justify="center">Więcej projektów wkrótce.</Text>
+          </Card>
+        {/if}
+      </VStack>
 
-    <section id="projects" class="scroll-mt-20 pb-20" aria-labelledby="projects-heading">
-      <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
-        <h2 id="projects-heading" class="text-3xl tracking-tight">Nasze projekty</h2>
-        <a href="/projects" class="btn btn-outline btn-sm group">
-          Zobacz więcej projektów
-          <ArrowRight class="transition-transform group-hover:translate-x-0.5" />
-        </a>
-      </div>
-      {#if data.projects.length}
-        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {#each data.projects as project (project.slug)}
-            <ProjectCard {project} />
+      <VStack gap={6} as="section" id="scientific">
+        <Heading level={2} id="research-heading">Badania w KSI</Heading>
+        <Grid columns={{ minWidth: 260, max: 3 }} gap={5}>
+          {#each research as item}
+            <Card padding={5}>
+              <VStack gap={4}>
+                <Icon icon={item.icon} color="accent" size="lg" />
+                <VStack gap={1}>
+                  <Heading level={3}>{item.title}</Heading>
+                  <Text type="supporting" color="secondary">{item.description}</Text>
+                </VStack>
+              </VStack>
+            </Card>
           {/each}
-        </div>
-      {:else}
-        <p class="border-input text-muted rounded-xl border border-dashed p-10 text-center text-sm">
-          Więcej projektów wkrótce.
-        </p>
-      {/if}
-    </section>
+        </Grid>
+      </VStack>
 
-    <section id="scientific" class="scroll-mt-20 pb-20" aria-labelledby="research-heading">
-      <h2 id="research-heading" class="mb-8 text-3xl tracking-tight">Badania w KSI</h2>
-      <div class="grid gap-5 md:grid-cols-3" data-field="research">
-        <div class="surface-card flex flex-col gap-5 p-6">
-          <span class="icon-tile"><Microscope /></span>
-          <div>
-            <h3 class="text-base">Dyskusje o pracach naukowych</h3>
-            <p class="text-muted mt-1.5 text-sm leading-relaxed">
-              Spotykamy się, żeby czytać i omawiać prace naukowe.
-            </p>
-          </div>
-        </div>
-        <div class="surface-card flex flex-col gap-5 p-6">
-          <span class="icon-tile"><Presentation /></span>
-          <div>
-            <h3 class="text-base">Seminaria gościnne</h3>
-            <p class="text-muted mt-1.5 text-sm leading-relaxed">
-              Badacze i absolwenci opowiadają o swojej pracy.
-            </p>
-          </div>
-        </div>
-        <div class="surface-card flex flex-col gap-5 p-6">
-          <span class="icon-tile"><Lightbulb /></span>
-          <div>
-            <h3 class="text-base">Projekty badawcze</h3>
-            <p class="text-muted mt-1.5 text-sm leading-relaxed">
-              Pracujemy nad problemami badawczymi z pracownikami naukowymi.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <div class="pb-20">
-      <ContactBanner />
-    </div>
-  </div>
+      <VStack paddingBlock={8}>
+        <ContactBanner />
+      </VStack>
+    </VStack>
+  </VStack>
 </main>
 
 <style>
   /* A dotted canvas that fades out towards the edges. */
-  .hero::before {
+  :global(.hero)::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -186,14 +164,5 @@
     );
     background-size: 22px 22px;
     mask-image: radial-gradient(ellipse 70% 80% at 70% 40%, #000 30%, transparent 75%);
-  }
-  .hero-photo::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    translate: 12px 12px;
-    border-radius: 1rem;
-    background: var(--lavender);
-    border: 1px solid var(--line);
   }
 </style>

@@ -2,8 +2,7 @@
   import { locales } from '../locales/data.js';
   import type { Locale } from '../locales/data.js';
   import { SunMoon } from '@lucide/svelte';
-  import NestedMenu from './NestedMenu.svelte';
-  import type { MenuItem } from './menu';
+  import { DropdownMenu, type DropdownMenuOption } from '@astryx-sv/core';
   import { preferences, setLanguage, setTheme, type ThemePreference } from './preferences.svelte';
 
   const themeOptions: { value: ThemePreference; label: string }[] = [
@@ -17,38 +16,44 @@
     return name.charAt(0).toLocaleUpperCase(code) + name.slice(1);
   }
   const languageOptions = locales.map((locale) => ({ value: locale, label: languageName(locale) }));
-  const themeLabel = $derived(
-    themeOptions.find((option) => option.value === preferences.theme)?.label ?? ''
-  );
-  const languageLabel = $derived(
-    languageOptions.find((option) => option.value === preferences.language)?.label ?? ''
-  );
-  const items = $derived<MenuItem[]>([
+  const items = $derived<DropdownMenuOption[]>([
     {
+      type: 'section',
       id: 'theme',
-      label: 'Motyw',
-      value: themeLabel,
-      children: themeOptions.map((option) => ({
+      title: 'Motyw',
+      items: themeOptions.map((option) => ({
         id: option.value,
         label: option.label,
-        checked: preferences.theme === option.value,
-        onselect: () => setTheme(option.value)
+        icon: preferences.theme === option.value ? 'check' : undefined,
+        onClick: () => setTheme(option.value)
       }))
     },
     {
+      type: 'section',
       id: 'language',
-      label: 'Język',
-      value: languageLabel,
-      children: languageOptions.map((option) => ({
+      title: 'Język',
+      items: languageOptions.map((option) => ({
         id: option.value,
         label: option.label,
-        checked: preferences.language === option.value,
-        onselect: () => setLanguage(option.value)
+        icon: preferences.language === option.value ? 'check' : undefined,
+        onClick: () => setLanguage(option.value)
       }))
     }
   ]);
 </script>
 
-<NestedMenu label={'Wygląd'} {items}>
-  {#snippet trigger()}<SunMoon size={18} aria-hidden="true" />{/snippet}
-</NestedMenu>
+{#snippet appearanceIcon()}<SunMoon size={18} aria-hidden="true" />{/snippet}
+
+<DropdownMenu
+  button={{
+    label: 'Wygląd',
+    variant: 'ghost',
+    size: 'sm',
+    isIconOnly: true,
+    icon: appearanceIcon
+  }}
+  {items}
+  menuWidth={240}
+  placement="below"
+  alignment="end"
+/>

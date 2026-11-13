@@ -2,9 +2,21 @@
   import { page } from '$app/state';
   import { goto } from '$app/navigation';
   import { Search, SearchX, X } from '@lucide/svelte';
-  import { slider } from '@ksi-core/ui/platform/slider';
+  import {
+    Button,
+    EmptyState,
+    Grid,
+    HStack,
+    Heading,
+    Icon,
+    SegmentedControl,
+    SegmentedControlItem,
+    StatusDot,
+    Text,
+    TextInput,
+    VStack
+  } from '@astryx-sv/core';
   import { projectFields } from '$lib/project-cover';
-  import FieldName from '../../components/ui/FieldName.svelte';
   import ProjectCard from '../../components/ui/ProjectCard.svelte';
   import ContactBanner from '../../components/ui/ContactBanner.svelte';
 
@@ -33,6 +45,11 @@
       ])
     )
   );
+  function fieldLabel(field: string) {
+    if (field === 'research') return 'Badania';
+    if (field === 'community') return 'Społeczność';
+    return 'Inżynieria';
+  }
   let query = $state('');
   const activeFilter = $derived(
     (projectFields as readonly string[]).includes(page.url.searchParams.get('field') ?? '')
@@ -65,85 +82,101 @@
   />
 </svelte:head>
 
-<main class="flex-1">
-  <header class="border-line border-b">
-    <div class="page-container py-14 md:py-20">
-      <p class="eyebrow"><span class="dot"></span>Nasze działania</p>
-      <h1 class="mt-4 text-[clamp(40px,6vw,64px)] font-bold tracking-[-0.045em]">Projekty w KSI</h1>
-      <p class="text-muted mt-4 max-w-xl text-lg leading-relaxed">
-        Oprogramowanie, badania i wydarzenia tworzone przez członków KSI.
-      </p>
-    </div>
-  </header>
+{#snippet searchIcon()}
+  <Icon icon={Search} size="sm" color="secondary" />
+{/snippet}
 
-  <section id="project-directory" class="page-container scroll-mt-20 py-10">
-    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-      <div class="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
-        <div
-          class="segmented-control w-max"
-          role="group"
-          aria-label="Filtruj według obszaru"
-          use:slider
+{#snippet clearIcon()}
+  <Icon icon={X} size="sm" />
+{/snippet}
+
+{#snippet emptyIcon()}
+  <Icon icon={SearchX} size="lg" color="secondary" />
+{/snippet}
+
+<VStack as="main" gap={0} class="flex-1">
+  <VStack as="header" gap={4} class="border-line border-b py-14 md:py-20">
+    <VStack gap={4} class="page-container w-full">
+      <HStack gap={2} vAlign="center">
+        <StatusDot variant="accent" label="Nasze działania" />
+        <Text type="code" color="secondary" class="tracking-wider uppercase">Nasze działania</Text>
+      </HStack>
+      <Heading level={1} type="display-1">Projekty w KSI</Heading>
+      <Text type="large" color="secondary" class="max-w-xl">
+        Oprogramowanie, badania i wydarzenia tworzone przez członków KSI.
+      </Text>
+    </VStack>
+  </VStack>
+
+  <VStack
+    as="section"
+    id="project-directory"
+    gap={5}
+    paddingBlock={10}
+    class="page-container w-full scroll-mt-20"
+  >
+    <HStack gap={3} vAlign="center" justify="between" wrap="wrap">
+      <HStack gap={0} class="max-w-full overflow-x-auto">
+        <SegmentedControl
+          label="Filtruj według obszaru"
+          size="sm"
+          value={activeFilter}
+          onChange={(value) => void setFilter(value)}
         >
           {#each filters as filter (filter)}
-            <button
-              type="button"
-              class="bg-transparent shadow-none"
-              aria-pressed={activeFilter === filter}
-              onclick={() => void setFilter(filter)}
-            >
-              {#if filter === 'all'}Wszystkie projekty{:else}<FieldName field={filter} />{/if}
-              <span class="text-muted font-mono text-[10px]">{counts[filter]}</span>
-            </button>
+            <SegmentedControlItem
+              value={filter}
+              label={`${filter === 'all' ? 'Wszystkie projekty' : fieldLabel(filter)} · ${counts[filter]}`}
+            />
           {/each}
-        </div>
-      </div>
+        </SegmentedControl>
+      </HStack>
 
-      <div class="relative w-full md:max-w-xs">
-        <Search
-          class="text-muted pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
-          aria-hidden="true"
-        />
-        <input
-          type="search"
-          class="mb-0 pl-9"
-          placeholder="Szukaj projektów..."
-          aria-label="Szukaj projektów..."
-          bind:value={query}
-        />
-      </div>
-    </div>
+      <TextInput
+        label="Szukaj projektów..."
+        isLabelHidden
+        type="text"
+        placeholder="Szukaj projektów..."
+        bind:value={query}
+        startIcon={searchIcon}
+        hasClear
+        width="100%"
+        containerClassName="w-full md:max-w-xs"
+      />
+    </HStack>
 
-    <p class="text-muted mt-5 mb-5 font-mono text-[11px]" aria-live="polite">
+    <Text type="code" color="secondary" aria-live="polite">
       Wyświetlono {filteredProjects.length} z {projects.length} projektów
-    </p>
+    </Text>
 
     {#if filteredProjects.length}
-      <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <Grid columns={{ minWidth: 240, max: 3 }} gap={5}>
         {#each filteredProjects as project (project.slug)}
           <ProjectCard {project} />
         {/each}
-      </div>
+      </Grid>
     {:else}
-      <div class="border-input rounded-xl border border-dashed px-6 py-14 text-center">
-        <SearchX class="text-muted mx-auto mb-4 size-6" aria-hidden="true" />
-        <h2 class="text-lg">Brak pasujących projektów.</h2>
-        <p class="text-muted mt-1.5 text-sm">Spróbuj innego hasła lub wybierz inną dziedzinę.</p>
-        <button
-          class="btn btn-outline mt-6"
-          type="button"
-          onclick={() => {
-            query = '';
-            void setFilter('all');
-          }}
-        >
-          <X /> Wyczyść filtry
-        </button>
-      </div>
+      <EmptyState
+        title="Brak pasujących projektów."
+        description="Spróbuj innego hasła lub wybierz inną dziedzinę."
+        icon={emptyIcon}
+      >
+        {#snippet actions()}
+          <Button
+            variant="secondary"
+            label="Wyczyść filtry"
+            icon={clearIcon}
+            onclick={() => {
+              query = '';
+              void setFilter('all');
+            }}
+          />
+        {/snippet}
+      </EmptyState>
     {/if}
-  </section>
+  </VStack>
 
-  <div class="page-container pb-20">
+  <VStack gap={0} class="page-container w-full pb-20">
     <ContactBanner />
-  </div>
-</main>
+  </VStack>
+</VStack>

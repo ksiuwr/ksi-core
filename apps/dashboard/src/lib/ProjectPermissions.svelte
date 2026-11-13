@@ -1,6 +1,25 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { Plus, Save, Trash2 } from '@lucide/svelte';
+  import {
+    Banner,
+    Button,
+    Card,
+    CheckboxInput,
+    Grid,
+    Heading,
+    HStack,
+    Spinner,
+    Table,
+    TableBody,
+    TableCell,
+    TableHeader,
+    TableHeaderCell,
+    TableRow,
+    Text,
+    TextInput,
+    VStack
+  } from '@astryx-sv/core';
 
   type Group = { name: string; permissions: string[]; userIds: string[] };
   let {
@@ -96,249 +115,185 @@
     }
   }
 
+  function toggle(values: string[], value: string) {
+    return values.includes(value) ? values.filter((item) => item !== value) : [...values, value];
+  }
+
   onMount(() => void load());
 </script>
 
-<div class="workspace-header">
-  <div>
-    <h1>Uprawnienia projektu</h1>
-    <p class="muted">
+<HStack gap={4} vAlign="start" justify="between" wrap="wrap">
+  <VStack gap={1}>
+    <Heading level={1}>Uprawnienia projektu</Heading>
+    <Text color="secondary">
       Wybierz domyślny dostęp do artykułów i dokumentacji oraz utwórz nazwane grupy z dodatkowymi
       uprawnieniami w projekcie.
-    </p>
-  </div>
-  <button
-    class="btn"
-    disabled={busy || loading || groups.some((group) => !group.name.trim())}
-    onclick={() => void save()}><Save size={15} />Zapisz uprawnienia</button
+    </Text>
+  </VStack>
+  <Button
+    label="Zapisz uprawnienia"
+    isDisabled={busy || loading || groups.some((group) => !group.name.trim())}
+    isLoading={busy}
+    onclick={() => void save()}
   >
-</div>
-{#if error}<p class="error" role="alert">{error}</p>{/if}
-{#if notice}<p class="notice" role="status">{notice}</p>{/if}
-{#if loading}<p class="muted">Wczytywanie uprawnień projektu…</p>
+    {#snippet icon()}<Save size={15} aria-hidden="true" />{/snippet}
+  </Button>
+</HStack>
+
+{#if error}<Banner status="error" title={error} role="alert" />{/if}
+{#if notice}<Banner status="success" title={notice} role="status" />{/if}
+
+{#if loading}
+  <HStack gap={2} vAlign="center">
+    <Spinner size="sm" />
+    <Text color="secondary">Wczytywanie uprawnień projektu…</Text>
+  </HStack>
 {:else}
-  <div class="settings-main">
-    <section class="settings-section">
-      <header>
-        <h2>Domyślny dostęp w projekcie</h2>
-        <p>
+  <VStack gap={6}>
+    <VStack gap={4}>
+      <VStack gap={1}>
+        <Heading level={2}>Domyślny dostęp w projekcie</Heading>
+        <Text type="supporting" color="secondary">
           Te uprawnienia dotyczą wszystkich osób w wybranej kategorii i uzupełniają uprawnienia
           wynikające z roli konta. Aktywni członkowie KSI, którzy nie należą do tego projektu.
-        </p>
-      </header>
-      <div class="card matrix">
-        <div class="matrix-row matrix-head">
-          <span></span>
-          <span>Członkowie projektu</span>
-          <span>Osoby spoza projektu</span>
-        </div>
-        {#each articlePermissions as permission}
-          <div class="matrix-row">
-            <div>
-              <strong>{info[permission]?.[0]}</strong>
-              <small>{info[permission]?.[1]}</small>
-            </div>
-            <label class="matrix-cell">
-              <input
-                type="checkbox"
-                value={permission}
-                bind:group={memberPermissions}
-                aria-label={`${'Członkowie projektu'}: ${info[permission]?.[0]}`}
-              />
-            </label>
-            <label class="matrix-cell">
-              <input
-                type="checkbox"
-                value={permission}
-                bind:group={nonMemberPermissions}
-                aria-label={`${'Osoby spoza projektu'}: ${info[permission]?.[0]}`}
-              />
-            </label>
-          </div>
-        {/each}
-      </div>
-    </section>
+        </Text>
+      </VStack>
+      <Card padding={0}>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHeaderCell></TableHeaderCell>
+              <TableHeaderCell>Członkowie projektu</TableHeaderCell>
+              <TableHeaderCell>Osoby spoza projektu</TableHeaderCell>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {#each articlePermissions as permission (permission)}
+              <TableRow>
+                <TableCell>
+                  <VStack gap={0}>
+                    <Text weight="medium">{info[permission]?.[0]}</Text>
+                    <Text type="supporting" color="secondary">{info[permission]?.[1]}</Text>
+                  </VStack>
+                </TableCell>
+                <TableCell>
+                  <CheckboxInput
+                    label={`Członkowie projektu: ${info[permission]?.[0]}`}
+                    isLabelHidden
+                    value={memberPermissions.includes(permission)}
+                    onChange={() => (memberPermissions = toggle(memberPermissions, permission))}
+                  />
+                </TableCell>
+                <TableCell>
+                  <CheckboxInput
+                    label={`Osoby spoza projektu: ${info[permission]?.[0]}`}
+                    isLabelHidden
+                    value={nonMemberPermissions.includes(permission)}
+                    onChange={() =>
+                      (nonMemberPermissions = toggle(nonMemberPermissions, permission))}
+                  />
+                </TableCell>
+              </TableRow>
+            {/each}
+          </TableBody>
+        </Table>
+      </Card>
+    </VStack>
 
-    <section class="settings-section">
-      <header class="group-header">
-        <div>
-          <h2>Nazwane grupy</h2>
-          <p>Do grupy można przypisać tylko aktywnych członków projektu.</p>
-        </div>
-        <button
-          type="button"
-          class="btn btn-outline"
-          disabled={busy || groups.length >= 30}
+    <VStack gap={4}>
+      <HStack gap={3} vAlign="end" justify="between" wrap="wrap">
+        <VStack gap={1}>
+          <Heading level={2}>Nazwane grupy</Heading>
+          <Text type="supporting" color="secondary">
+            Do grupy można przypisać tylko aktywnych członków projektu.
+          </Text>
+        </VStack>
+        <Button
+          variant="secondary"
+          label="Dodaj grupę"
+          isDisabled={busy || groups.length >= 30}
           onclick={() => (groups = [...groups, { name: '', permissions: [], userIds: [] }])}
-          ><Plus size={15} aria-hidden="true" />Dodaj grupę</button
         >
-      </header>
+          {#snippet icon()}<Plus size={15} aria-hidden="true" />{/snippet}
+        </Button>
+      </HStack>
+
       {#each groups as group, index (index)}
-        <div class="card group-card">
-          <div class="group-top">
-            <div class="group-name">
-              <label for={`group-name-${index}`}>Nazwa grupy</label>
-              <input
-                id={`group-name-${index}`}
-                bind:value={group.name}
-                maxlength="60"
-                placeholder="Na przykład: Opiekunowie"
-                required
-              />
-            </div>
-            <button
-              type="button"
-              class="btn btn-outline danger-button"
-              disabled={busy}
-              onclick={() => (groups = groups.filter((_, i) => i !== index))}
-              ><Trash2 size={15} aria-hidden="true" />Usuń grupę</button
-            >
-          </div>
-          <div class="group-columns">
-            <fieldset>
-              <legend>Członkowie</legend>
-              {#each members as member}
-                <label class="check"
-                  ><input
-                    type="checkbox"
-                    value={member.id}
-                    bind:group={group.userIds}
-                  />{member.firstName}
-                  {member.lastName}</label
-                >
-              {/each}
-            </fieldset>
-            <fieldset>
-              <legend>Uprawnienia</legend>
-              {#each groupPermissions as permission}
-                <label class="check permission-option">
-                  <input type="checkbox" value={permission} bind:group={group.permissions} />
-                  <span>
-                    <strong>{info[permission]?.[0]}</strong>
-                    <small>{info[permission]?.[1]}</small>
-                  </span>
-                </label>
-              {/each}
-            </fieldset>
-          </div>
-        </div>
+        <Card>
+          <VStack gap={4}>
+            <HStack gap={3} vAlign="end" justify="between" wrap="wrap">
+              <VStack gap={0} class="group-name">
+                <TextInput
+                  id={`group-name-${index}`}
+                  label="Nazwa grupy"
+                  value={group.name}
+                  onChange={(value) => (group.name = value.slice(0, 60))}
+                  placeholder="Na przykład: Opiekunowie"
+                  isRequired
+                />
+              </VStack>
+              <Button
+                variant="destructive"
+                label="Usuń grupę"
+                isDisabled={busy}
+                onclick={() => (groups = groups.filter((_, i) => i !== index))}
+              >
+                {#snippet icon()}<Trash2 size={15} aria-hidden="true" />{/snippet}
+              </Button>
+            </HStack>
+            <Grid columns={{ minWidth: 260, max: 2 }} gap={4}>
+              <fieldset>
+                <legend>Członkowie</legend>
+                <VStack gap={2}>
+                  {#each members as member (member.id)}
+                    <CheckboxInput
+                      label={`${member.firstName} ${member.lastName}`}
+                      value={group.userIds.includes(member.id)}
+                      onChange={() => (group.userIds = toggle(group.userIds, member.id))}
+                    />
+                  {/each}
+                </VStack>
+              </fieldset>
+              <fieldset>
+                <legend>Uprawnienia</legend>
+                <VStack gap={2}>
+                  {#each groupPermissions as permission (permission)}
+                    <CheckboxInput
+                      label={info[permission]?.[0] ?? permission}
+                      description={info[permission]?.[1]}
+                      value={group.permissions.includes(permission)}
+                      onChange={() => (group.permissions = toggle(group.permissions, permission))}
+                    />
+                  {/each}
+                </VStack>
+              </fieldset>
+            </Grid>
+          </VStack>
+        </Card>
       {:else}
-        <p class="list-empty">Brak grup.</p>
+        <Text type="supporting" color="secondary">Brak grup.</Text>
       {/each}
-    </section>
-  </div>
+    </VStack>
+  </VStack>
 {/if}
 
 <style>
-  .matrix {
-    display: grid;
-    padding: 4px 20px 12px;
-  }
-  .matrix-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 110px 110px;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 0;
-  }
-  .matrix-row + .matrix-row {
-    border-top: 1px solid var(--line);
-  }
-  .matrix-head {
-    padding: 12px 0 8px;
-    color: var(--muted);
-    font-size: 12px;
-    text-align: center;
-  }
-  .matrix-row strong,
-  .permission-option strong {
-    display: block;
-    font-size: 13px;
-    font-weight: 500;
-  }
-  .matrix-row small,
-  .permission-option small {
-    display: block;
-    margin-top: 2px;
-    color: var(--muted);
-    font-size: 12px;
-    line-height: 1.45;
-  }
-  .matrix-cell {
-    display: grid;
-    place-items: center;
-    margin: 0;
-    padding: 6px;
-    cursor: pointer;
-  }
-  .group-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .group-card {
-    display: grid;
-    gap: 18px;
-    padding: 20px;
-  }
-  .group-top {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .group-name {
+  :global(.group-name) {
     flex: 1 1 260px;
     max-width: 420px;
   }
-  .group-name input {
-    margin: 0;
-  }
-  .group-columns {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-    align-items: start;
-  }
   fieldset {
     display: grid;
-    gap: 10px;
+    gap: var(--spacing-2);
     margin: 0;
-    padding: 12px 16px 16px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
+    padding: var(--spacing-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-element);
   }
   legend {
-    padding: 0 6px;
-    color: var(--muted);
-    font-size: 12px;
-    font-weight: 500;
-  }
-  .check {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0;
-  }
-  .permission-option {
-    align-items: flex-start;
-  }
-  .notice {
-    margin: 0 0 16px;
-    padding: 12px 16px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    background: var(--surface-muted);
-  }
-  @media (max-width: 760px) {
-    .group-columns {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    .matrix-row {
-      grid-template-columns: minmax(0, 1fr) 72px 72px;
-    }
+    padding-inline: var(--spacing-1);
+    color: var(--color-text-secondary);
+    font-size: var(--text-supporting-size);
+    font-weight: var(--font-weight-medium);
   }
 </style>

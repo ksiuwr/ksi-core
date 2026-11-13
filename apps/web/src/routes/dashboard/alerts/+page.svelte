@@ -4,6 +4,35 @@
   import { api, resolveError } from '$lib/backend';
   import { toast } from 'svelte-sonner';
   import ms from 'ms';
+  import {
+    AlertDialog,
+    Badge,
+    Banner,
+    Button,
+    Card,
+    Center,
+    DateTimeInput,
+    EmptyState,
+    Grid,
+    GridSpan,
+    HStack,
+    Heading,
+    Icon,
+    IconButton,
+    Link,
+    List,
+    ListItem,
+    NumberInput,
+    Pagination,
+    Selector,
+    Spinner,
+    Text,
+    TextArea,
+    TextInput,
+    Token,
+    VStack,
+    type ISODateTimeString
+  } from '@astryx-sv/core';
 
   type Alert = NonNullable<
     Awaited<ReturnType<typeof api.dashboard.admin.alerts.get>>['data']
@@ -15,17 +44,19 @@
   let loading = $state(true);
   let loadError = $state<string | null>(null);
 
-  let pages = $derived(
-    [...new Set([0, currentPage - 1, currentPage, currentPage + 1, pageCount - 1])]
-      .filter((page) => page >= 0 && page < pageCount)
-      .sort((a, b) => a - b)
-  );
-
   let creating = $state(false);
   let editingId = $state<string | null>(null);
   let saving = $state(false);
   let deletingId = $state<string | null>(null);
+  let pendingDelete = $state<Alert | null>(null);
   let newAlert = $state(createInitialAlert());
+
+  const colorOptions = [
+    { value: 'neutral', label: 'Neutralny' },
+    { value: 'info', label: 'Informacja' },
+    { value: 'warning', label: 'Ostrzeżenie' },
+    { value: 'danger', label: 'Zagrożenie' }
+  ];
 
   function createInitialAlert() {
     return {
@@ -122,25 +153,31 @@
     await fetchAlerts(currentPage);
   }
 
-  async function deleteAlert(alert: Alert) {
-    if (!window.confirm(`Usunąć „${alert.title}”? Tej operacji nie można cofnąć.`)) return;
+  function requestDelete(alert: Alert) {
+    pendingDelete = alert;
+  }
 
-    deletingId = alert.id;
-    const response = await api.dashboard.admin.alerts({ id: alert.id }).delete();
+  async function confirmDelete() {
+    if (!pendingDelete) return;
+
+    deletingId = pendingDelete.id;
+    const response = await api.dashboard.admin.alerts({ id: pendingDelete.id }).delete();
     if (response.error) {
       toast.error(resolveError(response.error));
       deletingId = null;
+      pendingDelete = null;
       return;
     }
 
     toast.success('Usunięto alert');
     deletingId = null;
+    pendingDelete = null;
     await fetchAlerts(currentPage);
   }
 
   function formatDateForInput(date: Date) {
     const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
-    return localDate.toISOString().slice(0, 16);
+    return localDate.toISOString().slice(0, 16) as ISODateTimeString;
   }
 
   function formatLocalDate(date: Date | string) {
@@ -157,299 +194,339 @@
     return 'active';
   }
 
-  function statusClass(status: ReturnType<typeof alertStatus>) {
-    if (status === 'active') return 'border-success/30 bg-success/10 text-success';
-    if (status === 'scheduled') return 'border-info/30 bg-info/10 text-info';
-    return 'border-base-content/20 bg-base-200 text-base-content/55';
+  function statusVariant(status: ReturnType<typeof alertStatus>) {
+    if (status === 'active') return 'success' as const;
+    if (status === 'scheduled') return 'info' as const;
+    return 'neutral' as const;
   }
 
-  function colorClass(color: Alert['color']) {
-    if (color === 'danger') return 'border-error/30 bg-error/10 text-error';
-    if (color === 'warning') return 'border-warning/30 bg-warning/10 text-warning';
-    if (color === 'info') return 'border-info/30 bg-info/10 text-info';
-    return 'border-base-content/20 bg-base-200 text-base-content/65';
+  function colorVariant(color: Alert['color']) {
+    if (color === 'danger') return 'error' as const;
+    if (color === 'warning') return 'warning' as const;
+    if (color === 'info') return 'info' as const;
+    return 'neutral' as const;
   }
 </script>
 
-{#snippet icon()}
-  <Megaphone class="size-4" />
+{#snippet plusIcon()}
+  <Icon icon={Plus} size="sm" />
+{/snippet}
+
+{#snippet closeIcon()}
+  <Icon icon={X} size="sm" />
+{/snippet}
+
+{#snippet pencilIcon()}
+  <Icon icon={Pencil} size="sm" />
+{/snippet}
+
+{#snippet trashIcon()}
+  <Icon icon={Trash} size="sm" />
+{/snippet}
+
+{#snippet emptyIcon()}
+  <Icon icon={Megaphone} size="lg" color="secondary" />
 {/snippet}
 
 {#snippet hero()}
-  <header
-    class="border-base-content/15 flex flex-col gap-8 border-b pb-10 md:flex-row md:items-end md:justify-between"
+  <HStack
+    gap={8}
+    justify="between"
+    vAlign="end"
+    wrap="wrap"
+    class="border-line border-b pb-10 md:pb-14"
   >
-    <div>
-      <p class="text-primary mb-4 text-xs font-bold tracking-[0.2em] uppercase">Komunikaty</p>
-      <h1 class="mb-0! text-4xl tracking-[-0.04em] sm:text-5xl">Alerty</h1>
-      <p class="text-base-content/65 mt-4 max-w-2xl text-lg leading-relaxed">
+    <VStack gap={4}>
+      <Text type="code" color="accent" class="tracking-wider uppercase">Komunikaty</Text>
+      <Heading level={1} type="display-1">Alerty</Heading>
+      <Text type="large" color="secondary" class="max-w-2xl">
         Planuj i aktualizuj powiadomienia wyświetlane u góry publicznej witryny.
-      </p>
-    </div>
+      </Text>
+    </VStack>
     {#if !creating}
-      <button
-        class="btn btn-primary w-fit gap-2 px-5"
-        type="button"
+      <Button
+        variant="primary"
+        size="lg"
+        label="Nowy alert"
+        icon={plusIcon}
         onclick={() => (creating = true)}
-      >
-        <Plus class="size-4" />
-        Nowy alert
-      </button>
+      />
     {/if}
-  </header>
+  </HStack>
 {/snippet}
 
-<Wrapper name="dashboard / alerts" {icon} {hero}>
+<Wrapper name="dashboard / alerts" {hero}>
   {#if creating}
-    <section class="border-base-content/15 border-b py-10" aria-labelledby="editor-heading">
-      <form class="border-base-content/20 bg-base-100 border" onsubmit={saveAlert}>
-        <div
-          class="border-base-content/15 flex items-center justify-between border-b px-5 py-4 md:px-7"
-        >
-          <div>
-            <p class="text-primary mb-1 font-mono text-xs tracking-[0.16em] uppercase">Edytor</p>
-            <h2 id="editor-heading" class="mb-0! text-2xl">
-              {editingId ? 'Edytuj alert' : 'Utwórz alert'}
-            </h2>
-          </div>
-          <button
-            class="btn btn-square btn-ghost btn-sm"
-            type="button"
-            onclick={resetForm}
-            aria-label="Zamknij edytor alertu"
-            disabled={saving}
+    <VStack
+      as="section"
+      paddingBlock={10}
+      class="border-line border-b"
+      aria-labelledby="editor-heading"
+    >
+      <form onsubmit={saveAlert}>
+        <Card padding={0} elevation="low">
+          <HStack
+            gap={4}
+            justify="between"
+            vAlign="center"
+            padding={5}
+            class="border-line border-b md:px-7"
           >
-            <X class="size-5" />
-          </button>
-        </div>
-
-        <div class="grid gap-6 p-5 md:grid-cols-2 md:p-7">
-          <label class="form-control w-full">
-            <span class="mb-2 text-sm font-bold">Tytuł</span>
-            <input
-              type="text"
-              placeholder="Przerwa techniczna"
-              class="input input-bordered w-full"
-              bind:value={newAlert.title}
-              required
+            <VStack gap={1}>
+              <Text type="code" color="accent" class="tracking-wider uppercase">Edytor</Text>
+              <Heading level={2} id="editor-heading">
+                {editingId ? 'Edytuj alert' : 'Utwórz alert'}
+              </Heading>
+            </VStack>
+            <IconButton
+              variant="ghost"
+              label="Zamknij edytor alertu"
+              tooltip="Zamknij edytor"
+              icon={closeIcon}
+              onclick={resetForm}
+              isDisabled={saving}
             />
-          </label>
+          </HStack>
 
-          <label class="form-control w-full">
-            <span class="mb-2 text-sm font-bold">Styl wyświetlania</span>
-            <select class="select select-bordered w-full" bind:value={newAlert.color}>
-              <option value="neutral">Neutralny</option>
-              <option value="info">Informacja</option>
-              <option value="warning">Ostrzeżenie</option>
-              <option value="danger">Zagrożenie</option>
-            </select>
-          </label>
+          <VStack gap={6} padding={5} class="md:p-7">
+            <Grid columns={{ minWidth: 260, max: 2 }} gap={6}>
+              <TextInput
+                label="Tytuł"
+                placeholder="Przerwa techniczna"
+                bind:value={newAlert.title}
+                aria-required="true"
+                width="100%"
+              />
 
-          <label class="form-control w-full">
-            <span class="mb-2 text-sm font-bold">Początek</span>
-            <input
-              type="datetime-local"
-              class="input input-bordered w-full"
-              value={formatDateForInput(newAlert.startDate)}
-              oninput={(event) => (newAlert.startDate = new Date(event.currentTarget.value))}
-              required
-            />
-            <span class="text-base-content/45 mt-2 font-mono text-xs">Twój czas lokalny</span>
-          </label>
+              <Selector
+                label="Styl wyświetlania"
+                options={colorOptions}
+                value={newAlert.color}
+                onChange={(value: string | null) => {
+                  if (value) newAlert.color = value as typeof newAlert.color;
+                }}
+                width="100%"
+              />
 
-          <label class="form-control w-full">
-            <span class="mb-2 text-sm font-bold">Koniec</span>
-            <input
-              type="datetime-local"
-              class="input input-bordered w-full"
-              value={formatDateForInput(newAlert.endDate)}
-              oninput={(event) => (newAlert.endDate = new Date(event.currentTarget.value))}
-              required
-            />
-            <span class="text-base-content/45 mt-2 font-mono text-xs">Twój czas lokalny</span>
-          </label>
+              <DateTimeInput
+                label="Początek"
+                description="Twój czas lokalny"
+                value={formatDateForInput(newAlert.startDate)}
+                onChange={(value: ISODateTimeString | undefined) => {
+                  if (value) newAlert.startDate = new Date(value);
+                }}
+                aria-required="true"
+                width="100%"
+              />
 
-          <label class="form-control w-full">
-            <span class="mb-2 flex items-center justify-between gap-3 text-sm font-bold">
-              Priorytet
-              <span class="text-base-content/45 font-mono text-xs font-normal">Opcjonalnie</span>
-            </span>
-            <input
-              type="number"
-              step="1"
-              placeholder="0"
-              class="input input-bordered w-full"
-              bind:value={newAlert.priority}
-            />
-          </label>
+              <DateTimeInput
+                label="Koniec"
+                description="Twój czas lokalny"
+                value={formatDateForInput(newAlert.endDate)}
+                onChange={(value: ISODateTimeString | undefined) => {
+                  if (value) newAlert.endDate = new Date(value);
+                }}
+                aria-required="true"
+                width="100%"
+              />
 
-          <label class="form-control w-full">
-            <span class="mb-2 flex items-center justify-between gap-3 text-sm font-bold">
-              Link
-              <span class="text-base-content/45 font-mono text-xs font-normal">Opcjonalnie</span>
-            </span>
-            <input
-              type="url"
-              placeholder="https://example.com"
-              class="input input-bordered w-full"
-              bind:value={newAlert.link}
-            />
-          </label>
+              <NumberInput
+                label="Priorytet (opcjonalnie)"
+                placeholder="0"
+                step={1}
+                value={newAlert.priority}
+                onChange={(value: number | null) => (newAlert.priority = value ?? 0)}
+                width="100%"
+              />
 
-          <label class="form-control w-full md:col-span-2">
-            <span class="mb-2 text-sm font-bold">Opis</span>
-            <textarea
-              class="textarea textarea-bordered min-h-32 w-full text-base leading-relaxed"
-              placeholder="Napisz, co powinni wiedzieć odwiedzający…"
-              bind:value={newAlert.description}
-              required
-            ></textarea>
-          </label>
-        </div>
+              <TextInput
+                label="Link (opcjonalnie)"
+                placeholder="https://example.com"
+                bind:value={newAlert.link}
+                width="100%"
+              />
 
-        <div
-          class="border-base-content/15 flex flex-col-reverse gap-3 border-t p-5 sm:flex-row sm:justify-end md:px-7"
-        >
-          <button class="btn btn-ghost" type="button" onclick={resetForm} disabled={saving}
-            >Anuluj</button
+              <GridSpan columns="full">
+                <TextArea
+                  label="Opis"
+                  placeholder="Napisz, co powinni wiedzieć odwiedzający…"
+                  bind:value={newAlert.description}
+                  aria-required="true"
+                  rows={5}
+                  width="100%"
+                />
+              </GridSpan>
+            </Grid>
+          </VStack>
+
+          <HStack
+            gap={3}
+            justify="end"
+            padding={5}
+            class="border-line flex-col-reverse border-t sm:flex-row md:px-7"
           >
-          <button class="btn btn-primary min-w-36" type="submit" disabled={saving}>
-            {saving ? 'Zapisywanie…' : editingId ? 'Zapisz zmiany' : 'Utwórz alert'}
-          </button>
-        </div>
+            <Button variant="ghost" label="Anuluj" onclick={resetForm} isDisabled={saving} />
+            <Button
+              type="submit"
+              variant="primary"
+              label={saving ? 'Zapisywanie…' : editingId ? 'Zapisz zmiany' : 'Utwórz alert'}
+              isLoading={saving}
+            />
+          </HStack>
+        </Card>
       </form>
-    </section>
+    </VStack>
   {/if}
 
-  <section class="py-10 md:py-14" aria-labelledby="alert-list-heading" aria-busy={loading}>
-    <div class="mb-7 flex items-end justify-between gap-4">
-      <div>
-        <p class="text-primary mb-3 text-xs font-bold tracking-[0.2em] uppercase">
+  <VStack
+    as="section"
+    gap={8}
+    paddingBlock={10}
+    aria-labelledby="alert-list-heading"
+    aria-busy={loading}
+  >
+    <HStack gap={4} justify="between" vAlign="end" wrap="wrap">
+      <VStack gap={3}>
+        <Text type="code" color="accent" class="tracking-wider uppercase">
           01 / Opublikowane wpisy
-        </p>
-        <h2 id="alert-list-heading" class="mb-0! text-2xl tracking-tight sm:text-3xl">
-          Wszystkie alerty
-        </h2>
-      </div>
+        </Text>
+        <Heading level={2} id="alert-list-heading">Wszystkie alerty</Heading>
+      </VStack>
       {#if !loading && !loadError}
-        <span class="text-base-content/45 font-mono text-xs"
-          >Strona {currentPage + 1} / {Math.max(pageCount, 1)}</span
-        >
+        <Text type="code" color="secondary">
+          Strona {currentPage + 1} / {Math.max(pageCount, 1)}
+        </Text>
       {/if}
-    </div>
+    </HStack>
 
     {#if loading}
-      <div class="border-base-content/15 border p-8 text-center" role="status">
-        <p class="text-base-content/55 font-mono text-sm">Ładowanie alertów…</p>
-      </div>
+      <Card variant="muted" padding={8}>
+        <Center>
+          <HStack gap={2} vAlign="center" role="status">
+            <Spinner size="sm" />
+            <Text type="code" color="secondary">Ładowanie alertów…</Text>
+          </HStack>
+        </Center>
+      </Card>
     {:else if loadError}
-      <div class="border-error/30 bg-error/5 border p-6">
-        <p class="text-error font-bold">Nie udało się załadować alertów.</p>
-        <p class="text-base-content/65 mt-1 text-sm">{loadError}</p>
-        <button
-          class="btn btn-outline btn-sm mt-4"
-          type="button"
-          onclick={() => void fetchAlerts(currentPage)}
-        >
-          Spróbuj ponownie
-        </button>
-      </div>
+      <Banner
+        status="error"
+        title="Nie udało się załadować alertów."
+        description={loadError}
+        collapsible={false}
+      >
+        {#snippet endContent()}
+          <Button
+            variant="secondary"
+            size="sm"
+            label="Spróbuj ponownie"
+            onclick={() => void fetchAlerts(currentPage)}
+          />
+        {/snippet}
+      </Banner>
     {:else if alerts.length === 0}
-      <div class="border-base-content/25 border border-dashed px-6 py-14 text-center">
-        <Megaphone class="text-base-content/30 mx-auto mb-4 size-8" strokeWidth={1.5} />
-        <h3 class="mb-2! text-xl">Brak alertów na tej stronie</h3>
-        <p class="text-base-content/55">Utwórz alert, aby opublikować pierwszy komunikat.</p>
-      </div>
+      <EmptyState
+        title="Brak alertów na tej stronie"
+        description="Utwórz alert, aby opublikować pierwszy komunikat."
+        icon={emptyIcon}
+      >
+        {#snippet actions()}
+          <Button
+            variant="primary"
+            label="Nowy alert"
+            icon={plusIcon}
+            onclick={() => (creating = true)}
+          />
+        {/snippet}
+      </EmptyState>
     {:else}
-      <div class="border-base-content/15 bg-base-content/15 grid gap-px border">
-        {#each alerts as alert (alert.id)}
-          {@const status = alertStatus(alert)}
-          <article class="bg-base-100 p-5 md:p-7">
-            <div class="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-              <div class="min-w-0 flex-1">
-                <div class="mb-3 flex flex-wrap items-center gap-2">
-                  <span
-                    class={`border px-2 py-1 font-mono text-[0.65rem] font-bold tracking-[0.12em] uppercase ${statusClass(status)}`}
-                  >
-                    {status}
-                  </span>
-                  <span
-                    class={`border px-2 py-1 font-mono text-[0.65rem] tracking-[0.12em] uppercase ${colorClass(alert.color)}`}
-                  >
-                    {alert.color}
-                  </span>
-                  {#if alert.priority}
-                    <span
-                      class="border-base-content/15 text-base-content/50 border px-2 py-1 font-mono text-[0.65rem] tracking-[0.12em] uppercase"
+      <Card padding={0}>
+        <List hasDividers density="balanced">
+          {#each alerts as alert (alert.id)}
+            {@const status = alertStatus(alert)}
+            <ListItem align="start">
+              {#snippet label()}
+                <VStack gap={3}>
+                  <HStack gap={2} wrap="wrap" vAlign="center">
+                    <Badge variant={statusVariant(status)} label={status} />
+                    <Badge variant={colorVariant(alert.color)} label={alert.color} />
+                    {#if alert.priority}
+                      <Token size="sm" color="gray" label={`Priorytet ${alert.priority}`} />
+                    {/if}
+                  </HStack>
+                  <Heading level={3}>{alert.title}</Heading>
+                  <Text type="code" color="secondary">
+                    Od {formatLocalDate(alert.startDate)} do {formatLocalDate(alert.endDate)}
+                  </Text>
+                  <Text color="secondary" class="max-w-4xl wrap-anywhere whitespace-pre-wrap">
+                    {alert.description}
+                  </Text>
+                  {#if alert.link}
+                    <Link
+                      href={alert.link}
+                      type="supporting"
+                      isExternalLink
+                      target="_blank"
+                      class="max-w-full wrap-anywhere"
                     >
-                      Priorytet {alert.priority}
-                    </span>
+                      {alert.link}
+                    </Link>
                   {/if}
-                </div>
-                <h3 class="mb-2! text-xl tracking-tight sm:text-2xl">{alert.title}</h3>
-                <p class="text-base-content/50 mb-4 font-mono text-xs leading-relaxed">
-                  Od {formatLocalDate(alert.startDate)} do {formatLocalDate(alert.endDate)}
-                </p>
-                <p
-                  class="text-base-content/75 max-w-4xl leading-relaxed wrap-anywhere whitespace-pre-wrap"
-                >
-                  {alert.description}
-                </p>
-                {#if alert.link}
-                  <a
-                    href={alert.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="link link-primary mt-4 inline-block max-w-full text-sm wrap-anywhere"
-                    >{alert.link}</a
-                  >
-                {/if}
-              </div>
-
-              <div class="flex shrink-0 gap-1 self-end sm:self-start">
-                <button
-                  class="btn btn-square btn-ghost btn-sm"
-                  type="button"
-                  onclick={() => startEditing(alert)}
-                  aria-label={`Edytuj ${alert.title}`}
-                  disabled={deletingId === alert.id}
-                >
-                  <Pencil class="size-4" />
-                </button>
-                <button
-                  class="btn btn-square btn-ghost btn-sm text-error"
-                  type="button"
-                  onclick={() => void deleteAlert(alert)}
-                  aria-label={`Usuń ${alert.title}`}
-                  disabled={deletingId !== null}
-                >
-                  {#if deletingId === alert.id}
-                    <span class="text-xs" aria-hidden="true">…</span>
-                  {:else}
-                    <Trash class="size-4" />
-                  {/if}
-                </button>
-              </div>
-            </div>
-          </article>
-        {/each}
-      </div>
+                </VStack>
+              {/snippet}
+              {#snippet endContent()}
+                <HStack gap={1}>
+                  <IconButton
+                    variant="ghost"
+                    size="sm"
+                    label={`Edytuj ${alert.title}`}
+                    tooltip="Edytuj"
+                    icon={pencilIcon}
+                    onclick={() => startEditing(alert)}
+                    isDisabled={deletingId === alert.id}
+                  />
+                  <IconButton
+                    variant="destructive"
+                    size="sm"
+                    label={`Usuń ${alert.title}`}
+                    tooltip="Usuń"
+                    icon={trashIcon}
+                    onclick={() => requestDelete(alert)}
+                    isDisabled={deletingId !== null}
+                    isLoading={deletingId === alert.id}
+                  />
+                </HStack>
+              {/snippet}
+            </ListItem>
+          {/each}
+        </List>
+      </Card>
     {/if}
 
     {#if !loading && !loadError && pageCount > 1}
-      <nav class="mt-8 flex flex-wrap justify-center gap-2" aria-label="Stronicowanie alertów">
-        {#each pages as page}
-          <button
-            class={currentPage === page
-              ? 'btn btn-square btn-sm btn-primary'
-              : 'btn btn-square btn-sm btn-outline'}
-            type="button"
-            aria-label={`Przejdź do strony ${page + 1}`}
-            aria-current={currentPage === page ? 'page' : undefined}
-            onclick={() => (currentPage = page)}>{page + 1}</button
-          >
-        {/each}
-      </nav>
+      <HStack justify="center">
+        <Pagination
+          page={currentPage + 1}
+          totalPages={pageCount}
+          onChange={(page) => (currentPage = page - 1)}
+          label="Stronicowanie alertów"
+          size="sm"
+        />
+      </HStack>
     {/if}
-  </section>
+  </VStack>
+
+  <AlertDialog
+    isOpen={pendingDelete !== null}
+    onOpenChange={(open) => {
+      if (!open) pendingDelete = null;
+    }}
+    title={`Usunąć „${pendingDelete?.title ?? ''}”?`}
+    description="Tej operacji nie można cofnąć."
+    actionLabel="Usuń alert"
+    cancelLabel="Anuluj"
+    actionVariant="destructive"
+    isActionLoading={deletingId !== null}
+    onAction={() => void confirmDelete()}
+  />
 </Wrapper>

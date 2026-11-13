@@ -3,14 +3,18 @@
   import MemberPreview from '@ksi-core/ui/platform/MemberPreview.svelte';
   import Markdown from '@ksi-core/ui/platform/Markdown.svelte';
   import { locale } from '$lib/locale.svelte';
+  import { ArrowLeft, ArrowUpRight, LayoutDashboard, Plus, Shield } from '@lucide/svelte';
   import {
-    ArrowLeft,
-    ArrowUpRight,
-    CircleCheck,
-    LayoutDashboard,
-    Plus,
-    Shield
-  } from '@lucide/svelte';
+    Banner,
+    Button,
+    Card,
+    Grid,
+    HStack,
+    Heading,
+    Icon,
+    Token,
+    VStack
+  } from '@astryx-sv/core';
   import FieldTag from '../../../components/ui/FieldTag.svelte';
   import ProjectCover from '../../../components/ui/ProjectCover.svelte';
 
@@ -25,14 +29,32 @@
 
 <svelte:head><title>{project.name} · KSI UWr</title></svelte:head>
 
-<main class="page-container flex-1 pt-6 pb-20">
-  <a
-    href="/projects"
-    class="text-muted hover:text-ink inline-flex items-center gap-2 py-1.5 text-[13px]"
-    ><ArrowLeft class="size-4" aria-hidden="true" />Wszystkie projekty</a
-  >
+{#snippet backIcon()}
+  <Icon icon={ArrowLeft} size="sm" />
+{/snippet}
 
-  <header class="surface-card mt-4 overflow-hidden">
+{#snippet shieldIcon()}
+  <Icon icon={Shield} size="sm" />
+{/snippet}
+
+{#snippet plusIcon()}
+  <Icon icon={Plus} size="sm" />
+{/snippet}
+
+{#snippet dashboardIcon()}
+  <Icon icon={LayoutDashboard} size="sm" />
+{/snippet}
+
+{#snippet externalIcon()}
+  <Icon icon={ArrowUpRight} size="sm" />
+{/snippet}
+
+<VStack as="main" gap={0} paddingBlockStart={6} class="page-container w-full flex-1 pb-20">
+  <HStack>
+    <Button href="/projects" variant="ghost" size="sm" label="Wszystkie projekty" icon={backIcon} />
+  </HStack>
+
+  <Card padding={0} elevation="low" class="mt-4 overflow-hidden">
     <ProjectCover
       slug={project.slug}
       fields={project.fields}
@@ -40,112 +62,113 @@
       height={280}
       class="border-line h-40 border-b sm:h-52 md:h-60"
     />
-    <div class="flex flex-col gap-6 p-6 md:flex-row md:items-end md:justify-between md:p-8">
-      <div class="min-w-0">
+    <HStack gap={6} vAlign="end" justify="between" wrap="wrap" padding={6} class="md:p-8">
+      <VStack gap={3} class="min-w-0 flex-1">
         {#if project.fields?.length}
-          <div class="mb-3 flex flex-wrap gap-1.5">
+          <HStack gap={1.5} wrap="wrap">
             {#each project.fields as field (field)}<FieldTag {field} />{/each}
-          </div>
+          </HStack>
         {/if}
-        <h1 class="text-[clamp(32px,5vw,52px)] font-bold tracking-[-0.045em] wrap-anywhere">
-          {project.name}
-        </h1>
+        <Heading level={1} type="display-1" textWrap="balance">{project.name}</Heading>
         {#if project.tags?.length > 0}
-          <div class="mt-4 flex flex-wrap gap-1.5">
+          <HStack gap={1.5} wrap="wrap">
             {#each project.tags as tag (tag)}
-              <span class="tag">#{tag}</span>
+              <Token label={`#${tag}`} />
             {/each}
-          </div>
+          </HStack>
         {/if}
-      </div>
+      </VStack>
 
       {#if user?.membershipStatus === 'active'}
-        <div class="flex shrink-0 flex-wrap gap-2">
+        <HStack gap={2} wrap="wrap" class="shrink-0">
           {#if data.access.canEdit || data.access.canManageMembers}
-            <a
+            <Button
               href={`${data.dashboardOrigin}/projects/${encodeURIComponent(project.slug)}/settings`}
-              class="btn btn-outline"><Shield /> Ustawienia projektu</a
-            >
+              variant="secondary"
+              label="Ustawienia projektu"
+              icon={shieldIcon}
+            />
           {/if}
           {#if !data.access.isMember && !form?.joined}
             <form method="POST" action="?/join">
-              <button class="btn"><Plus /> Dołącz do projektu</button>
+              <Button type="submit" variant="primary" label="Dołącz do projektu" icon={plusIcon} />
             </form>
           {:else if data.access.isMember}
-            <a
+            <Button
               href={`${data.dashboardOrigin}/projects/${encodeURIComponent(project.slug)}`}
-              class="btn"><LayoutDashboard /> Otwórz przestrzeń projektu</a
-            >
+              variant="primary"
+              label="Otwórz przestrzeń projektu"
+              icon={dashboardIcon}
+            />
           {/if}
-        </div>
+        </HStack>
       {/if}
-    </div>
-  </header>
+    </HStack>
+  </Card>
 
   {#if form?.joined}
-    <p
-      role="status"
-      class="border-line bg-surface-muted mt-4 flex items-center gap-2 rounded-lg border px-4 py-3 text-sm"
-    >
-      <CircleCheck class="text-muted size-4 shrink-0" aria-hidden="true" />
-      {#if form.requested}
-        Prośba o dołączenie została wysłana.
-      {:else}
-        Dołączono do projektu.
-      {/if}
-    </p>
+    <Banner
+      status="success"
+      title={form.requested ? 'Prośba o dołączenie została wysłana.' : 'Dołączono do projektu.'}
+      collapsible={false}
+      class="mt-4"
+    />
   {/if}
-  {#if form && 'message' in form}<p role="alert" class="error mt-4">{form.message}</p>{/if}
+  {#if form && 'message' in form}
+    <Banner status="error" title={form.message} collapsible={false} role="alert" class="mt-4" />
+  {/if}
 
-  <div class="mx-auto max-w-4xl">
+  <VStack gap={0} maxWidth={896} class="mx-auto w-full">
     {#if project.description}
-      <div class="project-description mt-10">
+      <VStack gap={0} class="project-description mt-10">
         <Markdown blocks={data.descriptionBlocks} {language} />
-      </div>
+      </VStack>
     {/if}
 
     {#each project.sections as section (section)}
-      <section class="border-line mt-12 border-t pt-10">
+      <VStack as="section" gap={6} class="border-line mt-12 border-t pt-10">
         {#if section === 'main-article' && project.mainArticle}
-          <h2 class="mb-6 text-2xl tracking-tight">{project.mainArticle.title}</h2>
-          <div class="project-description">
+          <Heading level={2}>{project.mainArticle.title}</Heading>
+          <VStack gap={0} class="project-description">
             <Markdown blocks={data.mainArticleBlocks} {language} />
-          </div>
+          </VStack>
         {:else if section === 'articles'}
-          <h2 class="mb-6 text-2xl tracking-tight">Artykuły</h2>
+          <Heading level={2}>Artykuły</Heading>
           <ArticleList articles={project.articles} />
         {:else if section === 'leaders' || section === 'members'}
-          <h2 class="mb-6 text-2xl tracking-tight">
+          <Heading level={2}>
             {#if section === 'leaders'}Liderzy projektu{:else}Członkowie{/if}
-          </h2>
-          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          </Heading>
+          <Grid columns={{ minWidth: 240, max: 3 }} gap={3}>
             {#each section === 'leaders' ? project.leaders : project.members as member (member.id)}
-              <div class="surface-card px-4 py-3">
+              <Card padding={3}>
                 <MemberPreview {member} href={`/members/${encodeURIComponent(member.id)}`} />
-              </div>
+              </Card>
             {/each}
-          </div>
+          </Grid>
         {:else if section === 'links'}
-          <h2 class="mb-6 text-2xl tracking-tight">Linki</h2>
-          <div class="flex flex-wrap gap-2">
-            {#each project.links as link (link.id)}<a
-                class="btn btn-outline group"
+          <Heading level={2}>Linki</Heading>
+          <HStack gap={2} wrap="wrap">
+            {#each project.links as link (link.id)}
+              <Button
                 href={link.url}
+                variant="secondary"
+                label={link.label}
+                target="_blank"
                 rel="noopener noreferrer"
-                >{link.label}<ArrowUpRight
-                  class="text-muted transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                /></a
-              >{/each}
-          </div>
+                endContent={externalIcon}
+              />
+            {/each}
+          </HStack>
         {/if}
-      </section>
+      </VStack>
     {/each}
-  </div>
-</main>
+  </VStack>
+</VStack>
 
 <style>
-  .project-description {
-    font-size: 17px;
+  :global(.project-description) {
+    font-size: 1.0625rem;
     line-height: 1.75;
     color: color-mix(in oklch, var(--ink) 85%, var(--muted));
   }

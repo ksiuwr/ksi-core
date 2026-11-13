@@ -2,6 +2,7 @@
   import '@ksi-core/ui/docs-prose.css';
   import { untrack, type Snippet } from 'svelte';
   import { PanelLeftClose, PanelLeftOpen } from '@lucide/svelte';
+  import { IconButton } from '@astryx-sv/core';
   import { page } from '$app/state';
   import PublicDocsSidebar from '$lib/components/PublicDocsSidebar.svelte';
   let { data, children }: { data: import('./$types').LayoutData; children: Snippet } = $props();
@@ -20,6 +21,14 @@
   }
 </script>
 
+{#snippet toggleIcon()}
+  {#if sidebarCollapsed}
+    <PanelLeftOpen size={18} aria-hidden="true" />
+  {:else}
+    <PanelLeftClose size={18} aria-hidden="true" />
+  {/if}
+{/snippet}
+
 <div class="docs-shell page-container" class:sidebar-collapsed={sidebarCollapsed}>
   <aside
     class="docs-sidebar"
@@ -30,20 +39,18 @@
     }}
   >
     <div class="sidebar-panel" style:--tree-height={treeHeight ? `${treeHeight}px` : undefined}>
-      <button
-        type="button"
-        class="sidebar-toggle"
+      <IconButton
+        variant="ghost"
+        size="md"
+        width={40}
+        class="sidebar-toggle shrink-0"
+        label="Przełącz panel boczny"
+        tooltip="Przełącz panel boczny"
+        icon={toggleIcon}
         aria-controls="docs-navigation"
         aria-expanded={!sidebarCollapsed}
-        aria-label="Przełącz panel boczny"
-        title="Przełącz panel boczny"
         onclick={toggleSidebar}
-      >
-        {#if sidebarCollapsed}<PanelLeftOpen size={18} aria-hidden="true" />{:else}<PanelLeftClose
-            size={18}
-            aria-hidden="true"
-          />{/if}
-      </button>
+      />
       <div id="docs-navigation" class="sidebar-content">
         <div bind:clientHeight={treeHeight}>
           <PublicDocsSidebar
@@ -77,31 +84,6 @@
   .docs-sidebar,
   .docs-workspace {
     min-width: 0;
-  }
-  /* Borderless: when collapsed, the ring around it is the panel's own edge. */
-  .sidebar-toggle {
-    display: grid;
-    place-items: center;
-    width: var(--sidebar-toggle);
-    height: var(--sidebar-toggle);
-    flex-shrink: 0;
-    padding: 0;
-    border: 0;
-    border-radius: 50%;
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-    transition:
-      background-color 120ms ease,
-      color 120ms ease;
-  }
-  .sidebar-toggle:hover {
-    background: color-mix(in srgb, var(--surface-muted) 70%, transparent);
-    color: var(--ink);
-  }
-  .sidebar-toggle:focus-visible {
-    outline: none;
-    box-shadow: inset 0 0 0 2px var(--ring-strong);
   }
   @media (min-width: 901px) {
     .docs-sidebar {
@@ -225,7 +207,7 @@
       gap: 24px;
       padding-top: 20px;
     }
-    .sidebar-toggle {
+    :global(.sidebar-toggle) {
       display: none;
     }
   }

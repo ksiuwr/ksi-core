@@ -3,6 +3,7 @@
   import { dashboardPath, newTaskPath, taskPath, type Workspace } from '$lib/navigation';
   import type { BoardData, BoardLabel, BoardStatus, Item } from '$lib/types';
   import type { TaskInvolvement } from '$lib/task-filters';
+  import { Banner, Button, Heading, HStack, VStack } from '@astryx-sv/core';
   import { Trash2 } from '@lucide/svelte';
 
   let {
@@ -39,32 +40,30 @@
   );
 </script>
 
-<div class="workspace-header">
-  <h1>Tablica zadań</h1>
-  <a class="btn btn-outline" href={`${dashboardPath(workspace, projectSlug, 'board')}/graveyard`}
-    ><Trash2 size={15} aria-hidden="true" />Usunięte zadania</a
-  >
-</div>
-{#if error}<p class="error" role="alert">{error}</p>{/if}
-<KanbanBoard
-  {items}
-  {involvement}
-  {statuses}
-  boardLabels={labels}
-  boardId={board?.id ?? ''}
-  {projectId}
-  {canManage}
-  {userId}
-  taskHref={(item) => taskPath(workspace, projectSlug, item.referenceNumber ?? item.id)}
-  newTaskHref={(status) => newTaskPath(workspace, projectSlug, status)}
-  {refresh}
-  reportError={(message) => (error = message)}
-/>
-
-<style>
-  .workspace-header h1 {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-</style>
+<VStack gap={4}>
+  <HStack class="workspace-header" hAlign="between" vAlign="start" wrap="wrap" gap={4}>
+    <Heading level={1}>Tablica zadań</Heading>
+    <Button
+      href={`${dashboardPath(workspace, projectSlug, 'board')}/graveyard`}
+      variant="secondary"
+      label="Usunięte zadania"
+    >
+      {#snippet icon()}<Trash2 size={15} aria-hidden="true" />{/snippet}
+    </Button>
+  </HStack>
+  {#if error}<Banner status="error" title={error} role="alert" />{/if}
+  <KanbanBoard
+    {items}
+    {involvement}
+    {statuses}
+    boardLabels={labels}
+    boardId={board?.id ?? ''}
+    {projectId}
+    {canManage}
+    {userId}
+    taskHref={(item) => taskPath(workspace, projectSlug, item.referenceNumber ?? item.id)}
+    newTaskHref={(status) => newTaskPath(workspace, projectSlug, status)}
+    {refresh}
+    reportError={(message) => (error = message)}
+  />
+</VStack>

@@ -16,6 +16,8 @@
   import { threadActivitySummary } from 'shared/thread-activity';
   import type { AssignmentMember } from './Assignees.svelte';
   import MemberPreview from '@ksi-core/ui/platform/MemberPreview.svelte';
+  import { Center, HStack, Link, Text } from '@astryx-sv/core';
+
   let {
     event,
     members = [],
@@ -88,21 +90,26 @@
   const relativeTime = $derived(formatRelativeTime(event.createdAt, language, now));
 </script>
 
-<div class="thread-activity" id={`activity-${event.id}`}>
-  <span
-    class="activity-marker"
-    class:restored={kind === 'restored'}
-    class:removed={kind === 'comment-removed'}><Icon size={15} aria-hidden="true" /></span
+<HStack gap={3} align="start" class="thread-activity" id={`activity-${event.id}`}>
+  <Center
+    width={30}
+    height={30}
+    class={`activity-marker${kind === 'restored' ? ' restored' : ''}${kind === 'comment-removed' ? ' removed' : ''}`}
   >
-  <div class="activity-text">
-    {#if event.authorId}<a
-        class="activity-author"
+    <Icon size={15} aria-hidden="true" />
+  </Center>
+  <Text type="body" color="secondary" as="p" class="activity-text">
+    {#if event.authorId}<Link
         href={`/members/${encodeURIComponent(event.authorId)}`}
-        >{event.authorName || 'Członek stowarzyszenia'}</a
-      >{:else}<strong class="activity-author">{event.authorName || 'Systemowy'}</strong>{/if}
+        color="primary"
+        weight="semibold">{event.authorName || 'Członek stowarzyszenia'}</Link
+      >{:else}<Text as="span" weight="semibold" color="primary"
+        >{event.authorName || 'Systemowy'}</Text
+      >{/if}
     {' '}
     {#each summaries as summary, index}
-      {#if index > 0}{' '}<span class="activity-separator">·</span>{' '}{/if}
+      {#if index > 0}{' '}<span class="activity-separator">·</span>
+      {/if}
       {#if summary.kind === 'created'}utworzył(a) ten wątek
       {:else if summary.kind === 'archived'}zarchiwizował(a) ten wątek
       {:else if summary.kind === 'restored'}przywrócił(a) ten wątek
@@ -112,8 +119,8 @@
       {:else if summary.kind === 'access'}zmienił(a) dostęp do wątku
       {:else if summary.kind === 'visibility'}
         zmienił(a) widoczność z
-        <span class="thread-value">{visibilityName(summary.before)}</span>
-        na <span class="thread-value">{visibilityName(summary.after)}</span>
+        <Text as="span" weight="medium" color="primary">{visibilityName(summary.before)}</Text>
+        na <Text as="span" weight="medium" color="primary">{visibilityName(summary.after)}</Text>
       {:else if summary.kind === 'assignee-added' || summary.kind === 'assignee-removed'}
         {summary.kind === 'assignee-added' ? 'przypisał(a)' : 'usunął(a) przypisanie'}
         {' '}{#each summary.ids as id, personIndex}{#if personIndex > 0}{', '}{/if}<MemberPreview
@@ -135,73 +142,37 @@
     {' '}<time datetime={event.createdAt} title={absoluteTime} aria-label={absoluteTime}
       >{relativeTime}</time
     >
-  </div>
-</div>
+  </Text>
+</HStack>
 
 <style>
-  .thread-activity {
-    position: relative;
-    padding: 13px 0 13px 44px;
-    color: var(--muted);
-    font-size: 13px;
-    line-height: 1.8;
+  :global(.thread-activity) {
     min-height: 50px;
   }
-  .activity-marker {
-    position: absolute;
-    top: 10px;
-    left: 0;
-    width: 30px;
-    height: 30px;
-    border: 3px solid var(--surface);
-    border-radius: 50%;
-    background: var(--surface-muted);
-    display: grid;
-    place-items: center;
-    color: var(--muted);
+  :global(.activity-marker) {
+    flex-shrink: 0;
+    border-radius: var(--radius-full);
+    background: var(--color-background-muted);
+    color: var(--color-text-secondary);
   }
-  .activity-marker.restored {
-    color: var(--diff-added, #328152);
+  :global(.activity-marker.restored) {
+    color: var(--color-success);
   }
-  .activity-marker.removed {
-    color: var(--danger, #b42318);
+  :global(.activity-marker.removed) {
+    color: var(--color-error);
   }
-  .activity-text {
-    margin: 0;
+  :global(.activity-text) {
     overflow-wrap: anywhere;
-  }
-  .activity-author {
-    color: var(--ink);
-    font-weight: 600;
-    text-decoration: none;
-    margin-right: 0.25em;
-  }
-  a.activity-author:hover {
-    text-decoration: underline;
-  }
-  .thread-value {
-    color: var(--ink);
-    font-weight: 500;
   }
   time {
     margin-left: 0.25em;
-    color: var(--muted);
-    text-decoration: underline;
-    text-decoration-style: dotted;
+    color: var(--color-text-secondary);
+    text-decoration: underline dotted;
     text-underline-offset: 3px;
     white-space: nowrap;
-    font-size: 12px;
+    font-size: var(--text-supporting-size);
   }
   .activity-separator {
-    color: var(--muted);
-  }
-  @media (max-width: 600px) {
-    .thread-activity {
-      padding-left: 36px;
-      font-size: 12px;
-    }
-    .activity-marker {
-      left: -3px;
-    }
+    color: var(--color-text-secondary);
   }
 </style>

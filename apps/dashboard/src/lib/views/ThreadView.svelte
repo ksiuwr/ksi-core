@@ -6,7 +6,6 @@
   import MarkdownContent from '@ksi-core/ui/platform/MarkdownContent.svelte';
   import MemberPreview from '@ksi-core/ui/platform/MemberPreview.svelte';
   import ContentHistory from '$lib/ContentHistory.svelte';
-  import ConfirmDialog from '$lib/ConfirmDialog.svelte';
   import ThreadActivity from '$lib/ThreadActivity.svelte';
   import ThreadAside from '$lib/ThreadAside.svelte';
   import DetailLayout from '$lib/DetailLayout.svelte';
@@ -14,6 +13,18 @@
   import { TIMELINE_CHUNK, TIMELINE_INITIAL, TIMELINE_TAIL } from '$lib/timeline';
   import { dashboardPath, type Workspace } from '$lib/navigation';
   import type { AssignmentMember, Comment, Thread, ThreadEvent } from '$lib/types';
+  import {
+    AlertDialog,
+    Banner,
+    Button,
+    Card,
+    Heading,
+    HStack,
+    IconButton,
+    Link,
+    Text,
+    VStack
+  } from '@astryx-sv/core';
   import { MessagesSquare, Pencil, RotateCcw, Trash2 } from '@lucide/svelte';
 
   let {
@@ -238,152 +249,180 @@
     <ThreadAside {thread} {members} {canManage} {refresh} />
   {/snippet}
 
-  {#if error}<p class="error" role="alert">{error}</p>{/if}
-  {#if archived}<p class="notice">Ten wątek jest zarchiwizowany.</p>{/if}
+  <VStack gap={4}>
+    {#if error}<Banner status="error" title={error} role="alert" />{/if}
+    {#if archived}<Banner status="info" title="Ten wątek jest zarchiwizowany." />{/if}
 
-  <section class="issue-discussion" aria-label={'Dyskusja'}>
-    <div class="discussion-timeline">
-      {#each visibleTimeline as entry (`${entry.kind}-${entry.id}`)}
-        {#if entry.kind === 'event'}
-          <ThreadActivity event={entry.event} {members} {now} />
-        {:else if entry.kind === 'gap'}
-          <div class="timeline-gap">
-            {#if hiddenTimelineItems > 0}<p class="timeline-gap-count">
-                {remainingTimelineLabel}
-              </p>{/if}
-            {#if loadActivityError}<p class="timeline-gap-error" role="alert">
-                Nie udało się wczytać aktywności.
-              </p>{/if}
-            <button
-              type="button"
-              class="timeline-load"
-              disabled={activityLoading}
-              onclick={() => void revealTimeline()}
-            >
-              {#if loadActivityError}<RotateCcw size={13} aria-hidden="true" />{/if}
-              {#if activityLoading}Wczytywanie…{:else if loadActivityError}Spróbuj ponownie{:else}Wczytaj
-                więcej{/if}
-            </button>
-          </div>
-        {:else}
-          {@const comment = entry.comment}
-          {@const author = memberFor(comment.authorId, comment.authorName)}
-          <article class="timeline-comment">
-            <div class="comment-avatar">
-              <MemberPreview
-                member={author}
-                href={`/members/${encodeURIComponent(author.id)}`}
-                avatarOnly
-                size={32}
+    <VStack as="section" gap={4} aria-label={'Dyskusja'}>
+      <VStack gap={3} class="discussion-timeline">
+        {#each visibleTimeline as entry (`${entry.kind}-${entry.id}`)}
+          {#if entry.kind === 'event'}
+            <ThreadActivity event={entry.event} {members} {now} />
+          {:else if entry.kind === 'gap'}
+            <VStack gap={2} hAlign="center" paddingBlock={3}>
+              {#if hiddenTimelineItems > 0}
+                <Text weight="semibold">{remainingTimelineLabel}</Text>
+              {/if}
+              {#if loadActivityError}
+                <Text as="p" type="supporting" role="alert">Nie udało się wczytać aktywności.</Text>
+              {/if}
+              {#if loadActivityError}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  label="Spróbuj ponownie"
+                  isDisabled={activityLoading}
+                  onclick={() => void revealTimeline()}
+                >
+                  {#snippet icon()}<RotateCcw size={13} aria-hidden="true" />{/snippet}
+                </Button>
+              {:else}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  label={activityLoading ? 'Wczytywanie…' : 'Wczytaj więcej'}
+                  isDisabled={activityLoading}
+                  onclick={() => void revealTimeline()}
+                />
+              {/if}
+            </VStack>
+          {:else}
+            {@const comment = entry.comment}
+            {@const author = memberFor(comment.authorId, comment.authorName)}
+            <HStack gap={3} vAlign="start">
+              <HStack width={32} hAlign="center" vAlign="start" class="comment-avatar">
+                <MemberPreview
+                  member={author}
+                  href={`/members/${encodeURIComponent(author.id)}`}
+                  avatarOnly
+                  size={32}
+                />
+              </HStack>
+              <Card padding={0} width="100%">
+                <VStack gap={0}>
+                  <HStack gap={1.5} vAlign="center" wrap="wrap" class="comment-header">
+                    <Link
+                      href={`/members/${encodeURIComponent(author.id)}`}
+                      type="inherit"
+                      color="primary"
+                      weight="semibold"
+                    >
+                      {#if memberName(author)}{memberName(author)}{:else}Członek koła{/if}
+                    </Link>
+                    <Text type="supporting">
+                      {entry.first ? 'utworzył(a) ten wątek' : 'skomentował(a)'}
+                    </Text>
+                    <Text type="supporting">
+                      <time
+                        datetime={comment.createdAt}
+                        title={formatDateTime(comment.createdAt)}
+                        aria-label={formatDateTime(comment.createdAt)}
+                        >{relativeDateTime(comment.createdAt)}</time
+                      >
+                    </Text>
+                    <HStack gap={1} class="comment-actions">
+                      {#if comment.edited}
+                        <ContentHistory kind="comment" targetId={comment.id} />
+                      {/if}
+                      {#if !archived && (comment.authorId === userId || canManage)}
+                        <IconButton
+                          label="Edytuj"
+                          tooltip="Edytuj"
+                          variant="ghost"
+                          size="sm"
+                          onclick={() => {
+                            editingCommentId = comment.id;
+                            editingCommentMarkdown = comment.markdown;
+                          }}
+                        >
+                          {#snippet icon()}<Pencil size={13} aria-hidden="true" />{/snippet}
+                        </IconButton>
+                        <IconButton
+                          label="Usuń"
+                          tooltip="Usuń"
+                          variant="ghost"
+                          size="sm"
+                          onclick={() => (pendingCommentDelete = comment.id)}
+                        >
+                          {#snippet icon()}<Trash2 size={13} aria-hidden="true" />{/snippet}
+                        </IconButton>
+                      {/if}
+                    </HStack>
+                  </HStack>
+                  <VStack gap={3} padding={4}>
+                    {#if editingCommentId === comment.id}
+                      <form
+                        onsubmit={(event) => {
+                          event.preventDefault();
+                          saveCommentEdit(comment.id);
+                        }}
+                      >
+                        <VStack gap={3}>
+                          <Editor bind:value={editingCommentMarkdown} rows={4} allowReferences />
+                          <HStack gap={2}>
+                            <Button
+                              type="submit"
+                              variant="primary"
+                              label="Zapisz"
+                              isDisabled={busy || !editingCommentMarkdown.trim()}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              label="Anuluj"
+                              onclick={() => (editingCommentId = null)}
+                            />
+                          </HStack>
+                        </VStack>
+                      </form>
+                    {:else}
+                      <MarkdownContent value={comment.markdown} allowReferences />
+                    {/if}
+                  </VStack>
+                </VStack>
+              </Card>
+            </HStack>
+          {/if}
+        {/each}
+      </VStack>
+
+      {#if !archived}
+        <form
+          onsubmit={(event) => {
+            event.preventDefault();
+            submitReply();
+          }}
+        >
+          <VStack gap={3}>
+            <HStack gap={1.5} vAlign="center">
+              <MessagesSquare size={17} aria-hidden="true" />
+              <Heading level={2}>Dodaj odpowiedź</Heading>
+            </HStack>
+            <Editor bind:value={reply} rows={4} allowReferences />
+            <HStack>
+              <Button
+                type="submit"
+                variant="primary"
+                label="Dodaj odpowiedź"
+                isDisabled={busy || !reply.trim()}
               />
-            </div>
-            <div class="comment-card">
-              <header class="comment-header">
-                <a class="comment-author" href={`/members/${encodeURIComponent(author.id)}`}
-                  >{#if memberName(author)}{memberName(author)}{:else}Członek koła{/if}</a
-                >
-                <span class="comment-verb"
-                  >{#if entry.first}utworzył(a) ten wątek{:else}skomentował(a){/if}</span
-                >
-                <time
-                  datetime={comment.createdAt}
-                  title={formatDateTime(comment.createdAt)}
-                  aria-label={formatDateTime(comment.createdAt)}
-                  >{relativeDateTime(comment.createdAt)}</time
-                >
-                <div class="comment-actions">
-                  {#if comment.edited}
-                    <ContentHistory kind="comment" targetId={comment.id} />
-                  {/if}
-                  {#if !archived && (comment.authorId === userId || canManage)}
-                    <button
-                      type="button"
-                      class="icon-action-btn"
-                      title="Edytuj"
-                      onclick={() => {
-                        editingCommentId = comment.id;
-                        editingCommentMarkdown = comment.markdown;
-                      }}
-                    >
-                      <Pencil size={13} aria-hidden="true" />
-                    </button>
-                    <button
-                      type="button"
-                      class="icon-action-btn danger"
-                      title="Usuń"
-                      onclick={() => (pendingCommentDelete = comment.id)}
-                    >
-                      <Trash2 size={13} aria-hidden="true" />
-                    </button>
-                  {/if}
-                </div>
-              </header>
-              <div class="comment-body">
-                {#if editingCommentId === comment.id}
-                  <form
-                    class="issue-reply"
-                    onsubmit={(event) => {
-                      event.preventDefault();
-                      saveCommentEdit(comment.id);
-                    }}
-                  >
-                    <Editor bind:value={editingCommentMarkdown} rows={4} allowReferences />
-                    <div class="comment-composer-actions">
-                      <button class="btn" disabled={busy || !editingCommentMarkdown.trim()}
-                        >Zapisz</button
-                      >
-                      <button
-                        type="button"
-                        class="btn ghost"
-                        onclick={() => (editingCommentId = null)}>Anuluj</button
-                      >
-                    </div>
-                  </form>
-                {:else}
-                  <MarkdownContent value={comment.markdown} allowReferences />
-                {/if}
-              </div>
-            </div>
-          </article>
-        {/if}
-      {/each}
-    </div>
-
-    {#if !archived}
-      <form
-        class="issue-reply"
-        onsubmit={(event) => {
-          event.preventDefault();
-          submitReply();
-        }}
-      >
-        <h2><MessagesSquare size={17} aria-hidden="true" />Dodaj odpowiedź</h2>
-        <Editor bind:value={reply} rows={4} allowReferences />
-        <button class="btn" disabled={busy || !reply.trim()}>Dodaj odpowiedź</button>
-      </form>
-    {/if}
-  </section>
+            </HStack>
+          </VStack>
+        </form>
+      {/if}
+    </VStack>
+  </VStack>
 </DetailLayout>
 
-<ConfirmDialog
-  open={pendingCommentDelete !== null}
+<AlertDialog
+  isOpen={pendingCommentDelete !== null}
+  onOpenChange={(open) => {
+    if (!open) pendingCommentDelete = null;
+  }}
   title={'Usunąć komentarz?'}
-  message={'Tej operacji nie można cofnąć.'}
-  confirmLabel={'Usuń'}
+  description={'Tej operacji nie można cofnąć.'}
+  actionLabel={'Usuń'}
   cancelLabel={'Anuluj'}
-  {busy}
-  onconfirm={deleteComment}
-  onclose={() => (pendingCommentDelete = null)}
+  isActionLoading={busy}
+  onAction={deleteComment}
 />
-
-<style>
-  .issue-discussion {
-    padding-top: 4px;
-  }
-  .issue-reply h2 {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 15px;
-  }
-</style>

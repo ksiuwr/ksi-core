@@ -1,7 +1,14 @@
 <script lang="ts">
-  import FieldName from './FieldName.svelte';
+  import { Badge } from '@astryx-sv/core';
 
   let { field }: { field: string } = $props();
+
+  const variant = $derived(
+    field === 'research' ? 'purple' : field === 'community' ? 'orange' : 'teal'
+  );
 </script>
 
-<span class="tag field-tag" data-field={field}><FieldName {field} /></span>
+<Badge
+  {variant}
+  label={field === 'research' ? 'Badania' : field === 'community' ? 'Społeczność' : 'Inżynieria'}
+/>

@@ -25,6 +25,16 @@
     type FolderNode,
     type DocFolder
   } from './docs';
+  import {
+    Button,
+    Dialog,
+    DialogHeader,
+    HStack,
+    Icon,
+    IconButton,
+    Text,
+    VStack
+  } from '@astryx-sv/core';
 
   let {
     index,
@@ -41,7 +51,6 @@
   let over = $state<string | null | undefined>(undefined);
   let moving = $state<DocSummary | null>(null);
   let destination = $state('');
-  let moveDialog = $state<HTMLDialogElement>();
   let busy = $state(false);
   let error = $state('');
   const destinationName = $derived(docFolderPath(index.folders, destination || null, index.locale));
@@ -60,7 +69,6 @@
     moving = page;
     destination = folderId ?? '';
     error = '';
-    moveDialog?.showModal();
   }
   function dragStart(event: DragEvent, page: DocSummary) {
     if (!index.access.canReview || !event.dataTransfer) return;
@@ -96,7 +104,6 @@
         folderId: destination || null,
         version: moving.version
       });
-      moveDialog?.close();
       moving = null;
       await invalidateAll();
     } catch (cause) {
@@ -126,14 +133,16 @@
       {#if page.public}<Globe class="tree-public" size={12} aria-label={'Publiczna'} />{/if}
     </a>
     {#if index.access.canReview}
-      <button
-        type="button"
+      <IconButton
+        label={`Przenieś stronę: ${page.title}`}
+        tooltip={'Przenieś stronę'}
+        variant="ghost"
+        size="sm"
         class="tree-tool"
-        title={'Przenieś stronę'}
-        aria-label={`${'Przenieś stronę'}: ${page.title}`}
         onclick={() => askMove(page, page.folderId)}
-        ><ArrowRightLeft size={13} aria-hidden="true" /></button
       >
+        {#snippet icon()}<Icon icon={ArrowRightLeft} size="sm" />{/snippet}
+      </IconButton>
     {/if}
   </div>
 {/snippet}
@@ -157,78 +166,99 @@
           tooltip={folder.path.split('/').join(' / ')}
         />
         {#if index.access.canReview}
-          <span class="tree-tools">
-            <button
-              type="button"
-              class="tree-tool"
-              title={'Dodaj podfolder'}
-              aria-label={`${'Dodaj podfolder'}: ${folder.name}`}
+          <HStack gap={0} class="tree-tools">
+            <IconButton
+              label={`Dodaj podfolder: ${folder.name}`}
+              tooltip={'Dodaj podfolder'}
+              variant="ghost"
+              size="sm"
               onclick={(event) => {
                 event.preventDefault();
                 folderForm(null, folder.id);
-              }}><FolderPlus size={13} aria-hidden="true" /></button
+              }}
             >
-            <button
-              type="button"
-              class="tree-tool"
-              title={'Edytuj folder'}
-              aria-label={`${'Edytuj folder'}: ${folder.name}`}
+              {#snippet icon()}<Icon icon={FolderPlus} size="sm" />{/snippet}
+            </IconButton>
+            <IconButton
+              label={`Edytuj folder: ${folder.name}`}
+              tooltip={'Edytuj folder'}
+              variant="ghost"
+              size="sm"
               onclick={(event) => {
                 event.preventDefault();
                 folderForm(index.folders.find((item) => item.id === folder.id)!, null);
-              }}><Pencil size={13} aria-hidden="true" /></button
+              }}
             >
-          </span>
+              {#snippet icon()}<Icon icon={Pencil} size="sm" />{/snippet}
+            </IconButton>
+          </HStack>
         {/if}
       </summary>
       {@render branch(folder, depth + 1)}
-      {#if !folder.folders.length && !folder.pages.length}<p
+      {#if !folder.folders.length && !folder.pages.length}<Text
+          type="supporting"
+          display="block"
           class="tree-empty"
-          style:--depth={depth + 1}
+          style={`--depth:${depth + 1}`}
         >
           Pusty folder
-        </p>{/if}
+        </Text>{/if}
     </details>
   {/each}
 {/snippet}
 
-<div
-  class="tree-heading"
-  class:drop-zone={liftable}
-  class:drop-target={over === null}
+<HStack
+  class={`tree-heading${liftable ? ' drop-zone' : ''}${over === null ? ' drop-target' : ''}`}
   role="group"
   aria-label={liftable ? 'Najwyższy poziom' : undefined}
+  gap={1.5}
+  vAlign="center"
   ondragover={(event) => dragOver(event, null)}
   ondragleave={() => (over = undefined)}
   ondrop={(event) => drop(event, null)}
 >
   {#if liftable}
-    <FolderOpen size={14} aria-hidden="true" /><span>Przenieś na najwyższy poziom</span>
+    <Icon icon={FolderOpen} size="sm" />
+    <Text type="supporting" size="2xs">Przenieś na najwyższy poziom</Text>
   {:else}
-    <span>Strony</span>
-    <span class="tree-heading-tools">
+    <Text type="supporting" size="2xs">Strony</Text>
+    <HStack gap={0} class="tree-heading-tools">
       {#if index.access.canPropose}
         {@const newPage = index.access.canReview ? 'Nowa strona' : 'Zaproponuj stronę'}
-        <a class="tree-tool" href={docsPath(slug, 'new')} title={newPage} aria-label={newPage}
-          ><FilePlus size={15} aria-hidden="true" /></a
+        <IconButton
+          href={docsPath(slug, 'new')}
+          label={newPage}
+          tooltip={newPage}
+          variant="ghost"
+          size="sm"
         >
+          {#snippet icon()}<Icon icon={FilePlus} size="sm" />{/snippet}
+        </IconButton>
       {/if}
       {#if index.access.canReview}
-        <button
-          type="button"
-          class="tree-tool"
-          title={'Nowy folder'}
-          aria-label={'Nowy folder'}
-          onclick={() => folderForm(null, null)}><FolderPlus size={15} aria-hidden="true" /></button
+        <IconButton
+          label={'Nowy folder'}
+          tooltip={'Nowy folder'}
+          variant="ghost"
+          size="sm"
+          onclick={() => folderForm(null, null)}
         >
+          {#snippet icon()}<Icon icon={FolderPlus} size="sm" />{/snippet}
+        </IconButton>
       {/if}
-    </span>
+    </HStack>
   {/if}
-</div>
-<div class="page-tree" role="group" aria-label={'Strony dokumentacji'}>
+</HStack>
+<VStack class="page-tree" gap={0} role="group" aria-label={'Strony dokumentacji'}>
   {@render branch(tree, 0)}
-  {#if !index.pages.length && !index.folders.length}<p class="tree-empty">Brak stron.</p>{/if}
-</div>
+  {#if !index.pages.length && !index.folders.length}<Text
+      type="supporting"
+      display="block"
+      class="tree-empty"
+    >
+      Brak stron.
+    </Text>{/if}
+</VStack>
 <DocFolderDialog
   open={folderOpen}
   {projectId}
@@ -247,26 +277,26 @@
     folderOpen = false;
   }}
 />
-<dialog
-  bind:this={moveDialog}
-  class="move-dialog"
-  aria-labelledby={`${uid}-move-title`}
-  oncancel={(event) => {
-    if (busy) event.preventDefault();
+<Dialog
+  isOpen={!!moving}
+  onOpenChange={(next) => {
+    if (!next && !busy) moving = null;
   }}
+  purpose="form"
+  width={460}
+  padding={6}
 >
-  <form onsubmit={move}>
-    <h2 id={`${uid}-move-title`}>Przenieś stronę</h2>
+  <VStack as="form" gap={3} onsubmit={move}>
+    <DialogHeader title="Przenieś stronę" hasDivider={false} />
     <DocError code={error} />
     {#if moving}
-      <p>
+      <Text as="p">
         {#if destinationName}
           {`Czy chcesz przenieść „${moving.title}” do folderu „${destinationName}”?`}
         {:else}
           {`Czy chcesz przenieść „${moving.title}” na najwyższy poziom?`}
         {/if}
-      </p>
-      <label for={`${uid}-destination`}>Folder docelowy</label>
+      </Text>
       <DocFolderSelect
         id={`${uid}-destination`}
         bind:value={destination}
@@ -275,65 +305,63 @@
         locale={index.locale}
         disabled={busy}
       />
-      <div class="move-actions">
-        <button
-          type="button"
-          class="btn btn-outline"
-          disabled={busy}
-          onclick={() => moveDialog?.close()}>Anuluj</button
-        >
-        <button class="btn" disabled={busy || (destination || null) === moving.folderId}
-          >Przenieś</button
-        >
-      </div>
+      <HStack hAlign="end" gap={2}>
+        <Button
+          variant="secondary"
+          label="Anuluj"
+          isDisabled={busy}
+          onclick={() => (moving = null)}
+        />
+        <Button
+          type="submit"
+          label="Przenieś"
+          isDisabled={busy || (destination || null) === moving.folderId}
+        />
+      </HStack>
     {/if}
-  </form>
-</dialog>
+  </VStack>
+</Dialog>
 
 <style>
   /* An auto column would grow to fit full page names; this keeps rows to the panel so
      names shorten instead of scrolling sideways. */
-  .page-tree {
-    display: grid;
+  :global(.page-tree) {
+    display: grid !important;
     grid-template-columns: minmax(0, 1fr);
     gap: 1px;
     min-width: 0;
   }
-  .tree-heading {
-    display: flex;
-    align-items: center;
-    gap: 7px;
+  :global(.tree-heading) {
     min-height: 30px;
-    margin: 10px 0 2px;
-    padding-left: 6px;
+    margin: var(--spacing-2) 0 2px;
+    padding-left: var(--spacing-1-5);
     border: 1px solid transparent;
-    border-radius: var(--radius-md);
-    color: var(--muted);
-    font: 10px var(--mono);
+    border-radius: var(--radius-element);
+    color: var(--color-text-secondary);
+    font: 10px var(--font-family-code);
     text-transform: uppercase;
     letter-spacing: 0.08em;
   }
-  .tree-heading-tools {
-    display: inline-flex;
+  :global(.tree-heading-tools) {
     margin-left: auto;
     padding-right: 2px;
   }
-  .tree-heading.drop-zone {
-    border: 1px dashed var(--control-border-hover);
-    color: var(--ink);
+  :global(.tree-heading.drop-zone) {
+    border: 1px dashed var(--color-border-emphasized);
+    color: var(--color-text-primary);
   }
   /* A child's icon sits under its parent's name: chevron plus gap. */
   .tree-folder summary,
   .tree-link {
     position: relative;
     display: flex;
-    gap: 6px;
+    gap: var(--spacing-1-5);
     align-items: center;
     min-height: 30px;
     padding: 6px 8px 6px calc(6px + var(--depth, 0) * 20px);
-    color: var(--muted);
-    border-radius: var(--radius-md);
-    font-size: 13px;
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-element);
+    font-size: var(--font-size-base);
     line-height: 1.4;
   }
   .tree-folder summary {
@@ -345,7 +373,7 @@
     display: none;
   }
   .tree-folder summary :global(.tree-chevron) {
-    transition: transform 120ms var(--ease-out);
+    transition: transform 120ms var(--ease-standard);
   }
   .tree-folder[open] > summary :global(.tree-chevron) {
     transform: rotate(90deg);
@@ -362,11 +390,11 @@
   .tree-folder summary:hover,
   .tree-link:hover,
   .tree-link.active {
-    background: var(--surface-muted);
-    color: var(--ink);
+    background: var(--color-background-muted);
+    color: var(--color-text-primary);
   }
   .tree-link.active :global(svg:first-child) {
-    color: var(--accent);
+    color: var(--color-icon-accent);
   }
   .tree-page {
     position: relative;
@@ -380,49 +408,31 @@
   .tree-link[draggable='true']:active {
     cursor: grabbing;
   }
-  .tree-tool {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    flex-shrink: 0;
-    border: 0;
-    border-radius: var(--radius-sm);
-    color: var(--muted);
-    background: transparent;
-    cursor: pointer;
-  }
-  .tree-tool:hover {
-    background: color-mix(in srgb, var(--ink) 9%, transparent);
-    color: var(--ink);
-  }
-  .tree-page > .tree-tool,
-  .tree-tools {
+  .tree-page > :global(.tree-tool),
+  :global(.tree-tools) {
     position: absolute;
-    top: 3px;
-    right: 3px;
+    top: 1px;
+    right: 1px;
   }
-  .tree-tools {
+  :global(.tree-tools) {
     display: inline-flex;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-inner);
   }
   @media (hover: hover) {
-    .tree-page > .tree-tool,
-    .tree-tools {
+    .tree-page > :global(.tree-tool),
+    :global(.tree-tools) {
       opacity: 0;
     }
-    .tree-page:hover > .tree-tool,
-    .tree-page:focus-within > .tree-tool,
-    summary:hover .tree-tools,
-    summary:focus-within .tree-tools {
+    .tree-page:hover > :global(.tree-tool),
+    .tree-page:focus-within > :global(.tree-tool),
+    summary:hover :global(.tree-tools),
+    summary:focus-within :global(.tree-tools) {
       opacity: 1;
     }
     /* Long names continue under the tools; the backdrop keeps both legible. */
-    summary:hover .tree-tools,
-    summary:focus-within .tree-tools {
-      background: var(--surface-muted);
+    summary:hover :global(.tree-tools),
+    summary:focus-within :global(.tree-tools) {
+      background: var(--color-background-muted);
     }
     .tree-page.editable:hover :global(.tree-public),
     .tree-page.editable:focus-within :global(.tree-public) {
@@ -437,61 +447,27 @@
     .tree-folder.editable summary {
       padding-right: 56px;
     }
-    .tree-page > .tree-tool,
-    .tree-tools {
+    .tree-page > :global(.tree-tool),
+    :global(.tree-tools) {
       opacity: 0.6;
     }
   }
-  .tree-empty {
+  :global(.tree-empty) {
     padding: 4px 8px 4px calc(6px + var(--depth, 0) * 20px);
-    color: var(--muted);
-    font-size: 12px;
   }
-  .drop-target {
-    background: color-mix(in srgb, var(--accent) 12%, var(--surface)) !important;
-    outline: 1px solid var(--accent);
+  .drop-target,
+  :global(.tree-heading.drop-target) {
+    background: color-mix(
+      in srgb,
+      var(--color-accent) 12%,
+      var(--color-background-surface)
+    ) !important;
+    outline: 1px solid var(--color-accent);
     outline-offset: -1px;
   }
   @media (prefers-reduced-motion: reduce) {
     .tree-folder summary :global(.tree-chevron) {
       transition: none;
     }
-  }
-  .move-dialog {
-    width: min(460px, calc(100vw - 32px));
-    max-height: calc(100dvh - 32px);
-    padding: 24px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-xl);
-    background: var(--surface);
-    color: var(--ink);
-    box-shadow: var(--shadow-lg);
-  }
-  .move-dialog::backdrop {
-    background: rgb(12 13 15 / 0.42);
-    backdrop-filter: blur(2px);
-  }
-  .move-dialog form {
-    display: grid;
-    gap: 14px;
-  }
-  .move-dialog h2 {
-    margin: 0;
-    font-size: 20px;
-  }
-  .move-dialog p {
-    overflow-wrap: anywhere;
-    margin: 0;
-    font-size: 14px;
-    line-height: 1.6;
-  }
-  .move-dialog label {
-    margin-bottom: -8px;
-  }
-  .move-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 6px;
   }
 </style>

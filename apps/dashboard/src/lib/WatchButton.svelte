@@ -1,5 +1,7 @@
 <script lang="ts">
   import { Bell, BellOff } from '@lucide/svelte';
+  import { Text, ToggleButton } from '@astryx-sv/core';
+
   let {
     type,
     id,
@@ -50,67 +52,24 @@
   }
 </script>
 
-<button
-  type="button"
-  class="watch-button"
-  class:with-label={showLabel}
-  aria-pressed={watching}
-  aria-label={watching ? 'Przestań obserwować' : 'Obserwuj'}
-  disabled={busy}
-  onclick={toggle}
->
-  {#if busy}<span class="sr-only">Wczytywanie…</span>
-  {:else if watching}<BellOff size={13} aria-hidden="true" />
-  {:else}<Bell size={13} aria-hidden="true" />
-  {/if}
-  {#if showLabel}
-    <span class="watch-label"
-      >{#if watching}Przestań obserwować{:else}Obserwuj{/if}</span
-    >
-  {/if}
-</button>
-{#if error}<p role="alert">{error}</p>{/if}
+{#snippet bellIcon()}<Bell size={15} aria-hidden="true" />{/snippet}
+{#snippet bellOffIcon()}<BellOff size={15} aria-hidden="true" />{/snippet}
+
+<ToggleButton
+  label={watching ? 'Przestań obserwować' : 'Obserwuj'}
+  tooltip={watching ? 'Przestań obserwować' : 'Obserwuj'}
+  isPressed={watching}
+  isIconOnly={!showLabel}
+  isLoading={busy}
+  isDisabled={busy}
+  icon={bellIcon}
+  pressedIcon={bellOffIcon}
+  onPressedChange={() => void toggle()}
+/>
+{#if error}<Text role="alert" class="error-text">{error}</Text>{/if}
 
 <style>
-  .watch-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    border: 1px solid var(--input);
-    border-radius: var(--radius-md);
-    background: var(--surface);
-    box-shadow: var(--shadow-xs);
-    color: var(--muted);
-    cursor: pointer;
-    flex-shrink: 0;
-    transition:
-      background-color var(--dur-fast) ease,
-      color var(--dur-fast) ease;
-  }
-  .watch-button:hover {
-    color: var(--ink);
-    background: var(--surface-muted);
-  }
-  .watch-button.with-label {
-    width: auto;
-    height: 32px;
-    padding: 0 12px;
-    gap: 6px;
-    font-size: 12.5px;
-    font-weight: 500;
-  }
-  .watch-label {
-    white-space: nowrap;
-  }
-  .watch-button[aria-pressed='true'] {
-    color: var(--ink);
-  }
-  .watch-button:disabled {
-    opacity: 0.5;
-    cursor: wait;
-    pointer-events: none;
+  :global(.error-text) {
+    color: var(--color-error);
   }
 </style>

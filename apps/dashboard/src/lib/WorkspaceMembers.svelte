@@ -1,7 +1,28 @@
 <script lang="ts">
-  import { Github, Linkedin, ArrowLeft, Search } from '@lucide/svelte';
+  import { Github, Linkedin, ArrowLeft } from '@lucide/svelte';
   import Skeleton from './Skeleton.svelte';
   import MemberPreview from './MemberPreview.svelte';
+  import {
+    Avatar,
+    Banner,
+    Button,
+    Card,
+    EmptyState,
+    Heading,
+    HStack,
+    Link,
+    List,
+    ListItem,
+    Table,
+    TableBody,
+    TableCell,
+    TableHeader,
+    TableHeaderCell,
+    TableRow,
+    Text,
+    TextInput,
+    VStack
+  } from '@astryx-sv/core';
   let {
     projectId,
     memberId,
@@ -119,183 +140,201 @@
   });
 </script>
 
-{#if loading}<Skeleton label="Ładowanie członków" />{:else if error}<p class="error" role="alert">
-    {error}
-  </p>{:else if person}
-  <a class="btn btn-outline" href="/association/members"><ArrowLeft size={15} />Członkowie</a>
-  <section class="card person">
-    {#if person.image}<img class="portrait" src={person.image} alt="" />{/if}
-    <div>
-      <h1>{person.firstName} {person.lastName}</h1>
-      <a class="btn btn-outline" href={`${websiteOrigin}/members/${encodeURIComponent(person.id)}`}
-        >Zobacz publiczny profil</a
-      >
-      {#if person.nickname}<p>aka. {person.nickname}</p>{/if}
-      <p class="muted">{role(person)}</p>
-      <p class="bio">{person.bio}</p>
-      <div class="row">
-        {#if person.github}<a
-            class="btn btn-outline"
-            href={person.github}
-            rel="noopener noreferrer"
-            target="_blank"><Github size={16} />GitHub</a
-          >{/if}{#if person.linkedin}<a
-            class="btn btn-outline"
-            href={person.linkedin}
-            rel="noopener noreferrer"
-            target="_blank"><Linkedin size={16} />LinkedIn</a
+{#if loading}
+  <Skeleton label="Ładowanie członków" />
+{:else if error}
+  <Banner status="error" title={error} role="alert" />
+{:else if person}
+  <HStack>
+    <Button variant="secondary" label="Członkowie" href="/association/members">
+      {#snippet icon()}<ArrowLeft size={15} aria-hidden="true" />{/snippet}
+    </Button>
+  </HStack>
+  <Card>
+    <HStack gap={5} vAlign="start" wrap="wrap">
+      {#if person.image}
+        <Avatar
+          src={person.image}
+          name={`${person.firstName} ${person.lastName}`}
+          size={96}
+          shape="rounded"
+        />
+      {/if}
+      <VStack gap={2}>
+        <Heading level={1}>{person.firstName} {person.lastName}</Heading>
+        <Button
+          variant="secondary"
+          label="Zobacz publiczny profil"
+          href={`${websiteOrigin}/members/${encodeURIComponent(person.id)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        />
+        {#if person.nickname}<Text type="supporting" color="secondary">aka. {person.nickname}</Text
           >{/if}
-        {#if elevated}<a class="btn btn-outline" href={`/members/${encodeURIComponent(person.id)}`}
-            >Zarządzaj kontem</a
-          >{/if}
-      </div>
-    </div>
-  </section>
-{:else}
-  <div class="workspace-header">
-    <h1>Członkowie</h1>
-    <label class="search"
-      ><Search size={16} /><input
-        aria-label="Szukaj członków"
-        placeholder="Imię, nazwisko lub pseudonim…"
-        bind:value={search}
-      /></label
-    >
-  </div>
-  {#if manageable && requests.length}
-    <section class="card requests">
-      <h2>Prośby o dołączenie</h2>
-      {#each requests as request (request.request.id)}
-        <div class="request">
-          <a href={`/people/${encodeURIComponent(request.request.userId)}`}
-            >{request.firstName} {request.lastName}</a
-          >
-          <div class="row">
-            <button
-              class="btn btn-outline btn-sm"
-              disabled={busy}
-              onclick={() =>
-                manage(() =>
-                  projectApi(`/join-requests/${request.request.id}`, 'POST', { accept: true })
-                )}>Akceptuj</button
-            ><button
-              class="btn btn-outline btn-sm"
-              disabled={busy}
-              onclick={() =>
-                manage(() =>
-                  projectApi(`/join-requests/${request.request.id}`, 'POST', { accept: false })
-                )}>Odrzuć</button
+        <Text type="supporting" color="secondary">{role(person)}</Text>
+        <Text>{person.bio}</Text>
+        <HStack gap={2} wrap="wrap">
+          {#if person.github}
+            <Button
+              variant="secondary"
+              label="GitHub"
+              href={person.github}
+              target="_blank"
+              rel="noopener noreferrer"
             >
-          </div>
-        </div>
-      {/each}
-    </section>
+              {#snippet icon()}<Github size={16} aria-hidden="true" />{/snippet}
+            </Button>
+          {/if}
+          {#if person.linkedin}
+            <Button
+              variant="secondary"
+              label="LinkedIn"
+              href={person.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {#snippet icon()}<Linkedin size={16} aria-hidden="true" />{/snippet}
+            </Button>
+          {/if}
+          {#if elevated}
+            <Button
+              variant="secondary"
+              label="Zarządzaj kontem"
+              href={`/members/${encodeURIComponent(person.id)}`}
+            />
+          {/if}
+        </HStack>
+      </VStack>
+    </HStack>
+  </Card>
+{:else}
+  <HStack gap={4} vAlign="center" justify="between" wrap="wrap">
+    <Heading level={1}>Członkowie</Heading>
+    <VStack gap={0} class="member-search">
+      <TextInput
+        label="Szukaj członków"
+        isLabelHidden
+        bind:value={search}
+        placeholder="Imię, nazwisko lub pseudonim…"
+      />
+    </VStack>
+  </HStack>
+  {#if error}<Banner status="error" title={error} role="alert" />{/if}
+  {#if manageable && requests.length}
+    <Card>
+      <VStack gap={3}>
+        <Heading level={2}>Prośby o dołączenie</Heading>
+        <List hasDividers>
+          {#each requests as request (request.request.id)}
+            <ListItem>
+              {#snippet label()}
+                <Link href={`/people/${encodeURIComponent(request.request.userId)}`}>
+                  {request.firstName}
+                  {request.lastName}
+                </Link>
+              {/snippet}
+              {#snippet endContent()}
+                <HStack gap={2}>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    label="Akceptuj"
+                    isDisabled={busy}
+                    onclick={() =>
+                      manage(() =>
+                        projectApi(`/join-requests/${request.request.id}`, 'POST', { accept: true })
+                      )}
+                  />
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    label="Odrzuć"
+                    isDisabled={busy}
+                    onclick={() =>
+                      manage(() =>
+                        projectApi(`/join-requests/${request.request.id}`, 'POST', {
+                          accept: false
+                        })
+                      )}
+                  />
+                </HStack>
+              {/snippet}
+            </ListItem>
+          {/each}
+        </List>
+      </VStack>
+    </Card>
   {/if}
-  <div class="table-wrap">
-    <table>
-      <thead
-        ><tr
-          ><th>Osoba</th><th>Rola</th><th class="bio-cell">O osobie</th>{#if manageable}<th
-            ></th>{/if}</tr
-        ></thead
-      ><tbody>
-        {#each filtered as member}<tr
-            ><td
-              ><MemberPreview
+  <Card padding={0}>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHeaderCell>Osoba</TableHeaderCell>
+          <TableHeaderCell>Rola</TableHeaderCell>
+          <TableHeaderCell>O osobie</TableHeaderCell>
+          {#if manageable}<TableHeaderCell></TableHeaderCell>{/if}
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {#each filtered as member (member.id)}
+          <TableRow>
+            <TableCell>
+              <MemberPreview
                 {member}
                 href={`/people/${encodeURIComponent(member.id)}`}
                 role={role(member)}
-              /></td
-            ><td>{role(member)}</td><td class="bio-cell">{member.bio}</td>{#if manageable}<td
-                class="actions"
-                >{#if removing === member.id}<button
-                    class="btn btn-outline btn-sm danger-button"
-                    disabled={busy}
-                    onclick={() => manage(() => projectApi(`/members/${member.id}`, 'DELETE'))}
-                    >Tak, usuń</button
-                  ><button class="btn btn-outline btn-sm" onclick={() => (removing = null)}
-                    >Anuluj</button
-                  >{:else}<button
-                    class="btn btn-outline btn-sm"
-                    disabled={busy || (member.leader && leaderIds.length <= 1)}
-                    onclick={() => setLeader(member.id, !member.leader)}
-                    >{member.leader ? 'Odbierz rolę lidera' : 'Mianuj liderem'}</button
-                  ><button
-                    class="btn btn-outline btn-sm"
-                    disabled={busy}
-                    onclick={() => (removing = member.id)}>Usuń z projektu</button
-                  >{/if}</td
-              >{/if}</tr
-          >{/each}
-      </tbody>
-    </table>
-  </div>
-  {#if !filtered.length}<p class="muted">Brak pasujących osób.</p>{/if}
+              />
+            </TableCell>
+            <TableCell>{role(member)}</TableCell>
+            <TableCell><Text type="supporting" color="secondary">{member.bio}</Text></TableCell>
+            {#if manageable}
+              <TableCell>
+                <HStack gap={1} justify="end" wrap="wrap">
+                  {#if removing === member.id}
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      label="Tak, usuń"
+                      isDisabled={busy}
+                      onclick={() => manage(() => projectApi(`/members/${member.id}`, 'DELETE'))}
+                    />
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      label="Anuluj"
+                      onclick={() => (removing = null)}
+                    />
+                  {:else}
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      label={member.leader ? 'Odbierz rolę lidera' : 'Mianuj liderem'}
+                      isDisabled={busy || (member.leader && leaderIds.length <= 1)}
+                      onclick={() => setLeader(member.id, !member.leader)}
+                    />
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      label="Usuń z projektu"
+                      isDisabled={busy}
+                      onclick={() => (removing = member.id)}
+                    />
+                  {/if}
+                </HStack>
+              </TableCell>
+            {/if}
+          </TableRow>
+        {/each}
+      </TableBody>
+    </Table>
+    {#if !filtered.length}
+      <EmptyState title="Brak pasujących osób" description="Zmień wyszukiwaną frazę." />
+    {/if}
+  </Card>
 {/if}
 
 <style>
-  .search {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    max-width: 320px;
-  }
-  .search input {
-    margin: 0;
-  }
-  .actions {
-    text-align: right;
-    white-space: nowrap;
-  }
-  .actions :global(.btn) {
-    margin-left: 6px;
-  }
-  .requests {
-    margin-bottom: 16px;
-  }
-  .requests h2 {
-    margin-bottom: 8px;
-  }
-  .request {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 8px 0;
-  }
-  .request a {
-    color: var(--ink);
-  }
-  .bio-cell {
-    max-width: 360px;
-    overflow-wrap: anywhere;
-  }
-  .bio {
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-  }
-  .person {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 24px;
-    margin-top: 24px;
-  }
-  .portrait {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-    border-radius: 8px;
-  }
-  @media (max-width: 600px) {
-    .workspace-header {
-      display: grid;
-      gap: 16px;
-    }
-    .bio-cell {
-      display: none;
-    }
-    .person {
-      grid-template-columns: 1fr;
-    }
+  :global(.member-search) {
+    width: min(320px, 100%);
   }
 </style>

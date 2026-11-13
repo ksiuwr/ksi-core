@@ -16,10 +16,8 @@ msgstr "{0} · Panel KSI"
 msgid "Wystąpił nieoczekiwany błąd podczas żądania."
 msgstr "Wystąpił nieoczekiwany błąd podczas żądania."
 
-#. 0: page.status
-#: src/routes/+error.svelte
-msgid "<0/> Błąd {0}"
-msgstr "<0/> Błąd {0}"
+#~ msgid "<0/> Błąd {0}"
+#~ msgstr "<0/> Błąd {0}"
 
 #: src/routes/+error.svelte
 msgid "Błąd uwierzytelniania"
@@ -56,7 +54,6 @@ msgstr "Żądanie nie powiodło się"
 
 #: ../../packages/ui/src/lib/platform/Dropdown.svelte
 #: src/lib/Assignees.svelte
-#: src/routes/+layout.svelte
 msgid "Tab"
 msgstr "Tab"
 
@@ -69,7 +66,6 @@ msgstr "Tab"
 #: src/lib/NestedMenu.svelte
 #: src/lib/NotificationInbox.svelte
 #: src/lib/docs/FloatingDocsNavigation.svelte
-#: src/routes/+layout.svelte
 msgid "Escape"
 msgstr "Escape"
 
@@ -123,8 +119,6 @@ msgstr "Projekt"
 #: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
-#: src/routes/+layout.svelte
-#: src/routes/+layout.svelte
 #: src/routes/association/docs/[...path]/+page.svelte
 msgid "Całe koło"
 msgstr "Całe koło"
@@ -136,10 +130,11 @@ msgstr "Skrzynka akceptacji"
 #: src/lib/views/ProjectDirectory.svelte
 #: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
-#: src/routes/+layout.svelte
 msgid "Projekty"
 msgstr "Projekty"
 
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 msgid "Mój profil"
 msgstr "Mój profil"
@@ -153,16 +148,17 @@ msgstr "Mój profil"
 #: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
-#: src/routes/+layout.svelte
 #: src/routes/members/+page.svelte
 msgid "Członkowie"
 msgstr "Członkowie"
 
 #: src/lib/views/ProjectCreate.svelte
+#: src/lib/views/ProjectDirectory.svelte
 #: src/routes/+layout.svelte
 msgid "Nowy projekt"
 msgstr "Nowy projekt"
 
+#: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 msgid "Wszystkie projekty"
 msgstr "Wszystkie projekty"
@@ -189,43 +185,35 @@ msgid "Konto wymaga aktywacji"
 msgstr "Konto wymaga aktywacji"
 
 #: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
 msgid "Wyloguj się"
 msgstr "Wyloguj się"
 
 #: src/lib/docs/FloatingDocsNavigation.svelte
-#: src/routes/+layout.svelte
-#: src/routes/+layout.svelte
 msgid "Zamknij nawigację"
 msgstr "Zamknij nawigację"
 
-#: src/routes/+layout.svelte
-#: src/routes/+layout.svelte
-msgid "Nawigacja"
-msgstr "Nawigacja"
+#~ msgid "Nawigacja"
+#~ msgstr "Nawigacja"
 
-#: src/routes/+layout.svelte
-msgid "KSI<0>/ core</0>"
-msgstr "KSI<0>/ core</0>"
+#~ msgid "KSI<0>/ core</0>"
+#~ msgstr "KSI<0>/ core</0>"
 
-#: src/routes/+layout.svelte
-msgid "Wybierz przestrzeń"
-msgstr "Wybierz przestrzeń"
+#~ msgid "Wybierz przestrzeń"
+#~ msgstr "Wybierz przestrzeń"
 
-#: src/routes/+layout.svelte
-msgid "Szukaj projektu…"
-msgstr "Szukaj projektu…"
+#~ msgid "Szukaj projektu…"
+#~ msgstr "Szukaj projektu…"
 
-#: src/routes/+layout.svelte
-msgid "Nie znaleziono projektu."
-msgstr "Nie znaleziono projektu."
+#~ msgid "Nie znaleziono projektu."
+#~ msgstr "Nie znaleziono projektu."
 
-#: src/routes/+layout.svelte
-msgid "Wybierz projekt, aby otworzyć jego tablicę, forum i artykuły."
-msgstr "Wybierz projekt, aby otworzyć jego tablicę, forum i artykuły."
+#~ msgid "Wybierz projekt, aby otworzyć jego tablicę, forum i artykuły."
+#~ msgstr "Wybierz projekt, aby otworzyć jego tablicę, forum i artykuły."
 
-#: src/routes/+layout.svelte
-msgid "Administracja koła"
-msgstr "Administracja koła"
+#~ msgid "Administracja koła"
+#~ msgstr "Administracja koła"
 
 #: src/routes/+layout.svelte
 msgid "Kod źródłowy"
@@ -258,13 +246,11 @@ msgstr "Jasny"
 msgid "Ciemny"
 msgstr "Ciemny"
 
-#: src/routes/+layout.svelte
-msgid "Moje konto"
-msgstr "Moje konto"
+#~ msgid "Moje konto"
+#~ msgstr "Moje konto"
 
-#: src/routes/+layout.svelte
-msgid "Ustawienia konta"
-msgstr "Ustawienia konta"
+#~ msgid "Ustawienia konta"
+#~ msgstr "Ustawienia konta"
 
 #: src/lib/views/ProjectDirectory.svelte
 msgid "Wybierz projekt i rozpocznij współpracę."
@@ -1640,7 +1626,6 @@ msgstr "Przypisane do"
 #: src/lib/NotificationInbox.svelte
 #: src/lib/NotificationInbox.svelte
 #: src/lib/NotificationInbox.svelte
-#: src/lib/NotificationInbox.svelte
 #: src/lib/TaskAside.svelte
 #: src/lib/ThreadAside.svelte
 #: src/routes/+layout.svelte
@@ -1700,6 +1685,7 @@ msgstr "Nieprzeczytane"
 msgid "Prośba o aktywację konta"
 msgstr "Prośba o aktywację konta"
 
+#: src/lib/NotificationInbox.svelte
 #: src/lib/NotificationInbox.svelte
 msgid "Proponowane zdjęcie profilowe"
 msgstr "Proponowane zdjęcie profilowe"
@@ -1871,14 +1857,10 @@ msgid "Pulpit"
 msgstr "Pulpit"
 
 #: src/lib/docs/FloatingDocsNavigation.svelte
-#: src/routes/+layout.svelte
-#: src/routes/+layout.svelte
 msgid "Pokaż panel boczny"
 msgstr "Pokaż panel boczny"
 
 #: src/lib/docs/FloatingDocsNavigation.svelte
-#: src/routes/+layout.svelte
-#: src/routes/+layout.svelte
 msgid "Ukryj panel boczny"
 msgstr "Ukryj panel boczny"
 
@@ -1909,13 +1891,11 @@ msgid "Komentarz"
 msgstr "Komentarz"
 
 #: src/routes/+layout.svelte
-#: src/routes/+layout.svelte
 msgid "Strona KSI"
 msgstr "Strona KSI"
 
-#: src/routes/+layout.svelte
-msgid "Bieżąca strona"
-msgstr "Bieżąca strona"
+#~ msgid "Bieżąca strona"
+#~ msgstr "Bieżąca strona"
 
 #: src/lib/views/WorkspaceOverview.svelte
 msgid "Najnowsze zadania"
@@ -3393,18 +3373,14 @@ msgstr "H{0}"
 msgid "Twoje konto musi najpierw zostać aktywowane przez administratora. Zapytaj bezpośrednio: {0}."
 msgstr "Twoje konto musi najpierw zostać aktywowane przez administratora. Zapytaj bezpośrednio: {0}."
 
-#. 0.0: import.meta.env.PUBLIC_APP_VERSION
-#: src/routes/+layout.svelte
-msgid "KSI · Uniwersytet Wrocławski <0>v{0} · <0/></0>"
-msgstr "KSI · Uniwersytet Wrocławski <0>v{0} · <0/></0>"
+#~ msgid "KSI · Uniwersytet Wrocławski <0>v{0} · <0/></0>"
+#~ msgstr "KSI · Uniwersytet Wrocławski <0>v{0} · <0/></0>"
 
-#: src/routes/+layout.svelte
-msgid "<0/>Wyloguj się"
-msgstr "<0/>Wyloguj się"
+#~ msgid "<0/>Wyloguj się"
+#~ msgstr "<0/>Wyloguj się"
 
-#: src/routes/+layout.svelte
-msgid "<0/>Mój profil"
-msgstr "<0/>Mój profil"
+#~ msgid "<0/>Mój profil"
+#~ msgstr "<0/>Mój profil"
 
 #: src/lib/ApprovalInbox.svelte
 #: src/lib/ApprovalInbox.svelte
@@ -3551,9 +3527,8 @@ msgstr "<0/>Zapisz e-mail"
 msgid "<0/>Wszyscy członkowie"
 msgstr "<0/>Wszyscy członkowie"
 
-#: src/lib/NotificationInbox.svelte
-msgid "Nieprzeczytane<0/>"
-msgstr "Nieprzeczytane<0/>"
+#~ msgid "Nieprzeczytane<0/>"
+#~ msgstr "Nieprzeczytane<0/>"
 
 #. 0: formatDateTime(deployment.updatedAt, preferences.language)
 #: src/lib/PreviewCredentials.svelte
@@ -3980,13 +3955,11 @@ msgstr "<0/>Zapisz zmiany"
 msgid "<0/>Wróć"
 msgstr "<0/>Wróć"
 
-#: src/lib/views/ProjectDirectory.svelte
-msgid "<0/>Nowy projekt"
-msgstr "<0/>Nowy projekt"
+#~ msgid "<0/>Nowy projekt"
+#~ msgstr "<0/>Nowy projekt"
 
-#: src/lib/views/ProjectDirectory.svelte
-msgid "Otwórz projekt <0/>"
-msgstr "Otwórz projekt <0/>"
+#~ msgid "Otwórz projekt <0/>"
+#~ msgstr "Otwórz projekt <0/>"
 
 #: src/lib/views/TaskView.svelte
 msgid "<0/>Dodaj do dyskusji"
@@ -4024,3 +3997,43 @@ msgstr "New thread"
 #: src/lib/docs/DocInfo.svelte
 msgid "(nieaktualna)"
 msgstr "(nieaktualna)"
+
+#: src/routes/+layout.svelte
+msgid "Koło"
+msgstr "Koło"
+
+#: src/routes/+layout.svelte
+msgid "KSI · Uniwersytet Wrocławski"
+msgstr "KSI · Uniwersytet Wrocławski"
+
+#. 0: import.meta.env.PUBLIC_APP_VERSION
+#: src/routes/+layout.svelte
+msgid "v{0} · <0/>"
+msgstr "v{0} · <0/>"
+
+#: src/routes/+layout.svelte
+msgid "Nawigacja panelu"
+msgstr "Nawigacja panelu"
+
+#: src/routes/+layout.svelte
+msgid "KSI"
+msgstr "KSI"
+
+#: src/lib/views/ProjectDirectory.svelte
+msgid "Otwórz projekt"
+msgstr "Otwórz projekt"
+
+#. 0: totalUnread ? ` (${totalUnread})` \\: ''
+#: src/lib/NotificationInbox.svelte
+msgid "Powiadomienia{0}"
+msgstr "Powiadomienia{0}"
+
+#. 0: totalUnread
+#: src/lib/NotificationInbox.svelte
+msgid "Nieprzeczytane ({0})"
+msgstr "Nieprzeczytane ({0})"
+
+#. 0: page.status
+#: src/routes/+error.svelte
+msgid "Błąd {0}"
+msgstr "Błąd {0}"

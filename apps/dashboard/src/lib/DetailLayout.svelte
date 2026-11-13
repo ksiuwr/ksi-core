@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tick, type Snippet } from 'svelte';
   import { ArrowLeft, Pencil } from '@lucide/svelte';
+  import { Button, Heading, HStack, IconButton, Text, TextInput, VStack } from '@astryx-sv/core';
 
   let {
     backHref,
@@ -26,13 +27,13 @@
 
   let editing = $state(false);
   let draft = $state('');
-  let input = $state<HTMLInputElement>();
 
   function startEditing() {
     if (!canEditTitle || busy) return;
     draft = title;
     editing = true;
     void tick().then(() => {
+      const input = document.getElementById('detail-title-input') as HTMLInputElement | null;
       input?.focus();
       input?.select();
     });
@@ -57,42 +58,67 @@
   }
 </script>
 
-<a class="btn btn-outline detail-back" href={backHref}
-  ><ArrowLeft size={15} aria-hidden="true" />{backLabel}</a
->
+<Button href={backHref} variant="secondary" label={backLabel}>
+  {#snippet icon()}<ArrowLeft size={15} aria-hidden="true" />{/snippet}
+</Button>
 
-<header class="detail-heading">
-  <div class="detail-heading-main">
-    {#if editing}
-      <input
-        bind:this={input}
-        class="detail-title-input"
-        bind:value={draft}
-        maxlength="200"
-        aria-label={'Tytuł'}
-        disabled={busy}
-        onkeydown={onKeydown}
-        onblur={commit}
-      />
-    {:else}
-      <h1 class="detail-title">
-        {title}{#if referenceNumber}<span class="detail-reference">&nbsp;#{referenceNumber}</span
-          >{/if}{#if canEditTitle}<button
-            type="button"
-            class="icon-button title-edit"
-            aria-label={'Edytuj tytuł'}
-            title={'Edytuj tytuł'}
-            disabled={busy}
-            onclick={startEditing}><Pencil size={14} aria-hidden="true" /></button
-          >{/if}
-      </h1>
+{#if editing}
+  <TextInput
+    id="detail-title-input"
+    label="Tytuł"
+    isLabelHidden
+    value={draft}
+    onChange={(value) => (draft = value.slice(0, 200))}
+    isDisabled={busy}
+    hasAutoFocus
+    onkeydown={onKeydown}
+    onblur={commit}
+  />
+{:else}
+  <HStack gap={2} vAlign="center" wrap="wrap" class="detail-heading">
+    <Heading level={1}>
+      {title}{#if referenceNumber}<Text type="large" color="secondary" as="span"
+          >&nbsp;#{referenceNumber}</Text
+        >{/if}
+    </Heading>
+    {#if canEditTitle}
+      <IconButton
+        label="Edytuj tytuł"
+        tooltip="Edytuj tytuł"
+        variant="ghost"
+        size="sm"
+        isDisabled={busy}
+        onclick={startEditing}
+      >
+        {#snippet icon()}<Pencil size={14} aria-hidden="true" />{/snippet}
+      </IconButton>
     {/if}
-  </div>
-</header>
+  </HStack>
+{/if}
 
-<div class="detail-layout">
-  <div class="detail-main">
+<VStack gap={0} class="detail-layout">
+  <VStack gap={4} class="detail-main">
     {@render children()}
-  </div>
+  </VStack>
   {@render aside()}
-</div>
+</VStack>
+
+<style>
+  :global(.detail-heading) {
+    margin-bottom: var(--spacing-6);
+  }
+  :global(.detail-layout) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: var(--spacing-8);
+    align-items: start;
+  }
+  :global(.detail-main) {
+    min-width: 0;
+  }
+  @media (max-width: 900px) {
+    :global(.detail-layout) {
+      grid-template-columns: minmax(0, 1fr) !important;
+    }
+  }
+</style>

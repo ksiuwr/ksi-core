@@ -4,9 +4,21 @@
   import { formatDate } from 'shared/format';
   import { docsPath } from 'shared/docs';
   import { goto } from '$app/navigation';
-  import { slider } from '@ksi-core/ui/platform/slider';
   import { preferences } from '$lib/preferences.svelte';
   import type { SuggestionSummary } from './docs';
+  import {
+    Badge,
+    EmptyState,
+    Heading,
+    HStack,
+    Icon,
+    List,
+    ListItem,
+    SegmentedControl,
+    SegmentedControlItem,
+    Text,
+    VStack
+  } from '@astryx-sv/core';
 
   let {
     slug,
@@ -23,165 +35,124 @@
   const language = $derived(preferences.language);
   const when = (value: string) =>
     formatDate(value, language, { day: 'numeric', month: 'short', year: 'numeric' });
+  const state = $derived(resolved ? 'resolved' : 'pending');
 </script>
 
-<div class="workspace-header">
-  <div>
-    <p class="workspace-eyebrow">{workspaceName}</p>
-    <h1>Propozycje zmian</h1>
-    <p class="workspace-description">
+<HStack class="workspace-header" hAlign="between" vAlign="start" wrap="wrap" gap={4}>
+  <VStack gap={1}>
+    <Text type="supporting" class="workspace-eyebrow">{workspaceName}</Text>
+    <Heading level={1}>Propozycje zmian</Heading>
+    <Text as="p" class="workspace-description">
       Zmiany zaproponowane przez członków, czekające na porównanie i akceptację przez lidera lub
       recenzenta.
-    </p>
-  </div>
-  <div class="segmented-control" role="group" aria-label={'Stan propozycji'} use:slider>
-    <button
-      type="button"
-      class:active={!resolved}
-      aria-pressed={!resolved}
-      onclick={() => goto(docsPath(slug, 'suggestions'))}>Czeka na ocenę</button
-    >
-    <button
-      type="button"
-      class:active={resolved}
-      aria-pressed={resolved}
-      onclick={() => goto(`${docsPath(slug, 'suggestions')}?state=resolved`)}>Ocenione</button
-    >
-  </div>
-</div>
+    </Text>
+  </VStack>
+  <SegmentedControl
+    value={state}
+    onChange={(next) =>
+      goto(
+        next === 'resolved'
+          ? `${docsPath(slug, 'suggestions')}?state=resolved`
+          : docsPath(slug, 'suggestions')
+      )}
+    label={'Stan propozycji'}
+    size="sm"
+  >
+    <SegmentedControlItem value="pending" label="Czeka na ocenę" />
+    <SegmentedControlItem value="resolved" label="Ocenione" />
+  </SegmentedControl>
+</HStack>
 {#if suggestions.length}
-  <ul class="suggestions">
+  <List hasDividers class="suggestions">
     {#each suggestions as suggestion (suggestion.id)}
-      <li>
-        <a class="suggestion" href={docsPath(slug, 'suggestions', suggestion.id)}>
-          <span class="suggestion-icon">
-            {#if suggestion.pageId}<GitPullRequestArrow
-                size={18}
-                aria-hidden="true"
-              />{:else}<FilePlus size={18} aria-hidden="true" />{/if}
-          </span>
-          <span class="suggestion-body">
-            <span class="suggestion-title">
+      <ListItem href={docsPath(slug, 'suggestions', suggestion.id)} align="start">
+        {#snippet startContent()}
+          <Icon
+            icon={suggestion.pageId ? GitPullRequestArrow : FilePlus}
+            size="md"
+            color="accent"
+          />
+        {/snippet}
+        {#snippet label()}
+          <VStack gap={1.5}>
+            <Text size="lg" weight="semibold" class="suggestion-title">
               {#if suggestion.pageTitle}{suggestion.pageTitle}{:else}Nowa strona: {suggestion.title}{/if}
-            </span>
-            <span class="suggestion-reason">{suggestion.reason}</span>
-            <span class="suggestion-tags">
-              {#if !suggestion.pageId}<span class="tag tag-lavender">Nowa strona</span>{/if}
-              {#if suggestion.visibilityChange}<span class="tag tag-mint"
-                  ><Globe size={11} aria-hidden="true" />
-                  {#if suggestion.public}Upublicznienie{:else}Udostępnij tylko członkom{/if}</span
-                >{/if}
-              {#if suggestion.state === 'pending' && suggestion.outdated}<span class="tag tag-coral"
-                  ><TriangleAlert size={11} aria-hidden="true" />Strona zmieniła się od tego czasu</span
-                >{/if}
-              {#if suggestion.state === 'accepted'}<span class="tag tag-mint">Zaakceptowana</span
-                >{:else if suggestion.state === 'rejected'}<span class="tag">Odrzucona</span
-                >{:else if suggestion.state === 'withdrawn'}<span class="tag">Wycofana</span>{/if}
-            </span>
-          </span>
-          <span class="suggestion-meta">
+            </Text>
+            <Text type="supporting" class="suggestion-reason">{suggestion.reason}</Text>
+            <HStack gap={1.5} wrap="wrap">
+              {#if !suggestion.pageId}
+                <Badge variant="purple" label="Nowa strona" />
+              {/if}
+              {#if suggestion.visibilityChange}
+                <Badge
+                  variant="green"
+                  label={suggestion.public ? 'Upublicznienie' : 'Udostępnij tylko członkom'}
+                >
+                  {#snippet icon()}<Icon icon={Globe} size="xsm" />{/snippet}
+                </Badge>
+              {/if}
+              {#if suggestion.state === 'pending' && suggestion.outdated}
+                <Badge variant="warning" label="Strona zmieniła się od tego czasu">
+                  {#snippet icon()}<Icon icon={TriangleAlert} size="xsm" />{/snippet}
+                </Badge>
+              {/if}
+              {#if suggestion.state === 'accepted'}
+                <Badge variant="success" label="Zaakceptowana" />
+              {:else if suggestion.state === 'rejected'}
+                <Badge variant="neutral" label="Odrzucona" />
+              {:else if suggestion.state === 'withdrawn'}
+                <Badge variant="neutral" label="Wycofana" />
+              {/if}
+            </HStack>
+          </VStack>
+        {/snippet}
+        {#snippet endContent()}
+          <VStack gap={1.5} hAlign="end">
             {#if suggestion.author}<DocPerson person={suggestion.author} size={22} />{/if}
-            <time datetime={suggestion.createdAt}>{when(suggestion.createdAt)}</time>
-            {#if suggestion.state === 'pending'}<span class="suggestion-lines"
-                ><span class="added">+{suggestion.additions}</span>
-                <span class="removed">−{suggestion.deletions}</span></span
-              >{/if}
-          </span>
-        </a>
-      </li>
+            <Text type="supporting">
+              <time datetime={suggestion.createdAt}>{when(suggestion.createdAt)}</time>
+            </Text>
+            {#if suggestion.state === 'pending'}
+              <HStack gap={1.5} class="suggestion-lines">
+                <Text type="supporting" class="added">+{suggestion.additions}</Text>
+                <Text type="supporting" class="removed">−{suggestion.deletions}</Text>
+              </HStack>
+            {/if}
+          </VStack>
+        {/snippet}
+      </ListItem>
     {/each}
-  </ul>
+  </List>
 {:else}
-  <div class="empty-state">
-    <GitPullRequestArrow size={28} strokeWidth={1.4} aria-hidden="true" />
-    {#if !resolved}
-      <h2>Nic do oceny</h2>
-      <p>Tutaj pojawią się nowe propozycje od członków.</p>
-    {:else}
-      <h2>Brak ocenionych propozycji</h2>
-    {/if}
-  </div>
+  <EmptyState
+    title={resolved ? 'Brak ocenionych propozycji' : 'Nic do oceny'}
+    description={resolved ? undefined : 'Tutaj pojawią się nowe propozycje od członków.'}
+    headingLevel={2}
+  >
+    {#snippet icon()}<Icon icon={GitPullRequestArrow} size="lg" color="secondary" />{/snippet}
+  </EmptyState>
 {/if}
 
 <style>
-  .suggestions {
-    display: grid;
-    gap: 10px;
+  :global(.suggestions) {
     margin: 0;
-    padding: 0;
-    list-style: none;
   }
-  .suggestion {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    gap: 14px;
-    align-items: start;
-    padding: 16px 18px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-xl);
-    background: var(--surface);
-    color: var(--ink);
-    text-decoration: none;
-    box-shadow: var(--shadow-xs);
-  }
-  .suggestion:hover {
-    border-color: var(--control-border-hover);
-  }
-  .suggestion-icon {
-    color: var(--accent);
-    padding-top: 2px;
-  }
-  .suggestion-body {
-    display: grid;
-    gap: 6px;
-    min-width: 0;
-  }
-  .suggestion-title {
-    font-family: var(--display);
-    font-size: 16px;
-    font-weight: 600;
+  :global(.suggestion-title) {
     overflow-wrap: anywhere;
   }
-  .suggestion-reason {
-    color: var(--muted);
-    font-size: 13px;
+  :global(.suggestion-reason) {
     line-height: 1.5;
     overflow-wrap: anywhere;
   }
-  .suggestion-tags {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
+  :global(.suggestion-lines) {
+    font-family: var(--font-family-code);
   }
-  .suggestion-tags .tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
+  :global(.suggestion-lines .added) {
+    color: var(--color-text-green);
+    font-family: var(--font-family-code);
   }
-  .suggestion-meta {
-    display: grid;
-    justify-items: end;
-    gap: 6px;
-    color: var(--muted);
-    font-size: 12px;
-  }
-  .suggestion-lines {
-    font-family: var(--mono);
-    font-size: 11px;
-  }
-  .added {
-    color: var(--positive);
-  }
-  .removed {
-    color: var(--danger);
-  }
-  @media (max-width: 700px) {
-    .suggestion {
-      grid-template-columns: auto minmax(0, 1fr);
-    }
-    .suggestion-meta {
-      grid-column: 2;
-      justify-items: start;
-    }
+  :global(.suggestion-lines .removed) {
+    color: var(--color-text-red);
+    font-family: var(--font-family-code);
   }
 </style>

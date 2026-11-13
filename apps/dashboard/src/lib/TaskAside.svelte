@@ -7,12 +7,23 @@
   import Assignees from './Assignees.svelte';
   import WatchButton from './WatchButton.svelte';
   import ContentHistory from './ContentHistory.svelte';
-  import Dropdown from '@ksi-core/ui/platform/Dropdown.svelte';
   import DateTimePicker from '@ksi-core/ui/platform/DateTimePicker.svelte';
   import { api, errorMessage } from '$lib/api';
   import { dashboardPath, type Workspace } from '$lib/navigation';
   import type { AssignmentMember, BoardLabel, Item } from '$lib/types';
   import { Archive, Plus, X } from '@lucide/svelte';
+  import {
+    Banner,
+    Button,
+    Divider,
+    DropdownMenu,
+    HStack,
+    IconButton,
+    MetadataList,
+    MetadataListItem,
+    Text,
+    VStack
+  } from '@astryx-sv/core';
 
   let {
     workspace,
@@ -116,24 +127,33 @@
         busy = false;
       });
   }
+
+  const labelMenuItems = $derived(
+    unassignedLabels.map((label) => ({
+      id: label.name,
+      label: label.name,
+      onClick: () => addLabel(label.name)
+    }))
+  );
 </script>
 
-<aside class="detail-aside task-aside" aria-label={'Szczegóły zadania'}>
-  {#if error}<p class="error" role="alert">{error}</p>{/if}
+{#snippet plusIcon()}<Plus size={13} aria-hidden="true" />{/snippet}
 
-  <section class="aside-section">
-    <dl class="metadata-list">
-      {#if created}
-        <div>
-          <dt>Utworzono</dt>
-          <dd><time datetime={item.createdAt}>{created}</time></dd>
-        </div>
-      {/if}
-    </dl>
-  </section>
+<VStack as="aside" class="detail-aside task-aside" gap={4} aria-label="Szczegóły zadania">
+  {#if error}<Banner status="error" title={error} role="alert" />{/if}
 
-  <section class="aside-section">
-    <h2>Przypisane osoby</h2>
+  <Divider />
+  {#if created}
+    <MetadataList>
+      <MetadataListItem label="Utworzono">
+        <time datetime={item.createdAt}>{created}</time>
+      </MetadataListItem>
+    </MetadataList>
+  {/if}
+
+  <Divider />
+  <VStack gap={2}>
+    <Text type="label" weight="semibold" color="secondary">Przypisane osoby</Text>
     <Assignees
       value={item.assigneeIds ?? []}
       {members}
@@ -141,96 +161,109 @@
       disabled={busy}
       onchange={changeAssignees}
     />
-  </section>
+  </VStack>
 
-  <section class="aside-section">
-    <h2>Etykiety</h2>
-    <div class="task-label-list">
-      {#each item.labels as labelName}
+  <Divider />
+  <VStack gap={2}>
+    <Text type="label" weight="semibold" color="secondary">Etykiety</Text>
+    <HStack gap={1.5} wrap="wrap" vAlign="center">
+      {#each item.labels as labelName (labelName)}
         {@const label = labels.find((candidate) => candidate.name === labelName)}
         <span class="label-badge" style={labelColorStyle(label?.color)}>
           <span class="label-dot"></span>
           <span class="label-name">{labelName}</span>
-          <button
-            type="button"
-            class="label-remove"
-            aria-label={`Usuń etykietę ${labelName}`}
-            title={`Usuń etykietę ${labelName}`}
-            disabled={busy}
+          <IconButton
+            label={`Usuń etykietę ${labelName}`}
+            tooltip={`Usuń etykietę ${labelName}`}
+            variant="ghost"
+            size="sm"
+            isDisabled={busy}
             onclick={() => removeLabel(labelName)}
           >
-            <X size={11} aria-hidden="true" />
-          </button>
+            {#snippet icon()}<X size={11} aria-hidden="true" />{/snippet}
+          </IconButton>
         </span>
       {:else}
-        <span class="muted">Brak etykiet</span>
+        <Text type="supporting" color="secondary">Brak etykiet</Text>
       {/each}
       {#if unassignedLabels.length}
-        <Dropdown
-          label={'Dodaj etykietę'}
-          placeholder={'Dodaj etykietę'}
-          options={unassignedLabels.map((label) => ({
-            value: label.name,
-            label: label.name,
-            color: label.color || '#6b7280'
-          }))}
-          variant="compact"
-          disabled={busy}
-          onselect={addLabel}
-        >
-          {#snippet leading()}<Plus size={13} aria-hidden="true" />{/snippet}
-        </Dropdown>
+        <DropdownMenu
+          button={{
+            label: 'Dodaj etykietę',
+            variant: 'secondary',
+            size: 'sm',
+            icon: plusIcon
+          }}
+          items={labelMenuItems}
+          hasChevron={false}
+          menuWidth={200}
+        />
       {/if}
-    </div>
-  </section>
+    </HStack>
+  </VStack>
 
-  <section class="aside-section">
-    <div class="aside-due">
+  <Divider />
+  <HStack gap={1.5} vAlign="end">
+    <VStack gap={0} class="aside-due-picker">
       <DateTimePicker bind:value={deadlineValue} disabled={busy} />
-      {#if item.dueAt}
-        <button
-          type="button"
-          class="icon-action-btn"
-          title={'Usuń termin'}
-          aria-label={'Usuń termin'}
-          disabled={busy}
-          onclick={clearDeadline}
-        >
-          <X size={14} aria-hidden="true" />
-        </button>
-      {/if}
-    </div>
-  </section>
+    </VStack>
+    {#if item.dueAt}
+      <IconButton
+        label="Usuń termin"
+        tooltip="Usuń termin"
+        variant="secondary"
+        isDisabled={busy}
+        onclick={clearDeadline}
+      >
+        {#snippet icon()}<X size={14} aria-hidden="true" />{/snippet}
+      </IconButton>
+    {/if}
+  </HStack>
 
-  <section class="aside-section">
-    <h2>Powiadomienia</h2>
+  <Divider />
+  <VStack gap={2}>
+    <Text type="label" weight="semibold" color="secondary">Powiadomienia</Text>
     {#key (item.assigneeIds ?? []).join(',')}
       <WatchButton type="item" id={item.id} showLabel />
     {/key}
-  </section>
+  </VStack>
 
-  <section class="aside-section aside-actions">
+  <Divider />
+  <VStack gap={2} hAlign="start">
     <ContentHistory kind="task" targetId={item.id} labeled />
-    <button class="btn btn-outline" disabled={busy} onclick={archive}>
-      <Archive size={15} aria-hidden="true" />Zarchiwizuj zadanie
-    </button>
-  </section>
-</aside>
+    <Button variant="secondary" label="Zarchiwizuj zadanie" isDisabled={busy} onclick={archive}>
+      {#snippet icon()}<Archive size={15} aria-hidden="true" />{/snippet}
+    </Button>
+  </VStack>
+</VStack>
 
 <style>
-  .aside-due {
-    display: flex;
-    align-items: flex-end;
-    gap: 6px;
-  }
-  .aside-due :global(.picker) {
+  :global(.aside-due-picker) {
     flex: 1;
     min-width: 0;
   }
-  /* Same height as the picker trigger, aligned to its bottom edge. */
-  .aside-due :global(.icon-action-btn) {
-    width: 34px;
-    height: 34px;
+  .label-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    padding: var(--spacing-0-5) var(--spacing-2);
+    border: 1px solid color-mix(in srgb, var(--label-color) 45%, transparent);
+    border-radius: var(--radius-full);
+    background: var(--label-bg);
+    color: var(--label-fg);
+    font-size: var(--text-supporting-size);
+    font-weight: var(--font-weight-medium);
+  }
+  .label-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--label-color);
     flex-shrink: 0;
+  }
+  .label-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 </style>

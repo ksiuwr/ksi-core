@@ -9,6 +9,21 @@
   import type { Article } from '$lib/types';
   import { primaryContentLocale, type ContentLocale } from 'shared/content-locales';
   import { untrack } from 'svelte';
+  import {
+    Badge,
+    Banner,
+    Button,
+    CheckboxInput,
+    Divider,
+    Heading,
+    HStack,
+    Link,
+    MetadataList,
+    MetadataListItem,
+    Text,
+    TextInput,
+    VStack
+  } from '@astryx-sv/core';
   import { ArrowLeft, ArrowUpRight, Save } from '@lucide/svelte';
 
   let {
@@ -127,107 +142,133 @@
   }
 </script>
 
-<a class="btn btn-outline detail-back" href={dashboardPath(workspace, projectSlug, 'articles')}
-  ><ArrowLeft size={15} aria-hidden="true" />Wszystkie artykuły</a
->
+<VStack gap={5}>
+  <HStack>
+    <Button
+      href={dashboardPath(workspace, projectSlug, 'articles')}
+      variant="secondary"
+      label="Wszystkie artykuły"
+    >
+      {#snippet icon()}<ArrowLeft size={15} aria-hidden="true" />{/snippet}
+    </Button>
+  </HStack>
 
-{#if permissions.canManage}
-  <ContentTranslations
-    kind="article"
-    id={draft.id}
-    version={draft.version}
-    translations={draft.translations}
-    baseline={{ title, markdown }}
-    bind:selected={contentLocale}
-    bind:draft={translationDraft}
-    onsaved={refresh}
-  />
-{/if}
+  {#if permissions.canManage}
+    <ContentTranslations
+      kind="article"
+      id={draft.id}
+      version={draft.version}
+      translations={draft.translations}
+      baseline={{ title, markdown }}
+      bind:selected={contentLocale}
+      bind:draft={translationDraft}
+      onsaved={refresh}
+    />
+  {/if}
 
-<div class="detail-layout article-layout">
-  <div class="detail-main">
-    {#if permissions.canEdit}
-      <input
-        class="article-title-input"
-        aria-label={'Tytuł'}
-        placeholder={'Tytuł'}
-        bind:value={() => localized('title', title), (value) => setLocalized('title', value)}
-        required={contentLocale === primaryContentLocale}
-      />
-    {:else}
-      <h1 class="detail-title">{draft.title}</h1>
-    {/if}
-    <div class="article-editor">
+  <HStack vAlign="start" gap={8} wrap="wrap">
+    <VStack gap={4} class="article-main">
       {#if permissions.canEdit}
-        <Editor
-          allowGallery
-          rows={24}
-          bind:value={
-            () => localized('markdown', markdown), (value) => setLocalized('markdown', value)
-          }
+        <TextInput
+          id="article-title"
+          label="Tytuł"
+          isLabelHidden
+          value={localized('title', title)}
+          onChange={(value) => setLocalized('title', value)}
+          isRequired={contentLocale === primaryContentLocale}
+          placeholder={'Tytuł'}
+          width="100%"
+          size="lg"
         />
       {:else}
-        <MarkdownContent value={markdown} />
+        <Heading level={1}>{draft.title}</Heading>
       {/if}
-    </div>
-  </div>
-
-  <aside class="detail-aside" aria-label={'Ustawienia'}>
-    {#if error}<p class="error" role="alert">{error}</p>{/if}
-    {#if notice}<p class="notice" role="status">{notice}</p>{/if}
-
-    <section class="aside-section">
-      <h2>Status</h2>
-      <div class="status-line">
-        <span class="tag" class:tag-mint={draft.state === 'published'}
-          >{draft.state === 'published' ? 'Opublikowany' : 'Szkic'}</span
-        >
-        {#if draft.state === 'published'}
-          <a
-            class="status-link"
-            href={`${websiteOrigin}/articles/${encodeURIComponent(draft.slug)}`}
-            >Zobacz publiczny artykuł<ArrowUpRight size={13} aria-hidden="true" /></a
-          >
+      <VStack class="article-editor">
+        {#if permissions.canEdit}
+          <Editor
+            allowGallery
+            rows={24}
+            bind:value={
+              () => localized('markdown', markdown), (value) => setLocalized('markdown', value)
+            }
+          />
+        {:else}
+          <MarkdownContent value={markdown} />
         {/if}
-      </div>
-      {#if contentLocale === primaryContentLocale}<div class="action-stack">
-          {#if permissions.canPublish}
-            <button
-              class="btn btn-coral"
-              disabled={busy || thumbnailUploading}
-              onclick={() => save(true)}>Opublikuj</button
-            >
-          {/if}
-          {#if permissions.canSave}
-            <button
-              class="btn btn-outline"
-              disabled={busy || thumbnailUploading}
-              onclick={() => save(false)}
-            >
-              <Save size={15} aria-hidden="true" />
-              {draft.state === 'published' && !permissions.canPublish
-                ? 'Zapisz zmiany'
-                : 'Zapisz szkic'}
-            </button>
-          {/if}
-          {#if permissions.canPropose}
-            <button class="btn btn-outline" disabled={busy || thumbnailUploading} onclick={propose}
-              >Zaproponuj zmianę</button
-            >
-          {/if}
-        </div>{:else}<p class="muted">Zapisz tłumaczenie na pasku języka powyżej.</p>{/if}
-    </section>
+      </VStack>
+    </VStack>
 
-    {#if contentLocale === primaryContentLocale}<section class="aside-section">
-        <dl class="metadata-list">
-          <div>
-            <dt>Slug</dt>
-            <dd><code>{draft.slug}</code></dd>
-          </div>
-        </dl>
-      </section>{/if}
+    <VStack as="aside" gap={4} class="article-aside" aria-label={'Ustawienia'}>
+      {#if error}<Banner status="error" title={error} role="alert" />{/if}
+      {#if notice}<Banner status="success" title={notice} role="status" />{/if}
 
-    {#if contentLocale === primaryContentLocale}<section class="aside-section">
+      <VStack gap={3}>
+        <Heading level={2}>Status</Heading>
+        <HStack hAlign="between" vAlign="center" gap={2} wrap="wrap">
+          <Badge
+            variant={draft.state === 'published' ? 'success' : 'neutral'}
+            label={draft.state === 'published' ? 'Opublikowany' : 'Szkic'}
+          />
+          {#if draft.state === 'published'}
+            <Link
+              href={`${websiteOrigin}/articles/${encodeURIComponent(draft.slug)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              type="supporting"
+              color="secondary"
+            >
+              Zobacz publiczny artykuł
+              <ArrowUpRight size={13} aria-hidden="true" />
+            </Link>
+          {/if}
+        </HStack>
+        {#if contentLocale === primaryContentLocale}
+          <VStack gap={2}>
+            {#if permissions.canPublish}
+              <Button
+                label="Opublikuj"
+                variant="primary"
+                width="100%"
+                isDisabled={busy || thumbnailUploading}
+                onclick={() => save(true)}
+              />
+            {/if}
+            {#if permissions.canSave}
+              <Button
+                label={draft.state === 'published' && !permissions.canPublish
+                  ? 'Zapisz zmiany'
+                  : 'Zapisz szkic'}
+                variant="secondary"
+                width="100%"
+                isDisabled={busy || thumbnailUploading}
+                onclick={() => save(false)}
+              >
+                {#snippet icon()}<Save size={15} aria-hidden="true" />{/snippet}
+              </Button>
+            {/if}
+            {#if permissions.canPropose}
+              <Button
+                label="Zaproponuj zmianę"
+                variant="secondary"
+                width="100%"
+                isDisabled={busy || thumbnailUploading}
+                onclick={propose}
+              />
+            {/if}
+          </VStack>
+        {:else}
+          <Text as="p" type="supporting">Zapisz tłumaczenie na pasku języka powyżej.</Text>
+        {/if}
+      </VStack>
+
+      {#if contentLocale === primaryContentLocale}
+        <Divider />
+        <MetadataList>
+          <MetadataListItem label="Slug">
+            <Text type="code">{draft.slug}</Text>
+          </MetadataListItem>
+        </MetadataList>
+        <Divider />
         {#key draft.id}
           <ArticleThumbnail
             bind:fileId={thumbnailFileId}
@@ -235,124 +276,66 @@
             disabled={busy || !permissions.canSave}
           />
         {/key}
-      </section>{/if}
+      {/if}
 
-    {#if permissions.canManage && contentLocale === primaryContentLocale}
-      <section class="aside-section">
-        <h2>Publikacja</h2>
-        {#if workspace === 'project'}
-          <label class="check"
-            ><input type="checkbox" bind:checked={draft.mainArticle} />Główny artykuł projektu</label
-          >
-          <p class="muted">
-            Po opublikowaniu ten artykuł pojawi się na publicznej stronie projektu i zastąpi
-            poprzedni główny artykuł. Zapisz lub opublikuj, aby zastosować ustawienie.
-          </p>
-          <label class="check"
-            ><input type="checkbox" bind:checked={draft.projectFeed} />Pokaż w artykułach projektu</label
-          >
-        {/if}
-        <label class="check"
-          ><input type="checkbox" bind:checked={draft.websiteFeed} />Pokaż w artykułach na stronie</label
-        >
-        <p class="muted">
-          Te ustawienia obowiązują po opublikowaniu artykułu. Artykuł główny jest wyświetlany
-          oddzielnie od listy artykułów projektu.
-        </p>
-      </section>
-    {/if}
-
-    {#if draft.canManageCredit && contentLocale === primaryContentLocale}
-      <section class="aside-section">
-        <label class="check">
-          <input
-            type="checkbox"
-            checked={showCredit}
-            onchange={(event) => updateCredit(event.currentTarget.checked)}
+      {#if permissions.canManage && contentLocale === primaryContentLocale}
+        <Divider />
+        <VStack gap={2}>
+          <Heading level={2}>Publikacja</Heading>
+          {#if workspace === 'project'}
+            <CheckboxInput
+              label="Główny artykuł projektu"
+              value={draft.mainArticle}
+              onChange={(checked) => (draft.mainArticle = checked)}
+            />
+            <Text as="p" type="supporting">
+              Po opublikowaniu ten artykuł pojawi się na publicznej stronie projektu i zastąpi
+              poprzedni główny artykuł. Zapisz lub opublikuj, aby zastosować ustawienie.
+            </Text>
+            <CheckboxInput
+              label="Pokaż w artykułach projektu"
+              value={draft.projectFeed}
+              onChange={(checked) => (draft.projectFeed = checked)}
+            />
+          {/if}
+          <CheckboxInput
+            label="Pokaż w artykułach na stronie"
+            value={draft.websiteFeed}
+            onChange={(checked) => (draft.websiteFeed = checked)}
           />
-          Pokaż mnie jako autora
-        </label>
-      </section>
-    {/if}
-  </aside>
-</div>
+          <Text as="p" type="supporting">
+            Te ustawienia obowiązują po opublikowaniu artykułu. Artykuł główny jest wyświetlany
+            oddzielnie od listy artykułów projektu.
+          </Text>
+        </VStack>
+      {/if}
+
+      {#if draft.canManageCredit && contentLocale === primaryContentLocale}
+        <Divider />
+        <CheckboxInput label="Pokaż mnie jako autora" value={showCredit} onChange={updateCredit} />
+      {/if}
+    </VStack>
+  </HStack>
+</VStack>
 
 <style>
-  .article-layout {
-    grid-template-columns: minmax(0, 1fr) 300px;
-  }
-  /* The scoped rule outranks the shared .detail-layout breakpoint, so repeat it here. */
-  @media (max-width: 980px) {
-    .article-layout {
-      grid-template-columns: minmax(0, 1fr);
-    }
-  }
-  .article-title-input {
-    width: 100%;
-    margin: 0 0 14px;
-    padding: 6px 10px;
-    margin-inline: -10px;
-    width: calc(100% + 20px);
-    border: 1px solid transparent;
-    background: transparent !important;
-    box-shadow: none;
-    font-family: var(--display);
-    font-size: clamp(24px, 2.6vw, 32px);
-    font-weight: 600;
-    letter-spacing: -0.03em;
-    line-height: 1.2;
-  }
-  .article-title-input:hover {
-    border-color: var(--line);
-  }
-  .article-title-input:focus {
-    background: var(--surface) !important;
-  }
-  .article-editor {
+  :global(.article-main) {
+    flex: 1 1 34rem;
     min-width: 0;
   }
-  .article-editor :global(textarea) {
-    min-height: 60vh;
+  :global(.article-aside) {
+    flex: 0 1 19rem;
+    min-width: 0;
+    position: sticky;
+    top: 5.625rem;
   }
-  .status-line {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
+  :global(.article-editor) {
+    min-width: 0;
   }
-  .status-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    color: var(--muted);
-    font-size: 12px;
-    text-decoration: none;
-  }
-  .status-link:hover {
-    color: var(--ink);
-  }
-  .action-stack {
-    display: grid;
-    gap: 8px;
-  }
-  .action-stack .btn {
-    width: 100%;
-  }
-  .check {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0;
-    color: var(--ink);
-    font-size: 13px;
-  }
-  .aside-section p {
-    margin: 0;
-    font-size: 12px;
-  }
-  code {
-    font-family: var(--mono);
-    font-size: 12px;
-    overflow-wrap: anywhere;
+  @media (max-width: 61.25rem) {
+    :global(.article-aside) {
+      flex-basis: 100%;
+      position: static;
+    }
   }
 </style>

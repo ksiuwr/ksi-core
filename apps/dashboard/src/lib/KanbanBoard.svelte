@@ -31,6 +31,23 @@
     CalendarClock
   } from '@lucide/svelte';
   import MarkdownContent from '@ksi-core/ui/platform/MarkdownContent.svelte';
+  import {
+    Badge,
+    Button,
+    Card,
+    CheckboxInput,
+    Dialog,
+    DialogHeader,
+    Heading,
+    HStack,
+    IconButton,
+    List,
+    ListItem,
+    Section,
+    Text,
+    TextInput,
+    VStack
+  } from '@astryx-sv/core';
   export type BoardStatus = { id: string; name: string; color?: string; deleted?: boolean };
   export type BoardLabel = { name: string; color?: string; description?: string };
   export type Item = {
@@ -88,7 +105,7 @@
     new Map(normalizedLabels.map((label) => [label.name, label]))
   );
 
-  let labelDialog = $state<HTMLDialogElement>();
+  let labelDialogOpen = $state(false);
   let labelDraftName = $state('');
   let labelDraftColor = $state('#6b7280');
   let labelDraftDescription = $state('');
@@ -165,12 +182,12 @@
     labelDraftColor = existing?.color || '#6b7280';
     labelDraftDescription = existing?.description ?? '';
     labelFormError = '';
-    labelDialog?.showModal();
-    document.getElementById('label-name')?.focus();
+    labelDialogOpen = true;
+    void tick().then(() => document.getElementById('label-name')?.focus());
   }
 
   function closeLabelDialog() {
-    labelDialog?.close();
+    labelDialogOpen = false;
     editingLabelName = null;
     labelFormError = '';
   }
@@ -261,12 +278,11 @@
   const color = (s: BoardStatus) => colorForStatus(s);
   const activeStatuses = $derived(statuses.filter((s) => !s.deleted));
   let editingStatus = $state<BoardStatus | null>(null),
-    statusDialog = $state<HTMLDialogElement>(),
+    statusDialogOpen = $state(false),
     statusError = $state('');
   let busy = $state(false),
     dragged = $state<string | null>(null),
     over = $state<string | null>(null);
-  let boardElement = $state<HTMLDivElement>();
   let dragLayout: Record<string, { top: number; height: number; span: number }> = {};
   let dragStartFrame: number | undefined;
   let dragDestination = $state<{ column: string; index: number } | null>(null);
@@ -317,13 +333,16 @@
   }
   function startDrag(item: Item, event: DragEvent) {
     dragLayout = {};
-    boardElement?.querySelectorAll<HTMLElement>('[data-item-id]').forEach((element) => {
-      dragLayout[element.dataset.itemId!] = {
-        top: element.offsetTop,
-        height: element.offsetHeight,
-        span: element.offsetHeight + parseFloat(getComputedStyle(element).marginBottom)
-      };
-    });
+    document
+      .getElementById('kanban-board')
+      ?.querySelectorAll<HTMLElement>('[data-item-id]')
+      .forEach((element) => {
+        dragLayout[element.dataset.itemId!] = {
+          top: element.offsetTop,
+          height: element.offsetHeight,
+          span: element.offsetHeight + parseFloat(getComputedStyle(element).marginBottom)
+        };
+      });
     if (event.dataTransfer) {
       event.dataTransfer.setData('text/plain', item.id);
       event.dataTransfer.effectAllowed = 'move';
@@ -427,10 +446,10 @@
     editingStatus = { ...status };
     statusError = '';
     await tick();
-    statusDialog?.showModal();
+    statusDialogOpen = true;
   }
   function closeStatus() {
-    statusDialog?.close();
+    statusDialogOpen = false;
     editingStatus = null;
     lastTrigger?.focus();
   }
@@ -610,99 +629,113 @@
 />
 
 {#snippet labelActions(close: () => void)}
-  <div class="label-dropdown-actions">
-    <button
-      type="button"
-      class="label-dropdown-action"
-      disabled={busy}
-      onclick={() => (managingLabels = !managingLabels)}
-    >
-      <Settings2 size={15} aria-hidden="true" />
-      {#if managingLabels}Filtruj według etykiety{:else}Zarządzaj etykietami{/if}
-    </button>
-    <button
-      type="button"
-      class="label-dropdown-action"
-      disabled={busy}
-      onclick={() => {
-        close();
-        openLabelDialog();
-      }}
-    >
-      <Plus size={15} aria-hidden="true" />
-      Nowa etykieta
-    </button>
-  </div>
+  <Button
+    variant="secondary"
+    size="sm"
+    label={managingLabels ? 'Filtruj według etykiety' : 'Zarządzaj etykietami'}
+    isDisabled={busy}
+    onclick={() => (managingLabels = !managingLabels)}
+  >
+    {#snippet icon()}<Settings2 size={15} aria-hidden="true" />{/snippet}
+  </Button>
+  <Button
+    variant="secondary"
+    size="sm"
+    label="Nowa etykieta"
+    isDisabled={busy}
+    onclick={() => {
+      close();
+      openLabelDialog();
+    }}
+  >
+    {#snippet icon()}<Plus size={15} aria-hidden="true" />{/snippet}
+  </Button>
+{/snippet}
+
+{#snippet labelBadge(name: string, color?: string, description?: string)}
+  <span class="label-badge" style={labelColorStyle(color)} title={description || name}>
+    <span class="label-dot"></span>
+    <span class="label-name">{name}</span>
+  </span>
 {/snippet}
 
 {#snippet labelManagement(close: () => void)}
-  <section class="manage-labels-panel" aria-label={'Zarządzaj etykietami'}>
-    <div class="manage-labels-header">
-      <h4>Etykiety tablicy</h4>
-      <button
-        type="button"
-        class="icon-button"
+  <VStack gap={3} aria-label="Zarządzaj etykietami">
+    <HStack gap={2} vAlign="center" justify="between">
+      <Heading level={3}>Etykiety tablicy</Heading>
+      <IconButton
+        label="Zamknij"
+        tooltip="Zamknij"
+        variant="ghost"
+        size="sm"
         onclick={() => (managingLabels = false)}
-        aria-label={'Zamknij'}
       >
-        <X size={16} aria-hidden="true" />
-      </button>
-    </div>
+        {#snippet icon()}<X size={16} aria-hidden="true" />{/snippet}
+      </IconButton>
+    </HStack>
     {#if manageLabelError}
-      <p class="manage-label-error" role="alert">{manageLabelError}</p>
+      <Text role="alert" class="manage-label-error">{manageLabelError}</Text>
     {/if}
-    <p class="manage-labels-hint">Usuń etykietę z zadań przed usunięciem jej z tablicy.</p>
+    <Text type="supporting" color="secondary">
+      Usuń etykietę z zadań przed usunięciem jej z tablicy.
+    </Text>
 
     {#if normalizedLabels.length === 0}
-      <p class="muted">Brak etykiet na tej tablicy.</p>
+      <Text type="supporting" color="secondary">Brak etykiet na tej tablicy.</Text>
     {:else}
-      <div class="manage-labels-list">
-        {#each normalizedLabels as label}
-          <div class="manage-label-item">
-            <div class="manage-label-info">
-              <span class="label-badge" style={labelColorStyle(label.color)}>
-                <span class="label-dot"></span>
-                <span class="label-name">{label.name}</span>
-              </span>
-              {#if label.description}
-                <span class="manage-label-desc">{label.description}</span>
-              {/if}
-            </div>
-            <div class="manage-label-actions">
-              <button
-                type="button"
-                class="icon-button"
-                disabled={busy}
-                onclick={() => {
-                  close();
-                  openLabelDialog(label);
-                }}
-                aria-label={'Edytuj etykietę'}
-              >
-                <Pencil size={14} aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                class="icon-button danger-button"
-                disabled={busy}
-                onclick={() => void deleteLabel(label.name)}
-                aria-label={'Usuń etykietę'}
-              >
-                <Trash2 size={14} aria-hidden="true" />
-              </button>
-            </div>
-          </div>
+      <List>
+        {#each normalizedLabels as boardLabel (boardLabel.name)}
+          <ListItem>
+            {#snippet label()}{@render labelBadge(
+                boardLabel.name,
+                boardLabel.color,
+                boardLabel.description
+              )}{/snippet}
+            {#snippet description()}
+              {#if boardLabel.description}<Text type="supporting" color="secondary"
+                  >{boardLabel.description}</Text
+                >{/if}
+            {/snippet}
+            {#snippet endContent()}
+              <HStack gap={1}>
+                <IconButton
+                  label="Edytuj etykietę"
+                  tooltip="Edytuj etykietę"
+                  variant="ghost"
+                  size="sm"
+                  isDisabled={busy}
+                  onclick={() => {
+                    close();
+                    openLabelDialog(boardLabel);
+                  }}
+                >
+                  {#snippet icon()}<Pencil size={14} aria-hidden="true" />{/snippet}
+                </IconButton>
+                <IconButton
+                  label="Usuń etykietę"
+                  tooltip="Usuń etykietę"
+                  variant="destructive"
+                  size="sm"
+                  isDisabled={busy}
+                  onclick={() => void deleteLabel(boardLabel.name)}
+                >
+                  {#snippet icon()}<Trash2 size={14} aria-hidden="true" />{/snippet}
+                </IconButton>
+              </HStack>
+            {/snippet}
+          </ListItem>
         {/each}
-      </div>
+      </List>
     {/if}
-  </section>
+  </VStack>
 {/snippet}
-<div
-  class="board"
+
+<VStack
+  id="kanban-board"
+  class={`board${dragged ? ' drag-active' : ''}`}
+  gap={0}
   role="group"
-  bind:this={boardElement}
-  class:drag-active={!!dragged}
-  style:grid-template-columns={`repeat(${activeStatuses.length}, minmax(260px, 1fr))`}
+  style={`display: grid; grid-template-columns: repeat(${activeStatuses.length}, minmax(260px, 1fr))`}
   ondragover={(event) => {
     if (dragged) {
       event.preventDefault();
@@ -720,46 +753,59 @@
   }}
 >
   {#each activeStatuses as status (status.id)}
-    <section
-      class="board-column"
-      class:drop-target={over === status.id}
+    <Section
+      variant="muted"
+      padding={0}
+      class={`board-column${over === status.id ? ' drop-target' : ''}`}
+      style="display: flex; flex-direction: column; min-height: 330px"
       aria-label={label(status)}
       ondragenter={(event) => previewDrag(status.id, event)}
       ondragover={(event) => previewDrag(status.id, event)}
       ondrop={(event) => dropTask(status.id, event)}
     >
-      <div class="column-header">
-        <span class="column-label"
-          ><span class="column-dot" style:background={color(status)}></span>{label(status)}<span
-            class="column-count">{visibleItems.filter((i) => i.column === status.id).length}</span
-          ></span
-        >
-        {#if canManage}<button
-            type="button"
-            class="icon-button"
-            aria-label={`${'Edytuj status'}: ${label(status)}`}
-            disabled={busy}
+      <HStack gap={2} vAlign="center" class="column-header">
+        <HStack gap={2} vAlign="center" class="column-label">
+          <span class="column-dot" style:background={color(status)}></span>
+          <Text as="span" weight="medium">{label(status)}</Text>
+          <Badge
+            label={String(visibleItems.filter((i) => i.column === status.id).length)}
+            variant="neutral"
+          />
+        </HStack>
+        {#if canManage}
+          <IconButton
+            label={`Edytuj status: ${label(status)}`}
+            tooltip={`Edytuj status: ${label(status)}`}
+            variant="ghost"
+            size="sm"
+            isDisabled={busy}
             onclick={(event) => openStatus(status, event)}
-            ><Pencil size={15} aria-hidden="true" /></button
-          >{/if}
-        <a
-          id={`add-${status.id}`}
-          class="icon-button"
-          aria-label={`${'Dodaj zadanie do'} ${label(status)}`}
-          href={newTaskHref(status.id)}><Plus size={17} aria-hidden="true" /></a
+          >
+            {#snippet icon()}<Pencil size={15} aria-hidden="true" />{/snippet}
+          </IconButton>
+        {/if}
+        <IconButton
+          label={`Dodaj zadanie do ${label(status)}`}
+          tooltip={`Dodaj zadanie do ${label(status)}`}
+          variant="ghost"
+          size="sm"
+          href={newTaskHref(status.id)}
         >
-      </div>
-      <div
+          {#snippet icon()}<Plus size={17} aria-hidden="true" />{/snippet}
+        </IconButton>
+      </HStack>
+      <VStack
+        gap={2}
         class="column-items"
-        style:padding-bottom={`${dragPreview.slot?.column === status.id ? dragPreview.slot.extraSpace : 0}px`}
+        style={`padding-bottom: ${dragPreview.slot?.column === status.id ? dragPreview.slot.extraSpace : 0}px`}
       >
         {#if dragPreview.slot?.column === status.id}
-          <div
+          <VStack
             class="drag-slot"
+            gap={0}
             aria-hidden="true"
-            style:top={`${dragPreview.slot.top}px`}
-            style:height={`${dragPreview.slot.height}px`}
-          ></div>
+            style={`top: ${dragPreview.slot.top}px; height: ${dragPreview.slot.height}px`}
+          ></VStack>
         {/if}
         {#each visibleItems
           .filter((i) => i.column === status.id)
@@ -799,779 +845,586 @@
               }
             }}
           >
-            <span class="task-title">
-              <strong>{item.title}</strong>
-              <GripVertical size={14} aria-hidden="true" />
-              {#if item.referenceNumber}<span class="task-reference">#{item.referenceNumber}</span
-                >{/if}</span
-            >
-            {#if item.markdown}<div class="kanban-markdown-preview">
-                <MarkdownContent value={item.markdown} />
-              </div>{/if}
-            {#if item.labels.length}<div class="task-labels">
-                {#each item.labels as labelName}
-                  {@const label = labelMap.get(labelName)}
-                  <span
-                    class="label-badge"
-                    style={labelColorStyle(label?.color)}
-                    title={label?.description || labelName}
+            <VStack gap={2}>
+              <HStack gap={2} align="start" class="task-title">
+                <Text as="span" weight="medium" maxLines={3} class="task-title-text"
+                  >{item.title}</Text
+                >
+                <GripVertical size={14} aria-hidden="true" />
+                {#if item.referenceNumber}
+                  <Text as="span" type="code" color="secondary" class="task-reference"
+                    >#{item.referenceNumber}</Text
                   >
-                    <span class="label-dot"></span>
-                    <span class="label-name">{labelName}</span>
-                  </span>
-                {/each}
-              </div>{/if}
-            {#if item.dueAt || item.assigneeIds?.length}<div class="task-meta">
-                {#if item.dueAt}{@const urgency = deadlineUrgency(item, now)}<span
-                    class="task-due"
-                    class:overdue={urgency === 'overdue'}
-                    class:due-soon={urgency === 'soon'}
-                    title={formatTaskDateTime(item.dueAt)}
-                  >
-                    <CalendarClock size={13} aria-hidden="true" />
-                    {#if urgency === 'overdue'}<span class="sr-only">Po terminie</span>{:else}<span
-                        class="sr-only">Termin</span
-                      >{/if}
-                    <time datetime={item.dueAt}>{formatShortDue(item.dueAt)}</time>
-                  </span>{/if}
-                {#if item.assigneeIds?.length}<span class="task-assignees" title={'Przypisane do'}>
-                    <Assignees
-                      value={item.assigneeIds}
-                      {members}
-                      readonly
-                      showLabel={false}
-                      stacked={item.assigneeIds.length > 1}
-                    />
-                  </span>{/if}
-              </div>{/if}
+                {/if}
+              </HStack>
+              {#if item.markdown}
+                <VStack gap={0} class="kanban-markdown-preview">
+                  <MarkdownContent value={item.markdown} />
+                </VStack>
+              {/if}
+              {#if item.labels.length}
+                <HStack gap={1} wrap="wrap">
+                  {#each item.labels as labelName (labelName)}
+                    {@const label = labelMap.get(labelName)}
+                    {@render labelBadge(labelName, label?.color, label?.description)}
+                  {/each}
+                </HStack>
+              {/if}
+              {#if item.dueAt || item.assigneeIds?.length}
+                <HStack gap={2} vAlign="center" justify="between" wrap="wrap" class="task-meta">
+                  {#if item.dueAt}
+                    {@const urgency = deadlineUrgency(item, now)}
+                    <span
+                      class:overdue={urgency === 'overdue'}
+                      class:due-soon={urgency === 'soon'}
+                      class="task-due"
+                      title={formatTaskDateTime(item.dueAt)}
+                    >
+                      <CalendarClock size={13} aria-hidden="true" />
+                      <span class="visually-hidden">
+                        {urgency === 'overdue' ? 'Po terminie' : 'Termin'}
+                      </span>
+                      <time datetime={item.dueAt}>{formatShortDue(item.dueAt)}</time>
+                    </span>
+                  {/if}
+                  {#if item.assigneeIds?.length}
+                    <span class="task-assignees" title="Przypisane do">
+                      <Assignees
+                        value={item.assigneeIds}
+                        {members}
+                        readonly
+                        showLabel={false}
+                        stacked={item.assigneeIds.length > 1}
+                      />
+                    </span>
+                  {/if}
+                </HStack>
+              {/if}
+            </VStack>
           </a>
         {/each}
-      </div>
-      <a class="column-add" href={newTaskHref(status.id)}
-        ><Plus size={16} aria-hidden="true" />Dodaj zadanie</a
-      >
-    </section>
+      </VStack>
+      <HStack padding={2}>
+        <Button variant="ghost" size="sm" label="Dodaj zadanie" href={newTaskHref(status.id)}>
+          {#snippet icon()}<Plus size={16} aria-hidden="true" />{/snippet}
+        </Button>
+      </HStack>
+    </Section>
   {/each}
-</div>
+</VStack>
+
 {#if mobileMoveItem}
-  <div class="mobile-move-tray" role="group" aria-label={'Przenieś zadanie do kategorii'}>
-    <div class="mobile-move-heading">
-      <span>Przenieś zadanie do <strong>{mobileMoveItem.title}</strong></span>
-      <button type="button" class="icon-button" aria-label={'Zamknij'} onclick={cancelMobileMove}
-        ><X size={18} aria-hidden="true" /></button
-      >
-    </div>
-    <div class="mobile-move-options">
-      {#each activeStatuses as status (status.id)}
-        <button
-          type="button"
-          data-mobile-status={status.id}
-          class="mobile-move-option"
-          class:drop-target={mobileDropTarget === status.id}
-          style:border-color={color(status)}
-          disabled={busy}
-          onclick={() => finishMobileMove(status.id)}
+  <Card class="mobile-move-tray" role="group" aria-label="Przenieś zadanie do kategorii">
+    <VStack gap={3}>
+      <HStack gap={3} vAlign="center" justify="between">
+        <Text as="span" maxLines={1}>
+          Przenieś zadanie do <Text as="span" weight="semibold">{mobileMoveItem.title}</Text>
+        </Text>
+        <IconButton
+          label="Zamknij"
+          tooltip="Zamknij"
+          variant="ghost"
+          size="sm"
+          onclick={cancelMobileMove}
         >
-          <span class="column-dot" style:background={color(status)}></span>{label(status)}
-        </button>
-      {/each}
-    </div>
-  </div>
+          {#snippet icon()}<X size={18} aria-hidden="true" />{/snippet}
+        </IconButton>
+      </HStack>
+      <VStack gap={2} class="mobile-move-options">
+        {#each activeStatuses as status (status.id)}
+          {@const tone = color(status)}
+          <Button
+            variant="secondary"
+            label={label(status)}
+            data-mobile-status={status.id}
+            class={`mobile-move-option${mobileDropTarget === status.id ? ' drop-target' : ''}`}
+            isDisabled={busy}
+            onclick={() => finishMobileMove(status.id)}
+          >
+            {#snippet icon()}<span class="column-dot" style:background={tone}></span>{/snippet}
+          </Button>
+        {/each}
+      </VStack>
+    </VStack>
+  </Card>
 {/if}
+
 {#if canManage}
-  <dialog
-    bind:this={labelDialog}
-    class="issue-dialog label-dialog"
-    aria-labelledby="label-heading"
-    oncancel={(event) => {
-      event.preventDefault();
-      closeLabelDialog();
+  <Dialog
+    isOpen={labelDialogOpen}
+    onOpenChange={(isOpen) => {
+      if (!isOpen) closeLabelDialog();
     }}
+    width={540}
+    purpose="form"
   >
-    <div class="issue-heading">
-      <h2 id="label-heading">
-        {editingLabelName === null ? 'Utwórz nową etykietę' : 'Edytuj etykietę'}
-      </h2>
-      <button type="button" class="icon-button" aria-label={'Zamknij'} onclick={closeLabelDialog}>
-        <X size={20} aria-hidden="true" />
-      </button>
-    </div>
+    <VStack gap={4}>
+      <DialogHeader
+        title={editingLabelName === null ? 'Utwórz nową etykietę' : 'Edytuj etykietę'}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) closeLabelDialog();
+        }}
+      />
+      <Card variant="muted">
+        <HStack gap={3} vAlign="center" wrap="wrap">
+          <Text type="label" weight="semibold">Podgląd:</Text>
+          {@render labelBadge(
+            labelDraftName.trim() || 'Nazwa etykiety',
+            labelDraftColor,
+            labelDraftDescription
+          )}
+          {#if labelDraftDescription.trim()}
+            <Text type="supporting" color="secondary">{labelDraftDescription.trim()}</Text>
+          {/if}
+        </HStack>
+      </Card>
 
-    <div class="label-preview-card">
-      <span class="preview-title">Podgląd:</span>
-      <span class="label-badge" style={labelColorStyle(labelDraftColor)}>
-        <span class="label-dot"></span>
-        <span class="label-name">{labelDraftName.trim() || 'Nazwa etykiety'}</span>
-      </span>
-      {#if labelDraftDescription.trim()}
-        <span class="preview-desc muted">{labelDraftDescription.trim()}</span>
+      {#if labelFormError}
+        <Text role="alert" class="manage-label-error">{labelFormError}</Text>
       {/if}
-    </div>
 
-    {#if labelFormError}
-      <p class="manage-label-error" role="alert">{labelFormError}</p>
-    {/if}
-
-    <form
-      class="issue-editor"
-      onsubmit={(event) => {
-        event.preventDefault();
-        void submitLabel();
-      }}
-    >
-      <label for="label-name">Nazwa etykiety</label>
-      <input
-        id="label-name"
-        bind:value={labelDraftName}
-        maxlength="50"
-        required
-        placeholder={'e.g. bug, docs'}
-      />
-
-      <label for="label-desc">Opis (opcjonalny)</label>
-      <input
-        id="label-desc"
-        bind:value={labelDraftDescription}
-        maxlength="200"
-        placeholder={'Krótki opis przeznaczenia etykiety'}
-      />
-
-      <label for="label-color">Kolor</label>
-      <div class="color-picker-row">
-        <input id="label-color" type="color" bind:value={labelDraftColor} />
-        <div class="preset-swatches">
-          {#each PRESET_LABEL_COLORS as preset}
-            <button
+      <form
+        onsubmit={(event) => {
+          event.preventDefault();
+          void submitLabel();
+        }}
+      >
+        <VStack gap={3}>
+          <TextInput
+            id="label-name"
+            label="Nazwa etykiety"
+            value={labelDraftName}
+            onChange={(value) => (labelDraftName = value.slice(0, 50))}
+            isRequired
+            placeholder="np. bug, docs"
+          />
+          <TextInput
+            id="label-desc"
+            label="Opis (opcjonalny)"
+            value={labelDraftDescription}
+            onChange={(value) => (labelDraftDescription = value.slice(0, 200))}
+            placeholder="Krótki opis przeznaczenia etykiety"
+          />
+          <VStack gap={2}>
+            <Text type="label" weight="medium">Kolor</Text>
+            <HStack gap={2} wrap="wrap" vAlign="center">
+              <input
+                id="label-color"
+                type="color"
+                bind:value={labelDraftColor}
+                class="color-input"
+                aria-label="Kolor"
+              />
+              {#each PRESET_LABEL_COLORS as preset (preset)}
+                <button
+                  type="button"
+                  class="color-swatch"
+                  class:active={labelDraftColor.toLowerCase() === preset.toLowerCase()}
+                  style:background-color={preset}
+                  title={preset}
+                  aria-label={preset}
+                  aria-pressed={labelDraftColor.toLowerCase() === preset.toLowerCase()}
+                  onclick={() => (labelDraftColor = preset)}
+                ></button>
+              {/each}
+            </HStack>
+          </VStack>
+          <HStack gap={2}>
+            <Button
+              type="submit"
+              label={editingLabelName === null ? 'Utwórz etykietę' : 'Zapisz'}
+              isDisabled={busy || !labelDraftName.trim()}
+            />
+            <Button
               type="button"
-              class="color-swatch"
-              class:active={labelDraftColor.toLowerCase() === preset.toLowerCase()}
-              style:background-color={preset}
-              title={preset}
-              aria-label={preset}
-              aria-pressed={labelDraftColor.toLowerCase() === preset.toLowerCase()}
-              onclick={() => (labelDraftColor = preset)}
-            ></button>
-          {/each}
-        </div>
-      </div>
-
-      <div class="row">
-        <button class="btn" disabled={busy || !labelDraftName.trim()}>
-          {editingLabelName === null ? 'Utwórz etykietę' : 'Zapisz'}
-        </button>
-        <button type="button" class="btn btn-outline" disabled={busy} onclick={closeLabelDialog}>
-          Anuluj
-        </button>
-      </div>
-    </form>
-  </dialog>
+              variant="secondary"
+              label="Anuluj"
+              isDisabled={busy}
+              onclick={closeLabelDialog}
+            />
+          </HStack>
+        </VStack>
+      </form>
+    </VStack>
+  </Dialog>
 {/if}
-{#if canManage && activeStatuses.length < 20 && statuses.length < 100}<div class="status-create">
-    {#if addingStatus}<form
-        class="row"
+
+{#if canManage && activeStatuses.length < 20 && statuses.length < 100}
+  <HStack gap={2} class="status-create">
+    {#if addingStatus}
+      <form
         onsubmit={(event) => {
           event.preventDefault();
           void addStatus();
         }}
       >
-        <label for="status-name" class="sr-only">Nazwa statusu</label><input
-          id="status-name"
-          bind:value={statusName}
-          placeholder={'Nazwa statusu'}
-          maxlength="60"
-          required
-        /><input type="color" aria-label={'Kolor statusu'} bind:value={statusColor} /><button
-          class="btn btn-outline"
-          disabled={busy || !statusName.trim()}>Dodaj status</button
-        ><button
-          type="button"
-          class="icon-button"
-          aria-label={'Anuluj'}
-          onclick={() => (addingStatus = false)}><X size={16} aria-hidden="true" /></button
-        >
+        <HStack gap={2} wrap="wrap">
+          <TextInput
+            id="status-name"
+            label="Nazwa statusu"
+            isLabelHidden
+            value={statusName}
+            onChange={(value) => (statusName = value.slice(0, 60))}
+            placeholder="Nazwa statusu"
+            isRequired
+          />
+          <input
+            type="color"
+            aria-label="Kolor statusu"
+            bind:value={statusColor}
+            class="color-input"
+          />
+          <Button
+            type="submit"
+            variant="secondary"
+            label="Dodaj status"
+            isDisabled={busy || !statusName.trim()}
+          />
+          <IconButton
+            label="Anuluj"
+            tooltip="Anuluj"
+            variant="ghost"
+            size="sm"
+            onclick={() => (addingStatus = false)}
+          >
+            {#snippet icon()}<X size={16} aria-hidden="true" />{/snippet}
+          </IconButton>
+        </HStack>
       </form>
-    {:else}<button
-        type="button"
-        class="btn btn-outline"
-        disabled={busy}
+    {:else}
+      <Button
+        variant="secondary"
+        label="Dodaj status"
+        isDisabled={busy}
         onclick={async () => {
           addingStatus = true;
           await tick();
           document.getElementById('status-name')?.focus();
-        }}><Plus size={15} aria-hidden="true" />Dodaj status</button
-      >{/if}
-  </div>{/if}
-{#if canManage && statuses.some((s) => s.deleted)}<details class="deleted-statuses">
-    <summary>Usunięte statusy</summary>{#each statuses.filter((s) => s.deleted) as status}<button
-        class="btn btn-outline"
-        onclick={(event) => openStatus(status, event)}
-        ><Pencil size={14} aria-hidden="true" />{label(status)}</button
-      >{/each}
-  </details>{/if}
-{#if editingStatus}<dialog
-    class="issue-dialog status-dialog"
-    bind:this={statusDialog}
-    aria-labelledby="status-heading"
-    oncancel={(event) => {
-      event.preventDefault();
-      closeStatus();
-    }}
-  >
-    <div class="issue-heading">
-      <h2 id="status-heading">Edytuj status</h2>
-      <button class="icon-button" aria-label={'Zamknij'} onclick={closeStatus}
-        ><X size={18} aria-hidden="true" /></button
+        }}
       >
-    </div>
-    <form
-      class="issue-editor"
-      onsubmit={(event) => {
-        event.preventDefault();
-        void saveStatus();
-      }}
-    >
-      <label for="edit-status-name">Nazwa</label><input
-        id="edit-status-name"
-        bind:value={editingStatus.name}
-        required
-        maxlength="60"
+        {#snippet icon()}<Plus size={15} aria-hidden="true" />{/snippet}
+      </Button>
+    {/if}
+  </HStack>
+{/if}
+
+{#if canManage && statuses.some((s) => s.deleted)}
+  <details class="deleted-statuses">
+    <summary>Usunięte statusy</summary>
+    <HStack gap={2} wrap="wrap">
+      {#each statuses.filter((s) => s.deleted) as status (status.id)}
+        <Button
+          variant="secondary"
+          label={label(status)}
+          onclick={(event) => openStatus(status, event)}
+        >
+          {#snippet icon()}<Pencil size={14} aria-hidden="true" />{/snippet}
+        </Button>
+      {/each}
+    </HStack>
+  </details>
+{/if}
+
+<Dialog
+  isOpen={statusDialogOpen}
+  onOpenChange={(isOpen) => {
+    if (!isOpen) closeStatus();
+  }}
+  width={560}
+  purpose="form"
+>
+  {#if editingStatus}
+    <VStack gap={4}>
+      <DialogHeader
+        title="Edytuj status"
+        onOpenChange={(isOpen) => {
+          if (!isOpen) closeStatus();
+        }}
       />
-      <label for="edit-status-color">Kolor</label><input
-        id="edit-status-color"
-        type="color"
-        value={color(editingStatus)}
-        oninput={(event) => (editingStatus!.color = event.currentTarget.value)}
-      />
-      <label class="status-state"
-        ><input type="checkbox" bind:checked={editingStatus.deleted} />Usunięty</label
+      <form
+        onsubmit={(event) => {
+          event.preventDefault();
+          void saveStatus();
+        }}
       >
-      {#if statusError}<p role="alert" class="error">{statusError}</p>{/if}
-      <div class="row">
-        <button class="btn" disabled={busy || !editingStatus.name.trim()}
-          ><Save size={14} aria-hidden="true" />Zapisz</button
-        ><button type="button" class="btn btn-outline" disabled={busy} onclick={closeStatus}
-          >Anuluj</button
-        >{#if !editingStatus.deleted}<button
-            type="button"
-            class="btn btn-outline danger-button"
-            disabled={busy}
-            onclick={() => saveStatus(true)}
-            ><Trash2 size={14} aria-hidden="true" />Usuń status</button
-          >{/if}
-      </div>
-    </form>
-  </dialog>{/if}
+        <VStack gap={3}>
+          <TextInput
+            id="edit-status-name"
+            label="Nazwa"
+            bind:value={editingStatus.name}
+            isRequired
+          />
+          <VStack gap={2}>
+            <Text type="label" weight="medium">Kolor</Text>
+            <input
+              id="edit-status-color"
+              type="color"
+              value={color(editingStatus)}
+              class="color-input"
+              aria-label="Kolor"
+              oninput={(event) => (editingStatus!.color = event.currentTarget.value)}
+            />
+          </VStack>
+          <CheckboxInput
+            label="Usunięty"
+            value={!!editingStatus.deleted}
+            onChange={(checked) => (editingStatus!.deleted = checked)}
+          />
+          {#if statusError}
+            <Text role="alert" class="manage-label-error">{statusError}</Text>
+          {/if}
+          <HStack gap={2} wrap="wrap">
+            <Button type="submit" label="Zapisz" isDisabled={busy || !editingStatus.name.trim()}>
+              {#snippet icon()}<Save size={14} aria-hidden="true" />{/snippet}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              label="Anuluj"
+              isDisabled={busy}
+              onclick={closeStatus}
+            />
+            {#if !editingStatus.deleted}
+              <Button
+                type="button"
+                variant="destructive"
+                label="Usuń status"
+                isDisabled={busy}
+                onclick={() => saveStatus(true)}
+              >
+                {#snippet icon()}<Trash2 size={14} aria-hidden="true" />{/snippet}
+              </Button>
+            {/if}
+          </HStack>
+        </VStack>
+      </form>
+    </VStack>
+  {/if}
+</Dialog>
 
 <style>
-  .label-dropdown-actions {
+  :global(.board) {
     display: grid;
-    gap: 2px;
+    align-items: start;
+    gap: var(--spacing-4);
+    overflow-x: auto;
+    padding: var(--spacing-0-5) var(--spacing-0-5) var(--spacing-3);
   }
-  .label-dropdown-action {
+  :global(.board-column) {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    min-height: 36px;
-    padding: 8px 10px;
-    border: 0;
-    border-radius: var(--radius-sm);
-    background: transparent;
-    color: var(--ink);
-    font-size: 13px;
-    text-align: left;
-    cursor: pointer;
+    flex-direction: column;
+    min-height: 330px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-container);
   }
-  .label-dropdown-action:hover {
-    background: var(--surface-muted);
+  :global(.board-column.drop-target) {
+    border-color: var(--color-accent);
+    outline: 1px solid var(--color-accent);
+    outline-offset: -3px;
+  }
+  :global(.column-header) {
+    min-height: 56px;
+    padding: var(--spacing-2);
+  }
+  :global(.column-label) {
+    margin-right: auto;
+    min-width: 0;
+  }
+  :global(.column-items) {
+    position: relative;
+    flex: 1;
+    padding-inline: var(--spacing-2);
+    transition: padding-bottom 180ms ease;
+  }
+  :global(.drag-slot) {
+    position: absolute;
+    inset-inline: var(--spacing-2);
+    border: 1px dashed var(--color-accent);
+    border-radius: var(--radius-element);
+    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    pointer-events: none;
+  }
+  :global(.board.drag-active) .task-card:not(.dragging) {
+    pointer-events: none;
+  }
+  .task-card {
+    display: block;
+    margin-bottom: var(--spacing-2);
+    padding: var(--spacing-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-element);
+    background: var(--color-background-surface);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    cursor: grab;
+    transition:
+      translate 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      opacity 120ms ease,
+      border-color var(--duration-fast) ease;
+  }
+  .task-card:hover {
+    border-color: var(--color-text-secondary);
+  }
+  .task-card:active {
+    cursor: grabbing;
+  }
+  .task-card.dragging {
+    opacity: 0.15;
+  }
+  :global(.task-title) {
+    min-width: 0;
+  }
+  :global(.task-title-text) {
+    flex: 1;
+    min-width: 0;
+  }
+  :global(.task-title) :global(svg) {
+    color: var(--color-text-secondary);
+    opacity: 0;
+    flex-shrink: 0;
+  }
+  .task-card:hover :global(.task-title) :global(svg) {
+    opacity: 1;
+  }
+  :global(.kanban-markdown-preview) {
+    max-height: 4.5em;
+    overflow: hidden;
+    color: var(--color-text-secondary);
+    font-size: var(--text-supporting-size);
+    line-height: 1.5;
+    mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  }
+  :global(.kanban-markdown-preview) :global(:is(img, .gallery, pre, table, hr)) {
+    display: none;
+  }
+  :global(.kanban-markdown-preview) :global(p) {
+    margin: 2px 0 !important;
   }
   .label-badge {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    font-size: 11px;
-    font-weight: 500;
-    line-height: 1.2;
-    padding: 2px 7px;
-    border-radius: 12px;
-    background: var(
-      --label-bg,
-      color-mix(in srgb, var(--label-color, #6b7280) 14%, var(--surface))
-    );
-    border: 1px solid color-mix(in srgb, var(--label-color, #6b7280) 45%, transparent);
+    gap: var(--spacing-1);
     max-width: 100%;
-    white-space: nowrap;
+    padding: 2px 7px;
     overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .label-badge {
-    color: var(--label-fg, var(--ink));
+    border: 1px solid color-mix(in srgb, var(--label-color) 45%, transparent);
+    border-radius: var(--radius-full);
+    background: var(--label-bg);
+    color: var(--label-fg);
+    font-size: var(--text-supporting-size);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.2;
+    white-space: nowrap;
   }
   .label-dot {
     width: 6px;
     height: 6px;
-    border-radius: 50%;
-    background: var(--label-color, #6b7280);
     flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--label-color);
   }
   .label-name {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .label-dialog {
-    width: min(540px, calc(100vw - 32px));
-  }
-  .label-preview-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    border-radius: var(--radius-lg);
-    background: var(--surface-muted);
-    border: 1px solid var(--line);
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-  }
-  .preview-title {
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    color: var(--muted);
-    letter-spacing: 0.04em;
-  }
-  .preview-desc {
-    font-size: 12px;
-  }
-  .color-picker-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 4px;
-  }
-  .color-picker-row input[type='color'] {
-    box-sizing: border-box;
-    flex: 0 0 42px;
-    width: 42px;
-    height: 36px;
-    min-height: 36px;
-    margin: 0;
-    padding: 2px;
-    border-radius: 3px;
-    cursor: pointer;
-  }
-  .label-dialog .row .btn {
-    height: 36px;
-    min-height: 36px;
-    padding: 8px 12px;
-    line-height: 1.2;
-  }
-  .preset-swatches {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .color-swatch {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    cursor: pointer;
-    padding: 0;
-    transition: transform 0.1s ease;
-  }
-  .color-swatch:hover {
-    transform: scale(1.18);
-  }
-  .color-swatch.active {
-    border-color: var(--ink);
-    box-shadow: 0 0 0 1px var(--surface);
-  }
-  .manage-labels-panel {
-    padding: 10px;
-    margin: 0;
-    display: grid;
-    gap: 12px;
-  }
-  .manage-labels-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .manage-labels-header h4 {
-    margin: 0;
-    font-size: 15px;
-    font-weight: 600;
-  }
-  .manage-labels-hint {
-    font-size: 12px;
-    color: var(--muted);
-    margin: 0;
-  }
-  .manage-label-error {
-    color: var(--danger, var(--red));
-    font-size: 13px;
-    margin: 0;
-    padding: 8px 12px;
-    border: 1px solid var(--danger, var(--red));
-    border-radius: var(--radius-lg);
-    background: color-mix(in srgb, var(--danger, var(--red)) 10%, transparent);
-  }
-  .manage-labels-list {
-    display: grid;
-    gap: 8px;
-  }
-  .manage-label-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 8px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-  }
-  .manage-label-info {
-    display: flex;
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 4px;
-    flex: 1;
-    min-width: 0;
-  }
-  .manage-label-desc {
-    font-size: 12px;
-    color: var(--muted);
-    overflow-wrap: anywhere;
-  }
-  .manage-label-actions {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    flex-shrink: 0;
-  }
-  .status-dialog {
-    width: min(560px, calc(100vw - 32px));
-  }
-  .status-state {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .deleted-statuses {
-    margin-top: 20px;
-  }
-  .deleted-statuses summary {
-    cursor: pointer;
-    margin-bottom: 12px;
-  }
-  .deleted-statuses .btn {
-    margin: 4px;
-  }
-  .column-label {
-    margin-right: auto;
-  }
-  .column-header {
-    gap: 8px;
-  }
-  .board {
-    overflow-x: auto;
-    padding: 3px 3px 12px;
-  }
-  .column-items {
-    position: relative;
-    transition: padding-bottom 180ms ease;
-  }
-  .board-column {
-    padding: 0 12px 12px;
-    transition:
-      background-color 180ms ease,
-      border-color 180ms ease;
-  }
-  .drag-slot {
-    position: absolute;
-    left: 0;
-    right: 0;
-    border: 1px dashed var(--accent);
-    border-radius: var(--radius-lg);
-    background: color-mix(in srgb, var(--accent) 8%, transparent);
-    pointer-events: none;
-    transition:
-      top 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
-      height 180ms ease;
-  }
-
-  .task-card {
-    width: 100%;
-    text-align: left;
-    text-decoration: none;
-    color: var(--ink);
-    border: 1px solid var(--line);
-    cursor: grab;
-    display: grid;
-    gap: 7px;
-    margin-bottom: 8px;
-    padding: 10px 11px;
-    transition:
-      translate 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
-      opacity 120ms ease,
-      border-color var(--dur-fast) ease,
-      box-shadow var(--dur) ease;
-  }
-  .task-card:hover {
-    border-color: var(--control-border-hover);
-  }
-  .task-card:active {
-    cursor: grabbing;
-  }
-  .board.drag-active .task-card:not(.dragging) {
-    pointer-events: none;
-  }
-  .task-card.dragging {
-    opacity: 0.15;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .column-items,
-    .board-column,
-    .drag-slot,
-    .task-card {
-      transition: none;
-    }
-  }
-  .task-title {
-    display: flex;
-    gap: 10px;
-    align-items: start;
-  }
-  .task-title :global(strong) {
-    flex: 1;
-    min-width: 0;
-    margin: 0;
-    font-size: 13.5px;
-    font-weight: 500;
-    line-height: 1.4;
-    /* Long titles stay readable without stretching the column. */
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    overflow: hidden;
-  }
-  .task-title :global(svg) {
-    color: var(--muted);
-    opacity: 0;
-    flex-shrink: 0;
-  }
-  .task-card:hover .task-title :global(svg) {
-    opacity: 1;
-  }
-  /* A short text teaser: at most three lines, fading out, without media. */
-  .kanban-markdown-preview {
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.5;
-    max-height: 4.5em;
-    overflow: hidden;
-    mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
-  }
-  .kanban-markdown-preview :global(:is(img, .gallery, pre, table, hr)) {
-    display: none;
-  }
-  .kanban-markdown-preview :global(h1),
-  .kanban-markdown-preview :global(h2),
-  .kanban-markdown-preview :global(h3),
-  .kanban-markdown-preview :global(h4),
-  .kanban-markdown-preview :global(h5),
-  .kanban-markdown-preview :global(h6) {
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    margin: 4px 0 !important;
-    line-height: 1.4 !important;
-  }
-  .kanban-markdown-preview :global(p) {
-    margin: 2px 0 !important;
-  }
-  /* `.kanban-card strong` (card titles) must not turn inline bold into a block. */
-  .kanban-markdown-preview :global(strong) {
-    display: inline;
-    margin: 0;
-    font-size: inherit;
-    font-weight: 600;
-    line-height: inherit;
-  }
-  .task-labels {
-    display: flex;
-    gap: 5px;
-    flex-wrap: wrap;
-  }
-  .drop-target {
-    border-color: var(--accent) !important;
-    outline: 1px solid var(--accent);
-    outline-offset: -3px;
-    background: var(--surface-muted) !important;
-  }
-  .status-create {
-    margin-top: 20px;
-  }
-  .status-create input[type='color'] {
-    width: 42px;
-    height: 36px;
-    padding: 3px;
-  }
-
-  .status-create input {
-    max-width: 260px;
-    margin: 0;
-  }
-  .issue-dialog {
-    position: fixed;
-    inset: 0;
-    width: min(760px, calc(100vw - 32px));
-    max-height: calc(100dvh - 48px);
-    margin: auto;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-xl);
-    background: var(--surface);
-    color: var(--ink);
-    padding: 28px;
-    overflow: auto;
-    box-shadow: var(--shadow-lg);
-  }
-  .issue-dialog::backdrop {
-    background: rgb(12 13 15 / 0.42);
-    backdrop-filter: blur(2px);
-  }
-  .issue-heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
-    gap: 16px;
-    margin-bottom: 20px;
-  }
-  .issue-heading h2 {
-    font-size: 24px;
-    margin-top: 10px;
-    overflow-wrap: anywhere;
-  }
-  .issue-editor {
-    display: grid;
-    gap: 10px;
-    margin-bottom: 24px;
-  }
-  @media (max-width: 760px) {
-    .mobile-move-tray {
-      position: fixed;
-      z-index: 1000;
-      inset-inline: 12px;
-      bottom: calc(12px + env(safe-area-inset-bottom));
-      display: grid;
-      gap: 10px;
-      padding: 12px;
-      border: 1px solid var(--line);
-      border-radius: var(--radius-xl);
-      background: var(--surface);
-      box-shadow: var(--shadow-lg);
-    }
-    .mobile-move-heading {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      min-width: 0;
-      font-size: 13px;
-    }
-    .mobile-move-heading > span {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .mobile-move-options {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
-      gap: 8px;
-      max-height: min(35dvh, 240px);
-      overflow-y: auto;
-      padding: 2px 2px 6px;
-      overscroll-behavior: contain;
-    }
-    .mobile-move-option {
-      display: flex;
-      width: 100%;
-      min-height: 44px;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border: 1px solid var(--line);
-      border-radius: var(--radius-lg);
-      background: var(--surface);
-      color: var(--ink);
-      font: inherit;
-      text-align: left;
-      touch-action: manipulation;
-    }
-    .board {
-      grid-template-columns: none !important;
-      grid-auto-flow: column;
-      grid-auto-columns: minmax(250px, 1fr);
-      overflow-x: auto;
-      touch-action: pan-x pan-y;
-    }
-    .issue-dialog {
-      padding: 20px 16px;
-      max-height: calc(100dvh - 24px);
-    }
-    .issue-heading h2 {
-      font-size: 20px;
-    }
-  }
-
-  .task-reference {
-    flex: 0 0 auto;
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 11px;
-    line-height: 1.4;
-  }
-  /* One footer row: deadline on the left, assignees on the right. */
-  .task-meta {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 4px 10px;
-    padding-top: 7px;
-    border-top: 1px solid var(--line);
-    color: var(--muted);
-    font-size: 11.5px;
+  :global(.task-meta) {
+    padding-top: var(--spacing-1-5);
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-size: var(--text-supporting-size);
   }
   .task-due {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: var(--spacing-1);
     min-width: 0;
     white-space: nowrap;
   }
-  .task-due :global(svg) {
-    flex-shrink: 0;
-    opacity: 0.75;
+  .overdue {
+    color: var(--color-error);
+    font-weight: var(--font-weight-semibold);
   }
-  .task-due time {
-    color: inherit;
+  .due-soon {
+    color: var(--color-warning);
+    font-weight: var(--font-weight-semibold);
   }
   .task-assignees {
     display: flex;
     min-width: 0;
     margin-left: auto;
   }
-  .overdue {
-    color: var(--danger);
-    font-weight: 600;
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
-  .due-soon {
-    color: color-mix(in srgb, #d58a32 82%, var(--ink));
-    font-weight: 600;
+  :global(.mobile-move-tray) {
+    position: fixed !important;
+    z-index: 1000;
+    inset-inline: var(--spacing-3);
+    bottom: calc(var(--spacing-3) + env(safe-area-inset-bottom));
+    box-shadow: var(--shadow-high);
+  }
+  :global(.mobile-move-options) {
+    max-height: min(35dvh, 240px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  :global(.mobile-move-option.drop-target) {
+    border-color: var(--color-accent);
+  }
+  .color-input {
+    width: 42px;
+    height: 36px;
+    padding: 3px;
+    border: 1px solid var(--color-border-emphasized);
+    border-radius: var(--radius-inner);
+    cursor: pointer;
+  }
+  .color-swatch {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+  }
+  .color-swatch.active {
+    border-color: var(--color-text-primary);
+    box-shadow: 0 0 0 1px var(--color-background-surface);
+  }
+  :global(.status-create) {
+    margin-top: var(--spacing-5);
+  }
+  .deleted-statuses {
+    margin-top: var(--spacing-5);
+  }
+  .deleted-statuses summary {
+    margin-bottom: var(--spacing-3);
+    cursor: pointer;
+  }
+  :global(.manage-label-error) {
+    color: var(--color-error);
+    font-size: var(--text-supporting-size);
+  }
+  @media (max-width: 760px) {
+    :global(.board) {
+      grid-template-columns: none !important;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(250px, 1fr);
+      touch-action: pan-x pan-y;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(.column-items),
+    :global(.drag-slot),
+    .task-card {
+      transition: none;
+    }
   }
 </style>

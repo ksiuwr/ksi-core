@@ -1,6 +1,6 @@
 <script lang="ts">
   import { untrack } from 'svelte';
-  import { Check } from '@lucide/svelte';
+  import { Banner, MetadataList, MetadataListItem } from '@astryx-sv/core';
   import ContentLocaleEditor from './ContentLocaleEditor.svelte';
   import {
     contentLocaleName,
@@ -178,72 +178,27 @@
   onremove={() => save(true)}
 >
   {#snippet messages()}
-    {#if error}<p class="message error" role="alert">{error}</p>{/if}
-    {#if notice}<p class="message success" role="status">
-        <Check size={14} />{#if notice === 'saved'}Zapisano tłumaczenie: {localeLabel(
-            selected
-          )}.{:else}Usunięto tłumaczenie: {localeLabel(selected)}. Odwiedzający zobaczą teraz wersję
-          polską.{/if}
-      </p>{/if}
+    {#if error}
+      <Banner status="error" title={error} role="alert" />
+    {:else if notice}
+      <Banner
+        status="success"
+        title={notice === 'saved'
+          ? `Zapisano tłumaczenie: ${localeLabel(selected)}.`
+          : `Usunięto tłumaczenie: ${localeLabel(selected)}. Odwiedzający zobaczą teraz wersję polską.`}
+        role="status"
+      />
+    {/if}
   {/snippet}
   {#snippet reference()}
-    <div class="reference-grid">
+    <MetadataList>
       {#each Object.keys(baseline) as key}
-        <div>
-          <span>{labels[key]}</span>
-          <p>
-            {Array.isArray(baseline[key])
-              ? (baseline[key] as string[]).join(', ')
-              : baseline[key] || 'Brak treści'}
-          </p>
-        </div>
+        <MetadataListItem label={labels[key] ?? key}>
+          {Array.isArray(baseline[key])
+            ? (baseline[key] as string[]).join(', ')
+            : baseline[key] || 'Brak treści'}
+        </MetadataListItem>
       {/each}
-    </div>
+    </MetadataList>
   {/snippet}
 </ContentLocaleEditor>
-
-<style>
-  .message {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin: 10px 0 0;
-    padding: 9px 11px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    font-size: 12px;
-  }
-  .message.error {
-    border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
-    color: var(--danger);
-  }
-  .message.success {
-    background: var(--surface-muted);
-  }
-  .reference-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 1px;
-    background: var(--border);
-  }
-  .reference-grid > div {
-    min-width: 0;
-    padding: 11px 12px;
-    background: var(--surface);
-  }
-  .reference-grid > div > span {
-    color: var(--muted);
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-  .reference-grid p {
-    max-height: 190px;
-    margin: 5px 0 0;
-    overflow: auto;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    font-size: 12px;
-  }
-</style>

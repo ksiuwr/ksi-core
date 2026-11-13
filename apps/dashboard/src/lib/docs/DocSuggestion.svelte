@@ -20,11 +20,24 @@
     primaryContentLocale,
     type ContentLocale
   } from 'shared/content-locales';
-  import { slider } from '@ksi-core/ui/platform/slider';
   import { preferences } from '$lib/preferences.svelte';
   import DocDiff from './DocDiff.svelte';
   import DocError from './DocError.svelte';
   import { docsRequest, errorCode, languagesOf, textIn, type SuggestionDetail } from './docs';
+  import {
+    Badge,
+    Banner,
+    Button,
+    Card,
+    Heading,
+    HStack,
+    Icon,
+    SegmentedControl,
+    SegmentedControlItem,
+    Text,
+    TextArea,
+    VStack
+  } from '@astryx-sv/core';
 
   let {
     projectId,
@@ -83,118 +96,139 @@
   }
 </script>
 
-<div class="workspace-header">
-  <div>
-    <p class="workspace-eyebrow">Propozycja</p>
-    <h1>
+<HStack class="workspace-header" hAlign="between" vAlign="start" wrap="wrap" gap={4}>
+  <VStack gap={1}>
+    <Text type="supporting" class="workspace-eyebrow">Propozycja</Text>
+    <Heading level={1}>
       {#if suggestion.page}{suggestion.page.title}{:else}Nowa strona: {suggestion.title}{/if}
-    </h1>
-  </div>
-  <a class="btn btn-outline" href={docsPath(slug, 'suggestions')}
-    ><ArrowLeft size={15} aria-hidden="true" />Wszystkie propozycje</a
-  >
-</div>
+    </Heading>
+  </VStack>
+  <Button href={docsPath(slug, 'suggestions')} variant="secondary" label="Wszystkie propozycje">
+    {#snippet icon()}<Icon icon={ArrowLeft} size="sm" />{/snippet}
+  </Button>
+</HStack>
 <DocError code={error} />
-<div class="review">
-  <section class="review-summary card">
-    <div class="review-author">
-      {#if suggestion.author}<MemberPreview
-          member={suggestion.author}
-          href={`/people/${encodeURIComponent(suggestion.author.id)}`}
-          size={32}
-        />{/if}
-      <time datetime={suggestion.createdAt}>{when(suggestion.createdAt)}</time>
-      {#if suggestion.state === 'pending'}<span class="tag tag-lavender">Czeka na ocenę</span
-        >{:else if suggestion.state === 'accepted'}<span class="tag tag-mint">Zaakceptowana</span
-        >{:else if suggestion.state === 'rejected'}<span class="tag">Odrzucona</span>{:else}<span
-          class="tag">Wycofana</span
-        >{/if}
-    </div>
-    <blockquote class="review-reason">{suggestion.reason}</blockquote>
-    <ul class="review-notes">
-      {#if !suggestion.page}
-        <li>
-          <FilePlus size={15} aria-hidden="true" />
-          <span>Tworzy nową stronę pod adresem <code>{suggestion.slug}</code></span>
-        </li>
-      {/if}
-      {#if (before?.folder ?? '') !== suggestion.folder}
-        <li>
-          <Folder size={15} aria-hidden="true" />
-          <span
-            >Folder:
-            <del
-              >{#if before?.folder}{before.folder}{:else}Najwyższy poziom{/if}</del
-            >
-            →
-            <ins
-              >{#if suggestion.folder}{suggestion.folder}{:else}Najwyższy poziom{/if}</ins
-            ></span
-          >
-        </li>
-      {/if}
-      {#if visibilityChange}
-        <li class="review-visibility">
-          {#if suggestion.public}<Globe size={15} aria-hidden="true" /><span
-              >Prosi o publikację tej strony na stronie KSI.</span
-            >{:else}<Lock size={15} aria-hidden="true" /><span
-              >Prosi o ograniczenie widoczności strony do członków.</span
+<VStack class="review" gap={5}>
+  <Card padding={6}>
+    <VStack gap={3}>
+      <HStack class="review-author" gap={3} vAlign="center" wrap="wrap">
+        {#if suggestion.author}
+          <MemberPreview
+            member={suggestion.author}
+            href={`/people/${encodeURIComponent(suggestion.author.id)}`}
+            size={32}
+          />
+        {/if}
+        <Text type="supporting">
+          <time datetime={suggestion.createdAt}>{when(suggestion.createdAt)}</time>
+        </Text>
+        {#if suggestion.state === 'pending'}
+          <Badge variant="warning" label="Czeka na ocenę" />
+        {:else if suggestion.state === 'accepted'}
+          <Badge variant="success" label="Zaakceptowana" />
+        {:else if suggestion.state === 'rejected'}
+          <Badge variant="neutral" label="Odrzucona" />
+        {:else}
+          <Badge variant="neutral" label="Wycofana" />
+        {/if}
+      </HStack>
+      <blockquote class="review-reason">{suggestion.reason}</blockquote>
+      <VStack gap={2} class="review-notes">
+        {#if !suggestion.page}
+          <HStack gap={2} vAlign="start">
+            <Icon icon={FilePlus} size="sm" color="secondary" />
+            <Text type="supporting">
+              Tworzy nową stronę pod adresem <code>{suggestion.slug}</code>
+            </Text>
+          </HStack>
+        {/if}
+        {#if (before?.folder ?? '') !== suggestion.folder}
+          <HStack gap={2} vAlign="start">
+            <Icon icon={Folder} size="sm" color="secondary" />
+            <Text type="supporting">
+              Folder:
+              <del
+                >{#if before?.folder}{before.folder}{:else}Najwyższy poziom{/if}</del
+              >
+              →
+              <ins
+                >{#if suggestion.folder}{suggestion.folder}{:else}Najwyższy poziom{/if}</ins
+              >
+            </Text>
+          </HStack>
+        {/if}
+        {#if visibilityChange}
+          <HStack gap={2} vAlign="start" class="review-visibility">
+            {#if suggestion.public}
+              <Icon icon={Globe} size="sm" color="success" />
+              <Text type="supporting">Prosi o publikację tej strony na stronie KSI.</Text>
+            {:else}
+              <Icon icon={Lock} size="sm" color="secondary" />
+              <Text type="supporting">Prosi o ograniczenie widoczności strony do członków.</Text>
+            {/if}
+          </HStack>
+        {/if}
+        {#if suggestion.state === 'pending' && suggestion.outdated && suggestion.page}
+          <Banner
+            status="warning"
+            container="section"
+            title={`Strona zmieniła się po napisaniu tej propozycji (v${suggestion.baseVersion} → v${suggestion.page.version}). Akceptacja zastąpi obecną treść proponowaną, więc sprawdź porównanie poniżej.`}
+          />
+        {/if}
+      </VStack>
+      {#if suggestion.state !== 'pending' && suggestion.reviewer}
+        <Text as="p" type="supporting" class="review-outcome">
+          {#if suggestion.state === 'accepted'}Zaakceptował(a){:else}Odrzucił(a){/if}
+          <strong>{suggestion.reviewer.name}</strong>
+          {#if suggestion.reviewedAt}· <time datetime={suggestion.reviewedAt}
+              >{when(suggestion.reviewedAt)}</time
             >{/if}
-        </li>
+          {#if suggestion.reviewNote}<span class="review-note">“{suggestion.reviewNote}”</span>{/if}
+        </Text>
       {/if}
-      {#if suggestion.state === 'pending' && suggestion.outdated && suggestion.page}
-        <li class="review-warning">
-          <TriangleAlert size={15} aria-hidden="true" />
-          <span
-            >Strona zmieniła się po napisaniu tej propozycji (v{suggestion.baseVersion} → v{suggestion
-              .page.version}). Akceptacja zastąpi obecną treść proponowaną, więc sprawdź porównanie
-            poniżej.</span
-          >
-        </li>
+      {#if suggestion.state === 'accepted' && pageSlug}
+        <Button
+          href={docsPath(slug, pageSlug)}
+          variant="secondary"
+          label="Otwórz stronę"
+          class="review-open"
+        >
+          {#snippet icon()}<Icon icon={ArrowUpRight} size="sm" />{/snippet}
+        </Button>
       {/if}
-    </ul>
-    {#if suggestion.state !== 'pending' && suggestion.reviewer}
-      <p class="review-outcome">
-        {#if suggestion.state === 'accepted'}Zaakceptował(a){:else}Odrzucił(a){/if}
-        <strong>{suggestion.reviewer.name}</strong>
-        {#if suggestion.reviewedAt}· <time datetime={suggestion.reviewedAt}
-            >{when(suggestion.reviewedAt)}</time
-          >{/if}
-        {#if suggestion.reviewNote}<span class="review-note">“{suggestion.reviewNote}”</span>{/if}
-      </p>
-    {/if}
-    {#if suggestion.state === 'accepted' && pageSlug}
-      <a class="btn btn-outline review-open" href={docsPath(slug, pageSlug)}
-        ><ArrowUpRight size={15} aria-hidden="true" />Otwórz stronę</a
-      >
-    {/if}
-  </section>
+    </VStack>
+  </Card>
 
-  <section class="review-comparison" aria-label={'Zmiany'}>
+  <VStack as="section" gap={3} aria-label={'Zmiany'}>
     {#if locales.length > 1}
-      <div class="segmented-control" role="group" aria-label={'Język'} use:slider>
-        {#each locales as item (item)}
-          <button
-            type="button"
-            class:active={locale === item}
-            aria-pressed={locale === item}
-            onclick={() => (editing = item)}
-          >
-            {contentLocaleName(item, language)}
-            {#if languageChanged(item)}<span class="review-language-change" title={'Zmieniono'}
-                ><span class="sr-only">Zmieniono</span></span
-              >{/if}
-          </button>
-        {/each}
-      </div>
+      <HStack hAlign="start">
+        <SegmentedControl
+          value={locale}
+          onChange={(next) => (editing = next as ContentLocale)}
+          label={'Język'}
+          size="sm"
+        >
+          {#each locales as item (item)}
+            <SegmentedControlItem value={item} label={contentLocaleName(item, language)}>
+              {#snippet icon()}
+                {#if languageChanged(item)}
+                  <span class="review-language-change" aria-hidden="true"></span>
+                {/if}
+              {/snippet}
+            </SegmentedControlItem>
+          {/each}
+        </SegmentedControl>
+      </HStack>
     {/if}
     {#if beforeText.title !== afterText.title}
-      <p class="review-title-change">
+      <Text as="p" class="review-title-change">
         Tytuł: <del>{beforeText.title || '—'}</del> → <ins>{afterText.title || '—'}</ins>
-      </p>
+      </Text>
     {/if}
     {#if locale !== primaryContentLocale && (!afterText.title || !afterText.markdown)}
-      <p class="review-fallback">Puste pola tłumaczenia są zastępowane tekstem polskim.</p>
+      <Text as="p" type="supporting" class="review-fallback">
+        Puste pola tłumaczenia są zastępowane tekstem polskim.
+      </Text>
     {/if}
     <DocDiff
       before={beforeText.markdown}
@@ -204,163 +238,131 @@
       {beforeLabel}
       afterLabel={'Proponowana wersja'}
     />
-  </section>
+  </VStack>
 
   {#if suggestion.state === 'pending' && suggestion.access.canReview}
-    <section class="review-actions card" aria-labelledby="review-heading">
-      <h2 id="review-heading">Twoja ocena</h2>
-      <label for="review-note">Uwaga dla autora (opcjonalnie)</label>
-      <textarea id="review-note" bind:value={note} rows="3" maxlength="1000"></textarea>
-      {#if blockedByVisibility}
-        <p class="review-warning-text">
-          <TriangleAlert size={14} aria-hidden="true" />
-          Tylko liderzy przestrzeni mogą zaakceptować zmianę widoczności.
-        </p>
-      {/if}
-      <div class="row">
-        <button
-          class="btn"
-          disabled={busy || blockedByVisibility}
-          onclick={() => act('resolve', { accept: true, note })}
-          ><Check size={15} aria-hidden="true" />Akceptuj zmiany</button
-        >
-        <button
-          class="btn btn-outline"
-          disabled={busy}
-          onclick={() => act('resolve', { accept: false, note })}
-          ><X size={15} aria-hidden="true" />Odrzuć</button
-        >
-      </div>
-    </section>
+    <Card padding={6} class="review-actions" aria-labelledby="review-heading">
+      <VStack gap={2}>
+        <Heading level={2} id="review-heading" class="review-heading">Twoja ocena</Heading>
+        <TextArea
+          id="review-note"
+          label="Uwaga dla autora (opcjonalnie)"
+          value={note}
+          rows={3}
+          maxLength={1000}
+          onChange={(next) => (note = next)}
+        />
+        {#if blockedByVisibility}
+          <HStack gap={1.5} vAlign="center" class="review-warning-text">
+            <Icon icon={TriangleAlert} size="sm" color="error" />
+            <Text type="supporting"
+              >Tylko liderzy przestrzeni mogą zaakceptować zmianę widoczności.</Text
+            >
+          </HStack>
+        {/if}
+        <HStack gap={2} wrap="wrap">
+          <Button
+            label="Akceptuj zmiany"
+            isDisabled={busy || blockedByVisibility}
+            onclick={() => act('resolve', { accept: true, note })}
+          >
+            {#snippet icon()}<Icon icon={Check} size="sm" />{/snippet}
+          </Button>
+          <Button
+            variant="secondary"
+            label="Odrzuć"
+            isDisabled={busy}
+            onclick={() => act('resolve', { accept: false, note })}
+          >
+            {#snippet icon()}<Icon icon={X} size="sm" />{/snippet}
+          </Button>
+        </HStack>
+      </VStack>
+    </Card>
   {:else if suggestion.state === 'pending' && suggestion.isAuthor}
-    <div class="row">
-      <button class="btn btn-outline" disabled={busy} onclick={() => act('withdraw')}
-        ><Undo2 size={15} aria-hidden="true" />Wycofaj propozycję</button
+    <HStack>
+      <Button
+        variant="secondary"
+        label="Wycofaj propozycję"
+        isDisabled={busy}
+        onclick={() => act('withdraw')}
       >
-    </div>
+        {#snippet icon()}<Icon icon={Undo2} size="sm" />{/snippet}
+      </Button>
+    </HStack>
   {/if}
-</div>
+</VStack>
 
 <style>
-  .review {
-    display: grid;
-    gap: 22px;
+  :global(.review) {
     max-width: 1200px;
   }
-  .review-summary {
-    display: grid;
-    gap: 14px;
-  }
-  .review-author {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    color: var(--muted);
-    font-size: 12px;
+  :global(.review-author) {
+    color: var(--color-text-secondary);
   }
   .review-reason {
     margin: 0;
-    padding: 4px 0 4px 14px;
-    border-left: 3px solid var(--accent);
-    font-size: 15px;
+    padding: var(--spacing-1) 0 var(--spacing-1) var(--spacing-3);
+    border-left: 3px solid var(--color-accent);
+    font-size: var(--font-size-lg);
     line-height: 1.55;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
   }
-  .review-notes {
-    display: grid;
-    gap: 8px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    font-size: 13px;
+  :global(.review-notes) {
+    font-size: var(--font-size-base);
   }
-  .review-notes li {
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
+  :global(.review-notes) del,
+  :global(.review-title-change) del {
+    color: var(--color-text-red);
   }
-  .review-notes :global(svg) {
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-  .review-notes del,
-  .review-title-change del {
-    color: var(--danger);
-  }
-  .review-notes ins,
-  .review-title-change ins {
-    color: var(--positive);
+  :global(.review-notes) ins,
+  :global(.review-title-change) ins {
+    color: var(--color-text-green);
     text-decoration: none;
   }
-  .review-notes code {
-    font-family: var(--mono);
-    font-size: 12px;
+  :global(.review-notes) code {
+    font-family: var(--font-family-code);
+    font-size: var(--font-size-sm);
   }
-  .review-visibility {
-    color: var(--positive);
+  :global(.review-visibility) {
+    color: var(--color-text-green);
   }
-  .review-warning {
-    padding: 10px 12px;
-    border-radius: var(--radius-xl);
-    background: var(--coral);
-  }
-  .review-outcome {
+  :global(.review-outcome) {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: var(--spacing-1-5);
     margin: 0;
-    color: var(--muted);
-    font-size: 13px;
   }
   .review-note {
     flex-basis: 100%;
-    color: var(--ink);
+    color: var(--color-text-primary);
     font-style: italic;
   }
-  .review-open {
+  :global(.review-open) {
     justify-self: start;
-  }
-  .review-comparison {
-    display: grid;
-    gap: 14px;
-    min-width: 0;
-  }
-  .review-comparison > .segmented-control {
-    justify-self: start;
+    align-self: start;
   }
   .review-language-change {
+    display: inline-block;
     width: 6px;
     height: 6px;
-    margin-left: 6px;
     border-radius: var(--radius-full);
-    background: var(--accent);
+    background: var(--color-accent);
   }
-  .review-title-change,
-  .review-fallback {
+  :global(.review-title-change),
+  :global(.review-fallback) {
     margin: 0;
-    font-size: 13px;
+    font-size: var(--font-size-base);
     overflow-wrap: anywhere;
   }
-  .review-fallback {
-    color: var(--muted);
+  :global(.review-warning-text) {
+    color: var(--color-text-red);
   }
-  .review-actions {
-    display: grid;
-    gap: 8px;
+  :global(.review-actions) {
     max-width: 640px;
   }
-  .review-actions h2 {
-    margin-bottom: 8px;
-    font-size: 18px;
-  }
-  .review-warning-text {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin: 0 0 8px;
-    color: var(--danger);
-    font-size: 12px;
+  :global(.review-heading) {
+    font-size: var(--font-size-lg);
   }
 </style>
