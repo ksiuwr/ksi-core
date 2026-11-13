@@ -5,7 +5,8 @@
     GitCommitHorizontal,
     Github,
     Instagram,
-    Linkedin
+    Linkedin,
+    Youtube
   } from '@lucide/svelte';
 
   const commitHash = import.meta.env.PUBLIC_COMMIT_HASH || '';
@@ -16,7 +17,8 @@
     { label: 'GitHub', href: 'https://github.com/ksiuwr', icon: Github },
     { label: 'Instagram', href: 'https://instagram.com/ksi_uwr', icon: Instagram },
     { label: 'Facebook', href: 'https://www.facebook.com/ksi.uwr', icon: Facebook },
-    { label: 'LinkedIn', href: 'https://www.linkedin.com/company/ksiuwr/', icon: Linkedin }
+    { label: 'LinkedIn', href: 'https://www.linkedin.com/company/ksiuwr/', icon: Linkedin },
+    { label: 'YouTube', href: 'https://www.youtube.com/@ksi-uwr', icon: Youtube }
   ];
 
   // @wc-ignore
