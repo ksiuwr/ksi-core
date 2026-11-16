@@ -428,18 +428,6 @@ msgid "Zobacz, co robimy <0/>"
 msgstr "Zobacz, co robimy <0/>"
 
 #: src/routes/+page.svelte
-msgid "Dzieci uczące się programowania"
-msgstr "Dzieci uczące się programowania"
-
-#: src/routes/+page.svelte
-msgid "Zorganizowane konferencje"
-msgstr "Zorganizowane konferencje"
-
-#: src/routes/+page.svelte
-msgid "Zorganizowane wykłady stacjonarne"
-msgstr "Zorganizowane wykłady stacjonarne"
-
-#: src/routes/+page.svelte
 msgid "Dyskusje o pracach naukowych"
 msgstr "Dyskusje o pracach naukowych"
 
@@ -759,10 +747,6 @@ msgid "<0/> Kod źródłowy"
 msgstr "<0/> Kod źródłowy"
 
 #: src/routes/+page.svelte
-msgid "<0/> Koło naukowe na Uniwersytecie Wrocławskim"
-msgstr "<0/> Koło naukowe na Uniwersytecie Wrocławskim"
-
-#: src/routes/+page.svelte
 #: src/routes/+page.svelte
 msgid "Czytaj dalej <0/>"
 msgstr "Czytaj dalej <0/>"
@@ -1000,3 +984,15 @@ msgstr "<0/>Poprzednia"
 #: src/routes/docs/[workspace]/[slug]/+page.svelte
 msgid "Następna<0/>"
 msgstr "Następna<0/>"
+
+#: src/routes/+page.svelte
+msgid "przeszkolonych uczniów na warsztatach"
+msgstr "przeszkolonych uczniów na warsztatach"
+
+#: src/routes/+page.svelte
+msgid "zrealizowanych konferencji"
+msgstr "zrealizowanych konferencji"
+
+#: src/routes/+page.svelte
+msgid "przeprowadzonych wykładów stacjonarnych"
+msgstr "przeprowadzonych wykładów stacjonarnych"

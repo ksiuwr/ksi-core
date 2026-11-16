@@ -11,12 +11,6 @@
       class="page-container grid items-center gap-12 pt-14 pb-24 md:pt-20 md:pb-32 lg:grid-cols-[1.05fr_1fr]"
     >
       <div>
-        <p
-          class="border-line bg-surface text-muted inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs shadow-xs"
-        >
-          <span class="dot"></span>
-          Koło naukowe na Uniwersytecie Wrocławskim
-        </p>
         <h1 class="mt-6 text-[clamp(48px,8vw,84px)] leading-[0.98] font-bold tracking-[-0.05em]">
           Jesteśmy KSI.
         </h1>
@@ -48,15 +42,15 @@
       class="surface-card divide-line relative -mt-12 grid divide-y shadow-[var(--shadow-md)] sm:grid-cols-3 sm:divide-x sm:divide-y-0"
     >
       <div class="flex flex-col-reverse gap-1 p-6">
-        <dt class="text-muted text-sm">Dzieci uczące się programowania</dt>
+        <dt class="text-muted text-sm">przeszkolonych uczniów na warsztatach</dt>
         <dd class="font-display text-4xl font-semibold tracking-tight">500+</dd>
       </div>
       <div class="flex flex-col-reverse gap-1 p-6">
-        <dt class="text-muted text-sm">Zorganizowane konferencje</dt>
+        <dt class="text-muted text-sm">zrealizowanych konferencji</dt>
         <dd class="font-display text-4xl font-semibold tracking-tight">25+</dd>
       </div>
       <div class="flex flex-col-reverse gap-1 p-6">
-        <dt class="text-muted text-sm">Zorganizowane wykłady stacjonarne</dt>
+        <dt class="text-muted text-sm">przeprowadzonych wykładów stacjonarnych</dt>
         <dd class="font-display text-4xl font-semibold tracking-tight">20+</dd>
       </div>
     </dl>
