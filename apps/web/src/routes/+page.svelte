@@ -15,8 +15,8 @@
           Jesteśmy KSI.
         </h1>
         <p class="text-muted mt-6 max-w-xl text-lg leading-relaxed">
-          Jesteśmy studentami informatyki na Uniwersytecie Wrocławskim. Tworzymy oprogramowanie,
-          prowadzimy warsztaty i organizujemy wydarzenia.
+          Tworzymy Koło Studentów Informatyki na Uniwersytecie Wrocławskim. Piszemy kod, dzielimy
+          się wiedzą i organizujemy wydarzenia.
         </p>
         <div class="mt-8 flex flex-wrap gap-3">
           <a href="#projects" class="btn btn-lg btn-accent group"
@@ -24,7 +24,9 @@
               class="transition-transform group-hover:translate-x-0.5"
             /></a
           >
-          <a href="#about" class="btn btn-lg btn-outline">O KSI</a>
+          <!--
+          Nie ma na razie sekcji #about
+          <a href="#about" class="btn btn-lg btn-outline">Poznaj nasze koło</a> -->
         </div>
       </div>
       <div class="hero-photo relative mx-auto w-full max-w-xl lg:mr-0">

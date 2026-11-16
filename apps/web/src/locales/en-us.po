@@ -420,10 +420,6 @@ msgid "Grupy <0/>"
 msgstr "Groups <0/>"
 
 #: src/routes/+page.svelte
-msgid "Jesteśmy studentami informatyki na Uniwersytecie Wrocławskim. Tworzymy oprogramowanie, prowadzimy warsztaty i organizujemy wydarzenia."
-msgstr "We're computer science students at the University of Wrocław. We build software and organize workshops and events."
-
-#: src/routes/+page.svelte
 msgid "Zobacz, co robimy <0/>"
 msgstr "See what we do <0/>"
 
@@ -546,10 +542,6 @@ msgstr "Try again or return to the home page."
 #: src/routes/+page.svelte
 msgid "Więcej projektów wkrótce."
 msgstr "More projects coming soon."
-
-#: src/routes/+page.svelte
-msgid "O KSI"
-msgstr "About KSI"
 
 #: src/routes/+page.svelte
 msgid "Jesteśmy KSI."
@@ -996,3 +988,7 @@ msgstr "conferences held"
 #: src/routes/+page.svelte
 msgid "przeprowadzonych wykładów stacjonarnych"
 msgstr "in-person lectures delivered"
+
+#: src/routes/+page.svelte
+msgid "Tworzymy Koło Studentów Informatyki na Uniwersytecie Wrocławskim. Piszemy kod, dzielimy się wiedzą i organizujemy wydarzenia."
+msgstr "We are the Computer Science Student Club at the University of Wrocław. We write code, share knowledge, and organize events."
