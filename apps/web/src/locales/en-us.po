@@ -420,24 +420,8 @@ msgid "Grupy <0/>"
 msgstr "Groups <0/>"
 
 #: src/routes/+page.svelte
-msgid "Jesteśmy studentami informatyki na Uniwersytecie Wrocławskim. Tworzymy oprogramowanie, prowadzimy warsztaty i organizujemy wydarzenia."
-msgstr "We're computer science students at the University of Wrocław. We build software and organize workshops and events."
-
-#: src/routes/+page.svelte
 msgid "Zobacz, co robimy <0/>"
 msgstr "See what we do <0/>"
-
-#: src/routes/+page.svelte
-msgid "Dzieci uczące się programowania"
-msgstr "Children taught programming"
-
-#: src/routes/+page.svelte
-msgid "Zorganizowane konferencje"
-msgstr "Conferences organized"
-
-#: src/routes/+page.svelte
-msgid "Zorganizowane wykłady stacjonarne"
-msgstr "On-site lectures hosted"
 
 #: src/routes/+page.svelte
 msgid "Dyskusje o pracach naukowych"
@@ -558,14 +542,6 @@ msgstr "Try again or return to the home page."
 #: src/routes/+page.svelte
 msgid "Więcej projektów wkrótce."
 msgstr "More projects coming soon."
-
-#: src/routes/+page.svelte
-msgid "O KSI"
-msgstr "About KSI"
-
-#: src/routes/+page.svelte
-msgid "Jesteśmy KSI."
-msgstr "We're KSI."
 
 #: src/routes/+page.svelte
 msgid "Nasz zimowy obóz w górach na Dolnym Śląsku. Są wykłady o badaniach i zainteresowaniach oraz czas, żeby pobyć razem."
@@ -757,10 +733,6 @@ msgstr "<0/> Logout"
 #: src/components/Footer.svelte
 msgid "<0/> Kod źródłowy"
 msgstr "<0/> Source code"
-
-#: src/routes/+page.svelte
-msgid "<0/> Koło naukowe na Uniwersytecie Wrocławskim"
-msgstr "<0/> Student association at the University of Wrocław"
 
 #: src/routes/+page.svelte
 #: src/routes/+page.svelte
@@ -1000,3 +972,23 @@ msgstr "<0/>Previous"
 #: src/routes/docs/[workspace]/[slug]/+page.svelte
 msgid "Następna<0/>"
 msgstr "Next<0/>"
+
+#: src/routes/+page.svelte
+msgid "uczniów na naszych warsztatach"
+msgstr "students reached through our workshops"
+
+#: src/routes/+page.svelte
+msgid "zorganizowanych konferencji"
+msgstr "conferences organized"
+
+#: src/routes/+page.svelte
+msgid "otwartych wykładów"
+msgstr "open lectures"
+
+#: src/routes/+page.svelte
+msgid "Koło Studentów Informatyki"
+msgstr "Computer Science Students' Association"
+
+#: src/routes/+page.svelte
+msgid "Działamy na Uniwersytecie Wrocławskim. Piszemy własne narzędzia, organizujemy ZOSIĘ i warsztaty, a przy okazji po prostu robimy ciekawe rzeczy."
+msgstr "Based at the University of Wrocław. We build our own tools, organize ZOSIA and workshops, and simply work on cool things along the way."
