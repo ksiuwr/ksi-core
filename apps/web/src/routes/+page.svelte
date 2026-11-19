@@ -11,12 +11,12 @@
       class="page-container grid items-center gap-12 pt-14 pb-24 md:pt-20 md:pb-32 lg:grid-cols-[1.05fr_1fr]"
     >
       <div>
-        <h1 class="mt-6 text-[clamp(48px,8vw,84px)] leading-[0.98] font-bold tracking-[-0.05em]">
-          Jesteśmy KSI.
+        <h1 class="mt-6 text-[clamp(48px,8vw,76px)] leading-[0.98] font-bold tracking-[-0.05em]">
+          Koło Studentów Informatyki
         </h1>
         <p class="text-muted mt-6 max-w-xl text-lg leading-relaxed">
-          Tworzymy Koło Studentów Informatyki na Uniwersytecie Wrocławskim. Piszemy kod, dzielimy
-          się wiedzą i organizujemy wydarzenia.
+          Działamy na Uniwersytecie Wrocławskim. Piszemy własne narzędzia, organizujemy ZOSIĘ i
+          warsztaty, a przy okazji po prostu robimy ciekawe rzeczy.
         </p>
         <div class="mt-8 flex flex-wrap gap-3">
           <a href="#projects" class="btn btn-lg btn-accent group"
@@ -44,15 +44,15 @@
       class="surface-card divide-line relative -mt-12 grid divide-y shadow-[var(--shadow-md)] sm:grid-cols-3 sm:divide-x sm:divide-y-0"
     >
       <div class="flex flex-col-reverse gap-1 p-6">
-        <dt class="text-muted text-sm">przeszkolonych uczniów na warsztatach</dt>
+        <dt class="text-muted text-sm">uczniów na naszych warsztatach</dt>
         <dd class="font-display text-4xl font-semibold tracking-tight">500+</dd>
       </div>
       <div class="flex flex-col-reverse gap-1 p-6">
-        <dt class="text-muted text-sm">zrealizowanych konferencji</dt>
+        <dt class="text-muted text-sm">zorganizowanych konferencji</dt>
         <dd class="font-display text-4xl font-semibold tracking-tight">25+</dd>
       </div>
       <div class="flex flex-col-reverse gap-1 p-6">
-        <dt class="text-muted text-sm">przeprowadzonych wykładów stacjonarnych</dt>
+        <dt class="text-muted text-sm">otwartych wykładów</dt>
         <dd class="font-display text-4xl font-semibold tracking-tight">20+</dd>
       </div>
     </dl>

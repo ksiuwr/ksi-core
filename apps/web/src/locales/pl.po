@@ -544,10 +544,6 @@ msgid "Więcej projektów wkrótce."
 msgstr "Więcej projektów wkrótce."
 
 #: src/routes/+page.svelte
-msgid "Jesteśmy KSI."
-msgstr "Jesteśmy KSI."
-
-#: src/routes/+page.svelte
 msgid "Nasz zimowy obóz w górach na Dolnym Śląsku. Są wykłady o badaniach i zainteresowaniach oraz czas, żeby pobyć razem."
 msgstr "Nasz zimowy obóz w górach na Dolnym Śląsku. Są wykłady o badaniach i zainteresowaniach oraz czas, żeby pobyć razem."
 
@@ -978,17 +974,21 @@ msgid "Następna<0/>"
 msgstr "Następna<0/>"
 
 #: src/routes/+page.svelte
-msgid "przeszkolonych uczniów na warsztatach"
-msgstr "przeszkolonych uczniów na warsztatach"
+msgid "uczniów na naszych warsztatach"
+msgstr "uczniów na naszych warsztatach"
 
 #: src/routes/+page.svelte
-msgid "zrealizowanych konferencji"
-msgstr "zrealizowanych konferencji"
+msgid "zorganizowanych konferencji"
+msgstr "zorganizowanych konferencji"
 
 #: src/routes/+page.svelte
-msgid "przeprowadzonych wykładów stacjonarnych"
-msgstr "przeprowadzonych wykładów stacjonarnych"
+msgid "otwartych wykładów"
+msgstr "otwartych wykładów"
 
 #: src/routes/+page.svelte
-msgid "Tworzymy Koło Studentów Informatyki na Uniwersytecie Wrocławskim. Piszemy kod, dzielimy się wiedzą i organizujemy wydarzenia."
-msgstr "Tworzymy Koło Studentów Informatyki na Uniwersytecie Wrocławskim. Piszemy kod, dzielimy się wiedzą i organizujemy wydarzenia."
+msgid "Koło Studentów Informatyki"
+msgstr "Koło Studentów Informatyki"
+
+#: src/routes/+page.svelte
+msgid "Działamy na Uniwersytecie Wrocławskim. Piszemy własne narzędzia, organizujemy ZOSIĘ i warsztaty, a przy okazji po prostu robimy ciekawe rzeczy."
+msgstr "Działamy na Uniwersytecie Wrocławskim. Piszemy własne narzędzia, organizujemy ZOSIĘ i warsztaty, a przy okazji po prostu robimy ciekawe rzeczy."

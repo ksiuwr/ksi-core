@@ -544,10 +544,6 @@ msgid "Więcej projektów wkrótce."
 msgstr "More projects coming soon."
 
 #: src/routes/+page.svelte
-msgid "Jesteśmy KSI."
-msgstr "We're KSI."
-
-#: src/routes/+page.svelte
 msgid "Nasz zimowy obóz w górach na Dolnym Śląsku. Są wykłady o badaniach i zainteresowaniach oraz czas, żeby pobyć razem."
 msgstr "Our winter camp in the mountains of Lower Silesia, with talks on research and hobbies, and time to hang out."
 
@@ -978,17 +974,21 @@ msgid "Następna<0/>"
 msgstr "Next<0/>"
 
 #: src/routes/+page.svelte
-msgid "przeszkolonych uczniów na warsztatach"
-msgstr "students trained in workshops"
+msgid "uczniów na naszych warsztatach"
+msgstr "students reached through our workshops"
 
 #: src/routes/+page.svelte
-msgid "zrealizowanych konferencji"
-msgstr "conferences held"
+msgid "zorganizowanych konferencji"
+msgstr "conferences organized"
 
 #: src/routes/+page.svelte
-msgid "przeprowadzonych wykładów stacjonarnych"
-msgstr "in-person lectures delivered"
+msgid "otwartych wykładów"
+msgstr "open lectures"
 
 #: src/routes/+page.svelte
-msgid "Tworzymy Koło Studentów Informatyki na Uniwersytecie Wrocławskim. Piszemy kod, dzielimy się wiedzą i organizujemy wydarzenia."
-msgstr "We are the Computer Science Student Club at the University of Wrocław. We write code, share knowledge, and organize events."
+msgid "Koło Studentów Informatyki"
+msgstr "Computer Science Students' Association"
+
+#: src/routes/+page.svelte
+msgid "Działamy na Uniwersytecie Wrocławskim. Piszemy własne narzędzia, organizujemy ZOSIĘ i warsztaty, a przy okazji po prostu robimy ciekawe rzeczy."
+msgstr "Based at the University of Wrocław. We build our own tools, organize ZOSIA and workshops, and simply work on cool things along the way."
