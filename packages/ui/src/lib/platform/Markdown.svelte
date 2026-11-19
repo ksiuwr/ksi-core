@@ -95,13 +95,6 @@
     previewLoading = true;
     previewVisible = true;
     positionPreview(link);
-    void tick().then(() => {
-      try {
-        previewEl?.showPopover();
-      } catch {
-        // Ignore repeated open calls.
-      }
-    });
     const token = ++previewToken;
     void (async () => {
       try {
@@ -141,17 +134,49 @@
     })();
   }
 
+  function hidePreview() {
+    clearTimeout(hideTimer);
+    previewVisible = false;
+    previewData = null;
+    previewError = false;
+    previewNotFound = false;
+    previewLoading = false;
+    currentLink = null;
+  }
+
   function scheduleHide() {
     clearTimeout(hideTimer);
-    hideTimer = setTimeout(() => {
-      previewVisible = false;
-      previewData = null;
-      previewError = false;
-      previewNotFound = false;
-      previewLoading = false;
-      currentLink = null;
-    }, 120);
+    hideTimer = setTimeout(hidePreview, 120);
   }
+
+  // Touch screens never fire mouseleave, so taps elsewhere, scrolling and
+  // resizing must dismiss the preview too; the close button covers manual dismissal.
+  $effect(() => {
+    if (!previewVisible) return;
+    const dismiss = (event: Event) => {
+      const target = event.target as Node | null;
+      if (
+        event.type === 'pointerdown' &&
+        target &&
+        (previewEl?.contains(target) || currentLink?.contains(target))
+      )
+        return;
+      hidePreview();
+    };
+    const key = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') hidePreview();
+    };
+    document.addEventListener('pointerdown', dismiss, true);
+    window.addEventListener('scroll', dismiss, true);
+    window.addEventListener('resize', dismiss);
+    window.addEventListener('keydown', key);
+    return () => {
+      document.removeEventListener('pointerdown', dismiss, true);
+      window.removeEventListener('scroll', dismiss, true);
+      window.removeEventListener('resize', dismiss);
+      window.removeEventListener('keydown', key);
+    };
+  });
 
   function handleMouseOver(event: MouseEvent) {
     const link = (event.target as HTMLElement | null)?.closest?.(
@@ -190,6 +215,8 @@
     scheduleHide();
   }
 
+  // The preview lives on <body> so ancestor stacking contexts and overflow
+  // cannot trap it, while its z-index stays below the navigation overlays.
   function portal(node: HTMLElement) {
     document.body.appendChild(node);
     return {
@@ -231,14 +258,20 @@
   {#if previewVisible}
     <div
       bind:this={previewEl}
+      use:portal
       class="reference-preview"
-      popover="manual"
       style:left="{previewPos.left}px"
       style:top="{previewPos.top}px"
       onmouseenter={() => clearTimeout(hideTimer)}
       onmouseleave={scheduleHide}
       role="tooltip"
     >
+      <button
+        type="button"
+        class="reference-preview-close"
+        onclick={hidePreview}
+        aria-label={'Zamknij podgląd'}><X size={14} aria-hidden="true" /></button
+      >
       {#if previewLoading && !previewData}
         <p class="reference-preview-loading">Wczytywanie…</p>
       {:else if previewNotFound}
@@ -535,7 +568,10 @@
     position: fixed;
     inset: auto;
     margin: 0;
-    z-index: 1000;
+    /* Below the navigation overlays (website menu backdrop z-30, dashboard
+       mobile sideover z-50/60) so opening navigation hides the preview.
+       A top-layer popover would always paint above them instead. */
+    z-index: 20;
     width: 340px;
     padding: 0;
     border: 1px solid var(--line, #acbdb4);
@@ -546,10 +582,30 @@
     font-size: 12px;
     overflow: hidden;
   }
+  .reference-preview-close {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--muted, #6b6974);
+    cursor: pointer;
+  }
+  .reference-preview-close:hover,
+  .reference-preview-close:focus-visible {
+    background: var(--surface-muted, #edf1ed);
+    color: var(--ink, #272638);
+  }
   .reference-preview-header {
     display: grid;
     gap: 6px;
-    padding: 12px 14px;
+    padding: 12px 36px 12px 14px;
     background: var(--surface-muted, #edf1ed);
     border-bottom: 1px solid var(--line, #acbdb4);
   }
