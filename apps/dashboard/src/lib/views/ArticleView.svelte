@@ -35,6 +35,7 @@
   } = $props();
   const language = $derived(preferences.language);
 
+  let loadedId = untrack(() => article.id);
   let draft = $state<Article>(untrack(() => ({ ...article })));
   let title = $state(untrack(() => article.title));
   let markdown = $state(untrack(() => article.markdown));
@@ -58,12 +59,28 @@
     } else translationDraft[key] = value;
   }
 
+  // Live updates refresh page data via invalidateAll(); keep the local draft and
+  // version when editing the same article so uploads or background events don't
+  // wipe unsaved input, and concurrent edits still surface as a version conflict.
   $effect(() => {
-    draft = { ...article };
-    title = article.title;
-    markdown = article.markdown;
-    thumbnailFileId = article.thumbnailFileId;
-    showCredit = article.publicCredit ?? false;
+    const id = article.id;
+    const version = article.version;
+    const switched = id !== loadedId;
+    if (!switched && (permissions.canEdit || version === untrack(() => draft.version))) return;
+    loadedId = id;
+    untrack(() => {
+      draft = { ...article };
+      title = article.title;
+      markdown = article.markdown;
+      thumbnailFileId = article.thumbnailFileId;
+      showCredit = article.publicCredit ?? false;
+      if (switched) {
+        contentLocale = primaryContentLocale;
+        translationDraft = {};
+        error = '';
+        notice = '';
+      }
+    });
   });
 
   async function run(work: () => Promise<unknown>) {
@@ -125,6 +142,12 @@
       })
     );
   }
+
+  async function handleTranslationSaved(result: Partial<Article>) {
+    if (typeof result.version === 'number') draft.version = result.version;
+    if (result.translations) draft.translations = result.translations;
+    await refresh();
+  }
 </script>
 
 <a class="btn btn-outline detail-back" href={dashboardPath(workspace, projectSlug, 'articles')}
@@ -132,16 +155,18 @@
 >
 
 {#if permissions.canManage}
-  <ContentTranslations
-    kind="article"
-    id={draft.id}
-    version={draft.version}
-    translations={draft.translations}
-    baseline={{ title, markdown }}
-    bind:selected={contentLocale}
-    bind:draft={translationDraft}
-    onsaved={refresh}
-  />
+  {#key draft.id}
+    <ContentTranslations
+      kind="article"
+      id={draft.id}
+      version={draft.version}
+      translations={draft.translations}
+      baseline={{ title, markdown }}
+      bind:selected={contentLocale}
+      bind:draft={translationDraft}
+      onsaved={handleTranslationSaved}
+    />
+  {/key}
 {/if}
 
 <div class="detail-layout article-layout">
