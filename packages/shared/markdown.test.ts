@@ -4,6 +4,7 @@ import { JSDOM } from 'jsdom';
 import { renderMarkdown, type MarkdownBlock } from './markdown';
 import { createDomPurifySanitizer } from './markdown.browser';
 import { createMarkdownRenderer } from './markdown-core';
+import { insertMarkdownGallery } from './markdown-gallery';
 
 const { window } = new JSDOM('');
 const renderInBrowser = createMarkdownRenderer(
@@ -90,6 +91,21 @@ const documents: { name: string; source: string; scope?: string; expected: Markd
     ]
   },
   {
+    name: 'gallery with descriptions',
+    source:
+      'Intro\n\n:::gallery preview=2\nfile:abcdefgh Warsztaty z robotyki w sali 104\nfile:ijklmnop\nfile:qrstuvwx file:yzabcdefg\n:::\n\nOutro',
+    expected: [
+      { type: 'html', html: '<p>Intro</p>\n' },
+      {
+        type: 'gallery',
+        ids: ['abcdefgh', 'ijklmnop', 'qrstuvwx', 'yzabcdefg'],
+        preview: 2,
+        descriptions: { abcdefgh: 'Warsztaty z robotyki w sali 104' }
+      },
+      { type: 'html', html: '<p>Outro</p>\n' }
+    ]
+  },
+  {
     name: 'scoped references',
     source:
       'Fixes #12, relates to #ksi-core/34 and ##5.\n\n## Follow-up for #7\n\n- [ ] #8 pending',
@@ -159,6 +175,48 @@ test('gallery is allowlisted data with bounded preview', () => {
   const blocks = renderMarkdown(':::gallery preview=999\nfile:abcdefgh file:ijklmnop\n:::');
   const gallery = blocks.find((b) => b.type === 'gallery');
   expect(gallery).toEqual({ type: 'gallery', ids: ['abcdefgh', 'ijklmnop'], preview: 2 });
+});
+
+test('comma-separated gallery ids parse without descriptions', () => {
+  const blocks = renderMarkdown(':::gallery preview=5\nfile:abcdefgh, file:ijklmnop\n:::');
+  expect(blocks.find((b) => b.type === 'gallery')).toEqual({
+    type: 'gallery',
+    ids: ['abcdefgh', 'ijklmnop'],
+    preview: 2
+  });
+});
+
+test('gallery descriptions stay plain data in both renderers', () => {
+  const source =
+    ':::gallery preview=1\nfile:abcdefgh | **bold** <b>x</b> & `file:ijklmnop` ![alt](https://img.test/a.png)\n:::';
+  for (const render of [renderMarkdown, renderInBrowser]) {
+    const blocks = render(source);
+    expect(blocks.find((block) => block.type === 'gallery')).toEqual({
+      type: 'gallery',
+      ids: ['abcdefgh'],
+      preview: 1,
+      descriptions: {
+        abcdefgh: '**bold** <b>x</b> & `file:ijklmnop` ![alt](https://img.test/a.png)'
+      }
+    });
+    expect(html(blocks)).toBe('');
+  }
+});
+
+test('serialized descriptions cannot break out of the gallery block', () => {
+  const source = insertMarkdownGallery('Intro', ['abcdefgh'], 1, {
+    abcdefgh: 'opis\n:::\nfile:ijklmnop injected'
+  });
+  for (const render of [renderMarkdown, renderInBrowser]) {
+    expect(render(source).filter((block) => block.type === 'gallery')).toEqual([
+      {
+        type: 'gallery',
+        ids: ['abcdefgh'],
+        preview: 1,
+        descriptions: { abcdefgh: 'opis ::: file:ijklmnop injected' }
+      }
+    ]);
+  }
 });
 
 test('gallery preview permits zero selected images and code examples remain literal', () => {

@@ -2,9 +2,11 @@
   import type { FrontendLocale } from 'shared/content-locales';
   import { formatDate as formatLocaleDate } from 'shared/format';
   import { imageResize } from './image-resize.js';
-  import { tick, onDestroy } from 'svelte';
-  import { X, ChevronLeft, ChevronRight, ArrowUpRight, CalendarClock } from '@lucide/svelte';
+  import { onDestroy } from 'svelte';
+  import { X, ArrowUpRight, CalendarClock } from '@lucide/svelte';
   import type { MarkdownBlock } from 'shared/markdown';
+  import Lightbox from './Lightbox.svelte';
+  import type { LightboxItem } from './lightbox.js';
   let {
     blocks,
     language = 'pl',
@@ -15,20 +17,80 @@
     onresize?: (index: number, width: number) => void;
   } = $props();
 
-  let dialog = $state<HTMLDialogElement>();
   let container = $state<HTMLDivElement>();
-  function close() {
-    dialog?.close();
-    active = null;
+  let lightboxItems = $state<LightboxItem[]>([]);
+  let lightboxIndex = $state(0);
+  let lightboxOpen = $state(false);
+
+  function openLightbox(items: LightboxItem[], startIndex: number) {
+    lightboxItems = items;
+    lightboxIndex = startIndex;
+    lightboxOpen = true;
   }
+
+  function openInlineLightbox(target: HTMLImageElement) {
+    if (!container?.contains(target)) return;
+    const images = [...container.querySelectorAll('img')].filter(
+      (img) => !img.closest('.gallery, a[href]')
+    );
+    const index = images.indexOf(target);
+    if (index < 0) return;
+    openLightbox(
+      images.map((img) => ({
+        src: img.currentSrc || img.getAttribute('src') || '',
+        alt: img.alt || '',
+        description:
+          img.getAttribute('title')?.trim() || img.getAttribute('alt')?.trim() || undefined
+      })),
+      index
+    );
+  }
+
+  // Inline Markdown images open in the lightbox via click or keyboard. Gallery tiles
+  // handle their own clicks, linked images keep navigating, and resize handles stay separate.
   $effect(() => {
-    if (active) {
-      void tick().then(() => {
-        if (dialog && !dialog.open) dialog.showModal();
+    void blocks;
+    const root = container;
+    if (!root) return;
+    const openImageLabel = 'Otwórz zdjęcie';
+    const disposers: (() => void)[] = [];
+    for (const img of root.querySelectorAll<HTMLImageElement>('img')) {
+      if (img.closest('.gallery, a[href]')) continue;
+      const prevTabIndex = img.getAttribute('tabindex');
+      const prevRole = img.getAttribute('role');
+      const prevAriaLabel = img.getAttribute('aria-label');
+      img.setAttribute('data-lightbox-inline', '');
+      img.tabIndex = 0;
+      img.setAttribute('role', 'button');
+      img.setAttribute('aria-label', img.alt ? `${openImageLabel}: ${img.alt}` : openImageLabel);
+      const onClick = (event: MouseEvent) => {
+        if ((event.target as HTMLElement | null)?.closest('.image-resize-handle')) return;
+        openInlineLightbox(img);
+      };
+      const onKeyDown = (event: KeyboardEvent) => {
+        // @wc-ignore
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        openInlineLightbox(img);
+      };
+      img.addEventListener('click', onClick);
+      img.addEventListener('keydown', onKeyDown);
+      disposers.push(() => {
+        img.removeEventListener('click', onClick);
+        img.removeEventListener('keydown', onKeyDown);
+        img.removeAttribute('data-lightbox-inline');
+        if (prevTabIndex === null) img.removeAttribute('tabindex');
+        else img.setAttribute('tabindex', prevTabIndex);
+        if (prevRole === null) img.removeAttribute('role');
+        else img.setAttribute('role', prevRole);
+        if (prevAriaLabel === null) img.removeAttribute('aria-label');
+        else img.setAttribute('aria-label', prevAriaLabel);
       });
     }
+    return () => {
+      for (const dispose of disposers) dispose();
+    };
   });
-  let active = $state<{ ids: string[]; index: number } | null>(null);
 
   type PreviewData = {
     title: string;
@@ -239,10 +301,17 @@
   onmouseleave={scheduleHide}
   use:imageResize={{ onresize, blocks }}
 >
-  {#each blocks as block}{#if block.type === 'html'}{@html block.html}{:else}<div class="gallery">
+  {#each blocks as block}{#if block.type === 'html'}{@html block.html}{:else}{@const items =
+        block.ids.map((id, idx) => ({
+          src: `/media/${id}`,
+          alt: `${'Zdjęcie w galerii'} ${idx + 1}`,
+          description: block.descriptions?.[id]
+        }))}
+      <div class="gallery">
         {#each block.ids.slice(0, block.preview) as id, index}<button
             type="button"
-            onclick={() => (active = { ids: block.ids, index })}
+            class="gallery-tile"
+            onclick={() => openLightbox(items, index)}
             aria-label={`${'Otwórz zdjęcie'} ${index + 1}`}
             ><img
               src={`/media/${id}`}
@@ -251,8 +320,18 @@
             /></button
           >{/each}{#if block.ids.length > block.preview}<button
             type="button"
-            onclick={() => (active = { ids: block.ids, index: block.preview })}
-            >+{block.ids.length - block.preview}</button
+            class="gallery-more"
+            onclick={() => openLightbox(items, block.preview)}
+            aria-label={`${'Otwórz galerię'} (+${block.ids.length - block.preview})`}
+            ><img
+              class="gallery-more-backdrop"
+              src={`/media/${block.ids[block.preview]}`}
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+            /><span class="gallery-more-count" aria-hidden="true"
+              >+{block.ids.length - block.preview}</span
+            ></button
           >{/if}
       </div>{/if}{/each}
   {#if previewVisible}
@@ -358,39 +437,7 @@
     </div>
   {/if}
 </div>
-{#if active}<dialog
-    bind:this={dialog}
-    aria-label={'Galeria'}
-    class="lightbox"
-    oncancel={(event) => {
-      event.preventDefault();
-      close();
-    }}
-  >
-    <button type="button" onclick={close}><X size={16} aria-hidden="true" />Zamknij</button>
-    <div class="row">
-      <button
-        type="button"
-        onclick={() =>
-          (active = {
-            ids: active!.ids,
-            index: (active!.index - 1 + active!.ids.length) % active!.ids.length
-          })}
-        aria-label={'Poprzednie zdjęcie'}><ChevronLeft size={20} aria-hidden="true" /></button
-      ><img
-        src={`/media/${active.ids[active.index]}`}
-        alt={`${'Zdjęcie w galerii'} ${active.index + 1}`}
-      /><button
-        type="button"
-        onclick={() =>
-          (active = {
-            ids: active!.ids,
-            index: (active!.index + 1) % active!.ids.length
-          })}
-        aria-label={'Następne zdjęcie'}><ChevronRight size={20} aria-hidden="true" /></button
-      >
-    </div>
-  </dialog>{/if}
+<Lightbox items={lightboxItems} bind:index={lightboxIndex} bind:open={lightboxOpen} />
 
 <style>
   .markdown {
@@ -503,6 +550,15 @@
     max-width: 100%;
     height: auto;
   }
+  /* Inline images open the lightbox via click or keyboard; gallery tiles and links stay separate. */
+  .markdown :global(img[data-lightbox-inline]) {
+    cursor: zoom-in;
+  }
+  .markdown :global(img[data-lightbox-inline]:focus-visible) {
+    outline: 2px solid var(--accent, #a33d29);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm, 4px);
+  }
   .markdown :global(.markdown-image-frame) {
     display: inline-block;
     max-width: 100%;
@@ -541,28 +597,58 @@
     aspect-ratio: 1.3;
     object-fit: cover;
   }
-  .gallery button {
+  .gallery-tile,
+  .gallery-more {
+    display: block;
+    width: 100%;
     padding: 0;
-  }
-  .lightbox {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    width: min(95vw, 1000px);
-    max-height: 95vh;
     border: 1px solid var(--line, #acbdb4);
-    border-radius: 12px;
-    background: var(--surface, white);
-    color: var(--ink, #272638);
-    padding: 20px;
+    border-radius: var(--radius-md, 6px);
+    overflow: hidden;
+    background: var(--surface-muted, #edf1ed);
+    cursor: zoom-in;
+    transition: border-color 120ms ease;
   }
-  .lightbox::backdrop {
-    background: #0009;
+  .gallery-tile {
+    transition:
+      border-color 120ms ease,
+      scale 120ms ease;
   }
-  .lightbox img {
-    max-height: 75vh;
-    max-width: 70%;
-    object-fit: contain;
+  .gallery-tile:hover {
+    border-color: var(--accent, #a33d29);
+    scale: 1.02;
+  }
+  .gallery-more {
+    position: relative;
+    aspect-ratio: 1.3;
+  }
+  .gallery-more:hover {
+    border-color: var(--accent, #a33d29);
+  }
+  .gallery-tile:focus-visible,
+  .gallery-more:focus-visible {
+    outline: 2px solid var(--accent, #a33d29);
+    outline-offset: 2px;
+  }
+  /* The next hidden photo, blurred and dimmed, previews what the +N tile opens. */
+  .gallery-more-backdrop {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    filter: blur(6px) brightness(0.55);
+    scale: 1.1;
+  }
+  .gallery-more-count {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 22px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 1px 8px rgb(0 0 0 / 0.6);
   }
   .reference-preview {
     position: fixed;
@@ -775,6 +861,15 @@
     }
     .reference-preview {
       width: min(340px, calc(100vw - 16px));
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gallery-tile,
+    .gallery-more {
+      transition: none;
+    }
+    .gallery-tile:hover {
+      scale: 1;
     }
   }
 </style>

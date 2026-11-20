@@ -18,6 +18,7 @@ export default defineConfig({
         '../../packages/ui/src/lib/platform/Editor.svelte',
         '../../packages/ui/src/lib/platform/GalleryEditor.svelte',
         '../../packages/ui/src/lib/platform/GalleryImage.svelte',
+        '../../packages/ui/src/lib/platform/Lightbox.svelte',
         '../../packages/ui/src/lib/platform/Markdown.svelte',
         '../../packages/ui/src/lib/platform/MarkdownContent.svelte',
         '../../packages/ui/src/lib/platform/MemberPreview.svelte',
