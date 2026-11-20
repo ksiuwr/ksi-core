@@ -182,7 +182,10 @@ def render(branch: str, commit: str, images: dict[str, str], output: Path) -> st
             "securityContext": security,
         }
         if app == "server":
-            container["envFrom"].append({"secretRef": {"name": secret}})
+            container["envFrom"].extend([
+                {"secretRef": {"name": secret}},
+                {"secretRef": {"name": "preview-storage", "optional": True}},
+            ])
             container["readinessProbe"] = {"httpGet": {"path": "/ready", "port": 3000}, "initialDelaySeconds": 5}
             container["livenessProbe"] = {"httpGet": {"path": "/health", "port": 3000}, "initialDelaySeconds": 30}
         else:
@@ -196,7 +199,11 @@ def render(branch: str, commit: str, images: dict[str, str], output: Path) -> st
         "name": "worker",
         "image": images["server"],
         "command": ["bun", "apps/server/src/worker.ts"],
-        "envFrom": [{"configMapRef": {"name": config_name}}, {"secretRef": {"name": secret}}],
+        "envFrom": [
+            {"configMapRef": {"name": config_name}},
+            {"secretRef": {"name": secret}},
+            {"secretRef": {"name": "preview-storage", "optional": True}},
+        ],
         "resources": resources("64Mi"),
         "securityContext": security,
     }))

@@ -43,11 +43,18 @@ class PreviewTest(unittest.TestCase):
                     for item in deployments
                 )
             )
+            storage_secret = {"secretRef": {"name": "preview-storage", "optional": True}}
+            server = next(item for item in deployments if item["metadata"]["name"] == f"{slug}-server")
+            self.assertIn(storage_secret, server["spec"]["template"]["spec"]["containers"][0]["envFrom"])
+            for frontend in ("web", "auth", "dashboard"):
+                app = next(item for item in deployments if item["metadata"]["name"] == f"{slug}-{frontend}")
+                self.assertNotIn(storage_secret, app["spec"]["template"]["spec"]["containers"][0]["envFrom"])
             worker = next(item for item in deployments if item["metadata"]["name"] == f"{slug}-worker")
             worker_container = worker["spec"]["template"]["spec"]["containers"][0]
             self.assertEqual(worker_container["image"], images["server"])
             self.assertEqual(worker_container["command"], ["bun", "apps/server/src/worker.ts"])
             self.assertIn({"secretRef": {"name": f"runtime-{slug}"}}, worker_container["envFrom"])
+            self.assertIn(storage_secret, worker_container["envFrom"])
             self.assertEqual(worker["metadata"]["labels"], {"ksi.preview": slug})
             self.assertNotIn(
                 f"{slug}-worker",
