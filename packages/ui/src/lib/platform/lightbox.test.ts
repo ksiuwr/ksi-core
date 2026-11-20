@@ -7,6 +7,10 @@ import {
   LIGHTBOX_ZOOM_STEP,
   clampPan,
   clampZoom,
+  dismissSwipeProgress,
+  resolveSwipeAxis,
+  shouldCommitDismissSwipe,
+  shouldCommitHorizontalSwipe,
   stepZoom,
   wrapLightboxIndex,
   zoomAtPoint
@@ -235,5 +239,65 @@ describe('zoomAtPoint', () => {
     expect(next.scale).toBe(LIGHTBOX_DOUBLE_TAP_ZOOM);
     expect((point.x - next.x) / next.scale).toBeCloseTo(point.x, 10);
     expect((point.y - next.y) / next.scale).toBeCloseTo(point.y, 10);
+  });
+});
+
+describe('resolveSwipeAxis', () => {
+  test('locks multi-image swipes onto x or y with slight horizontal bias', () => {
+    expect(resolveSwipeAxis(-20, 8, true)).toBe('x');
+    expect(resolveSwipeAxis(15, 16, true)).toBe('x');
+    expect(resolveSwipeAxis(8, 20, true)).toBe('y');
+    expect(resolveSwipeAxis(-6, -15, true)).toBe('y');
+  });
+  test('only locks downward y drags for single-image galleries', () => {
+    expect(resolveSwipeAxis(4, 20, false)).toBe('y');
+    expect(resolveSwipeAxis(20, 4, false)).toBeNull();
+    expect(resolveSwipeAxis(0, -20, false)).toBeNull();
+  });
+  test('guards non-finite deltas', () => {
+    expect(resolveSwipeAxis(NaN, 10, true)).toBeNull();
+    expect(resolveSwipeAxis(10, Infinity, true)).toBeNull();
+  });
+});
+
+describe('shouldCommitHorizontalSwipe', () => {
+  test('commits when drag distance reaches the stage-scaled threshold', () => {
+    expect(shouldCommitHorizontalSwipe(-80, 500, 1000)).toBe(true);
+    expect(shouldCommitHorizontalSwipe(64, 500, 400)).toBe(true);
+    expect(shouldCommitHorizontalSwipe(30, 500, 400)).toBe(false);
+  });
+  test('commits quick flicks past the minimum flick distance', () => {
+    expect(shouldCommitHorizontalSwipe(-28, 60, 400)).toBe(true);
+    expect(shouldCommitHorizontalSwipe(-20, 40, 400)).toBe(false);
+    expect(shouldCommitHorizontalSwipe(-28, 200, 400)).toBe(false);
+  });
+  test('guards non-finite inputs', () => {
+    expect(shouldCommitHorizontalSwipe(NaN, 100, 400)).toBe(false);
+    expect(shouldCommitHorizontalSwipe(100, NaN, 400)).toBe(false);
+  });
+});
+
+describe('shouldCommitDismissSwipe', () => {
+  test('only commits downward swipes past distance or flick velocity thresholds', () => {
+    expect(shouldCommitDismissSwipe(110, 500, 800)).toBe(true);
+    expect(shouldCommitDismissSwipe(80, 500, 400)).toBe(true);
+    expect(shouldCommitDismissSwipe(50, 500, 800)).toBe(false);
+    expect(shouldCommitDismissSwipe(48, 80, 800)).toBe(true);
+    expect(shouldCommitDismissSwipe(-150, 100, 800)).toBe(false);
+    expect(shouldCommitDismissSwipe(0, 100, 800)).toBe(false);
+  });
+  test('guards non-finite inputs', () => {
+    expect(shouldCommitDismissSwipe(NaN, 100, 800)).toBe(false);
+    expect(shouldCommitDismissSwipe(120, NaN, 800)).toBe(false);
+  });
+});
+
+describe('dismissSwipeProgress', () => {
+  test('clamps downward pull progress to [0, 1]', () => {
+    expect(dismissSwipeProgress(0, 800)).toBe(0);
+    expect(dismissSwipeProgress(-40, 800)).toBe(0);
+    expect(dismissSwipeProgress(160, 800)).toBeCloseTo(0.5, 5);
+    expect(dismissSwipeProgress(500, 800)).toBe(1);
+    expect(dismissSwipeProgress(NaN, 800)).toBe(0);
   });
 });

@@ -14,6 +14,7 @@ export const LIGHTBOX_MIN_ZOOM = 1;
 export const LIGHTBOX_MAX_ZOOM = 4;
 export const LIGHTBOX_ZOOM_STEP = 0.5;
 export const LIGHTBOX_DOUBLE_TAP_ZOOM = 2.5;
+export const LIGHTBOX_SLIDE_GAP = 24;
 
 /** Wraps any integer index into `[0, total)`; returns 0 for empty galleries. */
 export function wrapLightboxIndex(index: number, total: number): number {
@@ -103,4 +104,49 @@ export function zoomAtPoint(
     viewport
   );
   return { scale, x: pan.x, y: pan.y };
+}
+
+/** Locks a single-finger unzoomed drag onto the horizontal or vertical axis. */
+export function resolveSwipeAxis(dx: number, dy: number, canHorizontal: boolean): 'x' | 'y' | null {
+  if (!Number.isFinite(dx) || !Number.isFinite(dy)) return null;
+  const absX = Math.abs(dx);
+  const absY = Math.abs(dy);
+  if (!canHorizontal) return dy > 0 && absY >= absX ? 'y' : null;
+  if (absY > absX * 1.15) return 'y';
+  return 'x';
+}
+
+/** Whether a horizontal swipe moved far or fast enough to switch slides. */
+export function shouldCommitHorizontalSwipe(
+  dx: number,
+  elapsedMs: number,
+  stageWidth: number
+): boolean {
+  if (!Number.isFinite(dx) || !Number.isFinite(elapsedMs)) return false;
+  const distance = Math.abs(dx);
+  const width = Number.isFinite(stageWidth) && stageWidth > 0 ? stageWidth : 400;
+  const threshold = Math.min(80, Math.max(40, width * 0.16));
+  const velocity = distance / Math.max(1, elapsedMs);
+  return distance >= threshold || (distance >= 24 && velocity >= 0.35);
+}
+
+/** Whether a downward swipe moved far or fast enough to dismiss the lightbox. */
+export function shouldCommitDismissSwipe(
+  dy: number,
+  elapsedMs: number,
+  stageHeight: number
+): boolean {
+  if (!Number.isFinite(dy) || !Number.isFinite(elapsedMs) || dy <= 0) return false;
+  const height = Number.isFinite(stageHeight) && stageHeight > 0 ? stageHeight : 400;
+  const threshold = Math.min(110, Math.max(72, height * 0.2));
+  const velocity = dy / Math.max(1, elapsedMs);
+  return dy >= threshold || (dy >= 40 && velocity >= 0.45);
+}
+
+/** Normalized `[0, 1]` progress for fading chrome and backdrop during swipe-down. */
+export function dismissSwipeProgress(dy: number, stageHeight: number): number {
+  if (!Number.isFinite(dy) || dy <= 0) return 0;
+  const height = Number.isFinite(stageHeight) && stageHeight > 0 ? stageHeight : 400;
+  const range = Math.min(height * 0.55, 320);
+  return Math.min(1, dy / Math.max(1, range));
 }

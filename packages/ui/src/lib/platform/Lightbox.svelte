@@ -13,8 +13,13 @@
     LIGHTBOX_DOUBLE_TAP_ZOOM,
     LIGHTBOX_MAX_ZOOM,
     LIGHTBOX_MIN_ZOOM,
+    LIGHTBOX_SLIDE_GAP,
     clampPan,
     clampZoom,
+    dismissSwipeProgress,
+    resolveSwipeAxis,
+    shouldCommitDismissSwipe,
+    shouldCommitHorizontalSwipe,
     stepZoom,
     wrapLightboxIndex,
     zoomAtPoint,
@@ -67,6 +72,8 @@
 
   let dialog = $state<HTMLDialogElement>();
   let stage = $state<HTMLDivElement>();
+  let trackEl = $state<HTMLDivElement>();
+  let mediaEl = $state<HTMLDivElement>();
   let imgEl = $state<HTMLImageElement>();
   let filmstrip = $state<HTMLDivElement>();
 
@@ -78,38 +85,77 @@
   let dragging = $state(false);
   let animateZoom = $state(false);
   let navDirection = $state<-1 | 0 | 1>(0);
+  let jumpId = $state(0);
   let dragOffsetX = $state(0);
+  let dragOffsetY = $state(0);
   let snapping = $state(false);
+  let slideMs = $state(220);
+  let pendingSlide = $state<{ target: number; direction: -1 | 1 } | null>(null);
+  let pendingClose = $state(false);
+  let dismissed = $state(false);
+
+  const loadedSrcs = new Set<string>();
+  let trackTimer: ReturnType<typeof setTimeout> | undefined;
+
+  function itemDescription(item: LightboxItem | undefined): string {
+    const text = item?.description ?? '';
+    return text.trim() ? text : '';
+  }
 
   const current = $derived(wrapLightboxIndex(index, items.length));
   const active = $derived(items[current]);
   const slideKey = $derived(active ? `${current}:${active.src}` : '');
   const multi = $derived(items.length > 1);
+  const prevIndex = $derived(multi ? wrapLightboxIndex(current - 1, items.length) : current);
+  const nextIndex = $derived(multi ? wrapLightboxIndex(current + 1, items.length) : current);
+  const prevItem = $derived(multi ? items[prevIndex] : undefined);
+  const nextItem = $derived(multi ? items[nextIndex] : undefined);
   const zoomed = $derived(scale > LIGHTBOX_MIN_ZOOM);
-  const description = $derived.by(() => {
-    const text = active?.description ?? '';
-    return text.trim() ? text : '';
+  const description = $derived(itemDescription(active));
+  const prevDescription = $derived(itemDescription(prevItem));
+  const nextDescription = $derived(itemDescription(nextItem));
+  const dismissProgress = $derived.by(() => {
+    if (pendingClose) return 1;
+    return dismissSwipeProgress(dragOffsetY, stage?.clientHeight || 400);
   });
+  const backdropOpacity = $derived(pendingClose ? 0 : 1 - dismissProgress * 0.85);
+  const chromeOpacity = $derived(pendingClose ? 0 : Math.max(0, 1 - dismissProgress * 2.2));
+  const dismissScale = $derived(pendingClose ? 0.84 : 1 - dismissProgress * 0.12);
 
   let lastFocused: HTMLElement | null = null;
 
+  function clearTrackTimer() {
+    if (trackTimer !== undefined) {
+      clearTimeout(trackTimer);
+      trackTimer = undefined;
+    }
+  }
+  function prefersReducedMotion() {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
   function restoreFocus() {
     if (lastFocused?.isConnected) lastFocused.focus();
     lastFocused = null;
   }
   function resetView(animate = false) {
+    clearTrackTimer();
+    pendingSlide = null;
+    pendingClose = false;
     animateZoom = animate;
     scale = LIGHTBOX_MIN_ZOOM;
     pan = { x: 0, y: 0 };
     dragOffsetX = 0;
+    dragOffsetY = 0;
     snapping = false;
   }
   function close() {
+    clearTrackTimer();
+    pendingSlide = null;
+    pendingClose = false;
     if (!open && !dialog?.open) return;
     if (dialog?.open) dialog.close();
     open = false;
     navDirection = 0;
-    resetView();
     onclose?.();
     restoreFocus();
   }
@@ -120,11 +166,13 @@
     if (open && items.length > 0) {
       if (dialog && !dialog.open) {
         lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        dismissed = false;
         navDirection = 0;
         resetView();
         dialog.showModal();
       }
       return () => {
+        clearTrackTimer();
         if (!open || items.length === 0) return;
         if (dialog?.open) dialog.close();
         restoreFocus();
@@ -132,9 +180,11 @@
     } else if (open) {
       close();
     } else if (dialog?.open) {
+      clearTrackTimer();
+      pendingSlide = null;
+      pendingClose = false;
       dialog.close();
       navDirection = 0;
-      resetView();
       restoreFocus();
     }
   });
@@ -162,48 +212,56 @@
     };
   });
 
-  // Per-slide loading state; cached images are detected after the DOM settles so
-  // they never get stuck behind the spinner, and duplicate-src slides still reset.
+  // Per-slide loading state; images already preloaded in neighbor slots skip the
+  // fade/spinner so carousel handoffs are seamless without a blank frame.
   $effect(() => {
     const key = slideKey;
     const src = active?.src ?? '';
     resetView();
-    ready = false;
     failed = !src;
+    ready = Boolean(src && loadedSrcs.has(src));
     content = { width: 0, height: 0 };
     if (!src) return;
     void tick().then(() => {
       if (slideKey !== key) return;
       if (imgEl?.complete && imgEl.naturalWidth > 0) {
+        loadedSrcs.add(src);
         ready = true;
         measure();
       }
     });
   });
 
-  function stageSize(): LightboxSize {
-    return { width: stage?.clientWidth ?? 0, height: stage?.clientHeight ?? 0 };
+  function mediaSize(): LightboxSize {
+    const el = mediaEl ?? stage;
+    return { width: el?.clientWidth ?? 0, height: el?.clientHeight ?? 0 };
   }
-  function stagePoint(clientX: number, clientY: number): LightboxPoint {
-    const rect = stage?.getBoundingClientRect();
+  function mediaPoint(clientX: number, clientY: number): LightboxPoint {
+    const rect = (mediaEl ?? stage)?.getBoundingClientRect();
     if (!rect) return { x: 0, y: 0 };
     return { x: clientX - rect.left - rect.width / 2, y: clientY - rect.top - rect.height / 2 };
   }
   // Fitted image size at scale 1, matching the max-width/max-height CSS.
   function measure() {
-    if (!stage || !imgEl || !imgEl.naturalWidth) return;
-    const viewport = stageSize();
+    if (!(mediaEl ?? stage) || !imgEl || !imgEl.naturalWidth) return;
+    const viewport = mediaSize();
     const ratio = Math.min(
       viewport.width / imgEl.naturalWidth,
       viewport.height / imgEl.naturalHeight,
       1
     );
-    content = { width: imgEl.naturalWidth * ratio, height: imgEl.naturalHeight * ratio };
-    pan = clampPan(pan, scale, content, viewport);
+    const nextContent = { width: imgEl.naturalWidth * ratio, height: imgEl.naturalHeight * ratio };
+    if (content.width !== nextContent.width || content.height !== nextContent.height) {
+      content = nextContent;
+    }
+    const nextPan = clampPan(pan, scale, nextContent, viewport);
+    if (pan.x !== nextPan.x || pan.y !== nextPan.y) {
+      pan = nextPan;
+    }
   }
 
   $effect(() => {
-    const el = stage;
+    const el = mediaEl ?? stage;
     if (!el) return;
     const observer = new ResizeObserver(measure);
     observer.observe(el);
@@ -215,6 +273,7 @@
     const el = stage;
     if (!el) return;
     const onWheel = (event: WheelEvent) => {
+      if (event.target instanceof Element && event.target.closest('.description')) return;
       event.preventDefault();
       animateZoom = false;
       const delta =
@@ -223,7 +282,7 @@
           : event.deltaMode === 2
             ? event.deltaY * (el.clientHeight || 800)
             : event.deltaY;
-      zoomTo(scale * Math.exp(-delta * 0.002), stagePoint(event.clientX, event.clientY), false);
+      zoomTo(scale * Math.exp(-delta * 0.002), mediaPoint(event.clientX, event.clientY), false);
     };
     el.addEventListener('wheel', onWheel, { passive: false });
     return () => el.removeEventListener('wheel', onWheel);
@@ -237,9 +296,9 @@
     pan = { x: view.x, y: view.y };
   }
   function zoomTo(nextScale: number, point: LightboxPoint = { x: 0, y: 0 }, animate = true) {
-    if (!ready || failed) return;
+    if (!ready || failed || pendingSlide || pendingClose) return;
     animateZoom = animate;
-    applyView(zoomAtPoint(currentView(), nextScale, point, content, stageSize()));
+    applyView(zoomAtPoint(currentView(), nextScale, point, content, mediaSize()));
   }
   function zoomBy(direction: 1 | -1) {
     zoomTo(stepZoom(scale, direction), { x: 0, y: 0 }, true);
@@ -249,24 +308,152 @@
     else zoomTo(LIGHTBOX_DOUBLE_TAP_ZOOM, point, true);
   }
 
+  function scheduleTrackSettle(ms: number) {
+    clearTrackTimer();
+    trackTimer = setTimeout(finishTrackTransition, ms + 60);
+  }
+  function finishTrackTransition() {
+    clearTrackTimer();
+    if (pendingSlide) {
+      const { target } = pendingSlide;
+      pendingSlide = null;
+      snapping = false;
+      dragOffsetX = 0;
+      dragOffsetY = 0;
+      navDirection = 0;
+      index = target;
+      return;
+    }
+    if (pendingClose) {
+      pendingClose = false;
+      dismissed = true;
+      close();
+      return;
+    }
+    snapping = false;
+  }
+  function trackTransitionEnd(event: TransitionEvent) {
+    if (event.target !== trackEl || event.propertyName !== 'transform') return;
+    if (!snapping && !pendingSlide && !pendingClose) return;
+    finishTrackTransition();
+  }
+  function snapBack() {
+    if (dragOffsetX === 0 && dragOffsetY === 0) {
+      snapping = false;
+      return;
+    }
+    if (prefersReducedMotion()) {
+      dragOffsetX = 0;
+      dragOffsetY = 0;
+      snapping = false;
+      return;
+    }
+    slideMs = 180;
+    snapping = true;
+    dragOffsetX = 0;
+    dragOffsetY = 0;
+    scheduleTrackSettle(180);
+  }
+  function slideBy(direction: -1 | 1) {
+    if (!multi || pendingClose) return;
+    if (pendingSlide) {
+      const nextTarget = wrapLightboxIndex(pendingSlide.target + direction, items.length);
+      clearTrackTimer();
+      pendingSlide = null;
+      snapping = false;
+      dragOffsetX = 0;
+      dragOffsetY = 0;
+      navDirection = 0;
+      index = nextTarget;
+      return;
+    }
+    const target = wrapLightboxIndex(current + direction, items.length);
+    if (target === current) return;
+    const width = stage?.clientWidth ?? 0;
+    if (prefersReducedMotion() || width <= 0) {
+      dragOffsetX = 0;
+      dragOffsetY = 0;
+      snapping = false;
+      navDirection = 0;
+      index = target;
+      return;
+    }
+    if (scale !== LIGHTBOX_MIN_ZOOM) {
+      animateZoom = false;
+      scale = LIGHTBOX_MIN_ZOOM;
+      pan = { x: 0, y: 0 };
+    }
+    const stride = width + LIGHTBOX_SLIDE_GAP;
+    const targetX = -direction * stride;
+    if (Math.abs(targetX - dragOffsetX) < 1) {
+      dragOffsetX = 0;
+      dragOffsetY = 0;
+      snapping = false;
+      navDirection = 0;
+      index = target;
+      return;
+    }
+    const remaining = Math.max(0, Math.min(1, Math.abs(targetX - dragOffsetX) / stride));
+    const ms = Math.round(140 + remaining * 100);
+    slideMs = ms;
+    pendingSlide = { target, direction };
+    snapping = true;
+    dragOffsetX = targetX;
+    dragOffsetY = 0;
+    scheduleTrackSettle(ms);
+  }
+  function dismissBySwipe() {
+    if (pendingClose) return;
+    if (prefersReducedMotion()) {
+      close();
+      return;
+    }
+    const height = stage?.clientHeight || window.innerHeight || 400;
+    slideMs = 180;
+    pendingClose = true;
+    snapping = true;
+    dragOffsetX = 0;
+    dragOffsetY = Math.max(dragOffsetY + 140, Math.round(height * 0.55));
+    scheduleTrackSettle(180);
+  }
   function goTo(target: number, direction?: -1 | 0 | 1) {
-    if (items.length === 0) return;
-    const nextIndex = wrapLightboxIndex(target, items.length);
-    if (nextIndex === current) return;
-    navDirection = direction ?? (nextIndex > current ? 1 : -1);
-    index = nextIndex;
+    if (items.length === 0 || pendingClose) return;
+    const targetIndex = wrapLightboxIndex(target, items.length);
+    if (targetIndex === current) return;
+    if (!pendingSlide && multi) {
+      if (items.length === 2) {
+        slideBy(direction === -1 ? -1 : direction === 1 ? 1 : targetIndex > current ? 1 : -1);
+        return;
+      }
+      if (targetIndex === nextIndex) {
+        slideBy(1);
+        return;
+      }
+      if (targetIndex === prevIndex) {
+        slideBy(-1);
+        return;
+      }
+    }
+    clearTrackTimer();
+    pendingSlide = null;
+    snapping = false;
+    dragOffsetX = 0;
+    dragOffsetY = 0;
+    navDirection = direction ?? (targetIndex > current ? 1 : -1);
+    jumpId += 1;
+    index = targetIndex;
   }
   function prev() {
-    goTo(current - 1, -1);
+    slideBy(-1);
   }
   function next() {
-    goTo(current + 1, 1);
+    slideBy(1);
   }
 
   // ── Pointer gestures: pan, swipe, pinch and double-tap ─────────────────────
   type Gesture = {
     mode: 'pan' | 'swipe' | 'pinch';
-    axis?: 'x' | 'y';
+    axis?: 'x' | 'y' | 'none';
     fromPinch: boolean;
     startTime: number;
     startX: number;
@@ -320,14 +507,22 @@
       startMid: { x: 0, y: 0 }
     };
   }
+  function isStageSurface(target: EventTarget | null) {
+    return target === stage || target === mediaEl;
+  }
   function pointerDown(event: PointerEvent) {
-    if (event.button !== 0) return;
-    if (event.target !== stage && event.target !== imgEl) return;
+    if (event.button !== 0 || pendingClose) return;
+    if (!isStageSurface(event.target) && event.target !== imgEl) return;
+    if (pendingSlide) finishTrackTransition();
+    else if (snapping) {
+      clearTrackTimer();
+      snapping = false;
+    }
     suppressClick = false;
     lastPressTarget = event.target;
     animateZoom = false;
-    snapping = false;
     dragOffsetX = 0;
+    dragOffsetY = 0;
     pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
     if (pointers.size === 1) {
       gesture = singleGesture(
@@ -346,7 +541,7 @@
         mode: 'pinch',
         captured: true,
         startDist: Math.hypot(a.x - b.x, a.y - b.y),
-        startMid: stagePoint((a.x + b.x) / 2, (a.y + b.y) / 2)
+        startMid: mediaPoint((a.x + b.x) / 2, (a.y + b.y) / 2)
       };
       dragging = true;
     }
@@ -361,7 +556,7 @@
       const dist = Math.hypot(a.x - b.x, a.y - b.y);
       if (gesture.startDist <= 0 || dist <= 0) return;
       const nextScale = clampZoom(gesture.startScale * (dist / gesture.startDist));
-      const mid = stagePoint((a.x + b.x) / 2, (a.y + b.y) / 2);
+      const mid = mediaPoint((a.x + b.x) / 2, (a.y + b.y) / 2);
       const ratio = nextScale / gesture.startScale;
       scale = nextScale;
       pan = clampPan(
@@ -371,7 +566,7 @@
         },
         nextScale,
         content,
-        stageSize()
+        mediaSize()
       );
       return;
     }
@@ -392,18 +587,20 @@
         { x: pan.x + event.clientX - gesture.lastX, y: pan.y + event.clientY - gesture.lastY },
         scale,
         content,
-        stageSize()
+        mediaSize()
       );
-    } else if (
-      gesture.mode === 'swipe' &&
-      !gesture.fromPinch &&
-      scale === LIGHTBOX_MIN_ZOOM &&
-      multi
-    ) {
+    } else if (gesture.mode === 'swipe' && !gesture.fromPinch && scale === LIGHTBOX_MIN_ZOOM) {
       const dx = event.clientX - gesture.startX;
       const dy = event.clientY - gesture.startY;
-      if (!gesture.axis) gesture.axis = Math.abs(dy) > Math.abs(dx) * 1.5 ? 'y' : 'x';
-      if (gesture.axis === 'x') dragOffsetX = dx;
+      if (!gesture.axis) gesture.axis = resolveSwipeAxis(dx, dy, multi) ?? 'none';
+      if (gesture.axis === 'x' && multi) {
+        const stride = (stage?.clientWidth || window.innerWidth || 400) + LIGHTBOX_SLIDE_GAP;
+        dragOffsetX = Math.max(-stride, Math.min(stride, dx));
+        dragOffsetY = 0;
+      } else if (gesture.axis === 'y') {
+        dragOffsetY = Math.max(0, dy);
+        dragOffsetX = 0;
+      }
     }
     gesture.lastX = event.clientX;
     gesture.lastY = event.clientY;
@@ -435,30 +632,36 @@
       finished?.mode === 'swipe' &&
       !finished.fromPinch &&
       finished.moved &&
-      finished.axis === 'x' &&
-      scale === LIGHTBOX_MIN_ZOOM &&
-      multi
+      scale === LIGHTBOX_MIN_ZOOM
     ) {
-      const dx = event.clientX - finished.startX;
       const elapsed = Math.max(1, event.timeStamp - finished.startTime);
-      const velocity = Math.abs(dx) / elapsed;
-      if (
-        event.type === 'pointerup' &&
-        (Math.abs(dx) >= 48 || (Math.abs(dx) >= 24 && velocity >= 0.4))
-      ) {
-        dragOffsetX = 0;
-        snapping = false;
-        if (dx < 0) next();
-        else prev();
+      if (finished.axis === 'x' && multi) {
+        const dx = event.clientX - finished.startX;
+        if (
+          event.type === 'pointerup' &&
+          shouldCommitHorizontalSwipe(dx, elapsed, stage?.clientWidth || 400)
+        ) {
+          slideBy(dx < 0 ? 1 : -1);
+          return;
+        }
+        snapBack();
         return;
       }
-      snapping = true;
-      dragOffsetX = 0;
-      return;
+      if (finished.axis === 'y') {
+        const dy = event.clientY - finished.startY;
+        if (
+          event.type === 'pointerup' &&
+          shouldCommitDismissSwipe(dy, elapsed, stage?.clientHeight || 400)
+        ) {
+          dismissBySwipe();
+          return;
+        }
+        snapBack();
+        return;
+      }
     }
-    if (dragOffsetX !== 0) {
-      snapping = true;
-      dragOffsetX = 0;
+    if (dragOffsetX !== 0 || dragOffsetY !== 0) {
+      snapBack();
     }
     if (!finished || event.type !== 'pointerup') return;
     if (!finished.moved && finished.onImage && event.pointerType === 'touch') {
@@ -470,7 +673,7 @@
       ) {
         lastTap = undefined;
         lastTouchZoom = now;
-        toggleZoom(stagePoint(event.clientX, event.clientY));
+        toggleZoom(mediaPoint(event.clientX, event.clientY));
       } else {
         lastTap = { time: now, x: event.clientX, y: event.clientY };
       }
@@ -484,17 +687,14 @@
       return;
     }
     // Only a plain click starting and ending on the empty stage closes the lightbox.
-    if (
-      event.target === event.currentTarget &&
-      (pressTarget === null || pressTarget === event.currentTarget)
-    )
+    if (isStageSurface(event.target) && (pressTarget === null || isStageSurface(pressTarget)))
       close();
   }
   function doubleClick(event: MouseEvent) {
     if (event.target !== imgEl && lastPressTarget !== imgEl) return;
     // Touch double-taps are handled in pointerEnd; skip the synthetic dblclick.
     if (Date.now() - lastTouchZoom < 500) return;
-    toggleZoom(stagePoint(event.clientX, event.clientY));
+    toggleZoom(mediaPoint(event.clientX, event.clientY));
   }
 
   function keydown(event: KeyboardEvent) {
@@ -533,7 +733,7 @@
     if (!strip || !multi) return;
     const thumb = strip.children[i] as HTMLElement | undefined;
     if (!thumb) return;
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reduced = prefersReducedMotion();
     strip.scrollTo({
       left: thumb.offsetLeft - (strip.clientWidth - thumb.clientWidth) / 2,
       behavior: reduced ? 'auto' : 'smooth'
@@ -544,6 +744,7 @@
 <dialog
   bind:this={dialog}
   class="lightbox"
+  class:dismissed
   aria-label={label}
   oncancel={(event) => {
     event.preventDefault();
@@ -551,7 +752,21 @@
   }}
   onkeydown={keydown}
 >
-  <div class="chrome">
+  <div
+    class="backdrop"
+    class:snapping
+    style:--slide-ms={`${slideMs}ms`}
+    style:opacity={backdropOpacity}
+    aria-hidden="true"
+  ></div>
+  <div
+    class="chrome"
+    class:snapping
+    class:has-filmstrip={multi}
+    class:dismissing={pendingClose || dismissProgress > 0.1}
+    style:--slide-ms={`${slideMs}ms`}
+    style:--chrome-opacity={chromeOpacity}
+  >
     <header class="toolbar">
       {#if multi}<span class="counter" aria-hidden="true">{current + 1} / {items.length}</span>{/if}
       <div class="tools">
@@ -598,43 +813,108 @@
       ondblclick={doubleClick}
     >
       {#if active}
-        {#key slideKey}
-          <div
-            class="slide"
-            class:slide-next={ready && navDirection > 0}
-            class:slide-prev={ready && navDirection < 0}
-            class:snapping
-            style:transform={dragOffsetX || snapping ? `translateX(${dragOffsetX}px)` : undefined}
-          >
-            <img
-              bind:this={imgEl}
-              src={active.src}
-              alt={active.alt ?? ''}
-              aria-describedby={description ? `${uid}-desc` : undefined}
-              draggable="false"
-              class:ready
-              style:transform={`translate(${pan.x}px, ${pan.y}px) scale(${scale})`}
-              onload={(event) => {
-                if (event.currentTarget !== imgEl) return;
-                ready = true;
-                failed = false;
-                measure();
-              }}
-              onerror={(event) => {
-                if (event.currentTarget !== imgEl) return;
-                failed = true;
-                ready = false;
-              }}
-            />
-          </div>
-        {/key}
-        {#if failed}<span class="image-status" role="status"
-            ><ImageOff size={28} aria-hidden="true" />{labels.error}</span
-          >
-        {:else if !ready}<span class="image-status" aria-hidden="true"
-            ><span class="spinner"><LoaderCircle size={28} aria-hidden="true" /></span
-            >{labels.loading}</span
-          >{/if}
+        <div
+          class="track"
+          class:snapping
+          bind:this={trackEl}
+          ontransitionend={trackTransitionEnd}
+          style:--slide-ms={`${slideMs}ms`}
+          style:--slide-gap={`${LIGHTBOX_SLIDE_GAP}px`}
+          style:opacity={pendingClose ? 0 : 1}
+          style:transform={`translate3d(${dragOffsetX}px, ${dragOffsetY}px, 0)${dismissScale !== 1 ? ` scale(${dismissScale})` : ''}`}
+        >
+          {#if open && multi && prevItem}
+            <div
+              class="slide slide-neighbor slide-prev-slot"
+              class:hidden-neighbor={zoomed && !pendingSlide}
+              aria-hidden="true"
+            >
+              <div class="slide-media">
+                <img
+                  src={prevItem.src}
+                  alt=""
+                  draggable="false"
+                  onload={() => loadedSrcs.add(prevItem.src)}
+                />
+              </div>
+              {#if prevDescription}
+                <div class="description description-neighbor">{prevDescription}</div>
+              {/if}
+            </div>
+          {/if}
+          {#key jumpId}
+            <div
+              class="slide slide-active"
+              class:slide-next={ready && navDirection > 0}
+              class:slide-prev={ready && navDirection < 0}
+            >
+              <div class="slide-media" bind:this={mediaEl}>
+                <img
+                  bind:this={imgEl}
+                  src={active.src}
+                  alt={active.alt ?? ''}
+                  aria-describedby={description ? `${uid}-desc` : undefined}
+                  draggable="false"
+                  decoding="sync"
+                  class:ready
+                  style:transform={`translate(${pan.x}px, ${pan.y}px) scale(${scale})`}
+                  onload={(event) => {
+                    if (event.currentTarget !== imgEl) return;
+                    if (active?.src) loadedSrcs.add(active.src);
+                    ready = true;
+                    failed = false;
+                    measure();
+                  }}
+                  onerror={(event) => {
+                    if (event.currentTarget !== imgEl) return;
+                    if (active?.src) loadedSrcs.delete(active.src);
+                    failed = true;
+                    ready = false;
+                  }}
+                />
+                {#if failed}<span class="image-status" role="status"
+                    ><ImageOff size={28} aria-hidden="true" />{labels.error}</span
+                  >
+                {:else if !ready}<span class="image-status" aria-hidden="true"
+                    ><span class="spinner"><LoaderCircle size={28} aria-hidden="true" /></span
+                    >{labels.loading}</span
+                  >{/if}
+              </div>
+              {#if description}
+                <!-- svelte-ignore a11y_no_noninteractive_tabindex (Scrollable description needs keyboard focus.) -->
+                <div
+                  id={`${uid}-desc`}
+                  class="description"
+                  class:description-animate={navDirection !== 0}
+                  role="region"
+                  aria-label={labels.description}
+                  tabindex="0"
+                >
+                  {description}
+                </div>
+              {/if}
+            </div>
+          {/key}
+          {#if open && multi && nextItem}
+            <div
+              class="slide slide-neighbor slide-next-slot"
+              class:hidden-neighbor={zoomed && !pendingSlide}
+              aria-hidden="true"
+            >
+              <div class="slide-media">
+                <img
+                  src={nextItem.src}
+                  alt=""
+                  draggable="false"
+                  onload={() => loadedSrcs.add(nextItem.src)}
+                />
+              </div>
+              {#if nextDescription}
+                <div class="description description-neighbor">{nextDescription}</div>
+              {/if}
+            </div>
+          {/if}
+        </div>
       {/if}
     </div>
     {#if multi}
@@ -644,42 +924,24 @@
       <button type="button" class="nav next" onclick={next} aria-label={labels.next}
         ><ChevronRight size={24} aria-hidden="true" /></button
       >
-    {/if}
-    {#if multi || description}
       <footer class="bottom">
-        {#if description}
-          {#key slideKey}
-            <!-- svelte-ignore a11y_no_noninteractive_tabindex (Scrollable description needs keyboard focus.) -->
-            <div
-              id={`${uid}-desc`}
-              class="description"
-              role="region"
-              aria-label={labels.description}
-              tabindex="0"
+        <div class="filmstrip" bind:this={filmstrip}>
+          {#each items as item, i (item.src + i)}
+            {@const thumbDetail = item.description?.trim() || item.alt?.trim()}
+            <button
+              type="button"
+              class="thumb"
+              class:active={i === current}
+              onclick={() => goTo(i)}
+              aria-label={thumbDetail
+                ? `${labels.image} ${i + 1}: ${thumbDetail}`
+                : `${labels.image} ${i + 1}`}
+              aria-current={i === current}
             >
-              {description}
-            </div>
-          {/key}
-        {/if}
-        {#if multi}
-          <div class="filmstrip" bind:this={filmstrip}>
-            {#each items as item, i (item.src + i)}
-              {@const thumbDetail = item.description?.trim() || item.alt?.trim()}
-              <button
-                type="button"
-                class="thumb"
-                class:active={i === current}
-                onclick={() => goTo(i)}
-                aria-label={thumbDetail
-                  ? `${labels.image} ${i + 1}: ${thumbDetail}`
-                  : `${labels.image} ${i + 1}`}
-                aria-current={i === current}
-              >
-                <img src={item.src} alt="" loading="lazy" draggable="false" />
-              </button>
-            {/each}
-          </div>
-        {/if}
+              <img src={item.src} alt="" loading="lazy" draggable="false" />
+            </button>
+          {/each}
+        </div>
       </footer>
     {/if}
   </div>
@@ -701,6 +963,7 @@
     color: #f4f5f7;
     overflow: hidden;
     overscroll-behavior: contain;
+    opacity: 0;
     /* Neutralize the shared :where(dialog) scale/translate entrance so the
        full-viewport layout never shifts; keep a gentle opacity fade. */
     scale: 1;
@@ -712,23 +975,54 @@
   }
   .lightbox[open] {
     display: flex;
+    opacity: 1;
+  }
+  .lightbox.dismissed {
+    opacity: 0;
+    transition: none;
   }
   .lightbox::backdrop {
-    background: rgba(10, 12, 14, 0.92);
-    backdrop-filter: blur(6px);
+    background: transparent;
   }
   @starting-style {
     .lightbox[open] {
       opacity: 0;
     }
   }
+  .backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 12, 14, 0.92);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    pointer-events: none;
+  }
+  .backdrop.snapping {
+    transition: opacity var(--slide-ms, 220ms) ease-out;
+  }
   .chrome {
     position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     width: 100%;
     height: 100%;
     min-height: 0;
+  }
+  .chrome.dismissing .toolbar,
+  .chrome.dismissing .bottom,
+  .chrome.dismissing .nav {
+    pointer-events: none;
+  }
+  .toolbar,
+  .bottom,
+  .nav {
+    opacity: var(--chrome-opacity, 1);
+  }
+  .chrome.snapping .toolbar,
+  .chrome.snapping .bottom,
+  .chrome.snapping .nav {
+    transition: opacity var(--slide-ms, 220ms) ease-out;
   }
   .toolbar {
     display: flex;
@@ -806,27 +1100,67 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    touch-action: none;
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
   }
-  .stage.zoomed {
+  .stage.zoomed .slide-active .slide-media {
     cursor: grab;
   }
-  .stage.dragging {
+  .stage.dragging .slide-active .slide-media {
     cursor: grabbing;
   }
-  .slide {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .track {
+    position: relative;
     width: 100%;
     height: 100%;
     pointer-events: none;
+    will-change: transform;
   }
-  .slide.snapping {
-    transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  .track.snapping {
+    transition:
+      transform var(--slide-ms, 220ms) cubic-bezier(0.22, 1, 0.36, 1),
+      opacity var(--slide-ms, 220ms) ease-out;
+  }
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    pointer-events: none;
+  }
+  .chrome:not(.has-filmstrip) .slide {
+    padding-bottom: 12px;
+  }
+  .slide-media {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .slide-active .slide-media {
+    pointer-events: auto;
+    touch-action: none;
+  }
+  .slide-prev-slot {
+    transform: translateX(calc(-100% - var(--slide-gap, 24px)));
+  }
+  .slide-next-slot {
+    transform: translateX(calc(100% + var(--slide-gap, 24px)));
+  }
+  .slide-neighbor.hidden-neighbor {
+    visibility: hidden;
   }
   .slide.slide-next {
     animation: lightbox-slide-next 200ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -868,25 +1202,30 @@
     max-height: 100%;
     width: auto;
     height: auto;
-    opacity: 0;
-    pointer-events: auto;
     touch-action: none;
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
     -webkit-user-drag: none;
     transform-origin: center center;
+  }
+  .slide-active img {
+    opacity: 0;
+    pointer-events: auto;
     transition: opacity 160ms ease;
   }
-  .stage img.ready {
+  .slide-active img.ready {
     opacity: 1;
   }
-  .stage.animate-zoom:not(.dragging) img.ready {
+  .slide-neighbor img {
+    pointer-events: none;
+  }
+  .stage.animate-zoom:not(.dragging) .slide-active img.ready {
     transition:
       transform 120ms ease-out,
       opacity 160ms ease;
   }
-  .stage.zoomed img {
+  .stage.zoomed .slide-active img {
     will-change: transform;
   }
   .image-status {
@@ -935,7 +1274,8 @@
     padding: 8px 12px 12px;
   }
   .description {
-    max-width: min(65ch, 100%);
+    flex: 0 0 auto;
+    max-width: min(65ch, calc(100% - 24px));
     max-height: 26vh;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -947,6 +1287,17 @@
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
     white-space: pre-line;
     overflow-wrap: anywhere;
+    pointer-events: auto;
+    touch-action: pan-y;
+    user-select: text;
+    -webkit-user-select: text;
+  }
+  .description.description-neighbor {
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .description.description-animate {
     animation: lightbox-fade 180ms ease-out;
   }
   .filmstrip {
@@ -1014,6 +1365,12 @@
       padding: 5px 8px;
       font-size: 12px;
     }
+    .slide {
+      gap: 6px;
+    }
+    .chrome:not(.has-filmstrip) .slide {
+      padding-bottom: 8px;
+    }
     .bottom {
       padding: 6px 8px 8px;
       gap: 6px;
@@ -1033,14 +1390,18 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .lightbox,
-    .slide.snapping,
-    .stage img,
-    .stage.animate-zoom:not(.dragging) img.ready {
+    .backdrop.snapping,
+    .chrome.snapping .toolbar,
+    .chrome.snapping .bottom,
+    .chrome.snapping .nav,
+    .track.snapping,
+    .slide-active img,
+    .stage.animate-zoom:not(.dragging) .slide-active img.ready {
       transition: none;
     }
     .slide.slide-next,
     .slide.slide-prev,
-    .description,
+    .description.description-animate,
     .spinner {
       animation: none;
     }
