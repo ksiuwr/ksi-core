@@ -12,7 +12,7 @@ import { referenceExtension } from './markdown-references.js';
 
 export type MarkdownBlock =
   | { type: 'html'; html: string }
-  | { type: 'gallery'; ids: string[]; preview: number };
+  | { type: 'gallery'; ids: string[]; preview: number; descriptions?: Record<string, string> };
 export type MarkdownRenderOptions = {
   /**
    * Workspace that bare `#12` references belong to (a project slug or `~association`).
@@ -75,7 +75,12 @@ export function createMarkdownRenderer(sanitize: MarkdownSanitizer) {
     let start = 0;
     for (const gallery of markdownGalleries(prepared)) {
       blocks.push({ type: 'html', html: html(prepared.slice(start, gallery.start)) });
-      blocks.push({ type: 'gallery', ids: gallery.ids, preview: gallery.preview });
+      blocks.push({
+        type: 'gallery',
+        ids: gallery.ids,
+        preview: gallery.preview,
+        ...(gallery.descriptions ? { descriptions: gallery.descriptions } : {})
+      });
       start = gallery.end;
     }
     blocks.push({ type: 'html', html: html(prepared.slice(start)) });

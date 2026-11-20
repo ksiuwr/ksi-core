@@ -4,6 +4,7 @@
   import {
     moveGalleryImage,
     removeGalleryImage,
+    setGalleryImageDescription,
     toggleGalleryImage,
     type GalleryState
   } from 'shared/markdown-gallery';
@@ -30,6 +31,10 @@
   let dropping = $state(false);
   let dragged = $state<string | null>(null);
   let dropTarget = $state<string | null>(null);
+  // Raw drafts keep trailing spaces alive while typing: the parsed gallery trims
+  // descriptions, so the focused input must not read its value back from it.
+  let drafts = $state<Record<string, string>>({});
+  const commitTimers = new Map<string, ReturnType<typeof setTimeout>>();
   let pointer: { id: number; x: number; y: number; moved: boolean } | undefined;
   const labels = $derived({
     title: 'Galeria',
@@ -38,6 +43,8 @@
     upload: 'Upuść zdjęcia tutaj lub wybierz pliki',
     removeGallery: 'Usuń galerię',
     image: 'Zdjęcie',
+    description: 'Opis zdjęcia',
+    descriptionPlaceholder: 'Opis zdjęcia (opcjonalny)…',
     remove: 'Usuń zdjęcie',
     reorder: 'Zmień kolejność zdjęcia',
     keyboard: 'Użyj klawiszy strzałek, aby zmienić kolejność.',
@@ -46,7 +53,31 @@
     queued: 'Oczekiwanie…'
   });
   // @wc-ignore
-  const keys = { left: 'ArrowLeft', right: 'ArrowRight', up: 'ArrowUp', down: 'ArrowDown' };
+  const keys = {
+    left: 'ArrowLeft',
+    right: 'ArrowRight',
+    up: 'ArrowUp',
+    down: 'ArrowDown',
+    enter: 'Enter'
+  };
+
+  // Prune stale drafts and timers when images are removed from the gallery.
+  $effect(() => {
+    const present = new Set(gallery.ids);
+    for (const id of Object.keys(drafts)) {
+      if (!present.has(id)) {
+        clearTimeout(commitTimers.get(id));
+        commitTimers.delete(id);
+        delete drafts[id];
+      }
+    }
+  });
+  $effect(() => {
+    return () => {
+      for (const timer of commitTimers.values()) clearTimeout(timer);
+      commitTimers.clear();
+    };
+  });
 
   function pointerMove(event: PointerEvent) {
     if (!pointer || pointer.id !== event.pointerId || !dragged) return;
@@ -71,6 +102,20 @@
     dragged = null;
     dropTarget = null;
     pointer = undefined;
+  }
+  function commitDescription(id: string, value: string) {
+    clearTimeout(commitTimers.get(id));
+    commitTimers.delete(id);
+    const next = setGalleryImageDescription(gallery, id, value);
+    if ((next.descriptions?.[id] ?? '') === (gallery.descriptions?.[id] ?? '')) return;
+    onchange(next);
+  }
+  function scheduleDescriptionCommit(id: string, value: string) {
+    clearTimeout(commitTimers.get(id));
+    commitTimers.set(
+      id,
+      setTimeout(() => commitDescription(id, value), 250)
+    );
   }
 </script>
 
@@ -169,6 +214,31 @@
               ><X size={16} aria-hidden="true" /></button
             >
           </div>
+          <input
+            type="text"
+            class="image-description"
+            enterkeyhint="done"
+            value={drafts[id] ?? gallery.descriptions?.[id] ?? ''}
+            placeholder={labels.descriptionPlaceholder}
+            aria-label={`${labels.description} ${index + 1}`}
+            maxlength={500}
+            disabled={busy}
+            onfocus={(event) => (drafts[id] = event.currentTarget.value)}
+            oninput={(event) => {
+              drafts[id] = event.currentTarget.value;
+              scheduleDescriptionCommit(id, event.currentTarget.value);
+            }}
+            onkeydown={(event) => {
+              if (event.key !== keys.enter) return;
+              event.preventDefault();
+              event.currentTarget.blur();
+            }}
+            onblur={() => {
+              const draft = drafts[id];
+              delete drafts[id];
+              if (draft !== undefined) commitDescription(id, draft);
+            }}
+          />
         </li>
       {/each}
       {#each uploads as upload (upload.key)}
@@ -367,6 +437,32 @@
   }
   .drag-handle:active {
     cursor: grabbing;
+  }
+  .gallery-editor .image-description {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 0;
+    margin: 0;
+    padding: 6px 8px;
+    border: 0;
+    border-top: 1px solid var(--line);
+    border-radius: 0;
+    background: var(--surface);
+    box-shadow: none;
+    color: var(--ink);
+    font-size: 12px;
+  }
+  :global(:root[data-theme='dark']) .gallery-editor .image-description {
+    background: var(--surface);
+  }
+  .gallery-editor .image-description:hover {
+    border-color: var(--line);
+  }
+  .gallery-editor .image-description:focus {
+    border-color: var(--line);
+    box-shadow: none;
+    outline: 2px solid var(--accent, #6750a4);
+    outline-offset: -2px;
   }
   .gallery-dropzone {
     width: 100%;

@@ -339,11 +339,11 @@ msgstr "No matching projects."
 msgid "ZOSIA"
 msgstr "ZOSIA"
 
-#: ../../packages/ui/src/lib/platform/Markdown.svelte
+#: ../../packages/ui/src/lib/platform/Lightbox.svelte
 msgid "Poprzednie zdjęcie"
 msgstr "Previous image"
 
-#: ../../packages/ui/src/lib/platform/Markdown.svelte
+#: ../../packages/ui/src/lib/platform/Lightbox.svelte
 msgid "Następne zdjęcie"
 msgstr "Next image"
 
@@ -657,6 +657,7 @@ msgid "Od {0} do {1}"
 msgstr "From {0} to {1}"
 
 #: ../../packages/ui/src/lib/platform/Markdown.svelte
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
 msgid "Otwórz zdjęcie"
 msgstr "Open image"
 
@@ -702,7 +703,7 @@ msgstr "Association member"
 msgid "Otwórz"
 msgstr "Open"
 
-#: ../../packages/ui/src/lib/platform/Markdown.svelte
+#: ../../packages/ui/src/lib/platform/Lightbox.svelte
 msgid "Galeria"
 msgstr "Gallery"
 
@@ -842,6 +843,7 @@ msgid "Brak wyników"
 msgstr "No results"
 
 #: ../../packages/ui/src/lib/platform/Dropdown.svelte
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
 #: ../../packages/ui/src/lib/platform/MemberPreview.svelte
 msgid "Escape"
 msgstr "Escape"
@@ -941,9 +943,8 @@ msgstr "<0/>On this page"
 msgid "Termin: <0/>"
 msgstr "Termin: <0/>"
 
-#: ../../packages/ui/src/lib/platform/Markdown.svelte
-msgid "<0/>Zamknij"
-msgstr "<0/>Close"
+#~ msgid "<0/>Zamknij"
+#~ msgstr "<0/>Close"
 
 #: src/routes/articles/[slug]/+page.svelte
 msgid "Opublikowano <0/>"
@@ -992,3 +993,52 @@ msgstr "Computer Science Students' Association"
 #: src/routes/+page.svelte
 msgid "Działamy na Uniwersytecie Wrocławskim. Piszemy własne narzędzia, organizujemy ZOSIĘ i warsztaty, a przy okazji po prostu robimy ciekawe rzeczy."
 msgstr "Based at the University of Wrocław. We build our own tools, organize ZOSIA and workshops, and simply work on cool things along the way."
+
+#: ../../packages/ui/src/lib/platform/Lightbox.svelte
+msgid "Zamknij"
+msgstr "Close"
+
+#: ../../packages/ui/src/lib/platform/Lightbox.svelte
+msgid "Powiększ"
+msgstr "Zoom in"
+
+#: ../../packages/ui/src/lib/platform/Lightbox.svelte
+msgid "Pomniejsz"
+msgstr "Zoom out"
+
+#: ../../packages/ui/src/lib/platform/Lightbox.svelte
+msgid "Przywróć 100%"
+msgstr "Reset to 100%"
+
+#~ msgid "Pokaż lub ukryj opis"
+#~ msgstr "Show or hide description"
+
+#: ../../packages/ui/src/lib/platform/Lightbox.svelte
+#: ../../packages/ui/src/lib/platform/Lightbox.svelte
+msgid "Zdjęcie"
+msgstr "Image"
+
+#: ../../packages/ui/src/lib/platform/Lightbox.svelte
+msgid "Ładowanie zdjęcia…"
+msgstr "Loading image…"
+
+#: ../../packages/ui/src/lib/platform/Lightbox.svelte
+msgid "Obraz niedostępny"
+msgstr "Image unavailable"
+
+#. 0: labels.status; 1: current + 1; 2: items.length
+#: ../../packages/ui/src/lib/platform/Lightbox.svelte
+msgid "{0} {1} z {2}"
+msgstr "{0} {1} of {2}"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Otwórz galerię"
+msgstr "Open gallery"
+
+#: ../../packages/ui/src/lib/platform/Markdown.svelte
+msgid "Zamknij podgląd"
+msgstr "Close preview"
+
+#: ../../packages/ui/src/lib/platform/Lightbox.svelte
+msgid "Opis zdjęcia"
+msgstr "Image description"

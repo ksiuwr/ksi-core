@@ -13,10 +13,12 @@ function imageAt(source: string) {
   return tokenizer.link(source);
 }
 
-// Ignore code: examples containing image syntax must remain literal examples.
+// Ignore code and gallery blocks: examples and gallery captions stay literal text.
 export function markdownImages(source: string) {
   const code = [
-    ...source.matchAll(/(^|\n)(`{3,}|~{3,})[^\n]*\n[\s\S]*?(?:\n\2[^\n]*(?=\n|$)|$)|(`+)[^`]*?\3/g)
+    ...source.matchAll(
+      /(^|\n)(`{3,}|~{3,})[^\n]*\n[\s\S]*?(?:\n\2[^\n]*(?=\n|$)|$)|(^|\n):::gallery(?:\s+preview=\d+)?[^\S\n]*\n[\s\S]*?\n:::[^\S\n]*(?=\n|$)|(`+)[^`]*?\4/g
+    )
   ].map((match) => [match.index!, match.index! + match[0].length] as const);
   const images: {
     start: number;

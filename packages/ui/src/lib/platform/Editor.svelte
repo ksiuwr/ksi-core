@@ -105,7 +105,12 @@
   }
   function insertGallery() {
     const index = galleries.length;
-    value = insertMarkdownGallery(value, galleryDraft.ids, galleryDraft.preview);
+    value = insertMarkdownGallery(
+      value,
+      galleryDraft.ids,
+      galleryDraft.preview,
+      galleryDraft.descriptions
+    );
     galleryPicker = false;
     galleryDraft = { ids: [], preview: 0 };
     activeGallery = index;
@@ -232,7 +237,11 @@
             const selected = gallery.preview === gallery.ids.length && gallery.preview < 3;
             const ids = [...gallery.ids];
             ids.splice(selected ? gallery.preview : ids.length, 0, data.id);
-            const updated = { ids, preview: gallery.preview + Number(selected) };
+            const updated = {
+              ids,
+              preview: gallery.preview + Number(selected),
+              ...(gallery.descriptions ? { descriptions: gallery.descriptions } : {})
+            };
             if (target === 'draft') galleryDraft = updated;
             else changeGallery(target, updated);
           } else {
