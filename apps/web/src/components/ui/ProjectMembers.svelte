@@ -19,7 +19,7 @@
     leaders = [],
     members = [],
     projectName,
-    limit = 20
+    limit = 8
   }: {
     leaders?: PublicProjectMember[];
     members?: PublicProjectMember[];
@@ -303,6 +303,9 @@
     color: var(--ink);
   }
 
+  :global(html:has(.members-dialog[open])) {
+    overflow: hidden;
+  }
   .members-dialog {
     width: min(720px, calc(100vw - 32px));
     max-height: min(80vh, 680px);
@@ -314,6 +317,7 @@
     color: var(--ink);
     box-shadow: var(--shadow-lg);
     overflow: hidden;
+    overscroll-behavior: contain;
   }
   .members-dialog[open] {
     display: flex;
@@ -348,6 +352,7 @@
   }
   .dialog-body {
     overflow: auto;
+    overscroll-behavior: contain;
     flex: 1;
   }
   .members-table {
