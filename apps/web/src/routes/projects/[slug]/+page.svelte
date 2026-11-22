@@ -1,6 +1,5 @@
 <script lang="ts">
   import ArticleList from '$lib/components/ArticleList.svelte';
-  import MemberPreview from '@ksi-core/ui/platform/MemberPreview.svelte';
   import Markdown from '@ksi-core/ui/platform/Markdown.svelte';
   import { locale } from '$lib/locale.svelte';
   import {
@@ -13,6 +12,7 @@
   } from '@lucide/svelte';
   import FieldTag from '../../../components/ui/FieldTag.svelte';
   import ProjectCover from '../../../components/ui/ProjectCover.svelte';
+  import ProjectMembers from '../../../components/ui/ProjectMembers.svelte';
 
   let { data, form } = $props<{
     data: import('./$types').PageData;
@@ -21,6 +21,13 @@
   let project = $derived(data.project);
   let user = $derived(data.user);
   const language = $derived(locale.current);
+  const sections = $derived(project.sections ?? []);
+  const visibleLeaders = $derived(sections.includes('leaders') ? (project.leaders ?? []) : []);
+  const visibleMembers = $derived(sections.includes('members') ? (project.members ?? []) : []);
+  const showRoster = $derived(visibleLeaders.length > 0 || visibleMembers.length > 0);
+  const bodySections = $derived(
+    sections.filter((section: string) => section !== 'members' && section !== 'leaders')
+  );
 </script>
 
 <svelte:head><title>{project.name} · KSI UWr</title></svelte:head>
@@ -80,6 +87,15 @@
         </div>
       {/if}
     </div>
+    {#if showRoster}
+      <div class="border-line border-t px-6 py-4 md:px-8">
+        <ProjectMembers
+          leaders={visibleLeaders}
+          members={visibleMembers}
+          projectName={project.name}
+        />
+      </div>
+    {/if}
   </header>
 
   {#if form?.joined}
@@ -104,7 +120,7 @@
       </div>
     {/if}
 
-    {#each project.sections as section (section)}
+    {#each bodySections as section (section)}
       <section class="border-line mt-12 border-t pt-10">
         {#if section === 'main-article' && project.mainArticle}
           <h2 class="mb-6 text-2xl tracking-tight">{project.mainArticle.title}</h2>
@@ -114,17 +130,6 @@
         {:else if section === 'articles'}
           <h2 class="mb-6 text-2xl tracking-tight">Artykuły</h2>
           <ArticleList articles={project.articles} />
-        {:else if section === 'leaders' || section === 'members'}
-          <h2 class="mb-6 text-2xl tracking-tight">
-            {#if section === 'leaders'}Liderzy projektu{:else}Członkowie{/if}
-          </h2>
-          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {#each section === 'leaders' ? project.leaders : project.members as member (member.id)}
-              <div class="surface-card px-4 py-3">
-                <MemberPreview {member} href={`/members/${encodeURIComponent(member.id)}`} />
-              </div>
-            {/each}
-          </div>
         {:else if section === 'links'}
           <h2 class="mb-6 text-2xl tracking-tight">Linki</h2>
           <div class="flex flex-wrap gap-2">

@@ -4,6 +4,7 @@
     member,
     href,
     role = '',
+    tone = 'default',
     avatarOnly = false,
     size = 36,
     inline = false
@@ -19,6 +20,7 @@
     };
     href: string;
     role?: string;
+    tone?: 'default' | 'gold';
     avatarOnly?: boolean;
     size?: number;
     inline?: boolean;
@@ -104,6 +106,7 @@
 <div
   class="identity"
   class:inline
+  class:gold={tone === 'gold'}
   role="group"
   aria-label={name}
   style:--avatar-size={`${size}px`}
@@ -169,7 +172,7 @@
         />{:else}<span class="initials">{initials}</span>{/if}
       <div>
         <strong>{name}</strong>{#if member.nickname}<small>aka. {member.nickname}</small
-          >{/if}{#if role}<small>{role}</small>{/if}
+          >{/if}{#if role}<small class="role-label">{role}</small>{/if}
       </div>
     </div>
     <p class="bio">{member.bio || 'Brak biografii.'}</p>
@@ -178,6 +181,22 @@
 </div>
 
 <style>
+  .identity {
+    --leader-gold: #b88214;
+  }
+  :global(:root[data-theme='dark']) .identity {
+    --leader-gold: #e5b84b;
+  }
+  .identity.gold .person-link img,
+  .identity.gold .person-link .initials,
+  .identity.gold .card-identity img,
+  .identity.gold .card-identity .initials {
+    box-shadow: 0 0 0 2px var(--leader-gold);
+  }
+  .identity.gold .role-label {
+    color: var(--leader-gold);
+    font-weight: 600;
+  }
   .identity.inline {
     display: inline;
   }

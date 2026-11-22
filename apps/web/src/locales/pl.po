@@ -605,23 +605,26 @@ msgstr "Dołączono do projektu."
 msgid "Artykuły"
 msgstr "Artykuły"
 
-#: src/routes/projects/[slug]/+page.svelte
-msgid "Liderzy projektu"
-msgstr "Liderzy projektu"
+#~ msgid "Liderzy projektu"
+#~ msgstr "Liderzy projektu"
 
-#: src/routes/projects/[slug]/+page.svelte
+#: src/components/ui/ProjectMembers.svelte
+#: src/components/ui/ProjectMembers.svelte
 msgid "Członkowie"
 msgstr "Członkowie"
 
 #. 0: member.nickname
 #. 0: member.nickname
+#. 0: entry.nickname
 #. 0: data.member.nickname
 #: ../../packages/ui/src/lib/platform/MemberPreview.svelte
 #: ../../packages/ui/src/lib/platform/MemberPreview.svelte
+#: src/components/ui/ProjectMembers.svelte
 #: src/routes/members/[id]/+page.svelte
 msgid "aka. {0}"
 msgstr "aka. {0}"
 
+#: src/components/ui/ProjectMembers.svelte
 #: src/routes/projects/[slug]/+page.svelte
 msgid "Linki"
 msgstr "Linki"
@@ -995,6 +998,7 @@ msgid "Działamy na Uniwersytecie Wrocławskim. Piszemy własne narzędzia, orga
 msgstr "Działamy na Uniwersytecie Wrocławskim. Piszemy własne narzędzia, organizujemy ZOSIĘ i warsztaty, a przy okazji po prostu robimy ciekawe rzeczy."
 
 #: ../../packages/ui/src/lib/platform/Lightbox.svelte
+#: src/components/ui/ProjectMembers.svelte
 msgid "Zamknij"
 msgstr "Zamknij"
 
@@ -1042,3 +1046,56 @@ msgstr "Zamknij podgląd"
 #: ../../packages/ui/src/lib/platform/Lightbox.svelte
 msgid "Opis zdjęcia"
 msgstr "Opis zdjęcia"
+
+#. 0: hiddenCount
+#: src/components/ui/ProjectMembers.svelte
+msgid "Pokaż wszystkich członków (+{0})"
+msgstr "Pokaż wszystkich członków (+{0})"
+
+#. 0: hiddenCount
+#: src/components/ui/ProjectMembers.svelte
+msgid "Pokaż więcej (+{0})"
+msgstr "Pokaż więcej (+{0})"
+
+#. 0: roster.length
+#: src/components/ui/ProjectMembers.svelte
+msgid "Zobacz wszystkich ({0})"
+msgstr "Zobacz wszystkich ({0})"
+
+#: src/components/ui/ProjectMembers.svelte
+msgid "Członek"
+msgstr "Członek"
+
+#: src/components/ui/ProjectMembers.svelte
+msgid "Profil"
+msgstr "Profil"
+
+#: src/components/ui/ProjectMembers.svelte
+msgid "GitHub"
+msgstr "GitHub"
+
+#. 0: entry.name
+#: src/components/ui/ProjectMembers.svelte
+msgid "GitHub – {0}"
+msgstr "GitHub – {0}"
+
+#: src/components/ui/ProjectMembers.svelte
+msgid "LinkedIn"
+msgstr "LinkedIn"
+
+#. 0: entry.name
+#: src/components/ui/ProjectMembers.svelte
+msgid "LinkedIn – {0}"
+msgstr "LinkedIn – {0}"
+
+#: src/components/ui/ProjectMembers.svelte
+msgid "Zobacz profil<0/>"
+msgstr "Zobacz profil<0/>"
+
+#: src/components/ui/ProjectMembers.svelte
+msgid "Lider"
+msgstr "Lider"
+
+#: src/components/ui/ProjectMembers.svelte
+msgid "(Lider)"
+msgstr "(Lider)"
